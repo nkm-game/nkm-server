@@ -13,20 +13,20 @@ case class Stat(statType: StatType, value: Int)
 object NKMCharacter {
   case class GetStat(statType: StatType)
   case object GetName
-  def props(name: String,
+  def apply(name: String,
             healthPoints: Int,
             attackPoints: Int,
             basicAttackRange: Int,
             speed: Int,
             psychicalDefense: Int,
-            magicalDefense: Int): Props =
-    Props(new NKMCharacter(name,
+            magicalDefense: Int) =
+    new NKMCharacter(name,
       Stat(HealthPoints, healthPoints),
       Stat(AttackPoints, attackPoints),
       Stat(BasicAttackRange, basicAttackRange),
       Stat(Speed, speed),
       Stat(PhysicalDefense, psychicalDefense),
-      Stat(MagicalDefense, magicalDefense)))
+      Stat(MagicalDefense, magicalDefense))
 }
 
 case class NKMCharacter(name: String
@@ -46,17 +46,4 @@ case class NKMCharacter(name: String
       case MagicalDefense => magicalDefense
       case BasicAttackRange => basicAttackRange
     }
-
-//  import NKMCharacter._
-//  override def receive: Receive = {
-//    case GetName => {
-//      log.info(s"Returning name: $name")
-//      sender() ! name
-//    }
-//    case GetStat(statType) => {
-//      val stat = getStatByType(statType)
-//      log.info(s"Returning stat of type $statType: $stat")
-//      sender() ! stat
-//    }
-//  }
 }

@@ -1,1 +1,3 @@
-case class GameState(hexMap: HexMap, characters: Set[NKMCharacter])
+case class GameState(hexMap: HexMap,
+                     characters: Set[NKMCharacter]
+                    )
