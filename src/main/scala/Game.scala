@@ -4,11 +4,16 @@ import akka.persistence.PersistentActor
 
 object Game {
   case object GetState
-  def props(id: String): Props = Props(new Game(id, HexMap(Set[HexCell]())))
+  def props(id: String): Props = Props(new Game(id, HexMap(Set[HexCell](HexCell(HexCoordinates(4, 5), Normal, None, Set())))))
 }
 
 class Game(id: String, hexMap: HexMap) extends Actor with ActorLogging {
-  var gameState: GameState = GameState(hexMap, Set[NKMCharacter]())
+  val characters: Set[NKMCharacter] = Set[NKMCharacter](
+    NKMCharacter("Aqua", 12, Stat(32), Stat(43), Stat(4), Stat(34), Stat(4)),
+    NKMCharacter("Dekomori Sanae", 14, Stat(32), Stat(43), Stat(4), Stat(34), Stat(4)),
+    NKMCharacter("Aqua", 0, Stat(34), Stat(43), Stat(4), Stat(34), Stat(5))
+  )
+  var gameState: GameState = GameState(hexMap, characters)
 
 //  override def persistenceId: String = "game-$id"
   override def receive: Receive = {
