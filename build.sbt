@@ -12,3 +12,5 @@ libraryDependencies += "com.typesafe.akka" %% "akka-persistence" % AkkaVersion
 libraryDependencies += "com.typesafe.akka" %% "akka-stream" % AkkaVersion
 libraryDependencies += "com.typesafe.akka" %% "akka-http" % AkkaHttpVersion
 libraryDependencies += "com.typesafe.akka" %% "akka-http-spray-json" % AkkaHttpVersion
+
+libraryDependencies += "com.softwaremill.quicklens" %% "quicklens" % "1.6.0"

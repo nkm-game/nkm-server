@@ -25,7 +25,9 @@ trait NKMJsonProtocol extends DefaultJsonProtocol {
         case "Normal" => Normal
         case "Wall" => Wall
         case "SpawnPoint" => SpawnPoint
+        case _ => deserializationError(s"Unable to parse:\n$value")
       }
+      case _ => deserializationError(s"Unable to parse:\n$json")
     }
   }
 
