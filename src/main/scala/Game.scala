@@ -4,7 +4,7 @@ import akka.persistence.PersistentActor
 
 object Game {
   case object GetState
-  def props(id: String): Props = Props(new Game(id, HexMap(Set[HexCell](HexCell(HexCoordinates(4, 5), Normal, None, Set())))))
+  def props(id: String): Props = Props(new Game(id, HexMap("test", Set[HexCell](HexCell(HexCoordinates(4, 5), Normal, None, Set(), None)))))
 }
 
 class Game(id: String, hexMap: HexMap) extends Actor with ActorLogging {

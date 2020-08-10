@@ -31,9 +31,8 @@ trait NKMJsonProtocol extends DefaultJsonProtocol {
 
   implicit val hexCoordinatesFormat: RootJsonFormat[HexCoordinates] = jsonFormat2(HexCoordinates)
   implicit val statFormat: RootJsonFormat[Stat] = jsonFormat1(Stat)
-//  val NKMCharacterApply: (String, Int, Int, Int, Int, Int, Int) => NKMCharacter = NKMCharacter.apply
   implicit val nkmCharacterFormat: RootJsonFormat[NKMCharacter] = jsonFormat7(NKMCharacter)
-  implicit val hexCellFormat: RootJsonFormat[HexCell] = jsonFormat4(HexCell)
-  implicit val hexMapFormat: RootJsonFormat[HexMap] = jsonFormat1(HexMap)
+  implicit val hexCellFormat: RootJsonFormat[HexCell] = jsonFormat5(HexCell)
+  implicit val hexMapFormat: RootJsonFormat[HexMap] = jsonFormat2(HexMap)
   implicit val gameStateFormat: RootJsonFormat[GameState] = jsonFormat2(GameState)
 }
