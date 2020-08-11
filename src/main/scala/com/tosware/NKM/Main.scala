@@ -2,7 +2,7 @@ package com.tosware.NKM
 
 import akka.pattern.ask
 import actors._
-import com.tosware.NKM.actors.Game.{GetState, PlaceCharacter}
+import com.tosware.NKM.actors.Game._
 import com.tosware.NKM.actors.NKMData.GetHexMaps
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
@@ -44,5 +44,6 @@ object Main extends App with NKMJsonProtocol with SprayJsonSupport {
     Http().newServerAt("localhost", 8080).bindFlow(skeleton)
 
 //    game ! PlaceCharacter(HexCoordinates(4, 5), NKMCharacter("Aqua", 12, Stat(32), Stat(43), Stat(4), Stat(34), Stat(4)))
+//    game ! MoveCharacter(HexCoordinates(0, 0), NKMCharacter("Aqua", 12, Stat(32), Stat(43), Stat(4), Stat(34), Stat(4)))
   }
 }

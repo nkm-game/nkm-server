@@ -1,7 +1,7 @@
 package com.tosware.NKM.serializers
 
 import com.tosware.NKM._
-import com.tosware.NKM.actors.Game.{CharacterPlaced, Event}
+import com.tosware.NKM.actors.Game.{CharacterMoved, CharacterPlaced, Event}
 import spray.json._
 
 trait NKMJsonProtocol extends DefaultJsonProtocol {
@@ -43,15 +43,19 @@ trait NKMJsonProtocol extends DefaultJsonProtocol {
 
   // Events
   implicit val characterPlacedFormat: RootJsonFormat[CharacterPlaced] = jsonFormat2(CharacterPlaced)
+  implicit val characterMovedFormat: RootJsonFormat[CharacterMoved] = jsonFormat2(CharacterMoved)
 
   implicit object EventJsonFormat extends RootJsonFormat[Event] {
     val characterPlacedId: JsString = JsString("CharacterPlaced")
+    val characterMovedId: JsString = JsString("CharacterMoved")
 
     override def write(obj: Event): JsValue = obj match {
       case e: CharacterPlaced => JsArray(Vector(characterPlacedId, characterPlacedFormat.write(e)))
+      case e: CharacterMoved => JsArray(Vector(characterMovedId, characterMovedFormat.write(e)))
     }
     override def read(json: JsValue): Event = json match {
       case JsArray(Vector(`characterPlacedId`, jsEvent)) => characterPlacedFormat.read(jsEvent)
+      case JsArray(Vector(`characterMovedId`, jsEvent)) => characterMovedFormat.read(jsEvent)
     }
   }
 

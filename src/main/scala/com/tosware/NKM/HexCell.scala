@@ -12,5 +12,5 @@ case class HexCoordinates(x: Int, z: Int)
 case class HexCell(coordinates: HexCoordinates,
                    cellType: HexCellType,
                    character: Option[NKMCharacter],
-                   effects: Set[HexCellEffect],
+                   effects: List[HexCellEffect],
                    spawnNumber: Option[Int])

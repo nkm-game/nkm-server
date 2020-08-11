@@ -1,3 +1,3 @@
 package com.tosware.NKM
 
-case class HexMap(name: String, cells: Set[HexCell])
+case class HexMap(name: String, cells: List[HexCell])
