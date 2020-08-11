@@ -1,3 +1,5 @@
+package NKM
+
 abstract class HexCellEffect(cooldown: Int)
 
 sealed trait HexCellType

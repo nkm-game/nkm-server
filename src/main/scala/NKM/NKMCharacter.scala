@@ -1,6 +1,8 @@
+package NKM
+
 case class Stat(value: Int)
 
-//object NKMCharacter {
+//object NKM.NKMCharacter {
 //  def apply(name: String,
 //            healthPoints: Int,
 //            attackPoints: Int,
@@ -8,13 +10,13 @@ case class Stat(value: Int)
 //            speed: Int,
 //            psychicalDefense: Int,
 //            magicalDefense: Int) =
-//    new NKMCharacter(name,
+//    new NKM.NKMCharacter(name,
 //      healthPoints,
-//      Stat(attackPoints),
-//      Stat(basicAttackRange),
-//      Stat(speed),
-//      Stat(psychicalDefense),
-//      Stat(magicalDefense))
+//      NKM.Stat(attackPoints),
+//      NKM.Stat(basicAttackRange),
+//      NKM.Stat(speed),
+//      NKM.Stat(psychicalDefense),
+//      NKM.Stat(magicalDefense))
 //}
 
 case class NKMCharacter(name: String,

@@ -1,7 +1,8 @@
+package NKM.Actors
+
 import com.softwaremill.quicklens._
-import Game.{GetState, PlaceCharacter}
+import NKM._
 import akka.actor.{Actor, ActorLogging, Props}
-import akka.persistence.PersistentActor
 
 object Game {
   sealed trait Commands
@@ -12,6 +13,7 @@ object Game {
 }
 
 class Game(id: String, hexMap: HexMap) extends Actor with ActorLogging {
+  import Game._
   val charactersOutsideMap: Set[NKMCharacter] = Set[NKMCharacter](
     NKMCharacter("Aqua", 12, Stat(32), Stat(43), Stat(4), Stat(34), Stat(4)),
     NKMCharacter("Dekomori Sanae", 14, Stat(32), Stat(43), Stat(4), Stat(34), Stat(4)),

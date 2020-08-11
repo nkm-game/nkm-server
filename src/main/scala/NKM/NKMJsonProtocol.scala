@@ -1,4 +1,6 @@
-import spray.json._
+package NKM
+
+import spray.json.{DefaultJsonProtocol, JsString, JsValue, RootJsonFormat, deserializationError}
 
 trait NKMJsonProtocol extends DefaultJsonProtocol {
 
