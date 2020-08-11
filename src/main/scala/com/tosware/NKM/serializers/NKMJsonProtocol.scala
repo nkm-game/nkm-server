@@ -1,6 +1,8 @@
-package NKM
+package com.tosware.NKM.serializers
 
-import spray.json.{DefaultJsonProtocol, JsString, JsValue, RootJsonFormat, deserializationError}
+import com.tosware.NKM._
+import com.tosware.NKM.actors.Game.{CharacterPlaced, Event}
+import spray.json._
 
 trait NKMJsonProtocol extends DefaultJsonProtocol {
 
@@ -14,7 +16,6 @@ trait NKMJsonProtocol extends DefaultJsonProtocol {
   }
 
   implicit object HexCellTypeJsonFormat extends RootJsonFormat[HexCellType] {
-
     override def write(obj: HexCellType): JsValue = obj match {
       case Transparent => JsString("Transparent")
       case Normal => JsString("Normal")
@@ -39,4 +40,20 @@ trait NKMJsonProtocol extends DefaultJsonProtocol {
   implicit val hexCellFormat: RootJsonFormat[HexCell] = jsonFormat5(HexCell)
   implicit val hexMapFormat: RootJsonFormat[HexMap] = jsonFormat2(HexMap)
   implicit val gameStateFormat: RootJsonFormat[GameState] = jsonFormat2(GameState)
+
+  // Events
+  implicit val characterPlacedFormat: RootJsonFormat[CharacterPlaced] = jsonFormat2(CharacterPlaced)
+
+  implicit object EventJsonFormat extends RootJsonFormat[Event] {
+    val characterPlacedId: JsString = JsString("CharacterPlaced")
+
+    override def write(obj: Event): JsValue = obj match {
+      case e: CharacterPlaced => JsArray(Vector(characterPlacedId, characterPlacedFormat.write(e)))
+    }
+    override def read(json: JsValue): Event = json match {
+      case JsArray(Vector(`characterPlacedId`, jsEvent)) => characterPlacedFormat.read(jsEvent)
+    }
+  }
+
+
 }

@@ -1,14 +1,16 @@
-package NKM
+package com.tosware.NKM
 
 import akka.pattern.ask
-import Actors._
-import NKM.Actors.Game.{GetState, PlaceCharacter}
-import NKM.Actors.NKMData.GetHexMaps
+import actors._
+import com.tosware.NKM.actors.Game.{GetState, PlaceCharacter}
+import com.tosware.NKM.actors.NKMData.GetHexMaps
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.server.Directives._
 import akka.util.Timeout
+import com.tosware.NKM.serializers.NKMJsonProtocol
+import com.typesafe.config.ConfigFactory
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
@@ -41,6 +43,6 @@ object Main extends App with NKMJsonProtocol with SprayJsonSupport {
       }
     Http().newServerAt("localhost", 8080).bindFlow(skeleton)
 
-    game ! PlaceCharacter(HexCoordinates(4, 5), NKMCharacter("Aqua", 12, Stat(32), Stat(43), Stat(4), Stat(34), Stat(4)))
+//    game ! PlaceCharacter(HexCoordinates(4, 5), NKMCharacter("Aqua", 12, Stat(32), Stat(43), Stat(4), Stat(34), Stat(4)))
   }
 }
