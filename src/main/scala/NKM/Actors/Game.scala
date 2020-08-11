@@ -9,7 +9,7 @@ object Game {
   case object GetState extends Commands
   case class PlaceCharacter(hexCoordinates: HexCoordinates, character: NKMCharacter) extends Commands
 
-  def props(id: String): Props = Props(new Game(id, HexMap("test", Set[HexCell](HexCell(HexCoordinates(4, 5), Normal, None, Set(), None)))))
+  def props(id: String, hexMap: HexMap): Props = Props(new Game(id, hexMap))
 }
 
 class Game(id: String, hexMap: HexMap) extends Actor with ActorLogging {
