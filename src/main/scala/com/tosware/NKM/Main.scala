@@ -1,22 +1,20 @@
 package com.tosware.NKM
 
-import akka.pattern.ask
-import actors._
-import com.tosware.NKM.actors.Game._
-import com.tosware.NKM.actors.NKMData.GetHexMaps
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.server.Directives._
+import akka.pattern.ask
 import akka.util.Timeout
-import com.tosware.NKM.models.{GameState, HexMap}
+import com.tosware.NKM.actors.Game._
+import com.tosware.NKM.actors.NKMData.GetHexMaps
+import com.tosware.NKM.actors._
+import com.tosware.NKM.models.{GameState, HexCoordinates, HexMap, NKMCharacter, Stat}
 import com.tosware.NKM.serializers.NKMJsonProtocol
-import com.typesafe.config.ConfigFactory
 
-import scala.concurrent.Future
+import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.language.postfixOps
-import scala.util.{Failure, Success}
 
 object Main extends App with NKMJsonProtocol with SprayJsonSupport {
   import system.dispatcher
@@ -44,7 +42,21 @@ object Main extends App with NKMJsonProtocol with SprayJsonSupport {
       }
     Http().newServerAt("localhost", 8080).bindFlow(skeleton)
 
-//    game ! PlaceCharacter(HexCoordinates(4, 5), NKMCharacter("Aqua", 12, Stat(32), Stat(43), Stat(4), Stat(34), Stat(4)))
-//    game ! MoveCharacter(HexCoordinates(0, 0), NKMCharacter("Aqua", 12, Stat(32), Stat(43), Stat(4), Stat(34), Stat(4)))
+//    val playerNames = List("Ryszard", "Ania", "Ola")
+//    val characters: List[NKMCharacter] = List[NKMCharacter](
+//      NKMCharacter("Aqua", 12, Stat(32), Stat(43), Stat(4), Stat(34), Stat(4)),
+//      NKMCharacter("Dekomori Sanae", 14, Stat(32), Stat(43), Stat(4), Stat(34), Stat(4)),
+//      NKMCharacter("Touka", 0, Stat(34), Stat(43), Stat(4), Stat(34), Stat(5))
+//    )
+//
+//    val touka = characters.find(_.name == "Touka").get
+//
+//    playerNames.foreach(n => game ! AddPlayer(n))
+//    val players = Await.result((game ? GetState).mapTo[GameState].map(s => s.players), 2 seconds)
+//
+//    characters.foreach(c => game ! AddCharacter("Ola", c))
+//
+//    game ! PlaceCharacter(HexCoordinates(4, 5), touka)
+//    game ! MoveCharacter(HexCoordinates(0, 0), touka)
   }
 }

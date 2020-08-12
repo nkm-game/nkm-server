@@ -1,6 +1,6 @@
 package com.tosware.NKM.serializers
 
-import com.tosware.NKM.actors.Game.{CharacterMoved, CharacterPlaced, Event}
+import com.tosware.NKM.actors.Game._
 import com.tosware.NKM.models._
 import spray.json._
 
@@ -34,28 +34,39 @@ trait NKMJsonProtocol extends DefaultJsonProtocol {
     }
   }
 
+  // Start with simple ones, finish with the most complex
+  // if format A depends on B, then B should be defined first (or we get a NullPointerException from spray)
   implicit val hexCoordinatesFormat: RootJsonFormat[HexCoordinates] = jsonFormat2(HexCoordinates)
   implicit val statFormat: RootJsonFormat[Stat] = jsonFormat1(Stat)
   implicit val phaseFormat: RootJsonFormat[Phase] = jsonFormat1(Phase)
   implicit val turnFormat: RootJsonFormat[Turn] = jsonFormat1(Turn)
   implicit val nkmCharacterFormat: RootJsonFormat[NKMCharacter] = jsonFormat7(NKMCharacter)
+  implicit val playerFormat: RootJsonFormat[Player] = jsonFormat2(Player)
   implicit val hexCellFormat: RootJsonFormat[HexCell] = jsonFormat5(HexCell)
   implicit val hexMapFormat: RootJsonFormat[HexMap] = jsonFormat2(HexMap)
-  implicit val gameStateFormat: RootJsonFormat[GameState] = jsonFormat4(GameState)
+  implicit val gameStateFormat: RootJsonFormat[GameState] = jsonFormat5(GameState)
 
   // Events
+  implicit val playerAddedFormat: RootJsonFormat[PlayerAdded] = jsonFormat1(PlayerAdded)
+  implicit val characterAddedFormat: RootJsonFormat[CharacterAdded] = jsonFormat2(CharacterAdded)
   implicit val characterPlacedFormat: RootJsonFormat[CharacterPlaced] = jsonFormat2(CharacterPlaced)
   implicit val characterMovedFormat: RootJsonFormat[CharacterMoved] = jsonFormat2(CharacterMoved)
 
   implicit object EventJsonFormat extends RootJsonFormat[Event] {
+    val playerAddedId: JsString = JsString("PlayerAdded")
+    val characterAddedId: JsString = JsString("CharacterAdded")
     val characterPlacedId: JsString = JsString("CharacterPlaced")
     val characterMovedId: JsString = JsString("CharacterMoved")
 
     override def write(obj: Event): JsValue = obj match {
+      case e: PlayerAdded => JsArray(Vector(playerAddedId, playerAddedFormat.write(e)))
+      case e: CharacterAdded => JsArray(Vector(characterAddedId, characterAddedFormat.write(e)))
       case e: CharacterPlaced => JsArray(Vector(characterPlacedId, characterPlacedFormat.write(e)))
       case e: CharacterMoved => JsArray(Vector(characterMovedId, characterMovedFormat.write(e)))
     }
     override def read(json: JsValue): Event = json match {
+      case JsArray(Vector(`playerAddedId`, jsEvent)) => playerAddedFormat.read(jsEvent)
+      case JsArray(Vector(`characterAddedId`, jsEvent)) => characterAddedFormat.read(jsEvent)
       case JsArray(Vector(`characterPlacedId`, jsEvent)) => characterPlacedFormat.read(jsEvent)
       case JsArray(Vector(`characterMovedId`, jsEvent)) => characterMovedFormat.read(jsEvent)
     }
