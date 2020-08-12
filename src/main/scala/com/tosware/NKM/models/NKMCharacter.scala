@@ -1,8 +1,8 @@
-package com.tosware.NKM
+package com.tosware.NKM.models
 
 case class Stat(value: Int)
 
-//object com.tosware.NKM.NKMCharacter {
+//object com.tosware.NKM.models.NKMCharacter {
 //  def apply(name: String,
 //            healthPoints: Int,
 //            attackPoints: Int,
@@ -10,13 +10,13 @@ case class Stat(value: Int)
 //            speed: Int,
 //            psychicalDefense: Int,
 //            magicalDefense: Int) =
-//    new com.tosware.NKM.NKMCharacter(name,
+//    new com.tosware.NKM.models.NKMCharacter(name,
 //      healthPoints,
-//      com.tosware.NKM.Stat(attackPoints),
-//      com.tosware.NKM.Stat(basicAttackRange),
-//      com.tosware.NKM.Stat(speed),
-//      com.tosware.NKM.Stat(psychicalDefense),
-//      com.tosware.NKM.Stat(magicalDefense))
+//      com.tosware.NKM.models.Stat(attackPoints),
+//      com.tosware.NKM.models.Stat(basicAttackRange),
+//      com.tosware.NKM.models.Stat(speed),
+//      com.tosware.NKM.models.Stat(psychicalDefense),
+//      com.tosware.NKM.models.Stat(magicalDefense))
 //}
 
 case class NKMCharacter(name: String,

@@ -3,8 +3,8 @@ package com.tosware.NKM.actors
 import java.io.File
 import java.nio.file.{Files, Paths}
 
-import com.tosware.NKM.HexMap
 import akka.actor.{Actor, ActorLogging, Props}
+import com.tosware.NKM.models.HexMap
 import com.tosware.NKM.serializers.NKMJsonProtocol
 import spray.json._
 

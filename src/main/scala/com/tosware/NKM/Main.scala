@@ -9,6 +9,7 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.server.Directives._
 import akka.util.Timeout
+import com.tosware.NKM.models.{GameState, HexMap}
 import com.tosware.NKM.serializers.NKMJsonProtocol
 import com.typesafe.config.ConfigFactory
 

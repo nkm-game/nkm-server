@@ -4,6 +4,7 @@ import com.softwaremill.quicklens._
 import com.tosware.NKM._
 import akka.actor.{Actor, ActorLogging, Props}
 import akka.persistence.PersistentActor
+import com.tosware.NKM.models.{GameState, HexCell, HexCoordinates, HexMap, NKMCharacter, Stat}
 
 object Game {
   sealed trait Command

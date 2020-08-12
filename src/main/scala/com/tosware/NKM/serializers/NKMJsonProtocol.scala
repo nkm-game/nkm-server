@@ -1,7 +1,7 @@
 package com.tosware.NKM.serializers
 
-import com.tosware.NKM._
 import com.tosware.NKM.actors.Game.{CharacterMoved, CharacterPlaced, Event}
+import com.tosware.NKM.models._
 import spray.json._
 
 trait NKMJsonProtocol extends DefaultJsonProtocol {
@@ -36,10 +36,12 @@ trait NKMJsonProtocol extends DefaultJsonProtocol {
 
   implicit val hexCoordinatesFormat: RootJsonFormat[HexCoordinates] = jsonFormat2(HexCoordinates)
   implicit val statFormat: RootJsonFormat[Stat] = jsonFormat1(Stat)
+  implicit val phaseFormat: RootJsonFormat[Phase] = jsonFormat1(Phase)
+  implicit val turnFormat: RootJsonFormat[Turn] = jsonFormat1(Turn)
   implicit val nkmCharacterFormat: RootJsonFormat[NKMCharacter] = jsonFormat7(NKMCharacter)
   implicit val hexCellFormat: RootJsonFormat[HexCell] = jsonFormat5(HexCell)
   implicit val hexMapFormat: RootJsonFormat[HexMap] = jsonFormat2(HexMap)
-  implicit val gameStateFormat: RootJsonFormat[GameState] = jsonFormat2(GameState)
+  implicit val gameStateFormat: RootJsonFormat[GameState] = jsonFormat4(GameState)
 
   // Events
   implicit val characterPlacedFormat: RootJsonFormat[CharacterPlaced] = jsonFormat2(CharacterPlaced)
