@@ -6,26 +6,29 @@ import com.softwaremill.quicklens._
 import com.tosware.NKM.models._
 
 object Game {
-  sealed trait Command
-  case object GetState extends Command
+  sealed trait Query
+  case object GetState extends Query
 
+  sealed trait Command
   case class AddPlayer(name: String) extends Command
   case class AddCharacter(playerName: String, character: NKMCharacter) extends Command
   case class PlaceCharacter(hexCoordinates: HexCoordinates, character: NKMCharacter) extends Command
   case class MoveCharacter(hexCoordinates: HexCoordinates, character: NKMCharacter) extends Command
+  case class SetMap(hexMap: HexMap) extends Command
 
   sealed trait Event
   case class PlayerAdded(name: String) extends Event
   case class CharacterAdded(playerName: String, character: NKMCharacter) extends Event
   case class CharacterPlaced(hexCoordinates: HexCoordinates, character: NKMCharacter) extends Event
   case class CharacterMoved(hexCoordinates: HexCoordinates, character: NKMCharacter) extends Event
+  case class MapSet(hexMap: HexMap) extends Event
 
-  def props(id: String, hexMap: HexMap): Props = Props(new Game(id, hexMap))
+  def props(id: String): Props = Props(new Game(id))
 }
 
-class Game(id: String, hexMap: HexMap) extends PersistentActor with ActorLogging {
+class Game(id: String) extends PersistentActor with ActorLogging {
   import Game._
-  var gameState: GameState = GameState(hexMap)
+  var gameState: GameState = GameState.empty
 
   def placeCharacter(targetCellCoordinates: HexCoordinates, character: NKMCharacter): Unit =
       gameState = gameState.modify(_.hexMap.cells.each).using {
@@ -59,6 +62,9 @@ class Game(id: String, hexMap: HexMap) extends PersistentActor with ActorLogging
     }.modify(_.charactersOutsideMap).setTo(character :: gameState.charactersOutsideMap)
   }
 
+  def setMap(hexMap: HexMap): Unit =
+    gameState = gameState.copy(hexMap = hexMap)
+
   override def persistenceId: String = s"game-$id"
   override def receive: Receive = {
     case GetState =>
@@ -88,6 +94,12 @@ class Game(id: String, hexMap: HexMap) extends PersistentActor with ActorLogging
         moveCharacter(hexCoordinates, character)
         log.info(s"Persisted ${character.name} on $hexCoordinates")
       }
+    case SetMap(hexMap) =>
+      log.info(s"Setting map: ${hexMap.name}")
+      persist(MapSet(hexMap)) { _ =>
+        setMap(hexMap)
+        log.info(s"Persisted map: ${hexMap.name}")
+      }
     case e => log.warning(s"Unknown message: $e")
   }
 
@@ -104,6 +116,9 @@ class Game(id: String, hexMap: HexMap) extends PersistentActor with ActorLogging
     case CharacterMoved(hexCoordinates, character) =>
       moveCharacter(hexCoordinates, character)
       log.info(s"Recovered ${character.name} to $hexCoordinates")
+    case MapSet(hexMap) =>
+      setMap(hexMap)
+      log.info(s"Recovered map: ${hexMap.name}")
     case e => log.warning(s"Unknown message: $e")
   }
 
