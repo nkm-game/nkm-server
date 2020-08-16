@@ -11,6 +11,6 @@ case object SpawnPoint extends HexCellType
 case class HexCoordinates(x: Int, z: Int)
 case class HexCell(coordinates: HexCoordinates,
                    cellType: HexCellType,
-                   character: Option[NKMCharacter],
+                   characterId: Option[String],
                    effects: List[HexCellEffect],
                    spawnNumber: Option[Int])

@@ -1,7 +1,7 @@
 package com.tosware.NKM.models
 
 case class GameState(hexMap: HexMap,
-                     charactersOutsideMap: List[NKMCharacter],
+                     characterIdsOutsideMap: List[String],
                      phase: Phase,
                      turn: Turn,
                      players: List[Player])

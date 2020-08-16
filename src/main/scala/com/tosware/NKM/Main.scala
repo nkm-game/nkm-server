@@ -16,6 +16,8 @@ import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
+import java.util.UUID.randomUUID
+
 object Main extends App with NKMJsonProtocol with SprayJsonSupport {
 
   implicit val system: ActorSystem = ActorSystem("NKMServer")
@@ -45,9 +47,9 @@ object Main extends App with NKMJsonProtocol with SprayJsonSupport {
 
     val playerNames = List("Ryszard", "Ania", "Ola")
     val characters: List[NKMCharacter] = List[NKMCharacter](
-      NKMCharacter("Aqua", 12, Stat(32), Stat(43), Stat(4), Stat(34), Stat(4)),
-      NKMCharacter("Dekomori Sanae", 14, Stat(32), Stat(43), Stat(4), Stat(34), Stat(4)),
-      NKMCharacter("Touka", 0, Stat(34), Stat(43), Stat(4), Stat(34), Stat(5))
+      NKMCharacter(randomUUID().toString, "Aqua", 12, Stat(32), Stat(43), Stat(4), Stat(34), Stat(4)),
+      NKMCharacter(randomUUID().toString, "Dekomori Sanae", 14, Stat(32), Stat(43), Stat(4), Stat(34), Stat(4)),
+      NKMCharacter(randomUUID().toString, "Touka", 0, Stat(34), Stat(43), Stat(4), Stat(34), Stat(5))
     )
 
     val touka = characters.find(_.name == "Touka").get
@@ -58,8 +60,8 @@ object Main extends App with NKMJsonProtocol with SprayJsonSupport {
     characters.foreach(c => game ! AddCharacter("Ola", c))
 
     game ! SetMap(hexMaps.head)
-    game ! PlaceCharacter(HexCoordinates(4, 5), touka)
-    game ! MoveCharacter(HexCoordinates(0, 0), touka)
+    game ! PlaceCharacter(HexCoordinates(4, 5), touka.id)
+    game ! MoveCharacter(HexCoordinates(0, 0), touka.id)
   }
 
 //  test()

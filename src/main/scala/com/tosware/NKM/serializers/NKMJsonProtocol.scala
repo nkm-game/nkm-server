@@ -40,7 +40,7 @@ trait NKMJsonProtocol extends DefaultJsonProtocol {
   implicit val statFormat: RootJsonFormat[Stat] = jsonFormat1(Stat)
   implicit val phaseFormat: RootJsonFormat[Phase] = jsonFormat1(Phase)
   implicit val turnFormat: RootJsonFormat[Turn] = jsonFormat1(Turn)
-  implicit val nkmCharacterFormat: RootJsonFormat[NKMCharacter] = jsonFormat7(NKMCharacter)
+  implicit val nkmCharacterFormat: RootJsonFormat[NKMCharacter] = jsonFormat8(NKMCharacter)
   implicit val playerFormat: RootJsonFormat[Player] = jsonFormat2(Player)
   implicit val hexCellFormat: RootJsonFormat[HexCell] = jsonFormat5(HexCell)
   implicit val hexMapFormat: RootJsonFormat[HexMap] = jsonFormat2(HexMap)
