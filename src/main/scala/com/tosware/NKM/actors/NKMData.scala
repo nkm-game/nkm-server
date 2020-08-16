@@ -10,6 +10,7 @@ import spray.json._
 
 object NKMData {
   case object GetHexMaps
+//  case class GetHexMapsResponse(hexMaps: List[HexMap])
 
   def props(): Props = Props(new NKMData())
 }
@@ -27,6 +28,5 @@ class NKMData extends Actor with ActorLogging with NKMJsonProtocol {
         .map(bytes => new String(bytes))
         .map(mapString => mapString.parseJson.convertTo[HexMap])
       sender ! mapList
-
   }
 }
