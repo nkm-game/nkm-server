@@ -69,7 +69,7 @@ class Game(id: String) extends PersistentActor with ActorLogging {
   override def receive: Receive = {
     case GetState =>
       log.info("Received state request")
-      sender ! gameState
+      sender() ! gameState
     case AddPlayer(name) =>
       log.info(s"Adding player: $name")
       persist(PlayerAdded(name)) { _ =>

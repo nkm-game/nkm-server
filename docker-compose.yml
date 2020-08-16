@@ -1,11 +1,19 @@
 version: "3.8"
 
 services:
-  cassandra:
-    image: library/cassandra:latest
-    container_name: cassandra
+#  cassandra:
+#    image: library/cassandra:latest
+#    container_name: cassandra
+#    ports:
+#    - "7000:7000"
+#    - "9042:9042"
+#    environment:
+#      - "CASSANDRA_CLUSTER_NAME=OUR_DOCKERIZED_CASSANDRA_SINGLE_NODE_CLUSTER"
+  NKM-http-server:
+    image: tojatos/scala-sbt:8u222_1.3.5_2.13.1
+    command: sh -c "sbt run"
     ports:
-    - "7000:7000"
-    - "9042:9042"
-    environment:
-      - "CASSANDRA_CLUSTER_NAME=OUR_DOCKERIZED_CASSANDRA_SINGLE_NODE_CLUSTER"
+      - 8080:8080
+    working_dir: /NKMActorServer
+    volumes:
+      - ./:/NKMActorServer

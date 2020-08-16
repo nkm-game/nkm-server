@@ -37,7 +37,7 @@ object Main extends App with NKMJsonProtocol with SprayJsonSupport {
             }
         }
       }
-    Http().newServerAt("localhost", 8080).bindFlow(skeleton)
+    Http().newServerAt("0.0.0.0", 8080).bindFlow(skeleton)
   }
 
   def test(): Unit = {

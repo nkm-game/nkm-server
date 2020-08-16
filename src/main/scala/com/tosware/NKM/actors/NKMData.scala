@@ -27,6 +27,6 @@ class NKMData extends Actor with ActorLogging with NKMJsonProtocol {
         .map(path => Files.readAllBytes(Paths.get(path)))
         .map(bytes => new String(bytes))
         .map(mapString => mapString.parseJson.convertTo[HexMap])
-      sender ! mapList
+      sender() ! mapList
   }
 }
