@@ -1,12 +1,15 @@
 package com.tosware.NKM.actors
 
 import java.io.File
-import java.nio.file.{Files, Paths}
+import java.util.jar.JarFile
 
 import akka.actor.{Actor, ActorLogging, Props}
 import com.tosware.NKM.models.HexMap
 import com.tosware.NKM.serializers.NKMJsonProtocol
 import spray.json._
+
+import scala.jdk.CollectionConverters._
+import scala.io.Source
 
 object NKMData {
   case object GetHexMaps
@@ -20,13 +23,26 @@ class NKMData extends Actor with ActorLogging with NKMJsonProtocol {
 
   override def receive: Receive = {
     case GetHexMaps =>
-      val hexMapFolderPath = getClass.getResource("/HexMaps").getPath
-      val mapList = new File(hexMapFolderPath).listFiles.toList
-        .filter(file => file.getName.endsWith(".json"))
-        .map(file => file.getPath)
-        .map(path => Files.readAllBytes(Paths.get(path)))
-        .map(bytes => new String(bytes))
-        .map(mapString => mapString.parseJson.convertTo[HexMap])
+      val path = "HexMaps"
+      val jarFile = new File(getClass.getProtectionDomain.getCodeSource.getLocation.getPath)
+      val filePaths = if (jarFile.isFile) {
+        val jar = new JarFile(jarFile)
+        val it = jar.entries().asScala.map(e => e.getName)
+          .filter(n => n.startsWith(s"$path/") && n.endsWith(".json")).toList
+        jar.close()
+        it
+      } else {
+        val hexMapFolderPath = getClass.getResource(s"/$path/").getPath
+        new File(hexMapFolderPath).listFiles
+          .map(e => e.getName)
+          .filter(n => n.endsWith(".json"))
+          .map(n => s"$path/$n")
+          .toList
+      }
+      val mapList = filePaths
+        .map(p => Source.fromResource(p).mkString)
+        .map(s => s.parseJson.convertTo[HexMap])
+
       sender() ! mapList
   }
 }
