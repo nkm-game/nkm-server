@@ -18,7 +18,7 @@ import scala.language.postfixOps
 
 import java.util.UUID.randomUUID
 
-object Main extends App with NKMJsonProtocol with SprayJsonSupport {
+object Main extends App with NKMJsonProtocol with SprayJsonSupport with CORSHandler {
 
   implicit val system: ActorSystem = ActorSystem("NKMServer")
   implicit val timeout: Timeout = Timeout(2 seconds)
@@ -27,14 +27,16 @@ object Main extends App with NKMJsonProtocol with SprayJsonSupport {
 
   def startServer() = {
     val skeleton =
-      pathPrefix("api") {
-        get {
-          path("state"/ Segment) { (gameId: String) =>
-            complete((system.actorOf(Game.props(gameId)) ? GetState).mapTo[GameState])
-          } ~
-            path("maps") {
-              complete((nkmData ? GetHexMaps).mapTo[List[HexMap]])
-            }
+      corsHandler {
+        pathPrefix("api") {
+          get {
+            path("state"/ Segment) { (gameId: String) =>
+              complete((system.actorOf(Game.props(gameId)) ? GetState).mapTo[GameState])
+            } ~
+              path("maps") {
+                complete((nkmData ? GetHexMaps).mapTo[List[HexMap]])
+              }
+          }
         }
       }
     Http().newServerAt("0.0.0.0", 8080).bindFlow(skeleton)
