@@ -10,11 +10,14 @@ lazy val CassandraVersion = "1.0.1"
 lazy val QuickLensVersion = "1.6.0"
 lazy val LevelDBVersion = "1.8"
 lazy val ScalaTestVersion = "3.2.0"
+lazy val AkkaHttpSessionVersion = "0.5.11"
 
 libraryDependencies += "com.typesafe.akka" %% "akka-actor" % AkkaVersion
 libraryDependencies += "com.typesafe.akka" %% "akka-stream" % AkkaVersion
 libraryDependencies += "com.typesafe.akka" %% "akka-http" % AkkaHttpVersion
 libraryDependencies += "com.typesafe.akka" %% "akka-http-spray-json" % AkkaHttpVersion
+
+libraryDependencies += "com.softwaremill.akka-http-session" %% "core" % AkkaHttpSessionVersion
 
 //persistence
 libraryDependencies += "com.typesafe.akka" %% "akka-persistence" % AkkaVersion

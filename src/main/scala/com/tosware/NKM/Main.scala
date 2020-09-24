@@ -1,11 +1,18 @@
 package com.tosware.NKM
 
+import java.util.UUID.randomUUID
+
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.server.Directives._
 import akka.pattern.ask
+import akka.stream.ActorMaterializer
 import akka.util.Timeout
+import com.softwaremill.session.SessionDirectives._
+import com.softwaremill.session.SessionOptions._
+import com.softwaremill.session.SessionResult._
+import com.softwaremill.session._
 import com.tosware.NKM.actors.Game._
 import com.tosware.NKM.actors.NKMData.GetHexMaps
 import com.tosware.NKM.actors._
@@ -16,14 +23,18 @@ import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
-import java.util.UUID.randomUUID
-
 object Main extends App with NKMJsonProtocol with SprayJsonSupport with CORSHandler {
 
   implicit val system: ActorSystem = ActorSystem("NKMServer")
+  implicit val materializer = ActorMaterializer()
   implicit val timeout: Timeout = Timeout(2 seconds)
 
   val nkmData = system.actorOf(NKMData.props())
+
+  val sessionConfig = SessionConfig.default(
+    "c05ll3lesrinf39t7mc5h6un6r0c69lgfno69dsak3vabeqamouq4328cuaekros401ajdpkh60rrtpd8ro24rbuqmgtnd1ebag6ljnb65i8a55d482ok7o0nch0bfbe")
+  implicit val BASIC_ENCODER = new BasicSessionEncoder[Map[String, String]]()
+  implicit val sessionManager = new SessionManager[String](sessionConfig)
 
   def startServer() = {
     val skeleton =
@@ -33,9 +44,31 @@ object Main extends App with NKMJsonProtocol with SprayJsonSupport with CORSHand
             path("state"/ Segment) { (gameId: String) =>
               complete((system.actorOf(Game.props(gameId)) ? GetState).mapTo[GameState])
             } ~
-              path("maps") {
-                complete((nkmData ? GetHexMaps).mapTo[List[HexMap]])
+            path("maps") {
+              complete((nkmData ? GetHexMaps).mapTo[List[HexMap]])
+            } ~
+            path("secret") {
+              session(oneOff, usingCookies) {
+                case Decoded(session) =>
+                  complete("secret1")
+                case DecodedLegacy(session) =>
+                  complete("secret2")
+                case CreatedFromToken(session) =>
+                  complete("secret3")
+                case NoSession | TokenNotFound | Expired | Corrupt(_) =>
+                  complete("no cookie")
               }
+            }
+          } ~
+          post {
+            path("do_login") {
+              entity(as[String]) { body =>
+                println(s"Logging in $body")
+                setSession(oneOff, usingCookies, body) {
+                  complete("ok")
+                }
+              }
+            }
           }
         }
       }
@@ -43,7 +76,6 @@ object Main extends App with NKMJsonProtocol with SprayJsonSupport with CORSHand
   }
 
   def test(): Unit = {
-    import system.dispatcher
     val hexMaps = Await.result((nkmData ? GetHexMaps).mapTo[List[HexMap]], 2 seconds)
     val game = system.actorOf(Game.props("1"))
 
@@ -57,7 +89,7 @@ object Main extends App with NKMJsonProtocol with SprayJsonSupport with CORSHand
     val touka = characters.find(_.name == "Touka").get
 
     playerNames.foreach(n => game ! AddPlayer(n))
-//    val players = Await.result((game ? GetState).mapTo[GameState].map(s => s.players), 2 seconds)
+    //    val players = Await.result((game ? GetState).mapTo[GameState].map(s => s.players), 2 seconds)
 
     characters.foreach(c => game ! AddCharacter("Ola", c))
 
@@ -66,6 +98,6 @@ object Main extends App with NKMJsonProtocol with SprayJsonSupport with CORSHand
     game ! MoveCharacter(HexCoordinates(0, 0), touka.id)
   }
 
-//  test()
+  //  test()
   startServer()
 }
