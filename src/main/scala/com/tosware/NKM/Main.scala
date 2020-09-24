@@ -11,6 +11,7 @@ import com.tosware.NKM.actors.NKMData.GetHexMaps
 import com.tosware.NKM.actors._
 import com.tosware.NKM.models._
 import com.tosware.NKM.serializers.NKMJsonProtocol
+import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
@@ -27,15 +28,18 @@ object Main extends App with NKMJsonProtocol with SprayJsonSupport {
 
   def startServer() = {
     val skeleton =
-      pathPrefix("api") {
-        get {
-          path("state"/ Segment) { (gameId: String) =>
-            complete((system.actorOf(Game.props(gameId)) ? GetState).mapTo[GameState])
-          } ~
-            path("maps") {
-              complete((nkmData ? GetHexMaps).mapTo[List[HexMap]])
-            }
+      cors() {
+        pathPrefix("api") {
+          get {
+            path("state"/ Segment) { (gameId: String) =>
+              complete((system.actorOf(Game.props(gameId)) ? GetState).mapTo[GameState])
+            } ~
+              path("maps") {
+                complete((nkmData ? GetHexMaps).mapTo[List[HexMap]])
+              }
+          }
         }
+
       }
     Http().newServerAt("0.0.0.0", 8080).bindFlow(skeleton)
   }
