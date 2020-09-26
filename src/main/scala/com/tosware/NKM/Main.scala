@@ -26,7 +26,6 @@ import scala.language.postfixOps
 object Main extends App with NKMJsonProtocol with SprayJsonSupport with CORSHandler {
 
   implicit val system: ActorSystem = ActorSystem("NKMServer")
-  implicit val materializer = ActorMaterializer()
   implicit val timeout: Timeout = Timeout(2 seconds)
 
   val nkmData = system.actorOf(NKMData.props())
@@ -50,22 +49,22 @@ object Main extends App with NKMJsonProtocol with SprayJsonSupport with CORSHand
             path("secret") {
               session(oneOff, usingCookies) {
                 case Decoded(session) =>
-                  complete("secret1")
-                case DecodedLegacy(session) =>
-                  complete("secret2")
-                case CreatedFromToken(session) =>
-                  complete("secret3")
-                case NoSession | TokenNotFound | Expired | Corrupt(_) =>
-                  complete("no cookie")
+                  complete(session)
+                case _ =>
+                  complete("permission denied")
               }
             }
           } ~
           post {
             path("do_login") {
-              entity(as[String]) { body =>
-                println(s"Logging in $body")
-                setSession(oneOff, usingCookies, body) {
-                  complete("ok")
+              entity(as[Login]) { entity =>
+                println(s"Logging in ${entity.login}")
+                if(entity.login == "tojatos" && entity.password == "password") {
+                  setSession(oneOff, usingCookies, entity.login) {
+                    complete("ok")
+                  }
+                } else {
+                  complete("invalid credentials")
                 }
               }
             }

@@ -46,6 +46,8 @@ trait NKMJsonProtocol extends DefaultJsonProtocol {
   implicit val hexMapFormat: RootJsonFormat[HexMap] = jsonFormat2(HexMap)
   implicit val gameStateFormat: RootJsonFormat[GameState] = jsonFormat5(GameState.apply)
 
+  implicit val loginFormat: RootJsonFormat[Login] = jsonFormat2(Login)
+
   implicit object EventJsonFormat extends RootJsonFormat[Event] {
     // Events
     implicit val playerAddedFormat: RootJsonFormat[PlayerAdded] = jsonFormat1(PlayerAdded)
