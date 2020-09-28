@@ -1,9 +1,10 @@
 package com.tosware.NKM
 
 import java.util.UUID.randomUUID
+import java.security.{KeyStore, SecureRandom}
 
 import akka.actor.ActorSystem
-import akka.http.scaladsl.Http
+import akka.http.scaladsl.{ConnectionContext, Http}
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.server.Directives._
 import akka.pattern.ask
@@ -18,6 +19,7 @@ import com.tosware.NKM.actors.NKMData.GetHexMaps
 import com.tosware.NKM.actors._
 import com.tosware.NKM.models._
 import com.tosware.NKM.serializers.NKMJsonProtocol
+import javax.net.ssl.{KeyManagerFactory, SSLContext, TrustManagerFactory}
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
@@ -30,12 +32,29 @@ object Main extends App with NKMJsonProtocol with SprayJsonSupport with CORSHand
 
   val nkmData = system.actorOf(NKMData.props())
 
-  val sessionConfig = SessionConfig.default(
-    "c05ll3lesrinf39t7mc5h6un6r0c69lgfno69dsak3vabeqamouq4328cuaekros401ajdpkh60rrtpd8ro24rbuqmgtnd1ebag6ljnb65i8a55d482ok7o0nch0bfbe")
-  implicit val BASIC_ENCODER = new BasicSessionEncoder[Map[String, String]]()
-  implicit val sessionManager = new SessionManager[String](sessionConfig)
 
   def startServer() = {
+    val password = "password".toCharArray // do not store passwords in code, read them from somewhere safe!
+    val ks: KeyStore = KeyStore.getInstance("PKCS12")
+    val keystore = getClass.getClassLoader.getResourceAsStream("mykeystore.pkcs12")
+
+    require(keystore != null, "Keystore required!")
+    ks.load(keystore, password)
+
+    val keyManagerFactory = KeyManagerFactory.getInstance("SunX509")
+    keyManagerFactory.init(ks, password)
+
+    val tmf = TrustManagerFactory.getInstance("SunX509")
+    tmf.init(ks)
+
+    val sslContext = SSLContext.getInstance("TLS")
+    sslContext.init(keyManagerFactory.getKeyManagers, tmf.getTrustManagers, new SecureRandom)
+    val https = ConnectionContext.httpsServer(sslContext)
+
+    val sessionConfig = SessionConfig.default(
+      "c05ll3lesrinf39t7mc5h6un6r0c69lgfno69dsak3vabeqamouq4328cuaekros401ajdpkh60rrtpd8ro24rbuqmgtnd1ebag6ljnb65i8a55d482ok7o0nch0bfbe")
+    implicit val BASIC_ENCODER = new BasicSessionEncoder[Map[String, String]]()
+    implicit val sessionManager = new SessionManager[String](sessionConfig)
     val skeleton =
       corsHandler {
         pathPrefix("api") {
@@ -71,7 +90,7 @@ object Main extends App with NKMJsonProtocol with SprayJsonSupport with CORSHand
           }
         }
       }
-    Http().newServerAt("0.0.0.0", 8080).bindFlow(skeleton)
+    Http().newServerAt("0.0.0.0", 8080).enableHttps(https).bindFlow(skeleton)
   }
 
   def test(): Unit = {
