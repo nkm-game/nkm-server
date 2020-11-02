@@ -1,29 +1,28 @@
 package com.tosware.NKM
 
-import java.util.UUID.randomUUID
 import java.security.{KeyStore, SecureRandom}
+import java.util.UUID.randomUUID
 
 import akka.actor.ActorSystem
-import akka.http.scaladsl.{ConnectionContext, Http}
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
+import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.{ConnectionContext, Http}
 import akka.pattern.ask
-import akka.stream.ActorMaterializer
 import akka.util.Timeout
-import com.softwaremill.session.SessionDirectives._
-import com.softwaremill.session.SessionOptions._
-import com.softwaremill.session.SessionResult._
-import com.softwaremill.session._
 import com.tosware.NKM.actors.Game._
 import com.tosware.NKM.actors.NKMData.GetHexMaps
 import com.tosware.NKM.actors._
 import com.tosware.NKM.models._
 import com.tosware.NKM.serializers.NKMJsonProtocol
 import javax.net.ssl.{KeyManagerFactory, SSLContext, TrustManagerFactory}
+import pdi.jwt.{Jwt, JwtAlgorithm}
+import spray.json._
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.language.postfixOps
+import scala.util.{Failure, Success}
 
 object Main extends App with NKMJsonProtocol with SprayJsonSupport with CORSHandler {
 
@@ -51,10 +50,8 @@ object Main extends App with NKMJsonProtocol with SprayJsonSupport with CORSHand
     sslContext.init(keyManagerFactory.getKeyManagers, tmf.getTrustManagers, new SecureRandom)
     val https = ConnectionContext.httpsServer(sslContext)
 
-    val sessionConfig = SessionConfig.default(
-      "c05ll3lesrinf39t7mc5h6un6r0c69lgfno69dsak3vabeqamouq4328cuaekros401ajdpkh60rrtpd8ro24rbuqmgtnd1ebag6ljnb65i8a55d482ok7o0nch0bfbe")
-    implicit val BASIC_ENCODER = new BasicSessionEncoder[Map[String, String]]()
-    implicit val sessionManager = new SessionManager[String](sessionConfig)
+    val jwtSecretKey = "much_secret"
+
     val skeleton =
       corsHandler {
         pathPrefix("api") {
@@ -66,24 +63,23 @@ object Main extends App with NKMJsonProtocol with SprayJsonSupport with CORSHand
               complete((nkmData ? GetHexMaps).mapTo[List[HexMap]])
             } ~
             path("secret") {
-              session(oneOff, usingCookies) {
-                case Decoded(session) =>
-                  complete(session)
-                case _ =>
-                  complete("permission denied")
+              entity(as[String]) { token =>
+                Jwt.decodeRawAll(token.trim(), jwtSecretKey, Seq(JwtAlgorithm.HS256)) match {
+                  case Success(value) => complete(value._2.parseJson.convertTo[Map[String, String]].get("user").head)
+                  case Failure(exception) => complete(StatusCodes.Unauthorized, exception.getMessage)
+                }
               }
             }
           } ~
           post {
-            path("do_login") {
+            path("login") {
               entity(as[Login]) { entity =>
                 println(s"Logging in ${entity.login}")
-                if(entity.login == "tojatos" && entity.password == "password") {
-                  setSession(oneOff, usingCookies, entity.login) {
-                    complete("ok")
-                  }
+                if (entity.login == "tojatos" && entity.password == "password") {
+                  val token = Jwt.encode("""{"user":"tojatos"}""", jwtSecretKey, JwtAlgorithm.HS256)
+                  complete(StatusCodes.OK, token)
                 } else {
-                  complete("invalid credentials")
+                  complete(StatusCodes.Unauthorized, "invalid credentials")
                 }
               }
             }
