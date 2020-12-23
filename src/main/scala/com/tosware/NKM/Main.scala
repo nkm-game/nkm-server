@@ -1,11 +1,13 @@
 package com.tosware.NKM
 
 import java.security.{KeyStore, SecureRandom}
+import java.time.Instant
 import java.util.UUID.randomUUID
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.model.StatusCodes
+import akka.http.scaladsl.server.Directive1
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.{ConnectionContext, Http}
 import akka.pattern.ask
@@ -16,7 +18,7 @@ import com.tosware.NKM.actors._
 import com.tosware.NKM.models._
 import com.tosware.NKM.serializers.NKMJsonProtocol
 import javax.net.ssl.{KeyManagerFactory, SSLContext, TrustManagerFactory}
-import pdi.jwt.{Jwt, JwtAlgorithm}
+import pdi.jwt.{Jwt, JwtAlgorithm, JwtClaim, JwtSprayJson}
 import spray.json._
 
 import scala.concurrent.Await
@@ -52,6 +54,17 @@ object Main extends App with NKMJsonProtocol with SprayJsonSupport with CORSHand
 
     val jwtSecretKey = "much_secret"
 
+    def authenticated: Directive1[JwtClaim] =
+      optionalHeaderValueByName("Authorization").flatMap {
+        case Some(bearerToken) =>
+          val token = bearerToken.split(' ')(1)
+          JwtSprayJson.decode(token, jwtSecretKey, Seq(JwtAlgorithm.HS256)) match {
+            case Success(value) => provide(value)
+            case Failure(exception) => complete(StatusCodes.Unauthorized, exception.getMessage)
+          }
+        case _ => complete(StatusCodes.Unauthorized)
+      }
+
     val skeleton =
       corsHandler {
         pathPrefix("api") {
@@ -63,11 +76,8 @@ object Main extends App with NKMJsonProtocol with SprayJsonSupport with CORSHand
               complete((nkmData ? GetHexMaps).mapTo[List[HexMap]])
             } ~
             path("secret") {
-              entity(as[String]) { token =>
-                Jwt.decodeRawAll(token.trim(), jwtSecretKey, Seq(JwtAlgorithm.HS256)) match {
-                  case Success(value) => complete(value._2.parseJson.convertTo[Map[String, String]].get("user").head)
-                  case Failure(exception) => complete(StatusCodes.Unauthorized, exception.getMessage)
-                }
+              authenticated { jwtClaim =>
+                complete(jwtClaim.content)
               }
             }
           } ~
@@ -76,7 +86,12 @@ object Main extends App with NKMJsonProtocol with SprayJsonSupport with CORSHand
               entity(as[Login]) { entity =>
                 println(s"Logging in ${entity.login}")
                 if (entity.login == "tojatos" && entity.password == "password") {
-                  val token = Jwt.encode("""{"user":"tojatos"}""", jwtSecretKey, JwtAlgorithm.HS256)
+                  val claim = JwtClaim(
+                    content = JwtContent(entity.login).toJson.toString,
+                    expiration = Some(Instant.now.plusSeconds(157784760).getEpochSecond),
+                    issuedAt = Some(Instant.now.getEpochSecond)
+                  )
+                  val token = Jwt.encode(claim, jwtSecretKey, JwtAlgorithm.HS256)
                   complete(StatusCodes.OK, token)
                 } else {
                   complete(StatusCodes.Unauthorized, "invalid credentials")

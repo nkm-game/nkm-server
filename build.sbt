@@ -18,6 +18,7 @@ libraryDependencies += "com.typesafe.akka" %% "akka-http" % AkkaHttpVersion
 libraryDependencies += "com.typesafe.akka" %% "akka-http-spray-json" % AkkaHttpVersion
 
 libraryDependencies += "com.pauldijou" %% "jwt-core" % JwtVersion
+libraryDependencies += "com.pauldijou" %% "jwt-spray-json" % JwtVersion
 
 //persistence
 libraryDependencies += "com.typesafe.akka" %% "akka-persistence" % AkkaVersion
