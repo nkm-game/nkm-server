@@ -57,24 +57,24 @@ trait Service extends NKMJsonProtocol with SprayJsonSupport with CORSHandler {
               }
             }
         } ~
-          post {
-            path("login") {
-              entity(as[Login]) { entity =>
-                println(s"Logging in ${entity.login}")
-                if (entity.login == "tojatos" && entity.password == "password") {
-                  val claim = JwtClaim(
-                    content = JwtContent(entity.login).toJson.toString,
-                    expiration = Some(Instant.now.plusSeconds(157784760).getEpochSecond),
-                    issuedAt = Some(Instant.now.getEpochSecond)
-                  )
-                  val token = Jwt.encode(claim, jwtSecretKey, JwtAlgorithm.HS256)
-                  complete(StatusCodes.OK, token)
-                } else {
-                  complete(StatusCodes.Unauthorized, "invalid credentials")
-                }
+        post {
+          path("login") {
+            entity(as[Login]) { entity =>
+              println(s"Logging in ${entity.login}")
+              if (entity.login == "tojatos" && entity.password == "password") {
+                val claim = JwtClaim(
+                  content = JwtContent(entity.login).toJson.toString,
+                  expiration = Some(Instant.now.plusSeconds(157784760).getEpochSecond),
+                  issuedAt = Some(Instant.now.getEpochSecond)
+                )
+                val token = Jwt.encode(claim, jwtSecretKey, JwtAlgorithm.HS256)
+                complete(StatusCodes.OK, token)
+              } else {
+                complete(StatusCodes.Unauthorized, "invalid credentials")
               }
             }
           }
+        }
       }
     }
 
@@ -103,30 +103,5 @@ object Main extends App with Service {
     https
   }
 
-
-  //  def test(): Unit = {
-  //    val hexMaps = Await.result((nkmData ? GetHexMaps).mapTo[List[HexMap]], 2 seconds)
-  //    val game = system.actorOf(Game.props("1"))
-  //
-  //    val playerNames = List("Ryszard", "Ania", "Ola")
-  //    val characters: List[NKMCharacter] = List[NKMCharacter](
-  //      NKMCharacter(randomUUID().toString, "Aqua", 12, Stat(32), Stat(43), Stat(4), Stat(34), Stat(4)),
-  //      NKMCharacter(randomUUID().toString, "Dekomori Sanae", 14, Stat(32), Stat(43), Stat(4), Stat(34), Stat(4)),
-  //      NKMCharacter(randomUUID().toString, "Touka", 0, Stat(34), Stat(43), Stat(4), Stat(34), Stat(5))
-  //    )
-  //
-  //    val touka = characters.find(_.name == "Touka").get
-  //
-  //    playerNames.foreach(n => game ! AddPlayer(n))
-  //    //    val players = Await.result((game ? GetState).mapTo[GameState].map(s => s.players), 2 seconds)
-  //
-  //    characters.foreach(c => game ! AddCharacter("Ola", c))
-  //
-  //    game ! SetMap(hexMaps.head)
-  //    game ! PlaceCharacter(HexCoordinates(4, 5), touka.id)
-  //    game ! MoveCharacter(HexCoordinates(0, 0), touka.id)
-  //  }
-
-  //  test()
   Http().newServerAt("0.0.0.0", 8080).enableHttps(getHttps).bindFlow(routes)
 }

@@ -34,6 +34,7 @@ libraryDependencies += "org.fusesource.leveldbjni" % "leveldbjni-all" % LevelDBV
 // testing
 libraryDependencies += "com.typesafe.akka" %% "akka-testkit" % AkkaVersion % Test
 libraryDependencies += "com.typesafe.akka" %% "akka-stream-testkit" % AkkaVersion % Test
+libraryDependencies += "com.typesafe.akka" %% "akka-persistence-testkit" % AkkaVersion % Test
 libraryDependencies += "com.typesafe.akka" %% "akka-http-testkit" % AkkaHttpVersion % Test
 libraryDependencies += "org.scalatest" %% "scalatest" % ScalaTestVersion % Test
 
