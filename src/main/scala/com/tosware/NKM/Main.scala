@@ -2,6 +2,7 @@ package com.tosware.NKM
 
 import java.security.{KeyStore, SecureRandom}
 import java.time.Instant
+
 import akka.actor.{ActorRef, ActorSystem}
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.model.StatusCodes
@@ -84,7 +85,7 @@ object Main extends App with Service {
   override implicit val system: ActorSystem = ActorSystem("NKMServer")
 
   def getHttps = {
-    val password = "password".toCharArray // do not store passwords in code, read them from somewhere safe!
+    val password = "password".toCharArray //TODO: do not store passwords in code, read them from somewhere safe!
     val ks: KeyStore = KeyStore.getInstance("PKCS12")
     val keystore = getClass.getClassLoader.getResourceAsStream("mykeystore.pkcs12")
 
@@ -103,5 +104,14 @@ object Main extends App with Service {
     https
   }
 
-  Http().newServerAt("0.0.0.0", 8080).enableHttps(getHttps).bindFlow(routes)
+  sys.env.getOrElse("DEBUG", "false").toBooleanOption match {
+    case Some(true) =>
+      Http().newServerAt("0.0.0.0", 8080).bind(routes)
+      println("Started http server")
+    case _ =>
+      Http().newServerAt("0.0.0.0", 8080).enableHttps(getHttps).bindFlow(routes)
+      println("Started https server")
+  }
+
+
 }
