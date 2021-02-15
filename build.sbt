@@ -11,6 +11,7 @@ lazy val QuickLensVersion = "1.6.0"
 lazy val LevelDBVersion = "1.8"
 lazy val ScalaTestVersion = "3.2.0"
 lazy val JwtVersion = "4.2.0"
+lazy val ScalaBcryptVersion = "4.1"
 
 libraryDependencies += "com.typesafe.akka" %% "akka-actor" % AkkaVersion
 libraryDependencies += "com.typesafe.akka" %% "akka-stream" % AkkaVersion
@@ -31,8 +32,12 @@ libraryDependencies += "com.softwaremill.quicklens" %% "quicklens" % QuickLensVe
 
 libraryDependencies += "org.fusesource.leveldbjni" % "leveldbjni-all" % LevelDBVersion
 
+// password hash
+libraryDependencies += "com.github.t3hnar" %% "scala-bcrypt" % ScalaBcryptVersion
+
 // testing
 libraryDependencies += "com.typesafe.akka" %% "akka-testkit" % AkkaVersion % Test
+libraryDependencies += "com.typesafe.akka" %% "akka-persistence-testkit" % AkkaVersion % Test
 libraryDependencies += "com.typesafe.akka" %% "akka-stream-testkit" % AkkaVersion % Test
 libraryDependencies += "com.typesafe.akka" %% "akka-http-testkit" % AkkaHttpVersion % Test
 libraryDependencies += "org.scalatest" %% "scalatest" % ScalaTestVersion % Test
