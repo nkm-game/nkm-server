@@ -16,6 +16,8 @@ import com.tosware.NKM.actors.NKMData.GetHexMaps
 import com.tosware.NKM.actors._
 import com.tosware.NKM.models._
 import com.tosware.NKM.serializers.NKMJsonProtocol
+import com.tosware.NKM.services.UserService
+import com.tosware.NKM.services.UserService.{InvalidCredentials, LoggedIn}
 import javax.net.ssl.{KeyManagerFactory, SSLContext, TrustManagerFactory}
 import pdi.jwt.{Jwt, JwtAlgorithm, JwtClaim, JwtSprayJson}
 import spray.json._
@@ -42,6 +44,16 @@ trait Service extends NKMJsonProtocol with SprayJsonSupport with CORSHandler {
       case _ => complete(StatusCodes.Unauthorized)
     }
 
+  def getToken(login: String): String = {
+    val claim: JwtClaim = JwtClaim(
+      content = JwtContent(login).toJson.toString,
+      expiration = Some(Instant.now.plusSeconds(157784760).getEpochSecond),
+      issuedAt = Some(Instant.now.getEpochSecond)
+    )
+    val token = Jwt.encode(claim, jwtSecretKey, JwtAlgorithm.HS256)
+    token
+  }
+
   val routes: Route =
     corsHandler {
       pathPrefix("api") {
@@ -60,18 +72,11 @@ trait Service extends NKMJsonProtocol with SprayJsonSupport with CORSHandler {
         } ~
         post {
           path("login") {
-            entity(as[Login]) { entity =>
+            entity(as[Credentials]) { entity =>
               println(s"Logging in ${entity.login}")
-              if (entity.login == "tojatos" && entity.password == "password") {
-                val claim = JwtClaim(
-                  content = JwtContent(entity.login).toJson.toString,
-                  expiration = Some(Instant.now.plusSeconds(157784760).getEpochSecond),
-                  issuedAt = Some(Instant.now.getEpochSecond)
-                )
-                val token = Jwt.encode(claim, jwtSecretKey, JwtAlgorithm.HS256)
-                complete(StatusCodes.OK, token)
-              } else {
-                complete(StatusCodes.Unauthorized, "invalid credentials")
+              UserService.authenticate(entity) match {
+                case LoggedIn(login) => complete(StatusCodes.OK, getToken(login))
+                case InvalidCredentials => complete(StatusCodes.Unauthorized, "invalid credentials")
               }
             }
           }

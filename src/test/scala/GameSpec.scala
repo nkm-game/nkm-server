@@ -15,8 +15,6 @@ import scala.concurrent.duration._
 import scala.language.postfixOps
 import java.util.UUID.randomUUID
 
-//TODO: cleanup persistence before running this test kit
-
 class GameSpec extends TestKit(ActorSystem("GameSpec"))
   with ImplicitSender
   with AnyWordSpecLike
