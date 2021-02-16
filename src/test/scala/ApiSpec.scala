@@ -1,17 +1,17 @@
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.testkit.ScalatestRouteTest
-import com.tosware.NKM.Service
-import com.tosware.NKM.models.{Credentials, JwtContent, JwtToken}
+import com.tosware.NKM.models.{Credentials, JwtContent}
+import com.tosware.NKM.services.HttpService
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import pdi.jwt.{JwtAlgorithm, JwtSprayJson}
+import spray.json._
 
 import scala.language.postfixOps
 import scala.util.Success
-import spray.json._
 
-class ApiSpec extends AnyWordSpec with Matchers with ScalatestRouteTest with Service
+class ApiSpec extends AnyWordSpec with Matchers with ScalatestRouteTest with HttpService
 {
   "API" must {
     "refuse incorrect login attempt" in {
