@@ -10,14 +10,14 @@ object User {
   case object GetState extends Query
 
   sealed trait Command
-  case class Register(password: String) extends Command
+  case class Register(email: String, password: String) extends Command
   case class CheckLogin(password: String) extends Command
 
   sealed trait Event
   sealed trait RegisterEvent extends Event
   sealed trait LoginEvent extends Event
 
-  case class RegisterSuccess(passwordHash: String) extends RegisterEvent
+  case class RegisterSuccess(email: String, passwordHash: String) extends RegisterEvent
   case object RegisterSuccess extends RegisterEvent
   case object RegisterFailure extends RegisterEvent
 
@@ -33,22 +33,22 @@ class User(login: String) extends PersistentActor with ActorLogging {
 
   var userState: UserState = UserState(login)
 
-  def register(passwordHash: String): Unit = {
-    userState = userState.copy(passwordHash = Some(passwordHash))
+  def register(email: String, passwordHash: String): Unit = {
+    userState = userState.copy(passwordHash = Some(passwordHash), email = Some(email))
   }
 
   override def receive: Receive = {
     case GetState =>
       log.info("Received state request")
       sender() ! userState
-    case Register(password) =>
+    case Register(email, password) =>
       log.info(s"Register request for: $login")
       if (userState.registered()) {
         sender() ! RegisterFailure
       } else {
         val passwordHash = password.bcrypt
-        persist(RegisterSuccess(passwordHash)) { _ =>
-          register(passwordHash)
+        persist(RegisterSuccess(email, passwordHash)) { _ =>
+          register(email, passwordHash)
           log.info(s"Persisted user: $login")
           sender() ! RegisterSuccess
         }
@@ -63,8 +63,8 @@ class User(login: String) extends PersistentActor with ActorLogging {
   }
 
   override def receiveRecover: Receive = {
-    case RegisterSuccess(passwordHash) =>
-      register(passwordHash)
+    case RegisterSuccess(email, passwordHash) =>
+      register(email, passwordHash)
       log.info(s"Recovered register")
     case e => log.warning(s"Unknown message: $e")
   }

@@ -45,7 +45,7 @@ class UserSpec extends TestKit(ActorSystem("UserSpec"))
       val user: ActorRef = system.actorOf(User.props("test"))
       within(500 millis) {
         implicit val timeout: Timeout = Timeout(500 millis)
-        val registerFuture = user ? Register("password")
+        val registerFuture = user ? Register("test@example.com","password")
         val response = Await.result(registerFuture.mapTo[RegisterEvent], 500 millis)
         response shouldBe RegisterSuccess
 
@@ -62,11 +62,11 @@ class UserSpec extends TestKit(ActorSystem("UserSpec"))
       within(500 millis) {
         implicit val timeout: Timeout = Timeout(500 millis)
 
-        val registerFuture = user ? Register("password")
+        val registerFuture = user ? Register("test@example.com","password")
         val response = Await.result(registerFuture.mapTo[RegisterEvent], 500 millis)
         response shouldBe RegisterSuccess
 
-        val registerFuture2 = user ? Register("password")
+        val registerFuture2 = user ? Register("test@example.com","password")
         val response2 = Await.result(registerFuture2.mapTo[RegisterEvent], 500 millis)
         response2 shouldBe RegisterFailure
       }
@@ -76,7 +76,7 @@ class UserSpec extends TestKit(ActorSystem("UserSpec"))
       val user: ActorRef = system.actorOf(User.props("test3"))
       within(500 millis) {
         implicit val timeout: Timeout = Timeout(500 millis)
-        val registerFuture = user ? Register("password")
+        val registerFuture = user ? Register("test@example.com","password")
         val response = Await.result(registerFuture.mapTo[RegisterEvent], 500 millis)
         response shouldBe RegisterSuccess
 
@@ -90,7 +90,7 @@ class UserSpec extends TestKit(ActorSystem("UserSpec"))
       val user: ActorRef = system.actorOf(User.props("test4"))
       within(500 millis) {
         implicit val timeout: Timeout = Timeout(500 millis)
-        val registerFuture = user ? Register("password")
+        val registerFuture = user ? Register("test@example.com","password")
         val response = Await.result(registerFuture.mapTo[RegisterEvent], 500 millis)
         response shouldBe RegisterSuccess
 
