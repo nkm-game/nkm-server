@@ -1,13 +1,15 @@
+package actors
+
 import akka.actor.{ActorRef, ActorSystem}
-import akka.testkit.{ImplicitSender, TestKit, TestProbe}
+import akka.pattern.ask
+import akka.testkit.{ImplicitSender, TestKit}
+import akka.util.Timeout
 import com.tosware.NKM.actors.NKMData
 import com.tosware.NKM.actors.NKMData.GetHexMaps
+import com.tosware.NKM.models.HexMap
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
-import akka.pattern.ask
-import akka.util.Timeout
-import com.tosware.NKM.models.HexMap
 
 import scala.concurrent.Await
 import scala.concurrent.duration._

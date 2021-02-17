@@ -1,11 +1,15 @@
+package actors
+
+import java.util.UUID.randomUUID
+
 import akka.actor.{ActorRef, ActorSystem}
 import akka.pattern.ask
 import akka.testkit.{ImplicitSender, TestKit}
 import akka.util.Timeout
-import com.tosware.NKM.actors.Game.{AddCharacter, AddPlayer, GetState, MoveCharacter, PlaceCharacter, SetMap}
-import com.tosware.NKM.actors.{Game, NKMData}
+import com.tosware.NKM.actors.Game._
 import com.tosware.NKM.actors.NKMData.GetHexMaps
-import com.tosware.NKM.models.{GameState, HexCoordinates, HexMap, NKMCharacter, Stat}
+import com.tosware.NKM.actors.{Game, NKMData}
+import com.tosware.NKM.models._
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
@@ -13,7 +17,6 @@ import org.scalatest.wordspec.AnyWordSpecLike
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.language.postfixOps
-import java.util.UUID.randomUUID
 
 class GameSpec extends TestKit(ActorSystem("GameSpec"))
   with ImplicitSender

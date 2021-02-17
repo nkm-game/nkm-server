@@ -1,14 +1,15 @@
+package actors
+
 import akka.actor.{ActorRef, ActorSystem}
 import akka.pattern.ask
-import akka.persistence.testkit.scaladsl.PersistenceTestKit
 import akka.testkit.{ImplicitSender, TestKit}
 import akka.util.Timeout
 import com.tosware.NKM.actors.User
 import com.tosware.NKM.actors.User._
 import com.tosware.NKM.models.UserState
-import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
+import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
