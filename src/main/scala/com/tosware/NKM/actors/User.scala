@@ -11,12 +11,18 @@ object User {
 
   sealed trait Command
   case class Register(password: String) extends Command
+  case class CheckLogin(password: String) extends Command
 
   sealed trait Event
   sealed trait RegisterEvent extends Event
+  sealed trait LoginEvent extends Event
+
   case class RegisterSuccess(passwordHash: String) extends RegisterEvent
   case object RegisterSuccess extends RegisterEvent
   case object RegisterFailure extends RegisterEvent
+
+  case object LoginSuccess extends LoginEvent
+  case object LoginFailure extends LoginEvent
 
   def props(login: String): Props = Props(new User(login))
 }
@@ -30,14 +36,6 @@ class User(login: String) extends PersistentActor with ActorLogging {
   def register(passwordHash: String): Unit = {
     userState = userState.copy(passwordHash = Some(passwordHash))
   }
-//  def register(password: String): RegisterEvent = {
-//    if (userState.registered) {
-//      RegisterFailure
-//    } else {
-//      userState = userState.copy(passwordHash = Some(password.bcrypt))
-//      RegisterSuccess(password.bcrypt) //#TODO: Hash
-//    }
-//  }
 
   override def receive: Receive = {
     case GetState =>
@@ -54,6 +52,12 @@ class User(login: String) extends PersistentActor with ActorLogging {
           log.info(s"Persisted user: $login")
           sender() ! RegisterSuccess
         }
+      }
+    case CheckLogin(password) =>
+      log.info(s"Login check request for: $login")
+      sender () ! {
+        if(userState.registered() && password.isBcrypted(userState.passwordHash.get)) LoginSuccess
+        else LoginFailure
       }
     case e => log.warning(s"Unknown message: $e")
   }

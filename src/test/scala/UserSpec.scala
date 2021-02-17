@@ -70,5 +70,43 @@ class UserSpec extends TestKit(ActorSystem("UserSpec"))
         response2 shouldBe RegisterFailure
       }
     }
+
+    "can login with correct credentials" in {
+      val user: ActorRef = system.actorOf(User.props("test3"))
+      within(500 millis) {
+        implicit val timeout: Timeout = Timeout(500 millis)
+        val registerFuture = user ? Register("password")
+        val response = Await.result(registerFuture.mapTo[RegisterEvent], 500 millis)
+        response shouldBe RegisterSuccess
+
+        val loginCheckFuture = user ? CheckLogin("password")
+        val loginCheckResponse = Await.result(loginCheckFuture.mapTo[LoginEvent], 500 millis)
+        loginCheckResponse shouldBe LoginSuccess
+      }
+    }
+
+    "cannot login with incorrect credentials" in {
+      val user: ActorRef = system.actorOf(User.props("test4"))
+      within(500 millis) {
+        implicit val timeout: Timeout = Timeout(500 millis)
+        val registerFuture = user ? Register("password")
+        val response = Await.result(registerFuture.mapTo[RegisterEvent], 500 millis)
+        response shouldBe RegisterSuccess
+
+        val loginCheckFuture = user ? CheckLogin("password1")
+        val loginCheckResponse = Await.result(loginCheckFuture.mapTo[LoginEvent], 500 millis)
+        loginCheckResponse shouldBe LoginFailure
+      }
+    }
+
+    "cannot login without registering" in {
+      val user: ActorRef = system.actorOf(User.props("test5"))
+      within(500 millis) {
+        implicit val timeout: Timeout = Timeout(500 millis)
+        val loginCheckFuture = user ? CheckLogin("password")
+        val loginCheckResponse = Await.result(loginCheckFuture.mapTo[LoginEvent], 500 millis)
+        loginCheckResponse shouldBe LoginFailure
+      }
+    }
   }
 }

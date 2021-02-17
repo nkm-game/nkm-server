@@ -12,6 +12,7 @@ lazy val LevelDBVersion = "1.8"
 lazy val ScalaTestVersion = "3.2.0"
 lazy val JwtVersion = "4.2.0"
 lazy val ScalaBcryptVersion = "4.1"
+lazy val LogbackClassicVersion = "1.2.3"
 
 libraryDependencies += "com.typesafe.akka" %% "akka-actor" % AkkaVersion
 libraryDependencies += "com.typesafe.akka" %% "akka-stream" % AkkaVersion
@@ -35,6 +36,10 @@ libraryDependencies += "org.fusesource.leveldbjni" % "leveldbjni-all" % LevelDBV
 // password hash
 libraryDependencies += "com.github.t3hnar" %% "scala-bcrypt" % ScalaBcryptVersion
 
+// logging
+libraryDependencies += "com.typesafe.akka" %% "akka-slf4j" % AkkaVersion
+libraryDependencies += "ch.qos.logback" % "logback-classic" % LogbackClassicVersion
+
 // testing
 libraryDependencies += "com.typesafe.akka" %% "akka-testkit" % AkkaVersion % Test
 libraryDependencies += "com.typesafe.akka" %% "akka-persistence-testkit" % AkkaVersion % Test
@@ -43,3 +48,4 @@ libraryDependencies += "com.typesafe.akka" %% "akka-http-testkit" % AkkaHttpVers
 libraryDependencies += "org.scalatest" %% "scalatest" % ScalaTestVersion % Test
 
 scalacOptions in Compile ++= Seq("-deprecation", "-feature", "-unchecked")
+

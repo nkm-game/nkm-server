@@ -25,6 +25,7 @@ import javax.net.ssl.{KeyManagerFactory, SSLContext, TrustManagerFactory}
 
 import scala.util.{Failure, Success}
 import scala.concurrent.duration._
+import scala.language.postfixOps
 
 trait HttpService extends NKMJsonProtocol with SprayJsonSupport with CORSHandler {
   implicit val system: ActorSystem
