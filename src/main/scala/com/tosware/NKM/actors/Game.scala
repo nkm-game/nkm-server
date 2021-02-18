@@ -1,7 +1,7 @@
 package com.tosware.NKM.actors
 
 import akka.actor.{ActorLogging, Props}
-import akka.persistence.PersistentActor
+import akka.persistence.{PersistentActor, RecoveryCompleted}
 import com.softwaremill.quicklens._
 import com.tosware.NKM.models._
 
@@ -119,6 +119,7 @@ class Game(id: String) extends PersistentActor with ActorLogging {
     case MapSet(hexMap) =>
       setMap(hexMap)
       log.info(s"Recovered map: ${hexMap.name}")
+    case RecoveryCompleted =>
     case e => log.warning(s"Unknown message: $e")
   }
 

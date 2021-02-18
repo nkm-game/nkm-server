@@ -1,7 +1,7 @@
 package com.tosware.NKM.actors
 
 import akka.actor.{ActorLogging, Props}
-import akka.persistence.PersistentActor
+import akka.persistence.{PersistentActor, RecoveryCompleted}
 import com.tosware.NKM.models._
 import com.github.t3hnar.bcrypt._
 
@@ -66,6 +66,7 @@ class User(login: String) extends PersistentActor with ActorLogging {
     case RegisterSuccess(email, passwordHash) =>
       register(email, passwordHash)
       log.info(s"Recovered register")
+    case RecoveryCompleted =>
     case e => log.warning(s"Unknown message: $e")
   }
 

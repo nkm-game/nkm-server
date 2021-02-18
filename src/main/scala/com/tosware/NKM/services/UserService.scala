@@ -14,11 +14,11 @@ object UserService {
   sealed trait Event
   case class LoggedIn(login: String) extends Event
   case object InvalidCredentials extends Event
-  implicit val timeout: Timeout = Timeout(500 millis)
+  implicit val timeout: Timeout = Timeout(500.millis)
 
   def authenticate(creds: Credentials)(implicit system: ActorSystem): Event = {
     val userActor: ActorRef = system.actorOf(User.props(creds.login))
-    Await.result(userActor ? CheckLogin(creds.password), 500 millis) match {
+    Await.result(userActor ? CheckLogin(creds.password), 500.millis) match {
       case LoginSuccess => LoggedIn(creds.login)
       case LoginFailure => InvalidCredentials
     }
@@ -27,6 +27,6 @@ object UserService {
   def register(request: RegisterRequest)(implicit system: ActorSystem): RegisterEvent = {
     val userActor: ActorRef = system.actorOf(User.props(request.login))
     // TODO: check if email exists
-    Await.result(userActor ? Register(request.email, request.password), 500 millis).asInstanceOf[RegisterEvent]
+    Await.result(userActor ? Register(request.email, request.password), 500.millis).asInstanceOf[RegisterEvent]
   }
 }
