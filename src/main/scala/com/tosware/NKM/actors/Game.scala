@@ -10,6 +10,7 @@ object Game {
   case object GetState extends Query
 
   sealed trait Command
+//  case class CreateGame(userId: String) extends Command
   case class AddPlayer(name: String) extends Command
   case class AddCharacter(playerName: String, character: NKMCharacter) extends Command
   case class PlaceCharacter(hexCoordinates: HexCoordinates, characterId: String) extends Command
@@ -17,6 +18,7 @@ object Game {
   case class SetMap(hexMap: HexMap) extends Command
 
   sealed trait Event
+//  case class GameCreated(userId: String) extends Event
   case class PlayerAdded(name: String) extends Event
   case class CharacterAdded(playerName: String, character: NKMCharacter) extends Event
   case class CharacterPlaced(hexCoordinates: HexCoordinates, characterId: String) extends Event
@@ -29,6 +31,9 @@ object Game {
 class Game(id: String) extends PersistentActor with ActorLogging {
   import Game._
   var gameState: GameState = GameState.empty
+
+//  def createGame(userId: String): Unit =
+//    gameState = gameState.modify(_.userId).setTo(Some(userId))
 
   def placeCharacter(targetCellCoordinates: HexCoordinates, characterId: String): Unit =
       gameState = gameState.modify(_.hexMap.cells.each).using {
@@ -70,14 +75,22 @@ class Game(id: String) extends PersistentActor with ActorLogging {
     case GetState =>
       log.info("Received state request")
       sender() ! gameState
+//    case CreateGame(userId) =>
+//      log.info(s"Creating game request: $userId")
+//      if(!gameState.created()) {
+//        persist(GameCreated(userId)) { _ =>
+//          createGame(userId)
+//          log.info(s"Created game: $userId")
+//        }
+//      }
     case AddPlayer(name) =>
-      log.info(s"Adding player: $name")
+      log.info(s"Add player event: $name")
       persist(PlayerAdded(name)) { _ =>
         addPlayer(name)
         log.info(s"Persisted player: $name")
       }
     case AddCharacter(player, character) =>
-      log.info(s"Adding character: ${character.name}")
+      log.info(s"Add character event: ${character.name}")
       persist(CharacterAdded(player, character)) { _ =>
         addCharacter(player, character)
         log.info(s"Persisted character: ${character.name}")

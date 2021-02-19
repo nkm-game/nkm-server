@@ -12,6 +12,8 @@ object User {
   sealed trait Command
   case class Register(email: String, password: String) extends Command
   case class CheckLogin(password: String) extends Command
+//  case class CreateNewGame(gameOpts: GameOptions) extends Command
+  case class CreateLobby(name: String) extends Command
 
   sealed trait Event
   sealed trait RegisterEvent extends Event
@@ -23,6 +25,8 @@ object User {
 
   case object LoginSuccess extends LoginEvent
   case object LoginFailure extends LoginEvent
+
+  case class LobbyCreated(lobbyId: String) extends Event
 
   def props(login: String): Props = Props(new User(login))
 }
