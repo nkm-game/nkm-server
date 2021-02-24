@@ -4,7 +4,6 @@ import java.time.LocalDate
 
 import akka.actor.{ActorLogging, Props}
 import akka.persistence.{PersistentActor, RecoveryCompleted}
-import com.tosware.NKM.actors.User.RegisterSuccess
 import com.tosware.NKM.models._
 
 
@@ -14,12 +13,15 @@ object Lobby {
 
   sealed trait Command
   case class Create(name: String) extends Command
+  case class UserJoin(userId: String) extends Command
 
   sealed trait Event
 
   case class CreateSuccess(name: String) extends Event
   case object CreateSuccess extends Event
   case object CreateFailure extends Event
+
+  case class UserJoined(userId: String) extends Event
 
   def props(id: String): Props = Props(new Lobby(id))
 }

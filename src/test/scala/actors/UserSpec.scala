@@ -29,12 +29,12 @@ class UserSpec extends TestKit(ActorSystem("UserSpec"))
   override def afterAll(): Unit = {
     TestKit.shutdownActorSystem(system)
   }
+  implicit val timeout: Timeout = Timeout(500 millis)
 
   "An User actor" must {
     "not be registered initially" in {
       val user: ActorRef = system.actorOf(User.props("test"))
       within(500 millis) {
-        implicit val timeout: Timeout = Timeout(500 millis)
         val future = user ? GetState
         val state: UserState = Await.result(future.mapTo[UserState], 500 millis)
         state.login shouldEqual "test"
@@ -44,7 +44,6 @@ class UserSpec extends TestKit(ActorSystem("UserSpec"))
     "be able to register" in {
       val user: ActorRef = system.actorOf(User.props("test"))
       within(500 millis) {
-        implicit val timeout: Timeout = Timeout(500 millis)
         val registerFuture = user ? Register("test@example.com","password")
         val response = Await.result(registerFuture.mapTo[RegisterEvent], 500 millis)
         response shouldBe RegisterSuccess
@@ -60,8 +59,6 @@ class UserSpec extends TestKit(ActorSystem("UserSpec"))
     "not be able to register a second time" in {
       val user: ActorRef = system.actorOf(User.props("test2"))
       within(500 millis) {
-        implicit val timeout: Timeout = Timeout(500 millis)
-
         val registerFuture = user ? Register("test@example.com","password")
         val response = Await.result(registerFuture.mapTo[RegisterEvent], 500 millis)
         response shouldBe RegisterSuccess
@@ -72,10 +69,9 @@ class UserSpec extends TestKit(ActorSystem("UserSpec"))
       }
     }
 
-    "can login with correct credentials" in {
+    "be able to login with correct credentials" in {
       val user: ActorRef = system.actorOf(User.props("test3"))
       within(500 millis) {
-        implicit val timeout: Timeout = Timeout(500 millis)
         val registerFuture = user ? Register("test@example.com","password")
         val response = Await.result(registerFuture.mapTo[RegisterEvent], 500 millis)
         response shouldBe RegisterSuccess
@@ -86,10 +82,9 @@ class UserSpec extends TestKit(ActorSystem("UserSpec"))
       }
     }
 
-    "cannot login with incorrect credentials" in {
+    "not be able to login with incorrect credentials" in {
       val user: ActorRef = system.actorOf(User.props("test4"))
       within(500 millis) {
-        implicit val timeout: Timeout = Timeout(500 millis)
         val registerFuture = user ? Register("test@example.com","password")
         val response = Await.result(registerFuture.mapTo[RegisterEvent], 500 millis)
         response shouldBe RegisterSuccess
@@ -100,13 +95,28 @@ class UserSpec extends TestKit(ActorSystem("UserSpec"))
       }
     }
 
-    "cannot login without registering" in {
+    "not be able to login without registering" in {
       val user: ActorRef = system.actorOf(User.props("test5"))
       within(500 millis) {
-        implicit val timeout: Timeout = Timeout(500 millis)
         val loginCheckFuture = user ? CheckLogin("password")
         val loginCheckResponse = Await.result(loginCheckFuture.mapTo[LoginEvent], 500 millis)
         loginCheckResponse shouldBe LoginFailure
+      }
+    }
+
+    "be able to create a lobby" in {
+      val user: ActorRef = system.actorOf(User.props("test6"))
+      within(500 millis) {
+        val registerFuture = user ? Register("test6@example.com","password")
+        val response = Await.result(registerFuture.mapTo[RegisterEvent], 500 millis)
+        response shouldBe RegisterSuccess
+
+        val createLobbyFuture = user ? CreateLobby("test lobby name")
+        val createLobbyResponse = Await.result(createLobbyFuture.mapTo[Event], 500 millis)
+        createLobbyResponse match {
+          case LobbyCreated(lobbyId) => println(s"Created lobby with id $lobbyId")
+          case other => fail(other.toString)
+        }
       }
     }
   }

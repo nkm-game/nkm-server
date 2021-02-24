@@ -1,9 +1,14 @@
 package com.tosware.NKM.actors
 
-import akka.actor.{ActorLogging, Props}
+import akka.actor.{ActorLogging, ActorRef, Props}
 import akka.persistence.{PersistentActor, RecoveryCompleted}
 import com.tosware.NKM.models._
 import com.github.t3hnar.bcrypt._
+import akka.pattern.ask
+import akka.util.Timeout
+
+import scala.concurrent.Await
+import scala.concurrent.duration._
 
 object User {
   sealed trait Query
@@ -27,6 +32,7 @@ object User {
   case object LoginFailure extends LoginEvent
 
   case class LobbyCreated(lobbyId: String) extends Event
+  case object LobbyCreationFailure extends Event
 
   def props(login: String): Props = Props(new User(login))
 }
@@ -34,6 +40,8 @@ object User {
 class User(login: String) extends PersistentActor with ActorLogging {
   import User._
   override def persistenceId: String = s"user-$login"
+
+  implicit val timeout: Timeout = Timeout(500.millis)
 
   var userState: UserState = UserState(login)
 
@@ -63,6 +71,16 @@ class User(login: String) extends PersistentActor with ActorLogging {
         if(userState.registered() && password.isBcrypted(userState.passwordHash.get)) LoginSuccess
         else LoginFailure
       }
+
+    case CreateLobby(name) =>
+      log.info(s"Received create lobby request")
+      val randomId = java.util.UUID.randomUUID.toString
+      val lobby: ActorRef = context.system.actorOf(Lobby.props(randomId))
+      val creationResult = Await.result(lobby ? Lobby.Create(name), 500.millis) match {
+        case Lobby.CreateSuccess => LobbyCreated(randomId)
+        case _ => LobbyCreationFailure
+      }
+      sender() ! creationResult
     case e => log.warning(s"Unknown message: $e")
   }
 

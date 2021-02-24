@@ -22,10 +22,10 @@ class LobbySpec extends TestKit(ActorSystem("LobbySpec"))
   with BeforeAndAfterAll
   with BeforeAndAfterEach
 {
-//  TODO: cleanup of persistence
-//  override def beforeEach(): Unit = {
-//
-//  }
+  //  TODO: cleanup of persistence
+  //  override def beforeEach(): Unit = {
+  //
+  //  }
   override def afterAll(): Unit = {
     TestKit.shutdownActorSystem(system)
   }
@@ -41,31 +41,31 @@ class LobbySpec extends TestKit(ActorSystem("LobbySpec"))
       }
 
     }
-  }
 
-  "be able to create" in {
-    val lobby: ActorRef = system.actorOf(Lobby.props("test1"))
-    within(500 millis) {
-      val testName = "test name"
-      val createFuture = lobby ? Create(testName)
-      val response = Await.result(createFuture.mapTo[Event], 500 millis)
-      response shouldBe CreateSuccess
+    "be able to create" in {
+      val lobby: ActorRef = system.actorOf(Lobby.props("test1"))
+      within(500 millis) {
+        val testName = "test name"
+        val createFuture = lobby ? Create(testName)
+        val response = Await.result(createFuture.mapTo[Event], 500 millis)
+        response shouldBe CreateSuccess
 
-      val state: LobbyState = Await.result((lobby ? GetState).mapTo[LobbyState], 500 millis)
-      state.created() shouldEqual true
-      state.name.get shouldEqual testName
+        val state: LobbyState = Await.result((lobby ? GetState).mapTo[LobbyState], 500 millis)
+        state.created() shouldEqual true
+        state.name.get shouldEqual testName
+      }
     }
-  }
 
-  "not be able to create more than once" in {
-    val lobby: ActorRef = system.actorOf(Lobby.props("test2"))
-    within(500 millis) {
-      val testName = "test name2"
-      val createCommand = Create(testName)
-      Await.result((lobby ? createCommand).mapTo[Event], 500 millis) shouldBe CreateSuccess
-      Await.result((lobby ? createCommand).mapTo[Event], 500 millis) shouldBe CreateFailure
-      Await.result((lobby ? createCommand).mapTo[Event], 500 millis) shouldBe CreateFailure
-      Await.result((lobby ? Create("otherName")).mapTo[Event], 500 millis) shouldBe CreateFailure
+    "not be able to create more than once" in {
+      val lobby: ActorRef = system.actorOf(Lobby.props("test2"))
+      within(500 millis) {
+        val testName = "test name2"
+        val createCommand = Create(testName)
+        Await.result((lobby ? createCommand).mapTo[Event], 500 millis) shouldBe CreateSuccess
+        Await.result((lobby ? createCommand).mapTo[Event], 500 millis) shouldBe CreateFailure
+        Await.result((lobby ? createCommand).mapTo[Event], 500 millis) shouldBe CreateFailure
+        Await.result((lobby ? Create("otherName")).mapTo[Event], 500 millis) shouldBe CreateFailure
+      }
     }
   }
 }
