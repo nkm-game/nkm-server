@@ -21,6 +21,7 @@ libraryDependencies += "com.typesafe.akka" %% "akka-actor" % AkkaVersion
 libraryDependencies += "com.typesafe.akka" %% "akka-stream" % AkkaVersion
 libraryDependencies += "com.typesafe.akka" %% "akka-http" % AkkaHttpVersion
 libraryDependencies += "com.typesafe.akka" %% "akka-http-spray-json" % AkkaHttpVersion
+libraryDependencies += "com.typesafe.akka" %% "akka-serialization-jackson" % AkkaVersion
 
 libraryDependencies += "com.pauldijou" %% "jwt-core" % JwtVersion
 libraryDependencies += "com.pauldijou" %% "jwt-spray-json" % JwtVersion
