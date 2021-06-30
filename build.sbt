@@ -7,8 +7,9 @@ scalaVersion := "2.13.3"
 // needed because of issua like in https://stackoverflow.com/questions/19425613/unsatisfiedlinkerror-with-native-library-under-sbt
 fork := true
 
-lazy val AkkaVersion = "2.6.8"
+lazy val AkkaVersion = "2.6.15"
 lazy val AkkaHttpVersion = "10.2.3"
+lazy val AkkaPersistenceVersion = "3.5.2"
 lazy val CassandraVersion = "1.0.1"
 lazy val QuickLensVersion = "1.6.0"
 lazy val LevelDBVersion = "1.8"

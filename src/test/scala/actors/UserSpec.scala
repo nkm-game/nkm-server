@@ -2,6 +2,10 @@ package actors
 
 import akka.actor.{ActorRef, ActorSystem}
 import akka.pattern.ask
+import akka.persistence.journal.inmem.InmemJournal
+import akka.persistence.query.PersistenceQuery
+import akka.persistence.query.journal.leveldb.scaladsl.LeveldbReadJournal
+import akka.persistence.query.scaladsl.{EventsByPersistenceIdQuery, ReadJournal}
 import akka.testkit.{ImplicitSender, TestKit}
 import akka.util.Timeout
 import com.tosware.NKM.actors.User
@@ -26,6 +30,8 @@ class UserSpec extends TestKit(ActorSystem("UserSpec"))
 //  override def beforeEach(): Unit = {
 //
 //  }
+
+
   override def afterAll(): Unit = {
     TestKit.shutdownActorSystem(system)
   }
@@ -119,5 +125,21 @@ class UserSpec extends TestKit(ActorSystem("UserSpec"))
         }
       }
     }
+
+//    "be able to read registered journal" in {
+//      val user: ActorRef = system.actorOf(User.props("test7"))
+//      within(500 millis) {
+//        val registerFuture = user ? Register("test@example.com","password")
+//        val response = Await.result(registerFuture.mapTo[RegisterEvent], 500 millis)
+//        response shouldBe RegisterSuccess
+//
+////        val readJournal = PersistenceQuery(system).readJournalFor[LeveldbReadJournal](LeveldbReadJournal.Identifier)
+//        val readJournal = PersistenceQuery(system).readJournalFor("akka.persistence.journal.inmem").asInstanceOf[ReadJournal with EventsByPersistenceIdQuery]
+//        val src = readJournal.eventsByPersistenceId("user-test7", 0L, Long.MaxValue)
+//        val events = src.map(_.event)
+//        println(events)
+//        fail
+//      }
+//    }
   }
 }
