@@ -50,7 +50,10 @@ libraryDependencies += "com.typesafe.akka" %% "akka-testkit" % AkkaVersion % Tes
 libraryDependencies += "com.typesafe.akka" %% "akka-persistence-testkit" % AkkaVersion % Test
 libraryDependencies += "com.typesafe.akka" %% "akka-stream-testkit" % AkkaVersion % Test
 libraryDependencies += "com.typesafe.akka" %% "akka-http-testkit" % AkkaHttpVersion % Test
+//libraryDependencies += "com.typesafe.akka" %% "akka-actor-testkit-typed" % AkkaVersion % Test
 libraryDependencies += "org.scalatest" %% "scalatest" % ScalaTestVersion % Test
+
+libraryDependencies += "com.github.dnvriend" %% "akka-persistence-inmemory" % "2.5.15.2"
 
 scalacOptions in Compile ++= Seq("-deprecation", "-feature", "-unchecked")
 

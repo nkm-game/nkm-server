@@ -125,21 +125,5 @@ class UserSpec extends TestKit(ActorSystem("UserSpec"))
         }
       }
     }
-
-//    "be able to read registered journal" in {
-//      val user: ActorRef = system.actorOf(User.props("test7"))
-//      within(500 millis) {
-//        val registerFuture = user ? Register("test@example.com","password")
-//        val response = Await.result(registerFuture.mapTo[RegisterEvent], 500 millis)
-//        response shouldBe RegisterSuccess
-//
-////        val readJournal = PersistenceQuery(system).readJournalFor[LeveldbReadJournal](LeveldbReadJournal.Identifier)
-//        val readJournal = PersistenceQuery(system).readJournalFor("akka.persistence.journal.inmem").asInstanceOf[ReadJournal with EventsByPersistenceIdQuery]
-//        val src = readJournal.eventsByPersistenceId("user-test7", 0L, Long.MaxValue)
-//        val events = src.map(_.event)
-//        println(events)
-//        fail
-//      }
-//    }
   }
 }
