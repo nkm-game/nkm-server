@@ -55,5 +55,13 @@ libraryDependencies += "org.scalatest" %% "scalatest" % ScalaTestVersion % Test
 
 libraryDependencies += "com.github.dnvriend" %% "akka-persistence-inmemory" % "2.5.15.2"
 
+libraryDependencies += "com.github.dnvriend" %% "akka-persistence-jdbc" % AkkaPersistenceVersion
+libraryDependencies += "mysql" % "mysql-connector-java" % "8.0.25"
+//libraryDependencies += "com.lightbend.akka" %% "akka-stream-alpakka-slick" % "3.0.2"
+//libraryDependencies ++= Seq(
+//  "com.typesafe.slick" %% "slick" % "3.3.3",
+//  "com.typesafe.slick" %% "slick-hikaricp" % "3.3.3"
+//)
+
 scalacOptions in Compile ++= Seq("-deprecation", "-feature", "-unchecked")
 
