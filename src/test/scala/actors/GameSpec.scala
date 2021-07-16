@@ -1,40 +1,24 @@
 package actors
 
-import java.util.UUID.randomUUID
-
 import akka.actor.{ActorRef, ActorSystem}
 import akka.pattern.ask
-import akka.testkit.{ImplicitSender, TestKit}
-import akka.util.Timeout
 import com.tosware.NKM.actors.Game._
 import com.tosware.NKM.actors.NKMData.GetHexMaps
 import com.tosware.NKM.actors.{Game, NKMData}
 import com.tosware.NKM.models._
-import org.scalatest.BeforeAndAfterAll
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpecLike
+import helpers.NKMPersistenceTestKit
 
+import java.util.UUID.randomUUID
 import scala.concurrent.Await
-import scala.concurrent.duration._
 import scala.language.postfixOps
 
-class GameSpec extends TestKit(ActorSystem("GameSpec"))
-  with ImplicitSender
-  with AnyWordSpecLike
-  with Matchers
-  with BeforeAndAfterAll
+class GameSpec extends NKMPersistenceTestKit(ActorSystem("GameSpec"))
 {
   val nkmData: ActorRef = system.actorOf(NKMData.props())
-
-  override def afterAll(): Unit = {
-    TestKit.shutdownActorSystem(system)
-  }
-
   "An Game actor" must {
     "works" in {
-      within(500 millis) {
-        implicit val timeout: Timeout = Timeout(500 millis)
-        val hexMaps = Await.result((nkmData ? GetHexMaps).mapTo[List[HexMap]], 500 millis)
+      within1000 {
+        val hexMaps = Await.result((nkmData ? GetHexMaps).mapTo[List[HexMap]], atMost)
         val game = system.actorOf(Game.props("1"))
 
         val playerNames = List("Ryszard", "Ania", "Ola")
@@ -53,7 +37,7 @@ class GameSpec extends TestKit(ActorSystem("GameSpec"))
         game ! SetMap(hexMaps.head)
         game ! PlaceCharacter(HexCoordinates(4, 5), touka.id)
 
-        val state = Await.result((game ? GetState).mapTo[GameState], 500 millis)
+        val state = Await.result((game ? GetState).mapTo[GameState], atMost)
 
         state.players.length shouldEqual 3
         state.hexMap.cells.find(_.coordinates == HexCoordinates(4, 5)).get.characterId.get shouldEqual touka.id
@@ -61,7 +45,7 @@ class GameSpec extends TestKit(ActorSystem("GameSpec"))
 
         game ! MoveCharacter(HexCoordinates(0, 0), touka.id)
 
-        val state2 = Await.result((game ? GetState).mapTo[GameState], 500 millis)
+        val state2 = Await.result((game ? GetState).mapTo[GameState], atMost)
         state2.hexMap.cells.find(_.coordinates == HexCoordinates(4, 5)).get.characterId shouldEqual None
         state2.hexMap.cells.find(_.coordinates == HexCoordinates(0, 0)).get.characterId.get shouldEqual touka.id
       }

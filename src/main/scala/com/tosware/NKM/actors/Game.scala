@@ -96,7 +96,7 @@ class Game(id: String) extends PersistentActor with ActorLogging {
         log.info(s"Persisted character: ${character.name}")
       }
     case PlaceCharacter(hexCoordinates, characterId) =>
-      log.info(s"Placing ${characterId} on $hexCoordinates")
+      log.info(s"Placing $characterId on $hexCoordinates")
       persist(CharacterPlaced(hexCoordinates, characterId)) { _ =>
         placeCharacter(hexCoordinates, characterId)
         log.info(s"Persisted $characterId on $hexCoordinates")

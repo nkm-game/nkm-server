@@ -6,11 +6,12 @@ import com.tosware.NKM.models._
 import com.github.t3hnar.bcrypt._
 import akka.pattern.ask
 import akka.util.Timeout
+import com.tosware.NKM.NKMTimeouts
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
 
-object User {
+object User extends NKMTimeouts {
   sealed trait Query
   case object GetState extends Query
 
@@ -40,8 +41,6 @@ object User {
 class User(login: String) extends PersistentActor with ActorLogging {
   import User._
   override def persistenceId: String = s"user-$login"
-
-  implicit val timeout: Timeout = Timeout(500.millis)
 
   var userState: UserState = UserState(login)
 
@@ -76,7 +75,7 @@ class User(login: String) extends PersistentActor with ActorLogging {
       log.info(s"Received create lobby request")
       val randomId = java.util.UUID.randomUUID.toString
       val lobby: ActorRef = context.system.actorOf(Lobby.props(randomId))
-      val creationResult = Await.result(lobby ? Lobby.Create(name), 500.millis) match {
+      val creationResult = Await.result(lobby ? Lobby.Create(name), atMost) match {
         case Lobby.CreateSuccess => LobbyCreated(randomId)
         case _ => LobbyCreationFailure
       }
