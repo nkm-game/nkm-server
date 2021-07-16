@@ -61,7 +61,6 @@ class NKMPersistenceTestKit (_system: ActorSystem) extends TestKit(_system)
     )
     val setupFuture = db.run(setupAction)
     Await.result(setupFuture, 5000 millis)
-
   }
 
   override def afterAll(): Unit = {
