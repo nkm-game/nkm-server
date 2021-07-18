@@ -2,9 +2,7 @@ package com.tosware.NKM.actors
 
 import akka.actor.{Actor, ActorLogging, Props}
 import com.tosware.NKM.DBManager
-import com.tosware.NKM.DBManager.dbTimeout
 import com.tosware.NKM.models.UserState
-import slick.dbio.DBIO
 import slick.jdbc.JdbcBackend.Database
 import slick.jdbc.MySQLProfile.api._
 

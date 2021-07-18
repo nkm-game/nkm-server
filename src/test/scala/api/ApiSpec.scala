@@ -3,6 +3,7 @@ package api
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.testkit.ScalatestRouteTest
+import com.tosware.NKM.actors.CQRSEventHandler
 import com.tosware.NKM.models.{Credentials, JwtContent, RegisterRequest}
 import com.tosware.NKM.services.HttpService
 import org.scalatest.matchers.should.Matchers
@@ -15,6 +16,9 @@ import scala.util.Success
 
 class ApiSpec extends AnyWordSpec with Matchers with ScalatestRouteTest with HttpService
 {
+  //TODO: move it somewhere else
+  system.actorOf(CQRSEventHandler.props())
+
   "API" must {
     "refuse incorrect register attempt" in {
       Post("/api/register") ~> Route.seal(routes) ~> check {
