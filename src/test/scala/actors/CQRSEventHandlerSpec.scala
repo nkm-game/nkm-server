@@ -2,10 +2,13 @@ package actors
 
 import akka.actor.{ActorRef, ActorSystem}
 import akka.pattern.ask
+import com.tosware.NKM.DBManager
 import com.tosware.NKM.actors.User._
 import com.tosware.NKM.actors.{CQRSEventHandler, User}
 import com.tosware.NKM.models.UserState
 import helpers.NKMPersistenceTestKit
+import slick.jdbc.JdbcBackend.Database
+import slick.jdbc.MySQLProfile.api._
 
 import scala.concurrent.Await
 import scala.language.postfixOps
@@ -25,8 +28,16 @@ class CQRSEventHandlerSpec extends NKMPersistenceTestKit(ActorSystem("CQRSEventH
         val response = Await.result(registerFuture.mapTo[RegisterEvent], atMost)
         response shouldBe RegisterSuccess
 
-        //TODO: check if it is persisted
-        fail
+
+        import system.dispatcher
+
+        val db = Database.forConfig("slick.db")
+        db.run(DBManager.users.result).map(_.foreach {
+          case UserState(login, emailResult, _) =>
+            login shouldBe username
+            emailResult shouldBe email
+          }
+        )
       }
     }
 

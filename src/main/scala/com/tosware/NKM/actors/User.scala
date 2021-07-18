@@ -1,15 +1,13 @@
 package com.tosware.NKM.actors
 
 import akka.actor.{ActorLogging, ActorRef, Props}
-import akka.persistence.{PersistentActor, RecoveryCompleted}
-import com.tosware.NKM.models._
-import com.github.t3hnar.bcrypt._
 import akka.pattern.ask
-import akka.util.Timeout
+import akka.persistence.{PersistentActor, RecoveryCompleted}
+import com.github.t3hnar.bcrypt._
 import com.tosware.NKM.NKMTimeouts
+import com.tosware.NKM.models._
 
 import scala.concurrent.Await
-import scala.concurrent.duration._
 
 object User extends NKMTimeouts {
   sealed trait Query
@@ -25,7 +23,7 @@ object User extends NKMTimeouts {
   sealed trait RegisterEvent extends Event
   sealed trait LoginEvent extends Event
 
-  case class RegisterSuccess(email: String, passwordHash: String) extends RegisterEvent
+  case class RegisterSuccess(login: String, email: String, passwordHash: String) extends RegisterEvent
   case object RegisterSuccess extends RegisterEvent
   case object RegisterFailure extends RegisterEvent
 
@@ -58,9 +56,9 @@ class User(login: String) extends PersistentActor with ActorLogging {
         sender() ! RegisterFailure
       } else {
         val passwordHash = password.bcrypt
-        persist(RegisterSuccess(email, passwordHash)) { _ =>
+        persist(RegisterSuccess(login, email, passwordHash)) { _ =>
           register(email, passwordHash)
-          context.system.eventStream.publish(RegisterSuccess(email, passwordHash))
+          context.system.eventStream.publish(RegisterSuccess(login, email, passwordHash))
           log.info(s"Persisted user: $login")
           sender() ! RegisterSuccess
         }
@@ -85,7 +83,7 @@ class User(login: String) extends PersistentActor with ActorLogging {
   }
 
   override def receiveRecover: Receive = {
-    case RegisterSuccess(email, passwordHash) =>
+    case RegisterSuccess(login, email, passwordHash) =>
       register(email, passwordHash)
       log.info(s"Recovered register")
     case RecoveryCompleted =>

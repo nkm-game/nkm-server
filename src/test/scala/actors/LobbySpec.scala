@@ -8,7 +8,6 @@ import com.tosware.NKM.models.LobbyState
 import helpers.NKMPersistenceTestKit
 
 import scala.concurrent.Await
-import scala.concurrent.duration._
 import scala.language.postfixOps
 
 class LobbySpec extends NKMPersistenceTestKit(ActorSystem("LobbySpec"))
