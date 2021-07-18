@@ -2,7 +2,8 @@ package actors
 
 import akka.actor.{ActorRef, ActorSystem}
 import akka.pattern.ask
-import com.tosware.NKM.actors.User
+import com.tosware.NKM.Main.system
+import com.tosware.NKM.actors.{CQRSEventHandler, User}
 import com.tosware.NKM.actors.User._
 import com.tosware.NKM.models.UserState
 import helpers.NKMPersistenceTestKit
@@ -16,7 +17,7 @@ class UserSpec extends NKMPersistenceTestKit(ActorSystem("UserSpec"))
   "An User actor" must {
     "not be registered initially" in {
       val user: ActorRef = system.actorOf(User.props("test"))
-      within1000 {
+      within2000 {
         val future = user ? GetState
         val state: UserState = Await.result(future.mapTo[UserState], atMost)
         state.login shouldEqual "test"
@@ -25,7 +26,7 @@ class UserSpec extends NKMPersistenceTestKit(ActorSystem("UserSpec"))
     }
     "be able to register" in {
       val user: ActorRef = system.actorOf(User.props("test"))
-      within1000 {
+      within2000 {
         val registerFuture = user ? Register("test@example.com","password")
         val response = Await.result(registerFuture.mapTo[RegisterEvent], atMost)
         response shouldBe RegisterSuccess
@@ -40,7 +41,7 @@ class UserSpec extends NKMPersistenceTestKit(ActorSystem("UserSpec"))
 
     "not be able to register a second time" in {
       val user: ActorRef = system.actorOf(User.props("test"))
-      within1000 {
+      within2000 {
         val registerFuture = user ? Register("test@example.com","password")
         val response = Await.result(registerFuture.mapTo[RegisterEvent], atMost)
         response shouldBe RegisterSuccess
@@ -53,7 +54,7 @@ class UserSpec extends NKMPersistenceTestKit(ActorSystem("UserSpec"))
 
     "be able to login with correct credentials" in {
       val user: ActorRef = system.actorOf(User.props("test3"))
-      within1000 {
+      within2000 {
         val registerFuture = user ? Register("test@example.com","password")
         val response = Await.result(registerFuture.mapTo[RegisterEvent], atMost)
         response shouldBe RegisterSuccess
@@ -66,7 +67,7 @@ class UserSpec extends NKMPersistenceTestKit(ActorSystem("UserSpec"))
 
     "not be able to login with incorrect credentials" in {
       val user: ActorRef = system.actorOf(User.props("test4"))
-        within1000 {
+        within2000 {
         val registerFuture = user ? Register("test@example.com","password")
         val response = Await.result(registerFuture.mapTo[RegisterEvent], atMost)
         response shouldBe RegisterSuccess
@@ -79,7 +80,7 @@ class UserSpec extends NKMPersistenceTestKit(ActorSystem("UserSpec"))
 
     "not be able to login without registering" in {
       val user: ActorRef = system.actorOf(User.props("test5"))
-      within1000 {
+      within2000 {
         val loginCheckFuture = user ? CheckLogin("password")
         val loginCheckResponse = Await.result(loginCheckFuture.mapTo[LoginEvent], atMost)
         loginCheckResponse shouldBe LoginFailure
@@ -88,7 +89,7 @@ class UserSpec extends NKMPersistenceTestKit(ActorSystem("UserSpec"))
 
     "be able to create a lobby" in {
       val user: ActorRef = system.actorOf(User.props("test6"))
-      within1000 {
+      within2000 {
         val registerFuture = user ? Register("test6@example.com","password")
         val response = Await.result(registerFuture.mapTo[RegisterEvent], atMost)
         response shouldBe RegisterSuccess

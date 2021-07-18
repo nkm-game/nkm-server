@@ -67,6 +67,6 @@ class NKMPersistenceTestKit (_system: ActorSystem) extends TestKit(_system)
     TestKit.shutdownActorSystem(system)
   }
 
-  def within1000[T](f: => T): T = within(1000 millis)(f)
+  def within2000[T](f: => T): T = within(2000 millis)(f)
 
 }

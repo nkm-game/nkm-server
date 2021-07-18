@@ -60,6 +60,7 @@ class User(login: String) extends PersistentActor with ActorLogging {
         val passwordHash = password.bcrypt
         persist(RegisterSuccess(email, passwordHash)) { _ =>
           register(email, passwordHash)
+          context.system.eventStream.publish(RegisterSuccess(email, passwordHash))
           log.info(s"Persisted user: $login")
           sender() ! RegisterSuccess
         }

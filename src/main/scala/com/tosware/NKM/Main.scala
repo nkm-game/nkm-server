@@ -1,7 +1,8 @@
 package com.tosware.NKM
 
-import akka.actor.ActorSystem
+import akka.actor.{ActorRef, ActorSystem}
 import akka.http.scaladsl.Http
+import com.tosware.NKM.actors.{CQRSEventHandler, User}
 import com.tosware.NKM.services.HttpService
 import slick.dbio.DBIO
 import slick.jdbc.JdbcBackend.Database
@@ -50,6 +51,8 @@ object Main extends App with HttpService {
 
   setupDatabase()
   override implicit val system: ActorSystem = ActorSystem("NKMServer")
+
+  system.actorOf(CQRSEventHandler.props())
 
   sys.env.getOrElse("DEBUG", "false").toBooleanOption match {
     case Some(true) =>

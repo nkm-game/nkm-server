@@ -16,7 +16,7 @@ class NKMDataSpec extends NKMPersistenceTestKit(ActorSystem("NKMDataSpec"))
 
   "An NKMData actor" must {
     "send HexMaps" in {
-      within1000 {
+      within2000 {
         val future = nkmData ? GetHexMaps
         val hexMaps = Await.result(future.mapTo[List[HexMap]], atMost)
         assert(hexMaps.nonEmpty)

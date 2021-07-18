@@ -17,7 +17,7 @@ class GameSpec extends NKMPersistenceTestKit(ActorSystem("GameSpec"))
   val nkmData: ActorRef = system.actorOf(NKMData.props())
   "An Game actor" must {
     "works" in {
-      within1000 {
+      within2000 {
         val hexMaps = Await.result((nkmData ? GetHexMaps).mapTo[List[HexMap]], atMost)
         val game = system.actorOf(Game.props("1"))
 
