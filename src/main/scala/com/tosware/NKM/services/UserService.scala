@@ -2,21 +2,23 @@ package com.tosware.NKM.services
 
 import akka.actor.{ActorRef, ActorSystem}
 import akka.pattern.ask
-import com.tosware.NKM.{DBManager, NKMTimeouts}
 import com.tosware.NKM.actors.User
 import com.tosware.NKM.actors.User._
 import com.tosware.NKM.models.{Credentials, RegisterRequest}
-import slick.jdbc.JdbcBackend.Database
+import com.tosware.NKM.{DBManager, NKMTimeouts}
+import slick.jdbc.JdbcBackend
 import slick.jdbc.MySQLProfile.api._
 
 import scala.concurrent.Await
 
-object UserService extends NKMTimeouts {
+object UserService {
   sealed trait Event
   case class LoggedIn(login: String) extends Event
   case object InvalidCredentials extends Event
+}
 
-  val db = Database.forConfig("slick.db")
+class UserService(implicit db: JdbcBackend.Database) extends NKMTimeouts {
+  import UserService._
 
   def authenticate(creds: Credentials)(implicit system: ActorSystem): Event = {
     val userActor: ActorRef = system.actorOf(User.props(creds.login))

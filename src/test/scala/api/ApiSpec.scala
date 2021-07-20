@@ -5,19 +5,27 @@ import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import com.tosware.NKM.actors.CQRSEventHandler
 import com.tosware.NKM.models.{Credentials, JwtContent, RegisterRequest}
-import com.tosware.NKM.services.HttpService
+import com.tosware.NKM.services.{HttpService, UserService}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import pdi.jwt.{JwtAlgorithm, JwtSprayJson}
+import slick.jdbc.JdbcBackend
+import slick.jdbc.JdbcBackend.Database
 import spray.json._
 
 import scala.language.postfixOps
 import scala.util.Success
 
-class ApiSpec extends AnyWordSpec with Matchers with ScalatestRouteTest with HttpService
+class ApiSpec
+  extends AnyWordSpec
+    with Matchers
+    with ScalatestRouteTest
+    with HttpService
 {
   //TODO: move it somewhere else
-  system.actorOf(CQRSEventHandler.props())
+  implicit val db: JdbcBackend.Database = Database.forConfig("slick.db")
+  implicit val userService: UserService = new UserService()
+  system.actorOf(CQRSEventHandler.props(db))
 
   "API" must {
     "refuse incorrect register attempt" in {

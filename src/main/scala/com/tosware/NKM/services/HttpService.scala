@@ -31,6 +31,7 @@ import scala.language.postfixOps
 trait HttpService extends NKMJsonProtocol with SprayJsonSupport with CORSHandler {
   implicit val system: ActorSystem
   implicit val timeout: Timeout = Timeout(2 seconds)
+  implicit val userService: UserService
   lazy val nkmData: ActorRef = system.actorOf(NKMData.props())
 
   val jwtSecretKey = "much_secret"
@@ -97,7 +98,7 @@ trait HttpService extends NKMJsonProtocol with SprayJsonSupport with CORSHandler
           path("register") {
             entity(as[RegisterRequest]) { entity =>
               println(s"Received register request for ${entity.login}")
-              UserService.register(entity) match {
+              userService.register(entity) match {
                 case RegisterSuccess => complete(StatusCodes.Created)
                 case RegisterFailure => complete(StatusCodes.Conflict) // TODO - change status code based on failure
               }
@@ -108,7 +109,7 @@ trait HttpService extends NKMJsonProtocol with SprayJsonSupport with CORSHandler
           path("login") {
               entity(as[Credentials]) { entity =>
                 println(s"Logging in ${entity.login}")
-                UserService.authenticate(entity) match {
+                userService.authenticate(entity) match {
                   case LoggedIn(login) => complete(StatusCodes.OK, getToken(login))
                   case InvalidCredentials => complete(StatusCodes.Unauthorized, "invalid credentials")
                 }

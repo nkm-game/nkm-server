@@ -29,6 +29,7 @@ class NKMPersistenceTestKit (_system: ActorSystem) extends TestKit(_system)
 
   override def afterAll(): Unit = {
     TestKit.shutdownActorSystem(system)
+    db.close()
   }
 
   def within2000[T](f: => T): T = within(2000 millis)(f)

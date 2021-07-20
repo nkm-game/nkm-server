@@ -21,7 +21,7 @@ class CQRSEventHandlerSpec extends NKMPersistenceTestKit(ActorSystem("CQRSEventH
       val username = "test"
       val email = s"$username@example.com"
       val password = "password"
-      system.actorOf(CQRSEventHandler.props())
+      system.actorOf(CQRSEventHandler.props(db))
       val user: ActorRef = system.actorOf(User.props(username))
       within2000 {
         val registerFuture = user ? Register(email,password)
@@ -31,7 +31,6 @@ class CQRSEventHandlerSpec extends NKMPersistenceTestKit(ActorSystem("CQRSEventH
 
         import system.dispatcher
 
-        val db = Database.forConfig("slick.db")
         db.run(DBManager.users.result).map(_.foreach {
           case UserState(login, emailResult, _) =>
             login shouldBe username
