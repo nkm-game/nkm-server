@@ -21,7 +21,6 @@ class CQRSEventHandlerSpec extends NKMPersistenceTestKit(ActorSystem("CQRSEventH
       val username = "test"
       val email = s"$username@example.com"
       val password = "password"
-      system.actorOf(CQRSEventHandler.props(db))
       val user: ActorRef = system.actorOf(User.props(username))
       within2000 {
         val registerFuture = user ? Register(email,password)

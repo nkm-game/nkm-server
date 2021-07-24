@@ -11,12 +11,18 @@ import scala.concurrent.duration.DurationInt
 object DBManager {
   val dbTimeout = 5000.millis
   val users = TableQuery[Users]
+  val lobbys = TableQuery[Lobbys]
+
+  val queries = List(
+    users,
+    lobbys,
+  )
 
   def dropAllTables(db: JdbcBackend.Database): Unit = {
     def dropActions = DBIO.seq(
       sqlu"""DROP TABLE IF EXISTS journal""",
       sqlu"""DROP TABLE IF EXISTS snapshot""",
-      users.schema.dropIfExists,
+      DBIO.sequence(queries.map(_.schema.dropIfExists)),
     )
     Await.result(db.run(dropActions), dbTimeout)
   }
@@ -50,7 +56,7 @@ object DBManager {
     val setupAction: DBIO[Unit] = DBIO.seq(
       createJournalIfNotExists,
       createSnapshotIfNotExists,
-      users.schema.createIfNotExists,
+      DBIO.sequence(queries.map(_.schema.createIfNotExists)),
     )
     Await.result(db.run(setupAction), dbTimeout)
   }

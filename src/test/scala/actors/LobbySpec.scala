@@ -24,9 +24,10 @@ class LobbySpec extends NKMPersistenceTestKit(ActorSystem("LobbySpec"))
 
     "be able to create" in {
       val lobby: ActorRef = system.actorOf(Lobby.props("test1"))
+      val hostUserID = "test_user"
       within2000 {
         val testName = "test name"
-        val createFuture = lobby ? Create(testName)
+        val createFuture = lobby ? Create(testName, hostUserID)
         val response = Await.result(createFuture.mapTo[Event], atMost)
         response shouldBe CreateSuccess
 
@@ -38,13 +39,14 @@ class LobbySpec extends NKMPersistenceTestKit(ActorSystem("LobbySpec"))
 
     "not be able to create more than once" in {
       val lobby: ActorRef = system.actorOf(Lobby.props("test2"))
+      val hostUserID = "test_user"
       within2000 {
         val testName = "test name2"
-        val createCommand = Create(testName)
+        val createCommand = Create(testName, hostUserID)
         Await.result((lobby ? createCommand).mapTo[Event], atMost) shouldBe CreateSuccess
         Await.result((lobby ? createCommand).mapTo[Event], atMost) shouldBe CreateFailure
         Await.result((lobby ? createCommand).mapTo[Event], atMost) shouldBe CreateFailure
-        Await.result((lobby ? Create("otherName")).mapTo[Event], atMost) shouldBe CreateFailure
+        Await.result((lobby ? Create("otherName", hostUserID)).mapTo[Event], atMost) shouldBe CreateFailure
       }
     }
   }

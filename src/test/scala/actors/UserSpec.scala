@@ -87,20 +87,20 @@ class UserSpec extends NKMPersistenceTestKit(ActorSystem("UserSpec"))
       }
     }
 
-    "be able to create a lobby" in {
-      val user: ActorRef = system.actorOf(User.props("test6"))
-      within2000 {
-        val registerFuture = user ? Register("test6@example.com","password")
-        val response = Await.result(registerFuture.mapTo[RegisterEvent], atMost)
-        response shouldBe RegisterSuccess
-
-        val createLobbyFuture = user ? CreateLobby("test lobby name")
-        val createLobbyResponse = Await.result(createLobbyFuture.mapTo[Event], atMost)
-        createLobbyResponse match {
-          case LobbyCreated(lobbyId) => println(s"Created lobby with id $lobbyId")
-          case other => fail(other.toString)
-        }
-      }
-    }
+//    "be able to create a lobby" in {
+//      val user: ActorRef = system.actorOf(User.props("test6"))
+//      within2000 {
+//        val registerFuture = user ? Register("test6@example.com","password")
+//        val response = Await.result(registerFuture.mapTo[RegisterEvent], atMost)
+//        response shouldBe RegisterSuccess
+//
+//        val createLobbyFuture = user ? CreateLobby("test lobby name")
+//        val createLobbyResponse = Await.result(createLobbyFuture.mapTo[Event], atMost)
+//        createLobbyResponse match {
+//          case LobbyCreated(lobbyId) => println(s"Created lobby with id $lobbyId")
+//          case other => fail(other.toString)
+//        }
+//      }
+//    }
   }
 }

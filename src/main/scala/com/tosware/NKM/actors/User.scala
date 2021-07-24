@@ -17,7 +17,7 @@ object User extends NKMTimeouts {
   case class Register(email: String, password: String) extends Command
   case class CheckLogin(password: String) extends Command
 //  case class CreateNewGame(gameOpts: GameOptions) extends Command
-  case class CreateLobby(name: String) extends Command
+//  case class CreateLobby(name: String) extends Command
 
   sealed trait Event
   sealed trait RegisterEvent extends Event
@@ -30,8 +30,8 @@ object User extends NKMTimeouts {
   case object LoginSuccess extends LoginEvent
   case object LoginFailure extends LoginEvent
 
-  case class LobbyCreated(lobbyId: String) extends Event
-  case object LobbyCreationFailure extends Event
+//  case class LobbyCreated(lobbyId: String) extends Event
+//  case object LobbyCreationFailure extends Event
 
   def props(login: String): Props = Props(new User(login))
 }
@@ -70,15 +70,15 @@ class User(login: String) extends PersistentActor with ActorLogging {
         else LoginFailure
       }
 
-    case CreateLobby(name) =>
-      log.info(s"Received create lobby request")
-      val randomId = java.util.UUID.randomUUID.toString
-      val lobby: ActorRef = context.system.actorOf(Lobby.props(randomId))
-      val creationResult = Await.result(lobby ? Lobby.Create(name), atMost) match {
-        case Lobby.CreateSuccess => LobbyCreated(randomId)
-        case _ => LobbyCreationFailure
-      }
-      sender() ! creationResult
+//    case CreateLobby(name) =>
+//      log.info(s"Received create lobby request")
+//      val randomId = java.util.UUID.randomUUID.toString
+//      val lobby: ActorRef = context.system.actorOf(Lobby.props(randomId))
+//      val creationResult = Await.result(lobby ? Lobby.Create(name), atMost) match {
+//        case Lobby.CreateSuccess => LobbyCreated(randomId)
+//        case _ => LobbyCreationFailure
+//      }
+//      sender() ! creationResult
     case e => log.warning(s"Unknown message: $e")
   }
 

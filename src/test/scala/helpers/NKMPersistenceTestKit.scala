@@ -2,6 +2,7 @@ package helpers
 
 import akka.actor.ActorSystem
 import akka.testkit.{ImplicitSender, TestKit}
+import com.tosware.NKM.actors.CQRSEventHandler
 import com.tosware.NKM.{DBManager, NKMTimeouts}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
@@ -19,7 +20,12 @@ class NKMPersistenceTestKit (_system: ActorSystem) extends TestKit(_system)
   with BeforeAndAfterAll
   with BeforeAndAfterEach
 {
+  override def beforeAll(): Unit = {
+    // spawn CQRS Event Handler
+    system.actorOf(CQRSEventHandler.props(db))
+  }
   val db = Database.forConfig("slick.db")
+
 
   // Clean up persistence before each test
   override def beforeEach(): Unit = {
