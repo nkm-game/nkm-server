@@ -11,11 +11,11 @@ import scala.concurrent.duration.DurationInt
 object DBManager {
   val dbTimeout = 5000.millis
   val users = TableQuery[Users]
-  val lobbys = TableQuery[Lobbys]
+  val lobbies = TableQuery[Lobbies]
 
   val queries = List(
     users,
-    lobbys,
+    lobbies,
   )
 
   def dropAllTables(db: JdbcBackend.Database): Unit = {

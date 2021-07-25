@@ -3,7 +3,7 @@ package com.tosware.NKM
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import com.tosware.NKM.actors.CQRSEventHandler
-import com.tosware.NKM.services.{HttpService, UserService}
+import com.tosware.NKM.services._
 import slick.jdbc.JdbcBackend
 import slick.jdbc.JdbcBackend.Database
 
@@ -12,6 +12,7 @@ import scala.language.postfixOps
 object Main extends App with HttpService {
   implicit val db: JdbcBackend.Database = Database.forConfig("slick.db")
   val userService = new UserService()
+  val lobbyService = new LobbyService()
 
   DBManager.createNeededTables(db)
 

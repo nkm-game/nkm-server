@@ -1,10 +1,10 @@
 package com.tosware.NKM.actors
 
-import java.time.LocalDate
 import akka.actor.{ActorLogging, Props}
 import akka.persistence.{PersistentActor, RecoveryCompleted}
-import com.tosware.NKM.actors.User.RegisterSuccess
 import com.tosware.NKM.models._
+
+import java.time.LocalDate
 
 
 object Lobby {
@@ -48,7 +48,7 @@ class Lobby(id: String) extends PersistentActor with ActorLogging {
           persist(createSuccessEvent) { _ =>
             context.system.eventStream.publish(createSuccessEvent)
             create(name, hostUserId, creationDate)
-            log.info(s"Created lobby")
+            log.info(s"Created lobby $name for $hostUserId")
             sender() ! CreateSuccess
           }
         }

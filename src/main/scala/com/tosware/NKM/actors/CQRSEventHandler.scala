@@ -24,7 +24,7 @@ class CQRSEventHandler(db: JdbcBackend.Database) extends Actor with ActorLogging
       val insertAction = DBManager.users += UserState(login, Some(email), Some(passwordHash))
       Await.result(db.run(insertAction), DBManager.dbTimeout)
     case Lobby.CreateSuccess(id, name, hostUserId, creationDate) =>
-      val insertAction = DBManager.lobbys += LobbyState(id, Some(name), Some(hostUserId), Some(creationDate))
+      val insertAction = DBManager.lobbies += LobbyState(id, Some(name), Some(hostUserId), Some(creationDate))
       Await.result(db.run(insertAction), DBManager.dbTimeout)
   }
 }

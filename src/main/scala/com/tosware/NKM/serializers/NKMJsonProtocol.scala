@@ -4,6 +4,10 @@ import com.tosware.NKM.actors.Game._
 import com.tosware.NKM.models._
 import spray.json._
 
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import scala.util.Try
+
 trait NKMJsonProtocol extends DefaultJsonProtocol {
 
   implicit object HexCellEffectJsonFormat extends RootJsonFormat[HexCellEffect] {
@@ -34,8 +38,24 @@ trait NKMJsonProtocol extends DefaultJsonProtocol {
     }
   }
 
+  // borrowed from https://github.com/theiterators/kebs/blob/master/examples/src/main/scala/pl/iterators/kebs_examples/SprayJsonWithAkkaHttpExample.scala
+  implicit object LocalDateFormat extends RootJsonFormat[LocalDate] {
+    override def write(obj: LocalDate) = JsString(formatter.format(obj))
+
+    override def read(json: JsValue) = json match {
+      case JsString(lDString) =>
+        Try(LocalDate.parse(lDString, formatter)).getOrElse(deserializationError(deserializationErrorMessage))
+      case _ => deserializationError(deserializationErrorMessage)
+    }
+
+    private val formatter = DateTimeFormatter.ISO_LOCAL_DATE
+    private val deserializationErrorMessage =
+      s"Expected date time in ISO offset date time format ex. ${LocalDate.now().format(formatter)}"
+  }
+
   // Start with simple ones, finish with the most complex
   // if format A depends on B, then B should be defined first (or we get a NullPointerException from spray)
+  implicit val lobbyStateFormat: RootJsonFormat[LobbyState] = jsonFormat5(LobbyState)
   implicit val hexCoordinatesFormat: RootJsonFormat[HexCoordinates] = jsonFormat2(HexCoordinates)
   implicit val statFormat: RootJsonFormat[Stat] = jsonFormat1(Stat)
   implicit val phaseFormat: RootJsonFormat[Phase] = jsonFormat1(Phase)
@@ -48,6 +68,7 @@ trait NKMJsonProtocol extends DefaultJsonProtocol {
 
   implicit val loginFormat: RootJsonFormat[Credentials] = jsonFormat2(Credentials)
   implicit val registerRequestFormat: RootJsonFormat[RegisterRequest] = jsonFormat3(RegisterRequest)
+  implicit val lobbyCreationRequestFormat: RootJsonFormat[LobbyCreationRequest] = jsonFormat1(LobbyCreationRequest)
 
   implicit object EventJsonFormat extends RootJsonFormat[Event] {
     // Events

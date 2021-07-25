@@ -6,7 +6,7 @@ import spray.json._
 
 import java.time.LocalDate
 
-class Lobbys(tag: Tag) extends Table[LobbyState](tag, "LOBBYS")
+class Lobbies(tag: Tag) extends Table[LobbyState](tag, "LOBBYS")
 //with SprayJsonSupport
 with DefaultJsonProtocol
 {
