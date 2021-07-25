@@ -108,6 +108,13 @@ class ApiSpec
       }
     }
 
+    "disallow creating lobby with wrong token" in {
+      var token: String = "random_token"
+      Post("/api/create_lobby", LobbyCreationRequest("lobby_name")).addHeader(RawHeader("Authorization", s"Bearer $token")) ~> routes ~> check {
+        status shouldEqual Unauthorized
+      }
+    }
+
     "allow getting created lobbies" in {
       Get("/api/lobbies") ~> routes ~> check {
         status shouldEqual OK

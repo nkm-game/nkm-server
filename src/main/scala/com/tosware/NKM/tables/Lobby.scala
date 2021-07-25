@@ -6,8 +6,7 @@ import spray.json._
 
 import java.time.LocalDate
 
-class Lobbies(tag: Tag) extends Table[LobbyState](tag, "LOBBYS")
-//with SprayJsonSupport
+class Lobby(tag: Tag) extends Table[LobbyState](tag, "lobby")
 with DefaultJsonProtocol
 {
   def id = column[String]("ID", O.PrimaryKey)
