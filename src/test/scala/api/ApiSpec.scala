@@ -104,7 +104,7 @@ class ApiSpec
         token = responseAs[String]
       }
       Post("/api/create_lobby", LobbyCreationRequest("lobby_name")).addHeader(RawHeader("Authorization", s"Bearer $token")) ~> routes ~> check {
-        status shouldEqual OK
+        status shouldEqual Created
       }
     }
 
@@ -129,7 +129,7 @@ class ApiSpec
         token = responseAs[String]
       }
       Post("/api/create_lobby", LobbyCreationRequest("lobby_name")).addHeader(RawHeader("Authorization", s"Bearer $token")) ~> routes ~> check {
-        status shouldEqual OK
+        status shouldEqual Created
       }
 
       Get("/api/lobbies") ~> routes ~> check {

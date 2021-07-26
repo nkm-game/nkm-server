@@ -125,7 +125,7 @@ trait HttpService extends NKMJsonProtocol with SprayJsonSupport with CORSHandler
                   import LobbyService._
                   val username = jwtClaim.content.parseJson.convertTo[JwtContent].content
                   lobbyService.createLobby(entity.name, username) match {
-                    case LobbyCreated(lobbyId) => complete(StatusCodes.OK, lobbyId)
+                    case LobbyCreated(lobbyId) => complete(StatusCodes.Created, lobbyId)
                     case LobbyCreationFailure => complete(StatusCodes.InternalServerError)
                   }
                 }
