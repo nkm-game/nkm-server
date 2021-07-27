@@ -49,5 +49,50 @@ class LobbySpec extends NKMPersistenceTestKit(ActorSystem("LobbySpec"))
         Await.result((lobby ? Create("otherName", hostUserID)).mapTo[Event], atMost) shouldBe CreateFailure
       }
     }
+
+    "be able to join created lobby" in {
+      val lobby: ActorRef = system.actorOf(Lobby.props("test"))
+      val hostUserID = "test_user"
+      val joinerID = "test_user2"
+      within2000 {
+        val testName = "test name"
+        val createFuture = lobby ? Create(testName, hostUserID)
+        val response = Await.result(createFuture.mapTo[Event], atMost)
+        response shouldBe CreateSuccess
+
+        val joinFuture = lobby ? UserJoin(joinerID)
+        val joinResponse = Await.result(joinFuture.mapTo[Event], atMost)
+        joinResponse shouldBe JoinSuccess
+
+        val state: LobbyState = Await.result((lobby ? GetState).mapTo[LobbyState], atMost)
+        state.userIds shouldEqual List(hostUserID, joinerID)
+      }
+    }
+
+    "be able to leave lobby" in {
+      val lobby: ActorRef = system.actorOf(Lobby.props("test"))
+      val hostUserID = "test_user"
+      val joinerID = "test_user2"
+      within2000 {
+        val testName = "test name"
+        val createFuture = lobby ? Create(testName, hostUserID)
+        val response = Await.result(createFuture.mapTo[Event], atMost)
+        response shouldBe CreateSuccess
+
+        val joinFuture = lobby ? UserJoin(joinerID)
+        val joinResponse = Await.result(joinFuture.mapTo[Event], atMost)
+        joinResponse shouldBe JoinSuccess
+
+        val state: LobbyState = Await.result((lobby ? GetState).mapTo[LobbyState], atMost)
+        state.userIds shouldEqual List(hostUserID, joinerID)
+
+        val leaveFuture = lobby ? UserLeave(joinerID)
+        val leaveResponse = Await.result(leaveFuture.mapTo[Event], atMost)
+        leaveResponse shouldBe LeaveSuccess
+
+        val leaveState: LobbyState = Await.result((lobby ? GetState).mapTo[LobbyState], atMost)
+        leaveState.userIds shouldEqual List(hostUserID)
+      }
+    }
   }
 }

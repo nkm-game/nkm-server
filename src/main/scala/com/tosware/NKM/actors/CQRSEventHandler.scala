@@ -6,6 +6,7 @@ import com.tosware.NKM.models.{LobbyState, UserState}
 import slick.jdbc.JdbcBackend
 import slick.jdbc.JdbcBackend.Database
 import slick.jdbc.MySQLProfile.api._
+import spray.json._
 
 import scala.concurrent.Await
 
@@ -13,7 +14,11 @@ object CQRSEventHandler {
   def props(db: JdbcBackend.Database): Props = Props(new CQRSEventHandler(db))
 }
 
-class CQRSEventHandler(db: JdbcBackend.Database) extends Actor with ActorLogging {
+class CQRSEventHandler(db: JdbcBackend.Database)
+  extends Actor
+    with ActorLogging
+    with DefaultJsonProtocol
+{
   override def preStart(): Unit = {
     log.info("CQRSEventHandler started")
     context.system.eventStream.subscribe(self, classOf[User.Event])
@@ -26,5 +31,19 @@ class CQRSEventHandler(db: JdbcBackend.Database) extends Actor with ActorLogging
     case Lobby.CreateSuccess(id, name, hostUserId, creationDate) =>
       val insertAction = DBManager.lobbies += LobbyState(id, Some(name), Some(hostUserId), Some(creationDate), List(hostUserId))
       Await.result(db.run(insertAction), DBManager.dbTimeout)
+    case Lobby.UserJoined(id, userId) =>
+      val q = for {l <- DBManager.lobbies if l.id === id} yield l.userIds
+      val currentUserIds: Seq[String] = Await.result(db.run(q.result), DBManager.dbTimeout)
+      val userIdsUpdated = currentUserIds :+ userId
+      val userIdsUpdatedString = userIdsUpdated.toJson.toString
+      val updateAction = q.update(userIdsUpdatedString)
+      Await.result(db.run(updateAction), DBManager.dbTimeout)
+    case Lobby.UserLeft(id, userId) =>
+      val q = for {l <- DBManager.lobbies if l.id === id} yield l.userIds
+      val currentUserIds: Seq[String] = Await.result(db.run(q.result), DBManager.dbTimeout)
+      val userIdsUpdated = currentUserIds.filterNot(_ == userId)
+      val userIdsUpdatedString = userIdsUpdated.toJson.toString
+      val updateAction = q.update(userIdsUpdatedString)
+      Await.result(db.run(updateAction), DBManager.dbTimeout)
   }
 }

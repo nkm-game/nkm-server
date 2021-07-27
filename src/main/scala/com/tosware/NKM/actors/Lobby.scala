@@ -5,6 +5,7 @@ import akka.persistence.{PersistentActor, RecoveryCompleted}
 import com.tosware.NKM.models._
 
 import java.time.LocalDate
+import scala.::
 
 
 object Lobby {
@@ -14,6 +15,7 @@ object Lobby {
   sealed trait Command
   case class Create(name: String, hostUserId: String) extends Command
   case class UserJoin(userId: String) extends Command
+  case class UserLeave(userId: String) extends Command
 
   sealed trait Event
 
@@ -21,7 +23,13 @@ object Lobby {
   case object CreateSuccess extends Event
   case object CreateFailure extends Event
 
-  case class UserJoined(userId: String) extends Event
+  case class UserJoined(id: String, userId: String) extends Event
+  case object JoinSuccess extends Event
+  case object JoinFailure extends Event
+
+  case class UserLeft(id: String, userId: String) extends Event
+  case object LeaveSuccess extends Event
+  case object LeaveFailure extends Event
 
   def props(id: String): Props = Props(new Lobby(id))
 }
@@ -34,6 +42,14 @@ class Lobby(id: String) extends PersistentActor with ActorLogging {
 
   def create(name: String, hostUserId: String, creationDate: LocalDate): Unit = {
     lobbyState = lobbyState.copy(name = Some(name), creationDate = Some(creationDate), hostUserId = Some(hostUserId), userIds = List(hostUserId))
+  }
+
+  def joinLobby(userId: String): Unit = {
+    lobbyState = lobbyState.copy(userIds = lobbyState.userIds :+ userId)
+  }
+
+  def leaveLobby(userId: String): Unit = {
+    lobbyState = lobbyState.copy(userIds = lobbyState.userIds.filterNot(_ == userId))
   }
 
   override def receive: Receive = {
@@ -55,6 +71,32 @@ class Lobby(id: String) extends PersistentActor with ActorLogging {
         else {
           sender() ! CreateFailure
         }
+
+    case UserJoin(userId: String) =>
+      if(!lobbyState.userIds.contains(userId)) {
+        val userJoinedEvent = UserJoined(id, userId)
+        persist(userJoinedEvent) { _ =>
+          context.system.eventStream.publish(userJoinedEvent)
+          joinLobby(userId)
+          log.info(s"$userId joined lobby")
+          sender() ! JoinSuccess
+        }
+      } else {
+        sender() ! JoinFailure
+      }
+
+    case UserLeave(userId: String) =>
+      if(lobbyState.userIds.contains(userId)) {
+        val userLeftEvent = UserLeft(id, userId)
+        persist(userLeftEvent) { _ =>
+          context.system.eventStream.publish(userLeftEvent)
+          leaveLobby(userId)
+          log.info(s"$userId left the lobby")
+          sender() ! LeaveSuccess
+        }
+      } else {
+        sender() ! LeaveFailure
+      }
     case e => log.warning(s"Unknown message: $e")
   }
 //
