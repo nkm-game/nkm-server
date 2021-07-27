@@ -33,7 +33,7 @@ class Lobby(id: String) extends PersistentActor with ActorLogging {
   var lobbyState: LobbyState = LobbyState(id)
 
   def create(name: String, hostUserId: String, creationDate: LocalDate): Unit = {
-    lobbyState = lobbyState.copy(name = Some(name), creationDate = Some(creationDate), hostUserId = Some(hostUserId))
+    lobbyState = lobbyState.copy(name = Some(name), creationDate = Some(creationDate), hostUserId = Some(hostUserId), userIds = List(hostUserId))
   }
 
   override def receive: Receive = {
