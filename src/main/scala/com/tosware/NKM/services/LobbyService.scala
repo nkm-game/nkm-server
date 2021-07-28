@@ -56,7 +56,6 @@ class LobbyService(implicit db: JdbcBackend.Database) extends NKMTimeouts {
   def getLobby(lobbyId: String): LobbyState = {
     val lobbyAction = DBManager.lobbies.filter(_.id === lobbyId).result.head
     val lobby = Await.result(db.run(lobbyAction), atMost)
-    println(lobby)
     lobby
   }
 }
