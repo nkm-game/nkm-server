@@ -9,6 +9,7 @@ import akka.testkit.TestKit
 import com.tosware.NKM.DBManager
 import com.tosware.NKM.actors.CQRSEventHandler
 import com.tosware.NKM.models._
+import com.tosware.NKM.models.lobby._
 import com.tosware.NKM.serializers.NKMJsonProtocol
 import com.tosware.NKM.services._
 import org.scalatest.matchers.should.Matchers
@@ -18,6 +19,7 @@ import pdi.jwt.{JwtAlgorithm, JwtSprayJson}
 import slick.jdbc.JdbcBackend.Database
 import spray.json._
 
+import scala.concurrent.Await
 import scala.language.postfixOps
 import scala.util.Success
 
@@ -136,6 +138,72 @@ class ApiSpec
         status shouldEqual OK
         val lobbies = responseAs[Seq[LobbyState]]
         lobbies.length shouldEqual 1
+      }
+    }
+
+    "allow joining and leaving lobbies" in {
+      var token: String = ""
+      var token2: String = ""
+      var lobbyId: String = ""
+      Post("/api/register", RegisterRequest("test", "test@example.com", "password")) ~> routes
+      Post("/api/register", RegisterRequest("test2", "test2@example.com", "password")) ~> routes
+      Post("/api/login", Credentials("test", "password")) ~> routes ~> check {
+        status shouldEqual OK
+        token = responseAs[String]
+      }
+
+      Post("/api/login", Credentials("test2", "password")) ~> routes ~> check {
+        status shouldEqual OK
+        token2 = responseAs[String]
+      }
+
+      Post("/api/create_lobby", LobbyCreationRequest("lobby_name")).addHeader(RawHeader("Authorization", s"Bearer $token")) ~> routes ~> check {
+        status shouldEqual Created
+        lobbyId = responseAs[String]
+      }
+
+      // this request should fail as it is not a lobby id, but lobby name
+      Post("/api/join_lobby", LobbyJoinRequest("lobby_name")).addHeader(RawHeader("Authorization", s"Bearer $token2")) ~> routes ~> check {
+        status shouldEqual InternalServerError
+      }
+
+      Post("/api/join_lobby", LobbyJoinRequest(lobbyId)).addHeader(RawHeader("Authorization", s"Bearer $token2")) ~> routes ~> check {
+        status shouldEqual OK
+      }
+
+      // wait for CQRS Event Handler to persist
+      Thread.sleep(DBManager.dbTimeout.toMillis)
+
+      Get(s"/api/lobby/$lobbyId") ~> routes ~> check {
+        status shouldEqual OK
+        val lobby = responseAs[LobbyState]
+        lobby.userIds shouldEqual List("test", "test2")
+      }
+
+      Post("/api/leave_lobby", LobbyLeaveRequest(lobbyId)).addHeader(RawHeader("Authorization", s"Bearer $token2")) ~> routes ~> check {
+        status shouldEqual OK
+      }
+
+      // wait for CQRS Event Handler to persist
+      Thread.sleep(DBManager.dbTimeout.toMillis)
+
+      Get(s"/api/lobby/$lobbyId") ~> routes ~> check {
+        status shouldEqual OK
+        val lobby = responseAs[LobbyState]
+        lobby.userIds shouldEqual List("test")
+      }
+
+      Post("/api/leave_lobby", LobbyLeaveRequest(lobbyId)).addHeader(RawHeader("Authorization", s"Bearer $token")) ~> routes ~> check {
+        status shouldEqual OK
+      }
+
+      // wait for CQRS Event Handler to persist
+      Thread.sleep(DBManager.dbTimeout.toMillis)
+
+      Get(s"/api/lobby/$lobbyId") ~> routes ~> check {
+        status shouldEqual OK
+        val lobby = responseAs[LobbyState]
+        lobby.userIds shouldEqual List()
       }
     }
   }

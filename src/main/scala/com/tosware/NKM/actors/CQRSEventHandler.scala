@@ -2,7 +2,8 @@ package com.tosware.NKM.actors
 
 import akka.actor.{Actor, ActorLogging, Props}
 import com.tosware.NKM.DBManager
-import com.tosware.NKM.models.{LobbyState, UserState}
+import com.tosware.NKM.models.UserState
+import com.tosware.NKM.models.lobby.LobbyState
 import slick.jdbc.JdbcBackend
 import slick.jdbc.JdbcBackend.Database
 import slick.jdbc.MySQLProfile.api._
@@ -33,14 +34,14 @@ class CQRSEventHandler(db: JdbcBackend.Database)
       Await.result(db.run(insertAction), DBManager.dbTimeout)
     case Lobby.UserJoined(id, userId) =>
       val q = for {l <- DBManager.lobbies if l.id === id} yield l.userIds
-      val currentUserIds: Seq[String] = Await.result(db.run(q.result), DBManager.dbTimeout)
+      val currentUserIds: List[String] = Await.result(db.run(q.result), DBManager.dbTimeout).head.parseJson.convertTo[List[String]]
       val userIdsUpdated = currentUserIds :+ userId
       val userIdsUpdatedString = userIdsUpdated.toJson.toString
       val updateAction = q.update(userIdsUpdatedString)
       Await.result(db.run(updateAction), DBManager.dbTimeout)
     case Lobby.UserLeft(id, userId) =>
       val q = for {l <- DBManager.lobbies if l.id === id} yield l.userIds
-      val currentUserIds: Seq[String] = Await.result(db.run(q.result), DBManager.dbTimeout)
+      val currentUserIds: List[String] = Await.result(db.run(q.result), DBManager.dbTimeout).head.parseJson.convertTo[List[String]]
       val userIdsUpdated = currentUserIds.filterNot(_ == userId)
       val userIdsUpdatedString = userIdsUpdated.toJson.toString
       val updateAction = q.update(userIdsUpdatedString)

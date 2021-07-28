@@ -4,7 +4,7 @@ import akka.actor.{ActorRef, ActorSystem}
 import akka.pattern.ask
 import com.tosware.NKM.actors.Lobby
 import com.tosware.NKM.actors.Lobby._
-import com.tosware.NKM.models.LobbyState
+import com.tosware.NKM.models.lobby.LobbyState
 import helpers.NKMPersistenceTestKit
 
 import scala.concurrent.Await

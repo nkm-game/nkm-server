@@ -1,5 +1,5 @@
 package com.tosware.NKM.tables
-import com.tosware.NKM.models.LobbyState
+import com.tosware.NKM.models.lobby.LobbyState
 import slick.jdbc.MySQLProfile.api._
 import slick.lifted.Tag
 import spray.json._

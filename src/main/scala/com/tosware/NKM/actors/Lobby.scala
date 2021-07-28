@@ -3,6 +3,7 @@ package com.tosware.NKM.actors
 import akka.actor.{ActorLogging, Props}
 import akka.persistence.{PersistentActor, RecoveryCompleted}
 import com.tosware.NKM.models._
+import com.tosware.NKM.models.lobby.LobbyState
 
 import java.time.LocalDate
 import scala.::
@@ -73,7 +74,7 @@ class Lobby(id: String) extends PersistentActor with ActorLogging {
         }
 
     case UserJoin(userId: String) =>
-      if(!lobbyState.userIds.contains(userId)) {
+      if(lobbyState.created() && !lobbyState.userIds.contains(userId)) {
         val userJoinedEvent = UserJoined(id, userId)
         persist(userJoinedEvent) { _ =>
           context.system.eventStream.publish(userJoinedEvent)
@@ -86,7 +87,7 @@ class Lobby(id: String) extends PersistentActor with ActorLogging {
       }
 
     case UserLeave(userId: String) =>
-      if(lobbyState.userIds.contains(userId)) {
+      if(lobbyState.created() && lobbyState.userIds.contains(userId)) {
         val userLeftEvent = UserLeft(id, userId)
         persist(userLeftEvent) { _ =>
           context.system.eventStream.publish(userLeftEvent)
@@ -104,6 +105,12 @@ class Lobby(id: String) extends PersistentActor with ActorLogging {
     case CreateSuccess(id, name, hostUserId, creationDate) =>
       create(name, hostUserId, creationDate)
       log.info(s"Recovered create")
+    case UserJoined(id, userId) =>
+      joinLobby(userId)
+      log.info(s"Recovered user join")
+    case UserLeft(id, userId) =>
+      leaveLobby(userId)
+      log.info(s"Recovered user leave")
     case RecoveryCompleted =>
     case e => log.warning(s"Unknown message: $e")
   }

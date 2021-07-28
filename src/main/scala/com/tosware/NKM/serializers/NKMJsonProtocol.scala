@@ -2,6 +2,7 @@ package com.tosware.NKM.serializers
 
 import com.tosware.NKM.actors.Game._
 import com.tosware.NKM.models._
+import com.tosware.NKM.models.lobby._
 import spray.json._
 
 import java.time.LocalDate
@@ -69,6 +70,8 @@ trait NKMJsonProtocol extends DefaultJsonProtocol {
   implicit val loginFormat: RootJsonFormat[Credentials] = jsonFormat2(Credentials)
   implicit val registerRequestFormat: RootJsonFormat[RegisterRequest] = jsonFormat3(RegisterRequest)
   implicit val lobbyCreationRequestFormat: RootJsonFormat[LobbyCreationRequest] = jsonFormat1(LobbyCreationRequest)
+  implicit val lobbyJoinRequestFormat: RootJsonFormat[LobbyJoinRequest] = jsonFormat1(LobbyJoinRequest)
+  implicit val lobbyLeaveRequestFormat: RootJsonFormat[LobbyLeaveRequest] = jsonFormat1(LobbyLeaveRequest)
 
   implicit object EventJsonFormat extends RootJsonFormat[Event] {
     // Events

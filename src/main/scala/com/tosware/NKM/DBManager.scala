@@ -9,7 +9,7 @@ import scala.concurrent.Await
 import scala.concurrent.duration.DurationInt
 
 object DBManager {
-  val dbTimeout = 5000.millis
+  val dbTimeout = 300.millis
   val users = TableQuery[User]
   val lobbies = TableQuery[Lobby]
 
