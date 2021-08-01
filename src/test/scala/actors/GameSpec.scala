@@ -29,8 +29,7 @@ class GameSpec extends NKMPersistenceTestKit(ActorSystem("GameSpec"))
         )
         val touka = characters.find(_.name == "Touka").get
 
-        playerNames.foreach(n => game ! AddPlayer(n))
-        //    val players = Await.result((game ? GetState).mapTo[GameState].map(s => s.players), 2 seconds)
+        game ! SetPlayers(playerNames);
 
         characters.foreach(c => game ! AddCharacter("Ola", c))
 
@@ -40,14 +39,14 @@ class GameSpec extends NKMPersistenceTestKit(ActorSystem("GameSpec"))
         val state = Await.result((game ? GetState).mapTo[GameState], atMost)
 
         state.players.length shouldEqual 3
-        state.hexMap.cells.find(_.coordinates == HexCoordinates(4, 5)).get.characterId.get shouldEqual touka.id
-        state.hexMap.cells.find(_.coordinates == HexCoordinates(0, 0)).get.characterId shouldEqual None
+        state.hexMap.get.cells.find(_.coordinates == HexCoordinates(4, 5)).get.characterId.get shouldEqual touka.id
+        state.hexMap.get.cells.find(_.coordinates == HexCoordinates(0, 0)).get.characterId shouldEqual None
 
         game ! MoveCharacter(HexCoordinates(0, 0), touka.id)
 
         val state2 = Await.result((game ? GetState).mapTo[GameState], atMost)
-        state2.hexMap.cells.find(_.coordinates == HexCoordinates(4, 5)).get.characterId shouldEqual None
-        state2.hexMap.cells.find(_.coordinates == HexCoordinates(0, 0)).get.characterId.get shouldEqual touka.id
+        state2.hexMap.get.cells.find(_.coordinates == HexCoordinates(4, 5)).get.characterId shouldEqual None
+        state2.hexMap.get.cells.find(_.coordinates == HexCoordinates(0, 0)).get.characterId.get shouldEqual touka.id
       }
     }
   }

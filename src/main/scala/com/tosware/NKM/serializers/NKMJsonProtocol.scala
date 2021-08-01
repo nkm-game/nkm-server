@@ -75,27 +75,27 @@ trait NKMJsonProtocol extends DefaultJsonProtocol {
 
   implicit object EventJsonFormat extends RootJsonFormat[Event] {
     // Events
-    implicit val playerAddedFormat: RootJsonFormat[PlayerAdded] = jsonFormat1(PlayerAdded)
+    implicit val playersSetFormat: RootJsonFormat[PlayersSet] = jsonFormat1(PlayersSet)
     implicit val characterAddedFormat: RootJsonFormat[CharacterAdded] = jsonFormat2(CharacterAdded)
     implicit val characterPlacedFormat: RootJsonFormat[CharacterPlaced] = jsonFormat2(CharacterPlaced)
     implicit val characterMovedFormat: RootJsonFormat[CharacterMoved] = jsonFormat2(CharacterMoved)
     implicit val mapSetFormat: RootJsonFormat[MapSet] = jsonFormat1(MapSet)
 
-    val playerAddedId: JsString = JsString("PlayerAdded")
+    val playersSetId: JsString = JsString("PlayersSet")
     val characterAddedId: JsString = JsString("CharacterAdded")
     val characterPlacedId: JsString = JsString("CharacterPlaced")
     val characterMovedId: JsString = JsString("CharacterMoved")
     val mapSetId: JsString = JsString("MapSet")
 
     override def write(obj: Event): JsValue = obj match {
-      case e: PlayerAdded => JsArray(Vector(playerAddedId, playerAddedFormat.write(e)))
+      case e: PlayersSet => JsArray(Vector(playersSetId, playersSetFormat.write(e)))
       case e: CharacterAdded => JsArray(Vector(characterAddedId, characterAddedFormat.write(e)))
       case e: CharacterPlaced => JsArray(Vector(characterPlacedId, characterPlacedFormat.write(e)))
       case e: CharacterMoved => JsArray(Vector(characterMovedId, characterMovedFormat.write(e)))
       case e: MapSet => JsArray(Vector(mapSetId, mapSetFormat.write(e)))
     }
     override def read(json: JsValue): Event = json match {
-      case JsArray(Vector(`playerAddedId`, jsEvent)) => playerAddedFormat.read(jsEvent)
+      case JsArray(Vector(`playersSetId`, jsEvent)) => playersSetFormat.read(jsEvent)
       case JsArray(Vector(`characterAddedId`, jsEvent)) => characterAddedFormat.read(jsEvent)
       case JsArray(Vector(`characterPlacedId`, jsEvent)) => characterPlacedFormat.read(jsEvent)
       case JsArray(Vector(`characterMovedId`, jsEvent)) => characterMovedFormat.read(jsEvent)
