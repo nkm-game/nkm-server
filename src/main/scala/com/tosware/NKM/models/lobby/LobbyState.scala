@@ -7,6 +7,7 @@ case class LobbyState(
                       name: Option[String] = None,
                       hostUserId: Option[String] = None,
                       creationDate: Option[LocalDate] = None,
+                      chosenHexMapName: Option[String] = None,
                       userIds: List[String] = List.empty,
                      )
 {

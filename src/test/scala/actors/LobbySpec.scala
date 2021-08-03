@@ -28,8 +28,8 @@ class LobbySpec extends NKMPersistenceTestKit(ActorSystem("LobbySpec"))
       within2000 {
         val testName = "test name"
         val createFuture = lobby ? Create(testName, hostUserID)
-        val response = Await.result(createFuture.mapTo[Event], atMost)
-        response shouldBe CreateSuccess
+        val response = Await.result(createFuture, atMost)
+        response shouldBe Lobby.Success
 
         val state: LobbyState = Await.result((lobby ? GetState).mapTo[LobbyState], atMost)
         state.created() shouldEqual true
@@ -43,10 +43,10 @@ class LobbySpec extends NKMPersistenceTestKit(ActorSystem("LobbySpec"))
       within2000 {
         val testName = "test name2"
         val createCommand = Create(testName, hostUserID)
-        Await.result((lobby ? createCommand).mapTo[Event], atMost) shouldBe CreateSuccess
-        Await.result((lobby ? createCommand).mapTo[Event], atMost) shouldBe CreateFailure
-        Await.result((lobby ? createCommand).mapTo[Event], atMost) shouldBe CreateFailure
-        Await.result((lobby ? Create("otherName", hostUserID)).mapTo[Event], atMost) shouldBe CreateFailure
+        Await.result((lobby ? createCommand).mapTo[CommandResponse], atMost) shouldBe Success
+        Await.result((lobby ? createCommand).mapTo[CommandResponse], atMost) shouldBe Failure
+        Await.result((lobby ? createCommand).mapTo[CommandResponse], atMost) shouldBe Failure
+        Await.result((lobby ? Create("otherName", hostUserID)).mapTo[CommandResponse], atMost) shouldBe Failure
       }
     }
 
@@ -57,12 +57,12 @@ class LobbySpec extends NKMPersistenceTestKit(ActorSystem("LobbySpec"))
       within2000 {
         val testName = "test name"
         val createFuture = lobby ? Create(testName, hostUserID)
-        val response = Await.result(createFuture.mapTo[Event], atMost)
-        response shouldBe CreateSuccess
+        val response = Await.result(createFuture.mapTo[CommandResponse], atMost)
+        response shouldBe Success
 
         val joinFuture = lobby ? UserJoin(joinerID)
-        val joinResponse = Await.result(joinFuture.mapTo[Event], atMost)
-        joinResponse shouldBe JoinSuccess
+        val joinResponse = Await.result(joinFuture.mapTo[CommandResponse], atMost)
+        joinResponse shouldBe Success
 
         val state: LobbyState = Await.result((lobby ? GetState).mapTo[LobbyState], atMost)
         state.userIds shouldEqual List(hostUserID, joinerID)
@@ -76,19 +76,19 @@ class LobbySpec extends NKMPersistenceTestKit(ActorSystem("LobbySpec"))
       within2000 {
         val testName = "test name"
         val createFuture = lobby ? Create(testName, hostUserID)
-        val response = Await.result(createFuture.mapTo[Event], atMost)
-        response shouldBe CreateSuccess
+        val response = Await.result(createFuture.mapTo[CommandResponse], atMost)
+        response shouldBe Success
 
         val joinFuture = lobby ? UserJoin(joinerID)
-        val joinResponse = Await.result(joinFuture.mapTo[Event], atMost)
-        joinResponse shouldBe JoinSuccess
+        val joinResponse = Await.result(joinFuture.mapTo[CommandResponse], atMost)
+        joinResponse shouldBe Success
 
         val state: LobbyState = Await.result((lobby ? GetState).mapTo[LobbyState], atMost)
         state.userIds shouldEqual List(hostUserID, joinerID)
 
         val leaveFuture = lobby ? UserLeave(joinerID)
-        val leaveResponse = Await.result(leaveFuture.mapTo[Event], atMost)
-        leaveResponse shouldBe LeaveSuccess
+        val leaveResponse = Await.result(leaveFuture.mapTo[CommandResponse], atMost)
+        leaveResponse shouldBe Success
 
         val leaveState: LobbyState = Await.result((lobby ? GetState).mapTo[LobbyState], atMost)
         leaveState.userIds shouldEqual List(hostUserID)

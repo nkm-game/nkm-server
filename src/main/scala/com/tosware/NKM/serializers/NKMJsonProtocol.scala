@@ -1,6 +1,8 @@
 package com.tosware.NKM.serializers
 
+import com.tosware.NKM.actors.Game
 import com.tosware.NKM.actors.Game._
+import com.tosware.NKM.actors.Lobby._
 import com.tosware.NKM.models._
 import com.tosware.NKM.models.lobby._
 import spray.json._
@@ -56,7 +58,7 @@ trait NKMJsonProtocol extends DefaultJsonProtocol {
 
   // Start with simple ones, finish with the most complex
   // if format A depends on B, then B should be defined first (or we get a NullPointerException from spray)
-  implicit val lobbyStateFormat: RootJsonFormat[LobbyState] = jsonFormat5(LobbyState)
+  implicit val lobbyStateFormat: RootJsonFormat[LobbyState] = jsonFormat6(LobbyState)
   implicit val hexCoordinatesFormat: RootJsonFormat[HexCoordinates] = jsonFormat2(HexCoordinates)
   implicit val statFormat: RootJsonFormat[Stat] = jsonFormat1(Stat)
   implicit val phaseFormat: RootJsonFormat[Phase] = jsonFormat1(Phase)
@@ -73,13 +75,13 @@ trait NKMJsonProtocol extends DefaultJsonProtocol {
   implicit val lobbyJoinRequestFormat: RootJsonFormat[LobbyJoinRequest] = jsonFormat1(LobbyJoinRequest)
   implicit val lobbyLeaveRequestFormat: RootJsonFormat[LobbyLeaveRequest] = jsonFormat1(LobbyLeaveRequest)
 
-  implicit object EventJsonFormat extends RootJsonFormat[Event] {
+  implicit object EventJsonFormat extends RootJsonFormat[Game.Event] {
     // Events
     implicit val playersSetFormat: RootJsonFormat[PlayersSet] = jsonFormat1(PlayersSet)
     implicit val characterAddedFormat: RootJsonFormat[CharacterAdded] = jsonFormat2(CharacterAdded)
     implicit val characterPlacedFormat: RootJsonFormat[CharacterPlaced] = jsonFormat2(CharacterPlaced)
     implicit val characterMovedFormat: RootJsonFormat[CharacterMoved] = jsonFormat2(CharacterMoved)
-    implicit val mapSetFormat: RootJsonFormat[MapSet] = jsonFormat1(MapSet)
+//    implicit val mapSetFormat: RootJsonFormat[MapSet] = jsonFormat1(MapSet)
 
     val playersSetId: JsString = JsString("PlayersSet")
     val characterAddedId: JsString = JsString("CharacterAdded")
@@ -87,19 +89,19 @@ trait NKMJsonProtocol extends DefaultJsonProtocol {
     val characterMovedId: JsString = JsString("CharacterMoved")
     val mapSetId: JsString = JsString("MapSet")
 
-    override def write(obj: Event): JsValue = obj match {
+    override def write(obj: Game.Event): JsValue = obj match {
       case e: PlayersSet => JsArray(Vector(playersSetId, playersSetFormat.write(e)))
       case e: CharacterAdded => JsArray(Vector(characterAddedId, characterAddedFormat.write(e)))
       case e: CharacterPlaced => JsArray(Vector(characterPlacedId, characterPlacedFormat.write(e)))
       case e: CharacterMoved => JsArray(Vector(characterMovedId, characterMovedFormat.write(e)))
-      case e: MapSet => JsArray(Vector(mapSetId, mapSetFormat.write(e)))
+//      case e: MapSet => JsArray(Vector(mapSetId, mapSetFormat.write(e)))
     }
-    override def read(json: JsValue): Event = json match {
+    override def read(json: JsValue): Game.Event = json match {
       case JsArray(Vector(`playersSetId`, jsEvent)) => playersSetFormat.read(jsEvent)
       case JsArray(Vector(`characterAddedId`, jsEvent)) => characterAddedFormat.read(jsEvent)
       case JsArray(Vector(`characterPlacedId`, jsEvent)) => characterPlacedFormat.read(jsEvent)
       case JsArray(Vector(`characterMovedId`, jsEvent)) => characterMovedFormat.read(jsEvent)
-      case JsArray(Vector(`mapSetId`, jsEvent)) => mapSetFormat.read(jsEvent)
+//      case JsArray(Vector(`mapSetId`, jsEvent)) => mapSetFormat.read(jsEvent)
     }
   }
 

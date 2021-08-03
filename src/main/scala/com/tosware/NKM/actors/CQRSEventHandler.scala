@@ -30,7 +30,7 @@ class CQRSEventHandler(db: JdbcBackend.Database)
       val insertAction = DBManager.users += UserState(login, Some(email), Some(passwordHash))
       Await.result(db.run(insertAction), DBManager.dbTimeout)
     case Lobby.CreateSuccess(id, name, hostUserId, creationDate) =>
-      val insertAction = DBManager.lobbies += LobbyState(id, Some(name), Some(hostUserId), Some(creationDate), List(hostUserId))
+      val insertAction = DBManager.lobbies += LobbyState(id, Some(name), Some(hostUserId), Some(creationDate), chosenHexMapName = None, List(hostUserId))
       Await.result(db.run(insertAction), DBManager.dbTimeout)
     case Lobby.UserJoined(id, userId) =>
       val q = for {l <- DBManager.lobbies if l.id === id} yield l.userIds
@@ -45,6 +45,10 @@ class CQRSEventHandler(db: JdbcBackend.Database)
       val userIdsUpdated = currentUserIds.filterNot(_ == userId)
       val userIdsUpdatedString = userIdsUpdated.toJson.toString
       val updateAction = q.update(userIdsUpdatedString)
+      Await.result(db.run(updateAction), DBManager.dbTimeout)
+    case Lobby.MapNameSet(id, hexMapName) =>
+      val q = for {l <- DBManager.lobbies if l.id === id} yield l.chosenHexMapName
+      val updateAction = q.update(Some(hexMapName))
       Await.result(db.run(updateAction), DBManager.dbTimeout)
   }
 }

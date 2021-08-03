@@ -3,6 +3,7 @@ package actors
 import akka.actor.{ActorRef, ActorSystem}
 import akka.pattern.ask
 import com.tosware.NKM.actors.Game._
+import com.tosware.NKM.actors.Lobby.SetMap
 import com.tosware.NKM.actors.NKMData.GetHexMaps
 import com.tosware.NKM.actors.{Game, NKMData}
 import com.tosware.NKM.models._
@@ -33,7 +34,7 @@ class GameSpec extends NKMPersistenceTestKit(ActorSystem("GameSpec"))
 
         characters.foreach(c => game ! AddCharacter("Ola", c))
 
-        game ! SetMap(hexMaps.head)
+//        game ! SetMap(hexMaps.head)
         game ! PlaceCharacter(HexCoordinates(4, 5), touka.id)
 
         val state = Await.result((game ? GetState).mapTo[GameState], atMost)

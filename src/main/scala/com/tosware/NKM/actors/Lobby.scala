@@ -2,11 +2,9 @@ package com.tosware.NKM.actors
 
 import akka.actor.{ActorLogging, Props}
 import akka.persistence.{PersistentActor, RecoveryCompleted}
-import com.tosware.NKM.models._
 import com.tosware.NKM.models.lobby.LobbyState
 
 import java.time.LocalDate
-import scala.::
 
 
 object Lobby {
@@ -17,20 +15,18 @@ object Lobby {
   case class Create(name: String, hostUserId: String) extends Command
   case class UserJoin(userId: String) extends Command
   case class UserLeave(userId: String) extends Command
+  case class SetMapName(hexMapName: String) extends Command
 
   sealed trait Event
 
   case class CreateSuccess(id: String, name: String, hostUserId: String, creationDate: LocalDate) extends Event
-  case object CreateSuccess extends Event
-  case object CreateFailure extends Event
-
   case class UserJoined(id: String, userId: String) extends Event
-  case object JoinSuccess extends Event
-  case object JoinFailure extends Event
-
   case class UserLeft(id: String, userId: String) extends Event
-  case object LeaveSuccess extends Event
-  case object LeaveFailure extends Event
+  case class MapNameSet(id: String, hexMapName: String) extends Event
+
+  sealed trait CommandResponse
+  case object Success extends CommandResponse
+  case object Failure extends CommandResponse
 
   def props(id: String): Props = Props(new Lobby(id))
 }
@@ -41,17 +37,17 @@ class Lobby(id: String) extends PersistentActor with ActorLogging {
 
   var lobbyState: LobbyState = LobbyState(id)
 
-  def create(name: String, hostUserId: String, creationDate: LocalDate): Unit = {
+  def create(name: String, hostUserId: String, creationDate: LocalDate): Unit =
     lobbyState = lobbyState.copy(name = Some(name), creationDate = Some(creationDate), hostUserId = Some(hostUserId), userIds = List(hostUserId))
-  }
 
-  def joinLobby(userId: String): Unit = {
+  def joinLobby(userId: String): Unit =
     lobbyState = lobbyState.copy(userIds = lobbyState.userIds :+ userId)
-  }
 
-  def leaveLobby(userId: String): Unit = {
+  def leaveLobby(userId: String): Unit =
     lobbyState = lobbyState.copy(userIds = lobbyState.userIds.filterNot(_ == userId))
-  }
+
+  def setMapName(hexMapName: String): Unit =
+    lobbyState = lobbyState.copy(chosenHexMapName = Some(hexMapName))
 
   override def receive: Receive = {
     case GetState =>
@@ -66,11 +62,11 @@ class Lobby(id: String) extends PersistentActor with ActorLogging {
             context.system.eventStream.publish(createSuccessEvent)
             create(name, hostUserId, creationDate)
             log.info(s"Created lobby $name for $hostUserId")
-            sender() ! CreateSuccess
+            sender() ! Success
           }
         }
         else {
-          sender() ! CreateFailure
+          sender() ! Failure
         }
 
     case UserJoin(userId: String) =>
@@ -80,10 +76,10 @@ class Lobby(id: String) extends PersistentActor with ActorLogging {
           context.system.eventStream.publish(userJoinedEvent)
           joinLobby(userId)
           log.info(s"$userId joined lobby")
-          sender() ! JoinSuccess
+          sender() ! Success
         }
       } else {
-        sender() ! JoinFailure
+        sender() ! Failure
       }
 
     case UserLeave(userId: String) =>
@@ -93,16 +89,30 @@ class Lobby(id: String) extends PersistentActor with ActorLogging {
           context.system.eventStream.publish(userLeftEvent)
           leaveLobby(userId)
           log.info(s"$userId left the lobby")
-          sender() ! LeaveSuccess
+          sender() ! Success
         }
       } else {
-        sender() ! LeaveFailure
+        sender() ! Failure
+      }
+
+
+    case SetMapName(hexMapName: String) =>
+      if(lobbyState.created()) {
+        val mapNameSetEvent = MapNameSet(id, hexMapName)
+        persist(mapNameSetEvent) { _ =>
+          context.system.eventStream.publish(mapNameSetEvent)
+          setMapName(hexMapName)
+          log.info(s"Set map name: $hexMapName")
+          sender() ! Success
+        }
+      } else {
+        sender() ! Failure
       }
     case e => log.warning(s"Unknown message: $e")
   }
 //
   override def receiveRecover: Receive = {
-    case CreateSuccess(id, name, hostUserId, creationDate) =>
+    case CreateSuccess(_, name, hostUserId, creationDate) =>
       create(name, hostUserId, creationDate)
       log.info(s"Recovered create")
     case UserJoined(id, userId) =>
@@ -111,6 +121,9 @@ class Lobby(id: String) extends PersistentActor with ActorLogging {
     case UserLeft(id, userId) =>
       leaveLobby(userId)
       log.info(s"Recovered user leave")
+    case MapNameSet(id, hexMapName) =>
+      setMapName(hexMapName)
+      log.info(s"Recovered setting hex map name")
     case RecoveryCompleted =>
     case e => log.warning(s"Unknown message: $e")
   }

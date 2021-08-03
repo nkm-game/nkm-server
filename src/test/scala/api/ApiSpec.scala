@@ -16,10 +16,10 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
 import pdi.jwt.{JwtAlgorithm, JwtSprayJson}
+import slick.jdbc.JdbcBackend
 import slick.jdbc.JdbcBackend.Database
 import spray.json._
 
-import scala.concurrent.Await
 import scala.language.postfixOps
 import scala.util.Success
 
@@ -33,7 +33,7 @@ class ApiSpec
     with NKMJsonProtocol
     with SprayJsonSupport
 {
-  implicit val db = Database.forConfig("slick.db")
+  implicit val db: JdbcBackend.Database = Database.forConfig("slick.db")
   implicit val userService: UserService = new UserService()
   implicit val lobbyService: LobbyService = new LobbyService()
 
@@ -111,7 +111,7 @@ class ApiSpec
     }
 
     "disallow creating lobby with wrong token" in {
-      var token: String = "random_token"
+      val token: String = "random_token"
       Post("/api/create_lobby", LobbyCreationRequest("lobby_name")).addHeader(RawHeader("Authorization", s"Bearer $token")) ~> routes ~> check {
         status shouldEqual Unauthorized
       }
@@ -204,6 +204,34 @@ class ApiSpec
         status shouldEqual OK
         val lobby = responseAs[LobbyState]
         lobby.userIds shouldEqual List()
+      }
+    }
+
+    "allow setting map name in a lobby for a host" in {
+      //TODO
+      fail
+      var token: String = ""
+      Post("/api/register", RegisterRequest("test", "test@example.com", "password")) ~> routes
+      Post("/api/login", Credentials("test", "password")) ~> routes ~> check {
+        status shouldEqual OK
+        token = responseAs[String]
+      }
+      Post("/api/create_lobby", LobbyCreationRequest("lobby_name")).addHeader(RawHeader("Authorization", s"Bearer $token")) ~> routes ~> check {
+        status shouldEqual Created
+      }
+    }
+
+    "disallow setting map name in a lobby for non host persons" in {
+      //TODO
+      fail
+      var token: String = ""
+      Post("/api/register", RegisterRequest("test", "test@example.com", "password")) ~> routes
+      Post("/api/login", Credentials("test", "password")) ~> routes ~> check {
+        status shouldEqual OK
+        token = responseAs[String]
+      }
+      Post("/api/create_lobby", LobbyCreationRequest("lobby_name")).addHeader(RawHeader("Authorization", s"Bearer $token")) ~> routes ~> check {
+        status shouldEqual Created
       }
     }
   }

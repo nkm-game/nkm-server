@@ -26,24 +26,24 @@ class LobbyService(implicit db: JdbcBackend.Database) extends NKMTimeouts {
     val randomId = java.util.UUID.randomUUID.toString
     val lobbyActor: ActorRef = system.actorOf(Lobby.props(randomId))
     Await.result(lobbyActor ? Lobby.Create(name, hostUserId), atMost) match {
-      case Lobby.CreateSuccess => LobbyCreated(randomId)
-      case Lobby.CreateFailure => LobbyCreationFailure
+      case Lobby.Success => LobbyCreated(randomId)
+      case Lobby.Failure => LobbyCreationFailure
     }
   }
 
   def joinLobby(userId: String, request: LobbyJoinRequest)(implicit system: ActorSystem): Event = {
     val lobbyActor: ActorRef = system.actorOf(Lobby.props(request.lobbyId))
     Await.result(lobbyActor ? Lobby.UserJoin(userId), atMost) match {
-      case Lobby.JoinSuccess => Success
-      case Lobby.JoinFailure => Failure
+      case Lobby.Success => Success
+      case Lobby.Failure => Failure
     }
   }
 
   def leaveLobby(userId: String, request: LobbyLeaveRequest)(implicit system: ActorSystem): Event = {
     val lobbyActor: ActorRef = system.actorOf(Lobby.props(request.lobbyId))
     Await.result(lobbyActor ? Lobby.UserLeave(userId), atMost) match {
-      case Lobby.LeaveSuccess => Success
-      case Lobby.LeaveFailure => Failure
+      case Lobby.Success => Success
+      case Lobby.Failure => Failure
     }
   }
 

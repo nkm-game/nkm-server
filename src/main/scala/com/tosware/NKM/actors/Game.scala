@@ -15,7 +15,6 @@ object Game {
   case class AddCharacter(playerName: String, character: NKMCharacter) extends Command
   case class PlaceCharacter(hexCoordinates: HexCoordinates, characterId: String) extends Command
   case class MoveCharacter(hexCoordinates: HexCoordinates, characterId: String) extends Command
-  case class SetMap(hexMap: HexMap) extends Command
 
   sealed trait Event
 //  case class GameCreated(userId: String) extends Event
@@ -23,7 +22,6 @@ object Game {
   case class CharacterAdded(playerName: String, character: NKMCharacter) extends Event
   case class CharacterPlaced(hexCoordinates: HexCoordinates, characterId: String) extends Event
   case class CharacterMoved(hexCoordinates: HexCoordinates, characterId: String) extends Event
-  case class MapSet(hexMap: HexMap) extends Event
 
   def props(id: String): Props = Props(new Game(id))
 }
@@ -104,12 +102,6 @@ class Game(id: String) extends PersistentActor with ActorLogging {
         moveCharacter(hexCoordinates, characterId)
         log.info(s"Persisted $characterId on $hexCoordinates")
       }
-    case SetMap(hexMap) =>
-      log.info(s"Setting map: ${hexMap.name}")
-      persist(MapSet(hexMap)) { _ =>
-        setMap(hexMap)
-        log.info(s"Persisted map: ${hexMap.name}")
-      }
     case e => log.warning(s"Unknown message: $e")
   }
 
@@ -126,9 +118,6 @@ class Game(id: String) extends PersistentActor with ActorLogging {
     case CharacterMoved(hexCoordinates, characterId) =>
       moveCharacter(hexCoordinates, characterId)
       log.info(s"Recovered $characterId to $hexCoordinates")
-    case MapSet(hexMap) =>
-      setMap(hexMap)
-      log.info(s"Recovered map: ${hexMap.name}")
     case RecoveryCompleted =>
     case e => log.warning(s"Unknown message: $e")
   }
