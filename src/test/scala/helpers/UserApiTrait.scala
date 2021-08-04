@@ -1,4 +1,4 @@
-package api
+package helpers
 
 import akka.http.scaladsl.model.headers.RawHeader
 import com.tosware.NKM.models.{Credentials, RegisterRequest}

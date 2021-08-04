@@ -6,6 +6,7 @@ import akka.http.scaladsl.server.Route
 import com.tosware.NKM.DBManager
 import com.tosware.NKM.models._
 import com.tosware.NKM.models.lobby._
+import helpers.ApiTrait
 import pdi.jwt.{JwtAlgorithm, JwtSprayJson}
 import spray.json._
 

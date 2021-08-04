@@ -1,4 +1,4 @@
-package api
+package helpers
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.testkit.ScalatestRouteTest
@@ -7,9 +7,9 @@ import com.tosware.NKM.DBManager
 import com.tosware.NKM.actors.CQRSEventHandler
 import com.tosware.NKM.serializers.NKMJsonProtocol
 import com.tosware.NKM.services.{HttpService, LobbyService, UserService}
-import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
 import slick.jdbc.JdbcBackend
 import slick.jdbc.JdbcBackend.Database
 
