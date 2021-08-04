@@ -82,7 +82,7 @@ class ApiSpec
         val token = responseAs[String]
         JwtSprayJson.decode(token, jwtSecretKey, Seq(JwtAlgorithm.HS256)) match {
           case Success(claim) => claim.content.parseJson.convertTo[JwtContent] shouldEqual JwtContent("test")
-          case _ => fail
+          case _ => fail()
         }
       }
     }
@@ -208,9 +208,8 @@ class ApiSpec
     }
 
     "allow setting map name in a lobby for a host" in {
-      //TODO
-      fail
       var token: String = ""
+      var lobbyId: String = ""
       Post("/api/register", RegisterRequest("test", "test@example.com", "password")) ~> routes
       Post("/api/login", Credentials("test", "password")) ~> routes ~> check {
         status shouldEqual OK
@@ -218,20 +217,80 @@ class ApiSpec
       }
       Post("/api/create_lobby", LobbyCreationRequest("lobby_name")).addHeader(RawHeader("Authorization", s"Bearer $token")) ~> routes ~> check {
         status shouldEqual Created
+        lobbyId = responseAs[String]
+      }
+      val hexMapName = "Linia"
+      val hexMapName2 = "1v1v1"
+
+      Post("/api/set_hexmap", SetHexmapNameRequest(lobbyId, hexMapName)).addHeader(RawHeader("Authorization", s"Bearer $token")) ~> routes ~> check {
+        status shouldEqual OK
+      }
+
+      // wait for CQRS Event Handler to persist
+      Thread.sleep(DBManager.dbTimeout.toMillis)
+
+      Get(s"/api/lobby/$lobbyId") ~> routes ~> check {
+        status shouldEqual OK
+        val lobby = responseAs[LobbyState]
+        lobby.chosenHexMapName shouldEqual Some(hexMapName)
+      }
+
+      Post("/api/set_hexmap", SetHexmapNameRequest(lobbyId, hexMapName2)).addHeader(RawHeader("Authorization", s"Bearer $token")) ~> routes ~> check {
+        status shouldEqual OK
+      }
+
+      // wait for CQRS Event Handler to persist
+      Thread.sleep(DBManager.dbTimeout.toMillis)
+
+      Get(s"/api/lobby/$lobbyId") ~> routes ~> check {
+        status shouldEqual OK
+        val lobby = responseAs[LobbyState]
+        lobby.chosenHexMapName shouldEqual Some(hexMapName2)
+      }
+    }
+
+    "disallow setting invalid map name" in {
+      var token: String = ""
+      var lobbyId: String = ""
+      Post("/api/register", RegisterRequest("test", "test@example.com", "password")) ~> routes
+      Post("/api/login", Credentials("test", "password")) ~> routes ~> check {
+        status shouldEqual OK
+        token = responseAs[String]
+      }
+      Post("/api/create_lobby", LobbyCreationRequest("lobby_name")).addHeader(RawHeader("Authorization", s"Bearer $token")) ~> routes ~> check {
+        status shouldEqual Created
+        lobbyId = responseAs[String]
+      }
+      val hexMapName = "this map does not exist"
+
+      Post("/api/set_hexmap", SetHexmapNameRequest(lobbyId, hexMapName)).addHeader(RawHeader("Authorization", s"Bearer $token")) ~> routes ~> check {
+        status shouldEqual InternalServerError
       }
     }
 
     "disallow setting map name in a lobby for non host persons" in {
-      //TODO
-      fail
       var token: String = ""
+      var token2: String = ""
+      var lobbyId: String = ""
       Post("/api/register", RegisterRequest("test", "test@example.com", "password")) ~> routes
       Post("/api/login", Credentials("test", "password")) ~> routes ~> check {
         status shouldEqual OK
         token = responseAs[String]
       }
+
+      Post("/api/register", RegisterRequest("test2", "test2@example.com", "password")) ~> routes
+      Post("/api/login", Credentials("test2", "password")) ~> routes ~> check {
+        status shouldEqual OK
+        token2 = responseAs[String]
+      }
       Post("/api/create_lobby", LobbyCreationRequest("lobby_name")).addHeader(RawHeader("Authorization", s"Bearer $token")) ~> routes ~> check {
         status shouldEqual Created
+        lobbyId = responseAs[String]
+      }
+      val hexMapName = "Linia"
+
+      Post("/api/set_hexmap", SetHexmapNameRequest(lobbyId, hexMapName)).addHeader(RawHeader("Authorization", s"Bearer $token2")) ~> routes ~> check {
+        status shouldEqual InternalServerError
       }
     }
   }

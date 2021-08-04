@@ -14,7 +14,7 @@ import com.tosware.NKM.actors.NKMData.GetHexMaps
 import com.tosware.NKM.actors.User.{RegisterFailure, RegisterSuccess}
 import com.tosware.NKM.actors._
 import com.tosware.NKM.models._
-import com.tosware.NKM.models.lobby.{LobbyCreationRequest, LobbyJoinRequest, LobbyLeaveRequest}
+import com.tosware.NKM.models.lobby.{LobbyCreationRequest, LobbyJoinRequest, LobbyLeaveRequest, SetHexmapNameRequest}
 import com.tosware.NKM.serializers.NKMJsonProtocol
 import com.tosware.NKM.services.UserService.{InvalidCredentials, LoggedIn}
 import pdi.jwt.{Jwt, JwtAlgorithm, JwtClaim, JwtSprayJson}
@@ -154,6 +154,18 @@ trait HttpService extends NKMJsonProtocol with SprayJsonSupport with CORSHandler
                 entity(as[LobbyLeaveRequest]) { entity =>
                   val username = jwtClaim.content.parseJson.convertTo[JwtContent].content
                   lobbyService.leaveLobby(username, entity) match {
+                    case LobbyService.Success => complete(StatusCodes.OK)
+                    case LobbyService.Failure => complete(StatusCodes.InternalServerError)
+                  }
+                }
+              }
+            },
+
+            path("set_hexmap") {
+              authenticated { jwtClaim =>
+                entity(as[SetHexmapNameRequest]) { entity =>
+                  val username = jwtClaim.content.parseJson.convertTo[JwtContent].content
+                  lobbyService.setHexmapName(username, entity) match {
                     case LobbyService.Success => complete(StatusCodes.OK)
                     case LobbyService.Failure => complete(StatusCodes.InternalServerError)
                   }

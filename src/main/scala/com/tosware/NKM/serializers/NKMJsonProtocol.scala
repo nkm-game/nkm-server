@@ -74,6 +74,7 @@ trait NKMJsonProtocol extends DefaultJsonProtocol {
   implicit val lobbyCreationRequestFormat: RootJsonFormat[LobbyCreationRequest] = jsonFormat1(LobbyCreationRequest)
   implicit val lobbyJoinRequestFormat: RootJsonFormat[LobbyJoinRequest] = jsonFormat1(LobbyJoinRequest)
   implicit val lobbyLeaveRequestFormat: RootJsonFormat[LobbyLeaveRequest] = jsonFormat1(LobbyLeaveRequest)
+  implicit val setHexmapNameRequestFormat: RootJsonFormat[SetHexmapNameRequest] = jsonFormat2(SetHexmapNameRequest)
 
   implicit object EventJsonFormat extends RootJsonFormat[Game.Event] {
     // Events

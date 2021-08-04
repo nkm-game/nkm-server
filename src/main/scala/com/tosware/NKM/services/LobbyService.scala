@@ -3,8 +3,9 @@ package com.tosware.NKM.services
 import akka.actor.{ActorRef, ActorSystem}
 import akka.pattern.ask
 import com.tosware.NKM.{DBManager, NKMTimeouts}
-import com.tosware.NKM.actors.Lobby
-import com.tosware.NKM.models.lobby.{LobbyJoinRequest, LobbyLeaveRequest, LobbyState}
+import com.tosware.NKM.actors.{Lobby, NKMData}
+import com.tosware.NKM.models.HexMap
+import com.tosware.NKM.models.lobby.{LobbyJoinRequest, LobbyLeaveRequest, LobbyState, SetHexmapNameRequest}
 import slick.jdbc.JdbcBackend
 import slick.jdbc.MySQLProfile.api._
 
@@ -46,6 +47,23 @@ class LobbyService(implicit db: JdbcBackend.Database) extends NKMTimeouts {
       case Lobby.Failure => Failure
     }
   }
+
+  def setHexmapName(username: String, request: SetHexmapNameRequest)(implicit system: ActorSystem): Event = {
+    val lobbyActor: ActorRef = system.actorOf(Lobby.props(request.lobbyId))
+    val nkmDataActor: ActorRef = system.actorOf(NKMData.props())
+
+    val lobbyState = Await.result(lobbyActor ? Lobby.GetState, atMost).asInstanceOf[LobbyState]
+    if(lobbyState.hostUserId.getOrElse() != username) return Failure
+
+    val hexMaps = Await.result(nkmDataActor ? NKMData.GetHexMaps, atMost).asInstanceOf[List[HexMap]]
+    if(!hexMaps.map(_.name).contains(request.hexMapName)) return Failure
+
+    Await.result(lobbyActor ? Lobby.SetMapName(request.hexMapName), atMost) match {
+      case Lobby.Success => Success
+      case Lobby.Failure => Failure
+    }
+  }
+
 
   def getAllLobbies(): Seq[LobbyState] = {
     val lobbysAction = DBManager.lobbies.result
