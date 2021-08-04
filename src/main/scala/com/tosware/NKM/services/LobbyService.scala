@@ -3,9 +3,9 @@ package com.tosware.NKM.services
 import akka.actor.{ActorRef, ActorSystem}
 import akka.pattern.ask
 import com.tosware.NKM.{DBManager, NKMTimeouts}
-import com.tosware.NKM.actors.{Lobby, NKMData}
-import com.tosware.NKM.models.HexMap
-import com.tosware.NKM.models.lobby.{LobbyJoinRequest, LobbyLeaveRequest, LobbyState, SetHexmapNameRequest}
+import com.tosware.NKM.actors.{Game, Lobby, NKMData}
+import com.tosware.NKM.models.{GameState, HexMap}
+import com.tosware.NKM.models.lobby.{LobbyJoinRequest, LobbyLeaveRequest, LobbyState, SetHexmapNameRequest, StartGameRequest}
 import slick.jdbc.JdbcBackend
 import slick.jdbc.MySQLProfile.api._
 
@@ -63,6 +63,27 @@ class LobbyService(implicit db: JdbcBackend.Database) extends NKMTimeouts {
       case Lobby.Failure => Failure
     }
   }
+
+  def startGame(username: String, request: StartGameRequest)(implicit system: ActorSystem): Event = {
+    val lobbyActor: ActorRef = system.actorOf(Lobby.props(request.lobbyId))
+    val gameActor: ActorRef = system.actorOf(Game.props(request.lobbyId))
+
+    val lobbyState = Await.result(lobbyActor ? Lobby.GetState, atMost).asInstanceOf[LobbyState]
+
+    if(lobbyState.hostUserId.getOrElse() != username) return Failure
+    if(lobbyState.chosenHexMapName.isEmpty) return Failure
+    if(lobbyState.userIds.length < 2) return Failure
+
+    val gameState = Await.result(gameActor ? Game.GetState, atMost).asInstanceOf[GameState]
+    if(gameState.isStarted) return Failure
+
+    Await.result(gameActor ? Game.StartGame, atMost) match {
+      case Game.Success => Success
+      case Game.Failure => Failure
+    }
+
+  }
+
 
 
   def getAllLobbies(): Seq[LobbyState] = {

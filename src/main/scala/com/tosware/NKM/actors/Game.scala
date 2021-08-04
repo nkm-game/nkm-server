@@ -10,18 +10,22 @@ object Game {
   case object GetState extends Query
 
   sealed trait Command
-//  case class CreateGame(userId: String) extends Command
+  case object StartGame extends Command
   case class SetPlayers(names: List[String]) extends Command
   case class AddCharacter(playerName: String, character: NKMCharacter) extends Command
   case class PlaceCharacter(hexCoordinates: HexCoordinates, characterId: String) extends Command
   case class MoveCharacter(hexCoordinates: HexCoordinates, characterId: String) extends Command
 
   sealed trait Event
-//  case class GameCreated(userId: String) extends Event
+  case class GameStarted(lobbyId: String) extends Event
   case class PlayersSet(names: List[String]) extends Event
   case class CharacterAdded(playerName: String, character: NKMCharacter) extends Event
   case class CharacterPlaced(hexCoordinates: HexCoordinates, characterId: String) extends Event
   case class CharacterMoved(hexCoordinates: HexCoordinates, characterId: String) extends Event
+
+  sealed trait CommandResponse
+  case object Success extends CommandResponse
+  case object Failure extends CommandResponse
 
   def props(id: String): Props = Props(new Game(id))
 }
@@ -29,6 +33,9 @@ object Game {
 class Game(id: String) extends PersistentActor with ActorLogging {
   import Game._
   var gameState: GameState = GameState.empty
+
+  def startGame(): Unit =
+    gameState = gameState.copy(isStarted = true)
 
   def placeCharacter(targetCellCoordinates: HexCoordinates, characterId: String): Unit =
       gameState = gameState.modify(_.hexMap.each.cells.each).using {
@@ -70,14 +77,16 @@ class Game(id: String) extends PersistentActor with ActorLogging {
     case GetState =>
       log.info("Received state request")
       sender() ! gameState
-//    case CreateGame(userId) =>
-//      log.info(s"Creating game request: $userId")
-//      if(!gameState.created()) {
-//        persist(GameCreated(userId)) { _ =>
-//          createGame(userId)
-//          log.info(s"Created game: $userId")
-//        }
-//      }
+    case StartGame =>
+      log.info(s"Starting the game")
+      if(gameState.isStarted) {
+        sender() ! Failure
+      } else {
+        persist(GameStarted(id)) { _ =>
+          startGame()
+          sender() ! Success
+        }
+      }
     case SetPlayers(names) =>
       log.info(s"Set player event: $names")
       persist(PlayersSet(names)) { _ =>
@@ -106,6 +115,9 @@ class Game(id: String) extends PersistentActor with ActorLogging {
   }
 
   override def receiveRecover: Receive = {
+    case GameStarted(_) =>
+      startGame()
+      log.info(s"Recovered game start")
     case PlayersSet(names) =>
       setPlayers(names)
       log.info(s"Recovered players: $names")

@@ -103,5 +103,38 @@ class LobbySpec extends LobbyApiTrait
         status shouldEqual InternalServerError
       }
     }
+
+    "allow to start a game" in {
+      val hexMapName = "Linia"
+      Post("/api/set_hexmap", SetHexmapNameRequest(lobbyId, hexMapName)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check {
+        status shouldEqual OK
+      }
+
+      Post("/api/join_lobby", LobbyJoinRequest(lobbyId)).addHeader(getAuthHeader(tokens(1))) ~> routes ~> check {
+        status shouldEqual OK
+      }
+
+      Post("/api/start_game", StartGameRequest(lobbyId)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check {
+        status shouldEqual OK
+      }
+    }
+
+    "disallow starting game without hexmap" in {
+      Post("/api/join_lobby", LobbyJoinRequest(lobbyId)).addHeader(getAuthHeader(tokens(1))) ~> routes ~> check {
+        status shouldEqual OK
+      }
+
+      Post("/api/start_game", LobbyJoinRequest(lobbyId)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check {
+        status shouldEqual InternalServerError
+      }
+    }
+
+    "disallow starting game with 1 or 0 players" in {
+      val hexMapName = "Linia"
+
+      Post("/api/set_hexmap", SetHexmapNameRequest(lobbyId, hexMapName)).addHeader(getAuthHeader(tokens(1))) ~> routes ~> check {
+        status shouldEqual InternalServerError
+      }
+    }
   }
 }

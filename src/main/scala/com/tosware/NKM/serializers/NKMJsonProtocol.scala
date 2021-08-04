@@ -67,7 +67,7 @@ trait NKMJsonProtocol extends DefaultJsonProtocol {
   implicit val playerFormat: RootJsonFormat[Player] = jsonFormat2(Player)
   implicit val hexCellFormat: RootJsonFormat[HexCell] = jsonFormat5(HexCell)
   implicit val hexMapFormat: RootJsonFormat[HexMap] = jsonFormat2(HexMap)
-  implicit val gameStateFormat: RootJsonFormat[GameState] = jsonFormat5(GameState.apply)
+  implicit val gameStateFormat: RootJsonFormat[GameState] = jsonFormat6(GameState.apply)
 
   implicit val loginFormat: RootJsonFormat[Credentials] = jsonFormat2(Credentials)
   implicit val registerRequestFormat: RootJsonFormat[RegisterRequest] = jsonFormat3(RegisterRequest)
@@ -75,36 +75,5 @@ trait NKMJsonProtocol extends DefaultJsonProtocol {
   implicit val lobbyJoinRequestFormat: RootJsonFormat[LobbyJoinRequest] = jsonFormat1(LobbyJoinRequest)
   implicit val lobbyLeaveRequestFormat: RootJsonFormat[LobbyLeaveRequest] = jsonFormat1(LobbyLeaveRequest)
   implicit val setHexmapNameRequestFormat: RootJsonFormat[SetHexmapNameRequest] = jsonFormat2(SetHexmapNameRequest)
-
-  implicit object EventJsonFormat extends RootJsonFormat[Game.Event] {
-    // Events
-    implicit val playersSetFormat: RootJsonFormat[PlayersSet] = jsonFormat1(PlayersSet)
-    implicit val characterAddedFormat: RootJsonFormat[CharacterAdded] = jsonFormat2(CharacterAdded)
-    implicit val characterPlacedFormat: RootJsonFormat[CharacterPlaced] = jsonFormat2(CharacterPlaced)
-    implicit val characterMovedFormat: RootJsonFormat[CharacterMoved] = jsonFormat2(CharacterMoved)
-//    implicit val mapSetFormat: RootJsonFormat[MapSet] = jsonFormat1(MapSet)
-
-    val playersSetId: JsString = JsString("PlayersSet")
-    val characterAddedId: JsString = JsString("CharacterAdded")
-    val characterPlacedId: JsString = JsString("CharacterPlaced")
-    val characterMovedId: JsString = JsString("CharacterMoved")
-    val mapSetId: JsString = JsString("MapSet")
-
-    override def write(obj: Game.Event): JsValue = obj match {
-      case e: PlayersSet => JsArray(Vector(playersSetId, playersSetFormat.write(e)))
-      case e: CharacterAdded => JsArray(Vector(characterAddedId, characterAddedFormat.write(e)))
-      case e: CharacterPlaced => JsArray(Vector(characterPlacedId, characterPlacedFormat.write(e)))
-      case e: CharacterMoved => JsArray(Vector(characterMovedId, characterMovedFormat.write(e)))
-//      case e: MapSet => JsArray(Vector(mapSetId, mapSetFormat.write(e)))
-    }
-    override def read(json: JsValue): Game.Event = json match {
-      case JsArray(Vector(`playersSetId`, jsEvent)) => playersSetFormat.read(jsEvent)
-      case JsArray(Vector(`characterAddedId`, jsEvent)) => characterAddedFormat.read(jsEvent)
-      case JsArray(Vector(`characterPlacedId`, jsEvent)) => characterPlacedFormat.read(jsEvent)
-      case JsArray(Vector(`characterMovedId`, jsEvent)) => characterMovedFormat.read(jsEvent)
-//      case JsArray(Vector(`mapSetId`, jsEvent)) => mapSetFormat.read(jsEvent)
-    }
-  }
-
-
+  implicit val startGameRequestFormat: RootJsonFormat[StartGameRequest] = jsonFormat1(StartGameRequest)
 }
