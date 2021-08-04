@@ -1,118 +1,25 @@
 package api
 
-import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.model.headers.RawHeader
-import akka.http.scaladsl.server.Route
-import akka.http.scaladsl.testkit.ScalatestRouteTest
-import akka.testkit.TestKit
 import com.tosware.NKM.DBManager
-import com.tosware.NKM.actors.CQRSEventHandler
 import com.tosware.NKM.models._
 import com.tosware.NKM.models.lobby._
-import com.tosware.NKM.serializers.NKMJsonProtocol
-import com.tosware.NKM.services._
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpec
-import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
-import pdi.jwt.{JwtAlgorithm, JwtSprayJson}
-import slick.jdbc.JdbcBackend
-import slick.jdbc.JdbcBackend.Database
-import spray.json._
 
 import scala.language.postfixOps
-import scala.util.Success
 
-class ApiSpec
-  extends AnyWordSpec
-    with Matchers
-    with ScalatestRouteTest
-    with HttpService
-    with BeforeAndAfterAll
-    with BeforeAndAfterEach
-    with NKMJsonProtocol
-    with SprayJsonSupport
+class ApiSpec extends UserApiTrait
 {
-  implicit val db: JdbcBackend.Database = Database.forConfig("slick.db")
-  implicit val userService: UserService = new UserService()
-  implicit val lobbyService: LobbyService = new LobbyService()
-
-  override def beforeAll(): Unit = {
-    // spawn CQRS Event Handler
-    system.actorOf(CQRSEventHandler.props(db))
-  }
-
-  // Clean up persistence before each test
-  override def beforeEach(): Unit = {
-    DBManager.dropAllTables(db)
-    DBManager.createNeededTables(db)
-  }
-
-  override def afterAll(): Unit = {
-    TestKit.shutdownActorSystem(system)
-    db.close()
-  }
-
   "API" must {
-    "refuse incorrect register attempt" in {
-      Post("/api/register") ~> Route.seal(routes) ~> check {
-        status shouldEqual BadRequest
-      }
-    }
-    "refuse incorrect login attempt" in {
-      Post("/api/login") ~> Route.seal(routes) ~> check {
-        status shouldEqual BadRequest
-      }
-    }
-    "refuse invalid credentials" in {
-      Post("/api/login", Credentials("username", "wrong_password")) ~> Route.seal(routes) ~> check {
-        status shouldEqual Unauthorized
-      }
-    }
-    "allow registration" in {
-      Post("/api/register", RegisterRequest("username", "username@example.com", "password")) ~> routes ~> check {
-        status shouldEqual Created
-      }
-    }
-    "return token when valid credentials are provided" in {
-      Post("/api/register", RegisterRequest("test", "test@example.com", "password")) ~> routes
-      Post("/api/login", Credentials("test", "password")) ~> routes ~> check {
-        status shouldBe OK
-
-        val token = responseAs[String]
-        JwtSprayJson.decode(token, jwtSecretKey, Seq(JwtAlgorithm.HS256)) match {
-          case Success(claim) => claim.content.parseJson.convertTo[JwtContent] shouldEqual JwtContent("test")
-          case _ => fail()
-        }
-      }
-    }
-    "disallow registration for taken username" in {
-      Post("/api/register", RegisterRequest("test_user", "test_user@example.com", "password")) ~> routes
-      Post("/api/register", RegisterRequest("test_user", "test_user2@example.com", "password")) ~> routes ~> check {
-        status shouldEqual Conflict
-      }
-    }
-    "disallow registration for taken email" in {
-      Post("/api/register", RegisterRequest("test_user", "test_user@example.com", "password")) ~> routes
-      Post("/api/register", RegisterRequest("test_user2", "test_user@example.com", "password")) ~> routes ~> check {
-        status shouldEqual Conflict
-      }
-    }
     "allow creating lobby" in {
-      var token: String = ""
-      Post("/api/register", RegisterRequest("test", "test@example.com", "password")) ~> routes
-      Post("/api/login", Credentials("test", "password")) ~> routes ~> check {
-        status shouldEqual OK
-        token = responseAs[String]
-      }
-      Post("/api/create_lobby", LobbyCreationRequest("lobby_name")).addHeader(RawHeader("Authorization", s"Bearer $token")) ~> routes ~> check {
+      Post("/api/create_lobby", LobbyCreationRequest("lobby_name")).addHeader(getAuthHeader(token)) ~> routes ~> check {
         status shouldEqual Created
       }
     }
 
     "disallow creating lobby with wrong token" in {
       val token: String = "random_token"
-      Post("/api/create_lobby", LobbyCreationRequest("lobby_name")).addHeader(RawHeader("Authorization", s"Bearer $token")) ~> routes ~> check {
+      Post("/api/create_lobby", LobbyCreationRequest("lobby_name")).addHeader(getAuthHeader(token)) ~> routes ~> check {
         status shouldEqual Unauthorized
       }
     }
@@ -124,13 +31,7 @@ class ApiSpec
         lobbies.length shouldEqual 0
       }
 
-      var token: String = ""
-      Post("/api/register", RegisterRequest("test", "test@example.com", "password")) ~> routes
-      Post("/api/login", Credentials("test", "password")) ~> routes ~> check {
-        status shouldEqual OK
-        token = responseAs[String]
-      }
-      Post("/api/create_lobby", LobbyCreationRequest("lobby_name")).addHeader(RawHeader("Authorization", s"Bearer $token")) ~> routes ~> check {
+      Post("/api/create_lobby", LobbyCreationRequest("lobby_name")).addHeader(getAuthHeader(token)) ~> routes ~> check {
         status shouldEqual Created
       }
 
@@ -157,17 +58,17 @@ class ApiSpec
         token2 = responseAs[String]
       }
 
-      Post("/api/create_lobby", LobbyCreationRequest("lobby_name")).addHeader(RawHeader("Authorization", s"Bearer $token")) ~> routes ~> check {
+      Post("/api/create_lobby", LobbyCreationRequest("lobby_name")).addHeader(getAuthHeader(token)) ~> routes ~> check {
         status shouldEqual Created
         lobbyId = responseAs[String]
       }
 
       // this request should fail as it is not a lobby id, but lobby name
-      Post("/api/join_lobby", LobbyJoinRequest("lobby_name")).addHeader(RawHeader("Authorization", s"Bearer $token2")) ~> routes ~> check {
+      Post("/api/join_lobby", LobbyJoinRequest("lobby_name")).addHeader(getAuthHeader(token2)) ~> routes ~> check {
         status shouldEqual InternalServerError
       }
 
-      Post("/api/join_lobby", LobbyJoinRequest(lobbyId)).addHeader(RawHeader("Authorization", s"Bearer $token2")) ~> routes ~> check {
+      Post("/api/join_lobby", LobbyJoinRequest(lobbyId)).addHeader(getAuthHeader(token2)) ~> routes ~> check {
         status shouldEqual OK
       }
 
@@ -180,7 +81,7 @@ class ApiSpec
         lobby.userIds shouldEqual List("test", "test2")
       }
 
-      Post("/api/leave_lobby", LobbyLeaveRequest(lobbyId)).addHeader(RawHeader("Authorization", s"Bearer $token2")) ~> routes ~> check {
+      Post("/api/leave_lobby", LobbyLeaveRequest(lobbyId)).addHeader(getAuthHeader(token2)) ~> routes ~> check {
         status shouldEqual OK
       }
 
@@ -193,7 +94,7 @@ class ApiSpec
         lobby.userIds shouldEqual List("test")
       }
 
-      Post("/api/leave_lobby", LobbyLeaveRequest(lobbyId)).addHeader(RawHeader("Authorization", s"Bearer $token")) ~> routes ~> check {
+      Post("/api/leave_lobby", LobbyLeaveRequest(lobbyId)).addHeader(getAuthHeader(token)) ~> routes ~> check {
         status shouldEqual OK
       }
 
@@ -208,21 +109,15 @@ class ApiSpec
     }
 
     "allow setting map name in a lobby for a host" in {
-      var token: String = ""
       var lobbyId: String = ""
-      Post("/api/register", RegisterRequest("test", "test@example.com", "password")) ~> routes
-      Post("/api/login", Credentials("test", "password")) ~> routes ~> check {
-        status shouldEqual OK
-        token = responseAs[String]
-      }
-      Post("/api/create_lobby", LobbyCreationRequest("lobby_name")).addHeader(RawHeader("Authorization", s"Bearer $token")) ~> routes ~> check {
+      Post("/api/create_lobby", LobbyCreationRequest("lobby_name")).addHeader(getAuthHeader(token)) ~> routes ~> check {
         status shouldEqual Created
         lobbyId = responseAs[String]
       }
       val hexMapName = "Linia"
       val hexMapName2 = "1v1v1"
 
-      Post("/api/set_hexmap", SetHexmapNameRequest(lobbyId, hexMapName)).addHeader(RawHeader("Authorization", s"Bearer $token")) ~> routes ~> check {
+      Post("/api/set_hexmap", SetHexmapNameRequest(lobbyId, hexMapName)).addHeader(getAuthHeader(token)) ~> routes ~> check {
         status shouldEqual OK
       }
 
@@ -235,7 +130,7 @@ class ApiSpec
         lobby.chosenHexMapName shouldEqual Some(hexMapName)
       }
 
-      Post("/api/set_hexmap", SetHexmapNameRequest(lobbyId, hexMapName2)).addHeader(RawHeader("Authorization", s"Bearer $token")) ~> routes ~> check {
+      Post("/api/set_hexmap", SetHexmapNameRequest(lobbyId, hexMapName2)).addHeader(getAuthHeader(token)) ~> routes ~> check {
         status shouldEqual OK
       }
 
@@ -257,13 +152,13 @@ class ApiSpec
         status shouldEqual OK
         token = responseAs[String]
       }
-      Post("/api/create_lobby", LobbyCreationRequest("lobby_name")).addHeader(RawHeader("Authorization", s"Bearer $token")) ~> routes ~> check {
+      Post("/api/create_lobby", LobbyCreationRequest("lobby_name")).addHeader(getAuthHeader(token)) ~> routes ~> check {
         status shouldEqual Created
         lobbyId = responseAs[String]
       }
       val hexMapName = "this map does not exist"
 
-      Post("/api/set_hexmap", SetHexmapNameRequest(lobbyId, hexMapName)).addHeader(RawHeader("Authorization", s"Bearer $token")) ~> routes ~> check {
+      Post("/api/set_hexmap", SetHexmapNameRequest(lobbyId, hexMapName)).addHeader(getAuthHeader(token)) ~> routes ~> check {
         status shouldEqual InternalServerError
       }
     }
@@ -283,13 +178,13 @@ class ApiSpec
         status shouldEqual OK
         token2 = responseAs[String]
       }
-      Post("/api/create_lobby", LobbyCreationRequest("lobby_name")).addHeader(RawHeader("Authorization", s"Bearer $token")) ~> routes ~> check {
+      Post("/api/create_lobby", LobbyCreationRequest("lobby_name")).addHeader(getAuthHeader(token)) ~> routes ~> check {
         status shouldEqual Created
         lobbyId = responseAs[String]
       }
       val hexMapName = "Linia"
 
-      Post("/api/set_hexmap", SetHexmapNameRequest(lobbyId, hexMapName)).addHeader(RawHeader("Authorization", s"Bearer $token2")) ~> routes ~> check {
+      Post("/api/set_hexmap", SetHexmapNameRequest(lobbyId, hexMapName)).addHeader(getAuthHeader(token2)) ~> routes ~> check {
         status shouldEqual InternalServerError
       }
     }
