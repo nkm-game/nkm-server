@@ -13,7 +13,6 @@ import scala.io.Source
 
 object NKMData {
   case object GetHexMaps
-//  case class GetHexMapsResponse(hexMaps: List[HexMap])
 
   def props(): Props = Props(new NKMData())
 }

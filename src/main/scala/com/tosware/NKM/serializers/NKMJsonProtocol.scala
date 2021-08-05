@@ -1,17 +1,18 @@
 package com.tosware.NKM.serializers
 
-import com.tosware.NKM.actors.Game
-import com.tosware.NKM.actors.Game._
-import com.tosware.NKM.actors.Lobby._
 import com.tosware.NKM.models._
-import com.tosware.NKM.models.lobby._
+import pl.iterators.kebs.json.KebsSpray
 import spray.json._
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import scala.util.Try
 
-trait NKMJsonProtocol extends DefaultJsonProtocol {
+trait NKMJsonProtocol
+  extends DefaultJsonProtocol
+    with KebsSpray
+    with KebsSpray.NoFlat // jwt serialize / deserialize does not work with flat serialization (idk why)
+{
 
   implicit object HexCellEffectJsonFormat extends RootJsonFormat[HexCellEffect] {
     override def write(obj: HexCellEffect): JsValue = obj match {
@@ -55,25 +56,4 @@ trait NKMJsonProtocol extends DefaultJsonProtocol {
     private val deserializationErrorMessage =
       s"Expected date time in ISO offset date time format ex. ${LocalDate.now().format(formatter)}"
   }
-
-  // Start with simple ones, finish with the most complex
-  // if format A depends on B, then B should be defined first (or we get a NullPointerException from spray)
-  implicit val lobbyStateFormat: RootJsonFormat[LobbyState] = jsonFormat6(LobbyState)
-  implicit val hexCoordinatesFormat: RootJsonFormat[HexCoordinates] = jsonFormat2(HexCoordinates)
-  implicit val statFormat: RootJsonFormat[Stat] = jsonFormat1(Stat)
-  implicit val phaseFormat: RootJsonFormat[Phase] = jsonFormat1(Phase)
-  implicit val turnFormat: RootJsonFormat[Turn] = jsonFormat1(Turn)
-  implicit val nkmCharacterFormat: RootJsonFormat[NKMCharacter] = jsonFormat8(NKMCharacter)
-  implicit val playerFormat: RootJsonFormat[Player] = jsonFormat2(Player)
-  implicit val hexCellFormat: RootJsonFormat[HexCell] = jsonFormat5(HexCell)
-  implicit val hexMapFormat: RootJsonFormat[HexMap] = jsonFormat2(HexMap)
-  implicit val gameStateFormat: RootJsonFormat[GameState] = jsonFormat6(GameState.apply)
-
-  implicit val loginFormat: RootJsonFormat[Credentials] = jsonFormat2(Credentials)
-  implicit val registerRequestFormat: RootJsonFormat[RegisterRequest] = jsonFormat3(RegisterRequest)
-  implicit val lobbyCreationRequestFormat: RootJsonFormat[LobbyCreationRequest] = jsonFormat1(LobbyCreationRequest)
-  implicit val lobbyJoinRequestFormat: RootJsonFormat[LobbyJoinRequest] = jsonFormat1(LobbyJoinRequest)
-  implicit val lobbyLeaveRequestFormat: RootJsonFormat[LobbyLeaveRequest] = jsonFormat1(LobbyLeaveRequest)
-  implicit val setHexmapNameRequestFormat: RootJsonFormat[SetHexmapNameRequest] = jsonFormat2(SetHexmapNameRequest)
-  implicit val startGameRequestFormat: RootJsonFormat[StartGameRequest] = jsonFormat1(StartGameRequest)
 }

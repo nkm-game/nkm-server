@@ -18,6 +18,7 @@ import com.tosware.NKM.models.lobby.{LobbyCreationRequest, LobbyJoinRequest, Lob
 import com.tosware.NKM.serializers.NKMJsonProtocol
 import com.tosware.NKM.services.UserService.{InvalidCredentials, LoggedIn}
 import pdi.jwt.{Jwt, JwtAlgorithm, JwtClaim, JwtSprayJson}
+import pl.iterators.kebs.json.KebsSpray
 import spray.json._
 
 import java.security.{KeyStore, SecureRandom}
@@ -27,7 +28,11 @@ import scala.concurrent.duration._
 import scala.language.postfixOps
 import scala.util.{Failure, Success}
 
-trait HttpService extends NKMJsonProtocol with SprayJsonSupport with CORSHandler {
+trait HttpService
+    extends CORSHandler
+    with SprayJsonSupport
+    with NKMJsonProtocol
+{
   implicit val system: ActorSystem
   implicit val timeout: Timeout = Timeout(2 seconds)
   implicit val userService: UserService

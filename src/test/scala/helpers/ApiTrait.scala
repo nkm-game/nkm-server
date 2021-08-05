@@ -10,6 +10,7 @@ import com.tosware.NKM.services.{HttpService, LobbyService, UserService}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
+import pl.iterators.kebs.json.KebsSpray
 import slick.jdbc.JdbcBackend
 import slick.jdbc.JdbcBackend.Database
 
