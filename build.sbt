@@ -32,8 +32,6 @@ libraryDependencies += "com.typesafe.akka" %% "akka-persistence" % AkkaVersion
 libraryDependencies += "com.typesafe.akka" %% "akka-persistence-query" % AkkaVersion
 libraryDependencies += "com.typesafe.akka" %% "akka-cluster-tools" % AkkaVersion
 
-//libraryDependencies += "com.typesafe.akka" %% "akka-persistence-cassandra" % CassandraVersion
-
 libraryDependencies += "com.softwaremill.quicklens" %% "quicklens" % QuickLensVersion
 
 libraryDependencies += "org.fusesource.leveldbjni" % "leveldbjni-all" % LevelDBVersion
@@ -50,18 +48,11 @@ libraryDependencies += "com.typesafe.akka" %% "akka-testkit" % AkkaVersion % Tes
 libraryDependencies += "com.typesafe.akka" %% "akka-persistence-testkit" % AkkaVersion % Test
 libraryDependencies += "com.typesafe.akka" %% "akka-stream-testkit" % AkkaVersion % Test
 libraryDependencies += "com.typesafe.akka" %% "akka-http-testkit" % AkkaHttpVersion % Test
-//libraryDependencies += "com.typesafe.akka" %% "akka-actor-testkit-typed" % AkkaVersion % Test
 libraryDependencies += "org.scalatest" %% "scalatest" % ScalaTestVersion % Test
 
 libraryDependencies += "com.github.dnvriend" %% "akka-persistence-inmemory" % "2.5.15.2"
 
 libraryDependencies += "com.github.dnvriend" %% "akka-persistence-jdbc" % AkkaPersistenceVersion
 libraryDependencies += "mysql" % "mysql-connector-java" % "8.0.25"
-//libraryDependencies += "com.lightbend.akka" %% "akka-stream-alpakka-slick" % "3.0.2"
-//libraryDependencies ++= Seq(
-//  "com.typesafe.slick" %% "slick" % "3.3.3",
-//  "com.typesafe.slick" %% "slick-hikaricp" % "3.3.3"
-//)
 
 scalacOptions in Compile ++= Seq("-deprecation", "-feature", "-unchecked")
-
