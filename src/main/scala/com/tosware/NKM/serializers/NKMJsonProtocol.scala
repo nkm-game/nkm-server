@@ -1,6 +1,7 @@
 package com.tosware.NKM.serializers
 
 import com.tosware.NKM.models._
+import com.tosware.NKM.models.game.{HexCellEffect, HexCellType, Normal, SpawnPoint, Transparent, Wall}
 import pl.iterators.kebs.json.KebsSpray
 import spray.json._
 

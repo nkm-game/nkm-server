@@ -1,4 +1,4 @@
-package com.tosware.NKM.models
+package com.tosware.NKM.models.game
 
 abstract class HexCellEffect(cooldown: Int)
 

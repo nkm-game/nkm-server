@@ -26,6 +26,9 @@ libraryDependencies += "com.typesafe.akka" %% "akka-serialization-jackson" % Akk
 
 libraryDependencies += "pl.iterators" %% "kebs-spray-json" % "1.9.2"
 
+libraryDependencies += "com.beachape" %% "enumeratum" % "1.7.0"
+
+
 libraryDependencies += "com.pauldijou" %% "jwt-core" % JwtVersion
 libraryDependencies += "com.pauldijou" %% "jwt-spray-json" % JwtVersion
 

@@ -4,7 +4,7 @@ import akka.actor.{ActorRef, ActorSystem}
 import akka.pattern.ask
 import com.tosware.NKM.actors.NKMData
 import com.tosware.NKM.actors.NKMData.GetHexMaps
-import com.tosware.NKM.models.HexMap
+import com.tosware.NKM.models.game.HexMap
 import helpers.NKMPersistenceTestKit
 
 import scala.concurrent.Await

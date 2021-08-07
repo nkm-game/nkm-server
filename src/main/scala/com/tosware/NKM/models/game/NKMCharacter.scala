@@ -1,4 +1,4 @@
-package com.tosware.NKM.models
+package com.tosware.NKM.models.game
 
 case class Stat(value: Int)
 

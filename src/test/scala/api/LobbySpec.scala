@@ -2,6 +2,7 @@ package api
 
 import akka.http.scaladsl.model.StatusCodes._
 import com.tosware.NKM.DBManager
+import com.tosware.NKM.models.game.{GamePhase, GameState}
 import com.tosware.NKM.models.lobby._
 import helpers.LobbyApiTrait
 
@@ -116,6 +117,14 @@ class LobbySpec extends LobbyApiTrait
 
       Post("/api/start_game", StartGameRequest(lobbyId)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check {
         status shouldEqual OK
+      }
+
+      //TODO: check more in state
+      Get("/api/state").addHeader(getAuthHeader(tokens(0))) ~> routes ~> check {
+        status shouldEqual OK
+//        val gameState = responseAs[GameState]
+//        gameState.gamePhase shouldEqual GamePhase.CharacterPick
+//        gameState.players.length shouldEqual 2
       }
     }
 

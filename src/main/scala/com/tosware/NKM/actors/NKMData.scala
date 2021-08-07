@@ -2,9 +2,8 @@ package com.tosware.NKM.actors
 
 import java.io.File
 import java.util.jar.JarFile
-
 import akka.actor.{Actor, ActorLogging, Props}
-import com.tosware.NKM.models.HexMap
+import com.tosware.NKM.models.game.HexMap
 import com.tosware.NKM.serializers.NKMJsonProtocol
 import spray.json._
 

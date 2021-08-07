@@ -3,22 +3,23 @@ package com.tosware.NKM.actors
 import akka.actor.{ActorLogging, Props}
 import akka.persistence.{PersistentActor, RecoveryCompleted}
 import com.softwaremill.quicklens._
-import com.tosware.NKM.models._
+import com.tosware.NKM.models.game.GamePhase.NotStarted
+import com.tosware.NKM.models.game._
 
 object Game {
   sealed trait Query
   case object GetState extends Query
 
   sealed trait Command
-  case object StartGame extends Command
-  case class SetPlayers(names: List[String]) extends Command
+  case class StartGame(gameStartDependencies: GameStartDependencies) extends Command
+//  case class SetPlayers(names: List[String]) extends Command
   case class AddCharacter(playerName: String, character: NKMCharacter) extends Command
   case class PlaceCharacter(hexCoordinates: HexCoordinates, characterId: String) extends Command
   case class MoveCharacter(hexCoordinates: HexCoordinates, characterId: String) extends Command
 
   sealed trait Event
-  case class GameStarted(lobbyId: String) extends Event
-  case class PlayersSet(names: List[String]) extends Event
+  case class GameStarted(gameId: String, gameStartDependencies: GameStartDependencies) extends Event
+//  case class PlayersSet(names: List[String]) extends Event
   case class CharacterAdded(playerName: String, character: NKMCharacter) extends Event
   case class CharacterPlaced(hexCoordinates: HexCoordinates, characterId: String) extends Event
   case class CharacterMoved(hexCoordinates: HexCoordinates, characterId: String) extends Event
@@ -34,8 +35,14 @@ class Game(id: String) extends PersistentActor with ActorLogging {
   import Game._
   var gameState: GameState = GameState.empty
 
-  def startGame(): Unit =
-    gameState = gameState.copy(isStarted = true)
+  def startGame(g: GameStartDependencies): Unit =
+    gameState = gameState.copy(
+      players = g.players,
+      hexMap = Some(g.hexMap),
+      pickType = g.pickType,
+      numberOfBans = g.numberOfBans,
+      numberOfCharactersPerPlayers = g.numberOfCharactersPerPlayers,
+    )
 
   def placeCharacter(targetCellCoordinates: HexCoordinates, characterId: String): Unit =
       gameState = gameState.modify(_.hexMap.each.cells.each).using {
@@ -55,8 +62,8 @@ class Game(id: String) extends PersistentActor with ActorLogging {
     }
   }
 
-  def setPlayers(names: List[String]): Unit =
-    gameState = gameState.modify(_.players).setTo(names.map(n => Player(n)))
+//  def setPlayers(names: List[String]): Unit =
+//    gameState = gameState.modify(_.players).setTo(names.map(n => Player(n)))
 
   def addCharacter(playerName: String, character: NKMCharacter): Unit = {
     val currentCharacters = gameState.players.find(_.name == playerName).getOrElse {
@@ -77,22 +84,22 @@ class Game(id: String) extends PersistentActor with ActorLogging {
     case GetState =>
       log.info("Received state request")
       sender() ! gameState
-    case StartGame =>
+    case StartGame(gameStartDependencies) =>
       log.info(s"Starting the game")
-      if(gameState.isStarted) {
+      if(gameState.gamePhase != NotStarted) {
         sender() ! Failure
       } else {
-        persist(GameStarted(id)) { _ =>
-          startGame()
+        persist(GameStarted(id, gameStartDependencies)) { _ =>
+          startGame(gameStartDependencies)
           sender() ! Success
         }
       }
-    case SetPlayers(names) =>
-      log.info(s"Set player event: $names")
-      persist(PlayersSet(names)) { _ =>
-        setPlayers(names)
-        log.info(s"Persisted players: $names")
-      }
+//    case SetPlayers(names) =>
+//      log.info(s"Set player event: $names")
+//      persist(PlayersSet(names)) { _ =>
+//        setPlayers(names)
+//        log.info(s"Persisted players: $names")
+//      }
     case AddCharacter(player, character) =>
       log.info(s"Add character event: ${character.name}")
       persist(CharacterAdded(player, character)) { _ =>
@@ -115,12 +122,12 @@ class Game(id: String) extends PersistentActor with ActorLogging {
   }
 
   override def receiveRecover: Receive = {
-    case GameStarted(_) =>
-      startGame()
+    case GameStarted(_, gameStartDependencies) =>
+      startGame(gameStartDependencies)
       log.info(s"Recovered game start")
-    case PlayersSet(names) =>
-      setPlayers(names)
-      log.info(s"Recovered players: $names")
+//    case PlayersSet(names) =>
+//      setPlayers(names)
+//      log.info(s"Recovered players: $names")
     case CharacterAdded(player, character) =>
       addCharacter(player, character)
       log.info(s"Recovered character: ${character.name}")

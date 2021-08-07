@@ -4,7 +4,7 @@ import akka.actor.{ActorRef, ActorSystem}
 import akka.pattern.ask
 import com.tosware.NKM.{DBManager, NKMTimeouts}
 import com.tosware.NKM.actors.{Game, Lobby, NKMData}
-import com.tosware.NKM.models.{GameState, HexMap}
+import com.tosware.NKM.models.game.{GamePhase, GameState, HexMap}
 import com.tosware.NKM.models.lobby.{LobbyJoinRequest, LobbyLeaveRequest, LobbyState, SetHexmapNameRequest, StartGameRequest}
 import slick.jdbc.JdbcBackend
 import slick.jdbc.MySQLProfile.api._
@@ -75,7 +75,7 @@ class LobbyService(implicit db: JdbcBackend.Database) extends NKMTimeouts {
     if(lobbyState.userIds.length < 2) return Failure
 
     val gameState = Await.result(gameActor ? Game.GetState, atMost).asInstanceOf[GameState]
-    if(gameState.isStarted) return Failure
+    if(gameState.gamePhase != GamePhase.NotStarted) return Failure
 
     Await.result(gameActor ? Game.StartGame, atMost) match {
       case Game.Success => Success
