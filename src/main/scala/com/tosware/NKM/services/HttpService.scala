@@ -2,7 +2,6 @@ package com.tosware.NKM.services
 
 import akka.actor.{ActorRef, ActorSystem}
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
-import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives.{entity, _}
 import akka.http.scaladsl.server.{Directive1, Route}
@@ -20,8 +19,8 @@ import com.tosware.NKM.models.lobby.{LobbyCreationRequest, LobbyJoinRequest, Lob
 import com.tosware.NKM.serializers.NKMJsonProtocol
 import com.tosware.NKM.services.UserService.{InvalidCredentials, LoggedIn}
 import pdi.jwt.{Jwt, JwtAlgorithm, JwtClaim, JwtSprayJson}
-import pl.iterators.kebs.json.KebsSpray
 import spray.json._
+import pl.iterators.kebs.json.KebsEnumFormats
 
 import java.security.{KeyStore, SecureRandom}
 import java.time.Instant
@@ -34,6 +33,7 @@ trait HttpService
     extends CORSHandler
     with SprayJsonSupport
     with NKMJsonProtocol
+    with KebsEnumFormats
 {
   implicit val system: ActorSystem
   implicit val timeout: Timeout = Timeout(2 seconds)
@@ -90,9 +90,9 @@ trait HttpService
       pathPrefix("api") {
         get {
           concat(
-//            path("state"/ Segment) { (gameId: String) =>
-//              complete((system.actorOf(Game.props(gameId)) ? GetState).mapTo[GameState])
-//            },
+            path("state"/ Segment) { (gameId: String) =>
+              complete((system.actorOf(Game.props(gameId)) ? GetState).mapTo[GameState])
+            },
             path("maps") {
               complete((nkmData ? GetHexMaps).mapTo[List[HexMap]])
             },

@@ -17,6 +17,7 @@ lazy val ScalaTestVersion = "3.2.0"
 lazy val JwtVersion = "4.2.0"
 lazy val ScalaBcryptVersion = "4.1"
 lazy val LogbackClassicVersion = "1.2.3"
+lazy val KebsVersion = "1.9.2"
 
 libraryDependencies += "com.typesafe.akka" %% "akka-actor" % AkkaVersion
 libraryDependencies += "com.typesafe.akka" %% "akka-stream" % AkkaVersion
@@ -24,7 +25,8 @@ libraryDependencies += "com.typesafe.akka" %% "akka-http" % AkkaHttpVersion
 libraryDependencies += "com.typesafe.akka" %% "akka-http-spray-json" % AkkaHttpVersion
 libraryDependencies += "com.typesafe.akka" %% "akka-serialization-jackson" % AkkaVersion
 
-libraryDependencies += "pl.iterators" %% "kebs-spray-json" % "1.9.2"
+libraryDependencies += "pl.iterators" %% "kebs-spray-json" % KebsVersion
+//libraryDependencies += "pl.iterators" %% "kebs-akka-http" % KebsVersion
 
 libraryDependencies += "com.beachape" %% "enumeratum" % "1.7.0"
 

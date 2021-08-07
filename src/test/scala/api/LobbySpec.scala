@@ -105,6 +105,16 @@ class LobbySpec extends LobbyApiTrait
       }
     }
 
+    // TODO: move this somewhere else
+    "allow inspecting empty game state" in {
+      Get("/api/state/random_id") ~> routes ~> check {
+        status shouldEqual OK
+        val gameState = responseAs[GameState]
+        gameState.gamePhase shouldEqual GamePhase.NotStarted
+        gameState.players.length shouldEqual 0
+      }
+    }
+
     "allow to start a game" in {
       val hexMapName = "Linia"
       Post("/api/set_hexmap", SetHexmapNameRequest(lobbyId, hexMapName)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check {
@@ -122,9 +132,9 @@ class LobbySpec extends LobbyApiTrait
       //TODO: check more in state
       Get("/api/state").addHeader(getAuthHeader(tokens(0))) ~> routes ~> check {
         status shouldEqual OK
-//        val gameState = responseAs[GameState]
-//        gameState.gamePhase shouldEqual GamePhase.CharacterPick
-//        gameState.players.length shouldEqual 2
+        val gameState = responseAs[GameState]
+        gameState.gamePhase shouldEqual GamePhase.CharacterPick
+        gameState.players.length shouldEqual 2
       }
     }
 
