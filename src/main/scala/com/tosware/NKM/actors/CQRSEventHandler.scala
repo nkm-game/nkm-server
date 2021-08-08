@@ -7,6 +7,8 @@ import com.tosware.NKM.models.lobby.LobbyState
 import slick.jdbc.JdbcBackend
 import slick.jdbc.MySQLProfile.api._
 import spray.json._
+import pl.iterators.kebs._
+import enums._
 
 import scala.concurrent.Await
 
@@ -48,6 +50,18 @@ class CQRSEventHandler(db: JdbcBackend.Database)
     case Lobby.MapNameSet(id, hexMapName) =>
       val q = for {l <- DBManager.lobbies if l.id === id} yield l.chosenHexMapName
       val updateAction = q.update(Some(hexMapName))
+      Await.result(db.run(updateAction), DBManager.dbTimeout)
+    case Lobby.PickTypeSet(id, pickType) =>
+      val q = for {l <- DBManager.lobbies if l.id === id} yield l.pickType
+      val updateAction = q.update(pickType)
+      Await.result(db.run(updateAction), DBManager.dbTimeout)
+    case Lobby.NumberOfCharactersPerPlayerSet(id, numberOfCharactersPerPlayer) =>
+      val q = for {l <- DBManager.lobbies if l.id === id} yield l.numberOfCharactersPerPlayer
+      val updateAction = q.update(numberOfCharactersPerPlayer)
+      Await.result(db.run(updateAction), DBManager.dbTimeout)
+    case Lobby.NumberOfBansSet(id, numberOfBans) =>
+      val q = for {l <- DBManager.lobbies if l.id === id} yield l.numberOfBans
+      val updateAction = q.update(numberOfBans)
       Await.result(db.run(updateAction), DBManager.dbTimeout)
     case e => log.warning(s"Unknown message: $e")
   }

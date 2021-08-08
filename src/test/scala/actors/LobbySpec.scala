@@ -4,6 +4,8 @@ import akka.actor.{ActorRef, ActorSystem}
 import akka.pattern.ask
 import com.tosware.NKM.actors.Lobby
 import com.tosware.NKM.actors.Lobby._
+import com.tosware.NKM.models.CommandResponse
+import com.tosware.NKM.models.CommandResponse._
 import com.tosware.NKM.models.lobby.LobbyState
 import helpers.NKMPersistenceTestKit
 
@@ -29,7 +31,7 @@ class LobbySpec extends NKMPersistenceTestKit(ActorSystem("LobbySpec"))
         val testName = "test name"
         val createFuture = lobby ? Create(testName, hostUserID)
         val response = Await.result(createFuture, atMost)
-        response shouldBe Lobby.Success
+        response shouldBe Success
 
         val state: LobbyState = Await.result((lobby ? GetState).mapTo[LobbyState], atMost)
         state.created() shouldEqual true

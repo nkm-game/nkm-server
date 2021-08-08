@@ -1,18 +1,24 @@
 package com.tosware.NKM.actors
 
-import akka.actor.{ActorLogging, Props}
+import akka.actor.{ActorLogging, ActorRef, Props}
 import akka.persistence.{PersistentActor, RecoveryCompleted}
-import com.tosware.NKM.models.game.PickType
+import com.tosware.NKM.models.game.{GameStartDependencies, HexMap, PickType, Player}
 import com.tosware.NKM.models.lobby.LobbyState
+import akka.pattern.ask
+import com.tosware.NKM.NKMTimeouts
+import com.tosware.NKM.actors.NKMData.GetHexMaps
+import com.tosware.NKM.models.CommandResponse
+import com.tosware.NKM.models.CommandResponse._
 
 import java.time.LocalDate
-
+import scala.concurrent.Await
 
 object Lobby {
   sealed trait Query
   case object GetState extends Query
 
   sealed trait Command
+  case object StartGame extends Command
   case class Create(name: String, hostUserId: String) extends Command
   case class UserJoin(userId: String) extends Command
   case class UserLeave(userId: String) extends Command
@@ -22,7 +28,6 @@ object Lobby {
   case class SetPickType(pickType: PickType) extends Command
 
   sealed trait Event
-
   case class CreateSuccess(id: String, name: String, hostUserId: String, creationDate: LocalDate) extends Event
   case class UserJoined(id: String, userId: String) extends Event
   case class UserLeft(id: String, userId: String) extends Event
@@ -31,18 +36,23 @@ object Lobby {
   case class NumberOfCharactersPerPlayerSet(id: String, numberOfCharactersPerPlayer: Int) extends Event
   case class PickTypeSet(id: String, pickType: PickType) extends Event
 
-  sealed trait CommandResponse
-  case object Success extends CommandResponse
-  case object Failure extends CommandResponse
-
   def props(id: String): Props = Props(new Lobby(id))
 }
 
-class Lobby(id: String) extends PersistentActor with ActorLogging {
+class Lobby(id: String)
+  extends PersistentActor
+    with ActorLogging
+    with NKMTimeouts
+{
   import Lobby._
   override def persistenceId: String = s"lobby-$id"
 
   var lobbyState: LobbyState = LobbyState(id)
+  val gameActor: ActorRef = context.system.actorOf(Game.props(id))
+  val nkmData: ActorRef = context.system.actorOf(NKMData.props())
+
+  def canStartGame(): Boolean =
+    lobbyState.chosenHexMapName.nonEmpty && lobbyState.userIds.length > 1
 
   def create(name: String, hostUserId: String, creationDate: LocalDate): Unit =
     lobbyState = lobbyState.copy(name = Some(name), creationDate = Some(creationDate), hostUserId = Some(hostUserId), userIds = List(hostUserId))
@@ -160,6 +170,24 @@ class Lobby(id: String) extends PersistentActor with ActorLogging {
           sender() ! Success
         }
       } else {
+        sender() ! Failure
+      }
+
+    case StartGame =>
+      if(canStartGame()) {
+        val hexMaps = Await.result(nkmData ? GetHexMaps, atMost).asInstanceOf[List[HexMap]]
+        log.info("Received game start request")
+        val deps = GameStartDependencies(
+          players = lobbyState.userIds.map(i => Player(i)),
+          hexMap = hexMaps.filter(m => m.name == lobbyState.chosenHexMapName.get).head,
+          pickType = lobbyState.pickType,
+          numberOfBans = lobbyState.numberOfBans,
+          numberOfCharactersPerPlayers = lobbyState.numberOfCharactersPerPlayer,
+        )
+        val r = Await.result(gameActor ? Game.StartGame(deps), atMost).asInstanceOf[CommandResponse]
+        sender() ! r
+      }
+      else {
         sender() ! Failure
       }
 

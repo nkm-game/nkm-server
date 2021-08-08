@@ -3,7 +3,8 @@ package com.tosware.NKM.actors
 import akka.actor.{ActorLogging, Props}
 import akka.persistence.{PersistentActor, RecoveryCompleted}
 import com.softwaremill.quicklens._
-import com.tosware.NKM.models.game.GamePhase.NotStarted
+import com.tosware.NKM.models.CommandResponse._
+import com.tosware.NKM.models.game.GamePhase._
 import com.tosware.NKM.models.game._
 
 object Game {
@@ -24,10 +25,6 @@ object Game {
   case class CharacterPlaced(hexCoordinates: HexCoordinates, characterId: String) extends Event
   case class CharacterMoved(hexCoordinates: HexCoordinates, characterId: String) extends Event
 
-  sealed trait CommandResponse
-  case object Success extends CommandResponse
-  case object Failure extends CommandResponse
-
   def props(id: String): Props = Props(new Game(id))
 }
 
@@ -42,6 +39,7 @@ class Game(id: String) extends PersistentActor with ActorLogging {
       pickType = g.pickType,
       numberOfBans = g.numberOfBans,
       numberOfCharactersPerPlayers = g.numberOfCharactersPerPlayers,
+      gamePhase = CharacterPick,
     )
 
   def placeCharacter(targetCellCoordinates: HexCoordinates, characterId: String): Unit =

@@ -4,6 +4,7 @@ import akka.actor.{ActorRef, ActorSystem}
 import akka.pattern.ask
 import com.tosware.NKM.{DBManager, NKMTimeouts}
 import com.tosware.NKM.actors._
+import com.tosware.NKM.models.CommandResponse
 import com.tosware.NKM.models.game._
 import com.tosware.NKM.models.lobby._
 import slick.jdbc.JdbcBackend
@@ -27,24 +28,24 @@ class LobbyService(implicit db: JdbcBackend.Database, system: ActorSystem) exten
     val randomId = java.util.UUID.randomUUID.toString
     val lobbyActor: ActorRef = system.actorOf(Lobby.props(randomId))
     Await.result(lobbyActor ? Lobby.Create(name, hostUserId), atMost) match {
-      case Lobby.Success => LobbyCreated(randomId)
-      case Lobby.Failure => LobbyCreationFailure
+      case CommandResponse.Success => LobbyCreated(randomId)
+      case CommandResponse.Failure => LobbyCreationFailure
     }
   }
 
   def joinLobby(userId: String, request: LobbyJoinRequest): Event = {
     val lobbyActor: ActorRef = system.actorOf(Lobby.props(request.lobbyId))
     Await.result(lobbyActor ? Lobby.UserJoin(userId), atMost) match {
-      case Lobby.Success => Success
-      case Lobby.Failure => Failure
+      case CommandResponse.Success => Success
+      case CommandResponse.Failure => Failure
     }
   }
 
   def leaveLobby(userId: String, request: LobbyLeaveRequest): Event = {
     val lobbyActor: ActorRef = system.actorOf(Lobby.props(request.lobbyId))
     Await.result(lobbyActor ? Lobby.UserLeave(userId), atMost) match {
-      case Lobby.Success => Success
-      case Lobby.Failure => Failure
+      case CommandResponse.Success => Success
+      case CommandResponse.Failure => Failure
     }
   }
 
@@ -59,8 +60,8 @@ class LobbyService(implicit db: JdbcBackend.Database, system: ActorSystem) exten
     if(!hexMaps.map(_.name).contains(request.hexMapName)) return Failure
 
     Await.result(lobbyActor ? Lobby.SetMapName(request.hexMapName), atMost) match {
-      case Lobby.Success => Success
-      case Lobby.Failure => Failure
+      case CommandResponse.Success => Success
+      case CommandResponse.Failure => Failure
     }
   }
 
@@ -73,8 +74,8 @@ class LobbyService(implicit db: JdbcBackend.Database, system: ActorSystem) exten
     if(lobbyState.hostUserId.getOrElse() != username) return Failure
 
     Await.result(lobbyActor ? Lobby.SetNumberOfCharactersPerPlayer(request.charactersPerPlayer), atMost) match {
-      case Lobby.Success => Success
-      case Lobby.Failure => Failure
+      case CommandResponse.Success => Success
+      case CommandResponse.Failure => Failure
     }
   }
 
@@ -87,8 +88,8 @@ class LobbyService(implicit db: JdbcBackend.Database, system: ActorSystem) exten
     if(lobbyState.hostUserId.getOrElse() != username) return Failure
 
     Await.result(lobbyActor ? Lobby.SetNumberOfBans(request.numberOfBans), atMost) match {
-      case Lobby.Success => Success
-      case Lobby.Failure => Failure
+      case CommandResponse.Success => Success
+      case CommandResponse.Failure => Failure
     }
   }
 
@@ -99,8 +100,8 @@ class LobbyService(implicit db: JdbcBackend.Database, system: ActorSystem) exten
     if(lobbyState.hostUserId.getOrElse() != username) return Failure
 
     Await.result(lobbyActor ? Lobby.SetPickType(request.pickType), atMost) match {
-      case Lobby.Success => Success
-      case Lobby.Failure => Failure
+      case CommandResponse.Success => Success
+      case CommandResponse.Failure => Failure
     }
   }
 
@@ -117,9 +118,9 @@ class LobbyService(implicit db: JdbcBackend.Database, system: ActorSystem) exten
     val gameState = Await.result(gameActor ? Game.GetState, atMost).asInstanceOf[GameState]
     if(gameState.gamePhase != GamePhase.NotStarted) return Failure
 
-    Await.result(gameActor ? Game.StartGame, atMost) match {
-      case Game.Success => Success
-      case Game.Failure => Failure
+    Await.result(lobbyActor ? Lobby.StartGame, atMost) match {
+      case CommandResponse.Success => Success
+      case CommandResponse.Failure => Failure
     }
 
   }

@@ -26,6 +26,7 @@ libraryDependencies += "com.typesafe.akka" %% "akka-http-spray-json" % AkkaHttpV
 libraryDependencies += "io.altoo" %% "akka-kryo-serialization" % "2.2.0"
 
 libraryDependencies += "pl.iterators" %% "kebs-spray-json" % KebsVersion
+libraryDependencies += "pl.iterators" %% "kebs-slick" % KebsVersion
 //libraryDependencies += "pl.iterators" %% "kebs-akka-http" % KebsVersion
 
 libraryDependencies += "com.beachape" %% "enumeratum" % "1.7.0"
