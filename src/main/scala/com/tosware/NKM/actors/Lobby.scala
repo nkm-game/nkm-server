@@ -2,6 +2,7 @@ package com.tosware.NKM.actors
 
 import akka.actor.{ActorLogging, Props}
 import akka.persistence.{PersistentActor, RecoveryCompleted}
+import com.tosware.NKM.models.game.PickType
 import com.tosware.NKM.models.lobby.LobbyState
 
 import java.time.LocalDate
@@ -16,6 +17,9 @@ object Lobby {
   case class UserJoin(userId: String) extends Command
   case class UserLeave(userId: String) extends Command
   case class SetMapName(hexMapName: String) extends Command
+  case class SetNumberOfBans(numberOfBans: Int) extends Command
+  case class SetNumberOfCharactersPerPlayer(numberOfCharactersPerPlayer: Int) extends Command
+  case class SetPickType(pickType: PickType) extends Command
 
   sealed trait Event
 
@@ -23,6 +27,9 @@ object Lobby {
   case class UserJoined(id: String, userId: String) extends Event
   case class UserLeft(id: String, userId: String) extends Event
   case class MapNameSet(id: String, hexMapName: String) extends Event
+  case class NumberOfBansSet(id: String, numberOfBans: Int) extends Event
+  case class NumberOfCharactersPerPlayerSet(id: String, numberOfCharactersPerPlayer: Int) extends Event
+  case class PickTypeSet(id: String, pickType: PickType) extends Event
 
   sealed trait CommandResponse
   case object Success extends CommandResponse
@@ -48,6 +55,15 @@ class Lobby(id: String) extends PersistentActor with ActorLogging {
 
   def setMapName(hexMapName: String): Unit =
     lobbyState = lobbyState.copy(chosenHexMapName = Some(hexMapName))
+
+  def setNumberOfBans(numberOfBans: Int): Unit =
+    lobbyState = lobbyState.copy(numberOfBans = numberOfBans)
+
+  def setNumberOfCharactersPerPlayer(numberOfCharacters: Int): Unit =
+    lobbyState = lobbyState.copy(numberOfCharactersPerPlayer = numberOfCharacters)
+
+  def setPickType(pickType: PickType): Unit =
+    lobbyState = lobbyState.copy(pickType = pickType)
 
   override def receive: Receive = {
     case GetState =>
@@ -95,7 +111,6 @@ class Lobby(id: String) extends PersistentActor with ActorLogging {
         sender() ! Failure
       }
 
-
     case SetMapName(hexMapName: String) =>
       if(lobbyState.created()) {
         val mapNameSetEvent = MapNameSet(id, hexMapName)
@@ -108,6 +123,46 @@ class Lobby(id: String) extends PersistentActor with ActorLogging {
       } else {
         sender() ! Failure
       }
+
+    case SetNumberOfBans(numberOfBans) =>
+      if(lobbyState.created()) {
+        val numberOfBansSetEvent = NumberOfBansSet(id, numberOfBans)
+        persist(numberOfBansSetEvent) { _ =>
+          context.system.eventStream.publish(numberOfBansSetEvent)
+          setNumberOfBans(numberOfBans)
+          log.info(s"Set number of bans: $numberOfBans")
+          sender() ! Success
+        }
+      } else {
+        sender() ! Failure
+      }
+
+    case SetNumberOfCharactersPerPlayer(numberOfCharactersPerPlayer) =>
+      if(lobbyState.created()) {
+        val numberOfCharactersPerPlayerSetEvent  = NumberOfCharactersPerPlayerSet(id, numberOfCharactersPerPlayer)
+        persist(numberOfCharactersPerPlayerSetEvent) { _ =>
+          context.system.eventStream.publish(numberOfCharactersPerPlayerSetEvent)
+          setNumberOfCharactersPerPlayer(numberOfCharactersPerPlayer)
+          log.info(s"Set number of characters: $numberOfCharactersPerPlayer")
+          sender() ! Success
+        }
+      } else {
+        sender() ! Failure
+      }
+
+    case SetPickType(pickType) =>
+      if(lobbyState.created()) {
+        val pickTypeSetEvent = PickTypeSet(id, pickType)
+        persist(pickTypeSetEvent) { _ =>
+          context.system.eventStream.publish(pickTypeSetEvent)
+          setPickType(pickType)
+          log.info(s"Set pick type: $pickType")
+          sender() ! Success
+        }
+      } else {
+        sender() ! Failure
+      }
+
     case e => log.warning(s"Unknown message: $e")
   }
 //
@@ -115,15 +170,24 @@ class Lobby(id: String) extends PersistentActor with ActorLogging {
     case CreateSuccess(_, name, hostUserId, creationDate) =>
       create(name, hostUserId, creationDate)
       log.info(s"Recovered create")
-    case UserJoined(id, userId) =>
+    case UserJoined(_, userId) =>
       joinLobby(userId)
       log.info(s"Recovered user join")
-    case UserLeft(id, userId) =>
+    case UserLeft(_, userId) =>
       leaveLobby(userId)
       log.info(s"Recovered user leave")
-    case MapNameSet(id, hexMapName) =>
+    case MapNameSet(_, hexMapName) =>
       setMapName(hexMapName)
       log.info(s"Recovered setting hex map name")
+    case NumberOfBansSet(_, numberOfBans) =>
+      setNumberOfBans(numberOfBans)
+      log.info(s"Recovered setting number of bans")
+    case NumberOfCharactersPerPlayerSet(_, numberOfCharactersPerPlayer) =>
+      setNumberOfCharactersPerPlayer(numberOfCharactersPerPlayer)
+      log.info(s"Recovered setting number of characters")
+    case PickTypeSet(_, pickType) =>
+      setPickType(pickType)
+      log.info(s"Recovered setting pick type")
     case RecoveryCompleted =>
     case e => log.warning(s"Unknown message: $e")
   }

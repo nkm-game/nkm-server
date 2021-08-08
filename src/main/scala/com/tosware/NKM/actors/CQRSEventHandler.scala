@@ -5,7 +5,6 @@ import com.tosware.NKM.DBManager
 import com.tosware.NKM.models.UserState
 import com.tosware.NKM.models.lobby.LobbyState
 import slick.jdbc.JdbcBackend
-import slick.jdbc.JdbcBackend.Database
 import slick.jdbc.MySQLProfile.api._
 import spray.json._
 
@@ -50,5 +49,6 @@ class CQRSEventHandler(db: JdbcBackend.Database)
       val q = for {l <- DBManager.lobbies if l.id === id} yield l.chosenHexMapName
       val updateAction = q.update(Some(hexMapName))
       Await.result(db.run(updateAction), DBManager.dbTimeout)
+    case e => log.warning(s"Unknown message: $e")
   }
 }

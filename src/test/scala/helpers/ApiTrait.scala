@@ -3,13 +3,14 @@ package helpers
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.testkit.TestKit
-import com.tosware.NKM.DBManager
+import com.tosware.NKM.{DBManager, NKMTimeouts}
 import com.tosware.NKM.actors.CQRSEventHandler
 import com.tosware.NKM.serializers.NKMJsonProtocol
 import com.tosware.NKM.services.{HttpService, LobbyService, UserService}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
+import org.slf4j.LoggerFactory
 import pl.iterators.kebs.json.KebsSpray
 import slick.jdbc.JdbcBackend
 import slick.jdbc.JdbcBackend.Database
@@ -27,6 +28,8 @@ trait ApiTrait
     implicit val db: JdbcBackend.Database = Database.forConfig("slick.db")
     implicit val userService: UserService = new UserService()
     implicit val lobbyService: LobbyService = new LobbyService()
+
+    val logger = LoggerFactory.getLogger(getClass)
 
     override def beforeAll(): Unit = {
       // spawn CQRS Event Handler

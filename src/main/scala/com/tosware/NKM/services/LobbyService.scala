@@ -3,9 +3,9 @@ package com.tosware.NKM.services
 import akka.actor.{ActorRef, ActorSystem}
 import akka.pattern.ask
 import com.tosware.NKM.{DBManager, NKMTimeouts}
-import com.tosware.NKM.actors.{Game, Lobby, NKMData}
-import com.tosware.NKM.models.game.{GamePhase, GameState, HexMap}
-import com.tosware.NKM.models.lobby.{LobbyJoinRequest, LobbyLeaveRequest, LobbyState, SetHexmapNameRequest, StartGameRequest}
+import com.tosware.NKM.actors._
+import com.tosware.NKM.models.game._
+import com.tosware.NKM.models.lobby._
 import slick.jdbc.JdbcBackend
 import slick.jdbc.MySQLProfile.api._
 
@@ -20,10 +20,10 @@ object LobbyService {
   case object Failure extends Event
 }
 
-class LobbyService(implicit db: JdbcBackend.Database) extends NKMTimeouts {
+class LobbyService(implicit db: JdbcBackend.Database, system: ActorSystem) extends NKMTimeouts {
   import LobbyService._
 
-  def createLobby(name: String, hostUserId: String)(implicit system: ActorSystem): Event = {
+  def createLobby(name: String, hostUserId: String): Event = {
     val randomId = java.util.UUID.randomUUID.toString
     val lobbyActor: ActorRef = system.actorOf(Lobby.props(randomId))
     Await.result(lobbyActor ? Lobby.Create(name, hostUserId), atMost) match {
@@ -32,7 +32,7 @@ class LobbyService(implicit db: JdbcBackend.Database) extends NKMTimeouts {
     }
   }
 
-  def joinLobby(userId: String, request: LobbyJoinRequest)(implicit system: ActorSystem): Event = {
+  def joinLobby(userId: String, request: LobbyJoinRequest): Event = {
     val lobbyActor: ActorRef = system.actorOf(Lobby.props(request.lobbyId))
     Await.result(lobbyActor ? Lobby.UserJoin(userId), atMost) match {
       case Lobby.Success => Success
@@ -40,7 +40,7 @@ class LobbyService(implicit db: JdbcBackend.Database) extends NKMTimeouts {
     }
   }
 
-  def leaveLobby(userId: String, request: LobbyLeaveRequest)(implicit system: ActorSystem): Event = {
+  def leaveLobby(userId: String, request: LobbyLeaveRequest): Event = {
     val lobbyActor: ActorRef = system.actorOf(Lobby.props(request.lobbyId))
     Await.result(lobbyActor ? Lobby.UserLeave(userId), atMost) match {
       case Lobby.Success => Success
@@ -48,7 +48,7 @@ class LobbyService(implicit db: JdbcBackend.Database) extends NKMTimeouts {
     }
   }
 
-  def setHexmapName(username: String, request: SetHexmapNameRequest)(implicit system: ActorSystem): Event = {
+  def setHexmapName(username: String, request: SetHexmapNameRequest): Event = {
     val lobbyActor: ActorRef = system.actorOf(Lobby.props(request.lobbyId))
     val nkmDataActor: ActorRef = system.actorOf(NKMData.props())
 
@@ -64,7 +64,47 @@ class LobbyService(implicit db: JdbcBackend.Database) extends NKMTimeouts {
     }
   }
 
-  def startGame(username: String, request: StartGameRequest)(implicit system: ActorSystem): Event = {
+  def setNumberOfCharactersPerPlayer(username: String, request: SetNumberOfCharactersPerPlayerRequest): Event = {
+    if(request.charactersPerPlayer < 1) return Failure
+
+    val lobbyActor: ActorRef = system.actorOf(Lobby.props(request.lobbyId))
+
+    val lobbyState = Await.result(lobbyActor ? Lobby.GetState, atMost).asInstanceOf[LobbyState]
+    if(lobbyState.hostUserId.getOrElse() != username) return Failure
+
+    Await.result(lobbyActor ? Lobby.SetNumberOfCharactersPerPlayer(request.charactersPerPlayer), atMost) match {
+      case Lobby.Success => Success
+      case Lobby.Failure => Failure
+    }
+  }
+
+  def setNumberOfBans(username: String, request: SetNumberOfBansRequest): Event = {
+    if(request.numberOfBans < 0) return Failure
+
+    val lobbyActor: ActorRef = system.actorOf(Lobby.props(request.lobbyId))
+
+    val lobbyState = Await.result(lobbyActor ? Lobby.GetState, atMost).asInstanceOf[LobbyState]
+    if(lobbyState.hostUserId.getOrElse() != username) return Failure
+
+    Await.result(lobbyActor ? Lobby.SetNumberOfBans(request.numberOfBans), atMost) match {
+      case Lobby.Success => Success
+      case Lobby.Failure => Failure
+    }
+  }
+
+  def setPickType(username: String, request: SetPickTypeRequest): Event = {
+    val lobbyActor: ActorRef = system.actorOf(Lobby.props(request.lobbyId))
+
+    val lobbyState = Await.result(lobbyActor ? Lobby.GetState, atMost).asInstanceOf[LobbyState]
+    if(lobbyState.hostUserId.getOrElse() != username) return Failure
+
+    Await.result(lobbyActor ? Lobby.SetPickType(request.pickType), atMost) match {
+      case Lobby.Success => Success
+      case Lobby.Failure => Failure
+    }
+  }
+
+  def startGame(username: String, request: StartGameRequest): Event = {
     val lobbyActor: ActorRef = system.actorOf(Lobby.props(request.lobbyId))
     val gameActor: ActorRef = system.actorOf(Game.props(request.lobbyId))
 
@@ -84,17 +124,17 @@ class LobbyService(implicit db: JdbcBackend.Database) extends NKMTimeouts {
 
   }
 
-
-
+  // TODO: return future
   def getAllLobbies(): Seq[LobbyState] = {
-    val lobbysAction = DBManager.lobbies.result
-    val lobbys = Await.result(db.run(lobbysAction), atMost)
-    lobbys
+    val lobbiesAction = DBManager.lobbies.result
+    val lobbies = Await.result(db.run(lobbiesAction), atMost)
+    lobbies
   }
 
+  // TODO: return future
   def getLobby(lobbyId: String): LobbyState = {
-    val lobbyAction = DBManager.lobbies.filter(_.id === lobbyId).result.head
-    val lobby = Await.result(db.run(lobbyAction), atMost)
-    lobby
+    val lobbyActor: ActorRef = system.actorOf(Lobby.props(lobbyId))
+    val lobbyState = Await.result(lobbyActor ? Lobby.GetState, atMost).asInstanceOf[LobbyState]
+    lobbyState
   }
 }
