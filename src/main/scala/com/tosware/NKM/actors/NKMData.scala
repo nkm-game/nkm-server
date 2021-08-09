@@ -16,7 +16,11 @@ object NKMData {
   def props(): Props = Props(new NKMData())
 }
 
-class NKMData extends Actor with ActorLogging with NKMJsonProtocol {
+class NKMData
+  extends Actor
+    with ActorLogging
+    with NKMJsonProtocol
+{
   import NKMData._
 
   override def receive: Receive = {

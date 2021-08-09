@@ -31,7 +31,6 @@ trait HttpService
     extends CORSHandler
     with SprayJsonSupport
     with NKMJsonProtocol
-    with KebsEnumFormats
     with NKMTimeouts
 {
   implicit val system: ActorSystem
