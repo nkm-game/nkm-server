@@ -10,7 +10,7 @@ import com.tosware.NKM.models.lobby._
 import slick.jdbc.JdbcBackend
 import slick.jdbc.MySQLProfile.api._
 
-import scala.concurrent.Await
+import scala.concurrent.{Await, Future}
 
 object LobbyService {
   sealed trait Event
@@ -125,17 +125,13 @@ class LobbyService(implicit db: JdbcBackend.Database, system: ActorSystem) exten
 
   }
 
-  // TODO: return future
-  def getAllLobbies(): Seq[LobbyState] = {
+  def getAllLobbies(): Future[Seq[LobbyState]] = {
     val lobbiesAction = DBManager.lobbies.result
-    val lobbies = Await.result(db.run(lobbiesAction), atMost)
-    lobbies
+    db.run(lobbiesAction)
   }
 
-  // TODO: return future
-  def getLobby(lobbyId: String): LobbyState = {
-    val lobbyActor: ActorRef = system.actorOf(Lobby.props(lobbyId))
-    val lobbyState = Await.result(lobbyActor ? Lobby.GetState, atMost).asInstanceOf[LobbyState]
-    lobbyState
+  def getLobby(lobbyId: String): Future[LobbyState] = {
+    val lobbyAction = DBManager.lobbies.filter(_.id === lobbyId).result.head
+    db.run(lobbyAction)
   }
 }
