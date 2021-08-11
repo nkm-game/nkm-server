@@ -14,14 +14,14 @@ object Game {
   sealed trait Command
   case class StartGame(gameStartDependencies: GameStartDependencies) extends Command
 //  case class SetPlayers(names: List[String]) extends Command
-  case class AddCharacter(playerName: String, character: NKMCharacter) extends Command
+//  case class AddCharacter(playerName: String, character: NKMCharacter) extends Command
   case class PlaceCharacter(hexCoordinates: HexCoordinates, characterId: String) extends Command
   case class MoveCharacter(hexCoordinates: HexCoordinates, characterId: String) extends Command
 
   sealed trait Event
   case class GameStarted(gameId: String, gameStartDependencies: GameStartDependencies) extends Event
 //  case class PlayersSet(names: List[String]) extends Event
-  case class CharacterAdded(playerName: String, character: NKMCharacter) extends Event
+//  case class CharacterAdded(playerName: String, character: NKMCharacter) extends Event
   case class CharacterPlaced(hexCoordinates: HexCoordinates, characterId: String) extends Event
   case class CharacterMoved(hexCoordinates: HexCoordinates, characterId: String) extends Event
 
@@ -63,16 +63,16 @@ class Game(id: String) extends PersistentActor with ActorLogging {
 //  def setPlayers(names: List[String]): Unit =
 //    gameState = gameState.modify(_.players).setTo(names.map(n => Player(n)))
 
-  def addCharacter(playerName: String, character: NKMCharacter): Unit = {
-    val currentCharacters = gameState.players.find(_.name == playerName).getOrElse {
-      log.error(s"Player $playerName not found")
-      return
-    }.characters
-    gameState = gameState.modify(_.players.each).using {
-      case p if p.name == playerName => p.modify(_.characters).setTo(character :: currentCharacters)
-      case p => p
-    }.modify(_.characterIdsOutsideMap).setTo(character.id :: gameState.characterIdsOutsideMap)
-  }
+//  def addCharacter(playerName: String, character: NKMCharacter): Unit = {
+//    val currentCharacters = gameState.players.find(_.name == playerName).getOrElse {
+//      log.error(s"Player $playerName not found")
+//      return
+//    }.characters
+//    gameState = gameState.modify(_.players.each).using {
+//      case p if p.name == playerName => p.modify(_.characters).setTo(character :: currentCharacters)
+//      case p => p
+//    }.modify(_.characterIdsOutsideMap).setTo(character.id :: gameState.characterIdsOutsideMap)
+//  }
 
   def setMap(hexMap: HexMap): Unit =
     gameState = gameState.copy(hexMap = Some(hexMap))
@@ -98,12 +98,12 @@ class Game(id: String) extends PersistentActor with ActorLogging {
 //        setPlayers(names)
 //        log.info(s"Persisted players: $names")
 //      }
-    case AddCharacter(player, character) =>
-      log.info(s"Add character event: ${character.name}")
-      persist(CharacterAdded(player, character)) { _ =>
-        addCharacter(player, character)
-        log.info(s"Persisted character: ${character.name}")
-      }
+//    case AddCharacter(player, character) =>
+//      log.info(s"Add character event: ${character.name}")
+//      persist(CharacterAdded(player, character)) { _ =>
+//        addCharacter(player, character)
+//        log.info(s"Persisted character: ${character.name}")
+//      }
     case PlaceCharacter(hexCoordinates, characterId) =>
       log.info(s"Placing $characterId on $hexCoordinates")
       persist(CharacterPlaced(hexCoordinates, characterId)) { _ =>
@@ -126,9 +126,9 @@ class Game(id: String) extends PersistentActor with ActorLogging {
 //    case PlayersSet(names) =>
 //      setPlayers(names)
 //      log.info(s"Recovered players: $names")
-    case CharacterAdded(player, character) =>
-      addCharacter(player, character)
-      log.info(s"Recovered character: ${character.name}")
+//    case CharacterAdded(player, character) =>
+//      addCharacter(player, character)
+//      log.info(s"Recovered character: ${character.name}")
     case CharacterPlaced(hexCoordinates, characterId) =>
       placeCharacter(hexCoordinates, characterId)
       log.info(s"Recovered $characterId on $hexCoordinates")

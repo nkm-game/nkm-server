@@ -6,7 +6,7 @@ import akka.testkit.TestKit
 import com.tosware.NKM.{DBManager, NKMTimeouts}
 import com.tosware.NKM.actors.CQRSEventHandler
 import com.tosware.NKM.serializers.NKMJsonProtocol
-import com.tosware.NKM.services.{HttpService, LobbyService, UserService}
+import com.tosware.NKM.services.{HttpService, LobbyService, NKMDataService, UserService}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
@@ -28,6 +28,7 @@ trait ApiTrait
     implicit val db: JdbcBackend.Database = Database.forConfig("slick.db")
     implicit val userService: UserService = new UserService()
     implicit val lobbyService: LobbyService = new LobbyService()
+    implicit val nkmDataService: NKMDataService = new NKMDataService()
 
     val logger = LoggerFactory.getLogger(getClass)
 

@@ -13,6 +13,7 @@ object Main extends App with HttpService {
   implicit val db: JdbcBackend.Database = Database.forConfig("slick.db")
   val userService = new UserService()
   val lobbyService = new LobbyService()
+  val nkmDataService = new NKMDataService()
 
   DBManager.createNeededTables(db)
 

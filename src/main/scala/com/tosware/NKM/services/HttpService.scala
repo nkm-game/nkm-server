@@ -36,6 +36,7 @@ trait HttpService
   implicit val system: ActorSystem
   implicit val userService: UserService
   implicit val lobbyService: LobbyService
+  implicit val nkmDataService: NKMDataService
   lazy val nkmData: ActorRef = system.actorOf(NKMData.props())
 
   val jwtSecretKey = "much_secret"
@@ -91,7 +92,10 @@ trait HttpService
               complete((system.actorOf(Game.props(gameId)) ? GetState).mapTo[GameState])
             },
             path("maps") {
-              complete((nkmData ? GetHexMaps).mapTo[List[HexMap]])
+              complete(nkmDataService.getHexMaps)
+            },
+            path("characters") {
+              complete(nkmDataService.getCharactersMetadata)
             },
             path("secret") {
               authenticated { jwtClaim =>
