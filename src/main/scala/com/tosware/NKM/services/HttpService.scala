@@ -171,7 +171,7 @@ trait HttpService
 
             path("set_hexmap") {
               authenticated { jwtClaim =>
-                entity(as[SetHexmapNameRequest]) { entity =>
+                entity(as[SetHexMapNameRequest]) { entity =>
                   val username = jwtClaim.content.parseJson.convertTo[JwtContent].content
                   lobbyService.setHexmapName(username, entity) match {
                     case LobbyService.Success => complete(StatusCodes.OK)

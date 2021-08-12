@@ -49,7 +49,7 @@ class LobbyService(implicit db: JdbcBackend.Database, system: ActorSystem) exten
     }
   }
 
-  def setHexmapName(username: String, request: SetHexmapNameRequest): Event = {
+  def setHexmapName(username: String, request: SetHexMapNameRequest): Event = {
     val lobbyActor: ActorRef = system.actorOf(Lobby.props(request.lobbyId))
     val nkmDataActor: ActorRef = system.actorOf(NKMData.props())
 
