@@ -85,7 +85,7 @@ class User(login: String) extends PersistentActor with ActorLogging {
   override def receiveRecover: Receive = {
     case RegisterSuccess(login, email, passwordHash) =>
       register(email, passwordHash)
-      log.info(s"Recovered register")
+      log.debug(s"Recovered register")
     case RecoveryCompleted =>
     case e => log.warning(s"Unknown message: $e")
   }

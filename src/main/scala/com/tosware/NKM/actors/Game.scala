@@ -122,19 +122,19 @@ class Game(id: String) extends PersistentActor with ActorLogging {
   override def receiveRecover: Receive = {
     case GameStarted(_, gameStartDependencies) =>
       startGame(gameStartDependencies)
-      log.info(s"Recovered game start")
+      log.debug(s"Recovered game start")
 //    case PlayersSet(names) =>
 //      setPlayers(names)
-//      log.info(s"Recovered players: $names")
+//      log.debug(s"Recovered players: $names")
 //    case CharacterAdded(player, character) =>
 //      addCharacter(player, character)
-//      log.info(s"Recovered character: ${character.name}")
+//      log.debug(s"Recovered character: ${character.name}")
     case CharacterPlaced(hexCoordinates, characterId) =>
       placeCharacter(hexCoordinates, characterId)
-      log.info(s"Recovered $characterId on $hexCoordinates")
+      log.debug(s"Recovered $characterId on $hexCoordinates")
     case CharacterMoved(hexCoordinates, characterId) =>
       moveCharacter(hexCoordinates, characterId)
-      log.info(s"Recovered $characterId to $hexCoordinates")
+      log.debug(s"Recovered $characterId to $hexCoordinates")
     case RecoveryCompleted =>
     case e => log.warning(s"Unknown message: $e")
   }

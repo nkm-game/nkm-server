@@ -197,25 +197,25 @@ class Lobby(id: String)
   override def receiveRecover: Receive = {
     case CreateSuccess(_, name, hostUserId, creationDate) =>
       create(name, hostUserId, creationDate)
-      log.info(s"Recovered create")
+      log.debug(s"Recovered create")
     case UserJoined(_, userId) =>
       joinLobby(userId)
-      log.info(s"Recovered user join")
+      log.debug(s"Recovered user join")
     case UserLeft(_, userId) =>
       leaveLobby(userId)
-      log.info(s"Recovered user leave")
+      log.debug(s"Recovered user leave")
     case MapNameSet(_, hexMapName) =>
       setMapName(hexMapName)
-      log.info(s"Recovered setting hex map name")
+      log.debug(s"Recovered setting hex map name")
     case NumberOfBansSet(_, numberOfBans) =>
       setNumberOfBans(numberOfBans)
-      log.info(s"Recovered setting number of bans")
+      log.debug(s"Recovered setting number of bans")
     case NumberOfCharactersPerPlayerSet(_, numberOfCharactersPerPlayer) =>
       setNumberOfCharactersPerPlayer(numberOfCharactersPerPlayer)
-      log.info(s"Recovered setting number of characters")
+      log.debug(s"Recovered setting number of characters")
     case PickTypeSet(_, pickType) =>
       setPickType(pickType)
-      log.info(s"Recovered setting pick type")
+      log.debug(s"Recovered setting pick type")
     case RecoveryCompleted =>
     case e => log.warning(s"Unknown message: $e")
   }
