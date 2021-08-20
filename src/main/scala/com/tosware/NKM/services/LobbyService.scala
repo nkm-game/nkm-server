@@ -34,7 +34,12 @@ class LobbyService(implicit db: JdbcBackend.Database, system: ActorSystem) exten
   }
 
   def joinLobby(userId: String, request: LobbyJoinRequest): Event = {
+    val gameActor: ActorRef = system.actorOf(Game.props(request.lobbyId))
+    val gameState = Await.result(gameActor ? Game.GetState, atMost).asInstanceOf[GameState]
+    if(gameState.gamePhase != GamePhase.NotStarted) return Failure
+
     val lobbyActor: ActorRef = system.actorOf(Lobby.props(request.lobbyId))
+
     Await.result(lobbyActor ? Lobby.UserJoin(userId), atMost) match {
       case CommandResponse.Success => Success
       case CommandResponse.Failure => Failure
@@ -42,7 +47,12 @@ class LobbyService(implicit db: JdbcBackend.Database, system: ActorSystem) exten
   }
 
   def leaveLobby(userId: String, request: LobbyLeaveRequest): Event = {
+    val gameActor: ActorRef = system.actorOf(Game.props(request.lobbyId))
+    val gameState = Await.result(gameActor ? Game.GetState, atMost).asInstanceOf[GameState]
+    if(gameState.gamePhase != GamePhase.NotStarted) return Failure
+
     val lobbyActor: ActorRef = system.actorOf(Lobby.props(request.lobbyId))
+
     Await.result(lobbyActor ? Lobby.UserLeave(userId), atMost) match {
       case CommandResponse.Success => Success
       case CommandResponse.Failure => Failure
@@ -50,6 +60,10 @@ class LobbyService(implicit db: JdbcBackend.Database, system: ActorSystem) exten
   }
 
   def setHexmapName(username: String, request: SetHexMapNameRequest): Event = {
+    val gameActor: ActorRef = system.actorOf(Game.props(request.lobbyId))
+    val gameState = Await.result(gameActor ? Game.GetState, atMost).asInstanceOf[GameState]
+    if(gameState.gamePhase != GamePhase.NotStarted) return Failure
+
     val lobbyActor: ActorRef = system.actorOf(Lobby.props(request.lobbyId))
     val nkmDataActor: ActorRef = system.actorOf(NKMData.props())
 
@@ -68,6 +82,10 @@ class LobbyService(implicit db: JdbcBackend.Database, system: ActorSystem) exten
   def setNumberOfCharactersPerPlayer(username: String, request: SetNumberOfCharactersPerPlayerRequest): Event = {
     if(request.charactersPerPlayer < 1) return Failure
 
+    val gameActor: ActorRef = system.actorOf(Game.props(request.lobbyId))
+    val gameState = Await.result(gameActor ? Game.GetState, atMost).asInstanceOf[GameState]
+    if(gameState.gamePhase != GamePhase.NotStarted) return Failure
+
     val lobbyActor: ActorRef = system.actorOf(Lobby.props(request.lobbyId))
 
     val lobbyState = Await.result(lobbyActor ? Lobby.GetState, atMost).asInstanceOf[LobbyState]
@@ -82,6 +100,10 @@ class LobbyService(implicit db: JdbcBackend.Database, system: ActorSystem) exten
   def setNumberOfBans(username: String, request: SetNumberOfBansRequest): Event = {
     if(request.numberOfBans < 0) return Failure
 
+    val gameActor: ActorRef = system.actorOf(Game.props(request.lobbyId))
+    val gameState = Await.result(gameActor ? Game.GetState, atMost).asInstanceOf[GameState]
+    if(gameState.gamePhase != GamePhase.NotStarted) return Failure
+
     val lobbyActor: ActorRef = system.actorOf(Lobby.props(request.lobbyId))
 
     val lobbyState = Await.result(lobbyActor ? Lobby.GetState, atMost).asInstanceOf[LobbyState]
@@ -94,6 +116,10 @@ class LobbyService(implicit db: JdbcBackend.Database, system: ActorSystem) exten
   }
 
   def setPickType(username: String, request: SetPickTypeRequest): Event = {
+    val gameActor: ActorRef = system.actorOf(Game.props(request.lobbyId))
+    val gameState = Await.result(gameActor ? Game.GetState, atMost).asInstanceOf[GameState]
+    if(gameState.gamePhase != GamePhase.NotStarted) return Failure
+
     val lobbyActor: ActorRef = system.actorOf(Lobby.props(request.lobbyId))
 
     val lobbyState = Await.result(lobbyActor ? Lobby.GetState, atMost).asInstanceOf[LobbyState]
