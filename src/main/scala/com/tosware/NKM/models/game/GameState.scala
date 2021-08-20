@@ -1,6 +1,7 @@
 package com.tosware.NKM.models.game
 
-case class GameState(hexMap: Option[HexMap],
+case class GameState(id: String,
+                     hexMap: Option[HexMap],
                      characterIdsOutsideMap: List[String],
                      phase: Phase,
                      turn: Turn,
@@ -11,7 +12,8 @@ case class GameState(hexMap: Option[HexMap],
                      numberOfCharactersPerPlayers: Int,
                     )
 object GameState {
-  def empty: GameState = GameState(
+  def empty(id: String): GameState = GameState(
+    id = id,
     hexMap = None,
     characterIdsOutsideMap = List(),
     phase = Phase(0),

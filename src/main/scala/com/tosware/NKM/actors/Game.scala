@@ -30,7 +30,7 @@ object Game {
 
 class Game(id: String) extends PersistentActor with ActorLogging {
   import Game._
-  var gameState: GameState = GameState.empty
+  var gameState: GameState = GameState.empty(id)
 
   def startGame(g: GameStartDependencies): Unit =
     gameState = gameState.copy(
