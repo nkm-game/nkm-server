@@ -2,7 +2,7 @@ package api
 
 import akka.http.scaladsl.model.StatusCodes._
 import com.tosware.NKM.DBManager
-import com.tosware.NKM.models.game.PickType.AllRandom
+import com.tosware.NKM.models.game.PickType.{AllRandom, DraftPick}
 import com.tosware.NKM.models.game._
 import com.tosware.NKM.models.lobby._
 import helpers.LobbyApiTrait
@@ -174,12 +174,41 @@ class LobbySpec extends LobbyApiTrait
 
       Post("/api/start_game", StartGameRequest(lobbyId)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check(status shouldEqual OK)
 
-      //TODO: check more in state
       Get(s"/api/state/$lobbyId").addHeader(getAuthHeader(tokens(0))) ~> routes ~> check {
         status shouldEqual OK
         val gameState = responseAs[GameState]
         gameState.gamePhase shouldEqual GamePhase.CharacterPick
         gameState.players.length shouldEqual 2
+        gameState.hexMap.get.name shouldEqual hexMapName
+        gameState.numberOfBans shouldEqual 0
+        gameState.numberOfCharactersPerPlayers shouldEqual 1
+        gameState.pickType shouldEqual AllRandom
+      }
+    }
+
+    "allow to start a game with all things changed" in {
+      val hexMapName = "1v1v1"
+      val pickType = DraftPick
+      val numberOfBans = 4
+      val numberOfCharacters = 5
+      Post("/api/set_hexmap", SetHexMapNameRequest(lobbyId, hexMapName)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check(status shouldEqual OK)
+      Post("/api/set_pick_type", SetPickTypeRequest(lobbyId, pickType)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check(status shouldEqual OK)
+      Post("/api/set_number_of_bans", SetNumberOfBansRequest(lobbyId, numberOfBans)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check(status shouldEqual OK)
+      Post("/api/set_number_of_characters", SetNumberOfCharactersPerPlayerRequest(lobbyId, numberOfCharacters)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check(status shouldEqual OK)
+
+      Post("/api/join_lobby", LobbyJoinRequest(lobbyId)).addHeader(getAuthHeader(tokens(1))) ~> routes ~> check(status shouldEqual OK)
+
+      Post("/api/start_game", StartGameRequest(lobbyId)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check(status shouldEqual OK)
+
+      Get(s"/api/state/$lobbyId").addHeader(getAuthHeader(tokens(0))) ~> routes ~> check {
+        status shouldEqual OK
+        val gameState = responseAs[GameState]
+        gameState.gamePhase shouldEqual GamePhase.CharacterPick
+        gameState.players.length shouldEqual 2
+        gameState.hexMap.get.name shouldEqual hexMapName
+        gameState.numberOfBans shouldEqual numberOfBans
+        gameState.numberOfCharactersPerPlayers shouldEqual numberOfCharacters
+        gameState.pickType shouldEqual DraftPick
       }
     }
 
