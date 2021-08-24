@@ -177,7 +177,7 @@ class LobbySpec extends LobbyApiTrait
       Get(s"/api/state/$lobbyId").addHeader(getAuthHeader(tokens(0))) ~> routes ~> check {
         status shouldEqual OK
         val gameState = responseAs[GameState]
-        gameState.gamePhase shouldEqual GamePhase.CharacterPick
+        gameState.gamePhase shouldEqual GamePhase.Running
         gameState.players.length shouldEqual 2
         gameState.hexMap.get.name shouldEqual hexMapName
         gameState.numberOfBans shouldEqual 0
@@ -249,6 +249,25 @@ class LobbySpec extends LobbyApiTrait
       Post("/api/set_pick_type", SetPickTypeRequest(lobbyId, AllRandom)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check(status shouldEqual InternalServerError)
       Post("/api/set_number_of_bans", SetNumberOfBansRequest(lobbyId, 3)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check(status shouldEqual InternalServerError)
       Post("/api/set_number_of_characters", SetNumberOfCharactersPerPlayerRequest(lobbyId, 4)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check(status shouldEqual InternalServerError)
+    }
+
+    "disallow starting a game with more players than the map allows" in {
+      val numberOfPlayers = 4
+      val hexMapName = "1v1v1"
+      val pickType = DraftPick
+      val numberOfBans = 4
+      val numberOfCharacters = 5
+
+      Post("/api/set_hexmap", SetHexMapNameRequest(lobbyId, hexMapName)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check(status shouldEqual OK)
+      Post("/api/set_pick_type", SetPickTypeRequest(lobbyId, pickType)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check(status shouldEqual OK)
+      Post("/api/set_number_of_bans", SetNumberOfBansRequest(lobbyId, numberOfBans)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check(status shouldEqual OK)
+      Post("/api/set_number_of_characters", SetNumberOfCharactersPerPlayerRequest(lobbyId, numberOfCharacters)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check(status shouldEqual OK)
+
+      for (i <- 1 until numberOfPlayers) {
+        Post("/api/join_lobby", LobbyJoinRequest(lobbyId)).addHeader(getAuthHeader(tokens(i))) ~> routes ~> check(status shouldEqual OK)
+      }
+
+      Post("/api/start_game", StartGameRequest(lobbyId)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check(status shouldEqual InternalServerError)
     }
   }
 }

@@ -12,9 +12,9 @@ import scala.language.postfixOps
 object Main extends App with HttpService {
   implicit val system: ActorSystem = ActorSystem("NKMServer")
   implicit val db: JdbcBackend.Database = Database.forConfig("slick.db")
-  val userService = new UserService()
-  val lobbyService = new LobbyService()
-  val nkmDataService = new NKMDataService()
+  implicit val NKMDataService: NKMDataService = new NKMDataService()
+  implicit val userService: UserService = new UserService()
+  implicit val lobbyService: LobbyService = new LobbyService()
 
   DBManager.createNeededTables(db)
 

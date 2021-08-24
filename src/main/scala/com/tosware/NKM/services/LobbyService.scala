@@ -21,7 +21,7 @@ object LobbyService {
   case object Failure extends Event
 }
 
-class LobbyService(implicit db: JdbcBackend.Database, system: ActorSystem) extends NKMTimeouts {
+class LobbyService(implicit db: JdbcBackend.Database, system: ActorSystem, NKMDataService: NKMDataService) extends NKMTimeouts {
   import LobbyService._
 
   def createLobby(name: String, hostUserId: String): Event = {

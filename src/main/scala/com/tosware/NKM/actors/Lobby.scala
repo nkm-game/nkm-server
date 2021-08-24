@@ -9,6 +9,7 @@ import com.tosware.NKM.NKMTimeouts
 import com.tosware.NKM.actors.NKMData.GetHexMaps
 import com.tosware.NKM.models.CommandResponse
 import com.tosware.NKM.models.CommandResponse._
+import com.tosware.NKM.services.NKMDataService
 
 import java.time.LocalDate
 import scala.concurrent.Await
@@ -36,10 +37,10 @@ object Lobby {
   case class NumberOfCharactersPerPlayerSet(id: String, numberOfCharactersPerPlayer: Int) extends Event
   case class PickTypeSet(id: String, pickType: PickType) extends Event
 
-  def props(id: String): Props = Props(new Lobby(id))
+  def props(id: String)(implicit NKMDataService: NKMDataService): Props = Props(new Lobby(id))
 }
 
-class Lobby(id: String)
+class Lobby(id: String)(implicit NKMDataService: NKMDataService)
   extends PersistentActor
     with ActorLogging
     with NKMTimeouts

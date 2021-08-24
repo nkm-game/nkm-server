@@ -5,7 +5,11 @@ import akka.persistence.{PersistentActor, RecoveryCompleted}
 import com.softwaremill.quicklens._
 import com.tosware.NKM.models.CommandResponse._
 import com.tosware.NKM.models.game.GamePhase._
+import com.tosware.NKM.models.game.PickType.AllRandom
 import com.tosware.NKM.models.game._
+import com.tosware.NKM.services.NKMDataService
+
+import scala.util.Random
 
 object Game {
   sealed trait Query
@@ -25,14 +29,15 @@ object Game {
   case class CharacterPlaced(hexCoordinates: HexCoordinates, characterId: String) extends Event
   case class CharacterMoved(hexCoordinates: HexCoordinates, characterId: String) extends Event
 
-  def props(id: String): Props = Props(new Game(id))
+  def props(id: String)(implicit NKMDataService: NKMDataService): Props = Props(new Game(id))
 }
 
-class Game(id: String) extends PersistentActor with ActorLogging {
+class Game(id: String)(implicit NKMDataService: NKMDataService) extends PersistentActor with ActorLogging {
   import Game._
   var gameState: GameState = GameState.empty(id)
+  var random: Random = new Random(id.hashCode)
 
-  def startGame(g: GameStartDependencies): Unit =
+  def startGame(g: GameStartDependencies): Unit = {
     gameState = gameState.copy(
       players = g.players,
       hexMap = Some(g.hexMap),
@@ -41,6 +46,16 @@ class Game(id: String) extends PersistentActor with ActorLogging {
       numberOfCharactersPerPlayers = g.numberOfCharactersPerPlayers,
       gamePhase = CharacterPick,
     )
+
+    if(gameState.pickType == AllRandom) {
+      val pickedCharacters = random.shuffle(NKMDataService.getCharactersMetadata).grouped(gameState.numberOfCharactersPerPlayers).take(gameState.players.length)
+      val playersWithAssignedCharacters = gameState.players.zip(pickedCharacters).map(x => {
+        val (player, characters) = x
+        player.copy(characters = characters.map(c => NKMCharacter.fromMetadata(java.util.UUID.randomUUID.toString, c)).toList)
+      })
+      gameState = gameState.copy(gamePhase = Running, players = playersWithAssignedCharacters)
+    }
+  }
 
   def placeCharacter(targetCellCoordinates: HexCoordinates, characterId: String): Unit =
       gameState = gameState.modify(_.hexMap.each.cells.each).using {

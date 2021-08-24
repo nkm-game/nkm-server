@@ -34,9 +34,9 @@ trait HttpService
     with NKMTimeouts
 {
   implicit val system: ActorSystem
+  implicit val NKMDataService: NKMDataService
   implicit val userService: UserService
   implicit val lobbyService: LobbyService
-  implicit val nkmDataService: NKMDataService
   lazy val nkmData: ActorRef = system.actorOf(NKMData.props())
 
   val jwtSecretKey = "much_secret"
@@ -92,10 +92,10 @@ trait HttpService
               complete((system.actorOf(Game.props(gameId)) ? GetState).mapTo[GameState])
             },
             path("maps") {
-              complete(nkmDataService.getHexMaps)
+              complete(NKMDataService.getHexMaps)
             },
             path("characters") {
-              complete(nkmDataService.getCharactersMetadata)
+              complete(NKMDataService.getCharactersMetadata)
             },
             path("secret") {
               authenticated { jwtClaim =>

@@ -24,6 +24,26 @@ case class NKMCharacterState
  psychicalDefense: Int,
  magicalDefense: Int,
 )
+
+object NKMCharacter {
+  def fromMetadata(characterId: String, NKMCharacterMetadata: NKMCharacterMetadata) = {
+    NKMCharacter(
+      id = characterId,
+      metadataId = NKMCharacterMetadata.id,
+      state = NKMCharacterState(
+        name = NKMCharacterMetadata.name,
+        healthPoints = NKMCharacterMetadata.initialHealthPoints,
+        attackPoints = NKMCharacterMetadata.initialAttackPoints,
+        basicAttackRange = NKMCharacterMetadata.initialBasicAttackRange,
+        speed = NKMCharacterMetadata.initialSpeed,
+        psychicalDefense = NKMCharacterMetadata.initialPsychicalDefense,
+        magicalDefense = NKMCharacterMetadata.initialMagicalDefense
+      )
+    )
+  }
+
+}
+
 case class NKMCharacter
 (
   id: String,
