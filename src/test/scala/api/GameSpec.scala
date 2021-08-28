@@ -65,7 +65,7 @@ class GameSpec extends GameApiTrait
       }
       val characterToPlace = gameState.players(0).characters(0).id
 
-      val secondPlayerSpawnPoints = gameState.hexMap.get.getSpawnPointsByNumber(0)
+      val secondPlayerSpawnPoints = gameState.hexMap.get.getSpawnPointsByNumber(1)
       val someHexCoordinates = HexCoordinates(1, 1)
       val candidateCoordinates = List(secondPlayerSpawnPoints(0).coordinates, someHexCoordinates)
 
@@ -114,6 +114,26 @@ class GameSpec extends GameApiTrait
           checkPostRequest("/api/place_character", PlaceCharacterRequest(lobbyId, c, ca), InternalServerError, 1)
         }
       }
+    }
+
+    "make turn change after placing a character" in {
+      initGame()
+      var gameState: GameState = GameState.empty("null")
+
+      Get(s"/api/state/$lobbyId").addHeader(getAuthHeader(tokens(0))) ~> routes ~> check {
+        gameState = responseAs[GameState]
+      }
+
+      val firstPlayerSpawnPoints = gameState.hexMap.get.getSpawnPointsByNumber(0)
+      val targetCellCoordinates = firstPlayerSpawnPoints(0).coordinates
+      val characterToPlace = gameState.players(0).characters(0).id
+
+      Post("/api/place_character", PlaceCharacterRequest(lobbyId, targetCellCoordinates, characterToPlace)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check(status shouldEqual OK)
+
+      Get(s"/api/state/$lobbyId").addHeader(getAuthHeader(tokens(0))) ~> routes ~> check {
+        gameState = responseAs[GameState]
+      }
+      gameState.getCurrentPlayerNumber shouldEqual 1
     }
   }
 }

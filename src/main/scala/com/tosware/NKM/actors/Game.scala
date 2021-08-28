@@ -62,6 +62,7 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
         case cell if cell.coordinates == targetCellCoordinates => HexCell(cell.coordinates, cell.cellType, Some(characterId), cell.effects, cell.spawnNumber)
         case cell => cell
       }.modify(_.characterIdsOutsideMap).using(_.filter(_ != characterId))
+        .modify(_.turn).using(oldTurn => Turn(oldTurn.number + 1))
 
   def moveCharacter(parentCellCoordinates: HexCoordinates, characterId: String): Unit = {
     val parentCell = gameState.hexMap.get.cells.find(_.characterId.contains(characterId)).getOrElse {

@@ -11,7 +11,8 @@ case class GameState(id: String,
                      numberOfBans: Int,
                      numberOfCharactersPerPlayers: Int,
                     ) {
-  def getCurrentPlayer = players(turn.number % players.length)
+  def getCurrentPlayerNumber = turn.number % players.length
+  def getCurrentPlayer = players(getCurrentPlayerNumber)
 }
 object GameState {
   def empty(id: String): GameState = GameState(
