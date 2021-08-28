@@ -177,7 +177,7 @@ class LobbySpec extends LobbyApiTrait
       Get(s"/api/state/$lobbyId").addHeader(getAuthHeader(tokens(0))) ~> routes ~> check {
         status shouldEqual OK
         val gameState = responseAs[GameState]
-        gameState.gamePhase shouldEqual GamePhase.Running
+        gameState.gamePhase shouldEqual GamePhase.CharacterPlacing
         gameState.players.length shouldEqual 2
         gameState.hexMap.get.name shouldEqual hexMapName
         gameState.numberOfBans shouldEqual 0
@@ -267,7 +267,7 @@ class LobbySpec extends LobbyApiTrait
         Post("/api/join_lobby", LobbyJoinRequest(lobbyId)).addHeader(getAuthHeader(tokens(i))) ~> routes ~> check(status shouldEqual OK)
       }
 
-      Post("/api/start_game", StartGameRequest(lobbyId)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check(status shouldEqual InternalServerError)
+      Post("/api/start_game", StartGameRequest(lobbyId)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check(status shouldEqual OK)
     }
   }
 }

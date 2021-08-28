@@ -15,6 +15,7 @@ object Main extends App with HttpService {
   implicit val NKMDataService: NKMDataService = new NKMDataService()
   implicit val userService: UserService = new UserService()
   implicit val lobbyService: LobbyService = new LobbyService()
+  implicit val gameService: GameService = new GameService()
 
   DBManager.createNeededTables(db)
 
@@ -30,6 +31,4 @@ object Main extends App with HttpService {
       Http().newServerAt("0.0.0.0", 8080).enableHttps(getHttps).bindFlow(routes)
       println("Started https server")
   }
-
-
 }

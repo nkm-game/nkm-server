@@ -6,19 +6,15 @@ import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives.{entity, _}
 import akka.http.scaladsl.server.{Directive1, Route}
 import akka.http.scaladsl.{ConnectionContext, HttpsConnectionContext}
-import akka.pattern.ask
-import com.tosware.NKM.actors.Game._
-import com.tosware.NKM.actors.NKMData.GetHexMaps
 import com.tosware.NKM.actors.User.{RegisterFailure, RegisterSuccess}
 import com.tosware.NKM.actors._
 import com.tosware.NKM.models._
-import com.tosware.NKM.models.game.{GameState, HexMap}
+import com.tosware.NKM.models.game.PlaceCharacterRequest
 import com.tosware.NKM.models.lobby._
 import com.tosware.NKM.serializers.NKMJsonProtocol
 import com.tosware.NKM.services.UserService.{InvalidCredentials, LoggedIn}
 import com.tosware.NKM.{CORSHandler, NKMTimeouts}
 import pdi.jwt.{Jwt, JwtAlgorithm, JwtClaim, JwtSprayJson}
-import pl.iterators.kebs.json.KebsEnumFormats
 import spray.json._
 
 import java.security.{KeyStore, SecureRandom}
@@ -37,6 +33,7 @@ trait HttpService
   implicit val NKMDataService: NKMDataService
   implicit val userService: UserService
   implicit val lobbyService: LobbyService
+  implicit val gameService: GameService
   lazy val nkmData: ActorRef = system.actorOf(NKMData.props())
 
   val jwtSecretKey = "much_secret"
@@ -89,7 +86,7 @@ trait HttpService
         get {
           concat(
             path("state"/ Segment) { (gameId: String) =>
-              complete((system.actorOf(Game.props(gameId)) ? GetState).mapTo[GameState])
+              complete(gameService.getGameState(gameId))
             },
             path("maps") {
               complete(NKMDataService.getHexMaps)
@@ -224,6 +221,18 @@ trait HttpService
                   lobbyService.startGame(username, entity) match {
                     case LobbyService.Success => complete(StatusCodes.OK)
                     case LobbyService.Failure => complete(StatusCodes.InternalServerError)
+                  }
+                }
+              }
+            },
+
+            path("place_character") {
+              authenticated { jwtClaim =>
+                entity(as[PlaceCharacterRequest]) { entity =>
+                  val username = jwtClaim.content.parseJson.convertTo[JwtContent].content
+                  onSuccess(gameService.placeCharacter(username, entity)) {
+                    case CommandResponse.Success => complete(StatusCodes.OK)
+                    case CommandResponse.Failure => complete(StatusCodes.InternalServerError)
                   }
                 }
               }

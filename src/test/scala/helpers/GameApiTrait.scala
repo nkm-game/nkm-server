@@ -1,13 +1,12 @@
 package helpers
 
-import akka.http.scaladsl.model.StatusCodes.{InternalServerError, OK}
-import com.tosware.NKM.models.game.PickType.DraftPick
+import akka.http.scaladsl.model.StatusCodes.OK
 import com.tosware.NKM.models.game.{GamePhase, GameState, PickType}
 import com.tosware.NKM.models.lobby._
 
 trait GameApiTrait extends LobbyApiTrait
   {
-    def initGame(numberOfPlayers: Int = 2, hexMapName: String = "Linia", pickType: PickType = PickType.AllRandom, numberOfBans: Int = 0, numberOfCharacters: Int = 1) {
+    def initGame(numberOfPlayers: Int = 2, hexMapName: String = "Linia", pickType: PickType = PickType.AllRandom, numberOfBans: Int = 0, numberOfCharacters: Int = 1) = {
       Post("/api/set_hexmap", SetHexMapNameRequest(lobbyId, hexMapName)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check(status shouldEqual OK)
       Post("/api/set_pick_type", SetPickTypeRequest(lobbyId, pickType)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check(status shouldEqual OK)
       Post("/api/set_number_of_bans", SetNumberOfBansRequest(lobbyId, numberOfBans)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check(status shouldEqual OK)
@@ -21,7 +20,7 @@ trait GameApiTrait extends LobbyApiTrait
 
       Get(s"/api/state/$lobbyId").addHeader(getAuthHeader(tokens(0))) ~> routes ~> check {
         val gameState = responseAs[GameState]
-        gameState.gamePhase shouldEqual (if(pickType == PickType.AllRandom) GamePhase.Running else GamePhase.CharacterPick)
+        gameState.gamePhase shouldEqual (if(pickType == PickType.AllRandom) GamePhase.CharacterPlacing else GamePhase.CharacterPick)
         gameState.players.length shouldEqual numberOfPlayers
         gameState.hexMap.get.name shouldEqual hexMapName
         gameState.numberOfBans shouldEqual numberOfBans

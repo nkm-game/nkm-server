@@ -35,7 +35,7 @@ object Game {
 class Game(id: String)(implicit NKMDataService: NKMDataService) extends PersistentActor with ActorLogging {
   import Game._
   var gameState: GameState = GameState.empty(id)
-  var random: Random = new Random(id.hashCode)
+  val random: Random = new Random(id.hashCode)
 
   def startGame(g: GameStartDependencies): Unit = {
     gameState = gameState.copy(
@@ -44,16 +44,16 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
       pickType = g.pickType,
       numberOfBans = g.numberOfBans,
       numberOfCharactersPerPlayers = g.numberOfCharactersPerPlayers,
-      gamePhase = CharacterPick,
+      gamePhase = GamePhase.CharacterPick,
     )
 
     if(gameState.pickType == AllRandom) {
       val pickedCharacters = random.shuffle(NKMDataService.getCharactersMetadata).grouped(gameState.numberOfCharactersPerPlayers).take(gameState.players.length)
       val playersWithAssignedCharacters = gameState.players.zip(pickedCharacters).map(x => {
         val (player, characters) = x
-        player.copy(characters = characters.map(c => NKMCharacter.fromMetadata(java.util.UUID.randomUUID.toString, c)).toList)
+        player.copy(characters = characters.map(c => NKMCharacter.fromMetadata(java.util.UUID.nameUUIDFromBytes(random.nextBytes(16)).toString, c)).toList)
       })
-      gameState = gameState.copy(gamePhase = Running, players = playersWithAssignedCharacters)
+      gameState = gameState.copy(gamePhase = GamePhase.CharacterPlacing, players = playersWithAssignedCharacters, characterIdsOutsideMap = playersWithAssignedCharacters.flatMap(c => c.characters.map(c => c.id)))
     }
   }
 
@@ -96,6 +96,7 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
   override def receive: Receive = {
     case GetState =>
       log.info("Received state request")
+      log.warning(gameState.toString)
       sender() ! gameState
     case StartGame(gameStartDependencies) =>
       log.info(s"Starting the game")
@@ -124,12 +125,14 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
       persist(CharacterPlaced(hexCoordinates, characterId)) { _ =>
         placeCharacter(hexCoordinates, characterId)
         log.info(s"Persisted $characterId on $hexCoordinates")
+        sender() ! Success
       }
     case MoveCharacter(hexCoordinates, characterId) =>
       log.info(s"Moving $characterId to $hexCoordinates")
       persist(CharacterMoved(hexCoordinates, characterId)) { _ =>
         moveCharacter(hexCoordinates, characterId)
         log.info(s"Persisted $characterId on $hexCoordinates")
+        sender() ! Success
       }
     case e => log.warning(s"Unknown message: $e")
   }

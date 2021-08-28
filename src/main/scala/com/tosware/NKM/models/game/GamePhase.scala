@@ -8,6 +8,7 @@ object GamePhase extends Enum[GamePhase] {
 
   case object NotStarted extends GamePhase
   case object CharacterPick extends GamePhase
+  case object CharacterPlacing extends GamePhase
   case object Running extends GamePhase
   case object Finished extends GamePhase
 }
