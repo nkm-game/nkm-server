@@ -1,0 +1,31 @@
+version: "3.8"
+
+services:
+  nkm-actor-server-dev:
+    restart: always
+    build: .
+    image: tojatos/nkm-actor-server-dev
+    environment:
+      - PORT=3000
+      - MYSQL_HOST=db
+      - MYSQL_DB=nkm_db
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=nkm_db_pass
+      - MYSQL_PORT=3306
+    ports:
+      - 3000:3000
+    depends_on:
+      - db
+  db:
+    restart: always
+    image: mysql
+    volumes:
+      - mysql_data:/var/lib/mysql
+    environment:
+      - MYSQL_DATABASE=nkm_db
+      - MYSQL_ROOT_PASSWORD=nkm_db_pass
+    expose:
+      - 3306
+
+volumes:
+  mysql_data:

@@ -6,7 +6,7 @@ import slick.jdbc.MySQLProfile.api._
 
 class User(tag: Tag) extends Table[UserState](tag, "user") {
   def login = column[String]("LOGIN", O.PrimaryKey)
-  def email = column[Option[String]]("EMAIL", O.Unique)
+  def email = column[Option[String]]("EMAIL", O.Unique, O.Length(255))
   def passwordHash = column[Option[String]]("PASSWORD_HASH")
   override def * = (login, email, passwordHash) <> (UserState.tupled, UserState.unapply)
 }

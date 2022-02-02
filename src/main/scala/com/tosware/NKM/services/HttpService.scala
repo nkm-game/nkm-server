@@ -5,7 +5,6 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives.{entity, _}
 import akka.http.scaladsl.server.{Directive1, Route}
-import akka.http.scaladsl.{ConnectionContext, HttpsConnectionContext}
 import com.tosware.NKM.actors.User.{RegisterFailure, RegisterSuccess}
 import com.tosware.NKM.actors._
 import com.tosware.NKM.models._
@@ -17,9 +16,7 @@ import com.tosware.NKM.{CORSHandler, NKMTimeouts}
 import pdi.jwt.{Jwt, JwtAlgorithm, JwtClaim, JwtSprayJson}
 import spray.json._
 
-import java.security.{KeyStore, SecureRandom}
 import java.time.Instant
-import javax.net.ssl.{KeyManagerFactory, SSLContext, TrustManagerFactory}
 import scala.language.postfixOps
 import scala.util.{Failure, Success}
 

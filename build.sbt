@@ -1,10 +1,12 @@
-name := "NKMActorServer"
+name := "nkm-actor-server"
 
 version := "0.1"
 
 scalaVersion := "2.13.3"
 
-// needed because of issua like in https://stackoverflow.com/questions/19425613/unsatisfiedlinkerror-with-native-library-under-sbt
+enablePlugins(JavaAppPackaging)
+
+// needed because of issues like in https://stackoverflow.com/questions/19425613/unsatisfiedlinkerror-with-native-library-under-sbt
 fork := true
 
 lazy val AkkaVersion = "2.6.15"

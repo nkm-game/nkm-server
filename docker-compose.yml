@@ -1,24 +1,20 @@
 version: "3.8"
 
 services:
-#  cassandra:
-#    image: library/cassandra:latest
-#    container_name: cassandra
-#    ports:
-#    - "7000:7000"
-#    - "9042:9042"
-#    environment:
-#      - "CASSANDRA_CLUSTER_NAME=OUR_DOCKERIZED_CASSANDRA_SINGLE_NODE_CLUSTER"
   nkm-actor-server:
     restart: always
-    image: tojatos/scala-sbt:8u222_1.3.5_2.13.1
-    command: sh -c "sbt run"
-    working_dir: /NKMActorServer
-    volumes:
-      - ./:/NKMActorServer
+    build: .
+    image: tojatos/nkm-actor-server
     networks:
       - web
       - default
+    environment:
+      - PORT=80
+      - MYSQL_HOST=db
+      - MYSQL_DB=nkm_db
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=nkm_db_pass
+      - MYSQL_PORT=3306
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.nkm-actor-server.rule=((Host(`krzysztofruczkowski.pl`) || Host(`www.krzysztofruczkowski.pl`)) && PathPrefix(`/nkm/`))"
@@ -27,8 +23,23 @@ services:
       - "traefik.http.routers.nkm-actor-server.tls.certresolver=myresolver"
       - "traefik.http.services.nkm-actor-server.loadbalancer.server.port=80"
       - "traefik.docker.network=traefik_default"
+    depends_on:
+      - db
+  db:
+    restart: always
+    image: mysql
+    volumes:
+      - mysql_data:/var/lib/mysql
+    environment:
+      - MYSQL_DATABASE=nkm_db
+      - MYSQL_ROOT_PASSWORD=nkm_db_pass
+    expose:
+      - 3306
 
 networks:
   web:
     name: traefik_default
     external: true
+
+volumes:
+  mysql_data:

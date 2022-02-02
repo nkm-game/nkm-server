@@ -16,15 +16,19 @@ object Main extends App with HttpService {
   implicit val userService: UserService = new UserService()
   implicit val lobbyService: LobbyService = new LobbyService()
   implicit val gameService: GameService = new GameService()
+  try {
+    DBManager.createNeededTables(db)
 
-  DBManager.createNeededTables(db)
+    // subscribe to events
+    system.actorOf(CQRSEventHandler.props(db))
 
+    val port = sys.env.getOrElse("PORT", "8080").toInt
 
-  // subscribe to events
-  system.actorOf(CQRSEventHandler.props(db))
-
-  val port = sys.env.getOrElse("PORT", "8080").toInt
-
-  Http().newServerAt("0.0.0.0", port).bind(routes)
-  println("Started http server")
+    Http().newServerAt("0.0.0.0", port).bind(routes)
+    println("Started http server")
+  } catch {
+    case e: Throwable =>
+      println(e.printStackTrace())
+      System.exit(1)
+  }
 }
