@@ -9,11 +9,26 @@ services:
 #    - "9042:9042"
 #    environment:
 #      - "CASSANDRA_CLUSTER_NAME=OUR_DOCKERIZED_CASSANDRA_SINGLE_NODE_CLUSTER"
-  NKM-http-server:
+  nkm-actor-server:
+    restart: always
     image: tojatos/scala-sbt:8u222_1.3.5_2.13.1
     command: sh -c "sbt run"
-    ports:
-      - 8080:8080
     working_dir: /NKMActorServer
     volumes:
       - ./:/NKMActorServer
+    networks:
+      - web
+      - default
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.nkm-actor-server.rule=((Host(`krzysztofruczkowski.pl`) || Host(`www.krzysztofruczkowski.pl`)) && PathPrefix(`/nkm/`))"
+      - "traefik.http.routers.nkm-actor-server.priority=1"
+      - "traefik.http.routers.nkm-actor-server.tls=true"
+      - "traefik.http.routers.nkm-actor-server.tls.certresolver=myresolver"
+      - "traefik.http.services.nkm-actor-server.loadbalancer.server.port=80"
+      - "traefik.docker.network=traefik_default"
+
+networks:
+  web:
+    name: traefik_default
+    external: true
