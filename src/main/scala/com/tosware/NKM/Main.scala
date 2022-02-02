@@ -19,9 +19,12 @@ object Main extends App with HttpService {
 
   DBManager.createNeededTables(db)
 
+
   // subscribe to events
   system.actorOf(CQRSEventHandler.props(db))
 
-  Http().newServerAt("0.0.0.0", 8080).bind(routes)
+  val port = sys.env.getOrElse("PORT", "8080").toInt
+
+  Http().newServerAt("0.0.0.0", port).bind(routes)
   println("Started http server")
 }
