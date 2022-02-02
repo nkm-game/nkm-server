@@ -59,27 +59,6 @@ trait HttpService
     token
   }
 
-  def getHttps: HttpsConnectionContext = {
-    val password = "password".toCharArray //TODO: do not store passwords in code, read them from somewhere safe!
-    val ks: KeyStore = KeyStore.getInstance("PKCS12")
-    val keystore = getClass.getClassLoader.getResourceAsStream("mykeystore.pkcs12")
-
-    require(keystore != null, "Keystore required!")
-    ks.load(keystore, password)
-
-    val keyManagerFactory = KeyManagerFactory.getInstance("SunX509")
-    keyManagerFactory.init(ks, password)
-
-    val tmf = TrustManagerFactory.getInstance("SunX509")
-    tmf.init(ks)
-
-    val sslContext = SSLContext.getInstance("TLS")
-    sslContext.init(keyManagerFactory.getKeyManagers, tmf.getTrustManagers, new SecureRandom)
-    val https = ConnectionContext.httpsServer(sslContext)
-    https
-  }
-
-
   val routes: Route =
     corsHandler {
       pathPrefix("api") {

@@ -19,16 +19,9 @@ object Main extends App with HttpService {
 
   DBManager.createNeededTables(db)
 
-
   // subscribe to events
   system.actorOf(CQRSEventHandler.props(db))
 
-  sys.env.getOrElse("DEBUG", "false").toBooleanOption match {
-    case Some(true) =>
-      Http().newServerAt("0.0.0.0", 8080).bind(routes)
-      println("Started http server")
-    case _ =>
-      Http().newServerAt("0.0.0.0", 8080).enableHttps(getHttps).bindFlow(routes)
-      println("Started https server")
-  }
+  Http().newServerAt("0.0.0.0", 8080).bind(routes)
+  println("Started http server")
 }
