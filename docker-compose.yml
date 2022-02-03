@@ -17,7 +17,9 @@ services:
       - MYSQL_PORT=3306
     labels:
       - "traefik.enable=true"
+      - "traefik.http.middlewares.nkm-actor-server-stripprefix.stripPrefix.prefixes=/nkm"
       - "traefik.http.routers.nkm-actor-server.rule=((Host(`krzysztofruczkowski.pl`) || Host(`www.krzysztofruczkowski.pl`)) && PathPrefix(`/nkm/`))"
+      - "traefik.http.routers.nkm-actor-server.middlewares=nkm-actor-server-stripprefix"
       - "traefik.http.routers.nkm-actor-server.tls=true"
       - "traefik.http.routers.nkm-actor-server.tls.certresolver=myresolver"
       - "traefik.http.services.nkm-actor-server.loadbalancer.server.port=80"
