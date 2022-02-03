@@ -18,7 +18,6 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.nkm-actor-server.rule=((Host(`krzysztofruczkowski.pl`) || Host(`www.krzysztofruczkowski.pl`)) && PathPrefix(`/nkm/`))"
-      - "traefik.http.routers.nkm-actor-server.priority=1"
       - "traefik.http.routers.nkm-actor-server.tls=true"
       - "traefik.http.routers.nkm-actor-server.tls.certresolver=myresolver"
       - "traefik.http.services.nkm-actor-server.loadbalancer.server.port=80"
