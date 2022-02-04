@@ -55,7 +55,7 @@ class User(login: String) extends PersistentActor with ActorLogging {
       if (userState.registered()) {
         sender() ! RegisterFailure
       } else {
-        val passwordHash = password.bcrypt
+        val passwordHash = password.boundedBcrypt
         persist(RegisterSuccess(login, email, passwordHash)) { _ =>
           register(email, passwordHash)
           context.system.eventStream.publish(RegisterSuccess(login, email, passwordHash))
@@ -66,7 +66,7 @@ class User(login: String) extends PersistentActor with ActorLogging {
     case CheckLogin(password) =>
       log.info(s"Login check request for: $login")
       sender () ! {
-        if(userState.registered() && password.isBcrypted(userState.passwordHash.get)) LoginSuccess
+        if(userState.registered() && password.isBcryptedBounded(userState.passwordHash.get)) LoginSuccess
         else LoginFailure
       }
 

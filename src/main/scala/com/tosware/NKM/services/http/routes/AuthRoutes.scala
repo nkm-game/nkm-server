@@ -23,6 +23,7 @@ trait AuthRoutes extends JwtDirective
         userService.register(entity) match {
           case RegisterSuccess => complete(StatusCodes.Created)
           case RegisterFailure => complete(StatusCodes.Conflict) // TODO - change status code based on failure
+          case _ => complete(StatusCodes.InternalServerError)
         }
       }
     },

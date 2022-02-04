@@ -68,7 +68,7 @@ class LobbyService(implicit db: JdbcBackend.Database, system: ActorSystem, NKMDa
     val nkmDataActor: ActorRef = system.actorOf(NKMData.props())
 
     val lobbyState = Await.result(lobbyActor ? Lobby.GetState, atMost).asInstanceOf[LobbyState]
-    if(lobbyState.hostUserId.getOrElse() != username) return Failure
+    if(!lobbyState.hostUserId.contains(username)) return Failure
 
     val hexMaps = Await.result(nkmDataActor ? NKMData.GetHexMaps, atMost).asInstanceOf[List[HexMap]]
     if(!hexMaps.map(_.name).contains(request.hexMapName)) return Failure
@@ -89,7 +89,7 @@ class LobbyService(implicit db: JdbcBackend.Database, system: ActorSystem, NKMDa
     val lobbyActor: ActorRef = system.actorOf(Lobby.props(request.lobbyId))
 
     val lobbyState = Await.result(lobbyActor ? Lobby.GetState, atMost).asInstanceOf[LobbyState]
-    if(lobbyState.hostUserId.getOrElse() != username) return Failure
+    if(!lobbyState.hostUserId.contains(username)) return Failure
 
     Await.result(lobbyActor ? Lobby.SetNumberOfCharactersPerPlayer(request.charactersPerPlayer), atMost) match {
       case CommandResponse.Success => Success
@@ -107,7 +107,7 @@ class LobbyService(implicit db: JdbcBackend.Database, system: ActorSystem, NKMDa
     val lobbyActor: ActorRef = system.actorOf(Lobby.props(request.lobbyId))
 
     val lobbyState = Await.result(lobbyActor ? Lobby.GetState, atMost).asInstanceOf[LobbyState]
-    if(lobbyState.hostUserId.getOrElse() != username) return Failure
+    if(!lobbyState.hostUserId.contains(username)) return Failure
 
     Await.result(lobbyActor ? Lobby.SetNumberOfBans(request.numberOfBans), atMost) match {
       case CommandResponse.Success => Success
@@ -123,7 +123,7 @@ class LobbyService(implicit db: JdbcBackend.Database, system: ActorSystem, NKMDa
     val lobbyActor: ActorRef = system.actorOf(Lobby.props(request.lobbyId))
 
     val lobbyState = Await.result(lobbyActor ? Lobby.GetState, atMost).asInstanceOf[LobbyState]
-    if(lobbyState.hostUserId.getOrElse() != username) return Failure
+    if(!lobbyState.hostUserId.contains(username)) return Failure
 
     Await.result(lobbyActor ? Lobby.SetPickType(request.pickType), atMost) match {
       case CommandResponse.Success => Success
@@ -137,7 +137,7 @@ class LobbyService(implicit db: JdbcBackend.Database, system: ActorSystem, NKMDa
 
     val lobbyState = Await.result(lobbyActor ? Lobby.GetState, atMost).asInstanceOf[LobbyState]
 
-    if(lobbyState.hostUserId.getOrElse() != username) return Failure
+    if(!lobbyState.hostUserId.contains(username)) return Failure
     if(lobbyState.chosenHexMapName.isEmpty) return Failure
     if(lobbyState.userIds.length < 2) return Failure
 

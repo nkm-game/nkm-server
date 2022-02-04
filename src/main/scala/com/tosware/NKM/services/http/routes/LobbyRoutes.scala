@@ -33,6 +33,7 @@ trait LobbyRoutes extends JwtDirective
           lobbyService.createLobby(entity.name, username) match {
             case LobbyService.LobbyCreated(lobbyId) => complete(StatusCodes.Created, lobbyId)
             case LobbyService.LobbyCreationFailure => complete(StatusCodes.InternalServerError)
+            case _ => complete(StatusCodes.InternalServerError)
           }
         }
       }
@@ -45,6 +46,7 @@ trait LobbyRoutes extends JwtDirective
           lobbyService.joinLobby(username, entity) match {
             case LobbyService.Success => complete(StatusCodes.OK)
             case LobbyService.Failure => complete(StatusCodes.InternalServerError)
+            case _ => complete(StatusCodes.InternalServerError)
           }
         }
       }
@@ -57,6 +59,7 @@ trait LobbyRoutes extends JwtDirective
           lobbyService.leaveLobby(username, entity) match {
             case LobbyService.Success => complete(StatusCodes.OK)
             case LobbyService.Failure => complete(StatusCodes.InternalServerError)
+            case _ => complete(StatusCodes.InternalServerError)
           }
         }
       }
@@ -69,6 +72,7 @@ trait LobbyRoutes extends JwtDirective
           lobbyService.setHexmapName(username, entity) match {
             case LobbyService.Success => complete(StatusCodes.OK)
             case LobbyService.Failure => complete(StatusCodes.InternalServerError)
+            case _ => complete(StatusCodes.InternalServerError)
           }
         }
       }
@@ -81,6 +85,7 @@ trait LobbyRoutes extends JwtDirective
           lobbyService.setPickType(username, request) match {
             case LobbyService.Success => complete(StatusCodes.OK)
             case LobbyService.Failure => complete(StatusCodes.InternalServerError)
+            case _ => complete(StatusCodes.InternalServerError)
           }
         }
       }
@@ -93,6 +98,7 @@ trait LobbyRoutes extends JwtDirective
           lobbyService.setNumberOfBans(username, request) match {
             case LobbyService.Success => complete(StatusCodes.OK)
             case LobbyService.Failure => complete(StatusCodes.InternalServerError)
+            case _ => complete(StatusCodes.InternalServerError)
           }
         }
       }
@@ -105,6 +111,7 @@ trait LobbyRoutes extends JwtDirective
           lobbyService.setNumberOfCharactersPerPlayer(username, request) match {
             case LobbyService.Success => complete(StatusCodes.OK)
             case LobbyService.Failure => complete(StatusCodes.InternalServerError)
+            case _ => complete(StatusCodes.InternalServerError)
           }
         }
       }
@@ -116,6 +123,7 @@ trait LobbyRoutes extends JwtDirective
           lobbyService.startGame(username, entity) match {
             case LobbyService.Success => complete(StatusCodes.OK)
             case LobbyService.Failure => complete(StatusCodes.InternalServerError)
+            case _ => complete(StatusCodes.InternalServerError)
           }
         }
       }
