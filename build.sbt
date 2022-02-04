@@ -9,23 +9,23 @@ enablePlugins(JavaAppPackaging)
 // needed because of issues like in https://stackoverflow.com/questions/19425613/unsatisfiedlinkerror-with-native-library-under-sbt
 fork := true
 
-lazy val AkkaVersion = "2.6.15"
-lazy val AkkaHttpVersion = "10.2.3"
-lazy val AkkaPersistenceVersion = "3.5.2"
+lazy val AkkaVersion = "2.6.18"
+lazy val AkkaHttpVersion = "10.2.6"
+lazy val AkkaPersistenceVersion = "3.5.3"
 lazy val CassandraVersion = "1.0.1"
-lazy val QuickLensVersion = "1.6.0"
+lazy val QuickLensVersion = "1.8.2"
 lazy val LevelDBVersion = "1.8"
-lazy val ScalaTestVersion = "3.2.0"
-lazy val JwtVersion = "4.2.0"
-lazy val ScalaBcryptVersion = "4.1"
-lazy val LogbackClassicVersion = "1.2.3"
-lazy val KebsVersion = "1.9.2"
+lazy val ScalaTestVersion = "3.2.9"
+lazy val JwtVersion = "5.0.0"
+lazy val ScalaBcryptVersion = "4.3.0"
+lazy val LogbackClassicVersion = "1.2.10"
+lazy val KebsVersion = "1.9.3"
 
 libraryDependencies += "com.typesafe.akka" %% "akka-actor" % AkkaVersion
 libraryDependencies += "com.typesafe.akka" %% "akka-stream" % AkkaVersion
 libraryDependencies += "com.typesafe.akka" %% "akka-http" % AkkaHttpVersion
 libraryDependencies += "com.typesafe.akka" %% "akka-http-spray-json" % AkkaHttpVersion
-libraryDependencies += "io.altoo" %% "akka-kryo-serialization" % "2.2.0"
+libraryDependencies += "io.altoo" %% "akka-kryo-serialization" % "2.3.0"
 
 libraryDependencies += "pl.iterators" %% "kebs-spray-json" % KebsVersion
 libraryDependencies += "pl.iterators" %% "kebs-slick" % KebsVersion
