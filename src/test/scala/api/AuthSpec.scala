@@ -1,16 +1,12 @@
 package api
 
 import akka.http.scaladsl.model.StatusCodes._
-import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.server.Route
-import com.tosware.NKM.DBManager
 import com.tosware.NKM.models._
-import com.tosware.NKM.models.lobby._
 import helpers.ApiTrait
 import pdi.jwt.{JwtAlgorithm, JwtSprayJson}
 import spray.json._
 
-import scala.language.postfixOps
 import scala.util.Success
 
 class AuthSpec extends ApiTrait
@@ -42,7 +38,7 @@ class AuthSpec extends ApiTrait
         status shouldBe OK
 
         val token = responseAs[String]
-        JwtSprayJson.decode(token, jwtSecretKey, Seq(JwtAlgorithm.HS256)) match {
+        JwtSprayJson.decode(token, jwtSecretKey.value, Seq(JwtAlgorithm.HS256)) match {
           case Success(claim) => claim.content.parseJson.convertTo[JwtContent] shouldEqual JwtContent("test")
           case _ => fail()
         }

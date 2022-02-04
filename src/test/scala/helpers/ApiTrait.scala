@@ -7,7 +7,9 @@ import akka.testkit.TestKit
 import com.tosware.NKM.DBManager
 import com.tosware.NKM.actors.CQRSEventHandler
 import com.tosware.NKM.serializers.NKMJsonProtocol
-import com.tosware.NKM.services.{GameService, HttpService, LobbyService, NKMDataService, UserService}
+import com.tosware.NKM.services.http.HttpService
+import com.tosware.NKM.services.http.directives.JwtSecretKey
+import com.tosware.NKM.services.{GameService, LobbyService, NKMDataService, UserService}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
@@ -32,6 +34,7 @@ trait ApiTrait
     implicit val userService: UserService = new UserService()
     implicit val lobbyService: LobbyService = new LobbyService()
     implicit val gameService: GameService = new GameService()
+    implicit val jwtSecretKey: JwtSecretKey = JwtSecretKey("jwt_test_key")
 
     implicit def default(implicit system: ActorSystem): RouteTestTimeout = RouteTestTimeout(5.seconds)
 
