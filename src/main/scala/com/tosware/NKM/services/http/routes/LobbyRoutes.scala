@@ -1,9 +1,7 @@
 package com.tosware.NKM.services.http.routes
 
-import akka.actor.ActorSystem
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.model.StatusCodes
-import akka.http.scaladsl.server.Directives
 import akka.http.scaladsl.server.Directives._
 import com.tosware.NKM.models.JwtContent
 import com.tosware.NKM.models.lobby._
@@ -14,7 +12,6 @@ import spray.json._
 trait LobbyRoutes extends JwtDirective
   with SprayJsonSupport
 {
-  implicit val system: ActorSystem
   implicit val lobbyService: LobbyService
 
   val lobbyGetRoutes = concat(

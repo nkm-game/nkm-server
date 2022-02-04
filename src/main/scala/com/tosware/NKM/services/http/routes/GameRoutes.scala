@@ -1,6 +1,5 @@
 package com.tosware.NKM.services.http.routes
 
-import akka.actor.ActorSystem
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
@@ -13,7 +12,6 @@ import spray.json._
 trait GameRoutes extends JwtDirective
   with SprayJsonSupport
 {
-  implicit val system: ActorSystem
   implicit val gameService: GameService
 
   val gameGetRoutes = concat(
