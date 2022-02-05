@@ -7,7 +7,26 @@ import com.tosware.NKM.models.JwtContent
 import com.tosware.NKM.models.lobby._
 import com.tosware.NKM.services.LobbyService
 import com.tosware.NKM.services.http.directives.JwtDirective
+import enumeratum.values.{StringEnum, StringEnumEntry}
 import spray.json._
+
+sealed abstract class LobbyRoute(val value: String) extends StringEnumEntry
+
+object LobbyRoute extends StringEnum[LobbyRoute] {
+  val values = findValues
+  case object Lobbies extends LobbyRoute("lobbies")
+  case object Lobby extends LobbyRoute("lobby")
+  case object CreateLobby extends LobbyRoute("create_lobby")
+  case object JoinLobby extends LobbyRoute("join_lobby")
+  case object LeaveLobby extends LobbyRoute("leave_lobby")
+  case object SetHexMap extends LobbyRoute("set_hexmap")
+  case object SetPickType extends LobbyRoute("set_pick_type")
+  case object SetNumberOfBans extends LobbyRoute("set_number_of_bans")
+  case object SetNumberOfCharacters extends LobbyRoute("set_number_of_characters")
+  case object StartGame extends LobbyRoute("start_game")
+}
+
+
 
 trait LobbyRoutes extends JwtDirective
   with SprayJsonSupport
@@ -15,18 +34,18 @@ trait LobbyRoutes extends JwtDirective
   implicit val lobbyService: LobbyService
 
   val lobbyGetRoutes = concat(
-    path("lobbies") {
+    path(LobbyRoute.Lobby.value) {
       val lobbies = lobbyService.getAllLobbies()
       complete(lobbies)
     },
-    path("lobby" / Segment) { (lobbyId: String) =>
+    path(LobbyRoute.Lobby.value / Segment) { (lobbyId: String) =>
       val lobby = lobbyService.getLobby(lobbyId)
       complete(lobby)
     },
   )
 
   val lobbyPostRoutes = concat(
-    path("create_lobby") {
+    path(LobbyRoute.CreateLobby.value) {
       authenticated { jwtClaim =>
         entity(as[LobbyCreationRequest]) { entity =>
           val username = jwtClaim.content.parseJson.convertTo[JwtContent].content
@@ -39,7 +58,7 @@ trait LobbyRoutes extends JwtDirective
       }
     },
 
-    path("join_lobby") {
+    path(LobbyRoute.JoinLobby.value) {
       authenticated { jwtClaim =>
         entity(as[LobbyJoinRequest]) { entity =>
           val username = jwtClaim.content.parseJson.convertTo[JwtContent].content
@@ -52,7 +71,7 @@ trait LobbyRoutes extends JwtDirective
       }
     },
 
-    path("leave_lobby") {
+    path(LobbyRoute.LeaveLobby.value) {
       authenticated { jwtClaim =>
         entity(as[LobbyLeaveRequest]) { entity =>
           val username = jwtClaim.content.parseJson.convertTo[JwtContent].content
@@ -65,7 +84,7 @@ trait LobbyRoutes extends JwtDirective
       }
     },
 
-    path("set_hexmap") {
+    path(LobbyRoute.SetHexMap.value) {
       authenticated { jwtClaim =>
         entity(as[SetHexMapNameRequest]) { entity =>
           val username = jwtClaim.content.parseJson.convertTo[JwtContent].content
@@ -78,7 +97,7 @@ trait LobbyRoutes extends JwtDirective
       }
     },
 
-    path("set_pick_type") {
+    path(LobbyRoute.SetPickType.value) {
       authenticated { jwtClaim =>
         entity(as[SetPickTypeRequest]) { request =>
           val username = jwtClaim.content.parseJson.convertTo[JwtContent].content
@@ -91,7 +110,7 @@ trait LobbyRoutes extends JwtDirective
       }
     },
 
-    path("set_number_of_bans") {
+    path(LobbyRoute.SetNumberOfBans.value) {
       authenticated { jwtClaim =>
         entity(as[SetNumberOfBansRequest]) { request =>
           val username = jwtClaim.content.parseJson.convertTo[JwtContent].content
@@ -104,7 +123,7 @@ trait LobbyRoutes extends JwtDirective
       }
     },
 
-    path("set_number_of_characters") {
+    path(LobbyRoute.SetNumberOfCharacters.value) {
       authenticated { jwtClaim =>
         entity(as[SetNumberOfCharactersPerPlayerRequest]) { request =>
           val username = jwtClaim.content.parseJson.convertTo[JwtContent].content
@@ -116,7 +135,7 @@ trait LobbyRoutes extends JwtDirective
         }
       }
     },
-    path("start_game") {
+    path(LobbyRoute.StartGame.value) {
       authenticated { jwtClaim =>
         entity(as[StartGameRequest]) { entity =>
           val username = jwtClaim.content.parseJson.convertTo[JwtContent].content
