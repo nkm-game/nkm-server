@@ -9,7 +9,7 @@ import helpers.ApiTrait
 import scala.concurrent.duration.DurationInt
 import spray.json._
 
-class LobbySpec extends ApiTrait
+class WSLobbySpec extends ApiTrait
 {
   "WS" must {
     "greet" in {
