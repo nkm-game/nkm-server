@@ -6,7 +6,7 @@ import akka.http.scaladsl.model.ws.{BinaryMessage, Message, TextMessage}
 import akka.http.scaladsl.server.Directives._
 import akka.stream.scaladsl.{Flow, Sink, Source}
 import com.tosware.NKM.NKMTimeouts
-import com.tosware.NKM.models.lobby.LobbyRequest
+import com.tosware.NKM.models.lobby.{GetLobbyRequest, LobbyCreationRequest, LobbyRequest}
 import com.tosware.NKM.serializers.NKMJsonProtocol
 import com.tosware.NKM.services.LobbyService
 import com.tosware.NKM.services.http.directives.JwtDirective
@@ -40,10 +40,12 @@ trait WebsocketRoutes extends JwtDirective
       val request = text.parseJson.convertTo[WebsocketLobbyRequest]
       request.requestPath match {
         case LobbyRoute.Lobbies =>
-          println("lobbies")
           val lobbies = Await.result(lobbyService.getAllLobbies(), atMost)
           TextMessage.Strict(lobbies.toJson.toString)
-        case LobbyRoute.Lobby => ???
+        case LobbyRoute.Lobby =>
+          val lobbyId = request.requestJson.parseJson.convertTo[GetLobbyRequest].lobbyId
+          val lobby = Await.result(lobbyService.getLobby(lobbyId), atMost)
+          TextMessage.Strict(lobby.toJson.toString)
         case LobbyRoute.CreateLobby => ???
         case LobbyRoute.JoinLobby => ???
         case LobbyRoute.LeaveLobby => ???
@@ -53,9 +55,6 @@ trait WebsocketRoutes extends JwtDirective
         case LobbyRoute.SetNumberOfCharacters => ???
         case LobbyRoute.StartGame => ???
       }
-//      Nil
-//    case _ =>
-//      Nil
   }
 
   val websocketRoutes = concat (

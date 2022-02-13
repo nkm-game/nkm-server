@@ -34,7 +34,7 @@ trait LobbyRoutes extends JwtDirective
   implicit val lobbyService: LobbyService
 
   val lobbyGetRoutes = concat(
-    path(LobbyRoute.Lobby.value) {
+    path(LobbyRoute.Lobbies.value) {
       val lobbies = lobbyService.getAllLobbies()
       complete(lobbies)
     },
