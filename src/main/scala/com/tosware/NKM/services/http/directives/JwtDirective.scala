@@ -13,7 +13,7 @@ import scala.util.{Failure, Success}
 
 case class JwtSecretKey(value: String)
 
-trait JwtDirective extends NKMJsonProtocol {
+trait JwtHelper extends NKMJsonProtocol {
   implicit val jwtSecretKey: JwtSecretKey
 
   /** returns Some(username) when authenticated, otherwise None */
@@ -27,6 +27,21 @@ trait JwtDirective extends NKMJsonProtocol {
     }
   }
 
+  /** returns token for given login */
+  def getToken(login: String): String = {
+    val claim: JwtClaim = JwtClaim(
+      content = JwtContent(login).toJson.toString,
+      expiration = Some(Instant.now.plusSeconds(157784760).getEpochSecond),
+      issuedAt = Some(Instant.now.getEpochSecond)
+    )
+    val token = Jwt.encode(claim, jwtSecretKey.value, JwtAlgorithm.HS256)
+    token
+  }
+
+}
+
+trait JwtDirective extends JwtHelper {
+  implicit val jwtSecretKey: JwtSecretKey
 
   def authenticated: Directive1[String] =
     optionalHeaderValueByName("Authorization").flatMap {
@@ -37,14 +52,4 @@ trait JwtDirective extends NKMJsonProtocol {
         }
       case _ => complete(StatusCodes.Unauthorized)
     }
-
-  def getToken(login: String): String = {
-    val claim: JwtClaim = JwtClaim(
-      content = JwtContent(login).toJson.toString,
-      expiration = Some(Instant.now.plusSeconds(157784760).getEpochSecond),
-      issuedAt = Some(Instant.now.getEpochSecond)
-    )
-    val token = Jwt.encode(claim, jwtSecretKey.value, JwtAlgorithm.HS256)
-    token
-  }
 }
