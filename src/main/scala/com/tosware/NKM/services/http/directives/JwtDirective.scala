@@ -16,13 +16,24 @@ case class JwtSecretKey(value: String)
 trait JwtDirective extends NKMJsonProtocol {
   implicit val jwtSecretKey: JwtSecretKey
 
-  def authenticated: Directive1[JwtClaim] =
+  /** returns Some(username) when authenticated, otherwise None */
+  def authenticateToken(bearerToken: String): Option[String] = {
+    val token = bearerToken.split(' ')(1)
+    JwtSprayJson.decode(token, jwtSecretKey.value, Seq(JwtAlgorithm.HS256)) match {
+      case Success(jwtClaim) =>
+        val username = jwtClaim.content.parseJson.convertTo[JwtContent].content
+        Some(username)
+      case Failure(_) => None
+    }
+  }
+
+
+  def authenticated: Directive1[String] =
     optionalHeaderValueByName("Authorization").flatMap {
       case Some(bearerToken) =>
-        val token = bearerToken.split(' ')(1)
-        JwtSprayJson.decode(token, jwtSecretKey.value, Seq(JwtAlgorithm.HS256)) match {
-          case Success(value) => provide(value)
-          case Failure(exception) => complete(StatusCodes.Unauthorized, exception.getMessage)
+        authenticateToken(bearerToken) match {
+          case Some(username) => provide(username)
+          case None => complete(StatusCodes.Unauthorized)
         }
       case _ => complete(StatusCodes.Unauthorized)
     }

@@ -8,7 +8,8 @@ import akka.http.scaladsl.server.Directives._
 import akka.stream.OverflowStrategy
 import akka.stream.scaladsl.{Flow, Sink, Source}
 import com.tosware.NKM.NKMTimeouts
-import com.tosware.NKM.models.lobby.{GetLobbyRequest, LobbyCreationRequest, LobbyRequest}
+import com.tosware.NKM.actors.{LobbySessionActor, WebsocketUser}
+import com.tosware.NKM.models.lobby.{AuthRequest, GetLobbyRequest, LobbyCreationRequest, LobbyRequest}
 import com.tosware.NKM.serializers.NKMJsonProtocol
 import com.tosware.NKM.services.LobbyService
 import com.tosware.NKM.services.http.directives.JwtDirective
@@ -29,55 +30,6 @@ import scala.concurrent.Await
 //  }
 //}
 
-object LobbySessionActor {
-  case object Join
-  case class ChatMessage(message: String)
-}
-
-class LobbySessionActor extends Actor {
-  import LobbySessionActor._
-
-  var users: Set[ActorRef] = Set.empty
-  def receive = {
-    case Join =>
-      users += sender()
-      context.watch(sender())
-    case Terminated(user) =>
-      users -= user
-    case msg: ChatMessage =>
-      users.foreach(_ ! msg)
-  }
-}
-
-object User {
-  case class Connected(outgoing: ActorRef)
-  case class IncomingMessage(text: String)
-  case class OutgoingMessage(text: String)
-}
-
-class User(lobbySession: ActorRef) extends Actor {
-
-  import User._
-
-  def receive = {
-    case Connected(outgoing) =>
-      context.become(connected(outgoing))
-  }
-
-  def connected(outgoing: ActorRef): Receive = {
-    lobbySession ! LobbySessionActor.Join
-
-    {
-      case IncomingMessage(text) =>
-        lobbySession ! LobbySessionActor.ChatMessage(text)
-
-      case LobbySessionActor.ChatMessage(text) =>
-        outgoing ! OutgoingMessage(text)
-    }
-  }
-}
-
-
 
 case class WebsocketLobbyRequest(requestPath: LobbyRoute, requestJson: String)
 case class WebsocketLobbyResponse(statusCode: Int, body: String = "")
@@ -90,47 +42,42 @@ trait WebsocketRoutes extends JwtDirective
   implicit val system: ActorSystem
   implicit val lobbyService: LobbyService
 
-  lazy val lobbySession = system.actorOf(Props(new LobbySessionActor), "lobby")
+  lazy val lobbySession = system.actorOf(LobbySessionActor.props(), "lobby")
 
   def newUser() = {
     // new connection - new user actor
-    val userActor = system.actorOf(Props(new User(lobbySession)))
+    val userActor = system.actorOf(WebsocketUser.props(lobbySession))
 
     val incomingMessages =
       Flow[Message].map {
-        // transform websocket message to domain message
-        case TextMessage.Strict(text) => User.IncomingMessage(text)
-      }.to(Sink.actorRef[User.IncomingMessage](userActor, PoisonPill))
+        case TextMessage.Strict(text) => WebsocketUser.IncomingMessage(text)
+      }.to(Sink.actorRef[WebsocketUser.IncomingMessage](userActor, PoisonPill))
 
     val outgoingMessages =
-      Source.actorRef[User.OutgoingMessage](10, OverflowStrategy.fail)
+      Source.actorRef[WebsocketUser.OutgoingMessage](10, OverflowStrategy.fail)
         .mapMaterializedValue { outActor =>
-          // give the user actor a way to send messages out
-          userActor ! User.Connected(outActor)
+          userActor ! WebsocketUser.Connected(outActor)
           NotUsed
         }.map(
-        // transform domain message to web socket message
-        (outMsg: User.OutgoingMessage) => TextMessage(outMsg.text))
+        (outMsg: WebsocketUser.OutgoingMessage) => TextMessage(outMsg.text))
 
     // then combine both to a flow
     Flow.fromSinkAndSource(incomingMessages, outgoingMessages)
   }
 
-  def greeter = Flow[Message].collect {
-    case TextMessage.Strict(text) => TextMessage(s"Hello ${text}!")
-  }
-
-  def lobby = Flow[Message].collect {
-    case TextMessage.Strict(text) =>
-      val request = text.parseJson.convertTo[WebsocketLobbyRequest]
+  def parseWebsocketLobbyRequest(request: WebsocketLobbyRequest): WebsocketLobbyResponse = {
+//      val request = text.parseJson.convertTo[WebsocketLobbyRequest]
       request.requestPath match {
+        case LobbyRoute.Auth =>
+          val token = request.requestJson.parseJson.convertTo[AuthRequest].token
+          WebsocketLobbyResponse(200)
         case LobbyRoute.Lobbies =>
           val lobbies = Await.result(lobbyService.getAllLobbies(), atMost)
-          TextMessage(lobbies.toJson.toString)
+          WebsocketLobbyResponse(200, lobbies.toJson.toString)
         case LobbyRoute.Lobby =>
           val lobbyId = request.requestJson.parseJson.convertTo[GetLobbyRequest].lobbyId
           val lobby = Await.result(lobbyService.getLobby(lobbyId), atMost)
-          TextMessage(lobby.toJson.toString)
+          WebsocketLobbyResponse(200, lobby.toJson.toString)
         case LobbyRoute.CreateLobby => ???
         case LobbyRoute.JoinLobby => ???
         case LobbyRoute.LeaveLobby => ???
@@ -143,14 +90,8 @@ trait WebsocketRoutes extends JwtDirective
   }
 
   val websocketRoutes = concat (
-    path("test") {
-      handleWebSocketMessages(newUser())
-    },
-    path("greeter") {
-      handleWebSocketMessages(greeter)
-    },
     path("lobby") {
-      handleWebSocketMessages(lobby)
+      handleWebSocketMessages(newUser())
     },
   )
 }

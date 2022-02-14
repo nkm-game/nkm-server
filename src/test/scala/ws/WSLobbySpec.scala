@@ -12,30 +12,30 @@ import spray.json._
 class WSLobbySpec extends ApiTrait
 {
   "WS" must {
-    "greet" in {
-      val wsClient = WSProbe()
-
-      // WS creates a WebSocket request for testing
-      WS("/ws/greeter", wsClient.flow) ~> routes ~>
-        check {
-          // check response for WS Upgrade headers
-          isWebSocketUpgrade shouldEqual true
-
-          // manually run a WS conversation
-          wsClient.sendMessage("Peter")
-          wsClient.expectMessage("Hello Peter!")
-
-          wsClient.sendMessage(BinaryMessage(ByteString("abcdef")))
-          wsClient.expectNoMessage(100.millis)
-
-          wsClient.sendMessage("John")
-          wsClient.expectMessage("Hello John!")
-
-          wsClient.sendCompletion()
-          wsClient.expectCompletion()
-        }
-
-    }
+//    "greet" in {
+//      val wsClient = WSProbe()
+//
+//      // WS creates a WebSocket request for testing
+//      WS("/ws/greeter", wsClient.flow) ~> routes ~>
+//        check {
+//          // check response for WS Upgrade headers
+//          isWebSocketUpgrade shouldEqual true
+//
+//          // manually run a WS conversation
+//          wsClient.sendMessage("Peter")
+//          wsClient.expectMessage("Hello Peter!")
+//
+//          wsClient.sendMessage(BinaryMessage(ByteString("abcdef")))
+//          wsClient.expectNoMessage(100.millis)
+//
+//          wsClient.sendMessage("John")
+//          wsClient.expectMessage("Hello John!")
+//
+//          wsClient.sendCompletion()
+//          wsClient.expectCompletion()
+//        }
+//
+//    }
 
     "return lobby state" in {
       val wsClient = WSProbe()

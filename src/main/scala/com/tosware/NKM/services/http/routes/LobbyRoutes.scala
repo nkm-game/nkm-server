@@ -3,17 +3,16 @@ package com.tosware.NKM.services.http.routes
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
-import com.tosware.NKM.models.JwtContent
 import com.tosware.NKM.models.lobby._
 import com.tosware.NKM.services.LobbyService
 import com.tosware.NKM.services.http.directives.JwtDirective
 import enumeratum.values.{StringEnum, StringEnumEntry}
-import spray.json._
 
 sealed abstract class LobbyRoute(val value: String) extends StringEnumEntry
 
 object LobbyRoute extends StringEnum[LobbyRoute] {
   val values = findValues
+  case object Auth extends LobbyRoute("auth")
   case object Lobbies extends LobbyRoute("lobbies")
   case object Lobby extends LobbyRoute("lobby")
   case object CreateLobby extends LobbyRoute("create_lobby")
@@ -46,9 +45,8 @@ trait LobbyRoutes extends JwtDirective
 
   val lobbyPostRoutes = concat(
     path(LobbyRoute.CreateLobby.value) {
-      authenticated { jwtClaim =>
+      authenticated { username =>
         entity(as[LobbyCreationRequest]) { entity =>
-          val username = jwtClaim.content.parseJson.convertTo[JwtContent].content
           lobbyService.createLobby(entity.name, username) match {
             case LobbyService.LobbyCreated(lobbyId) => complete(StatusCodes.Created, lobbyId)
             case LobbyService.LobbyCreationFailure => complete(StatusCodes.InternalServerError)
@@ -59,9 +57,8 @@ trait LobbyRoutes extends JwtDirective
     },
 
     path(LobbyRoute.JoinLobby.value) {
-      authenticated { jwtClaim =>
+      authenticated { username =>
         entity(as[LobbyJoinRequest]) { entity =>
-          val username = jwtClaim.content.parseJson.convertTo[JwtContent].content
           lobbyService.joinLobby(username, entity) match {
             case LobbyService.Success => complete(StatusCodes.OK)
             case LobbyService.Failure => complete(StatusCodes.InternalServerError)
@@ -72,9 +69,8 @@ trait LobbyRoutes extends JwtDirective
     },
 
     path(LobbyRoute.LeaveLobby.value) {
-      authenticated { jwtClaim =>
+      authenticated { username =>
         entity(as[LobbyLeaveRequest]) { entity =>
-          val username = jwtClaim.content.parseJson.convertTo[JwtContent].content
           lobbyService.leaveLobby(username, entity) match {
             case LobbyService.Success => complete(StatusCodes.OK)
             case LobbyService.Failure => complete(StatusCodes.InternalServerError)
@@ -85,9 +81,8 @@ trait LobbyRoutes extends JwtDirective
     },
 
     path(LobbyRoute.SetHexMap.value) {
-      authenticated { jwtClaim =>
+      authenticated { username =>
         entity(as[SetHexMapNameRequest]) { entity =>
-          val username = jwtClaim.content.parseJson.convertTo[JwtContent].content
           lobbyService.setHexmapName(username, entity) match {
             case LobbyService.Success => complete(StatusCodes.OK)
             case LobbyService.Failure => complete(StatusCodes.InternalServerError)
@@ -98,9 +93,8 @@ trait LobbyRoutes extends JwtDirective
     },
 
     path(LobbyRoute.SetPickType.value) {
-      authenticated { jwtClaim =>
+      authenticated { username =>
         entity(as[SetPickTypeRequest]) { request =>
-          val username = jwtClaim.content.parseJson.convertTo[JwtContent].content
           lobbyService.setPickType(username, request) match {
             case LobbyService.Success => complete(StatusCodes.OK)
             case LobbyService.Failure => complete(StatusCodes.InternalServerError)
@@ -111,9 +105,8 @@ trait LobbyRoutes extends JwtDirective
     },
 
     path(LobbyRoute.SetNumberOfBans.value) {
-      authenticated { jwtClaim =>
+      authenticated { username =>
         entity(as[SetNumberOfBansRequest]) { request =>
-          val username = jwtClaim.content.parseJson.convertTo[JwtContent].content
           lobbyService.setNumberOfBans(username, request) match {
             case LobbyService.Success => complete(StatusCodes.OK)
             case LobbyService.Failure => complete(StatusCodes.InternalServerError)
@@ -124,9 +117,8 @@ trait LobbyRoutes extends JwtDirective
     },
 
     path(LobbyRoute.SetNumberOfCharacters.value) {
-      authenticated { jwtClaim =>
+      authenticated { username =>
         entity(as[SetNumberOfCharactersPerPlayerRequest]) { request =>
-          val username = jwtClaim.content.parseJson.convertTo[JwtContent].content
           lobbyService.setNumberOfCharactersPerPlayer(username, request) match {
             case LobbyService.Success => complete(StatusCodes.OK)
             case LobbyService.Failure => complete(StatusCodes.InternalServerError)
@@ -136,9 +128,8 @@ trait LobbyRoutes extends JwtDirective
       }
     },
     path(LobbyRoute.StartGame.value) {
-      authenticated { jwtClaim =>
+      authenticated { username =>
         entity(as[StartGameRequest]) { entity =>
-          val username = jwtClaim.content.parseJson.convertTo[JwtContent].content
           lobbyService.startGame(username, entity) match {
             case LobbyService.Success => complete(StatusCodes.OK)
             case LobbyService.Failure => complete(StatusCodes.InternalServerError)
