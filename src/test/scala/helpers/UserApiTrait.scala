@@ -9,7 +9,7 @@ trait UserApiTrait extends ApiTrait
   {
     val usernames = (1 to 5).map(x => { s"test_user_$x" })
     val registerRequests = usernames.map(u => RegisterRequest(u, s"test_user_$u@example.com", "password"))
-    var tokens: List[String] = List()
+    var tokens: Seq[String] = Seq()
 
     def getAuthHeader(token: String) = RawHeader("Authorization", s"Bearer $token")
 

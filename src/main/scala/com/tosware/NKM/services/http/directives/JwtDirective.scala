@@ -17,14 +17,19 @@ trait JwtHelper extends NKMJsonProtocol {
   implicit val jwtSecretKey: JwtSecretKey
 
   /** returns Some(username) when authenticated, otherwise None */
-  def authenticateToken(bearerToken: String): Option[String] = {
-    val token = bearerToken.split(' ')(1)
+  def authenticateToken(token: String): Option[String] = {
     JwtSprayJson.decode(token, jwtSecretKey.value, Seq(JwtAlgorithm.HS256)) match {
       case Success(jwtClaim) =>
         val username = jwtClaim.content.parseJson.convertTo[JwtContent].content
         Some(username)
       case Failure(_) => None
     }
+  }
+
+  /** returns Some(username) when authenticated, otherwise None */
+  def authenticateBearerToken(bearerToken: String): Option[String] = {
+    val token = bearerToken.split(' ')(1)
+    authenticateToken(token)
   }
 
   /** returns token for given login */
@@ -46,7 +51,7 @@ trait JwtDirective extends JwtHelper {
   def authenticated: Directive1[String] =
     optionalHeaderValueByName("Authorization").flatMap {
       case Some(bearerToken) =>
-        authenticateToken(bearerToken) match {
+        authenticateBearerToken(bearerToken) match {
           case Some(username) => provide(username)
           case None => complete(StatusCodes.Unauthorized)
         }

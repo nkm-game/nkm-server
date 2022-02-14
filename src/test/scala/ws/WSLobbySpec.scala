@@ -1,15 +1,13 @@
 package ws
 
-import akka.http.scaladsl.model.ws.BinaryMessage
 import akka.http.scaladsl.testkit.WSProbe
-import akka.util.ByteString
-import com.tosware.NKM.services.http.routes.{LobbyRoute, WebsocketLobbyRequest}
-import helpers.ApiTrait
-
-import scala.concurrent.duration.DurationInt
+import com.tosware.NKM.actors.WebsocketUser.{WebsocketLobbyRequest, WebsocketLobbyResponse}
+import com.tosware.NKM.models.lobby.AuthRequest
+import com.tosware.NKM.services.http.routes.LobbyRoute
+import helpers.{ApiTrait, UserApiTrait}
 import spray.json._
 
-class WSLobbySpec extends ApiTrait
+class WSLobbySpec extends UserApiTrait
 {
   "WS" must {
 //    "greet" in {
@@ -44,11 +42,34 @@ class WSLobbySpec extends ApiTrait
         check {
           isWebSocketUpgrade shouldEqual true
 
-          wsClient.sendMessage(WebsocketLobbyRequest(requestPath = LobbyRoute.Lobbies, "").toJson.toString)
-          wsClient.expectMessage("[]")
+          val request = WebsocketLobbyRequest(requestPath = LobbyRoute.Lobbies, "").toJson.toString
+          val expectedResponse = WebsocketLobbyResponse(body = "[]", statusCode = 200).toJson.toString
+
+          wsClient.sendMessage(request)
+          wsClient.expectMessage(expectedResponse)
 
           wsClient.sendCompletion()
-          wsClient.expectCompletion()
+//          wsClient.expectCompletion()
+        }
+    }
+
+    "authenticate" in {
+      val wsClient = WSProbe()
+
+      WS("/ws/lobby", wsClient.flow) ~> routes ~>
+        check {
+          isWebSocketUpgrade shouldEqual true
+
+          val authRequest = AuthRequest(tokens(0)).toJson.toString
+
+          val request = WebsocketLobbyRequest(requestPath = LobbyRoute.Auth, authRequest).toJson.toString
+          val expectedResponse = WebsocketLobbyResponse(body = usernames(0), statusCode = 200).toJson.toString
+
+          wsClient.sendMessage(request)
+          wsClient.expectMessage(expectedResponse)
+
+          wsClient.sendCompletion()
+          //          wsClient.expectCompletion()
         }
 
     }
