@@ -2,8 +2,10 @@ package com.tosware.NKM.actors
 
 import akka.actor.{Actor, ActorLogging, ActorRef, PoisonPill, Props}
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
+import akka.http.scaladsl.model.{StatusCode, StatusCodes}
+import akka.pattern.ask
 import com.tosware.NKM.NKMTimeouts
-import com.tosware.NKM.models.lobby.{AuthRequest, GetLobbyRequest}
+import com.tosware.NKM.models.lobby.{AuthRequest, GetLobbyRequest, LobbyCreationRequest}
 import com.tosware.NKM.serializers.NKMJsonProtocol
 import com.tosware.NKM.services.LobbyService
 import com.tosware.NKM.services.http.directives.{JwtHelper, JwtSecretKey}
@@ -13,6 +15,8 @@ import scala.concurrent.Await
 import spray.json._
 
 object WebsocketUser {
+  case object GetAuthStatus
+  case class AuthStatus(username: Option[String])
   case class Connected(outgoing: ActorRef)
   case class IncomingMessage(text: String)
   case class OutgoingMessage(text: String)
@@ -44,43 +48,52 @@ class WebsocketUser(lobbySession: ActorRef)(implicit val lobbyService: LobbyServ
     lobbySession ! LobbySessionActor.Join
 
     {
+      case GetAuthStatus =>
+        log.info("get auth status")
+        sender() ! AuthStatus(username)
       case Authenticate(u) =>
-        log.info(s"Authenticated $u")
         username = Some(u)
       case IncomingMessage(text) =>
-        lobbySession ! LobbySessionActor.ChatMessage(text)
         val request = text.parseJson.convertTo[WebsocketLobbyRequest]
-        val response = parseWebsocketLobbyRequest(request, self)
+        log.info(s"Request: $request")
+        val response = parseWebsocketLobbyRequest(request, self, AuthStatus(username))
+        log.info(s"Response: $response")
         outgoing ! OutgoingMessage(response.toJson.toString)
-
-      case LobbySessionActor.ChatMessage(text) =>
-        outgoing ! OutgoingMessage(text)
       case PoisonPill =>
         log.info(s"Disconnected")
     }
   }
 
-  def parseWebsocketLobbyRequest(request: WebsocketLobbyRequest, userActor: ActorRef): WebsocketLobbyResponse = {
-    //      val request = text.parseJson.convertTo[WebsocketLobbyRequest]
+  def parseWebsocketLobbyRequest(request: WebsocketLobbyRequest, userActor: ActorRef, authStatus: AuthStatus): WebsocketLobbyResponse = {
     request.requestPath match {
       case LobbyRoute.Auth =>
         val token = request.requestJson.parseJson.convertTo[AuthRequest].token
         authenticateToken(token) match {
           case Some(username) =>
             userActor ! WebsocketUser.Authenticate(username)
-            WebsocketLobbyResponse(200, username)
+            WebsocketLobbyResponse(StatusCodes.OK.intValue, username)
           case None =>
-            WebsocketLobbyResponse(401, "Invalid token.")
+            WebsocketLobbyResponse(StatusCodes.Unauthorized.intValue, "Invalid token.")
         }
 
       case LobbyRoute.Lobbies =>
         val lobbies = Await.result(lobbyService.getAllLobbies(), atMost)
-        WebsocketLobbyResponse(200, lobbies.toJson.toString)
+        WebsocketLobbyResponse(StatusCodes.OK.intValue, lobbies.toJson.toString)
       case LobbyRoute.Lobby =>
         val lobbyId = request.requestJson.parseJson.convertTo[GetLobbyRequest].lobbyId
         val lobby = Await.result(lobbyService.getLobby(lobbyId), atMost)
-        WebsocketLobbyResponse(200, lobby.toJson.toString)
-      case LobbyRoute.CreateLobby => ???
+        WebsocketLobbyResponse(StatusCodes.OK.intValue, lobby.toJson.toString)
+      case LobbyRoute.CreateLobby =>
+        val lobbyName = request.requestJson.parseJson.convertTo[LobbyCreationRequest].name
+        authStatus match {
+          case AuthStatus(Some(username)) =>
+            lobbyService.createLobby(lobbyName, username) match {
+              case LobbyService.LobbyCreated(lobbyId) => WebsocketLobbyResponse(StatusCodes.Created.intValue, lobbyId)
+              case LobbyService.LobbyCreationFailure => WebsocketLobbyResponse(StatusCodes.InternalServerError.intValue)
+              case _ => WebsocketLobbyResponse(StatusCodes.InternalServerError.intValue)
+            }
+          case _ => WebsocketLobbyResponse(StatusCodes.Unauthorized.intValue)
+        }
       case LobbyRoute.JoinLobby => ???
       case LobbyRoute.LeaveLobby => ???
       case LobbyRoute.SetHexMap => ???

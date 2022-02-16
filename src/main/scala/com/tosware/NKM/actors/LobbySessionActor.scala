@@ -4,7 +4,7 @@ import akka.actor.{Actor, ActorRef, Props, Terminated}
 
 object LobbySessionActor {
   case object Join
-  case class ChatMessage(message: String)
+  case class BroadcastMessage(message: String)
 
   def props(): Props = Props(new LobbySessionActor)
 
@@ -20,7 +20,7 @@ class LobbySessionActor extends Actor {
       context.watch(sender())
     case Terminated(user) =>
       users -= user
-    case msg: ChatMessage =>
+    case msg: BroadcastMessage =>
       users.foreach(_ ! msg)
   }
 }

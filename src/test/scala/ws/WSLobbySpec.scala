@@ -1,44 +1,32 @@
 package ws
 
+import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.testkit.WSProbe
 import com.tosware.NKM.actors.WebsocketUser.{WebsocketLobbyRequest, WebsocketLobbyResponse}
-import com.tosware.NKM.models.lobby.AuthRequest
+import com.tosware.NKM.models.lobby.{AuthRequest, LobbyCreationRequest, LobbyJoinRequest}
 import com.tosware.NKM.services.http.routes.LobbyRoute
 import helpers.{ApiTrait, UserApiTrait}
 import spray.json._
 
 class WSLobbySpec extends UserApiTrait
 {
-  "WS" must {
-//    "greet" in {
-//      val wsClient = WSProbe()
-//
-//      // WS creates a WebSocket request for testing
-//      WS("/ws/greeter", wsClient.flow) ~> routes ~>
-//        check {
-//          // check response for WS Upgrade headers
-//          isWebSocketUpgrade shouldEqual true
-//
-//          // manually run a WS conversation
-//          wsClient.sendMessage("Peter")
-//          wsClient.expectMessage("Hello Peter!")
-//
-//          wsClient.sendMessage(BinaryMessage(ByteString("abcdef")))
-//          wsClient.expectNoMessage(100.millis)
-//
-//          wsClient.sendMessage("John")
-//          wsClient.expectMessage("Hello John!")
-//
-//          wsClient.sendCompletion()
-//          wsClient.expectCompletion()
-//        }
-//
-//    }
+  val wsPrefix = "/ws"
+  val wsUri = s"$wsPrefix/lobby"
+  def auth(tokenId: Int)(implicit wsClient: WSProbe): Unit = {
+    val authRequest = AuthRequest(tokens(tokenId)).toJson.toString
 
+    val request = WebsocketLobbyRequest(requestPath = LobbyRoute.Auth, authRequest).toJson.toString
+    val expectedResponse = WebsocketLobbyResponse(body = usernames(tokenId), statusCode = 200).toJson.toString
+
+    wsClient.sendMessage(request)
+    wsClient.expectMessage(expectedResponse)
+  }
+
+
+  "WS" must {
     "return lobby state" in {
       val wsClient = WSProbe()
-
-      WS("/ws/lobby", wsClient.flow) ~> routes ~>
+      WS(wsUri, wsClient.flow) ~> routes ~>
         check {
           isWebSocketUpgrade shouldEqual true
 
@@ -55,25 +43,65 @@ class WSLobbySpec extends UserApiTrait
 
     "authenticate" in {
       val wsClient = WSProbe()
+      WS(wsUri, wsClient.flow) ~> routes ~> check {
+        isWebSocketUpgrade shouldEqual true
 
-      WS("/ws/lobby", wsClient.flow) ~> routes ~>
-        check {
-          isWebSocketUpgrade shouldEqual true
+        val authRequest = AuthRequest(tokens(0)).toJson.toString
 
-          val authRequest = AuthRequest(tokens(0)).toJson.toString
+        val request = WebsocketLobbyRequest(requestPath = LobbyRoute.Auth, authRequest).toJson.toString
+        val expectedResponse = WebsocketLobbyResponse(body = usernames(0), statusCode = 200).toJson.toString
 
-          val request = WebsocketLobbyRequest(requestPath = LobbyRoute.Auth, authRequest).toJson.toString
-          val expectedResponse = WebsocketLobbyResponse(body = usernames(0), statusCode = 200).toJson.toString
+        wsClient.sendMessage(request)
+        wsClient.expectMessage(expectedResponse)
 
-          wsClient.sendMessage(request)
-          wsClient.expectMessage(expectedResponse)
+        wsClient.sendCompletion()
+//        wsClient.expectCompletion()
+      }
+    }
 
-          wsClient.sendCompletion()
-          //          wsClient.expectCompletion()
-        }
+    "allow creating lobbies" in {
+      val lobbyName = "lobby_name"
+      implicit val wsClient: WSProbe = WSProbe()
+      WS(wsUri, wsClient.flow) ~> routes ~> check {
+        isWebSocketUpgrade shouldEqual true
+        auth(0)
+        val createLobbyRequest = LobbyCreationRequest(lobbyName).toJson.toString
+        val wsRequest = WebsocketLobbyRequest(requestPath = LobbyRoute.CreateLobby, createLobbyRequest).toJson.toString
 
+        wsClient.sendMessage(wsRequest)
+
+        val response = wsClient.expectMessage().asTextMessage.getStrictText.parseJson.convertTo[WebsocketLobbyResponse]
+        response.statusCode shouldBe StatusCodes.Created.intValue
+
+        wsClient.sendCompletion()
+      }
     }
 //    "allow joining and leaving lobbies" in {
+//      val lobbyName = "lobby_name"
+//      implicit val wsClient: WSProbe = WSProbe()
+//      WS(wsUri, wsClient.flow) ~> routes ~> check {
+//        isWebSocketUpgrade shouldEqual true
+//
+////        val authRequest = AuthRequest(tokens(0)).toJson.toString
+////
+////        val request = WebsocketLobbyRequest(requestPath = LobbyRoute.Auth, authRequest).toJson.toString
+////        val expectedResponse = WebsocketLobbyResponse(body = usernames(0), statusCode = 200).toJson.toString
+////
+////        wsClient.sendMessage(request)
+////        wsClient.expectMessage(expectedResponse)
+//        auth(0)
+//        val createLobbyRequest = LobbyCreationRequest(lobbyName).toJson.toString
+//        val wsRequest = WebsocketLobbyRequest(requestPath = LobbyRoute.CreateLobby, createLobbyRequest).toJson.toString
+//
+//        val joinLobbyRequest = LobbyJoinRequest(lobbyName).toJson.toString
+//        val wsRequest = WebsocketLobbyRequest(requestPath = LobbyRoute.JoinLobby, joinLobbyRequest).toJson.toString
+//
+//        wsClient.sendMessage(wsRequest)
+////        wsClient.
+//
+//        wsClient.sendCompletion()
+//        //          wsClient.expectCompletion()
+//      }
 //
 //      // this request should fail as it is not a lobby id, but lobby name
 //      Post("/api/join_lobby", LobbyJoinRequest(lobbyName)).addHeader(getAuthHeader(tokens(1))) ~> routes ~> check(status shouldEqual InternalServerError)
@@ -330,5 +358,6 @@ class WSLobbySpec extends UserApiTrait
 //
 //      Post("/api/start_game", StartGameRequest(lobbyId)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check(status shouldEqual OK)
 //    }
+//  }
   }
 }
