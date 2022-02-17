@@ -48,6 +48,10 @@ class Lobby(id: String)(implicit NKMDataService: NKMDataService)
   import Lobby._
   override def persistenceId: String = s"lobby-$id"
 
+  override def log = {
+    akka.event.Logging(context.system, s"${this.getClass}($persistenceId)")
+  }
+
   var lobbyState: LobbyState = LobbyState(id)
   val gameActor: ActorRef = context.system.actorOf(Game.props(id))
   val nkmData: ActorRef = context.system.actorOf(NKMData.props())
@@ -97,6 +101,8 @@ class Lobby(id: String)(implicit NKMDataService: NKMDataService)
         }
 
     case UserJoin(userId: String) =>
+      log.info(s"$userId tries to join lobby")
+      log.warning(lobbyState.toString)
       if(lobbyState.created() && !lobbyState.userIds.contains(userId)) {
         val userJoinedEvent = UserJoined(id, userId)
         persist(userJoinedEvent) { _ =>
@@ -110,6 +116,7 @@ class Lobby(id: String)(implicit NKMDataService: NKMDataService)
       }
 
     case UserLeave(userId: String) =>
+      log.info(s"$userId tries to leave lobby")
       if(lobbyState.created() && lobbyState.userIds.contains(userId)) {
         val userLeftEvent = UserLeft(id, userId)
         persist(userLeftEvent) { _ =>

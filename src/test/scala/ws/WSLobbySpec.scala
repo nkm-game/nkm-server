@@ -2,8 +2,9 @@ package ws
 
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.testkit.WSProbe
+import com.tosware.NKM.DBManager
 import com.tosware.NKM.actors.WebsocketUser.{WebsocketLobbyRequest, WebsocketLobbyResponse}
-import com.tosware.NKM.models.lobby.{AuthRequest, LobbyCreationRequest, LobbyJoinRequest}
+import com.tosware.NKM.models.lobby.{AuthRequest, GetLobbyRequest, LobbyCreationRequest, LobbyJoinRequest, LobbyLeaveRequest, LobbyState}
 import com.tosware.NKM.services.http.routes.LobbyRoute
 import helpers.{ApiTrait, UserApiTrait}
 import spray.json._
@@ -12,29 +13,82 @@ class WSLobbySpec extends UserApiTrait
 {
   val wsPrefix = "/ws"
   val wsUri = s"$wsPrefix/lobby"
-  def auth(tokenId: Int)(implicit wsClient: WSProbe): Unit = {
+
+  def sendRequest(request: WebsocketLobbyRequest)(implicit wsClient: WSProbe): Unit =
+    wsClient.sendMessage(request.toJson.toString)
+
+  def fetchResponse()(implicit wsClient: WSProbe): WebsocketLobbyResponse = {
+    val response = wsClient.expectMessage().asTextMessage.getStrictText.parseJson.convertTo[WebsocketLobbyResponse]
+    response
+  }
+
+  def auth(tokenId: Int)(implicit wsClient: WSProbe): WebsocketLobbyResponse = {
     val authRequest = AuthRequest(tokens(tokenId)).toJson.toString
 
-    val request = WebsocketLobbyRequest(requestPath = LobbyRoute.Auth, authRequest).toJson.toString
-    val expectedResponse = WebsocketLobbyResponse(body = usernames(tokenId), statusCode = 200).toJson.toString
+    val request = WebsocketLobbyRequest(LobbyRoute.Auth, authRequest)
+    val expectedResponse = WebsocketLobbyResponse(body = usernames(tokenId), statusCode = 200)
 
-    wsClient.sendMessage(request)
-    wsClient.expectMessage(expectedResponse)
+    sendRequest(request)
+
+    val response = fetchResponse()
+    response shouldBe expectedResponse
+    response
+  }
+
+  def createLobby(lobbyName: String)(implicit wsClient: WSProbe): WebsocketLobbyResponse = {
+    val createLobbyRequest = LobbyCreationRequest(lobbyName).toJson.toString
+    val request = WebsocketLobbyRequest(LobbyRoute.CreateLobby, createLobbyRequest)
+
+    sendRequest(request)
+
+    val response = fetchResponse()
+    response
+  }
+
+  def fetchLobbies()(implicit wsClient: WSProbe): WebsocketLobbyResponse = {
+    val request = WebsocketLobbyRequest(LobbyRoute.Lobbies)
+    sendRequest(request)
+
+    val response = fetchResponse()
+    response
+  }
+
+  def fetchLobby(lobbyId: String)(implicit wsClient: WSProbe): WebsocketLobbyResponse = {
+    val getLobbyRequest = GetLobbyRequest(lobbyId).toJson.toString
+    val request = WebsocketLobbyRequest(LobbyRoute.Lobby, getLobbyRequest)
+    sendRequest(request)
+
+    val response = fetchResponse()
+    response
+  }
+
+  def joinLobby(lobbyId: String)(implicit wsClient: WSProbe): WebsocketLobbyResponse = {
+    val joinLobbyRequest = LobbyJoinRequest(lobbyId).toJson.toString
+    val request = WebsocketLobbyRequest(LobbyRoute.JoinLobby, joinLobbyRequest)
+
+    sendRequest(request)
+
+    val response = fetchResponse()
+    response
+  }
+
+  def leaveLobby(lobbyId: String)(implicit wsClient: WSProbe): WebsocketLobbyResponse = {
+    val leaveLobbyRequest = LobbyLeaveRequest(lobbyId).toJson.toString
+    val request = WebsocketLobbyRequest(LobbyRoute.LeaveLobby, leaveLobbyRequest)
+
+    sendRequest(request)
+
+    val response = fetchResponse()
+    response
   }
 
 
   "WS" must {
-    "return lobby state" in {
-      val wsClient = WSProbe()
+    "fetch empty lobbies state" in {
+      implicit val wsClient: WSProbe = WSProbe()
       WS(wsUri, wsClient.flow) ~> routes ~>
         check {
-          isWebSocketUpgrade shouldEqual true
-
-          val request = WebsocketLobbyRequest(requestPath = LobbyRoute.Lobbies, "").toJson.toString
-          val expectedResponse = WebsocketLobbyResponse(body = "[]", statusCode = 200).toJson.toString
-
-          wsClient.sendMessage(request)
-          wsClient.expectMessage(expectedResponse)
+          fetchLobbies().body shouldBe "[]"
 
           wsClient.sendCompletion()
 //          wsClient.expectCompletion()
@@ -42,17 +96,9 @@ class WSLobbySpec extends UserApiTrait
     }
 
     "authenticate" in {
-      val wsClient = WSProbe()
+      implicit val wsClient: WSProbe = WSProbe()
       WS(wsUri, wsClient.flow) ~> routes ~> check {
-        isWebSocketUpgrade shouldEqual true
-
-        val authRequest = AuthRequest(tokens(0)).toJson.toString
-
-        val request = WebsocketLobbyRequest(requestPath = LobbyRoute.Auth, authRequest).toJson.toString
-        val expectedResponse = WebsocketLobbyResponse(body = usernames(0), statusCode = 200).toJson.toString
-
-        wsClient.sendMessage(request)
-        wsClient.expectMessage(expectedResponse)
+        auth(0).statusCode shouldBe StatusCodes.OK.intValue
 
         wsClient.sendCompletion()
 //        wsClient.expectCompletion()
@@ -63,82 +109,67 @@ class WSLobbySpec extends UserApiTrait
       val lobbyName = "lobby_name"
       implicit val wsClient: WSProbe = WSProbe()
       WS(wsUri, wsClient.flow) ~> routes ~> check {
-        isWebSocketUpgrade shouldEqual true
         auth(0)
+
         val createLobbyRequest = LobbyCreationRequest(lobbyName).toJson.toString
-        val wsRequest = WebsocketLobbyRequest(requestPath = LobbyRoute.CreateLobby, createLobbyRequest).toJson.toString
+        val wsRequest = WebsocketLobbyRequest(LobbyRoute.CreateLobby, createLobbyRequest)
 
-        wsClient.sendMessage(wsRequest)
+        sendRequest(wsRequest)
 
-        val response = wsClient.expectMessage().asTextMessage.getStrictText.parseJson.convertTo[WebsocketLobbyResponse]
+        val response = fetchResponse()
         response.statusCode shouldBe StatusCodes.Created.intValue
 
         wsClient.sendCompletion()
       }
     }
-//    "allow joining and leaving lobbies" in {
-//      val lobbyName = "lobby_name"
-//      implicit val wsClient: WSProbe = WSProbe()
-//      WS(wsUri, wsClient.flow) ~> routes ~> check {
-//        isWebSocketUpgrade shouldEqual true
-//
-////        val authRequest = AuthRequest(tokens(0)).toJson.toString
-////
-////        val request = WebsocketLobbyRequest(requestPath = LobbyRoute.Auth, authRequest).toJson.toString
-////        val expectedResponse = WebsocketLobbyResponse(body = usernames(0), statusCode = 200).toJson.toString
-////
-////        wsClient.sendMessage(request)
-////        wsClient.expectMessage(expectedResponse)
-//        auth(0)
-//        val createLobbyRequest = LobbyCreationRequest(lobbyName).toJson.toString
-//        val wsRequest = WebsocketLobbyRequest(requestPath = LobbyRoute.CreateLobby, createLobbyRequest).toJson.toString
-//
-//        val joinLobbyRequest = LobbyJoinRequest(lobbyName).toJson.toString
-//        val wsRequest = WebsocketLobbyRequest(requestPath = LobbyRoute.JoinLobby, joinLobbyRequest).toJson.toString
-//
-//        wsClient.sendMessage(wsRequest)
-////        wsClient.
-//
-//        wsClient.sendCompletion()
-//        //          wsClient.expectCompletion()
-//      }
-//
-//      // this request should fail as it is not a lobby id, but lobby name
-//      Post("/api/join_lobby", LobbyJoinRequest(lobbyName)).addHeader(getAuthHeader(tokens(1))) ~> routes ~> check(status shouldEqual InternalServerError)
-//
-//      Post("/api/join_lobby", LobbyJoinRequest(lobbyId)).addHeader(getAuthHeader(tokens(1))) ~> routes ~> check(status shouldEqual OK)
-//
-//      // wait for CQRS Event Handler to persist
-//      Thread.sleep(DBManager.dbTimeout.toMillis)
-//
-//      Get(s"/api/lobby/$lobbyId") ~> routes ~> check {
-//        status shouldEqual OK
-//        val lobby = responseAs[LobbyState]
-//        lobby.userIds shouldEqual List(usernames(0), usernames(1))
-//      }
-//
-//      Post("/api/leave_lobby", LobbyLeaveRequest(lobbyId)).addHeader(getAuthHeader(tokens(1))) ~> routes ~> check(status shouldEqual OK)
-//
-//      // wait for CQRS Event Handler to persist
-//      Thread.sleep(DBManager.dbTimeout.toMillis)
-//
-//      Get(s"/api/lobby/$lobbyId") ~> routes ~> check {
-//        status shouldEqual OK
-//        val lobby = responseAs[LobbyState]
-//        lobby.userIds shouldEqual List(usernames(0))
-//      }
-//
-//      Post("/api/leave_lobby", LobbyLeaveRequest(lobbyId)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check(status shouldEqual OK)
-//
-//      // wait for CQRS Event Handler to persist
-//      Thread.sleep(DBManager.dbTimeout.toMillis)
-//
-//      Get(s"/api/lobby/$lobbyId") ~> routes ~> check {
-//        status shouldEqual OK
-//        val lobby = responseAs[LobbyState]
-//        lobby.userIds shouldEqual List()
-//      }
-//    }
+    "allow joining and leaving lobbies" in {
+      val lobbyName = "lobby_name"
+      implicit val wsClient: WSProbe = WSProbe()
+      WS(wsUri, wsClient.flow) ~> routes ~> check {
+        auth(0)
+        val lobbyId = createLobby(lobbyName).body
+
+        // this request should fail as it is not a lobby id, but lobby name
+        joinLobby(lobbyName).statusCode shouldBe StatusCodes.InternalServerError.intValue
+        // user that creates the lobby joins it automatically
+        joinLobby(lobbyId).statusCode shouldBe StatusCodes.InternalServerError.intValue
+        auth(1)
+        joinLobby(lobbyId).statusCode shouldBe StatusCodes.OK.intValue
+
+        // wait for CQRS Event Handler to persist
+        Thread.sleep(DBManager.dbTimeout.toMillis)
+
+        {
+          val lobbyResponse = fetchLobby(lobbyId)
+          lobbyResponse.statusCode shouldBe StatusCodes.OK.intValue
+          val lobby = lobbyResponse.body.parseJson.convertTo[LobbyState]
+          lobby.userIds shouldEqual List(usernames(0), usernames(1))
+        }
+
+        leaveLobby(lobbyId).statusCode shouldBe StatusCodes.OK.intValue
+        leaveLobby(lobbyId).statusCode shouldBe StatusCodes.InternalServerError.intValue
+
+        {
+          val lobbyResponse = fetchLobby(lobbyId)
+          lobbyResponse.statusCode shouldBe StatusCodes.OK.intValue
+          val lobby = lobbyResponse.body.parseJson.convertTo[LobbyState]
+          lobby.userIds shouldEqual List(usernames(0))
+        }
+
+        auth(0)
+        leaveLobby(lobbyId).statusCode shouldBe StatusCodes.OK.intValue
+        leaveLobby(lobbyId).statusCode shouldBe StatusCodes.InternalServerError.intValue
+
+        {
+          val lobbyResponse = fetchLobby(lobbyId)
+          lobbyResponse.statusCode shouldBe StatusCodes.OK.intValue
+          val lobby = lobbyResponse.body.parseJson.convertTo[LobbyState]
+          lobby.userIds shouldEqual List()
+        }
+
+        wsClient.sendCompletion()
+      }
+    }
 //
 //    "disallow joining a lobby you are already in" in {
 //      Post("/api/join_lobby", LobbyJoinRequest(lobbyId)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check(status shouldEqual InternalServerError)
