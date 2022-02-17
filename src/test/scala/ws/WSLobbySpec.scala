@@ -83,6 +83,18 @@ class WSLobbySpec extends UserApiTrait
 
 
   "WS" must {
+    "respond to invalid requests" in {
+      implicit val wsClient: WSProbe = WSProbe()
+      WS(wsUri, wsClient.flow) ~> routes ~>
+        check {
+          wsClient.sendMessage("invalid request")
+          fetchResponse().statusCode shouldBe 500
+
+          wsClient.sendCompletion()
+          //          wsClient.expectCompletion()
+        }
+    }
+
     "fetch empty lobbies state" in {
       implicit val wsClient: WSProbe = WSProbe()
       WS(wsUri, wsClient.flow) ~> routes ~>

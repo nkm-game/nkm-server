@@ -54,11 +54,18 @@ class WebsocketUser(lobbySession: ActorRef)(implicit val lobbyService: LobbyServ
       case Authenticate(u) =>
         username = Some(u)
       case IncomingMessage(text) =>
-        val request = text.parseJson.convertTo[WebsocketLobbyRequest]
-        log.info(s"Request: $request")
-        val response = parseWebsocketLobbyRequest(request, self, AuthStatus(username))
-        log.info(s"Response: $response")
-        outgoing ! OutgoingMessage(response.toJson.toString)
+        try {
+          val request = text.parseJson.convertTo[WebsocketLobbyRequest]
+          log.info(s"Request: $request")
+          val response = parseWebsocketLobbyRequest(request, self, AuthStatus(username))
+          log.info(s"Response: $response")
+          outgoing ! OutgoingMessage(response.toJson.toString)
+        }
+        catch {
+          case e: Exception =>
+            val response = WebsocketLobbyResponse(StatusCodes.InternalServerError.intValue, "Error with request parsing.")
+            outgoing ! OutgoingMessage(response.toJson.toString)
+        }
       case PoisonPill =>
         log.info(s"Disconnected")
     }
