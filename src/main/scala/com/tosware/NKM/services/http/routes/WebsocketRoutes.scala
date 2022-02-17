@@ -2,16 +2,13 @@ package com.tosware.NKM.services.http.routes
 
 import akka.NotUsed
 import akka.actor.{ActorSystem, PoisonPill}
-import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.model.ws.{Message, TextMessage}
 import akka.http.scaladsl.server.Directives._
 import akka.stream.OverflowStrategy
 import akka.stream.scaladsl.{Flow, Sink, Source}
-import com.tosware.NKM.NKMTimeouts
 import com.tosware.NKM.actors.{LobbySessionActor, WebsocketUser}
-import com.tosware.NKM.serializers.NKMJsonProtocol
 import com.tosware.NKM.services.LobbyService
-import com.tosware.NKM.services.http.directives.{JwtDirective, JwtHelper}
+import com.tosware.NKM.services.http.directives.JwtDirective
 
 // object to keep track of lobby sessions
 //object LobbySessionMap {

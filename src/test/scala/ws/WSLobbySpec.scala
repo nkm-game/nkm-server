@@ -4,9 +4,10 @@ import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.testkit.WSProbe
 import com.tosware.NKM.DBManager
 import com.tosware.NKM.actors.WebsocketUser.{WebsocketLobbyRequest, WebsocketLobbyResponse}
-import com.tosware.NKM.models.lobby.{AuthRequest, GetLobbyRequest, LobbyCreationRequest, LobbyJoinRequest, LobbyLeaveRequest, LobbyState}
+import com.tosware.NKM.models.game.PickType
+import com.tosware.NKM.models.lobby._
 import com.tosware.NKM.services.http.routes.LobbyRoute
-import helpers.{ApiTrait, UserApiTrait}
+import helpers.UserApiTrait
 import spray.json._
 
 class WSLobbySpec extends UserApiTrait
@@ -35,52 +36,50 @@ class WSLobbySpec extends UserApiTrait
     response
   }
 
-  def createLobby(lobbyName: String)(implicit wsClient: WSProbe): WebsocketLobbyResponse = {
-    val createLobbyRequest = LobbyCreationRequest(lobbyName).toJson.toString
-    val request = WebsocketLobbyRequest(LobbyRoute.CreateLobby, createLobbyRequest)
 
-    sendRequest(request)
-
-    val response = fetchResponse()
-    response
+  def sendWSRequest(route: LobbyRoute, requestJson: String = "")(implicit wsClient: WSProbe): WebsocketLobbyResponse = {
+    sendRequest(WebsocketLobbyRequest(route, requestJson))
+    fetchResponse()
   }
 
-  def fetchLobbies()(implicit wsClient: WSProbe): WebsocketLobbyResponse = {
-    val request = WebsocketLobbyRequest(LobbyRoute.Lobbies)
-    sendRequest(request)
+  def createLobby(lobbyName: String)(implicit wsClient: WSProbe): WebsocketLobbyResponse =
+    sendWSRequest(LobbyRoute.CreateLobby, LobbyCreationRequest(lobbyName).toJson.toString)
 
-    val response = fetchResponse()
-    response
+  def fetchLobbies()(implicit wsClient: WSProbe): WebsocketLobbyResponse =
+    sendWSRequest(LobbyRoute.Lobbies)
+
+  def fetchLobby(lobbyId: String)(implicit wsClient: WSProbe): WebsocketLobbyResponse =
+    sendWSRequest(LobbyRoute.Lobby, GetLobbyRequest(lobbyId).toJson.toString)
+
+  def joinLobby(lobbyId: String)(implicit wsClient: WSProbe): WebsocketLobbyResponse =
+    sendWSRequest(LobbyRoute.JoinLobby, LobbyJoinRequest(lobbyId).toJson.toString)
+
+  def leaveLobby(lobbyId: String)(implicit wsClient: WSProbe): WebsocketLobbyResponse =
+    sendWSRequest(LobbyRoute.LeaveLobby, LobbyLeaveRequest(lobbyId).toJson.toString)
+
+  def setHexMap(lobbyId: String, hexMapName: String)(implicit wsClient: WSProbe): WebsocketLobbyResponse =
+    sendWSRequest(LobbyRoute.SetHexMap, SetHexMapNameRequest(lobbyId, hexMapName).toJson.toString)
+
+  def setPickType(lobbyId: String, pickType: PickType)(implicit wsClient: WSProbe): WebsocketLobbyResponse =
+    sendWSRequest(LobbyRoute.SetPickType, SetPickTypeRequest(lobbyId, pickType).toJson.toString)
+
+  def setNumberOfBans(lobbyId: String, numberOfBans: Int)(implicit wsClient: WSProbe): WebsocketLobbyResponse =
+    sendWSRequest(LobbyRoute.SetNumberOfBans, SetNumberOfBansRequest(lobbyId, numberOfBans).toJson.toString)
+
+  def setNumberOfCharacters(lobbyId: String, numberOfCharacters: Int)(implicit wsClient: WSProbe): WebsocketLobbyResponse =
+    sendWSRequest(LobbyRoute.SetNumberOfCharacters, SetNumberOfCharactersPerPlayerRequest(lobbyId, numberOfCharacters).toJson.toString)
+
+  def startGame(lobbyId: String)(implicit wsClient: WSProbe): WebsocketLobbyResponse =
+    sendWSRequest(LobbyRoute.StartGame, StartGameRequest(lobbyId).toJson.toString)
+
+  def fetchAndParseLobby(lobbyId: String)(implicit wsClient: WSProbe): LobbyState = {
+    // wait for CQRS Event Handler to persist
+    Thread.sleep(DBManager.dbTimeout.toMillis)
+    val lobbyResponse = fetchLobby(lobbyId)
+    lobbyResponse.statusCode shouldBe StatusCodes.OK.intValue
+    lobbyResponse.body.parseJson.convertTo[LobbyState]
   }
 
-  def fetchLobby(lobbyId: String)(implicit wsClient: WSProbe): WebsocketLobbyResponse = {
-    val getLobbyRequest = GetLobbyRequest(lobbyId).toJson.toString
-    val request = WebsocketLobbyRequest(LobbyRoute.Lobby, getLobbyRequest)
-    sendRequest(request)
-
-    val response = fetchResponse()
-    response
-  }
-
-  def joinLobby(lobbyId: String)(implicit wsClient: WSProbe): WebsocketLobbyResponse = {
-    val joinLobbyRequest = LobbyJoinRequest(lobbyId).toJson.toString
-    val request = WebsocketLobbyRequest(LobbyRoute.JoinLobby, joinLobbyRequest)
-
-    sendRequest(request)
-
-    val response = fetchResponse()
-    response
-  }
-
-  def leaveLobby(lobbyId: String)(implicit wsClient: WSProbe): WebsocketLobbyResponse = {
-    val leaveLobbyRequest = LobbyLeaveRequest(lobbyId).toJson.toString
-    val request = WebsocketLobbyRequest(LobbyRoute.LeaveLobby, leaveLobbyRequest)
-
-    sendRequest(request)
-
-    val response = fetchResponse()
-    response
-  }
 
 
   "WS" must {
@@ -136,166 +135,166 @@ class WSLobbySpec extends UserApiTrait
         auth(1)
         joinLobby(lobbyId).statusCode shouldBe StatusCodes.OK.intValue
 
-        // wait for CQRS Event Handler to persist
-        Thread.sleep(DBManager.dbTimeout.toMillis)
-
-        {
-          val lobbyResponse = fetchLobby(lobbyId)
-          lobbyResponse.statusCode shouldBe StatusCodes.OK.intValue
-          val lobby = lobbyResponse.body.parseJson.convertTo[LobbyState]
-          lobby.userIds shouldEqual List(usernames(0), usernames(1))
-        }
+        fetchAndParseLobby(lobbyId).userIds shouldEqual List(usernames(0), usernames(1))
 
         leaveLobby(lobbyId).statusCode shouldBe StatusCodes.OK.intValue
         leaveLobby(lobbyId).statusCode shouldBe StatusCodes.InternalServerError.intValue
 
-        {
-          val lobbyResponse = fetchLobby(lobbyId)
-          lobbyResponse.statusCode shouldBe StatusCodes.OK.intValue
-          val lobby = lobbyResponse.body.parseJson.convertTo[LobbyState]
-          lobby.userIds shouldEqual List(usernames(0))
-        }
+        fetchAndParseLobby(lobbyId).userIds shouldEqual List(usernames(0))
 
         auth(0)
         leaveLobby(lobbyId).statusCode shouldBe StatusCodes.OK.intValue
         leaveLobby(lobbyId).statusCode shouldBe StatusCodes.InternalServerError.intValue
 
-        {
-          val lobbyResponse = fetchLobby(lobbyId)
-          lobbyResponse.statusCode shouldBe StatusCodes.OK.intValue
-          val lobby = lobbyResponse.body.parseJson.convertTo[LobbyState]
-          lobby.userIds shouldEqual List()
-        }
+        fetchAndParseLobby(lobbyId).userIds shouldEqual List()
 
         wsClient.sendCompletion()
       }
     }
-//
-//    "disallow joining a lobby you are already in" in {
-//      Post("/api/join_lobby", LobbyJoinRequest(lobbyId)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check(status shouldEqual InternalServerError)
-//
-//      Post("/api/join_lobby", LobbyJoinRequest(lobbyId)).addHeader(getAuthHeader(tokens(1))) ~> routes ~> check(status shouldEqual OK)
-//      Post("/api/join_lobby", LobbyJoinRequest(lobbyId)).addHeader(getAuthHeader(tokens(1))) ~> routes ~> check(status shouldEqual InternalServerError)
-//    }
-//
-//    "disallow leaving a lobby you are already in" in {
-//      Post("/api/leave_lobby", LobbyLeaveRequest(lobbyId)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check(status shouldEqual OK)
-//      Post("/api/leave_lobby", LobbyLeaveRequest(lobbyId)).addHeader(getAuthHeader(tokens(1))) ~> routes ~> check(status shouldEqual InternalServerError)
-//
-//      Post("/api/leave_lobby", LobbyLeaveRequest(lobbyId)).addHeader(getAuthHeader(tokens(1))) ~> routes ~> check(status shouldEqual InternalServerError)
-//
-//    }
-//
-//    // TODO: move this somewhere else
-//    "allow inspecting empty game state" in {
-//      Get("/api/state/random_id") ~> routes ~> check {
-//        status shouldEqual OK
-//        val gameState = responseAs[GameState]
-//        gameState.gamePhase shouldEqual GamePhase.NotStarted
-//        gameState.players.length shouldEqual 0
-//      }
-//    }
-//
-//
-//    "allow setting map name in a lobby for a host" in {
-//      val hexMapNames = List("Linia", "1v1v1")
-//
-//      hexMapNames.foreach { hexMapName =>
-//        Post("/api/set_hexmap", SetHexMapNameRequest(lobbyId, hexMapName)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check(status shouldEqual OK)
-//
-//        // wait for CQRS Event Handler to persist
-//        Thread.sleep(DBManager.dbTimeout.toMillis)
-//
-//        Get(s"/api/lobby/$lobbyId") ~> routes ~> check {
-//          status shouldEqual OK
-//          val lobby = responseAs[LobbyState]
-//          lobby.chosenHexMapName shouldEqual Some(hexMapName)
-//        }
-//      }
-//    }
-//
-//    "disallow setting invalid map name" in {
-//      val hexMapName = "this map does not exist"
-//
-//      Post("/api/set_hexmap", SetHexMapNameRequest(lobbyId, hexMapName)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check(status shouldEqual InternalServerError)
-//    }
-//
-//    "allow setting pick type in a lobby for a host" in {
-//      val pickTypes = PickType.values
-//
-//      pickTypes.foreach { p =>
-//        Post("/api/set_pick_type", SetPickTypeRequest(lobbyId, p)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check(status shouldEqual OK)
-//
-//        // wait for CQRS Event Handler to persist
-//        Thread.sleep(DBManager.dbTimeout.toMillis)
-//
-//        Get(s"/api/lobby/$lobbyId") ~> routes ~> check {
-//          status shouldEqual OK
-//          val lobby = responseAs[LobbyState]
-//          lobby.pickType shouldEqual p
-//        }
-//      }
-//    }
-//
-//    "allow setting number of bans in a lobby for a host" in {
-//      val numberOfBansList = List(5,3,2,1,0,3)
-//
-//      numberOfBansList.foreach { n =>
-//        Post("/api/set_number_of_bans", SetNumberOfBansRequest(lobbyId, n)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check(status shouldEqual OK)
-//
-//        // wait for CQRS Event Handler to persist
-//        Thread.sleep(DBManager.dbTimeout.toMillis)
-//
-//        Get(s"/api/lobby/$lobbyId") ~> routes ~> check {
-//          status shouldEqual OK
-//          val lobby = responseAs[LobbyState]
-//          lobby.numberOfBans shouldEqual n
-//        }
-//      }
-//    }
-//
-//    "disallow setting invalid number of bans in a lobby for a host" in {
-//      val numberOfBansList = List(-1, -4, -234)
-//
-//      numberOfBansList.foreach { n =>
-//        Post("/api/set_number_of_bans", SetNumberOfBansRequest(lobbyId, n)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check(status shouldEqual InternalServerError)
-//      }
-//    }
-//
-//    "allow setting number of characters in a lobby for a host" in {
-//      val numberOfCharactersList = List(5,3,2,3,8)
-//
-//      numberOfCharactersList.foreach { n =>
-//        Post("/api/set_number_of_characters", SetNumberOfCharactersPerPlayerRequest(lobbyId, n)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check(status shouldEqual OK)
-//
-//        // wait for CQRS Event Handler to persist
-//        Thread.sleep(DBManager.dbTimeout.toMillis)
-//
-//        Get(s"/api/lobby/$lobbyId") ~> routes ~> check {
-//          status shouldEqual OK
-//          val lobby = responseAs[LobbyState]
-//          lobby.numberOfCharactersPerPlayer shouldEqual n
-//        }
-//      }
-//    }
-//
-//    "disallow setting invalid number of characters in a lobby for a host" in {
-//      val numberOfCharactersList = List(-1, 0, -234)
-//
-//      numberOfCharactersList.foreach { n =>
-//        Post("/api/set_number_of_characters", SetNumberOfCharactersPerPlayerRequest(lobbyId, n)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check(status shouldEqual InternalServerError)
-//      }
-//    }
-//
-//    "allow to start a game" in {
-//      val hexMapName = "Linia"
-//      Post("/api/set_hexmap", SetHexMapNameRequest(lobbyId, hexMapName)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check(status shouldEqual OK)
-//      Post("/api/join_lobby", LobbyJoinRequest(lobbyId)).addHeader(getAuthHeader(tokens(1))) ~> routes ~> check(status shouldEqual OK)
-//
-//      Post("/api/start_game", StartGameRequest(lobbyId)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check(status shouldEqual OK)
-//
-//      Get(s"/api/state/$lobbyId").addHeader(getAuthHeader(tokens(0))) ~> routes ~> check {
-//        status shouldEqual OK
+
+    "disallow joining a lobby you are already in" in {
+      val lobbyName = "lobby_name"
+      implicit val wsClient: WSProbe = WSProbe()
+      WS(wsUri, wsClient.flow) ~> routes ~> check {
+        auth(0)
+        val lobbyId = createLobby(lobbyName).body
+
+        // user that creates the lobby joins it automatically
+        joinLobby(lobbyId).statusCode shouldBe StatusCodes.InternalServerError.intValue
+        auth(1)
+        joinLobby(lobbyId).statusCode shouldBe StatusCodes.OK.intValue
+        joinLobby(lobbyId).statusCode shouldBe StatusCodes.InternalServerError.intValue
+      }
+    }
+
+    "disallow leaving a lobby you are already in" in {
+      val lobbyName = "lobby_name"
+      implicit val wsClient: WSProbe = WSProbe()
+      WS(wsUri, wsClient.flow) ~> routes ~> check {
+        auth(0)
+        val lobbyId = createLobby(lobbyName).body
+
+        // user that creates the lobby joins it automatically
+        leaveLobby(lobbyId).statusCode shouldBe StatusCodes.OK.intValue
+        leaveLobby(lobbyId).statusCode shouldBe StatusCodes.InternalServerError.intValue
+        auth(1)
+        leaveLobby(lobbyId).statusCode shouldBe StatusCodes.InternalServerError.intValue
+      }
+    }
+
+    "allow setting map name in a lobby for a host" in {
+      val lobbyName = "lobby_name"
+      val hexMapNames = List("Linia", "1v1v1")
+      implicit val wsClient: WSProbe = WSProbe()
+      WS(wsUri, wsClient.flow) ~> routes ~> check {
+
+        auth(0)
+        val lobbyId = createLobby(lobbyName).body
+
+        hexMapNames.foreach { hexMapName =>
+          setHexMap(lobbyId, hexMapName).statusCode shouldBe StatusCodes.OK.intValue
+          fetchAndParseLobby(lobbyId).chosenHexMapName shouldEqual Some(hexMapName)
+        }
+      }
+    }
+
+    "disallow setting invalid map name" in {
+      val lobbyName = "lobby_name"
+      val hexMapName = "this map does not exist"
+      implicit val wsClient: WSProbe = WSProbe()
+      WS(wsUri, wsClient.flow) ~> routes ~> check {
+        auth(0)
+        val lobbyId = createLobby(lobbyName).body
+        setHexMap(lobbyId, hexMapName).statusCode shouldBe StatusCodes.InternalServerError.intValue
+      }
+    }
+
+    "allow setting pick type in a lobby for a host" in {
+      val lobbyName = "lobby_name"
+      val pickTypes = PickType.values
+      implicit val wsClient: WSProbe = WSProbe()
+      WS(wsUri, wsClient.flow) ~> routes ~> check {
+        auth(0)
+        val lobbyId = createLobby(lobbyName).body
+
+        pickTypes.foreach { p =>
+          setPickType(lobbyId, p)
+          fetchAndParseLobby(lobbyId).pickType shouldBe p
+        }
+      }
+    }
+
+    "allow setting number of bans in a lobby for a host" in {
+      val lobbyName = "lobby_name"
+      val numberOfBansList = List(5,3,2,1,0,3)
+      implicit val wsClient: WSProbe = WSProbe()
+      WS(wsUri, wsClient.flow) ~> routes ~> check {
+        auth(0)
+        val lobbyId = createLobby(lobbyName).body
+
+        numberOfBansList.foreach { b =>
+          setNumberOfBans(lobbyId, b)
+          fetchAndParseLobby(lobbyId).numberOfBans shouldBe b
+        }
+      }
+    }
+
+    "disallow setting invalid number of bans in a lobby for a host" in {
+      val lobbyName = "lobby_name"
+      val numberOfBansList = List(-1, -4, -234)
+      implicit val wsClient: WSProbe = WSProbe()
+      WS(wsUri, wsClient.flow) ~> routes ~> check {
+        auth(0)
+        val lobbyId = createLobby(lobbyName).body
+
+        numberOfBansList.foreach { b =>
+          setNumberOfBans(lobbyId, b).statusCode shouldBe StatusCodes.InternalServerError.intValue
+        }
+      }
+    }
+
+    "allow setting number of characters in a lobby for a host" in {
+      val lobbyName = "lobby_name"
+      val numberOfCharactersList = List(5,3,2,3,8)
+      implicit val wsClient: WSProbe = WSProbe()
+      WS(wsUri, wsClient.flow) ~> routes ~> check {
+        auth(0)
+        val lobbyId = createLobby(lobbyName).body
+
+        numberOfCharactersList.foreach { n =>
+          setNumberOfCharacters(lobbyId, n)
+          fetchAndParseLobby(lobbyId).numberOfCharactersPerPlayer shouldBe n
+        }
+      }
+    }
+
+    "disallow setting invalid number of characters in a lobby for a host" in {
+      val lobbyName = "lobby_name"
+      val numberOfCharactersList = List(-1, 0, -234)
+      implicit val wsClient: WSProbe = WSProbe()
+      WS(wsUri, wsClient.flow) ~> routes ~> check {
+        auth(0)
+        val lobbyId = createLobby(lobbyName).body
+
+        numberOfCharactersList.foreach { n =>
+          setNumberOfCharacters(lobbyId, n).statusCode shouldBe StatusCodes.InternalServerError.intValue
+        }
+      }
+    }
+
+    "allow to start a game" in {
+      val lobbyName = "lobby_name"
+      val hexMapName = "Linia"
+      implicit val wsClient: WSProbe = WSProbe()
+      WS(wsUri, wsClient.flow) ~> routes ~> check {
+        auth(0)
+        val lobbyId = createLobby(lobbyName).body
+        setHexMap(lobbyId, hexMapName)
+        auth(1)
+        joinLobby(lobbyId)
+        auth(0)
+        startGame(lobbyId).statusCode shouldBe StatusCodes.OK
+        fail() // TODO: fetch and validate game state
 //        val gameState = responseAs[GameState]
 //        gameState.gamePhase shouldEqual GamePhase.CharacterPlacing
 //        gameState.players.length shouldEqual 2
@@ -303,35 +302,39 @@ class WSLobbySpec extends UserApiTrait
 //        gameState.numberOfBans shouldEqual 0
 //        gameState.numberOfCharactersPerPlayers shouldEqual 1
 //        gameState.pickType shouldEqual AllRandom
-//      }
-//    }
-//
-//    "allow to start a game with all things changed" in {
-//      val hexMapName = "1v1v1"
-//      val pickType = DraftPick
-//      val numberOfBans = 4
-//      val numberOfCharacters = 5
-//      Post("/api/set_hexmap", SetHexMapNameRequest(lobbyId, hexMapName)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check(status shouldEqual OK)
-//      Post("/api/set_pick_type", SetPickTypeRequest(lobbyId, pickType)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check(status shouldEqual OK)
-//      Post("/api/set_number_of_bans", SetNumberOfBansRequest(lobbyId, numberOfBans)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check(status shouldEqual OK)
-//      Post("/api/set_number_of_characters", SetNumberOfCharactersPerPlayerRequest(lobbyId, numberOfCharacters)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check(status shouldEqual OK)
-//
-//      Post("/api/join_lobby", LobbyJoinRequest(lobbyId)).addHeader(getAuthHeader(tokens(1))) ~> routes ~> check(status shouldEqual OK)
-//
-//      Post("/api/start_game", StartGameRequest(lobbyId)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check(status shouldEqual OK)
-//
-//      Get(s"/api/state/$lobbyId").addHeader(getAuthHeader(tokens(0))) ~> routes ~> check {
-//        status shouldEqual OK
-//        val gameState = responseAs[GameState]
-//        gameState.gamePhase shouldEqual GamePhase.CharacterPick
-//        gameState.players.length shouldEqual 2
-//        gameState.hexMap.get.name shouldEqual hexMapName
-//        gameState.numberOfBans shouldEqual numberOfBans
-//        gameState.numberOfCharactersPerPlayers shouldEqual numberOfCharacters
-//        gameState.pickType shouldEqual DraftPick
-//      }
-//    }
-//
+
+      }
+    }
+
+    "allow to start a game with all things changed" in {
+      val lobbyName = "A very interesting lobby name ;)"
+      val hexMapName = "1v1v1"
+      val pickType = PickType.DraftPick
+      val numberOfBans = 4
+      val numberOfCharacters = 5
+      implicit val wsClient: WSProbe = WSProbe()
+      WS(wsUri, wsClient.flow) ~> routes ~> check {
+        auth(0)
+        val lobbyId = createLobby(lobbyName).body
+        setHexMap(lobbyId, hexMapName)
+        setPickType(lobbyId, pickType)
+        setNumberOfBans(lobbyId, numberOfBans)
+        setNumberOfCharacters(lobbyId, numberOfCharacters)
+        auth(1)
+        joinLobby(lobbyId)
+        auth(0)
+        startGame(lobbyId).statusCode shouldBe StatusCodes.OK
+        fail() // TODO: fetch and validate game state
+        //        val gameState = responseAs[GameState]
+        //        gameState.gamePhase shouldEqual GamePhase.CharacterPick
+        //        gameState.players.length shouldEqual 2
+        //        gameState.hexMap.get.name shouldEqual hexMapName
+        //        gameState.numberOfBans shouldEqual numberOfBans
+        //        gameState.numberOfCharactersPerPlayers shouldEqual numberOfCharacters
+        //        gameState.pickType shouldEqual DraftPick
+      }
+    }
+
 //    "disallow starting game without hexmap" in {
 //      Post("/api/join_lobby", LobbyJoinRequest(lobbyId)).addHeader(getAuthHeader(tokens(1))) ~> routes ~> check(status shouldEqual OK)
 //      Post("/api/start_game", StartGameRequest(lobbyId)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check(status shouldEqual InternalServerError)
