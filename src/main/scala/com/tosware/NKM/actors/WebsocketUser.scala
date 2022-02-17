@@ -5,7 +5,7 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.model.{StatusCode, StatusCodes}
 import akka.pattern.ask
 import com.tosware.NKM.NKMTimeouts
-import com.tosware.NKM.models.lobby.{AuthRequest, GetLobbyRequest, LobbyCreationRequest, LobbyJoinRequest, LobbyLeaveRequest}
+import com.tosware.NKM.models.lobby.{AuthRequest, GetLobbyRequest, LobbyCreationRequest, LobbyJoinRequest, LobbyLeaveRequest, SetHexMapNameRequest, SetNumberOfBansRequest, SetNumberOfCharactersPerPlayerRequest, SetPickTypeRequest, StartGameRequest}
 import com.tosware.NKM.serializers.NKMJsonProtocol
 import com.tosware.NKM.services.LobbyService
 import com.tosware.NKM.services.http.directives.{JwtHelper, JwtSecretKey}
@@ -116,11 +116,61 @@ class WebsocketUser(lobbySession: ActorRef)(implicit val lobbyService: LobbyServ
             }
           case _ => WebsocketLobbyResponse(StatusCodes.Unauthorized.intValue)
         }
-      case LobbyRoute.SetHexMap => ???
-      case LobbyRoute.SetPickType => ???
-      case LobbyRoute.SetNumberOfBans => ???
-      case LobbyRoute.SetNumberOfCharacters => ???
-      case LobbyRoute.StartGame => ???
+      case LobbyRoute.SetHexMap =>
+        val entity = request.requestJson.parseJson.convertTo[SetHexMapNameRequest]
+        authStatus match {
+          case AuthStatus(Some(username)) =>
+            lobbyService.setHexmapName(username, entity) match {
+              case LobbyService.Success => WebsocketLobbyResponse(StatusCodes.OK.intValue)
+              case LobbyService.Failure => WebsocketLobbyResponse(StatusCodes.InternalServerError.intValue)
+              case _ => WebsocketLobbyResponse(StatusCodes.InternalServerError.intValue)
+            }
+          case _ => WebsocketLobbyResponse(StatusCodes.Unauthorized.intValue)
+        }
+      case LobbyRoute.SetPickType =>
+        val entity = request.requestJson.parseJson.convertTo[SetPickTypeRequest]
+        authStatus match {
+          case AuthStatus(Some(username)) =>
+            lobbyService.setPickType(username, entity) match {
+              case LobbyService.Success => WebsocketLobbyResponse(StatusCodes.OK.intValue)
+              case LobbyService.Failure => WebsocketLobbyResponse(StatusCodes.InternalServerError.intValue)
+              case _ => WebsocketLobbyResponse(StatusCodes.InternalServerError.intValue)
+            }
+          case _ => WebsocketLobbyResponse(StatusCodes.Unauthorized.intValue)
+        }
+      case LobbyRoute.SetNumberOfBans =>
+        val entity = request.requestJson.parseJson.convertTo[SetNumberOfBansRequest]
+        authStatus match {
+          case AuthStatus(Some(username)) =>
+            lobbyService.setNumberOfBans(username, entity) match {
+              case LobbyService.Success => WebsocketLobbyResponse(StatusCodes.OK.intValue)
+              case LobbyService.Failure => WebsocketLobbyResponse(StatusCodes.InternalServerError.intValue)
+              case _ => WebsocketLobbyResponse(StatusCodes.InternalServerError.intValue)
+            }
+          case _ => WebsocketLobbyResponse(StatusCodes.Unauthorized.intValue)
+        }
+      case LobbyRoute.SetNumberOfCharacters =>
+        val entity = request.requestJson.parseJson.convertTo[SetNumberOfCharactersPerPlayerRequest]
+        authStatus match {
+          case AuthStatus(Some(username)) =>
+            lobbyService.setNumberOfCharactersPerPlayer(username, entity) match {
+              case LobbyService.Success => WebsocketLobbyResponse(StatusCodes.OK.intValue)
+              case LobbyService.Failure => WebsocketLobbyResponse(StatusCodes.InternalServerError.intValue)
+              case _ => WebsocketLobbyResponse(StatusCodes.InternalServerError.intValue)
+            }
+          case _ => WebsocketLobbyResponse(StatusCodes.Unauthorized.intValue)
+        }
+      case LobbyRoute.StartGame =>
+        val entity = request.requestJson.parseJson.convertTo[StartGameRequest]
+        authStatus match {
+          case AuthStatus(Some(username)) =>
+            lobbyService.startGame(username, entity) match {
+              case LobbyService.Success => WebsocketLobbyResponse(StatusCodes.OK.intValue)
+              case LobbyService.Failure => WebsocketLobbyResponse(StatusCodes.InternalServerError.intValue)
+              case _ => WebsocketLobbyResponse(StatusCodes.InternalServerError.intValue)
+            }
+          case _ => WebsocketLobbyResponse(StatusCodes.Unauthorized.intValue)
+        }
     }
   }
 

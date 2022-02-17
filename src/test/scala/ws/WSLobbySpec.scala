@@ -293,7 +293,7 @@ class WSLobbySpec extends UserApiTrait
         auth(1)
         joinLobby(lobbyId)
         auth(0)
-        startGame(lobbyId).statusCode shouldBe StatusCodes.OK
+        startGame(lobbyId).statusCode shouldBe StatusCodes.OK.intValue
         fail() // TODO: fetch and validate game state
 //        val gameState = responseAs[GameState]
 //        gameState.gamePhase shouldEqual GamePhase.CharacterPlacing
@@ -323,7 +323,7 @@ class WSLobbySpec extends UserApiTrait
         auth(1)
         joinLobby(lobbyId)
         auth(0)
-        startGame(lobbyId).statusCode shouldBe StatusCodes.OK
+        startGame(lobbyId).statusCode shouldBe StatusCodes.OK.intValue
         fail() // TODO: fetch and validate game state
         //        val gameState = responseAs[GameState]
         //        gameState.gamePhase shouldEqual GamePhase.CharacterPick
