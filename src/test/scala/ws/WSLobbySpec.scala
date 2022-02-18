@@ -3,10 +3,9 @@ package ws
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.testkit.WSProbe
 import com.tosware.NKM.DBManager
-import com.tosware.NKM.actors.WebsocketUser.{WebsocketLobbyRequest, WebsocketLobbyResponse}
 import com.tosware.NKM.models.game.PickType
 import com.tosware.NKM.models.lobby._
-import com.tosware.NKM.services.http.routes.LobbyRoute
+import com.tosware.NKM.models.lobby.LobbyRoute
 import helpers.UserApiTrait
 import spray.json._
 
@@ -15,8 +14,10 @@ class WSLobbySpec extends UserApiTrait
   val wsPrefix = "/ws"
   val wsUri = s"$wsPrefix/lobby"
 
-  def sendRequest(request: WebsocketLobbyRequest)(implicit wsClient: WSProbe): Unit =
+  def sendRequest(request: WebsocketLobbyRequest)(implicit wsClient: WSProbe): Unit = {
+    println(request.toJson.toString)
     wsClient.sendMessage(request.toJson.toString)
+  }
 
   def fetchResponse()(implicit wsClient: WSProbe): WebsocketLobbyResponse = {
     val response = wsClient.expectMessage().asTextMessage.getStrictText.parseJson.convertTo[WebsocketLobbyResponse]
@@ -27,7 +28,7 @@ class WSLobbySpec extends UserApiTrait
     val authRequest = AuthRequest(tokens(tokenId)).toJson.toString
 
     val request = WebsocketLobbyRequest(LobbyRoute.Auth, authRequest)
-    val expectedResponse = WebsocketLobbyResponse(body = usernames(tokenId), statusCode = 200)
+    val expectedResponse = WebsocketLobbyResponse(LobbyResponseType.Auth, 200, usernames(tokenId))
 
     sendRequest(request)
 
@@ -88,7 +89,9 @@ class WSLobbySpec extends UserApiTrait
       WS(wsUri, wsClient.flow) ~> routes ~>
         check {
           wsClient.sendMessage("invalid request")
-          fetchResponse().statusCode shouldBe 500
+          val response = fetchResponse()
+          response.statusCode shouldBe 500
+          response.lobbyResponseType shouldBe LobbyResponseType.Error
 
           wsClient.sendCompletion()
           //          wsClient.expectCompletion()
