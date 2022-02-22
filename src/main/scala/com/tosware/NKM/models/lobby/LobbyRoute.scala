@@ -16,5 +16,6 @@ object LobbyRoute extends StringEnum[LobbyRoute] {
   case object SetPickType extends LobbyRoute("set_pick_type")
   case object SetNumberOfBans extends LobbyRoute("set_number_of_bans")
   case object SetNumberOfCharacters extends LobbyRoute("set_number_of_characters")
+  case object SetLobbyName extends LobbyRoute("set_lobby_name")
   case object StartGame extends LobbyRoute("start_game")
 }

@@ -12,4 +12,5 @@ case class SetHexMapNameRequest(lobbyId: String, hexMapName: String) extends Lob
 case class SetNumberOfBansRequest(lobbyId: String, numberOfBans: Int) extends LobbyRequest
 case class SetNumberOfCharactersPerPlayerRequest(lobbyId: String, charactersPerPlayer: Int) extends LobbyRequest
 case class SetPickTypeRequest(lobbyId: String, pickType: PickType) extends LobbyRequest
+case class SetLobbyNameRequest(lobbyId: String, newName: String) extends LobbyRequest
 final case class StartGameRequest(lobbyId: String) extends LobbyRequest

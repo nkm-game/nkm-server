@@ -70,6 +70,9 @@ class WSLobbySpec extends UserApiTrait
   def setNumberOfCharacters(lobbyId: String, numberOfCharacters: Int)(implicit wsClient: WSProbe): WebsocketLobbyResponse =
     sendWSRequest(LobbyRoute.SetNumberOfCharacters, SetNumberOfCharactersPerPlayerRequest(lobbyId, numberOfCharacters).toJson.toString)
 
+  def setLobbyName(lobbyId: String, newName: String)(implicit wsClient: WSProbe): WebsocketLobbyResponse =
+    sendWSRequest(LobbyRoute.SetLobbyName, SetLobbyNameRequest(lobbyId, newName).toJson.toString)
+
   def startGame(lobbyId: String)(implicit wsClient: WSProbe): WebsocketLobbyResponse =
     sendWSRequest(LobbyRoute.StartGame, StartGameRequest(lobbyId).toJson.toString)
 
@@ -294,6 +297,18 @@ class WSLobbySpec extends UserApiTrait
         numberOfCharactersList.foreach { n =>
           setNumberOfCharacters(lobbyId, n).statusCode shouldBe StatusCodes.InternalServerError.intValue
         }
+      }
+    }
+
+    "allow setting lobby name in a lobby for a host" in {
+      val lobbyName = "lobby_name"
+      val lobbyName2 = "lobby_name2"
+      implicit val wsClient: WSProbe = WSProbe()
+      WS(wsUri, wsClient.flow) ~> routes ~> check {
+        auth(0)
+        val lobbyId = createLobby(lobbyName).body
+        setLobbyName(lobbyId, lobbyName2).statusCode shouldBe StatusCodes.OK.intValue
+        fetchAndParseLobby(lobbyId).name shouldBe Some(lobbyName2)
       }
     }
 

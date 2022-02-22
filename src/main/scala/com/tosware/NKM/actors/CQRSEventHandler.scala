@@ -55,6 +55,10 @@ class CQRSEventHandler(db: JdbcBackend.Database)
       val q = for {l <- DBManager.lobbies if l.id === id} yield l.pickType
       val updateAction = q.update(pickType)
       Await.result(db.run(updateAction), DBManager.dbTimeout)
+    case Lobby.LobbyNameSet(id, name) =>
+      val q = for {l <- DBManager.lobbies if l.id === id} yield l.name
+      val updateAction = q.update(Some(name))
+      Await.result(db.run(updateAction), DBManager.dbTimeout)
     case Lobby.NumberOfCharactersPerPlayerSet(id, numberOfCharactersPerPlayer) =>
       val q = for {l <- DBManager.lobbies if l.id === id} yield l.numberOfCharactersPerPlayer
       val updateAction = q.update(numberOfCharactersPerPlayer)

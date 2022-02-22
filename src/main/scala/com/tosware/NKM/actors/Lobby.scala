@@ -27,6 +27,7 @@ object Lobby {
   case class SetNumberOfBans(numberOfBans: Int) extends Command
   case class SetNumberOfCharactersPerPlayer(numberOfCharactersPerPlayer: Int) extends Command
   case class SetPickType(pickType: PickType) extends Command
+  case class SetLobbyName(name: String) extends Command
 
   sealed trait Event
   case class CreateSuccess(id: String, name: String, hostUserId: String, creationDate: LocalDate) extends Event
@@ -36,6 +37,7 @@ object Lobby {
   case class NumberOfBansSet(id: String, numberOfBans: Int) extends Event
   case class NumberOfCharactersPerPlayerSet(id: String, numberOfCharactersPerPlayer: Int) extends Event
   case class PickTypeSet(id: String, pickType: PickType) extends Event
+  case class LobbyNameSet(id: String, name: String) extends Event
 
   def props(id: String)(implicit NKMDataService: NKMDataService): Props = Props(new Lobby(id))
 }
@@ -79,6 +81,9 @@ class Lobby(id: String)(implicit NKMDataService: NKMDataService)
 
   def setPickType(pickType: PickType): Unit =
     lobbyState = lobbyState.copy(pickType = pickType)
+
+  def setLobbyName(name: String): Unit =
+    lobbyState = lobbyState.copy(name = Some(name))
 
   override def receive: Receive = {
     case GetState =>
@@ -175,6 +180,19 @@ class Lobby(id: String)(implicit NKMDataService: NKMDataService)
           context.system.eventStream.publish(pickTypeSetEvent)
           setPickType(pickType)
           log.info(s"Set pick type: $pickType")
+          sender() ! Success
+        }
+      } else {
+        sender() ! Failure
+      }
+
+    case SetLobbyName(name) =>
+      if(lobbyState.created()) {
+        val lobbyNameSetEvent = LobbyNameSet(id, name)
+        persist(lobbyNameSetEvent) { _ =>
+          context.system.eventStream.publish(lobbyNameSetEvent)
+          setLobbyName(name)
+          log.info(s"Set lobby name: $name")
           sender() ! Success
         }
       } else {

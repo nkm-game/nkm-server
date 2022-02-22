@@ -163,6 +163,17 @@ class WebsocketUser(lobbySession: ActorRef)(implicit val lobbyService: LobbyServ
             }
           case _ => WebsocketLobbyResponse(LobbyResponseType.SetNumberOfCharacters, StatusCodes.Unauthorized.intValue)
         }
+      case LobbyRoute.SetLobbyName =>
+        val entity = request.requestJson.parseJson.convertTo[SetLobbyNameRequest]
+        authStatus match {
+          case AuthStatus(Some(username)) =>
+            lobbyService.setLobbyName(username, entity) match {
+              case LobbyService.Success => WebsocketLobbyResponse(LobbyResponseType.SetLobbyName, StatusCodes.OK.intValue)
+              case LobbyService.Failure => WebsocketLobbyResponse(LobbyResponseType.SetLobbyName, StatusCodes.InternalServerError.intValue)
+              case _ => WebsocketLobbyResponse(LobbyResponseType.SetLobbyName, StatusCodes.InternalServerError.intValue)
+            }
+          case _ => WebsocketLobbyResponse(LobbyResponseType.SetNumberOfCharacters, StatusCodes.Unauthorized.intValue)
+        }
       case LobbyRoute.StartGame =>
         val entity = request.requestJson.parseJson.convertTo[StartGameRequest]
         authStatus match {

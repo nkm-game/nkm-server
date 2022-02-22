@@ -16,6 +16,7 @@ object LobbyResponseType extends StringEnum[LobbyResponseType] {
   case object SetPickType extends LobbyResponseType("set_pick_type")
   case object SetNumberOfBans extends LobbyResponseType("set_number_of_bans")
   case object SetNumberOfCharacters extends LobbyResponseType("set_number_of_characters")
+  case object SetLobbyName extends LobbyResponseType("set_lobby_name")
   case object StartGame extends LobbyResponseType("start_game")
 
   case object Error extends LobbyResponseType("error")

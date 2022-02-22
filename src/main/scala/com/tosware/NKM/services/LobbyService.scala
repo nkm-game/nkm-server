@@ -131,6 +131,23 @@ class LobbyService(implicit db: JdbcBackend.Database, system: ActorSystem, NKMDa
     }
   }
 
+  def setLobbyName(username: String, request: SetLobbyNameRequest): Event = {
+    val gameActor: ActorRef = system.actorOf(Game.props(request.lobbyId))
+    val gameState = Await.result(gameActor ? Game.GetState, atMost).asInstanceOf[GameState]
+    if(gameState.gamePhase != GamePhase.NotStarted) return Failure
+
+    val lobbyActor: ActorRef = system.actorOf(Lobby.props(request.lobbyId))
+
+    val lobbyState = Await.result(lobbyActor ? Lobby.GetState, atMost).asInstanceOf[LobbyState]
+    if(!lobbyState.hostUserId.contains(username)) return Failure
+
+    Await.result(lobbyActor ? Lobby.SetLobbyName(request.newName), atMost) match {
+      case CommandResponse.Success => Success
+      case CommandResponse.Failure => Failure
+    }
+  }
+
+
   def startGame(username: String, request: StartGameRequest): Event = {
     val lobbyActor: ActorRef = system.actorOf(Lobby.props(request.lobbyId))
     val gameActor: ActorRef = system.actorOf(Game.props(request.lobbyId))
