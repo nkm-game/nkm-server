@@ -4,6 +4,7 @@ import com.tosware.NKM.models.game.PickType
 
 sealed trait LobbyRequest
 final case class AuthRequest(token: String) extends LobbyRequest
+final case class ObserveRequest(lobbyId: String) extends LobbyRequest
 final case class GetLobbyRequest(lobbyId: String) extends LobbyRequest
 final case class LobbyCreationRequest(name: String) extends LobbyRequest
 final case class LobbyJoinRequest(lobbyId: String) extends LobbyRequest

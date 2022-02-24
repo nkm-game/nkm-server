@@ -41,7 +41,6 @@ class WebsocketUser(lobbySession: ActorRef)(implicit val lobbyService: LobbyServ
 
   def connected(outgoing: ActorRef): Receive = {
     log.info(s"Connected")
-    lobbySession ! LobbySessionActor.Join
 
     {
       case GetAuthStatus =>
@@ -53,7 +52,7 @@ class WebsocketUser(lobbySession: ActorRef)(implicit val lobbyService: LobbyServ
         try {
           val request = text.parseJson.convertTo[WebsocketLobbyRequest]
           log.info(s"Request: $request")
-          val response = parseWebsocketLobbyRequest(request, self, AuthStatus(username))
+          val response = parseWebsocketLobbyRequest(request, outgoing, self, AuthStatus(username))
           log.info(s"Response: $response")
           outgoing ! OutgoingMessage(response.toJson.toString)
         }
@@ -67,7 +66,7 @@ class WebsocketUser(lobbySession: ActorRef)(implicit val lobbyService: LobbyServ
     }
   }
 
-  def parseWebsocketLobbyRequest(request: WebsocketLobbyRequest, userActor: ActorRef, authStatus: AuthStatus): WebsocketLobbyResponse = {
+  def parseWebsocketLobbyRequest(request: WebsocketLobbyRequest, outgoing: ActorRef, userActor: ActorRef, authStatus: AuthStatus): WebsocketLobbyResponse = {
     request.requestPath match {
       case LobbyRoute.Auth =>
         val token = request.requestJson.parseJson.convertTo[AuthRequest].token
@@ -78,7 +77,10 @@ class WebsocketUser(lobbySession: ActorRef)(implicit val lobbyService: LobbyServ
           case None =>
             WebsocketLobbyResponse(LobbyResponseType.Auth, StatusCodes.Unauthorized.intValue, "Invalid token.")
         }
-
+      case LobbyRoute.Observe =>
+        val lobbyId = request.requestJson.parseJson.convertTo[ObserveRequest].lobbyId
+        lobbySession ! LobbySessionActor.Observe(lobbyId, outgoing)
+        WebsocketLobbyResponse(LobbyResponseType.Observe, StatusCodes.OK.intValue)
       case LobbyRoute.Lobbies =>
         val lobbies = Await.result(lobbyService.getAllLobbies(), atMost)
         WebsocketLobbyResponse(LobbyResponseType.Lobbies, StatusCodes.OK.intValue, lobbies.toJson.toString)

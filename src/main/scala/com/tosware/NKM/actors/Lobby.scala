@@ -29,7 +29,9 @@ object Lobby {
   case class SetPickType(pickType: PickType) extends Command
   case class SetLobbyName(name: String) extends Command
 
-  sealed trait Event
+  sealed trait Event {
+    val id: String
+  }
   case class CreateSuccess(id: String, name: String, hostUserId: String, creationDate: LocalDate) extends Event
   case class UserJoined(id: String, userId: String) extends Event
   case class UserLeft(id: String, userId: String) extends Event

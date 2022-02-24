@@ -10,21 +10,6 @@ import com.tosware.NKM.actors.{LobbySessionActor, WebsocketUser}
 import com.tosware.NKM.services.LobbyService
 import com.tosware.NKM.services.http.directives.JwtDirective
 
-// object to keep track of lobby sessions
-//object LobbySessionMap {
-//  private var sessions = Map.empty[String, LobbySession]
-//
-//  def findOrCreate(userId: String)(implicit system: ActorSystem) = sessions.getOrElse(userId, create(userId))
-//
-//  private def create(userId: String)(implicit system: ActorSystem) = {
-//    val session = LobbySession(userId)
-//    sessions += userId -> session
-//    session
-//  }
-//}
-
-
-
 trait WebsocketRoutes extends JwtDirective
 {
   implicit val system: ActorSystem

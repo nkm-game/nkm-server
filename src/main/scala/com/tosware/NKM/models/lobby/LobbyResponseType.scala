@@ -7,6 +7,7 @@ sealed abstract class LobbyResponseType(val value: String) extends StringEnumEnt
 object LobbyResponseType extends StringEnum[LobbyResponseType] {
   val values = findValues
   case object Auth extends LobbyResponseType("auth")
+  case object Observe extends LobbyResponseType("observe")
   case object Lobbies extends LobbyResponseType("lobbies")
   case object Lobby extends LobbyResponseType("lobby")
   case object CreateLobby extends LobbyResponseType("create_lobby")

@@ -24,24 +24,19 @@ class WSLobbySpec extends UserApiTrait
     response
   }
 
-  def auth(tokenId: Int)(implicit wsClient: WSProbe): WebsocketLobbyResponse = {
-    val authRequest = AuthRequest(tokens(tokenId)).toJson.toString
-
-    val request = WebsocketLobbyRequest(LobbyRoute.Auth, authRequest)
-    val expectedResponse = WebsocketLobbyResponse(LobbyResponseType.Auth, 200, usernames(tokenId))
-
-    sendRequest(request)
-
-    val response = fetchResponse()
-    response shouldBe expectedResponse
-    response
-  }
-
-
   def sendWSRequest(route: LobbyRoute, requestJson: String = "")(implicit wsClient: WSProbe): WebsocketLobbyResponse = {
     sendRequest(WebsocketLobbyRequest(route, requestJson))
     fetchResponse()
   }
+
+  def auth(tokenId: Int)(implicit wsClient: WSProbe): WebsocketLobbyResponse = {
+    val response = sendWSRequest(LobbyRoute.Auth, AuthRequest(tokens(tokenId)).toJson.toString)
+    response.statusCode shouldBe StatusCodes.OK.intValue
+    response
+  }
+
+  def observe(lobbyId: String)(implicit wsClient: WSProbe): WebsocketLobbyResponse =
+    sendWSRequest(LobbyRoute.Observe, ObserveRequest(lobbyId).toJson.toString)
 
   def createLobby(lobbyName: String)(implicit wsClient: WSProbe): WebsocketLobbyResponse =
     sendWSRequest(LobbyRoute.CreateLobby, LobbyCreationRequest(lobbyName).toJson.toString)
@@ -112,13 +107,31 @@ class WSLobbySpec extends UserApiTrait
         }
     }
 
-    "authenticate" in {
+    "allow authenticating" in {
       implicit val wsClient: WSProbe = WSProbe()
       WS(wsUri, wsClient.flow) ~> routes ~> check {
         auth(0).statusCode shouldBe StatusCodes.OK.intValue
 
         wsClient.sendCompletion()
 //        wsClient.expectCompletion()
+      }
+    }
+
+    "allow observing" in {
+      implicit val wsClient: WSProbe = WSProbe()
+      val lobbyName = "lobby_name"
+      WS(wsUri, wsClient.flow) ~> routes ~> check {
+        auth(0)
+        val lobbyId = createLobby(lobbyName).body
+        observe(lobbyId).statusCode shouldBe StatusCodes.OK.intValue
+        setLobbyName(lobbyId, "hi") shouldBe WebsocketLobbyResponse(LobbyResponseType.SetLobbyName, StatusCodes.OK.intValue)
+
+        val observedResponse = fetchResponse()
+        observedResponse.lobbyResponseType shouldBe LobbyResponseType.Lobby
+        observedResponse.statusCode shouldBe StatusCodes.OK.intValue
+
+        wsClient.sendCompletion()
+        //        wsClient.expectCompletion()
       }
     }
 
