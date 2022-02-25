@@ -79,8 +79,6 @@ class WSLobbySpec extends UserApiTrait
     lobbyResponse.body.parseJson.convertTo[LobbyState]
   }
 
-
-
   "WS" must {
     "respond to invalid requests" in {
       implicit val wsClient: WSProbe = WSProbe()
@@ -152,6 +150,7 @@ class WSLobbySpec extends UserApiTrait
         wsClient.sendCompletion()
       }
     }
+
     "allow joining and leaving lobbies" in {
       val lobbyName = "lobby_name"
       implicit val wsClient: WSProbe = WSProbe()

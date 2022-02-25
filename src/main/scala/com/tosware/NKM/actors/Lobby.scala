@@ -244,6 +244,9 @@ class Lobby(id: String)(implicit NKMDataService: NKMDataService)
     case PickTypeSet(_, pickType) =>
       setPickType(pickType)
       log.debug(s"Recovered setting pick type")
+    case LobbyNameSet(_, name) =>
+      setLobbyName(name)
+      log.debug(s"Recovered setting name")
     case RecoveryCompleted =>
     case e => log.warning(s"Unknown message: $e")
   }
