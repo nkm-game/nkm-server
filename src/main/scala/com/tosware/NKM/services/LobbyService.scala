@@ -10,6 +10,7 @@ import com.tosware.NKM.models.lobby._
 import slick.jdbc.JdbcBackend
 import slick.jdbc.MySQLProfile.api._
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Await, Future}
 
 object LobbyService {
@@ -174,7 +175,8 @@ class LobbyService(implicit db: JdbcBackend.Database, system: ActorSystem, NKMDa
   }
 
   def getLobby(lobbyId: String): Future[LobbyState] = {
-    val lobbyAction = DBManager.lobbies.filter(_.id === lobbyId).result.head
-    db.run(lobbyAction)
+    val lobbyActor: ActorRef = system.actorOf(Lobby.props(lobbyId))
+    val lobbyStateFuture: Future[LobbyState] = (lobbyActor ? Lobby.GetState).map(x => x.asInstanceOf[LobbyState])
+    lobbyStateFuture
   }
 }
