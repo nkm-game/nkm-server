@@ -1,17 +1,17 @@
 package com.tosware.NKM.actors
 
 import akka.actor.{ActorLogging, ActorRef, Props}
-import akka.persistence.{PersistentActor, RecoveryCompleted}
-import com.tosware.NKM.models.game.{GameStartDependencies, HexMap, PickType, Player}
-import com.tosware.NKM.models.lobby.LobbyState
 import akka.pattern.ask
+import akka.persistence.{PersistentActor, RecoveryCompleted}
 import com.tosware.NKM.NKMTimeouts
 import com.tosware.NKM.actors.NKMData.GetHexMaps
 import com.tosware.NKM.models.CommandResponse
 import com.tosware.NKM.models.CommandResponse._
+import com.tosware.NKM.models.game.{GameStartDependencies, HexMap, PickType, Player}
+import com.tosware.NKM.models.lobby.LobbyState
 import com.tosware.NKM.services.NKMDataService
 
-import java.time.LocalDate
+import java.time.LocalDateTime
 import scala.concurrent.Await
 
 object Lobby {
@@ -32,7 +32,7 @@ object Lobby {
   sealed trait Event {
     val id: String
   }
-  case class CreateSuccess(id: String, name: String, hostUserId: String, creationDate: LocalDate) extends Event
+  case class CreateSuccess(id: String, name: String, hostUserId: String, creationDate: LocalDateTime) extends Event
   case class UserJoined(id: String, userId: String) extends Event
   case class UserLeft(id: String, userId: String) extends Event
   case class MapNameSet(id: String, hexMapName: String) extends Event
@@ -63,7 +63,7 @@ class Lobby(id: String)(implicit NKMDataService: NKMDataService)
   def canStartGame(): Boolean =
     lobbyState.chosenHexMapName.nonEmpty && lobbyState.userIds.length > 1
 
-  def create(name: String, hostUserId: String, creationDate: LocalDate): Unit =
+  def create(name: String, hostUserId: String, creationDate: LocalDateTime): Unit =
     lobbyState = lobbyState.copy(name = Some(name), creationDate = Some(creationDate), hostUserId = Some(hostUserId), userIds = List(hostUserId))
 
   def joinLobby(userId: String): Unit =
@@ -94,7 +94,7 @@ class Lobby(id: String)(implicit NKMDataService: NKMDataService)
     case Create(name, hostUserId) =>
       log.info(s"Received create request")
         if(!lobbyState.created()) {
-          val creationDate = LocalDate.now()
+          val creationDate = LocalDateTime.now()
           val createSuccessEvent = CreateSuccess(id, name, hostUserId, creationDate)
           persist(createSuccessEvent) { _ =>
             context.system.eventStream.publish(createSuccessEvent)

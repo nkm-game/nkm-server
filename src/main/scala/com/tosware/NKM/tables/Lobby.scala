@@ -7,7 +7,7 @@ import spray.json._
 import pl.iterators.kebs._
 import enums._
 
-import java.time.LocalDate
+import java.time.LocalDateTime
 
 class Lobby(tag: Tag) extends Table[LobbyState](tag, "lobby")
   with DefaultJsonProtocol
@@ -15,7 +15,7 @@ class Lobby(tag: Tag) extends Table[LobbyState](tag, "lobby")
   def id = column[String]("ID", O.PrimaryKey)
   def name = column[Option[String]]("NAME")
   def hostUserID = column[Option[String]]("HOST_USER_ID")
-  def creationDate = column[Option[LocalDate]]("CREATION_DATE")
+  def creationDate = column[Option[LocalDateTime]]("CREATION_DATE")
   def chosenHexMapName = column[Option[String]]("HEX_MAP_NAME")
   def userIds = column[String]("USER_IDS")
   def pickType = column[PickType]("PICK_TYPE")

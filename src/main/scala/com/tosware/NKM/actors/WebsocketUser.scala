@@ -57,7 +57,8 @@ class WebsocketUser(lobbySession: ActorRef)(implicit val lobbyService: LobbyServ
           outgoing ! OutgoingMessage(response.toJson.toString)
         }
         catch {
-          case _: Exception =>
+          case e: Exception =>
+            log.error(e.toString)
             val response = WebsocketLobbyResponse(LobbyResponseType.Error, StatusCodes.InternalServerError.intValue, "Error with request parsing.")
             outgoing ! OutgoingMessage(response.toJson.toString)
         }
