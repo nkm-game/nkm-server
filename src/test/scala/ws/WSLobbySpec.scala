@@ -3,7 +3,7 @@ package ws
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.testkit.WSProbe
 import com.tosware.NKM.DBManager
-import com.tosware.NKM.models.game.PickType
+import com.tosware.NKM.models.game.{GamePhase, GameState, PickType}
 import com.tosware.NKM.models.lobby._
 import com.tosware.NKM.models.lobby.LobbyRoute
 import helpers.UserApiTrait
@@ -336,15 +336,16 @@ class WSLobbySpec extends UserApiTrait
         joinLobby(lobbyId)
         auth(0)
         startGame(lobbyId).statusCode shouldBe StatusCodes.OK.intValue
-        fail() // TODO: fetch and validate game state
-//        val gameState = responseAs[GameState]
-//        gameState.gamePhase shouldEqual GamePhase.CharacterPlacing
-//        gameState.players.length shouldEqual 2
-//        gameState.hexMap.get.name shouldEqual hexMapName
-//        gameState.numberOfBans shouldEqual 0
-//        gameState.numberOfCharactersPerPlayers shouldEqual 1
-//        gameState.pickType shouldEqual AllRandom
 
+        Get(s"/api/state/$lobbyId") ~> routes ~> check {
+          val gameState = responseAs[GameState]
+          gameState.gamePhase shouldEqual GamePhase.CharacterPlacing
+          gameState.players.length shouldEqual 2
+          gameState.hexMap.get.name shouldEqual hexMapName
+          gameState.numberOfBans shouldEqual 0
+          gameState.numberOfCharactersPerPlayers shouldEqual 1
+          gameState.pickType shouldEqual PickType.AllRandom
+        }
       }
     }
 
@@ -366,74 +367,122 @@ class WSLobbySpec extends UserApiTrait
         joinLobby(lobbyId)
         auth(0)
         startGame(lobbyId).statusCode shouldBe StatusCodes.OK.intValue
-        fail() // TODO: fetch and validate game state
-        //        val gameState = responseAs[GameState]
-        //        gameState.gamePhase shouldEqual GamePhase.CharacterPick
-        //        gameState.players.length shouldEqual 2
-        //        gameState.hexMap.get.name shouldEqual hexMapName
-        //        gameState.numberOfBans shouldEqual numberOfBans
-        //        gameState.numberOfCharactersPerPlayers shouldEqual numberOfCharacters
-        //        gameState.pickType shouldEqual DraftPick
+        Get(s"/api/state/$lobbyId") ~> routes ~> check {
+          val gameState = responseAs[GameState]
+          gameState.gamePhase shouldEqual GamePhase.CharacterPick
+          gameState.players.length shouldEqual 2
+          gameState.hexMap.get.name shouldEqual hexMapName
+          gameState.numberOfBans shouldEqual numberOfBans
+          gameState.numberOfCharactersPerPlayers shouldEqual numberOfCharacters
+          gameState.pickType shouldEqual PickType.DraftPick
+        }
       }
     }
 
-//    "disallow starting game without hexmap" in {
-//      Post("/api/join_lobby", LobbyJoinRequest(lobbyId)).addHeader(getAuthHeader(tokens(1))) ~> routes ~> check(status shouldEqual OK)
-//      Post("/api/start_game", StartGameRequest(lobbyId)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check(status shouldEqual InternalServerError)
-//    }
-//
-//    "disallow starting game with 1 or 0 players" in {
-//      val hexMapName = "Linia"
-//
-//      Post("/api/set_hexmap", SetHexMapNameRequest(lobbyId, hexMapName)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check(status shouldEqual OK)
-//      Post("/api/start_game", StartGameRequest(lobbyId)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check(status shouldEqual InternalServerError)
-//      Post("/api/leave_lobby", LobbyLeaveRequest(lobbyId)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check(status shouldEqual OK)
-//      Post("/api/start_game", StartGameRequest(lobbyId)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check(status shouldEqual InternalServerError)
-//    }
-//
-//
-//    "disallow setting stuff in a lobby for non host persons" in {
-//      Post("/api/set_hexmap", SetHexMapNameRequest(lobbyId, "Linia")) ~> routes ~> check(status shouldEqual Unauthorized)
-//      Post("/api/set_pick_type", SetPickTypeRequest(lobbyId, AllRandom)) ~> routes ~> check(status shouldEqual Unauthorized)
-//      Post("/api/set_number_of_bans", SetNumberOfBansRequest(lobbyId, 3)) ~> routes ~> check(status shouldEqual Unauthorized)
-//      Post("/api/set_number_of_characters", SetNumberOfCharactersPerPlayerRequest(lobbyId, 4)) ~> routes ~> check(status shouldEqual Unauthorized)
-//
-//      Post("/api/set_hexmap", SetHexMapNameRequest(lobbyId, "Linia")).addHeader(getAuthHeader(tokens(1))) ~> routes ~> check(status shouldEqual InternalServerError)
-//      Post("/api/set_pick_type", SetPickTypeRequest(lobbyId, AllRandom)).addHeader(getAuthHeader(tokens(1))) ~> routes ~> check(status shouldEqual InternalServerError)
-//      Post("/api/set_number_of_bans", SetNumberOfBansRequest(lobbyId, 3)).addHeader(getAuthHeader(tokens(1))) ~> routes ~> check(status shouldEqual InternalServerError)
-//      Post("/api/set_number_of_characters", SetNumberOfCharactersPerPlayerRequest(lobbyId, 4)).addHeader(getAuthHeader(tokens(1))) ~> routes ~> check(status shouldEqual InternalServerError)
-//    }
-//
-//    "disallow setting stuff in a lobby after game start" in {
-//      val hexMapName = "Linia"
-//      Post("/api/set_hexmap", SetHexMapNameRequest(lobbyId, hexMapName)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check(status shouldEqual OK)
-//      Post("/api/join_lobby", LobbyJoinRequest(lobbyId)).addHeader(getAuthHeader(tokens(1))) ~> routes ~> check(status shouldEqual OK)
-//      Post("/api/start_game", StartGameRequest(lobbyId)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check(status shouldEqual OK)
-//
-//      Post("/api/set_hexmap", SetHexMapNameRequest(lobbyId, "Linia")).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check(status shouldEqual InternalServerError)
-//      Post("/api/set_pick_type", SetPickTypeRequest(lobbyId, AllRandom)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check(status shouldEqual InternalServerError)
-//      Post("/api/set_number_of_bans", SetNumberOfBansRequest(lobbyId, 3)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check(status shouldEqual InternalServerError)
-//      Post("/api/set_number_of_characters", SetNumberOfCharactersPerPlayerRequest(lobbyId, 4)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check(status shouldEqual InternalServerError)
-//    }
-//
-//    "disallow starting a game with more players than the map allows" in {
-//      val numberOfPlayers = 4
-//      val hexMapName = "1v1v1"
-//      val pickType = DraftPick
-//      val numberOfBans = 4
-//      val numberOfCharacters = 5
-//
-//      Post("/api/set_hexmap", SetHexMapNameRequest(lobbyId, hexMapName)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check(status shouldEqual OK)
-//      Post("/api/set_pick_type", SetPickTypeRequest(lobbyId, pickType)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check(status shouldEqual OK)
-//      Post("/api/set_number_of_bans", SetNumberOfBansRequest(lobbyId, numberOfBans)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check(status shouldEqual OK)
-//      Post("/api/set_number_of_characters", SetNumberOfCharactersPerPlayerRequest(lobbyId, numberOfCharacters)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check(status shouldEqual OK)
-//
-//      for (i <- 1 until numberOfPlayers) {
-//        Post("/api/join_lobby", LobbyJoinRequest(lobbyId)).addHeader(getAuthHeader(tokens(i))) ~> routes ~> check(status shouldEqual OK)
-//      }
-//
-//      Post("/api/start_game", StartGameRequest(lobbyId)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check(status shouldEqual OK)
-//    }
-//  }
+    "disallow starting game without hexmap" in {
+      val lobbyName = "lobby_name"
+      implicit val wsClient: WSProbe = WSProbe()
+      WS(wsUri, wsClient.flow) ~> routes ~> check {
+        auth(0)
+        val lobbyId = createLobby(lobbyName).body
+        auth(1)
+        joinLobby(lobbyId)
+        auth(0)
+        startGame(lobbyId).statusCode shouldBe StatusCodes.InternalServerError.intValue
+      }
+    }
+
+    "disallow starting game with 1 or 0 players" in {
+      val lobbyName = "lobby_name"
+      val hexMapName = "Linia"
+      implicit val wsClient: WSProbe = WSProbe()
+      WS(wsUri, wsClient.flow) ~> routes ~> check {
+        auth(0)
+        val lobbyId = createLobby(lobbyName).body
+        setHexMap(lobbyId, hexMapName).statusCode shouldBe StatusCodes.OK.intValue
+        startGame(lobbyId).statusCode shouldBe StatusCodes.InternalServerError.intValue
+        leaveLobby(lobbyId)
+        startGame(lobbyId).statusCode shouldBe StatusCodes.InternalServerError.intValue
+      }
+    }
+
+    "disallow setting stuff in a lobby for non host persons" in {
+        val lobbyName = "lobby_name"
+        val hexMapName = "Linia"
+
+        var lobbyId: String = ""
+
+        {
+          implicit val wsClient: WSProbe = WSProbe()
+          WS(wsUri, wsClient.flow) ~> routes ~> check {
+            auth(0)
+            lobbyId = createLobby(lobbyName).body
+          }
+        }
+
+        {
+          implicit val wsClient: WSProbe = WSProbe()
+          WS(wsUri, wsClient.flow) ~> routes ~> check {
+            setHexMap(lobbyId, "Linia").statusCode shouldBe StatusCodes.Unauthorized.intValue
+            setPickType(lobbyId, PickType.AllRandom).statusCode shouldBe StatusCodes.Unauthorized.intValue
+            setNumberOfBans(lobbyId, 3).statusCode shouldBe StatusCodes.Unauthorized.intValue
+            setNumberOfCharacters(lobbyId, 4).statusCode shouldBe StatusCodes.Unauthorized.intValue
+            auth(1)
+            setHexMap(lobbyId, "Linia").statusCode shouldBe StatusCodes.InternalServerError.intValue
+            setPickType(lobbyId, PickType.AllRandom).statusCode shouldBe StatusCodes.InternalServerError.intValue
+            setNumberOfBans(lobbyId, 3).statusCode shouldBe StatusCodes.InternalServerError.intValue
+            setNumberOfCharacters(lobbyId, 4).statusCode shouldBe StatusCodes.InternalServerError.intValue
+          }
+        }
+    }
+
+    "disallow setting stuff in a lobby after game start" in {
+      val lobbyName = "lobby_name"
+      val hexMapName = "Linia"
+      implicit val wsClient: WSProbe = WSProbe()
+      WS(wsUri, wsClient.flow) ~> routes ~> check {
+        auth(0)
+        val lobbyId = createLobby(lobbyName).body
+        setHexMap(lobbyId, hexMapName)
+        auth(1)
+        joinLobby(lobbyId)
+        auth(0)
+        startGame(lobbyId).statusCode shouldBe StatusCodes.OK.intValue
+
+        setHexMap(lobbyId, hexMapName).statusCode shouldBe StatusCodes.InternalServerError.intValue
+        startGame(lobbyId).statusCode shouldBe StatusCodes.InternalServerError.intValue
+        leaveLobby(lobbyId).statusCode shouldBe StatusCodes.InternalServerError.intValue
+        setPickType(lobbyId, PickType.AllRandom).statusCode shouldBe StatusCodes.InternalServerError.intValue
+        setNumberOfCharacters(lobbyId, 3).statusCode shouldBe StatusCodes.InternalServerError.intValue
+        setNumberOfBans(lobbyId, 4).statusCode shouldBe StatusCodes.InternalServerError.intValue
+      }
+    }
+
+    "disallow starting a game with more players than the map allows" in {
+      val lobbyName = "lobby_name"
+      val numberOfPlayers = 4
+      val hexMapName = "1v1v1"
+      val pickType = PickType.DraftPick
+      val numberOfBans = 4
+      val numberOfCharacters = 5
+
+      implicit val wsClient: WSProbe = WSProbe()
+      WS(wsUri, wsClient.flow) ~> routes ~> check {
+        auth(0)
+        val lobbyId = createLobby(lobbyName).body
+        setHexMap(lobbyId, hexMapName).statusCode shouldBe StatusCodes.OK.intValue
+        setPickType(lobbyId, pickType).statusCode shouldBe StatusCodes.OK.intValue
+        setNumberOfBans(lobbyId, numberOfBans).statusCode shouldBe StatusCodes.OK.intValue
+        setNumberOfCharacters(lobbyId, numberOfCharacters).statusCode shouldBe StatusCodes.OK.intValue
+        for (i <- 1 until numberOfPlayers) {
+          auth(i)
+          joinLobby(lobbyId).statusCode shouldBe StatusCodes.OK.intValue
+        }
+        auth(0)
+        startGame(lobbyId).statusCode shouldBe StatusCodes.InternalServerError.intValue
+        leaveLobby(lobbyId)
+        startGame(lobbyId).statusCode shouldBe StatusCodes.OK.intValue
+      }
+    }
   }
 }
