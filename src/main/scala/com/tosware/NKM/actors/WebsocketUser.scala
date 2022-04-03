@@ -80,7 +80,7 @@ class WebsocketUser(lobbySession: ActorRef)(implicit val lobbyService: LobbyServ
         }
       case LobbyRoute.Observe =>
         val lobbyId = request.requestJson.parseJson.convertTo[ObserveRequest].lobbyId
-        lobbySession ! LobbySessionActor.Observe(lobbyId, outgoing)
+        lobbySession ! SessionActor.Observe(lobbyId, outgoing)
         WebsocketLobbyResponse(LobbyResponseType.Observe, StatusCodes.OK.intValue)
       case LobbyRoute.Lobbies =>
         val lobbies = Await.result(lobbyService.getAllLobbies(), atMost)
