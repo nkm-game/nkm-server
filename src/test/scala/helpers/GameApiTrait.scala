@@ -3,6 +3,7 @@ package helpers
 import akka.http.scaladsl.model.StatusCodes.OK
 import com.tosware.NKM.models.game.{GamePhase, GameState, PickType}
 import com.tosware.NKM.models.lobby._
+import com.tosware.NKM.models.lobby.ws.{LobbyJoinRequest, SetHexMapNameRequest, SetNumberOfBansRequest, SetNumberOfCharactersPerPlayerRequest, SetPickTypeRequest, StartGameRequest}
 
 trait GameApiTrait extends LobbyApiTrait
   {

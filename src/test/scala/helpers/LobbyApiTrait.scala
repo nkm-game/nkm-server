@@ -4,7 +4,8 @@ import akka.actor.ActorRef
 import akka.pattern.ask
 import com.tosware.NKM.DBManager
 import com.tosware.NKM.actors.Lobby
-import com.tosware.NKM.models.lobby.{LobbyCreationRequest, LobbyState}
+import com.tosware.NKM.models.lobby.LobbyState
+import com.tosware.NKM.models.lobby.ws.LobbyCreationRequest
 import slick.jdbc.MySQLProfile.api._
 
 import scala.concurrent.Await

@@ -1,9 +1,9 @@
-package com.tosware.NKM.actors
+package com.tosware.NKM.actors.ws
 
-import akka.actor.{ActorRef, Props}
+import akka.actor.Props
 import akka.http.scaladsl.model.StatusCodes
-import com.tosware.NKM.actors.WebsocketUser.OutgoingMessage
-import com.tosware.NKM.models.lobby.{LobbyResponseType, WebsocketLobbyResponse}
+import com.tosware.NKM.actors.Lobby
+import com.tosware.NKM.models.lobby.ws._
 import com.tosware.NKM.services.LobbyService
 import spray.json._
 
@@ -14,7 +14,7 @@ object LobbySessionActor {
 }
 
 class LobbySessionActor(implicit val lobbyService: LobbyService)
-  extends SessionActor[Lobby.Event]
+  extends SessionActor
 {
   override def preStart(): Unit = {
     log.info("LobbySessionActor started")
@@ -26,6 +26,6 @@ class LobbySessionActor(implicit val lobbyService: LobbyService)
       val lobbyId = e.id
       val lobbyState = Await.result(lobbyService.getLobby(lobbyId), atMost)
       val response = WebsocketLobbyResponse(LobbyResponseType.Lobby, StatusCodes.OK.intValue, lobbyState.toJson.toString)
-      getObservers(lobbyId).foreach(_ ! OutgoingMessage(response.toJson.toString))
+      getObservers(lobbyId).foreach(_ ! WebsocketUser.OutgoingMessage(response.toJson.toString))
   }
 }

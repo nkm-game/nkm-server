@@ -1,71 +1,35 @@
-package com.tosware.NKM.actors
+package com.tosware.NKM.actors.ws
 
-import akka.actor.{Actor, ActorLogging, ActorRef, PoisonPill, Props}
-import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
+import akka.actor.ActorRef
 import akka.http.scaladsl.model.StatusCodes
-import com.tosware.NKM.NKMTimeouts
-import com.tosware.NKM.models.lobby._
-import com.tosware.NKM.serializers.NKMJsonProtocol
+import com.tosware.NKM.models.lobby.ws._
 import com.tosware.NKM.services.LobbyService
-import com.tosware.NKM.services.http.directives.{JwtHelper, JwtSecretKey}
+import com.tosware.NKM.services.http.directives.JwtSecretKey
 import spray.json._
 
 import scala.concurrent.Await
 
-object WebsocketUser {
-  case object GetAuthStatus
-  case class AuthStatus(username: Option[String])
-  case class Connected(outgoing: ActorRef)
-  case class IncomingMessage(text: String)
-  case class OutgoingMessage(text: String)
-  case class Authenticate(username: String)
-  def props(lobbySession: ActorRef)(implicit lobbyService: LobbyService, jwtSecretKey: JwtSecretKey): Props = Props(new WebsocketUser(lobbySession))
-}
+trait LobbyWebsocketUserBehaviour extends WebsocketUserBehaviour {
+  val session: ActorRef
+  implicit val lobbyService: LobbyService
+  implicit val jwtSecretKey: JwtSecretKey
 
-class WebsocketUser(lobbySession: ActorRef)(implicit val lobbyService: LobbyService, implicit val jwtSecretKey: JwtSecretKey)
-  extends Actor
-  with ActorLogging
-  with SprayJsonSupport
-  with NKMJsonProtocol
-  with NKMTimeouts
-  with JwtHelper
-{
   import WebsocketUser._
 
-  var username: Option[String] = None
-
-  def receive = {
-    case Connected(outgoing) =>
-      context.become(connected(outgoing))
-  }
-
-  def connected(outgoing: ActorRef): Receive = {
-    log.info(s"Connected")
-
-    {
-      case GetAuthStatus =>
-        log.info("get auth status")
-        sender() ! AuthStatus(username)
-      case Authenticate(u) =>
-        username = Some(u)
-      case IncomingMessage(text) =>
-        try {
-          val request = text.parseJson.convertTo[WebsocketLobbyRequest]
-          log.info(s"Request: $request")
-          val response = parseWebsocketLobbyRequest(request, outgoing, self, AuthStatus(username))
-          log.info(s"Response: $response")
-          outgoing ! OutgoingMessage(response.toJson.toString)
-        }
-        catch {
-          case e: Exception =>
-            log.error(e.toString)
-            val response = WebsocketLobbyResponse(LobbyResponseType.Error, StatusCodes.InternalServerError.intValue, "Error with request parsing.")
-            outgoing ! OutgoingMessage(response.toJson.toString)
-        }
-      case PoisonPill =>
-        log.info(s"Disconnected")
+  override def parseIncomingMessage(outgoing: ActorRef, username: Option[String], text: String): Unit =
+    try {
+      val request = text.parseJson.convertTo[WebsocketLobbyRequest]
+      log.info(s"Request: $request")
+      val response = parseWebsocketLobbyRequest(request, outgoing, self, AuthStatus(username))
+      log.info(s"Response: $response")
+      outgoing ! OutgoingMessage(response.toJson.toString)
     }
-  }
+    catch {
+      case e: Exception =>
+        log.error(e.toString)
+        val response = WebsocketLobbyResponse(LobbyResponseType.Error, StatusCodes.InternalServerError.intValue, "Error with request parsing.")
+        outgoing ! OutgoingMessage(response.toJson.toString)
+    }
 
   def parseWebsocketLobbyRequest(request: WebsocketLobbyRequest, outgoing: ActorRef, userActor: ActorRef, authStatus: AuthStatus): WebsocketLobbyResponse = {
     request.requestPath match {
@@ -80,7 +44,7 @@ class WebsocketUser(lobbySession: ActorRef)(implicit val lobbyService: LobbyServ
         }
       case LobbyRoute.Observe =>
         val lobbyId = request.requestJson.parseJson.convertTo[ObserveRequest].lobbyId
-        lobbySession ! SessionActor.Observe(lobbyId, outgoing)
+        session ! SessionActor.Observe(lobbyId, outgoing)
         WebsocketLobbyResponse(LobbyResponseType.Observe, StatusCodes.OK.intValue)
       case LobbyRoute.Lobbies =>
         val lobbies = Await.result(lobbyService.getAllLobbies(), atMost)

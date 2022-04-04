@@ -1,26 +1,26 @@
 package com.tosware.NKM.services.http.routes
 
 import akka.NotUsed
-import akka.actor.{ActorSystem, PoisonPill}
+import akka.actor.{ActorRef, ActorSystem, PoisonPill}
 import akka.http.scaladsl.model.ws.{Message, TextMessage}
 import akka.http.scaladsl.server.Directives._
 import akka.stream.OverflowStrategy
 import akka.stream.scaladsl.{Flow, Sink, Source}
-import com.tosware.NKM.actors.{LobbySessionActor, WebsocketUser}
-import com.tosware.NKM.services.LobbyService
+import com.tosware.NKM.actors.ws._
 import com.tosware.NKM.services.http.directives.JwtDirective
+import com.tosware.NKM.services.{GameService, LobbyService}
 
 trait WebsocketRoutes extends JwtDirective
 {
   implicit val system: ActorSystem
   implicit val lobbyService: LobbyService
+  implicit val gameService: GameService
 
-  lazy val lobbySession = system.actorOf(LobbySessionActor.props(), "lobby")
+  lazy val lobbySessionActor = system.actorOf(LobbySessionActor.props(), "lobby_session")
+  lazy val gameSessionActor = system.actorOf(GameSessionActor.props(), "game_session")
 
-  def newUser() = {
-    // new connection - new user actor
-    val userActor = system.actorOf(WebsocketUser.props(lobbySession))
-
+  // new connection - new user actor
+  def newUser(userActor: ActorRef) = {
     val onFailureMessage = (onFailureMessage: Throwable) => println(onFailureMessage.getMessage)
 
     val incomingMessages =
@@ -43,7 +43,12 @@ trait WebsocketRoutes extends JwtDirective
 
   val websocketRoutes = concat (
     path("lobby") {
-      handleWebSocketMessages(newUser())
+      // new connection - new user actor
+      handleWebSocketMessages(newUser(system.actorOf(WebsocketUser.lobbyProps(lobbySessionActor))))
+    },
+    path("game") {
+      // new connection - new user actor
+      handleWebSocketMessages(newUser(system.actorOf(WebsocketUser.gameProps(gameSessionActor))))
     },
   )
 }

@@ -4,7 +4,6 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import com.tosware.NKM.models.CommandResponse
-import com.tosware.NKM.models.game.PlaceCharacterRequest
 import com.tosware.NKM.services.GameService
 import com.tosware.NKM.services.http.directives.JwtDirective
 
@@ -19,16 +18,16 @@ trait GameRoutes extends JwtDirective
     },
   )
 
-  val gamePostRoutes = concat(
-    path("place_character") {
-      authenticated { username =>
-        entity(as[PlaceCharacterRequest]) { entity =>
-          onSuccess(gameService.placeCharacter(username, entity)) {
-            case CommandResponse.Success => complete(StatusCodes.OK)
-            case CommandResponse.Failure => complete(StatusCodes.InternalServerError)
-          }
-        }
-      }
-    },
-  )
+//  val gamePostRoutes = concat(
+//    path("place_character") {
+//      authenticated { username =>
+//        entity(as[PlaceCharacterRequest]) { entity =>
+//          onSuccess(gameService.placeCharacter(username, entity)) {
+//            case CommandResponse.Success => complete(StatusCodes.OK)
+//            case CommandResponse.Failure => complete(StatusCodes.InternalServerError)
+//          }
+//        }
+//      }
+//    },
+//  )
 }

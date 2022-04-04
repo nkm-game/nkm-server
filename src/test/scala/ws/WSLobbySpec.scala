@@ -5,7 +5,7 @@ import akka.http.scaladsl.testkit.WSProbe
 import com.tosware.NKM.DBManager
 import com.tosware.NKM.models.game.{GamePhase, GameState, PickType}
 import com.tosware.NKM.models.lobby._
-import com.tosware.NKM.models.lobby.LobbyRoute
+import com.tosware.NKM.models.lobby.ws._
 import helpers.UserApiTrait
 import spray.json._
 

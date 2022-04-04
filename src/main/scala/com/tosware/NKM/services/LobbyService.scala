@@ -7,6 +7,7 @@ import com.tosware.NKM.actors._
 import com.tosware.NKM.models.CommandResponse
 import com.tosware.NKM.models.game._
 import com.tosware.NKM.models.lobby._
+import com.tosware.NKM.models.lobby.ws.{LobbyJoinRequest, LobbyLeaveRequest, SetHexMapNameRequest, SetLobbyNameRequest, SetNumberOfBansRequest, SetNumberOfCharactersPerPlayerRequest, SetPickTypeRequest, StartGameRequest}
 import slick.jdbc.JdbcBackend
 import slick.jdbc.MySQLProfile.api._
 

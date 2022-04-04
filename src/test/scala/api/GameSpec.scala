@@ -41,99 +41,99 @@ class GameSpec extends GameApiTrait
 ////      }
 //    }
 
-    "allow to place characters" in {
-      initGame()
-      var gameState: GameState = GameState.empty("null")
-
-      Get(s"/api/state/$lobbyId").addHeader(getAuthHeader(tokens(0))) ~> routes ~> check {
-        gameState = responseAs[GameState]
-      }
-
-      val firstPlayerSpawnPoints = gameState.hexMap.get.getSpawnPointsByNumber(0)
-      val targetCellCoordinates = firstPlayerSpawnPoints(0).coordinates
-      val characterToPlace = gameState.players(0).characters(0).id
-
-      Post("/api/place_character", PlaceCharacterRequest(lobbyId, targetCellCoordinates, characterToPlace)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check(status shouldEqual OK)
-    }
-
-    "disallow to place characters on other cells than spawnpoint" in {
-      initGame()
-      var gameState: GameState = GameState.empty("null")
-
-      Get(s"/api/state/$lobbyId").addHeader(getAuthHeader(tokens(0))) ~> routes ~> check {
-        gameState = responseAs[GameState]
-      }
-      val characterToPlace = gameState.players(0).characters(0).id
-
-      val secondPlayerSpawnPoints = gameState.hexMap.get.getSpawnPointsByNumber(1)
-      val someHexCoordinates = HexCoordinates(1, 1)
-      val candidateCoordinates = List(secondPlayerSpawnPoints(0).coordinates, someHexCoordinates)
-
-      candidateCoordinates.foreach { c =>
-        checkPostRequest("/api/place_character", PlaceCharacterRequest(lobbyId, c, characterToPlace), InternalServerError, 0)
-      }
-    }
-
-    "disallow to place other characters" in {
-      initGame()
-      var gameState: GameState = GameState.empty("null")
-
-      Get(s"/api/state/$lobbyId").addHeader(getAuthHeader(tokens(0))) ~> routes ~> check {
-        gameState = responseAs[GameState]
-      }
-      val characterToPlace = gameState.players(1).characters(0).id
-
-      val secondPlayerSpawnPoints = gameState.hexMap.get.getSpawnPointsByNumber(0)
-      val firstPlayerSpawnPoints = gameState.hexMap.get.getSpawnPointsByNumber(0)
-
-      val candidateCoordinates = List(secondPlayerSpawnPoints(0).coordinates, firstPlayerSpawnPoints(0).coordinates)
-
-      candidateCoordinates.foreach { c =>
-        checkPostRequest("/api/place_character", PlaceCharacterRequest(lobbyId, c, characterToPlace), InternalServerError, 0)
-      }
-    }
-
-    "disallow to place characters outside your turn" in {
-      initGame()
-      var gameState: GameState = GameState.empty("null")
-
-      Get(s"/api/state/$lobbyId").addHeader(getAuthHeader(tokens(1))) ~> routes ~> check {
-        gameState = responseAs[GameState]
-      }
-      val characterToPlace1 = gameState.players(0).characters(0).id
-      val characterToPlace2 = gameState.players(1).characters(0).id
-      val candidateCharactersToPlace = List(characterToPlace1, characterToPlace2)
-
-      val secondPlayerSpawnPoints = gameState.hexMap.get.getSpawnPointsByNumber(0)
-      val firstPlayerSpawnPoints = gameState.hexMap.get.getSpawnPointsByNumber(0)
-
-      val candidateCoordinates = List(secondPlayerSpawnPoints(0).coordinates, firstPlayerSpawnPoints(0).coordinates)
-
-      candidateCharactersToPlace.foreach { ca =>
-        candidateCoordinates.foreach { c =>
-          checkPostRequest("/api/place_character", PlaceCharacterRequest(lobbyId, c, ca), InternalServerError, 1)
-        }
-      }
-    }
-
-    "make turn change after placing a character" in {
-      initGame()
-      var gameState: GameState = GameState.empty("null")
-
-      Get(s"/api/state/$lobbyId").addHeader(getAuthHeader(tokens(0))) ~> routes ~> check {
-        gameState = responseAs[GameState]
-      }
-
-      val firstPlayerSpawnPoints = gameState.hexMap.get.getSpawnPointsByNumber(0)
-      val targetCellCoordinates = firstPlayerSpawnPoints(0).coordinates
-      val characterToPlace = gameState.players(0).characters(0).id
-
-      Post("/api/place_character", PlaceCharacterRequest(lobbyId, targetCellCoordinates, characterToPlace)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check(status shouldEqual OK)
-
-      Get(s"/api/state/$lobbyId").addHeader(getAuthHeader(tokens(0))) ~> routes ~> check {
-        gameState = responseAs[GameState]
-      }
-      gameState.getCurrentPlayerNumber shouldEqual 1
-    }
+//    "allow to place characters" in {
+//      initGame()
+//      var gameState: GameState = GameState.empty("null")
+//
+//      Get(s"/api/state/$lobbyId").addHeader(getAuthHeader(tokens(0))) ~> routes ~> check {
+//        gameState = responseAs[GameState]
+//      }
+//
+//      val firstPlayerSpawnPoints = gameState.hexMap.get.getSpawnPointsByNumber(0)
+//      val targetCellCoordinates = firstPlayerSpawnPoints(0).coordinates
+//      val characterToPlace = gameState.players(0).characters(0).id
+//
+//      Post("/api/place_character", PlaceCharacterRequest(lobbyId, targetCellCoordinates, characterToPlace)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check(status shouldEqual OK)
+//    }
+//
+//    "disallow to place characters on other cells than spawnpoint" in {
+//      initGame()
+//      var gameState: GameState = GameState.empty("null")
+//
+//      Get(s"/api/state/$lobbyId").addHeader(getAuthHeader(tokens(0))) ~> routes ~> check {
+//        gameState = responseAs[GameState]
+//      }
+//      val characterToPlace = gameState.players(0).characters(0).id
+//
+//      val secondPlayerSpawnPoints = gameState.hexMap.get.getSpawnPointsByNumber(1)
+//      val someHexCoordinates = HexCoordinates(1, 1)
+//      val candidateCoordinates = List(secondPlayerSpawnPoints(0).coordinates, someHexCoordinates)
+//
+//      candidateCoordinates.foreach { c =>
+//        checkPostRequest("/api/place_character", PlaceCharacterRequest(lobbyId, c, characterToPlace), InternalServerError, 0)
+//      }
+//    }
+//
+//    "disallow to place other characters" in {
+//      initGame()
+//      var gameState: GameState = GameState.empty("null")
+//
+//      Get(s"/api/state/$lobbyId").addHeader(getAuthHeader(tokens(0))) ~> routes ~> check {
+//        gameState = responseAs[GameState]
+//      }
+//      val characterToPlace = gameState.players(1).characters(0).id
+//
+//      val secondPlayerSpawnPoints = gameState.hexMap.get.getSpawnPointsByNumber(0)
+//      val firstPlayerSpawnPoints = gameState.hexMap.get.getSpawnPointsByNumber(0)
+//
+//      val candidateCoordinates = List(secondPlayerSpawnPoints(0).coordinates, firstPlayerSpawnPoints(0).coordinates)
+//
+//      candidateCoordinates.foreach { c =>
+//        checkPostRequest("/api/place_character", PlaceCharacterRequest(lobbyId, c, characterToPlace), InternalServerError, 0)
+//      }
+//    }
+//
+//    "disallow to place characters outside your turn" in {
+//      initGame()
+//      var gameState: GameState = GameState.empty("null")
+//
+//      Get(s"/api/state/$lobbyId").addHeader(getAuthHeader(tokens(1))) ~> routes ~> check {
+//        gameState = responseAs[GameState]
+//      }
+//      val characterToPlace1 = gameState.players(0).characters(0).id
+//      val characterToPlace2 = gameState.players(1).characters(0).id
+//      val candidateCharactersToPlace = List(characterToPlace1, characterToPlace2)
+//
+//      val secondPlayerSpawnPoints = gameState.hexMap.get.getSpawnPointsByNumber(0)
+//      val firstPlayerSpawnPoints = gameState.hexMap.get.getSpawnPointsByNumber(0)
+//
+//      val candidateCoordinates = List(secondPlayerSpawnPoints(0).coordinates, firstPlayerSpawnPoints(0).coordinates)
+//
+//      candidateCharactersToPlace.foreach { ca =>
+//        candidateCoordinates.foreach { c =>
+//          checkPostRequest("/api/place_character", PlaceCharacterRequest(lobbyId, c, ca), InternalServerError, 1)
+//        }
+//      }
+//    }
+//
+//    "make turn change after placing a character" in {
+//      initGame()
+//      var gameState: GameState = GameState.empty("null")
+//
+//      Get(s"/api/state/$lobbyId").addHeader(getAuthHeader(tokens(0))) ~> routes ~> check {
+//        gameState = responseAs[GameState]
+//      }
+//
+//      val firstPlayerSpawnPoints = gameState.hexMap.get.getSpawnPointsByNumber(0)
+//      val targetCellCoordinates = firstPlayerSpawnPoints(0).coordinates
+//      val characterToPlace = gameState.players(0).characters(0).id
+//
+//      Post("/api/place_character", PlaceCharacterRequest(lobbyId, targetCellCoordinates, characterToPlace)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check(status shouldEqual OK)
+//
+//      Get(s"/api/state/$lobbyId").addHeader(getAuthHeader(tokens(0))) ~> routes ~> check {
+//        gameState = responseAs[GameState]
+//      }
+//      gameState.getCurrentPlayerNumber shouldEqual 1
+//    }
   }
 }

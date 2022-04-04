@@ -5,6 +5,7 @@ import com.tosware.NKM.DBManager
 import com.tosware.NKM.models.game.PickType.{AllRandom, DraftPick}
 import com.tosware.NKM.models.game._
 import com.tosware.NKM.models.lobby._
+import com.tosware.NKM.models.lobby.ws.{LobbyJoinRequest, LobbyLeaveRequest, SetHexMapNameRequest, SetNumberOfBansRequest, SetNumberOfCharactersPerPlayerRequest, SetPickTypeRequest, StartGameRequest}
 import helpers.LobbyApiTrait
 
 import scala.language.postfixOps

@@ -2,6 +2,7 @@ package api
 
 import akka.http.scaladsl.model.StatusCodes._
 import com.tosware.NKM.models.lobby._
+import com.tosware.NKM.models.lobby.ws.LobbyCreationRequest
 import helpers.UserApiTrait
 
 import scala.language.postfixOps

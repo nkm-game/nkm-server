@@ -1,6 +1,6 @@
-package com.tosware.NKM.actors
+package com.tosware.NKM.actors.ws
 
-import akka.actor.{Actor, ActorLogging, ActorRef, Props, Terminated}
+import akka.actor.{Actor, ActorLogging, ActorRef, Terminated}
 import com.tosware.NKM.NKMTimeouts
 import com.tosware.NKM.serializers.NKMJsonProtocol
 
@@ -11,7 +11,7 @@ object SessionActor {
 }
 
 
-trait SessionActor[A]
+trait SessionActor
   extends Actor
   with ActorLogging
   with NKMTimeouts
