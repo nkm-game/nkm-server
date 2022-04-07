@@ -39,8 +39,6 @@ trait HttpService
               post {
                 concat(
                   authPostRoutes,
-                  lobbyPostRoutes,
-//                  gamePostRoutes,
                 )
               }
           }
