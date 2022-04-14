@@ -2,10 +2,13 @@ package com.tosware.NKM.actors.ws
 
 import akka.actor.ActorRef
 import akka.http.scaladsl.model.StatusCodes
-import com.tosware.NKM.models.game.ws.{GameResponseType, WebsocketGameRequest, WebsocketGameResponse}
+import com.tosware.NKM.models.game.ws._
+import com.tosware.NKM.models.lobby.ws.{GetLobbyRequest, LobbyResponseType, WebsocketLobbyResponse}
 import com.tosware.NKM.services.GameService
 import com.tosware.NKM.services.http.directives.JwtSecretKey
 import spray.json._
+
+import scala.concurrent.Await
 
 trait GameWebsocketUserBehaviour extends WebsocketUserBehaviour {
   val session: ActorRef
@@ -29,6 +32,37 @@ trait GameWebsocketUserBehaviour extends WebsocketUserBehaviour {
         outgoing ! OutgoingMessage(response.toJson.toString)
     }
 
-  def parseWebsocketGameRequest(request: WebsocketGameRequest, outgoing: ActorRef, self: ActorRef, status: AuthStatus): WebsocketGameResponse = ???
+  def parseWebsocketGameRequest(request: WebsocketGameRequest, outgoing: ActorRef, userActor: ActorRef, status: AuthStatus): WebsocketGameResponse = {
+    request.requestPath match {
+      case GameRoute.Auth =>
+        val token = request.requestJson.parseJson.convertTo[AuthRequest].token
+        authenticateToken(token) match {
+          case Some(username) =>
+            userActor ! WebsocketUser.Authenticate(username)
+            WebsocketGameResponse(GameResponseType.Auth, StatusCodes.OK.intValue, username)
+          case None =>
+            WebsocketGameResponse(GameResponseType.Auth, StatusCodes.Unauthorized.intValue, "Invalid token.")
+        }
+      case GameRoute.Observe =>
+        val gameId = request.requestJson.parseJson.convertTo[ObserveRequest].gameId
+        session ! SessionActor.Observe(gameId, outgoing)
+        WebsocketGameResponse(GameResponseType.Observe, StatusCodes.OK.intValue)
+      case GameRoute.GetState =>
+        val gameId = request.requestJson.parseJson.convertTo[GetStateRequest].gameId
+        val gameState = Await.result(gameService.getGameState(gameId), atMost)
+        WebsocketGameResponse(GameResponseType.State, StatusCodes.OK.intValue, gameState.toJson.toString)
+      case GameRoute.Pause => ???
+      case GameRoute.Surrender => ???
+      case GameRoute.BanCharacters => ???
+      case GameRoute.PickCharacters => ???
+      case GameRoute.PlaceCharacters => ???
+      case GameRoute.EndTurn => ???
+      case GameRoute.Move => ???
+      case GameRoute.BasicAttack => ???
+      case GameRoute.UseAbility => ???
+      case GameRoute.SendChatMessage => ???
+      case GameRoute.ExecuteCommand => ???
+    }
+  }
 
 }

@@ -1,3 +1,5 @@
 package com.tosware.NKM.models.game.ws
 
-case class WebsocketGameRequest(requestPath: GameRoute, requestJson: String = "")
+import com.tosware.NKM.models.WebsocketRequest
+
+case class WebsocketGameRequest(requestPath: GameRoute, requestJson: String = "") extends WebsocketRequest
