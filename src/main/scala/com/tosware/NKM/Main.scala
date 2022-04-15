@@ -6,6 +6,7 @@ import com.tosware.NKM.actors.CQRSEventHandler
 import com.tosware.NKM.services._
 import com.tosware.NKM.services.http.HttpService
 import com.tosware.NKM.services.http.directives.JwtSecretKey
+import com.typesafe.config.{Config, ConfigFactory}
 import slick.jdbc.JdbcBackend
 import slick.jdbc.JdbcBackend.Database
 
@@ -23,6 +24,9 @@ object Main extends App with HttpService {
   val port = sys.env.getOrElse("PORT", "8080").toInt
 
   try {
+    val config: Config = ConfigFactory.load()
+    val dbName = config.getString("slick.db.dbName")
+    DBManager.createDbIfNotExists(dbName)
     DBManager.createNeededTables(db)
 
     // subscribe to events

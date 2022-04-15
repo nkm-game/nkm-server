@@ -1,6 +1,7 @@
 package com.tosware.NKM
 
 import com.tosware.NKM.tables._
+import com.typesafe.config.{Config, ConfigFactory}
 import slick.dbio.DBIO
 import slick.jdbc.JdbcBackend
 import slick.jdbc.MySQLProfile.api._
@@ -9,7 +10,7 @@ import scala.concurrent.Await
 import scala.concurrent.duration.DurationInt
 
 object DBManager {
-  val dbTimeout = 300.millis
+  val dbTimeout = 1000.millis
   val users = TableQuery[User]
   val lobbies = TableQuery[Lobby]
 
@@ -17,6 +18,14 @@ object DBManager {
     users,
     lobbies,
   )
+
+  def createDbIfNotExists(dbName: String): Unit = {
+    val config: Config = ConfigFactory.load("slick_no_db.conf")
+    val db = Database.forConfig("slick.db", config)
+    val setupAction = DBIO.seq(sqlu"""CREATE DATABASE IF NOT EXISTS #$dbName;""")
+
+    Await.result(db.run(setupAction), dbTimeout)
+  }
 
   def dropAllTables(db: JdbcBackend.Database): Unit = {
     def dropActions = DBIO.seq(
