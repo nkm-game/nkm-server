@@ -10,7 +10,7 @@ services:
       - MYSQL_HOST=db
       - MYSQL_DB=nkm_db
       - MYSQL_USER=root
-      - MYSQL_PASSWORD=nkm_db_pass
+      - MYSQL_PASSWORD=root
       - MYSQL_PORT=3306
     ports:
       - 3000:3000
@@ -23,7 +23,9 @@ services:
       - mysql_data:/var/lib/mysql
     environment:
       - MYSQL_DATABASE=nkm_db
-      - MYSQL_ROOT_PASSWORD=nkm_db_pass
+      - MYSQL_ROOT_PASSWORD=root
+    ports:
+      - 3306:3306
     expose:
       - 3306
 
