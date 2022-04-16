@@ -23,7 +23,7 @@ class GameSessionActor(implicit gameService: GameService)
   }
 
   override def receive: Receive = super.receive.orElse[Any, Unit]{
-    case e: Lobby.Event =>
+    case e: Game.Event =>
       val gameId = e.id
       val gameState = Await.result(gameService.getGameState(gameId), atMost)
       val response = WebsocketGameResponse(GameResponseType.State, StatusCodes.OK.intValue, gameState.toJson.toString)

@@ -117,6 +117,9 @@ trait WSTrait extends UserApiTrait
       lobbyResponse.body.parseJson.convertTo[LobbyState]
     }
 
+    def surrender(gameId: String): WebsocketGameResponse =
+      sendWSRequestG(GameRoute.Surrender, SurrenderRequest(gameId).toJson.toString)
+
     def fetchGame(gameId: String): WebsocketGameResponse =
       sendWSRequestG(GameRoute.GetState, GetStateRequest(gameId).toJson.toString)
 

@@ -32,7 +32,16 @@ trait GameWebsocketUserBehaviour extends WebsocketUserBehaviour {
         outgoing ! OutgoingMessage(response.toJson.toString)
     }
 
-  def parseWebsocketGameRequest(request: WebsocketGameRequest, outgoing: ActorRef, userActor: ActorRef, status: AuthStatus): WebsocketGameResponse = {
+  def ok()(implicit responseType: GameResponseType): WebsocketGameResponse =
+    WebsocketGameResponse(responseType, StatusCodes.OK.intValue)
+
+  def nok(msg: String = "")(implicit responseType: GameResponseType): WebsocketGameResponse =
+    WebsocketGameResponse(responseType, StatusCodes.InternalServerError.intValue, msg)
+
+  def unauthorized()(implicit responseType: GameResponseType): WebsocketGameResponse =
+    WebsocketGameResponse(responseType, StatusCodes.Unauthorized.intValue)
+
+  def parseWebsocketGameRequest(request: WebsocketGameRequest, outgoing: ActorRef, userActor: ActorRef, authStatus: AuthStatus): WebsocketGameResponse = {
     request.requestPath match {
       case GameRoute.Auth =>
         val token = request.requestJson.parseJson.convertTo[AuthRequest].token
@@ -52,7 +61,16 @@ trait GameWebsocketUserBehaviour extends WebsocketUserBehaviour {
         val gameState = Await.result(gameService.getGameState(gameId), atMost)
         WebsocketGameResponse(GameResponseType.State, StatusCodes.OK.intValue, gameState.toJson.toString)
       case GameRoute.Pause => ???
-      case GameRoute.Surrender => ???
+      case GameRoute.Surrender =>
+        val gameId = request.requestJson.parseJson.convertTo[SurrenderRequest].gameId
+        implicit val responseType: GameResponseType = GameResponseType.Surrender
+        if(authStatus.username.isEmpty) unauthorized()
+        val username = authStatus.username.get
+        val surrenderStatus = Await.result(gameService.surrender(username, gameId), atMost)
+        surrenderStatus match {
+          case GameService.Success(_) => ok()
+          case GameService.Failure(msg) => nok(msg)
+        }
       case GameRoute.BanCharacters => ???
       case GameRoute.PickCharacters => ???
       case GameRoute.PlaceCharacters => ???

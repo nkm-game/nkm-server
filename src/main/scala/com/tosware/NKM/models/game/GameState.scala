@@ -2,17 +2,17 @@ package com.tosware.NKM.models.game
 
 case class GameState(id: String,
                      hexMap: Option[HexMap],
-                     characterIdsOutsideMap: List[String],
+                     characterIdsOutsideMap: Seq[String],
                      phase: Phase,
                      turn: Turn,
-                     players: List[Player],
+                     players: Seq[Player],
                      gamePhase: GamePhase,
                      pickType: PickType,
                      numberOfBans: Int,
                      numberOfCharactersPerPlayers: Int,
                     ) {
-  def getCurrentPlayerNumber = turn.number % players.length
-  def getCurrentPlayer = players(getCurrentPlayerNumber)
+  def getCurrentPlayerNumber: Int = turn.number % players.length
+  def getCurrentPlayer: Player = players(getCurrentPlayerNumber)
 }
 object GameState {
   def empty(id: String): GameState = GameState(

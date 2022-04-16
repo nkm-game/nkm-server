@@ -17,17 +17,21 @@ object Game {
 
   sealed trait Command
   case class StartGame(gameStartDependencies: GameStartDependencies) extends Command
+  case class Surrender(playerName: String) extends Command
 //  case class SetPlayers(names: List[String]) extends Command
 //  case class AddCharacter(playerName: String, character: NKMCharacter) extends Command
   case class PlaceCharacter(hexCoordinates: HexCoordinates, characterId: String) extends Command
   case class MoveCharacter(hexCoordinates: HexCoordinates, characterId: String) extends Command
 
-  sealed trait Event
-  case class GameStarted(gameId: String, gameStartDependencies: GameStartDependencies) extends Event
+  sealed trait Event {
+    val id: String
+  }
+  case class GameStarted(id: String, gameStartDependencies: GameStartDependencies) extends Event
+  case class Surrendered(id: String, playerName: String) extends Event
 //  case class PlayersSet(names: List[String]) extends Event
 //  case class CharacterAdded(playerName: String, character: NKMCharacter) extends Event
-  case class CharacterPlaced(hexCoordinates: HexCoordinates, characterId: String) extends Event
-  case class CharacterMoved(hexCoordinates: HexCoordinates, characterId: String) extends Event
+  case class CharacterPlaced(id: String, hexCoordinates: HexCoordinates, characterId: String) extends Event
+  case class CharacterMoved(id: String, hexCoordinates: HexCoordinates, characterId: String) extends Event
 
   def props(id: String)(implicit NKMDataService: NKMDataService): Props = Props(new Game(id))
 }
@@ -55,6 +59,11 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
       })
       gameState = gameState.copy(gamePhase = GamePhase.CharacterPlacing, players = playersWithAssignedCharacters, characterIdsOutsideMap = playersWithAssignedCharacters.flatMap(c => c.characters.map(c => c.id)))
     }
+  }
+
+  def surrender(playerName: String): Unit = {
+    def filterPlayer: Player => Boolean = _.name == playerName
+    gameState = gameState.modify(_.players.eachWhere(filterPlayer).victoryStatus).setTo(VictoryStatus.Lost)
   }
 
   def placeCharacter(targetCellCoordinates: HexCoordinates, characterId: String): Unit =
@@ -104,7 +113,9 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
       if(gameState.gamePhase != NotStarted) {
         sender() ! Failure
       } else {
-        persist(GameStarted(id, gameStartDependencies)) { _ =>
+        val e = GameStarted(id, gameStartDependencies)
+        persist(e) { _ =>
+          context.system.eventStream.publish(e)
           startGame(gameStartDependencies)
           sender() ! Success
         }
@@ -121,16 +132,36 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
 //        addCharacter(player, character)
 //        log.info(s"Persisted character: ${character.name}")
 //      }
+    case Surrender(playerName) =>
+      log.info(s"Surrendering $playerName")
+      //TODO: check if game is started
+      val playerOption = gameState.players.find(_.name == playerName)
+      if(playerOption.isEmpty) {
+        sender() ! Failure //TODO ("This player is not in this game.")
+      } else {
+        val player = playerOption.get
+        if(player.victoryStatus != VictoryStatus.Pending) {
+          sender() ! Failure //TODO ("This player already finished the game."))
+        } else {
+          val e = Surrendered(id, playerName)
+          persist(e) { _ =>
+            context.system.eventStream.publish(e)
+            surrender(playerName)
+            log.info(s"Surrendered $playerName")
+            sender() ! Success
+          }
+        }
+      }
     case PlaceCharacter(hexCoordinates, characterId) =>
       log.info(s"Placing $characterId on $hexCoordinates")
-      persist(CharacterPlaced(hexCoordinates, characterId)) { _ =>
+      persist(CharacterPlaced(id, hexCoordinates, characterId)) { _ =>
         placeCharacter(hexCoordinates, characterId)
         log.info(s"Persisted $characterId on $hexCoordinates")
         sender() ! Success
       }
     case MoveCharacter(hexCoordinates, characterId) =>
       log.info(s"Moving $characterId to $hexCoordinates")
-      persist(CharacterMoved(hexCoordinates, characterId)) { _ =>
+      persist(CharacterMoved(id, hexCoordinates, characterId)) { _ =>
         moveCharacter(hexCoordinates, characterId)
         log.info(s"Persisted $characterId on $hexCoordinates")
         sender() ! Success
@@ -142,16 +173,19 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
     case GameStarted(_, gameStartDependencies) =>
       startGame(gameStartDependencies)
       log.debug(s"Recovered game start")
+    case Surrendered(_, playerName) =>
+      surrender(playerName)
+      log.debug(s"Recovered $playerName surrender")
 //    case PlayersSet(names) =>
 //      setPlayers(names)
 //      log.debug(s"Recovered players: $names")
 //    case CharacterAdded(player, character) =>
 //      addCharacter(player, character)
 //      log.debug(s"Recovered character: ${character.name}")
-    case CharacterPlaced(hexCoordinates, characterId) =>
+    case CharacterPlaced(_, hexCoordinates, characterId) =>
       placeCharacter(hexCoordinates, characterId)
       log.debug(s"Recovered $characterId on $hexCoordinates")
-    case CharacterMoved(hexCoordinates, characterId) =>
+    case CharacterMoved(_, hexCoordinates, characterId) =>
       moveCharacter(hexCoordinates, characterId)
       log.debug(s"Recovered $characterId to $hexCoordinates")
     case RecoveryCompleted =>

@@ -11,7 +11,31 @@ import slick.jdbc.JdbcBackend
 
 import scala.concurrent.{Await, Future}
 
+object GameService {
+  sealed trait Event
+  case class Success(msg: String = "") extends Event
+  case class Failure(msg: String = "") extends Event
+}
+
 class GameService(implicit db: JdbcBackend.Database, system: ActorSystem, NKMDataService: NKMDataService) extends NKMTimeouts {
+  import GameService._
+
+  def surrender(username: String, gameId: String): Future[Event] = {
+    implicit val gameActor: ActorRef = system.actorOf(Game.props(gameId))
+    val gameStateFuture = getGameState()
+    val gameState: GameState = Await.result(gameStateFuture, atMost)
+
+    val playerOption = gameState.players.find(_.name == username)
+    if(playerOption.isEmpty) return Future.successful(Failure("This player is not in this game."))
+    val player = playerOption.get
+    if(player.victoryStatus != VictoryStatus.Pending) return Future.successful(Failure("This player already finished the game."))
+
+    val surrenderFuture = gameActor ? Game.Surrender(username)
+    Await.result(surrenderFuture, atMost) match {
+      case CommandResponse.Success => Future.successful(Success())
+      case CommandResponse.Failure => Future.successful(Failure())
+    }
+  }
 
   // TODO: check for placing on spawn or if character is owned by user
 //  def placeCharacters(userId: String, request: PlaceCharactersRequest): Future[CommandResponse] = {
@@ -41,9 +65,11 @@ class GameService(implicit db: JdbcBackend.Database, system: ActorSystem, NKMDat
 //    val placeCharacterFuture = gameActor ? Game.PlaceCharacter(request.hexCoordinates, request.characterId)
 //    placeCharacterFuture.mapTo[CommandResponse]
 //  }
-
   def getGameState(gameId: String): Future[GameState] = {
-    val gameActor: ActorRef = system.actorOf(Game.props(gameId))
+    implicit val gameActor: ActorRef = system.actorOf(Game.props(gameId))
+    getGameState()
+  }
+  def getGameState()(implicit gameActor: ActorRef): Future[GameState] = {
     (gameActor ? GetState).mapTo[GameState]
   }
 }

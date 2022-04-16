@@ -2,14 +2,12 @@ package ws
 
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.testkit.WSProbe
+import com.tosware.NKM.models.game.PickType
 import com.tosware.NKM.models.game.ws._
-import com.tosware.NKM.models.lobby.ws.{LobbyCreationRequest, LobbyRoute, WebsocketLobbyRequest}
 import helpers.WSTrait
 
 class WSGameSpec extends WSTrait
 {
-  import spray.json._
-
   def sendRequest(request: WebsocketGameRequest)(implicit wsClient: WSProbe): Unit = sendRequestG(request)
   def fetchResponse()(implicit wsClient: WSProbe): WebsocketGameResponse = fetchResponseG()
   def sendWSRequest(route: GameRoute, requestJson: String = "")(implicit wsClient: WSProbe): WebsocketGameResponse = sendWSRequestG(route, requestJson)
@@ -34,21 +32,31 @@ class WSGameSpec extends WSTrait
 
     "allow observing" in {
       val lobbyName = "lobby_name"
+      val hexMapName = "Linia"
+      val pickType = PickType.DraftPick
+      val numberOfBans = 1
+      val numberOfCharacters = 4
       var gameId = ""
       withLobbyWS {
         authL(0)
         gameId = createLobby(lobbyName).body
+        setHexMap(gameId, hexMapName)
+        setPickType(gameId, pickType)
+        setNumberOfBans(gameId, numberOfBans)
+        setNumberOfCharacters(gameId, numberOfCharacters)
+        authL(1)
+        joinLobby(gameId)
+        authL(0)
+        startGame(gameId).statusCode shouldBe StatusCodes.OK.intValue
       }
 
       withGameWS {
         auth(0)
         observe(gameId).statusCode shouldBe StatusCodes.OK.intValue
-        // TODO
-//        setLobbyName(gameId, "hi") shouldBe WebsocketLobbyResponse(LobbyResponseType.SetLobbyName, StatusCodes.OK.intValue)
+        surrender(gameId).statusCode shouldBe StatusCodes.OK.intValue
 
         val observedResponse = fetchResponse()
-        // TODO
-//        observedResponse.lobbyResponseType shouldBe LobbyResponseType.Lobby
+        observedResponse.gameResponseType shouldBe GameResponseType.State
         observedResponse.statusCode shouldBe StatusCodes.OK.intValue
       }
     }
