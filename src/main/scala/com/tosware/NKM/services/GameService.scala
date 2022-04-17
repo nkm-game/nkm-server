@@ -11,30 +11,14 @@ import slick.jdbc.JdbcBackend
 
 import scala.concurrent.{Await, Future}
 
-object GameService {
-  sealed trait Event
-  case class Success(msg: String = "") extends Event
-  case class Failure(msg: String = "") extends Event
-}
-
 class GameService(implicit db: JdbcBackend.Database, system: ActorSystem, NKMDataService: NKMDataService) extends NKMTimeouts {
-  import GameService._
+  import CommandResponse._
 
-  def surrender(username: String, gameId: String): Future[Event] = {
+  def surrender(username: String, gameId: String): Future[CommandResponse] = {
     implicit val gameActor: ActorRef = system.actorOf(Game.props(gameId))
-    val gameStateFuture = getGameState()
-    val gameState: GameState = Await.result(gameStateFuture, atMost)
-
-    val playerOption = gameState.players.find(_.name == username)
-    if(playerOption.isEmpty) return Future.successful(Failure("This player is not in this game."))
-    val player = playerOption.get
-    if(player.victoryStatus != VictoryStatus.Pending) return Future.successful(Failure("This player already finished the game."))
 
     val surrenderFuture = gameActor ? Game.Surrender(username)
-    Await.result(surrenderFuture, atMost) match {
-      case CommandResponse.Success => Future.successful(Success())
-      case CommandResponse.Failure => Future.successful(Failure())
-    }
+    Future.successful(Await.result(surrenderFuture, atMost).asInstanceOf[CommandResponse])
   }
 
   // TODO: check for placing on spawn or if character is owned by user

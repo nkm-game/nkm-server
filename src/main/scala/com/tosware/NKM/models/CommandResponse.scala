@@ -1,12 +1,9 @@
 package com.tosware.NKM.models
-import enumeratum._
 
-sealed trait CommandResponse extends EnumEntry
-object CommandResponse extends Enum[CommandResponse] {
-  val values = findValues
+object CommandResponse {
+  sealed trait CommandResponse
 
-  case object Success extends CommandResponse
-  case object Failure extends CommandResponse
+  case class Success(msg: String = "") extends CommandResponse
+
+  case class Failure(msg: String = "") extends CommandResponse
 }
-
-

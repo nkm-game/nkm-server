@@ -116,12 +116,12 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
     case StartGame(gameStartDependencies) =>
       log.info(s"Starting the game")
       if(gameState.gamePhase != NotStarted) {
-        sender() ! Failure
+        sender() ! Failure("Game is not started")
       } else {
         val e = GameStarted(id, gameStartDependencies)
         persistAndPublish(e) { _ =>
           startGame(gameStartDependencies)
-          sender() ! Success
+          sender() ! Success()
         }
       }
 //    case SetPlayers(names) =>
@@ -141,17 +141,17 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
       //TODO: check if game is started
       val playerOption = gameState.players.find(_.name == playerName)
       if(playerOption.isEmpty) {
-        sender() ! Failure //TODO ("This player is not in this game.")
+        sender() ! Failure("This player is not in this game.")
       } else {
         val player = playerOption.get
         if(player.victoryStatus != VictoryStatus.Pending) {
-          sender() ! Failure //TODO ("This player already finished the game."))
+          sender() ! Failure("This player already finished the game.")
         } else {
           val e = Surrendered(id, playerName)
           persistAndPublish(e) { _ =>
             surrender(playerName)
             log.info(s"Surrendered $playerName")
-            sender() ! Success
+            sender() ! Success()
           }
         }
       }
@@ -161,7 +161,7 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
       persistAndPublish(e) { _ =>
         placeCharacter(hexCoordinates, characterId)
         log.info(s"Persisted $characterId on $hexCoordinates")
-        sender() ! Success
+        sender() ! Success()
       }
     case MoveCharacter(hexCoordinates, characterId) =>
       log.info(s"Moving $characterId to $hexCoordinates")
@@ -169,7 +169,7 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
       persistAndPublish(e) { _ =>
         moveCharacter(hexCoordinates, characterId)
         log.info(s"Persisted $characterId on $hexCoordinates")
-        sender() ! Success
+        sender() ! Success()
       }
     case e => log.warning(s"Unknown message: $e")
   }

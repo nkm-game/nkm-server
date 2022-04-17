@@ -4,170 +4,136 @@ import akka.actor.{ActorRef, ActorSystem}
 import akka.pattern.ask
 import com.tosware.NKM.{DBManager, NKMTimeouts}
 import com.tosware.NKM.actors._
-import com.tosware.NKM.models.CommandResponse
 import com.tosware.NKM.models.game._
 import com.tosware.NKM.models.lobby._
-import com.tosware.NKM.models.lobby.ws.{LobbyJoinRequest, LobbyLeaveRequest, SetHexMapNameRequest, SetLobbyNameRequest, SetNumberOfBansRequest, SetNumberOfCharactersPerPlayerRequest, SetPickTypeRequest, StartGameRequest}
+import com.tosware.NKM.models.lobby.ws._
 import slick.jdbc.JdbcBackend
 import slick.jdbc.MySQLProfile.api._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Await, Future}
 
-object LobbyService {
-  sealed trait Event
-  case class LobbyCreated(lobbyId: String) extends Event
-  case object LobbyCreationFailure extends Event
-
-  case object Success extends Event
-  case object Failure extends Event
-}
-
 class LobbyService(implicit db: JdbcBackend.Database, system: ActorSystem, NKMDataService: NKMDataService) extends NKMTimeouts {
-  import LobbyService._
 
-  def createLobby(name: String, hostUserId: String): Event = {
+  import com.tosware.NKM.models.CommandResponse._
+
+  def createLobby(name: String, hostUserId: String): CommandResponse = {
     val randomId = java.util.UUID.randomUUID.toString
     val lobbyActor: ActorRef = system.actorOf(Lobby.props(randomId))
     Await.result(lobbyActor ? Lobby.Create(name, hostUserId), atMost) match {
-      case CommandResponse.Success => LobbyCreated(randomId)
-      case CommandResponse.Failure => LobbyCreationFailure
+      case Success(_) => Success(randomId)
+      case Failure(msg) => Failure(msg)
     }
   }
 
-  def joinLobby(userId: String, request: LobbyJoinRequest): Event = {
+  def joinLobby(userId: String, request: LobbyJoinRequest): CommandResponse = {
     val gameActor: ActorRef = system.actorOf(Game.props(request.lobbyId))
     val gameState = Await.result(gameActor ? Game.GetState, atMost).asInstanceOf[GameState]
-    if(gameState.gamePhase != GamePhase.NotStarted) return Failure
+    if (gameState.gamePhase != GamePhase.NotStarted) return Failure("Game is already started")
 
     val lobbyActor: ActorRef = system.actorOf(Lobby.props(request.lobbyId))
 
-    Await.result(lobbyActor ? Lobby.UserJoin(userId), atMost) match {
-      case CommandResponse.Success => Success
-      case CommandResponse.Failure => Failure
-    }
+    Await.result(lobbyActor ? Lobby.UserJoin(userId), atMost).asInstanceOf[CommandResponse]
   }
 
-  def leaveLobby(userId: String, request: LobbyLeaveRequest): Event = {
+  def leaveLobby(userId: String, request: LobbyLeaveRequest): CommandResponse = {
     val gameActor: ActorRef = system.actorOf(Game.props(request.lobbyId))
     val gameState = Await.result(gameActor ? Game.GetState, atMost).asInstanceOf[GameState]
-    if(gameState.gamePhase != GamePhase.NotStarted) return Failure
+    if (gameState.gamePhase != GamePhase.NotStarted) return Failure("Game is already started")
 
     val lobbyActor: ActorRef = system.actorOf(Lobby.props(request.lobbyId))
 
-    Await.result(lobbyActor ? Lobby.UserLeave(userId), atMost) match {
-      case CommandResponse.Success => Success
-      case CommandResponse.Failure => Failure
-    }
+    Await.result(lobbyActor ? Lobby.UserLeave(userId), atMost).asInstanceOf[CommandResponse]
   }
 
-  def setHexmapName(username: String, request: SetHexMapNameRequest): Event = {
+  def setHexmapName(username: String, request: SetHexMapNameRequest): CommandResponse = {
     val gameActor: ActorRef = system.actorOf(Game.props(request.lobbyId))
     val gameState = Await.result(gameActor ? Game.GetState, atMost).asInstanceOf[GameState]
-    if(gameState.gamePhase != GamePhase.NotStarted) return Failure
+    if (gameState.gamePhase != GamePhase.NotStarted) return Failure("Game is already started")
 
     val lobbyActor: ActorRef = system.actorOf(Lobby.props(request.lobbyId))
     val nkmDataActor: ActorRef = system.actorOf(NKMData.props())
 
     val lobbyState = Await.result(lobbyActor ? Lobby.GetState, atMost).asInstanceOf[LobbyState]
-    if(!lobbyState.hostUserId.contains(username)) return Failure
+    if (!lobbyState.hostUserId.contains(username)) return Failure("You are not the host")
 
     val hexMaps = Await.result(nkmDataActor ? NKMData.GetHexMaps, atMost).asInstanceOf[List[HexMap]]
-    if(!hexMaps.map(_.name).contains(request.hexMapName)) return Failure
+    if (!hexMaps.map(_.name).contains(request.hexMapName)) return Failure("Hexmap with this name does not exist")
 
-    Await.result(lobbyActor ? Lobby.SetMapName(request.hexMapName), atMost) match {
-      case CommandResponse.Success => Success
-      case CommandResponse.Failure => Failure
-    }
+    Await.result(lobbyActor ? Lobby.SetMapName(request.hexMapName), atMost).asInstanceOf[CommandResponse]
   }
 
-  def setNumberOfCharactersPerPlayer(username: String, request: SetNumberOfCharactersPerPlayerRequest): Event = {
-    if(request.charactersPerPlayer < 1) return Failure
+  def setNumberOfCharactersPerPlayer(username: String, request: SetNumberOfCharactersPerPlayerRequest): CommandResponse = {
+    if (request.charactersPerPlayer < 1) return Failure("Number of characters has to be more than 0")
 
     val gameActor: ActorRef = system.actorOf(Game.props(request.lobbyId))
     val gameState = Await.result(gameActor ? Game.GetState, atMost).asInstanceOf[GameState]
-    if(gameState.gamePhase != GamePhase.NotStarted) return Failure
+    if (gameState.gamePhase != GamePhase.NotStarted) return Failure("Game is already started")
 
     val lobbyActor: ActorRef = system.actorOf(Lobby.props(request.lobbyId))
 
     val lobbyState = Await.result(lobbyActor ? Lobby.GetState, atMost).asInstanceOf[LobbyState]
-    if(!lobbyState.hostUserId.contains(username)) return Failure
+    if (!lobbyState.hostUserId.contains(username)) return Failure("You are not the host")
 
-    Await.result(lobbyActor ? Lobby.SetNumberOfCharactersPerPlayer(request.charactersPerPlayer), atMost) match {
-      case CommandResponse.Success => Success
-      case CommandResponse.Failure => Failure
-    }
+    Await.result(lobbyActor ? Lobby.SetNumberOfCharactersPerPlayer(request.charactersPerPlayer), atMost).asInstanceOf[CommandResponse]
   }
 
-  def setNumberOfBans(username: String, request: SetNumberOfBansRequest): Event = {
-    if(request.numberOfBans < 0) return Failure
+  def setNumberOfBans(username: String, request: SetNumberOfBansRequest): CommandResponse = {
+    if (request.numberOfBans < 0) return Failure("Number of bans has to be more or equal 0")
 
     val gameActor: ActorRef = system.actorOf(Game.props(request.lobbyId))
     val gameState = Await.result(gameActor ? Game.GetState, atMost).asInstanceOf[GameState]
-    if(gameState.gamePhase != GamePhase.NotStarted) return Failure
+    if (gameState.gamePhase != GamePhase.NotStarted) return Failure("Game is already started")
 
     val lobbyActor: ActorRef = system.actorOf(Lobby.props(request.lobbyId))
 
     val lobbyState = Await.result(lobbyActor ? Lobby.GetState, atMost).asInstanceOf[LobbyState]
-    if(!lobbyState.hostUserId.contains(username)) return Failure
+    if (!lobbyState.hostUserId.contains(username)) return Failure("You are not the host")
 
-    Await.result(lobbyActor ? Lobby.SetNumberOfBans(request.numberOfBans), atMost) match {
-      case CommandResponse.Success => Success
-      case CommandResponse.Failure => Failure
-    }
+    Await.result(lobbyActor ? Lobby.SetNumberOfBans(request.numberOfBans), atMost).asInstanceOf[CommandResponse]
   }
 
-  def setPickType(username: String, request: SetPickTypeRequest): Event = {
+  def setPickType(username: String, request: SetPickTypeRequest): CommandResponse = {
     val gameActor: ActorRef = system.actorOf(Game.props(request.lobbyId))
     val gameState = Await.result(gameActor ? Game.GetState, atMost).asInstanceOf[GameState]
-    if(gameState.gamePhase != GamePhase.NotStarted) return Failure
+    if (gameState.gamePhase != GamePhase.NotStarted) return Failure("Game is already started")
 
     val lobbyActor: ActorRef = system.actorOf(Lobby.props(request.lobbyId))
 
     val lobbyState = Await.result(lobbyActor ? Lobby.GetState, atMost).asInstanceOf[LobbyState]
-    if(!lobbyState.hostUserId.contains(username)) return Failure
+    if (!lobbyState.hostUserId.contains(username)) return Failure("You are not the host")
 
-    Await.result(lobbyActor ? Lobby.SetPickType(request.pickType), atMost) match {
-      case CommandResponse.Success => Success
-      case CommandResponse.Failure => Failure
-    }
+    Await.result(lobbyActor ? Lobby.SetPickType(request.pickType), atMost).asInstanceOf[CommandResponse]
   }
 
-  def setLobbyName(username: String, request: SetLobbyNameRequest): Event = {
+  def setLobbyName(username: String, request: SetLobbyNameRequest): CommandResponse = {
     val gameActor: ActorRef = system.actorOf(Game.props(request.lobbyId))
     val gameState = Await.result(gameActor ? Game.GetState, atMost).asInstanceOf[GameState]
-    if(gameState.gamePhase != GamePhase.NotStarted) return Failure
+    if (gameState.gamePhase != GamePhase.NotStarted) return Failure("Game is already started")
 
     val lobbyActor: ActorRef = system.actorOf(Lobby.props(request.lobbyId))
 
     val lobbyState = Await.result(lobbyActor ? Lobby.GetState, atMost).asInstanceOf[LobbyState]
-    if(!lobbyState.hostUserId.contains(username)) return Failure
+    if (!lobbyState.hostUserId.contains(username)) return Failure("You are not the host")
 
-    Await.result(lobbyActor ? Lobby.SetLobbyName(request.newName), atMost) match {
-      case CommandResponse.Success => Success
-      case CommandResponse.Failure => Failure
-    }
+    Await.result(lobbyActor ? Lobby.SetLobbyName(request.newName), atMost).asInstanceOf[CommandResponse]
   }
 
 
-  def startGame(username: String, request: StartGameRequest): Event = {
+  def startGame(username: String, request: StartGameRequest): CommandResponse = {
     val lobbyActor: ActorRef = system.actorOf(Lobby.props(request.lobbyId))
     val gameActor: ActorRef = system.actorOf(Game.props(request.lobbyId))
 
     val lobbyState = Await.result(lobbyActor ? Lobby.GetState, atMost).asInstanceOf[LobbyState]
 
-    if(!lobbyState.hostUserId.contains(username)) return Failure
-    if(lobbyState.chosenHexMapName.isEmpty) return Failure
-    if(lobbyState.userIds.length < 2) return Failure
+    if (!lobbyState.hostUserId.contains(username)) return Failure("You are not the host")
+    if (lobbyState.chosenHexMapName.isEmpty) return Failure("Chosen hex map name is empty")
+    if (lobbyState.userIds.length < 2) return Failure("There are less than 2 players")
 
     val gameState = Await.result(gameActor ? Game.GetState, atMost).asInstanceOf[GameState]
-    if(gameState.gamePhase != GamePhase.NotStarted) return Failure
+    if (gameState.gamePhase != GamePhase.NotStarted) return Failure("Game is already started")
 
-    Await.result(lobbyActor ? Lobby.StartGame, atMost) match {
-      case CommandResponse.Success => Success
-      case CommandResponse.Failure => Failure
-    }
-
+    Await.result(lobbyActor ? Lobby.StartGame, atMost).asInstanceOf[CommandResponse]
   }
 
   def getAllLobbies(): Future[Seq[LobbyState]] = {

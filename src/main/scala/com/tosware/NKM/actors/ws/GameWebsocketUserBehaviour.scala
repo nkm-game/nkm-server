@@ -2,6 +2,7 @@ package com.tosware.NKM.actors.ws
 
 import akka.actor.ActorRef
 import akka.http.scaladsl.model.StatusCodes
+import com.tosware.NKM.models.CommandResponse.{CommandResponse, Failure, Success}
 import com.tosware.NKM.models.game.ws._
 import com.tosware.NKM.models.lobby.ws.{GetLobbyRequest, LobbyResponseType, WebsocketLobbyResponse}
 import com.tosware.NKM.services.GameService
@@ -32,14 +33,21 @@ trait GameWebsocketUserBehaviour extends WebsocketUserBehaviour {
         outgoing ! OutgoingMessage(response.toJson.toString)
     }
 
-  def ok()(implicit responseType: GameResponseType): WebsocketGameResponse =
-    WebsocketGameResponse(responseType, StatusCodes.OK.intValue)
+  def ok(msg: String = "")(implicit responseType: GameResponseType): WebsocketGameResponse =
+    WebsocketGameResponse(responseType, StatusCodes.OK.intValue, msg)
 
   def nok(msg: String = "")(implicit responseType: GameResponseType): WebsocketGameResponse =
     WebsocketGameResponse(responseType, StatusCodes.InternalServerError.intValue, msg)
 
-  def unauthorized()(implicit responseType: GameResponseType): WebsocketGameResponse =
-    WebsocketGameResponse(responseType, StatusCodes.Unauthorized.intValue)
+  def unauthorized(msg: String = "")(implicit responseType: GameResponseType): WebsocketGameResponse =
+    WebsocketGameResponse(responseType, StatusCodes.Unauthorized.intValue, msg)
+
+  def resolveResponse(commandResponse: CommandResponse)(implicit responseType: GameResponseType): WebsocketGameResponse = {
+    commandResponse match {
+      case Success(msg) => ok(msg)
+      case Failure(msg) => nok(msg)
+    }
+  }
 
   def parseWebsocketGameRequest(request: WebsocketGameRequest, outgoing: ActorRef, userActor: ActorRef, authStatus: AuthStatus): WebsocketGameResponse = {
     request.requestPath match {
@@ -66,11 +74,8 @@ trait GameWebsocketUserBehaviour extends WebsocketUserBehaviour {
         implicit val responseType: GameResponseType = GameResponseType.Surrender
         if(authStatus.username.isEmpty) unauthorized()
         val username = authStatus.username.get
-        val surrenderStatus = Await.result(gameService.surrender(username, gameId), atMost)
-        surrenderStatus match {
-          case GameService.Success(_) => ok()
-          case GameService.Failure(msg) => nok(msg)
-        }
+        val response = Await.result(gameService.surrender(username, gameId), atMost)
+        resolveResponse(response)
       case GameRoute.BanCharacters => ???
       case GameRoute.PickCharacters => ???
       case GameRoute.PlaceCharacters => ???

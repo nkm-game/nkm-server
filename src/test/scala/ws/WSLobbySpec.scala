@@ -62,7 +62,7 @@ class WSLobbySpec extends WSTrait
         sendRequest(wsRequest)
 
         val response = fetchResponse()
-        response.statusCode shouldBe StatusCodes.Created.intValue
+        response.statusCode shouldBe StatusCodes.OK.intValue
       }
     }
 
@@ -298,10 +298,10 @@ class WSLobbySpec extends WSTrait
       }
 
       withLobbyWS {
-        setHexMap(lobbyId, "Linia").statusCode shouldBe StatusCodes.Unauthorized.intValue
-        setPickType(lobbyId, PickType.AllRandom).statusCode shouldBe StatusCodes.Unauthorized.intValue
-        setNumberOfBans(lobbyId, 3).statusCode shouldBe StatusCodes.Unauthorized.intValue
-        setNumberOfCharacters(lobbyId, 4).statusCode shouldBe StatusCodes.Unauthorized.intValue
+        setHexMap(lobbyId, "Linia").statusCode shouldBe StatusCodes.InternalServerError.intValue
+        setPickType(lobbyId, PickType.AllRandom).statusCode shouldBe StatusCodes.InternalServerError.intValue
+        setNumberOfBans(lobbyId, 3).statusCode shouldBe StatusCodes.InternalServerError.intValue
+        setNumberOfCharacters(lobbyId, 4).statusCode shouldBe StatusCodes.InternalServerError.intValue
         auth(1)
         setHexMap(lobbyId, "Linia").statusCode shouldBe StatusCodes.InternalServerError.intValue
         setPickType(lobbyId, PickType.AllRandom).statusCode shouldBe StatusCodes.InternalServerError.intValue
