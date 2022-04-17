@@ -87,6 +87,11 @@ class Lobby(id: String)(implicit NKMDataService: NKMDataService)
   def setLobbyName(name: String): Unit =
     lobbyState = lobbyState.copy(name = Some(name))
 
+  def persistAndPublish[A](event: A)(handler: A => Unit): Unit = {
+    context.system.eventStream.publish(event)
+    persist(event)(handler)
+  }
+
   override def receive: Receive = {
     case GetState =>
       log.info("Received state request")
@@ -95,9 +100,8 @@ class Lobby(id: String)(implicit NKMDataService: NKMDataService)
       log.info(s"Received create request")
         if(!lobbyState.created()) {
           val creationDate = LocalDateTime.now()
-          val createSuccessEvent = CreateSuccess(id, name, hostUserId, creationDate)
-          persist(createSuccessEvent) { _ =>
-            context.system.eventStream.publish(createSuccessEvent)
+          val e = CreateSuccess(id, name, hostUserId, creationDate)
+          persistAndPublish(e) { _ =>
             create(name, hostUserId, creationDate)
             log.info(s"Created lobby $name for $hostUserId")
             sender() ! Success
@@ -111,9 +115,8 @@ class Lobby(id: String)(implicit NKMDataService: NKMDataService)
       log.info(s"$userId tries to join lobby")
       log.warning(lobbyState.toString)
       if(lobbyState.created() && !lobbyState.userIds.contains(userId)) {
-        val userJoinedEvent = UserJoined(id, userId)
-        persist(userJoinedEvent) { _ =>
-          context.system.eventStream.publish(userJoinedEvent)
+        val e = UserJoined(id, userId)
+        persistAndPublish(e) { _ =>
           joinLobby(userId)
           log.info(s"$userId joined lobby")
           sender() ! Success
@@ -125,9 +128,8 @@ class Lobby(id: String)(implicit NKMDataService: NKMDataService)
     case UserLeave(userId: String) =>
       log.info(s"$userId tries to leave lobby")
       if(lobbyState.created() && lobbyState.userIds.contains(userId)) {
-        val userLeftEvent = UserLeft(id, userId)
-        persist(userLeftEvent) { _ =>
-          context.system.eventStream.publish(userLeftEvent)
+        val e = UserLeft(id, userId)
+        persistAndPublish(e) { _ =>
           leaveLobby(userId)
           log.info(s"$userId left the lobby")
           sender() ! Success
@@ -138,9 +140,8 @@ class Lobby(id: String)(implicit NKMDataService: NKMDataService)
 
     case SetMapName(hexMapName: String) =>
       if(lobbyState.created()) {
-        val mapNameSetEvent = MapNameSet(id, hexMapName)
-        persist(mapNameSetEvent) { _ =>
-          context.system.eventStream.publish(mapNameSetEvent)
+        val e = MapNameSet(id, hexMapName)
+        persistAndPublish(e) { _ =>
           setMapName(hexMapName)
           log.info(s"Set map name: $hexMapName")
           sender() ! Success
@@ -151,9 +152,8 @@ class Lobby(id: String)(implicit NKMDataService: NKMDataService)
 
     case SetNumberOfBans(numberOfBans) =>
       if(lobbyState.created()) {
-        val numberOfBansSetEvent = NumberOfBansSet(id, numberOfBans)
-        persist(numberOfBansSetEvent) { _ =>
-          context.system.eventStream.publish(numberOfBansSetEvent)
+        val e = NumberOfBansSet(id, numberOfBans)
+        persistAndPublish(e) { _ =>
           setNumberOfBans(numberOfBans)
           log.info(s"Set number of bans: $numberOfBans")
           sender() ! Success
@@ -164,9 +164,8 @@ class Lobby(id: String)(implicit NKMDataService: NKMDataService)
 
     case SetNumberOfCharactersPerPlayer(numberOfCharactersPerPlayer) =>
       if(lobbyState.created()) {
-        val numberOfCharactersPerPlayerSetEvent  = NumberOfCharactersPerPlayerSet(id, numberOfCharactersPerPlayer)
-        persist(numberOfCharactersPerPlayerSetEvent) { _ =>
-          context.system.eventStream.publish(numberOfCharactersPerPlayerSetEvent)
+        val e  = NumberOfCharactersPerPlayerSet(id, numberOfCharactersPerPlayer)
+        persistAndPublish(e) { _ =>
           setNumberOfCharactersPerPlayer(numberOfCharactersPerPlayer)
           log.info(s"Set number of characters: $numberOfCharactersPerPlayer")
           sender() ! Success
@@ -177,9 +176,8 @@ class Lobby(id: String)(implicit NKMDataService: NKMDataService)
 
     case SetPickType(pickType) =>
       if(lobbyState.created()) {
-        val pickTypeSetEvent = PickTypeSet(id, pickType)
-        persist(pickTypeSetEvent) { _ =>
-          context.system.eventStream.publish(pickTypeSetEvent)
+        val e = PickTypeSet(id, pickType)
+        persistAndPublish(e) { _ =>
           setPickType(pickType)
           log.info(s"Set pick type: $pickType")
           sender() ! Success
@@ -190,9 +188,8 @@ class Lobby(id: String)(implicit NKMDataService: NKMDataService)
 
     case SetLobbyName(name) =>
       if(lobbyState.created()) {
-        val lobbyNameSetEvent = LobbyNameSet(id, name)
-        persist(lobbyNameSetEvent) { _ =>
-          context.system.eventStream.publish(lobbyNameSetEvent)
+        val e = LobbyNameSet(id, name)
+        persistAndPublish(e) { _ =>
           setLobbyName(name)
           log.info(s"Set lobby name: $name")
           sender() ! Success

@@ -102,6 +102,11 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
   def setMap(hexMap: HexMap): Unit =
     gameState = gameState.copy(hexMap = Some(hexMap))
 
+  def persistAndPublish[A](event: A)(handler: A => Unit): Unit = {
+    context.system.eventStream.publish(event)
+    persist(event)(handler)
+  }
+
   override def persistenceId: String = s"game-$id"
   override def receive: Receive = {
     case GetState =>
@@ -114,8 +119,7 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
         sender() ! Failure
       } else {
         val e = GameStarted(id, gameStartDependencies)
-        persist(e) { _ =>
-          context.system.eventStream.publish(e)
+        persistAndPublish(e) { _ =>
           startGame(gameStartDependencies)
           sender() ! Success
         }
@@ -144,8 +148,7 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
           sender() ! Failure //TODO ("This player already finished the game."))
         } else {
           val e = Surrendered(id, playerName)
-          persist(e) { _ =>
-            context.system.eventStream.publish(e)
+          persistAndPublish(e) { _ =>
             surrender(playerName)
             log.info(s"Surrendered $playerName")
             sender() ! Success
@@ -154,14 +157,16 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
       }
     case PlaceCharacter(hexCoordinates, characterId) =>
       log.info(s"Placing $characterId on $hexCoordinates")
-      persist(CharacterPlaced(id, hexCoordinates, characterId)) { _ =>
+      val e = CharacterPlaced(id, hexCoordinates, characterId)
+      persistAndPublish(e) { _ =>
         placeCharacter(hexCoordinates, characterId)
         log.info(s"Persisted $characterId on $hexCoordinates")
         sender() ! Success
       }
     case MoveCharacter(hexCoordinates, characterId) =>
       log.info(s"Moving $characterId to $hexCoordinates")
-      persist(CharacterMoved(id, hexCoordinates, characterId)) { _ =>
+      val e = CharacterMoved(id, hexCoordinates, characterId)
+      persistAndPublish(e) { _ =>
         moveCharacter(hexCoordinates, characterId)
         log.info(s"Persisted $characterId on $hexCoordinates")
         sender() ! Success
