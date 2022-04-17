@@ -132,6 +132,9 @@ class LobbyService(implicit db: JdbcBackend.Database, system: ActorSystem, NKMDa
     if (lobbyState.chosenHexMapName.isEmpty) return Failure("Chosen hex map name is empty")
     if (lobbyState.userIds.length < 2) return Failure("There are less than 2 players")
 
+    val chosenHexMap: HexMap = NKMDataService.getHexMaps.find(_.name == lobbyState.chosenHexMapName.get).get
+    if(chosenHexMap.maxNumberOfCharacters < lobbyState.userIds.length) return Failure("There are more players than allowed for this map")
+
     val gameState = Await.result(gameActor ? Game.GetState, atMost).asInstanceOf[GameState]
     if (gameState.gamePhase != GamePhase.NotStarted) return Failure("Game is already started")
 
