@@ -2,13 +2,15 @@ package com.tosware.NKM.services
 
 import akka.actor.{ActorRef, ActorSystem}
 import akka.pattern.ask
-import com.tosware.NKM.{DBManager, NKMTimeouts}
+import akka.persistence.jdbc.query.scaladsl.JdbcReadJournal
+import akka.persistence.query.PersistenceQuery
+import akka.stream.scaladsl.Sink
+import com.tosware.NKM.NKMTimeouts
 import com.tosware.NKM.actors._
 import com.tosware.NKM.models.game._
 import com.tosware.NKM.models.lobby._
 import com.tosware.NKM.models.lobby.ws._
 import slick.jdbc.JdbcBackend
-import slick.jdbc.MySQLProfile.api._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Await, Future}
@@ -137,8 +139,17 @@ class LobbyService(implicit db: JdbcBackend.Database, system: ActorSystem, NKMDa
   }
 
   def getAllLobbies(): Future[Seq[LobbyState]] = {
-    val lobbiesAction = DBManager.lobbies.result
-    db.run(lobbiesAction)
+    val readJournal = PersistenceQuery(system).readJournalFor[JdbcReadJournal](JdbcReadJournal.Identifier)
+    val lobbyIdsFuture = readJournal.
+      currentEventsByTag("lobby", 0)
+      .map(_.event.asInstanceOf[Lobby.CreateSuccess])
+      .map(_.id)
+      .runWith(Sink.seq[String])
+
+    val lobbyIds = Await.result(lobbyIdsFuture, atMost)
+
+    val lobbyActors = lobbyIds.map(lobbyId => system.actorOf(Lobby.props(lobbyId)))
+    Future.sequence(lobbyActors.map(a => (a ? Lobby.GetState).map(_.asInstanceOf[LobbyState])))
   }
 
   def getLobby(lobbyId: String): Future[LobbyState] = {

@@ -1,13 +1,11 @@
 package com.tosware.NKM.actors
 
-import akka.actor.{ActorLogging, ActorRef, Props}
-import akka.pattern.ask
+import akka.actor.{ActorLogging, Props}
+import akka.persistence.journal.Tagged
 import akka.persistence.{PersistentActor, RecoveryCompleted}
 import com.github.t3hnar.bcrypt._
 import com.tosware.NKM.NKMTimeouts
 import com.tosware.NKM.models._
-
-import scala.concurrent.Await
 
 object User extends NKMTimeouts {
   sealed trait Query
@@ -16,8 +14,6 @@ object User extends NKMTimeouts {
   sealed trait Command
   case class Register(email: String, password: String) extends Command
   case class CheckLogin(password: String) extends Command
-//  case class CreateNewGame(gameOpts: GameOptions) extends Command
-//  case class CreateLobby(name: String) extends Command
 
   sealed trait Event
   sealed trait RegisterEvent extends Event
@@ -29,9 +25,6 @@ object User extends NKMTimeouts {
 
   case object LoginSuccess extends LoginEvent
   case object LoginFailure extends LoginEvent
-
-//  case class LobbyCreated(lobbyId: String) extends Event
-//  case object LobbyCreationFailure extends Event
 
   def props(login: String): Props = Props(new User(login))
 }
@@ -56,9 +49,11 @@ class User(login: String) extends PersistentActor with ActorLogging {
         sender() ! RegisterFailure
       } else {
         val passwordHash = password.boundedBcrypt
-        persist(RegisterSuccess(login, email, passwordHash)) { _ =>
+        val e = RegisterSuccess(login, email, passwordHash)
+        val taggedE = Tagged(e, Set("register"))
+        persist(taggedE) { _ =>
+          context.system.eventStream.publish(e)
           register(email, passwordHash)
-          context.system.eventStream.publish(RegisterSuccess(login, email, passwordHash))
           log.info(s"Persisted user: $login")
           sender() ! RegisterSuccess
         }
@@ -69,16 +64,6 @@ class User(login: String) extends PersistentActor with ActorLogging {
         if(userState.registered() && password.isBcryptedBounded(userState.passwordHash.get)) LoginSuccess
         else LoginFailure
       }
-
-//    case CreateLobby(name) =>
-//      log.info(s"Received create lobby request")
-//      val randomId = java.util.UUID.randomUUID.toString
-//      val lobby: ActorRef = context.system.actorOf(Lobby.props(randomId))
-//      val creationResult = Await.result(lobby ? Lobby.Create(name), atMost) match {
-//        case Lobby.CreateSuccess => LobbyCreated(randomId)
-//        case _ => LobbyCreationFailure
-//      }
-//      sender() ! creationResult
     case e => log.warning(s"Unknown message: $e")
   }
 

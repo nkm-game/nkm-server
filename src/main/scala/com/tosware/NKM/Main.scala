@@ -2,7 +2,6 @@ package com.tosware.NKM
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
-import com.tosware.NKM.actors.CQRSEventHandler
 import com.tosware.NKM.services._
 import com.tosware.NKM.services.http.HttpService
 import com.tosware.NKM.services.http.directives.JwtSecretKey
@@ -28,9 +27,6 @@ object Main extends App with HttpService {
     val dbName = config.getString("slick.db.dbName")
     DBManager.createDbIfNotExists(dbName)
     DBManager.createNeededTables(db)
-
-    // subscribe to events
-    system.actorOf(CQRSEventHandler.props(db))
 
     Http().newServerAt("0.0.0.0", port).bind(routes)
     println("Started http server")

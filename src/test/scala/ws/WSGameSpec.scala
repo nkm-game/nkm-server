@@ -2,7 +2,7 @@ package ws
 
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.testkit.WSProbe
-import com.tosware.NKM.models.game.PickType
+import com.tosware.NKM.models.game.{PickType, VictoryStatus}
 import com.tosware.NKM.models.game.ws._
 import helpers.WSTrait
 
@@ -58,6 +58,39 @@ class WSGameSpec extends WSTrait
         val observedResponse = fetchResponse()
         observedResponse.gameResponseType shouldBe GameResponseType.State
         observedResponse.statusCode shouldBe StatusCodes.OK.intValue
+      }
+    }
+
+    "allow surrendering" in {
+      val lobbyName = "lobby_name"
+      val hexMapName = "Linia"
+      val pickType = PickType.DraftPick
+      val numberOfBans = 1
+      val numberOfCharacters = 4
+      var gameId = ""
+      withLobbyWS {
+        authL(0)
+        gameId = createLobby(lobbyName).body
+        setHexMap(gameId, hexMapName)
+        setPickType(gameId, pickType)
+        setNumberOfBans(gameId, numberOfBans)
+        setNumberOfCharacters(gameId, numberOfCharacters)
+        authL(1)
+        joinLobby(gameId)
+        authL(0)
+        startGame(gameId).statusCode shouldBe StatusCodes.OK.intValue
+      }
+
+      withGameWS {
+        auth(0)
+        fetchAndParseGame(gameId).players.head.victoryStatus shouldBe VictoryStatus.Pending
+        fetchAndParseGame(gameId).players.tail.head.victoryStatus shouldBe VictoryStatus.Pending
+        surrender(gameId).statusCode shouldBe StatusCodes.OK.intValue
+        fetchAndParseGame(gameId).players.head.victoryStatus shouldBe VictoryStatus.Lost
+        fetchAndParseGame(gameId).players.tail.head.victoryStatus shouldBe VictoryStatus.Won
+        surrender(gameId).statusCode shouldBe StatusCodes.InternalServerError.intValue
+        auth(1)
+        surrender(gameId).statusCode shouldBe StatusCodes.InternalServerError.intValue
       }
     }
   }

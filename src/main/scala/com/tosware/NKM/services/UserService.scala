@@ -2,6 +2,9 @@ package com.tosware.NKM.services
 
 import akka.actor.{ActorRef, ActorSystem}
 import akka.pattern.ask
+import akka.persistence.jdbc.query.scaladsl.JdbcReadJournal
+import akka.persistence.query.PersistenceQuery
+import akka.stream.scaladsl.Sink
 import com.tosware.NKM.actors.User
 import com.tosware.NKM.actors.User._
 import com.tosware.NKM.models.{Credentials, RegisterRequest}
@@ -29,11 +32,15 @@ class UserService(implicit db: JdbcBackend.Database) extends NKMTimeouts {
   }
 
   def register(request: RegisterRequest)(implicit system: ActorSystem): RegisterEvent = {
+    val readJournal: JdbcReadJournal = PersistenceQuery(system).readJournalFor[JdbcReadJournal](JdbcReadJournal.Identifier)
     val userActor: ActorRef = system.actorOf(User.props(request.login))
-    val emailExistsAction = DBManager.users.filter(_.email === Option(request.email)).exists.result
-    val emailExists = Await.result(db.run(emailExistsAction), atMost)
-    println(emailExistsAction.statements)
-    println(emailExists)
+    val allEmailsFuture = readJournal.
+      currentEventsByTag("register", 0)
+      .map(_.event.asInstanceOf[RegisterSuccess].email)
+      .runWith(Sink.seq[String])
+
+    val allEmails = Await.result(allEmailsFuture, atMost)
+    val emailExists = allEmails.contains(request.email)
 
     if(emailExists) RegisterFailure
     else Await.result(userActor ? Register(request.email, request.password), atMost).asInstanceOf[RegisterEvent]

@@ -1,23 +1,15 @@
 package com.tosware.NKM
 
-import com.tosware.NKM.tables._
 import com.typesafe.config.{Config, ConfigFactory}
 import slick.dbio.DBIO
 import slick.jdbc.JdbcBackend
 import slick.jdbc.MySQLProfile.api._
 
 import scala.concurrent.Await
-import scala.concurrent.duration.DurationInt
+import scala.concurrent.duration.{DurationInt, FiniteDuration}
 
 object DBManager {
-  val dbTimeout = 3000.millis
-  val users = TableQuery[User]
-  val lobbies = TableQuery[Lobby]
-
-  val queries = List(
-    users,
-    lobbies,
-  )
+  val dbTimeout: FiniteDuration = 3000.millis
 
   def createDbIfNotExists(dbName: String): Unit = {
     val config: Config = ConfigFactory.load("slick_no_db.conf")
@@ -31,10 +23,11 @@ object DBManager {
     def dropActions = DBIO.seq(
       sqlu"""DROP TABLE IF EXISTS journal""",
       sqlu"""DROP TABLE IF EXISTS snapshot""",
-      DBIO.sequence(queries.map(_.schema.dropIfExists)),
     )
+
     Await.result(db.run(dropActions), dbTimeout)
   }
+
   def createNeededTables(db: JdbcBackend.Database): Unit = {
     def createJournalIfNotExists = DBIO.seq(
       sqlu"""
@@ -50,6 +43,7 @@ object DBManager {
     )
     """,
     )
+
     def createSnapshotIfNotExists = DBIO.seq(
       sqlu"""
         CREATE TABLE IF NOT EXISTS snapshot (
@@ -65,7 +59,6 @@ object DBManager {
     val setupAction: DBIO[Unit] = DBIO.seq(
       createJournalIfNotExists,
       createSnapshotIfNotExists,
-      DBIO.sequence(queries.map(_.schema.createIfNotExists)),
     )
     Await.result(db.run(setupAction), dbTimeout)
   }

@@ -2,6 +2,7 @@ package com.tosware.NKM.actors
 
 import akka.actor.{ActorLogging, ActorRef, Props}
 import akka.pattern.ask
+import akka.persistence.journal.Tagged
 import akka.persistence.{PersistentActor, RecoveryCompleted}
 import com.tosware.NKM.NKMTimeouts
 import com.tosware.NKM.actors.NKMData.GetHexMaps
@@ -110,6 +111,11 @@ class Lobby(id: String)(implicit NKMDataService: NKMDataService)
     persist(event)(handler)
   }
 
+  def persistAndPublishWithTag[A](event: A, tag: String)(handler: Tagged => Unit): Unit = {
+    context.system.eventStream.publish(event)
+    persist(Tagged(event, Set(tag)))(handler)
+  }
+
   override def receive: Receive = {
     case GetState =>
       log.debug("Received state request")
@@ -121,7 +127,7 @@ class Lobby(id: String)(implicit NKMDataService: NKMDataService)
       } else {
         val creationDate = LocalDateTime.now()
         val e = CreateSuccess(id, name, hostUserId, creationDate)
-        persistAndPublish(e) { _ =>
+        persistAndPublishWithTag(e, "lobby") { _ =>
           create(name, hostUserId, creationDate)
           log.info(s"Created lobby $name for $hostUserId")
           sender() ! Success()
