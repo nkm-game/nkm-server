@@ -61,9 +61,19 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
     }
   }
 
+  def checkVictoryStatus(): Unit = {
+    if(gameState.players.count(p => p.victoryStatus == VictoryStatus.Pending) == 1) {
+      def filterPlayer: Player => Boolean = _.victoryStatus == VictoryStatus.Pending
+      gameState = gameState.modify(_.players.eachWhere(filterPlayer).victoryStatus)
+        .setTo(VictoryStatus.Won)
+        .modify(_.gamePhase).setTo(GamePhase.Finished)
+    }
+  }
+
   def surrender(playerName: String): Unit = {
     def filterPlayer: Player => Boolean = _.name == playerName
     gameState = gameState.modify(_.players.eachWhere(filterPlayer).victoryStatus).setTo(VictoryStatus.Lost)
+    checkVictoryStatus()
   }
 
   def placeCharacter(targetCellCoordinates: HexCoordinates, characterId: String): Unit =
