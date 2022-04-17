@@ -1,34 +1,31 @@
-package api
-
-import akka.http.scaladsl.marshalling.ToEntityMarshaller
-import akka.http.scaladsl.model.StatusCode
-import akka.http.scaladsl.model.StatusCodes._
-import com.tosware.NKM.models.game._
-import com.tosware.NKM.models.game.PickType._
-import helpers.GameApiTrait
-
-import scala.language.postfixOps
-
-class GameSpec extends GameApiTrait
-{
-  "API" must {
-    "allow initializing game" in {
-      initGame()
-    }
-
-    "initialize characters randomly in all random pick" in {
-      initGame(pickType = AllRandom, numberOfCharacters = 3)
-
-      Get(s"/api/state/$lobbyId").addHeader(getAuthHeader(tokens(0))) ~> routes ~> check {
-        val gameState = responseAs[GameState]
-        gameState.gamePhase shouldEqual GamePhase.CharacterPlacing
-        gameState.players.forall(p => p.characters.length == 3) shouldEqual true
-        gameState.characterIdsOutsideMap.length shouldEqual 6
-        val allCharacterNames = gameState.players.flatMap(p => p.characters).map(c => c.state.name)
-        val allCharacterNamesUnique = allCharacterNames.toSet
-        allCharacterNames.length shouldEqual allCharacterNamesUnique.toList.length
-      }
-    }
+//package api
+//
+//import com.tosware.NKM.models.game.PickType._
+//import com.tosware.NKM.models.game._
+//import helpers.GameApiTrait
+//
+//import scala.language.postfixOps
+//
+//class GameSpec extends GameApiTrait
+//{
+//  "API" must {
+//    "allow initializing game" in {
+//      initGame()
+//    }
+//
+//    "initialize characters randomly in all random pick" in {
+//      initGame(pickType = AllRandom, numberOfCharacters = 3)
+//
+//      Get(s"/api/state/$lobbyId").addHeader(getAuthHeader(tokens(0))) ~> routes ~> check {
+//        val gameState = responseAs[GameState]
+//        gameState.gamePhase shouldEqual GamePhase.CharacterPlacing
+//        gameState.players.forall(p => p.characters.length == 3) shouldEqual true
+//        gameState.characterIdsOutsideMap.length shouldEqual 6
+//        val allCharacterNames = gameState.players.flatMap(p => p.characters).map(c => c.state.name)
+//        val allCharacterNamesUnique = allCharacterNames.toSet
+//        allCharacterNames.length shouldEqual allCharacterNamesUnique.toList.length
+//      }
+//    }
 
 //    "allow to blind pick characters" in {
 //      initGame(pickType = BlindPick)
@@ -135,5 +132,5 @@ class GameSpec extends GameApiTrait
 //      }
 //      gameState.getCurrentPlayerNumber shouldEqual 1
 //    }
-  }
-}
+//  }
+//}
