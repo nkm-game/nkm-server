@@ -1,5 +1,10 @@
 package com.tosware.NKM.models.game
 
+import NKMCharacterMetadata._
+
+object NKMCharacterMetadata {
+  type CharacterMetadataId = String
+}
 case class NKMCharacterMetadata
 (
   name: String,
@@ -9,9 +14,9 @@ case class NKMCharacterMetadata
   initialSpeed: Int,
   initialPsychicalDefense: Int,
   initialMagicalDefense: Int,
-  initialAbilitiesMetadataIds: List[String],
+  initialAbilitiesMetadataIds: Seq[String],
 ) {
-  val id = name
+  val id: CharacterMetadataId = name
 }
 
 case class NKMCharacterState

@@ -25,7 +25,7 @@ class NKMDataService(implicit system: ActorSystem) extends NKMTimeouts
       initialSpeed = 5,
       initialPsychicalDefense = 10,
       initialMagicalDefense = 10,
-      List(),
+      Seq.empty,
     )
   })
 

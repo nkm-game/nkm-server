@@ -226,9 +226,9 @@ class Lobby(id: String)(implicit NKMDataService: NKMDataService)
           players = lobbyState.userIds.map(i => Player(i)),
           hexMap = hexMaps.filter(m => m.name == lobbyState.chosenHexMapName.get).head,
           pickType = lobbyState.pickType,
-          numberOfBans = lobbyState.numberOfBans,
-          numberOfCharactersPerPlayers = lobbyState.numberOfCharactersPerPlayer,
-          NKMDataService.getCharactersMetadata
+          numberOfBansPerPlayer = lobbyState.numberOfBans,
+          numberOfCharactersPerPlayer = lobbyState.numberOfCharactersPerPlayer,
+          NKMDataService.getCharactersMetadata.toSet
         )
         val r = Await.result(gameActor ? Game.StartGame(deps), atMost).asInstanceOf[CommandResponse]
         sender() ! r

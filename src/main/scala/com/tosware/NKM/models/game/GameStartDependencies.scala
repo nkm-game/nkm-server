@@ -4,7 +4,7 @@ case class GameStartDependencies(
                                   players: List[Player],
                                   hexMap: HexMap,
                                   pickType: PickType,
-                                  numberOfBans: Int,
-                                  numberOfCharactersPerPlayers: Int,
-                                  charactersMetadata: Seq[NKMCharacterMetadata],
+                                  numberOfBansPerPlayer: Int,
+                                  numberOfCharactersPerPlayer: Int,
+                                  charactersMetadata: Set[NKMCharacterMetadata],
                                 )

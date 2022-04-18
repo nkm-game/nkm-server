@@ -1,6 +1,8 @@
 package com.tosware.NKM.models.game
 
 import com.softwaremill.quicklens._
+import com.tosware.NKM.models.game.draftpick.{DraftPickConfig, DraftPickState}
+
 import scala.util.Random
 
 case class GameState(id: String,
@@ -13,6 +15,7 @@ case class GameState(id: String,
                      pickType: PickType,
                      numberOfBans: Int,
                      numberOfCharactersPerPlayers: Int,
+                     draftPickState: Option[DraftPickState]
                     ) {
   def getCurrentPlayerNumber: Int = turn.number % players.length
 
@@ -23,13 +26,14 @@ case class GameState(id: String,
       players = g.players,
       hexMap = Some(g.hexMap),
       pickType = g.pickType,
-      numberOfBans = g.numberOfBans,
-      numberOfCharactersPerPlayers = g.numberOfCharactersPerPlayers,
+      numberOfBans = g.numberOfBansPerPlayer,
+      numberOfCharactersPerPlayers = g.numberOfCharactersPerPlayer,
       gamePhase = GamePhase.CharacterPick,
+      draftPickState = if (g.pickType == PickType.DraftPick) Some(DraftPickState.empty(DraftPickConfig.generate(g))) else None
     ).placeCharactersRandomlyIfAllRandom(g.charactersMetadata)
   }
 
-  def placeCharactersRandomlyIfAllRandom(charactersMetadata: Seq[NKMCharacterMetadata])(implicit random: Random): GameState = {
+  def placeCharactersRandomlyIfAllRandom(charactersMetadata: Set[NKMCharacterMetadata])(implicit random: Random): GameState = {
     if (pickType == PickType.AllRandom) {
       val pickedCharacters = random.shuffle(charactersMetadata).grouped(numberOfCharactersPerPlayers).take(players.length)
       val playersWithAssignedCharacters = players.zip(pickedCharacters).map(x => {
@@ -91,5 +95,6 @@ object GameState {
     pickType = PickType.AllRandom,
     numberOfBans = 0,
     numberOfCharactersPerPlayers = 1,
+    None,
   )
 }
