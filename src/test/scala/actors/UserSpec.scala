@@ -2,8 +2,7 @@ package actors
 
 import akka.actor.{ActorRef, ActorSystem}
 import akka.pattern.ask
-import com.tosware.NKM.Main.system
-import com.tosware.NKM.actors.{CQRSEventHandler, User}
+import com.tosware.NKM.actors.User
 import com.tosware.NKM.actors.User._
 import com.tosware.NKM.models.UserState
 import helpers.NKMPersistenceTestKit
