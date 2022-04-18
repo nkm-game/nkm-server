@@ -228,6 +228,7 @@ class Lobby(id: String)(implicit NKMDataService: NKMDataService)
           pickType = lobbyState.pickType,
           numberOfBans = lobbyState.numberOfBans,
           numberOfCharactersPerPlayers = lobbyState.numberOfCharactersPerPlayer,
+          NKMDataService.getCharactersMetadata
         )
         val r = Await.result(gameActor ? Game.StartGame(deps), atMost).asInstanceOf[CommandResponse]
         sender() ! r

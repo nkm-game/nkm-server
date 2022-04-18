@@ -6,4 +6,5 @@ case class GameStartDependencies(
                                   pickType: PickType,
                                   numberOfBans: Int,
                                   numberOfCharactersPerPlayers: Int,
+                                  charactersMetadata: Seq[NKMCharacterMetadata],
                                 )

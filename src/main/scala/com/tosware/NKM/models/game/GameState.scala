@@ -1,5 +1,8 @@
 package com.tosware.NKM.models.game
 
+import com.softwaremill.quicklens._
+import scala.util.Random
+
 case class GameState(id: String,
                      hexMap: Option[HexMap],
                      characterIdsOutsideMap: Seq[String],
@@ -12,8 +15,70 @@ case class GameState(id: String,
                      numberOfCharactersPerPlayers: Int,
                     ) {
   def getCurrentPlayerNumber: Int = turn.number % players.length
+
   def getCurrentPlayer: Player = players(getCurrentPlayerNumber)
+
+  def startGame(g: GameStartDependencies)(implicit random: Random): GameState = {
+    copy(
+      players = g.players,
+      hexMap = Some(g.hexMap),
+      pickType = g.pickType,
+      numberOfBans = g.numberOfBans,
+      numberOfCharactersPerPlayers = g.numberOfCharactersPerPlayers,
+      gamePhase = GamePhase.CharacterPick,
+    ).placeCharactersRandomlyIfAllRandom(g.charactersMetadata)
+  }
+
+  def placeCharactersRandomlyIfAllRandom(charactersMetadata: Seq[NKMCharacterMetadata])(implicit random: Random): GameState = {
+    if (pickType == PickType.AllRandom) {
+      val pickedCharacters = random.shuffle(charactersMetadata).grouped(numberOfCharactersPerPlayers).take(players.length)
+      val playersWithAssignedCharacters = players.zip(pickedCharacters).map(x => {
+        val (player, characters) = x
+        player.copy(characters = characters.map(c => NKMCharacter.fromMetadata(java.util.UUID.nameUUIDFromBytes(random.nextBytes(16)).toString, c)).toList)
+      })
+      copy(gamePhase = GamePhase.CharacterPlacing, players = playersWithAssignedCharacters, characterIdsOutsideMap = playersWithAssignedCharacters.flatMap(c => c.characters.map(c => c.id)))
+    } else this
+  }
+
+  def checkVictoryStatus(): GameState = {
+    if (players.count(p => p.victoryStatus == VictoryStatus.Pending) == 1) {
+      def filterPlayer: Player => Boolean = _.victoryStatus == VictoryStatus.Pending
+
+      this.modify(_.players.eachWhere(filterPlayer).victoryStatus)
+        .setTo(VictoryStatus.Won)
+        .modify(_.gamePhase).setTo(GamePhase.Finished)
+    } else this
+  }
+
+  def surrender(playerName: String): GameState = {
+    def filterPlayer: Player => Boolean = _.name == playerName
+
+    this.modify(_.players.eachWhere(filterPlayer).victoryStatus).setTo(VictoryStatus.Lost).checkVictoryStatus()
+  }
+
+  def placeCharacter(targetCellCoordinates: HexCoordinates, characterId: String): GameState =
+    this.modify(_.hexMap.each.cells.each).using {
+      case cell if cell.coordinates == targetCellCoordinates => HexCell(cell.coordinates, cell.cellType, Some(characterId), cell.effects, cell.spawnNumber)
+      case cell => cell
+    }.modify(_.characterIdsOutsideMap).using(_.filter(_ != characterId))
+      .modify(_.turn).using(oldTurn => Turn(oldTurn.number + 1))
+
+  def moveCharacter(parentCellCoordinates: HexCoordinates, characterId: String): GameState = {
+    val parentCell = hexMap.get.cells.find(_.characterId.contains(characterId)).getOrElse {
+      // TODO      log.error(s"Unable to move character $characterId to $parentCellCoordinates")
+      return this
+    }
+    this.modify(_.hexMap.each.cells.each).using {
+      case cell if cell == parentCell => HexCell(cell.coordinates, cell.cellType, None, cell.effects, cell.spawnNumber)
+      case cell if cell.coordinates == parentCellCoordinates => HexCell(cell.coordinates, cell.cellType, Some(characterId), cell.effects, cell.spawnNumber)
+      case cell => cell
+    }
+  }
+
+  def setMap(hexMap: HexMap): GameState =
+    copy(hexMap = Some(hexMap))
 }
+
 object GameState {
   def empty(id: String): GameState = GameState(
     id = id,
