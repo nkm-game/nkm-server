@@ -83,11 +83,20 @@ class WSGameSpec extends WSTrait
 
       withGameWS {
         auth(0)
-        fetchAndParseGame(gameId).players.head.victoryStatus shouldBe VictoryStatus.Pending
-        fetchAndParseGame(gameId).players.tail.head.victoryStatus shouldBe VictoryStatus.Pending
+
+        {
+          val gameState = fetchAndParseGame(gameId)
+          gameState.players.head.victoryStatus shouldBe VictoryStatus.Pending
+          gameState.players.tail.head.victoryStatus shouldBe VictoryStatus.Pending
+        }
+
         surrender(gameId).statusCode shouldBe StatusCodes.OK.intValue
-        fetchAndParseGame(gameId).players.head.victoryStatus shouldBe VictoryStatus.Lost
-        fetchAndParseGame(gameId).players.tail.head.victoryStatus shouldBe VictoryStatus.Won
+
+        {
+          val gameState = fetchAndParseGame(gameId)
+          gameState.players.head.victoryStatus shouldBe VictoryStatus.Lost
+          gameState.players.tail.head.victoryStatus shouldBe VictoryStatus.Won
+        }
         surrender(gameId).statusCode shouldBe StatusCodes.InternalServerError.intValue
         auth(1)
         surrender(gameId).statusCode shouldBe StatusCodes.InternalServerError.intValue
