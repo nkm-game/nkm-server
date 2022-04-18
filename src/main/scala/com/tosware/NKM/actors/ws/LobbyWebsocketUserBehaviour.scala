@@ -9,6 +9,7 @@ import com.tosware.NKM.models.CommandResponse._
 import spray.json._
 
 import scala.concurrent.Await
+import scala.concurrent.duration.DurationInt
 
 trait LobbyWebsocketUserBehaviour extends WebsocketUserBehaviour {
   val session: ActorRef
@@ -66,7 +67,7 @@ trait LobbyWebsocketUserBehaviour extends WebsocketUserBehaviour {
         ok()
       case LobbyRoute.Lobbies =>
         implicit val responseType: LobbyResponseType = LobbyResponseType.Lobbies
-        val lobbies = Await.result(lobbyService.getAllLobbies(), atMost)
+        val lobbies = Await.result(lobbyService.getAllLobbies(), 5000.millis)
         ok(lobbies.toJson.toString)
       case LobbyRoute.Lobby =>
         implicit val responseType: LobbyResponseType = LobbyResponseType.Lobby
