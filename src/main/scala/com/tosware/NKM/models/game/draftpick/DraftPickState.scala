@@ -22,6 +22,23 @@ case class DraftPickState(config: DraftPickConfig,
 
   def charactersAvailableToPick: Set[CharacterMetadataId] = config.availableCharacters -- bannedCharacters -- pickedCharacters
 
+  def currentPlayerPicking: Option[PlayerId] = {
+    if (pickPhase != DraftPickPhase.Picking) return None
+
+    // round robin picking, for example: (4 players, 3 characters per player:)
+    // 0 1 2 3
+    // 3 2 1 0
+    // 0 1 2 3
+    val isInversedOrder = pickedCharacters.size % (config.playersPicking.size * 2) >= config.playersPicking.size
+    val currentPlayerIndex =
+      if (isInversedOrder)
+        config.playersPicking.size - (pickedCharacters.size % config.playersPicking.size) - 1
+      else
+        pickedCharacters.size % config.playersPicking.size
+
+    Some(config.playersPicking(currentPlayerIndex))
+  }
+
   def pickPhase: DraftPickPhase = if (bans.values.exists(_.size != config.numberOfBansPerPlayer)) {
     DraftPickPhase.Banning
   } else if (characterSelection.values.exists(_.size != config.numberOfCharactersPerPlayer)) {
@@ -39,9 +56,10 @@ case class DraftPickState(config: DraftPickConfig,
     copy(bans = bans.updated(playerId, characters))
   }
 
+
   def validatePick(playerId: PlayerId, character: CharacterMetadataId): Boolean = {
     if (!charactersAvailableToPick.contains(character)) return false
-    // TODO: validate if it is his turn to pick
+    if (!currentPlayerPicking.contains(playerId)) return false
     true
   }
 
