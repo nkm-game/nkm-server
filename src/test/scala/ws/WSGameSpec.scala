@@ -2,7 +2,7 @@ package ws
 
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.testkit.WSProbe
-import com.tosware.NKM.models.game.{PickType, VictoryStatus}
+import com.tosware.NKM.models.game.{GamePhase, PickType, VictoryStatus}
 import com.tosware.NKM.models.game.ws._
 import helpers.WSTrait
 
@@ -61,9 +61,9 @@ class WSGameSpec extends WSTrait
       }
     }
 
-    "allow surrendering" in {
+    "allow surrendering during draft pick" in {
       val lobbyName = "lobby_name"
-      val hexMapName = "Linia"
+      val hexMapName = "1v1v1"
       val pickType = PickType.DraftPick
       val numberOfBans = 1
       val numberOfCharacters = 4
@@ -77,6 +77,8 @@ class WSGameSpec extends WSTrait
         setNumberOfCharacters(gameId, numberOfCharacters)
         authL(1)
         joinLobby(gameId)
+        authL(2)
+        joinLobby(gameId)
         authL(0)
         startGame(gameId).statusCode shouldBe StatusCodes.OK.intValue
       }
@@ -86,20 +88,78 @@ class WSGameSpec extends WSTrait
 
         {
           val gameState = fetchAndParseGame(gameId)
-          gameState.players.head.victoryStatus shouldBe VictoryStatus.Pending
-          gameState.players.tail.head.victoryStatus shouldBe VictoryStatus.Pending
+          gameState.gamePhase shouldBe GamePhase.CharacterPick
+          gameState.players(0).victoryStatus shouldBe VictoryStatus.Pending
+          gameState.players(1).victoryStatus shouldBe VictoryStatus.Pending
+          gameState.players(2).victoryStatus shouldBe VictoryStatus.Pending
         }
 
         surrender(gameId).statusCode shouldBe StatusCodes.OK.intValue
 
         {
           val gameState = fetchAndParseGame(gameId)
-          gameState.players.head.victoryStatus shouldBe VictoryStatus.Lost
-          gameState.players.tail.head.victoryStatus shouldBe VictoryStatus.Won
+          gameState.gamePhase shouldBe GamePhase.Finished
+          gameState.players(0).victoryStatus shouldBe VictoryStatus.Lost
+          gameState.players(1).victoryStatus shouldBe VictoryStatus.Drawn
+          gameState.players(2).victoryStatus shouldBe VictoryStatus.Drawn
         }
         surrender(gameId).statusCode shouldBe StatusCodes.InternalServerError.intValue
         auth(1)
         surrender(gameId).statusCode shouldBe StatusCodes.InternalServerError.intValue
+      }
+    }
+
+    "allow surrendering during game" in {
+      val lobbyName = "lobby_name"
+      val hexMapName = "1v1v1"
+      val pickType = PickType.AllRandom
+      val numberOfBans = 0
+      val numberOfCharacters = 4
+      var gameId = ""
+      withLobbyWS {
+        authL(0)
+        gameId = createLobby(lobbyName).body
+        setHexMap(gameId, hexMapName)
+        setPickType(gameId, pickType)
+        setNumberOfBans(gameId, numberOfBans)
+        setNumberOfCharacters(gameId, numberOfCharacters)
+        authL(1)
+        joinLobby(gameId)
+        authL(2)
+        joinLobby(gameId)
+        authL(0)
+        startGame(gameId).statusCode shouldBe StatusCodes.OK.intValue
+      }
+
+      withGameWS {
+        auth(0)
+
+        {
+          val gameState = fetchAndParseGame(gameId)
+          gameState.gamePhase shouldBe GamePhase.CharacterPlacing
+          gameState.players(0).victoryStatus shouldBe VictoryStatus.Pending
+          gameState.players(1).victoryStatus shouldBe VictoryStatus.Pending
+          gameState.players(2).victoryStatus shouldBe VictoryStatus.Pending
+        }
+
+        surrender(gameId).statusCode shouldBe StatusCodes.OK.intValue
+
+        {
+          val gameState = fetchAndParseGame(gameId)
+          gameState.players(0).victoryStatus shouldBe VictoryStatus.Lost
+          gameState.players(1).victoryStatus shouldBe VictoryStatus.Pending
+          gameState.players(2).victoryStatus shouldBe VictoryStatus.Pending
+        }
+
+        auth(1)
+        surrender(gameId).statusCode shouldBe StatusCodes.OK.intValue
+
+        {
+          val gameState = fetchAndParseGame(gameId)
+          gameState.players(0).victoryStatus shouldBe VictoryStatus.Lost
+          gameState.players(1).victoryStatus shouldBe VictoryStatus.Lost
+          gameState.players(2).victoryStatus shouldBe VictoryStatus.Won
+        }
       }
     }
   }

@@ -45,10 +45,14 @@ case class GameState(id: String,
   }
 
   def checkVictoryStatus(): GameState = {
-    if (players.count(p => p.victoryStatus == VictoryStatus.Pending) == 1) {
-      def filterPlayer: Player => Boolean = _.victoryStatus == VictoryStatus.Pending
+    def filterPendingPlayers: Player => Boolean = _.victoryStatus == VictoryStatus.Pending
 
-      this.modify(_.players.eachWhere(filterPlayer).victoryStatus)
+    if (gamePhase == GamePhase.CharacterPick && players.count(_.victoryStatus == VictoryStatus.Lost) > 0) {
+      this.modify(_.players.eachWhere(filterPendingPlayers).victoryStatus)
+        .setTo(VictoryStatus.Drawn)
+        .modify(_.gamePhase).setTo(GamePhase.Finished)
+    } else if (players.count(_.victoryStatus == VictoryStatus.Pending) == 1) {
+      this.modify(_.players.eachWhere(filterPendingPlayers).victoryStatus)
         .setTo(VictoryStatus.Won)
         .modify(_.gamePhase).setTo(GamePhase.Finished)
     } else this

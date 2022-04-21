@@ -71,9 +71,10 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
       }
     case Surrender(playerName) =>
       log.info(s"Surrendering $playerName")
-      //TODO: check if game is started
       val playerOption = gameState.players.find(_.name == playerName)
-      if (playerOption.isEmpty) {
+      if (gameState.gamePhase == NotStarted) {
+        sender() ! Failure("Game is not started")
+      } else if (playerOption.isEmpty) {
         sender() ! Failure("This player is not in this game.")
       } else {
         val player = playerOption.get
