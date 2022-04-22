@@ -4,6 +4,8 @@ import akka.actor.{ActorLogging, Props}
 import akka.persistence.{PersistentActor, RecoveryCompleted}
 import com.tosware.NKM.models.CommandResponse._
 import com.tosware.NKM.models.game.GamePhase._
+import com.tosware.NKM.models.game.NKMCharacterMetadata.CharacterMetadataId
+import com.tosware.NKM.models.game.Player.PlayerId
 import com.tosware.NKM.models.game._
 import com.tosware.NKM.services.NKMDataService
 
@@ -18,7 +20,9 @@ object Game {
 
   case class StartGame(gameStartDependencies: GameStartDependencies) extends Command
 
-  case class Surrender(playerName: String) extends Command
+  case class Surrender(playerId: PlayerId) extends Command
+
+  case class BanCharacters(playerId: PlayerId, characterIds: Set[CharacterMetadataId]) extends Command
 
   case class PlaceCharacter(hexCoordinates: HexCoordinates, characterId: String) extends Command
 
@@ -30,7 +34,9 @@ object Game {
 
   case class GameStarted(id: String, gameStartDependencies: GameStartDependencies) extends Event
 
-  case class Surrendered(id: String, playerName: String) extends Event
+  case class Surrendered(id: String, playerId: PlayerId) extends Event
+
+  case class CharactersBanned(id: String, playerId: PlayerId, characterIds: Set[CharacterMetadataId]) extends Event
 
   case class CharacterPlaced(id: String, hexCoordinates: HexCoordinates, characterId: String) extends Event
 
@@ -89,6 +95,23 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
           }
         }
       }
+    case BanCharacters(playerId, characterIds) =>
+      log.info(s"$playerId banning")
+      val playerOption = gameState.players.find(_.name == playerId)
+      if (playerOption.isEmpty) {
+        sender() ! Failure("This player is not in this game.")
+      } else if (gameState.gamePhase != CharacterPick) {
+        sender() ! Failure("Game is not in character pick phase")
+      } else if (!gameState.draftPickState.fold(false)(_.validateBan(playerId, characterIds))) {
+        sender() ! Failure("Ban is not valid")
+      } else {
+        val e = CharactersBanned(id, playerId, characterIds)
+        persistAndPublish(e) { _ =>
+          gameState = gameState.ban(playerId, characterIds)
+          log.info(s"$playerId banned")
+          sender() ! Success()
+        }
+      }
     case PlaceCharacter(hexCoordinates, characterId) =>
       log.info(s"Placing $characterId on $hexCoordinates")
       val e = CharacterPlaced(id, hexCoordinates, characterId)
@@ -115,6 +138,9 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
     case Surrendered(_, playerName) =>
       gameState = gameState.surrender(playerName)
       log.debug(s"Recovered $playerName surrender")
+    case CharactersBanned(_, playerId, characterIds) =>
+      gameState = gameState.ban(playerId, characterIds)
+      log.debug(s"Recovered $playerId ban")
     case CharacterPlaced(_, hexCoordinates, characterId) =>
       gameState = gameState.placeCharacter(hexCoordinates, characterId)
       log.debug(s"Recovered $characterId on $hexCoordinates")

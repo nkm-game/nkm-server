@@ -6,17 +6,17 @@ import com.tosware.NKM.models.game.Player.PlayerId
 object DraftPickState {
   def empty(config: DraftPickConfig): DraftPickState = DraftPickState(
     config,
-    config.playersPicking.map(x => x -> Set.empty[CharacterMetadataId]).toMap,
+    config.playersPicking.map(x => x -> None).toMap,
     config.playersPicking.map(x => x -> Seq.empty).toMap,
   )
 }
 
 case class DraftPickState(config: DraftPickConfig,
-                          bans: Map[PlayerId, Set[CharacterMetadataId]],
+                          bans: Map[PlayerId, Option[Set[CharacterMetadataId]]],
                           characterSelection: Map[PlayerId, Seq[CharacterMetadataId]],
                          ) {
 
-  def bannedCharacters: Set[CharacterMetadataId] = bans.values.flatten.toSet
+  def bannedCharacters: Set[CharacterMetadataId] = bans.values.flatten.flatten.toSet
 
   def pickedCharacters: Set[CharacterMetadataId] = characterSelection.values.flatten.toSet
 
@@ -39,21 +39,21 @@ case class DraftPickState(config: DraftPickConfig,
     Some(config.playersPicking(currentPlayerIndex))
   }
 
-  def pickPhase: DraftPickPhase = if (bans.values.exists(_.size != config.numberOfBansPerPlayer)) {
+  def pickPhase: DraftPickPhase = if (config.numberOfBansPerPlayer > 0 && bans.values.exists(_.isEmpty)) {
     DraftPickPhase.Banning
   } else if (characterSelection.values.exists(_.size != config.numberOfCharactersPerPlayer)) {
     DraftPickPhase.Picking
   } else DraftPickPhase.Finished
 
   def validateBan(playerId: PlayerId, characters: Set[CharacterMetadataId]): Boolean = {
-    if (!characters.forall(charactersAvailableToPick.contains)) return false
-    if (bans(playerId) != Set.empty) return false
-    if (characters.size != config.numberOfBansPerPlayer) return false
+    if (!characters.forall(config.availableCharacters.contains)) return false
+    if (bans(playerId).isDefined) return false
+    if (characters.size > config.numberOfBansPerPlayer) return false
     true
   }
 
   def ban(playerId: PlayerId, characters: Set[CharacterMetadataId]): DraftPickState = {
-    copy(bans = bans.updated(playerId, characters))
+    copy(bans = bans.updated(playerId, Some(characters)))
   }
 
 

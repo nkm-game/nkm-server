@@ -1,6 +1,7 @@
 package com.tosware.NKM.models.game.ws
 
 import com.tosware.NKM.models.game.HexCoordinates
+import com.tosware.NKM.models.game.NKMCharacterMetadata.CharacterMetadataId
 
 sealed trait GameRequest
 
@@ -12,8 +13,9 @@ final case class PauseRequest(gameId: String) extends GameRequest
 final case class SurrenderRequest(gameId: String) extends GameRequest
 
 // Character Select
-final case class BanCharactersRequest(gameId: String, characterIdsOpt: Option[Seq[String]]) extends GameRequest
-final case class PickCharactersRequest(gameId: String, characterIds: Seq[String]) extends GameRequest
+final case class BanCharactersRequest(gameId: String, characterIds: Set[CharacterMetadataId]) extends GameRequest
+final case class PickCharacterRequest(gameId: String, characterId: CharacterMetadataId) extends GameRequest
+final case class BlindPickCharactersRequest(gameId: String, characterIds: Set[CharacterMetadataId]) extends GameRequest
 
 // Actions
 final case class PlaceCharactersRequest(gameId: String, coordinatesToCharacterIdMap: Map[HexCoordinates, String]) extends GameRequest

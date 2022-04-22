@@ -7,9 +7,10 @@ import com.tosware.NKM.actors.Game.GetState
 import com.tosware.NKM.actors._
 import com.tosware.NKM.models.CommandResponse
 import com.tosware.NKM.models.game._
+import com.tosware.NKM.models.game.ws.BanCharactersRequest
 import slick.jdbc.JdbcBackend
 
-import scala.concurrent.{Await, Future}
+import scala.concurrent.{Await, Awaitable, Future}
 
 class GameService(implicit db: JdbcBackend.Database, system: ActorSystem, NKMDataService: NKMDataService) extends NKMTimeouts {
   import CommandResponse._
@@ -19,6 +20,13 @@ class GameService(implicit db: JdbcBackend.Database, system: ActorSystem, NKMDat
 
     val surrenderFuture = gameActor ? Game.Surrender(username)
     Future.successful(Await.result(surrenderFuture, atMost).asInstanceOf[CommandResponse])
+  }
+
+  def banCharacters(username: String, request: BanCharactersRequest): Future[CommandResponse] = {
+    implicit val gameActor: ActorRef = system.actorOf(Game.props(request.gameId))
+
+    val requestFuture = gameActor ? Game.BanCharacters(username, request.characterIds)
+    Future.successful(Await.result(requestFuture, atMost).asInstanceOf[CommandResponse])
   }
 
   // TODO: check for placing on spawn or if character is owned by user
