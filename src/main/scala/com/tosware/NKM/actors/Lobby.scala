@@ -7,6 +7,7 @@ import akka.persistence.{PersistentActor, RecoveryCompleted}
 import com.tosware.NKM.NKMTimeouts
 import com.tosware.NKM.actors.NKMData.GetHexMaps
 import com.tosware.NKM.models.CommandResponse._
+import com.tosware.NKM.models.UserState.UserId
 import com.tosware.NKM.models.game.{GameStartDependencies, HexMap, PickType, Player}
 import com.tosware.NKM.models.lobby.LobbyState
 import com.tosware.NKM.services.NKMDataService
@@ -82,13 +83,13 @@ class Lobby(id: String)(implicit NKMDataService: NKMDataService)
   def canStartGame(): Boolean =
     lobbyState.chosenHexMapName.nonEmpty && lobbyState.userIds.length > 1
 
-  def create(name: String, hostUserId: String, creationDate: LocalDateTime): Unit =
+  def create(name: String, hostUserId: UserId, creationDate: LocalDateTime): Unit =
     lobbyState = lobbyState.copy(name = Some(name), creationDate = Some(creationDate), hostUserId = Some(hostUserId), userIds = List(hostUserId))
 
-  def joinLobby(userId: String): Unit =
+  def joinLobby(userId: UserId): Unit =
     lobbyState = lobbyState.copy(userIds = lobbyState.userIds :+ userId)
 
-  def leaveLobby(userId: String): Unit =
+  def leaveLobby(userId: UserId): Unit =
     lobbyState = lobbyState.copy(userIds = lobbyState.userIds.filterNot(_ == userId))
 
   def setMapName(hexMapName: String): Unit =
@@ -133,7 +134,7 @@ class Lobby(id: String)(implicit NKMDataService: NKMDataService)
           sender() ! Success()
         }
       }
-    case UserJoin(userId: String) =>
+    case UserJoin(userId) =>
       log.debug(s"$userId tries to join lobby")
       if (!lobbyState.created()) {
         sender() ! Failure("Lobby is not created")
@@ -147,7 +148,7 @@ class Lobby(id: String)(implicit NKMDataService: NKMDataService)
           sender() ! Success()
         }
       }
-    case UserLeave(userId: String) =>
+    case UserLeave(userId) =>
       log.debug(s"$userId tries to leave lobby")
       if (!lobbyState.created()) {
         sender() ! Failure("Lobby is not created")
@@ -161,7 +162,7 @@ class Lobby(id: String)(implicit NKMDataService: NKMDataService)
           sender() ! Success()
         }
       }
-    case SetMapName(hexMapName: String) =>
+    case SetMapName(hexMapName) =>
       if (!lobbyState.created()) {
         sender() ! Failure("Lobby is not created")
       } else {

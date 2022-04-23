@@ -1,6 +1,7 @@
 package com.tosware.NKM.models.game
 
 import com.softwaremill.quicklens._
+import com.tosware.NKM.models.game.NKMCharacter.CharacterId
 import com.tosware.NKM.models.game.NKMCharacterMetadata.CharacterMetadataId
 import com.tosware.NKM.models.game.Player.PlayerId
 import com.tosware.NKM.models.game.draftpick.{DraftPickConfig, DraftPickState}
@@ -9,7 +10,7 @@ import scala.util.Random
 
 case class GameState(id: String,
                      hexMap: Option[HexMap],
-                     characterIdsOutsideMap: Seq[String],
+                     characterIdsOutsideMap: Seq[CharacterId],
                      phase: Phase,
                      turn: Turn,
                      players: Seq[Player],
@@ -60,8 +61,8 @@ case class GameState(id: String,
     } else this
   }
 
-  def surrender(playerName: String): GameState = {
-    def filterPlayer: Player => Boolean = _.name == playerName
+  def surrender(playerId: PlayerId): GameState = {
+    def filterPlayer: Player => Boolean = _.name == playerId
 
     this.modify(_.players.eachWhere(filterPlayer).victoryStatus).setTo(VictoryStatus.Lost).checkVictoryStatus()
   }
@@ -69,7 +70,7 @@ case class GameState(id: String,
   def ban(playerId: PlayerId, characterIds: Set[CharacterMetadataId]): GameState =
     copy(draftPickState = draftPickState.map(_.ban(playerId, characterIds)))
 
-  def placeCharacter(targetCellCoordinates: HexCoordinates, characterId: String): GameState =
+  def placeCharacter(targetCellCoordinates: HexCoordinates, characterId: CharacterId): GameState =
     this.modify(_.hexMap.each.cells.each).using {
       case cell if cell.coordinates == targetCellCoordinates => HexCell(cell.coordinates, cell.cellType, Some(characterId), cell.effects, cell.spawnNumber)
       case cell => cell

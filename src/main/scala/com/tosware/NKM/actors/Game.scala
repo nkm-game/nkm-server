@@ -4,7 +4,7 @@ import akka.actor.{ActorLogging, Props}
 import akka.persistence.{PersistentActor, RecoveryCompleted}
 import com.tosware.NKM.models.CommandResponse._
 import com.tosware.NKM.models.GameStateValidator
-import com.tosware.NKM.models.game.GamePhase._
+import com.tosware.NKM.models.game.NKMCharacter.CharacterId
 import com.tosware.NKM.models.game.NKMCharacterMetadata.CharacterMetadataId
 import com.tosware.NKM.models.game.Player.PlayerId
 import com.tosware.NKM.models.game._
@@ -25,9 +25,9 @@ object Game {
 
   case class BanCharacters(playerId: PlayerId, characterIds: Set[CharacterMetadataId]) extends Command
 
-  case class PlaceCharacter(hexCoordinates: HexCoordinates, characterId: String) extends Command
+  case class PlaceCharacter(hexCoordinates: HexCoordinates, characterId: CharacterId) extends Command
 
-  case class MoveCharacter(hexCoordinates: HexCoordinates, characterId: String) extends Command
+  case class MoveCharacter(hexCoordinates: HexCoordinates, characterId: CharacterId) extends Command
 
   sealed trait Event {
     val id: String
@@ -39,9 +39,9 @@ object Game {
 
   case class CharactersBanned(id: String, playerId: PlayerId, characterIds: Set[CharacterMetadataId]) extends Event
 
-  case class CharacterPlaced(id: String, hexCoordinates: HexCoordinates, characterId: String) extends Event
+  case class CharacterPlaced(id: String, hexCoordinates: HexCoordinates, characterId: CharacterId) extends Event
 
-  case class CharacterMoved(id: String, hexCoordinates: HexCoordinates, characterId: String) extends Event
+  case class CharacterMoved(id: String, hexCoordinates: HexCoordinates, characterId: CharacterId) extends Event
 
   def props(id: String)(implicit NKMDataService: NKMDataService): Props = Props(new Game(id))
 }
@@ -74,13 +74,13 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
             sender() ! Success()
           }
       }
-    case Surrender(playerName) =>
-      GameStateValidator(gameState).validateSurrender(playerName) match {
+    case Surrender(playerId) =>
+      GameStateValidator(gameState).validateSurrender(playerId) match {
         case failure @ Failure(_) => sender() ! failure
         case Success(_) =>
-          val e = Surrendered(id, playerName)
+          val e = Surrendered(id, playerId)
           persistAndPublish(e) { _ =>
-            gameState = gameState.surrender(playerName)
+            gameState = gameState.surrender(playerId)
             sender() ! Success()
           }
       }
@@ -113,9 +113,9 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
     case GameStarted(_, gameStartDependencies) =>
       gameState = gameState.startGame(gameStartDependencies)
       log.debug(s"Recovered game start")
-    case Surrendered(_, playerName) =>
-      gameState = gameState.surrender(playerName)
-      log.debug(s"Recovered $playerName surrender")
+    case Surrendered(_, playerId) =>
+      gameState = gameState.surrender(playerId)
+      log.debug(s"Recovered $playerId surrender")
     case CharactersBanned(_, playerId, characterIds) =>
       gameState = gameState.ban(playerId, characterIds)
       log.debug(s"Recovered $playerId ban")

@@ -1,37 +1,11 @@
 package com.tosware.NKM.models.game
 
-import NKMCharacterMetadata._
-
-object NKMCharacterMetadata {
-  type CharacterMetadataId = String
-}
-case class NKMCharacterMetadata
-(
-  name: String,
-  initialHealthPoints: Int,
-  initialAttackPoints: Int,
-  initialBasicAttackRange: Int,
-  initialSpeed: Int,
-  initialPsychicalDefense: Int,
-  initialMagicalDefense: Int,
-  initialAbilitiesMetadataIds: Seq[String],
-) {
-  val id: CharacterMetadataId = name
-}
-
-case class NKMCharacterState
-(
- name: String,
- healthPoints: Int,
- attackPoints: Int,
- basicAttackRange: Int,
- speed: Int,
- psychicalDefense: Int,
- magicalDefense: Int,
-)
+import NKMCharacter._
+import NKMCharacterMetadata.CharacterMetadataId
 
 object NKMCharacter {
-  def fromMetadata(characterId: String, NKMCharacterMetadata: NKMCharacterMetadata) = {
+  type CharacterId = String
+  def fromMetadata(characterId: CharacterId, NKMCharacterMetadata: NKMCharacterMetadata) = {
     NKMCharacter(
       id = characterId,
       metadataId = NKMCharacterMetadata.id,
@@ -46,13 +20,12 @@ object NKMCharacter {
       )
     )
   }
-
 }
 
 case class NKMCharacter
 (
-  id: String,
-  metadataId: String,
+  id: CharacterId,
+  metadataId: CharacterMetadataId,
   state: NKMCharacterState,
 )
 {
