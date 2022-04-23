@@ -1,0 +1,47 @@
+package com.tosware.NKM.models
+
+import com.tosware.NKM.models.CommandResponse._
+import com.tosware.NKM.models.game.NKMCharacterMetadata.CharacterMetadataId
+import com.tosware.NKM.models.game.Player.PlayerId
+import com.tosware.NKM.models.game._
+
+case class GameStateValidator(gameState: GameState) {
+  private def playerInGame(playerId: PlayerId) =
+    gameState.players.exists(_.name == playerId)
+
+  private def playerFinishedGame(playerId: PlayerId) =
+    gameState.players.find(_.name == playerId).get.victoryStatus != VictoryStatus.Pending
+
+  private def gamePhaseIs(gamePhase: GamePhase) =
+    gameState.gamePhase == gamePhase
+
+  private def banValid(playerId: PlayerId, characterIds: Set[CharacterMetadataId]) =
+    gameState.draftPickState.fold(false)(_.validateBan(playerId, characterIds))
+
+  private val gameStartedMessage = "Game is started."
+  private val gameNotStartedMessage = "Game is not started."
+  private val playerNotInGameMessage = "This player is not in the game."
+  private val playerFinishedGameMessage = "This player already finished the game."
+  private val gameNotInCharacterPickMessage = "Game is not in character pick phase."
+  private val banNotValidMessage = "Ban is not valid."
+
+  def validateStartGame(): CommandResponse = {
+    if (!gamePhaseIs(GamePhase.NotStarted)) Failure(gameStartedMessage)
+    else Success()
+  }
+
+  def validateSurrender(playerId: PlayerId): CommandResponse = {
+    if (!playerInGame(playerId)) Failure(playerNotInGameMessage)
+    else if (gamePhaseIs(GamePhase.NotStarted)) Failure(gameNotStartedMessage)
+    else if (playerFinishedGame(playerId)) Failure(playerFinishedGameMessage)
+    else Success()
+  }
+
+  def validateBanCharacters(playerId: PlayerId, characterIds: Set[CharacterMetadataId]): CommandResponse = {
+    if (!playerInGame(playerId)) Failure(playerNotInGameMessage)
+    else if (gamePhaseIs(GamePhase.NotStarted)) Failure(gameNotStartedMessage)
+    else if (!gamePhaseIs(GamePhase.CharacterPick)) Failure(gameNotInCharacterPickMessage)
+    else if (!banValid(playerId, characterIds)) Failure(banNotValidMessage)
+    else Success()
+  }
+}

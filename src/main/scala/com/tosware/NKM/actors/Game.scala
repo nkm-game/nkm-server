@@ -3,6 +3,7 @@ package com.tosware.NKM.actors
 import akka.actor.{ActorLogging, Props}
 import akka.persistence.{PersistentActor, RecoveryCompleted}
 import com.tosware.NKM.models.CommandResponse._
+import com.tosware.NKM.models.GameStateValidator
 import com.tosware.NKM.models.game.GamePhase._
 import com.tosware.NKM.models.game.NKMCharacterMetadata.CharacterMetadataId
 import com.tosware.NKM.models.game.Player.PlayerId
@@ -61,71 +62,48 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
 
   override def receive: Receive = {
     case GetState =>
-      log.info("Received state request")
       log.warning(gameState.toString)
       sender() ! gameState
     case StartGame(gameStartDependencies) =>
-      log.info(s"Starting the game")
-      if (gameState.gamePhase != NotStarted) {
-        sender() ! Failure("Game is not started")
-      } else {
-        val e = GameStarted(id, gameStartDependencies)
-        persistAndPublish(e) { _ =>
-          gameState = gameState.startGame(gameStartDependencies)
-          sender() ! Success()
-        }
+      GameStateValidator(gameState).validateStartGame() match {
+        case failure @ Failure(_) => sender() ! failure
+        case Success(_) =>
+          val e = GameStarted(id, gameStartDependencies)
+          persistAndPublish(e) { _ =>
+            gameState = gameState.startGame(gameStartDependencies)
+            sender() ! Success()
+          }
       }
     case Surrender(playerName) =>
-      log.info(s"Surrendering $playerName")
-      val playerOption = gameState.players.find(_.name == playerName)
-      if (gameState.gamePhase == NotStarted) {
-        sender() ! Failure("Game is not started")
-      } else if (playerOption.isEmpty) {
-        sender() ! Failure("This player is not in this game.")
-      } else {
-        val player = playerOption.get
-        if (player.victoryStatus != VictoryStatus.Pending) {
-          sender() ! Failure("This player already finished the game.")
-        } else {
+      GameStateValidator(gameState).validateSurrender(playerName) match {
+        case failure @ Failure(_) => sender() ! failure
+        case Success(_) =>
           val e = Surrendered(id, playerName)
           persistAndPublish(e) { _ =>
             gameState = gameState.surrender(playerName)
-            log.info(s"Surrendered $playerName")
             sender() ! Success()
           }
-        }
       }
     case BanCharacters(playerId, characterIds) =>
-      log.info(s"$playerId banning")
-      val playerOption = gameState.players.find(_.name == playerId)
-      if (playerOption.isEmpty) {
-        sender() ! Failure("This player is not in this game.")
-      } else if (gameState.gamePhase != CharacterPick) {
-        sender() ! Failure("Game is not in character pick phase")
-      } else if (!gameState.draftPickState.fold(false)(_.validateBan(playerId, characterIds))) {
-        sender() ! Failure("Ban is not valid")
-      } else {
-        val e = CharactersBanned(id, playerId, characterIds)
-        persistAndPublish(e) { _ =>
-          gameState = gameState.ban(playerId, characterIds)
-          log.info(s"$playerId banned")
-          sender() ! Success()
-        }
+      GameStateValidator(gameState).validateBanCharacters(playerId, characterIds) match {
+        case failure @ Failure(_) => sender() ! failure
+        case Success(_) =>
+          val e = CharactersBanned(id, playerId, characterIds)
+          persistAndPublish(e) { _ =>
+            gameState = gameState.ban(playerId, characterIds)
+            sender() ! Success()
+          }
       }
     case PlaceCharacter(hexCoordinates, characterId) =>
-      log.info(s"Placing $characterId on $hexCoordinates")
       val e = CharacterPlaced(id, hexCoordinates, characterId)
       persistAndPublish(e) { _ =>
         gameState = gameState.placeCharacter(hexCoordinates, characterId)
-        log.info(s"Persisted $characterId on $hexCoordinates")
         sender() ! Success()
       }
     case MoveCharacter(hexCoordinates, characterId) =>
-      log.info(s"Moving $characterId to $hexCoordinates")
       val e = CharacterMoved(id, hexCoordinates, characterId)
       persistAndPublish(e) { _ =>
         gameState = gameState.moveCharacter(hexCoordinates, characterId)
-        log.info(s"Persisted $characterId on $hexCoordinates")
         sender() ! Success()
       }
     case e => log.warning(s"Unknown message: $e")
