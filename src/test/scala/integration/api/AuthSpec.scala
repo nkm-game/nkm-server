@@ -1,4 +1,4 @@
-package api
+package integration.api
 
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.server.Route

@@ -1,6 +1,5 @@
-package ws
+package integration.ws
 
-import akka.http.scaladsl.model.StatusCodes
 import com.tosware.NKM.models.game._
 import com.tosware.NKM.models.lobby.ws._
 import helpers.WSTrait

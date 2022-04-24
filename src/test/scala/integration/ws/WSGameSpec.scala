@@ -1,10 +1,9 @@
-package ws
+package integration.ws
 
-import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.testkit.WSProbe
 import com.tosware.NKM.models.game.draftpick.DraftPickPhase
-import com.tosware.NKM.models.game.{GamePhase, PickType, VictoryStatus}
 import com.tosware.NKM.models.game.ws._
+import com.tosware.NKM.models.game.{GamePhase, PickType, VictoryStatus}
 import helpers.WSTrait
 
 class WSGameSpec extends WSTrait {
