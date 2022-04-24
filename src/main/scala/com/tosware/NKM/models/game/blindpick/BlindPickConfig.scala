@@ -1,23 +1,22 @@
-package com.tosware.NKM.models.game.draftpick
+package com.tosware.NKM.models.game.blindpick
 
 import com.tosware.NKM.models.game.GameStartDependencies
 import com.tosware.NKM.models.game.NKMCharacterMetadata.CharacterMetadataId
 import com.tosware.NKM.models.game.Player.PlayerId
 
-object DraftPickConfig {
-  def generate(g: GameStartDependencies): DraftPickConfig = {
-    DraftPickConfig(
+
+object BlindPickConfig {
+  def generate(g: GameStartDependencies): BlindPickConfig = {
+    BlindPickConfig(
       g.players.map(_.name),
       g.charactersMetadata.map(_.id),
-      g.numberOfBansPerPlayer,
       g.numberOfCharactersPerPlayer
     )
   }
 }
 
-case class DraftPickConfig(
+case class BlindPickConfig(
                             playersPicking: Seq[PlayerId],
                             availableCharacters: Set[CharacterMetadataId],
-                            numberOfBansPerPlayer: Int,
                             numberOfCharactersPerPlayer: Int,
                           )
