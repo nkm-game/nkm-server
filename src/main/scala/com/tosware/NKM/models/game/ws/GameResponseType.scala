@@ -16,7 +16,8 @@ object GameResponseType extends StringEnum[GameResponseType] {
 
   // Character Select
   case object BanCharacters extends GameResponseType("ban_characters")
-  case object PickCharacters extends GameResponseType("pick_characters")
+  case object PickCharacter extends GameResponseType("pick_character")
+  case object BlindPickCharacters extends GameResponseType("blind_pick_characters")
 
   // Actions
   case object PlaceCharacters extends GameResponseType("place_characters")

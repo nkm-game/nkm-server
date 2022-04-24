@@ -25,6 +25,8 @@ object Game {
 
   case class BanCharacters(playerId: PlayerId, characterIds: Set[CharacterMetadataId]) extends Command
 
+  case class PickCharacter(playerId: PlayerId, characterId: CharacterMetadataId) extends Command
+
   case class PlaceCharacter(hexCoordinates: HexCoordinates, characterId: CharacterId) extends Command
 
   case class MoveCharacter(hexCoordinates: HexCoordinates, characterId: CharacterId) extends Command
@@ -38,6 +40,8 @@ object Game {
   case class Surrendered(id: String, playerId: PlayerId) extends Event
 
   case class CharactersBanned(id: String, playerId: PlayerId, characterIds: Set[CharacterMetadataId]) extends Event
+
+  case class CharacterPicked(id: String, playerId: PlayerId, characterId: CharacterMetadataId) extends Event
 
   case class CharacterPlaced(id: String, hexCoordinates: HexCoordinates, characterId: CharacterId) extends Event
 
@@ -94,6 +98,16 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
             sender() ! Success()
           }
       }
+    case PickCharacter(playerId, characterId) =>
+      GameStateValidator(gameState).validatePickCharacter(playerId, characterId) match {
+        case failure @ Failure(_) => sender() ! failure
+        case Success(_) =>
+          val e = CharacterPicked(id, playerId, characterId)
+          persistAndPublish(e) { _ =>
+            gameState = gameState.pick(playerId, characterId)
+            sender() ! Success()
+          }
+      }
     case PlaceCharacter(hexCoordinates, characterId) =>
       val e = CharacterPlaced(id, hexCoordinates, characterId)
       persistAndPublish(e) { _ =>
@@ -118,6 +132,9 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
       log.debug(s"Recovered $playerId surrender")
     case CharactersBanned(_, playerId, characterIds) =>
       gameState = gameState.ban(playerId, characterIds)
+      log.debug(s"Recovered $playerId ban")
+    case CharacterPicked(_, playerId, characterId) =>
+      gameState = gameState.pick(playerId, characterId)
       log.debug(s"Recovered $playerId ban")
     case CharacterPlaced(_, hexCoordinates, characterId) =>
       gameState = gameState.placeCharacter(hexCoordinates, characterId)

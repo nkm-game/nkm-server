@@ -123,6 +123,9 @@ trait WSTrait extends UserApiTrait {
   def ban(gameId: String, characterIds: Set[CharacterMetadataId]): WebsocketGameResponse =
     sendWSRequestG(GameRoute.BanCharacters, BanCharactersRequest(gameId, characterIds).toJson.toString)
 
+  def pick(gameId: String, characterId: CharacterMetadataId): WebsocketGameResponse =
+    sendWSRequestG(GameRoute.PickCharacter, PickCharacterRequest(gameId, characterId).toJson.toString)
+
   def fetchGame(gameId: String): WebsocketGameResponse =
     sendWSRequestG(GameRoute.GetState, GetStateRequest(gameId).toJson.toString)
 

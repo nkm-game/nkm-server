@@ -18,12 +18,16 @@ case class GameStateValidator(gameState: GameState) {
   private def banValid(playerId: PlayerId, characterIds: Set[CharacterMetadataId]) =
     gameState.draftPickState.fold(false)(_.validateBan(playerId, characterIds))
 
+  private def characterPickValid(playerId: PlayerId, characterId: CharacterMetadataId) =
+    gameState.draftPickState.fold(false)(_.validatePick(playerId, characterId))
+
   private val gameStartedMessage = "Game is started."
   private val gameNotStartedMessage = "Game is not started."
   private val playerNotInGameMessage = "This player is not in the game."
   private val playerFinishedGameMessage = "This player already finished the game."
   private val gameNotInCharacterPickMessage = "Game is not in character pick phase."
   private val banNotValidMessage = "Ban is not valid."
+  private val pickNotValidMessage = "Pick is not valid."
 
   def validateStartGame(): CommandResponse = {
     if (!gamePhaseIs(GamePhase.NotStarted)) Failure(gameStartedMessage)
@@ -42,6 +46,14 @@ case class GameStateValidator(gameState: GameState) {
     else if (gamePhaseIs(GamePhase.NotStarted)) Failure(gameNotStartedMessage)
     else if (!gamePhaseIs(GamePhase.CharacterPick)) Failure(gameNotInCharacterPickMessage)
     else if (!banValid(playerId, characterIds)) Failure(banNotValidMessage)
+    else Success()
+  }
+
+  def validatePickCharacter(playerId: PlayerId, characterId: CharacterMetadataId): CommandResponse = {
+    if (!playerInGame(playerId)) Failure(playerNotInGameMessage)
+    else if (gamePhaseIs(GamePhase.NotStarted)) Failure(gameNotStartedMessage)
+    else if (!gamePhaseIs(GamePhase.CharacterPick)) Failure(gameNotInCharacterPickMessage)
+    else if (!characterPickValid(playerId, characterId)) Failure(pickNotValidMessage)
     else Success()
   }
 }

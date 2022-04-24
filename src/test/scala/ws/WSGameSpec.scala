@@ -207,5 +207,56 @@ class WSGameSpec extends WSTrait {
         fetchAndParseGame(gameId).draftPickState.get.pickPhase shouldBe DraftPickPhase.Picking
       }
     }
+
+    "allow picking during draft pick" in {
+      val lobbyName = "lobby_name"
+      val hexMapName = "1v1v1"
+      val pickType = PickType.DraftPick
+      val numberOfBans = 0
+      val numberOfCharacters = 2
+      var gameId = ""
+      withLobbyWS {
+        authL(0)
+        gameId = createLobby(lobbyName).body
+        setHexMap(gameId, hexMapName)
+        setPickType(gameId, pickType)
+        setNumberOfBans(gameId, numberOfBans)
+        setNumberOfCharacters(gameId, numberOfCharacters)
+        authL(1)
+        joinLobby(gameId)
+        authL(2)
+        joinLobby(gameId)
+        authL(0)
+        startGame(gameId).statusCode shouldBe StatusCodes.OK.intValue
+      }
+
+      withGameWS {
+        auth(0)
+        val availableCharacters = fetchAndParseGame(gameId).draftPickState.get.config.availableCharacters.toSeq
+
+        pick(gameId, availableCharacters(0)).statusCode shouldBe StatusCodes.OK.intValue
+        pick(gameId, availableCharacters(0)).statusCode shouldBe StatusCodes.InternalServerError.intValue
+        pick(gameId, availableCharacters(1)).statusCode shouldBe StatusCodes.InternalServerError.intValue
+
+        auth(1)
+        pick(gameId, availableCharacters(0)).statusCode shouldBe StatusCodes.InternalServerError.intValue
+        pick(gameId, availableCharacters(1)).statusCode shouldBe StatusCodes.OK.intValue
+
+        auth(2)
+        pick(gameId, availableCharacters(2)).statusCode shouldBe StatusCodes.OK.intValue
+        pick(gameId, availableCharacters(3)).statusCode shouldBe StatusCodes.OK.intValue
+
+        auth(1)
+        pick(gameId, availableCharacters(4)).statusCode shouldBe StatusCodes.OK.intValue
+
+        auth(0)
+        pick(gameId, availableCharacters(5)).statusCode shouldBe StatusCodes.OK.intValue
+        pick(gameId, availableCharacters(6)).statusCode shouldBe StatusCodes.InternalServerError.intValue
+
+        val gameState = fetchAndParseGame(gameId)
+        gameState.draftPickState.get.pickPhase shouldBe DraftPickPhase.Finished
+        gameState.gamePhase shouldBe GamePhase.CharacterPlacing
+      }
+    }
   }
 }

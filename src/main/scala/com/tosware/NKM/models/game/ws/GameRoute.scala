@@ -16,7 +16,8 @@ object GameRoute extends StringEnum[GameRoute] {
 
   // Character Select
   case object BanCharacters extends GameRoute("ban_characters")
-  case object PickCharacters extends GameRoute("pick_characters")
+  case object PickCharacter extends GameRoute("pick_character")
+  case object BlindPickCharacters extends GameRoute("blind_pick_characters")
 
   // Actions
   case object PlaceCharacters extends GameRoute("place_characters")

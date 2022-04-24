@@ -4,7 +4,7 @@ import com.softwaremill.quicklens._
 import com.tosware.NKM.models.game.NKMCharacter.CharacterId
 import com.tosware.NKM.models.game.NKMCharacterMetadata.CharacterMetadataId
 import com.tosware.NKM.models.game.Player.PlayerId
-import com.tosware.NKM.models.game.draftpick.{DraftPickConfig, DraftPickState}
+import com.tosware.NKM.models.game.draftpick.{DraftPickConfig, DraftPickPhase, DraftPickState}
 
 import scala.util.Random
 
@@ -61,6 +61,12 @@ case class GameState(id: String,
     } else this
   }
 
+  def checkIfCharacterPickFinished(): GameState = {
+    if(draftPickState.fold(false)(_.pickPhase == DraftPickPhase.Finished)) {
+      this.modify(_.gamePhase).setTo(GamePhase.CharacterPlacing)
+    } else this
+  }
+
   def surrender(playerId: PlayerId): GameState = {
     def filterPlayer: Player => Boolean = _.name == playerId
 
@@ -69,6 +75,10 @@ case class GameState(id: String,
 
   def ban(playerId: PlayerId, characterIds: Set[CharacterMetadataId]): GameState =
     copy(draftPickState = draftPickState.map(_.ban(playerId, characterIds)))
+
+
+  def pick(playerId: PlayerId, characterId: CharacterMetadataId): GameState =
+    copy(draftPickState = draftPickState.map(_.pick(playerId, characterId))).checkIfCharacterPickFinished()
 
   def placeCharacter(targetCellCoordinates: HexCoordinates, characterId: CharacterId): GameState =
     this.modify(_.hexMap.each.cells.each).using {

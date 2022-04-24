@@ -72,19 +72,25 @@ trait GameWebsocketUserBehaviour extends WebsocketUserBehaviour {
       case GameRoute.Surrender =>
         val gameId = request.requestJson.parseJson.convertTo[SurrenderRequest].gameId
         implicit val responseType: GameResponseType = GameResponseType.Surrender
-        if(authStatus.username.isEmpty) unauthorized()
+        if (authStatus.username.isEmpty) return unauthorized()
         val username = authStatus.username.get
         val response = Await.result(gameService.surrender(username, gameId), atMost)
         resolveResponse(response)
       case GameRoute.BanCharacters =>
         val banCharactersRequest = request.requestJson.parseJson.convertTo[BanCharactersRequest]
-        val gameId = banCharactersRequest.gameId
         implicit val responseType: GameResponseType = GameResponseType.BanCharacters
-        if(authStatus.username.isEmpty) unauthorized()
+        if (authStatus.username.isEmpty) return unauthorized()
         val username = authStatus.username.get
         val response = Await.result(gameService.banCharacters(username, banCharactersRequest), atMost)
         resolveResponse(response)
-      case GameRoute.PickCharacters => ???
+      case GameRoute.PickCharacter =>
+        val pickCharacterRequest = request.requestJson.parseJson.convertTo[PickCharacterRequest]
+        implicit val responseType: GameResponseType = GameResponseType.PickCharacter
+        if (authStatus.username.isEmpty) return unauthorized()
+        val username = authStatus.username.get
+        val response = Await.result(gameService.pickCharacter(username, pickCharacterRequest), atMost)
+        resolveResponse(response)
+      case GameRoute.BlindPickCharacters => ???
       case GameRoute.PlaceCharacters => ???
       case GameRoute.EndTurn => ???
       case GameRoute.Move => ???
