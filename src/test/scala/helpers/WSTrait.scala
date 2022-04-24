@@ -129,6 +129,9 @@ trait WSTrait extends UserApiTrait {
   def pick(gameId: String, characterId: CharacterMetadataId): WebsocketGameResponse =
     sendWSRequestG(GameRoute.PickCharacter, PickCharacterRequest(gameId, characterId).toJson.toString)
 
+  def blindPick(gameId: String, characterIds: Set[CharacterMetadataId]): WebsocketGameResponse =
+    sendWSRequestG(GameRoute.BlindPickCharacters, BlindPickCharactersRequest(gameId, characterIds).toJson.toString)
+
   def fetchGame(gameId: String): WebsocketGameResponse =
     sendWSRequestG(GameRoute.GetState, GetStateRequest(gameId).toJson.toString)
 

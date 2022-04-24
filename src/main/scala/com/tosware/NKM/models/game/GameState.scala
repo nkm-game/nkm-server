@@ -4,7 +4,8 @@ import com.softwaremill.quicklens._
 import com.tosware.NKM.models.game.NKMCharacter.CharacterId
 import com.tosware.NKM.models.game.NKMCharacterMetadata.CharacterMetadataId
 import com.tosware.NKM.models.game.Player.PlayerId
-import com.tosware.NKM.models.game.draftpick.{DraftPickConfig, DraftPickPhase, DraftPickState}
+import com.tosware.NKM.models.game.blindpick._
+import com.tosware.NKM.models.game.draftpick._
 
 import scala.util.Random
 
@@ -18,7 +19,8 @@ case class GameState(id: String,
                      pickType: PickType,
                      numberOfBans: Int,
                      numberOfCharactersPerPlayers: Int,
-                     draftPickState: Option[DraftPickState]
+                     draftPickState: Option[DraftPickState],
+                     blindPickState: Option[BlindPickState],
                     ) {
   def getCurrentPlayerNumber: Int = turn.number % players.length
 
@@ -32,7 +34,8 @@ case class GameState(id: String,
       numberOfBans = g.numberOfBansPerPlayer,
       numberOfCharactersPerPlayers = g.numberOfCharactersPerPlayer,
       gamePhase = GamePhase.CharacterPick,
-      draftPickState = if (g.pickType == PickType.DraftPick) Some(DraftPickState.empty(DraftPickConfig.generate(g))) else None
+      draftPickState = if (g.pickType == PickType.DraftPick) Some(DraftPickState.empty(DraftPickConfig.generate(g))) else None,
+      blindPickState = if (g.pickType == PickType.BlindPick) Some(BlindPickState.empty(BlindPickConfig.generate(g))) else None,
     ).placeCharactersRandomlyIfAllRandom(g.charactersMetadata)
   }
 
@@ -62,7 +65,10 @@ case class GameState(id: String,
   }
 
   def checkIfCharacterPickFinished(): GameState = {
-    if(draftPickState.fold(false)(_.pickPhase == DraftPickPhase.Finished)) {
+    val draftPickFinished = draftPickState.fold(false)(_.pickPhase == DraftPickPhase.Finished)
+    val blindPickFinished = blindPickState.fold(false)(_.pickPhase == BlindPickPhase.Finished)
+
+    if(draftPickFinished || blindPickFinished) {
       this.modify(_.gamePhase).setTo(GamePhase.CharacterPlacing)
     } else this
   }
@@ -76,9 +82,11 @@ case class GameState(id: String,
   def ban(playerId: PlayerId, characterIds: Set[CharacterMetadataId]): GameState =
     copy(draftPickState = draftPickState.map(_.ban(playerId, characterIds)))
 
-
   def pick(playerId: PlayerId, characterId: CharacterMetadataId): GameState =
     copy(draftPickState = draftPickState.map(_.pick(playerId, characterId))).checkIfCharacterPickFinished()
+
+  def blindPick(playerId: PlayerId, characterIds: Set[CharacterMetadataId]): GameState =
+    copy(blindPickState = blindPickState.map(_.pick(playerId, characterIds))).checkIfCharacterPickFinished()
 
   def placeCharacter(targetCellCoordinates: HexCoordinates, characterId: CharacterId): GameState =
     this.modify(_.hexMap.each.cells.each).using {
@@ -115,6 +123,7 @@ object GameState {
     pickType = PickType.AllRandom,
     numberOfBans = 0,
     numberOfCharactersPerPlayers = 1,
+    None,
     None,
   )
 }

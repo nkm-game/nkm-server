@@ -21,6 +21,9 @@ case class GameStateValidator(gameState: GameState) {
   private def characterPickValid(playerId: PlayerId, characterId: CharacterMetadataId) =
     gameState.draftPickState.fold(false)(_.validatePick(playerId, characterId))
 
+  private def characterBlindPickValid(playerId: PlayerId, characterIds: Set[CharacterMetadataId]) =
+    gameState.blindPickState.fold(false)(_.validatePick(playerId, characterIds))
+
   private val gameStartedMessage = "Game is started."
   private val gameNotStartedMessage = "Game is not started."
   private val playerNotInGameMessage = "This player is not in the game."
@@ -54,6 +57,14 @@ case class GameStateValidator(gameState: GameState) {
     else if (gamePhaseIs(GamePhase.NotStarted)) Failure(gameNotStartedMessage)
     else if (!gamePhaseIs(GamePhase.CharacterPick)) Failure(gameNotInCharacterPickMessage)
     else if (!characterPickValid(playerId, characterId)) Failure(pickNotValidMessage)
+    else Success()
+  }
+
+  def validateBlindPickCharacters(playerId: PlayerId, characterIds: Set[CharacterMetadataId]): CommandResponse = {
+    if (!playerInGame(playerId)) Failure(playerNotInGameMessage)
+    else if (gamePhaseIs(GamePhase.NotStarted)) Failure(gameNotStartedMessage)
+    else if (!gamePhaseIs(GamePhase.CharacterPick)) Failure(gameNotInCharacterPickMessage)
+    else if (!characterBlindPickValid(playerId, characterIds)) Failure(pickNotValidMessage)
     else Success()
   }
 }

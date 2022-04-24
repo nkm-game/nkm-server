@@ -27,6 +27,8 @@ object Game {
 
   case class PickCharacter(playerId: PlayerId, characterId: CharacterMetadataId) extends Command
 
+  case class BlindPickCharacters(playerId: PlayerId, characterId: Set[CharacterMetadataId]) extends Command
+
   case class PlaceCharacter(hexCoordinates: HexCoordinates, characterId: CharacterId) extends Command
 
   case class MoveCharacter(hexCoordinates: HexCoordinates, characterId: CharacterId) extends Command
@@ -44,6 +46,8 @@ object Game {
   case class CharacterPicked(id: String, playerId: PlayerId, characterId: CharacterMetadataId) extends Event
 
   case class CharacterPlaced(id: String, hexCoordinates: HexCoordinates, characterId: CharacterId) extends Event
+
+  case class CharactersBlindPicked(id: String, playerId: PlayerId, characterId: Set[CharacterMetadataId]) extends Event
 
   case class CharacterMoved(id: String, hexCoordinates: HexCoordinates, characterId: CharacterId) extends Event
 
@@ -108,6 +112,16 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
             sender() ! Success()
           }
       }
+    case BlindPickCharacters(playerId, characterIds) =>
+      GameStateValidator(gameState).validateBlindPickCharacters(playerId, characterIds) match {
+        case failure @ Failure(_) => sender() ! failure
+        case Success(_) =>
+          val e = CharactersBlindPicked(id, playerId, characterIds)
+          persistAndPublish(e) { _ =>
+            gameState = gameState.blindPick(playerId, characterIds)
+            sender() ! Success()
+          }
+      }
     case PlaceCharacter(hexCoordinates, characterId) =>
       val e = CharacterPlaced(id, hexCoordinates, characterId)
       persistAndPublish(e) { _ =>
@@ -135,7 +149,10 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
       log.debug(s"Recovered $playerId ban")
     case CharacterPicked(_, playerId, characterId) =>
       gameState = gameState.pick(playerId, characterId)
-      log.debug(s"Recovered $playerId ban")
+      log.debug(s"Recovered $playerId pick")
+    case CharactersBlindPicked(_, playerId, characterIds) =>
+      gameState = gameState.blindPick(playerId, characterIds)
+      log.debug(s"Recovered $playerId blind pick")
     case CharacterPlaced(_, hexCoordinates, characterId) =>
       gameState = gameState.placeCharacter(hexCoordinates, characterId)
       log.debug(s"Recovered $characterId on $hexCoordinates")

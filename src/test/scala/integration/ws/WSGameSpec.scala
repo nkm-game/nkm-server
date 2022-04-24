@@ -1,6 +1,7 @@
 package integration.ws
 
 import akka.http.scaladsl.testkit.WSProbe
+import com.tosware.NKM.models.game.blindpick.BlindPickPhase
 import com.tosware.NKM.models.game.draftpick.DraftPickPhase
 import com.tosware.NKM.models.game.ws._
 import com.tosware.NKM.models.game.{GamePhase, PickType, VictoryStatus}
@@ -254,6 +255,47 @@ class WSGameSpec extends WSTrait {
 
         val gameState = fetchAndParseGame(gameId)
         gameState.draftPickState.get.pickPhase shouldBe DraftPickPhase.Finished
+        gameState.gamePhase shouldBe GamePhase.CharacterPlacing
+      }
+    }
+
+    "allow picking during blind pick" in {
+      val lobbyName = "lobby_name"
+      val hexMapName = "1v1v1"
+      val pickType = PickType.BlindPick
+      val numberOfBans = 0
+      val numberOfCharacters = 2
+      var gameId = ""
+      withLobbyWS {
+        authL(0)
+        gameId = createLobby(lobbyName).body
+        setHexMap(gameId, hexMapName)
+        setPickType(gameId, pickType)
+        setNumberOfBans(gameId, numberOfBans)
+        setNumberOfCharacters(gameId, numberOfCharacters)
+        authL(1)
+        joinLobby(gameId)
+        authL(2)
+        joinLobby(gameId)
+        authL(0)
+        startGame(gameId).statusCode shouldBe ok
+      }
+
+      withGameWS {
+        auth(0)
+        val availableCharacters = fetchAndParseGame(gameId).blindPickState.get.config.availableCharacters.toSeq
+
+        blindPick(gameId, availableCharacters.take(numberOfCharacters).toSet).statusCode shouldBe ok
+        blindPick(gameId, availableCharacters.take(numberOfCharacters).toSet).statusCode shouldBe nok
+
+        auth(2)
+        blindPick(gameId, availableCharacters.take(numberOfCharacters).toSet).statusCode shouldBe ok
+
+        auth(1)
+        blindPick(gameId, availableCharacters.take(numberOfCharacters).toSet).statusCode shouldBe ok
+
+        val gameState = fetchAndParseGame(gameId)
+        gameState.blindPickState.get.pickPhase shouldBe BlindPickPhase.Finished
         gameState.gamePhase shouldBe GamePhase.CharacterPlacing
       }
     }
