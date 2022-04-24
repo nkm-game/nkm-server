@@ -35,7 +35,7 @@ class WSLobbySpec extends WSTrait
 
     "allow authenticating" in {
       withLobbyWS {
-        auth(0).statusCode shouldBe StatusCodes.OK.intValue
+        auth(0).statusCode shouldBe ok
       }
     }
 
@@ -43,12 +43,12 @@ class WSLobbySpec extends WSTrait
       withLobbyWS {
         auth(0)
         val lobbyId = createLobby(lobbyName).body
-        observe(lobbyId).statusCode shouldBe StatusCodes.OK.intValue
-        setLobbyName(lobbyId, "hi") shouldBe WebsocketLobbyResponse(LobbyResponseType.SetLobbyName, StatusCodes.OK.intValue)
+        observe(lobbyId).statusCode shouldBe ok
+        setLobbyName(lobbyId, "hi") shouldBe WebsocketLobbyResponse(LobbyResponseType.SetLobbyName, ok)
 
         val observedResponse = fetchResponse()
         observedResponse.lobbyResponseType shouldBe LobbyResponseType.Lobby
-        observedResponse.statusCode shouldBe StatusCodes.OK.intValue
+        observedResponse.statusCode shouldBe ok
       }
     }
 
@@ -62,7 +62,7 @@ class WSLobbySpec extends WSTrait
         sendRequest(wsRequest)
 
         val response = fetchResponse()
-        response.statusCode shouldBe StatusCodes.OK.intValue
+        response.statusCode shouldBe ok
       }
     }
 
@@ -72,22 +72,22 @@ class WSLobbySpec extends WSTrait
         val lobbyId = createLobby(lobbyName).body
 
         // this request should fail as it is not a lobby id, but lobby name
-        joinLobby(lobbyName).statusCode shouldBe StatusCodes.InternalServerError.intValue
+        joinLobby(lobbyName).statusCode shouldBe nok
         // user that creates the lobby joins it automatically
-        joinLobby(lobbyId).statusCode shouldBe StatusCodes.InternalServerError.intValue
+        joinLobby(lobbyId).statusCode shouldBe nok
         auth(1)
-        joinLobby(lobbyId).statusCode shouldBe StatusCodes.OK.intValue
+        joinLobby(lobbyId).statusCode shouldBe ok
 
         fetchAndParseLobby(lobbyId).userIds shouldEqual List(usernames(0), usernames(1))
 
-        leaveLobby(lobbyId).statusCode shouldBe StatusCodes.OK.intValue
-        leaveLobby(lobbyId).statusCode shouldBe StatusCodes.InternalServerError.intValue
+        leaveLobby(lobbyId).statusCode shouldBe ok
+        leaveLobby(lobbyId).statusCode shouldBe nok
 
         fetchAndParseLobby(lobbyId).userIds shouldEqual List(usernames(0))
 
         auth(0)
-        leaveLobby(lobbyId).statusCode shouldBe StatusCodes.OK.intValue
-        leaveLobby(lobbyId).statusCode shouldBe StatusCodes.InternalServerError.intValue
+        leaveLobby(lobbyId).statusCode shouldBe ok
+        leaveLobby(lobbyId).statusCode shouldBe nok
 
         fetchAndParseLobby(lobbyId).userIds shouldEqual List()
       }
@@ -99,10 +99,10 @@ class WSLobbySpec extends WSTrait
         val lobbyId = createLobby(lobbyName).body
 
         // user that creates the lobby joins it automatically
-        joinLobby(lobbyId).statusCode shouldBe StatusCodes.InternalServerError.intValue
+        joinLobby(lobbyId).statusCode shouldBe nok
         auth(1)
-        joinLobby(lobbyId).statusCode shouldBe StatusCodes.OK.intValue
-        joinLobby(lobbyId).statusCode shouldBe StatusCodes.InternalServerError.intValue
+        joinLobby(lobbyId).statusCode shouldBe ok
+        joinLobby(lobbyId).statusCode shouldBe nok
       }
     }
 
@@ -112,10 +112,10 @@ class WSLobbySpec extends WSTrait
         val lobbyId = createLobby(lobbyName).body
 
         // user that creates the lobby joins it automatically
-        leaveLobby(lobbyId).statusCode shouldBe StatusCodes.OK.intValue
-        leaveLobby(lobbyId).statusCode shouldBe StatusCodes.InternalServerError.intValue
+        leaveLobby(lobbyId).statusCode shouldBe ok
+        leaveLobby(lobbyId).statusCode shouldBe nok
         auth(1)
-        leaveLobby(lobbyId).statusCode shouldBe StatusCodes.InternalServerError.intValue
+        leaveLobby(lobbyId).statusCode shouldBe nok
       }
     }
 
@@ -126,7 +126,7 @@ class WSLobbySpec extends WSTrait
         val lobbyId = createLobby(lobbyName).body
 
         hexMapNames.foreach { hexMapName =>
-          setHexMap(lobbyId, hexMapName).statusCode shouldBe StatusCodes.OK.intValue
+          setHexMap(lobbyId, hexMapName).statusCode shouldBe ok
           fetchAndParseLobby(lobbyId).chosenHexMapName shouldEqual Some(hexMapName)
         }
       }
@@ -137,7 +137,7 @@ class WSLobbySpec extends WSTrait
       withLobbyWS {
         auth(0)
         val lobbyId = createLobby(lobbyName).body
-        setHexMap(lobbyId, hexMapName).statusCode shouldBe StatusCodes.InternalServerError.intValue
+        setHexMap(lobbyId, hexMapName).statusCode shouldBe nok
       }
     }
 
@@ -174,7 +174,7 @@ class WSLobbySpec extends WSTrait
         val lobbyId = createLobby(lobbyName).body
 
         numberOfBansList.foreach { b =>
-          setNumberOfBans(lobbyId, b).statusCode shouldBe StatusCodes.InternalServerError.intValue
+          setNumberOfBans(lobbyId, b).statusCode shouldBe nok
         }
       }
     }
@@ -199,7 +199,7 @@ class WSLobbySpec extends WSTrait
         val lobbyId = createLobby(lobbyName).body
 
         numberOfCharactersList.foreach { n =>
-          setNumberOfCharacters(lobbyId, n).statusCode shouldBe StatusCodes.InternalServerError.intValue
+          setNumberOfCharacters(lobbyId, n).statusCode shouldBe nok
         }
       }
     }
@@ -209,7 +209,7 @@ class WSLobbySpec extends WSTrait
       withLobbyWS {
         auth(0)
         val lobbyId = createLobby(lobbyName).body
-        setLobbyName(lobbyId, lobbyName2).statusCode shouldBe StatusCodes.OK.intValue
+        setLobbyName(lobbyId, lobbyName2).statusCode shouldBe ok
         fetchAndParseLobby(lobbyId).name shouldBe Some(lobbyName2)
       }
     }
@@ -223,7 +223,7 @@ class WSLobbySpec extends WSTrait
         auth(1)
         joinLobby(lobbyId)
         auth(0)
-        startGame(lobbyId).statusCode shouldBe StatusCodes.OK.intValue
+        startGame(lobbyId).statusCode shouldBe ok
 
         Get(s"/api/state/$lobbyId") ~> routes ~> check {
           val gameState = responseAs[GameState]
@@ -253,7 +253,7 @@ class WSLobbySpec extends WSTrait
         auth(1)
         joinLobby(lobbyId)
         auth(0)
-        startGame(lobbyId).statusCode shouldBe StatusCodes.OK.intValue
+        startGame(lobbyId).statusCode shouldBe ok
         Get(s"/api/state/$lobbyId") ~> routes ~> check {
           val gameState = responseAs[GameState]
           gameState.gamePhase shouldEqual GamePhase.CharacterPick
@@ -273,7 +273,7 @@ class WSLobbySpec extends WSTrait
         auth(1)
         joinLobby(lobbyId)
         auth(0)
-        startGame(lobbyId).statusCode shouldBe StatusCodes.InternalServerError.intValue
+        startGame(lobbyId).statusCode shouldBe nok
       }
     }
 
@@ -282,10 +282,10 @@ class WSLobbySpec extends WSTrait
       withLobbyWS {
         auth(0)
         val lobbyId = createLobby(lobbyName).body
-        setHexMap(lobbyId, hexMapName).statusCode shouldBe StatusCodes.OK.intValue
-        startGame(lobbyId).statusCode shouldBe StatusCodes.InternalServerError.intValue
+        setHexMap(lobbyId, hexMapName).statusCode shouldBe ok
+        startGame(lobbyId).statusCode shouldBe nok
         leaveLobby(lobbyId)
-        startGame(lobbyId).statusCode shouldBe StatusCodes.InternalServerError.intValue
+        startGame(lobbyId).statusCode shouldBe nok
       }
     }
 
@@ -298,15 +298,15 @@ class WSLobbySpec extends WSTrait
       }
 
       withLobbyWS {
-        setHexMap(lobbyId, "Linia").statusCode shouldBe StatusCodes.Unauthorized.intValue
-        setPickType(lobbyId, PickType.AllRandom).statusCode shouldBe StatusCodes.Unauthorized.intValue
-        setNumberOfBans(lobbyId, 3).statusCode shouldBe StatusCodes.Unauthorized.intValue
-        setNumberOfCharacters(lobbyId, 4).statusCode shouldBe StatusCodes.Unauthorized.intValue
+        setHexMap(lobbyId, "Linia").statusCode shouldBe unauthorized
+        setPickType(lobbyId, PickType.AllRandom).statusCode shouldBe unauthorized
+        setNumberOfBans(lobbyId, 3).statusCode shouldBe unauthorized
+        setNumberOfCharacters(lobbyId, 4).statusCode shouldBe unauthorized
         auth(1)
-        setHexMap(lobbyId, "Linia").statusCode shouldBe StatusCodes.InternalServerError.intValue
-        setPickType(lobbyId, PickType.AllRandom).statusCode shouldBe StatusCodes.InternalServerError.intValue
-        setNumberOfBans(lobbyId, 3).statusCode shouldBe StatusCodes.InternalServerError.intValue
-        setNumberOfCharacters(lobbyId, 4).statusCode shouldBe StatusCodes.InternalServerError.intValue
+        setHexMap(lobbyId, "Linia").statusCode shouldBe nok
+        setPickType(lobbyId, PickType.AllRandom).statusCode shouldBe nok
+        setNumberOfBans(lobbyId, 3).statusCode shouldBe nok
+        setNumberOfCharacters(lobbyId, 4).statusCode shouldBe nok
       }
     }
 
@@ -319,14 +319,14 @@ class WSLobbySpec extends WSTrait
         auth(1)
         joinLobby(lobbyId)
         auth(0)
-        startGame(lobbyId).statusCode shouldBe StatusCodes.OK.intValue
+        startGame(lobbyId).statusCode shouldBe ok
 
-        setHexMap(lobbyId, hexMapName).statusCode shouldBe StatusCodes.InternalServerError.intValue
-        startGame(lobbyId).statusCode shouldBe StatusCodes.InternalServerError.intValue
-        leaveLobby(lobbyId).statusCode shouldBe StatusCodes.InternalServerError.intValue
-        setPickType(lobbyId, PickType.AllRandom).statusCode shouldBe StatusCodes.InternalServerError.intValue
-        setNumberOfCharacters(lobbyId, 3).statusCode shouldBe StatusCodes.InternalServerError.intValue
-        setNumberOfBans(lobbyId, 4).statusCode shouldBe StatusCodes.InternalServerError.intValue
+        setHexMap(lobbyId, hexMapName).statusCode shouldBe nok
+        startGame(lobbyId).statusCode shouldBe nok
+        leaveLobby(lobbyId).statusCode shouldBe nok
+        setPickType(lobbyId, PickType.AllRandom).statusCode shouldBe nok
+        setNumberOfCharacters(lobbyId, 3).statusCode shouldBe nok
+        setNumberOfBans(lobbyId, 4).statusCode shouldBe nok
       }
     }
 
@@ -341,18 +341,18 @@ class WSLobbySpec extends WSTrait
       withLobbyWS {
         auth(0)
         val lobbyId = createLobby(lobbyName).body
-        setHexMap(lobbyId, hexMapName).statusCode shouldBe StatusCodes.OK.intValue
-        setPickType(lobbyId, pickType).statusCode shouldBe StatusCodes.OK.intValue
-        setNumberOfBans(lobbyId, numberOfBans).statusCode shouldBe StatusCodes.OK.intValue
-        setNumberOfCharacters(lobbyId, numberOfCharacters).statusCode shouldBe StatusCodes.OK.intValue
+        setHexMap(lobbyId, hexMapName).statusCode shouldBe ok
+        setPickType(lobbyId, pickType).statusCode shouldBe ok
+        setNumberOfBans(lobbyId, numberOfBans).statusCode shouldBe ok
+        setNumberOfCharacters(lobbyId, numberOfCharacters).statusCode shouldBe ok
         for (i <- 1 until numberOfPlayers) {
           auth(i)
-          joinLobby(lobbyId).statusCode shouldBe StatusCodes.OK.intValue
+          joinLobby(lobbyId).statusCode shouldBe ok
         }
         auth(0)
-        startGame(lobbyId).statusCode shouldBe StatusCodes.InternalServerError.intValue
+        startGame(lobbyId).statusCode shouldBe nok
         leaveLobby(lobbyId)
-        startGame(lobbyId).statusCode shouldBe StatusCodes.OK.intValue
+        startGame(lobbyId).statusCode shouldBe ok
       }
     }
   }

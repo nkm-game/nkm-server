@@ -30,7 +30,7 @@ class WSGameSpec extends WSTrait {
 
     "allow authenticating" in {
       withGameWS {
-        auth(0).statusCode shouldBe StatusCodes.OK.intValue
+        auth(0).statusCode shouldBe ok
       }
     }
 
@@ -51,17 +51,17 @@ class WSGameSpec extends WSTrait {
         authL(1)
         joinLobby(gameId)
         authL(0)
-        startGame(gameId).statusCode shouldBe StatusCodes.OK.intValue
+        startGame(gameId).statusCode shouldBe ok
       }
 
       withGameWS {
         auth(0)
-        observe(gameId).statusCode shouldBe StatusCodes.OK.intValue
-        surrender(gameId).statusCode shouldBe StatusCodes.OK.intValue
+        observe(gameId).statusCode shouldBe ok
+        surrender(gameId).statusCode shouldBe ok
 
         val observedResponse = fetchResponse()
         observedResponse.gameResponseType shouldBe GameResponseType.State
-        observedResponse.statusCode shouldBe StatusCodes.OK.intValue
+        observedResponse.statusCode shouldBe ok
       }
     }
 
@@ -84,7 +84,7 @@ class WSGameSpec extends WSTrait {
         authL(2)
         joinLobby(gameId)
         authL(0)
-        startGame(gameId).statusCode shouldBe StatusCodes.OK.intValue
+        startGame(gameId).statusCode shouldBe ok
       }
 
       withGameWS {
@@ -98,7 +98,7 @@ class WSGameSpec extends WSTrait {
           gameState.players(2).victoryStatus shouldBe VictoryStatus.Pending
         }
 
-        surrender(gameId).statusCode shouldBe StatusCodes.OK.intValue
+        surrender(gameId).statusCode shouldBe ok
 
         {
           val gameState = fetchAndParseGame(gameId)
@@ -107,9 +107,9 @@ class WSGameSpec extends WSTrait {
           gameState.players(1).victoryStatus shouldBe VictoryStatus.Drawn
           gameState.players(2).victoryStatus shouldBe VictoryStatus.Drawn
         }
-        surrender(gameId).statusCode shouldBe StatusCodes.InternalServerError.intValue
+        surrender(gameId).statusCode shouldBe nok
         auth(1)
-        surrender(gameId).statusCode shouldBe StatusCodes.InternalServerError.intValue
+        surrender(gameId).statusCode shouldBe nok
       }
     }
 
@@ -132,7 +132,7 @@ class WSGameSpec extends WSTrait {
         authL(2)
         joinLobby(gameId)
         authL(0)
-        startGame(gameId).statusCode shouldBe StatusCodes.OK.intValue
+        startGame(gameId).statusCode shouldBe ok
       }
 
       withGameWS {
@@ -146,7 +146,7 @@ class WSGameSpec extends WSTrait {
           gameState.players(2).victoryStatus shouldBe VictoryStatus.Pending
         }
 
-        surrender(gameId).statusCode shouldBe StatusCodes.OK.intValue
+        surrender(gameId).statusCode shouldBe ok
 
         {
           val gameState = fetchAndParseGame(gameId)
@@ -156,7 +156,7 @@ class WSGameSpec extends WSTrait {
         }
 
         auth(1)
-        surrender(gameId).statusCode shouldBe StatusCodes.OK.intValue
+        surrender(gameId).statusCode shouldBe ok
 
         {
           val gameState = fetchAndParseGame(gameId)
@@ -186,23 +186,23 @@ class WSGameSpec extends WSTrait {
         authL(2)
         joinLobby(gameId)
         authL(0)
-        startGame(gameId).statusCode shouldBe StatusCodes.OK.intValue
+        startGame(gameId).statusCode shouldBe ok
       }
 
       withGameWS {
         auth(0)
         val availableCharacters = fetchAndParseGame(gameId).draftPickState.get.config.availableCharacters
 
-        ban(gameId, availableCharacters).statusCode shouldBe StatusCodes.InternalServerError.intValue
-        ban(gameId, Set()).statusCode shouldBe StatusCodes.OK.intValue
-        ban(gameId, Set()).statusCode shouldBe StatusCodes.InternalServerError.intValue
+        ban(gameId, availableCharacters).statusCode shouldBe nok
+        ban(gameId, Set()).statusCode shouldBe ok
+        ban(gameId, Set()).statusCode shouldBe nok
 
         auth(1)
-        ban(gameId, Set(availableCharacters.head, availableCharacters.tail.head)).statusCode shouldBe StatusCodes.OK.intValue
-        ban(gameId, Set()).statusCode shouldBe StatusCodes.InternalServerError.intValue
+        ban(gameId, Set(availableCharacters.head, availableCharacters.tail.head)).statusCode shouldBe ok
+        ban(gameId, Set()).statusCode shouldBe nok
 
         auth(2)
-        ban(gameId, Set(availableCharacters.head)).statusCode shouldBe StatusCodes.OK.intValue
+        ban(gameId, Set(availableCharacters.head)).statusCode shouldBe ok
 
         fetchAndParseGame(gameId).draftPickState.get.pickPhase shouldBe DraftPickPhase.Picking
       }
@@ -227,31 +227,31 @@ class WSGameSpec extends WSTrait {
         authL(2)
         joinLobby(gameId)
         authL(0)
-        startGame(gameId).statusCode shouldBe StatusCodes.OK.intValue
+        startGame(gameId).statusCode shouldBe ok
       }
 
       withGameWS {
         auth(0)
         val availableCharacters = fetchAndParseGame(gameId).draftPickState.get.config.availableCharacters.toSeq
 
-        pick(gameId, availableCharacters(0)).statusCode shouldBe StatusCodes.OK.intValue
-        pick(gameId, availableCharacters(0)).statusCode shouldBe StatusCodes.InternalServerError.intValue
-        pick(gameId, availableCharacters(1)).statusCode shouldBe StatusCodes.InternalServerError.intValue
+        pick(gameId, availableCharacters(0)).statusCode shouldBe ok
+        pick(gameId, availableCharacters(0)).statusCode shouldBe nok
+        pick(gameId, availableCharacters(1)).statusCode shouldBe nok
 
         auth(1)
-        pick(gameId, availableCharacters(0)).statusCode shouldBe StatusCodes.InternalServerError.intValue
-        pick(gameId, availableCharacters(1)).statusCode shouldBe StatusCodes.OK.intValue
+        pick(gameId, availableCharacters(0)).statusCode shouldBe nok
+        pick(gameId, availableCharacters(1)).statusCode shouldBe ok
 
         auth(2)
-        pick(gameId, availableCharacters(2)).statusCode shouldBe StatusCodes.OK.intValue
-        pick(gameId, availableCharacters(3)).statusCode shouldBe StatusCodes.OK.intValue
+        pick(gameId, availableCharacters(2)).statusCode shouldBe ok
+        pick(gameId, availableCharacters(3)).statusCode shouldBe ok
 
         auth(1)
-        pick(gameId, availableCharacters(4)).statusCode shouldBe StatusCodes.OK.intValue
+        pick(gameId, availableCharacters(4)).statusCode shouldBe ok
 
         auth(0)
-        pick(gameId, availableCharacters(5)).statusCode shouldBe StatusCodes.OK.intValue
-        pick(gameId, availableCharacters(6)).statusCode shouldBe StatusCodes.InternalServerError.intValue
+        pick(gameId, availableCharacters(5)).statusCode shouldBe ok
+        pick(gameId, availableCharacters(6)).statusCode shouldBe nok
 
         val gameState = fetchAndParseGame(gameId)
         gameState.draftPickState.get.pickPhase shouldBe DraftPickPhase.Finished

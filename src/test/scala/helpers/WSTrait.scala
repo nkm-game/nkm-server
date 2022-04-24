@@ -2,7 +2,6 @@ package helpers
 
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.testkit.WSProbe
-import com.tosware.NKM.DBManager
 import com.tosware.NKM.models.game.NKMCharacterMetadata.CharacterMetadataId
 import com.tosware.NKM.models.game._
 import com.tosware.NKM.models.game.ws._
@@ -16,6 +15,10 @@ trait WSTrait extends UserApiTrait {
   val wsPrefix = "/ws"
   val wsLobbyUri = s"$wsPrefix/lobby"
   val wsGameUri = s"$wsPrefix/game"
+
+  val ok = StatusCodes.OK.intValue
+  val nok = StatusCodes.InternalServerError.intValue
+  val unauthorized = StatusCodes.Unauthorized.intValue
 
   def withWS[T](wsUri: String, body: => T): T = {
     wsClient = WSProbe()
