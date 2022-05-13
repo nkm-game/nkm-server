@@ -1,6 +1,6 @@
 package com.tosware.NKM.models.lobby
 
-import com.tosware.NKM.models.game.PickType
+import com.tosware.NKM.models.game.{ClockConfig, PickType}
 import com.tosware.NKM.models.game.PickType.AllRandom
 
 import java.time.LocalDateTime
@@ -15,6 +15,7 @@ case class LobbyState(
                       pickType: PickType = AllRandom,
                       numberOfCharactersPerPlayer: Int = 1,
                       numberOfBans: Int = 0,
+                      clockConfig: ClockConfig = ClockConfig.empty(),
                      )
 {
   def created(): Boolean = creationDate.isDefined

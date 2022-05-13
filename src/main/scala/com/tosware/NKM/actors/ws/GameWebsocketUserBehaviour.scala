@@ -4,7 +4,6 @@ import akka.actor.ActorRef
 import akka.http.scaladsl.model.StatusCodes
 import com.tosware.NKM.models.CommandResponse.{CommandResponse, Failure, Success}
 import com.tosware.NKM.models.game.ws._
-import com.tosware.NKM.models.lobby.ws.{GetLobbyRequest, LobbyResponseType, WebsocketLobbyResponse}
 import com.tosware.NKM.services.GameService
 import com.tosware.NKM.services.http.directives.JwtSecretKey
 import spray.json._

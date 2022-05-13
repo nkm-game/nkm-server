@@ -140,7 +140,7 @@ class WSGameSpec extends WSTrait {
 
         {
           val gameState = fetchAndParseGame(gameId)
-          gameState.gamePhase shouldBe GamePhase.CharacterPlacing
+          gameState.gamePhase shouldBe GamePhase.CharacterPicked
           gameState.players(0).victoryStatus shouldBe VictoryStatus.Pending
           gameState.players(1).victoryStatus shouldBe VictoryStatus.Pending
           gameState.players(2).victoryStatus shouldBe VictoryStatus.Pending
@@ -255,7 +255,7 @@ class WSGameSpec extends WSTrait {
 
         val gameState = fetchAndParseGame(gameId)
         gameState.draftPickState.get.pickPhase shouldBe DraftPickPhase.Finished
-        gameState.gamePhase shouldBe GamePhase.CharacterPlacing
+        gameState.gamePhase shouldBe GamePhase.CharacterPicked
       }
     }
 
@@ -296,7 +296,7 @@ class WSGameSpec extends WSTrait {
 
         val gameState = fetchAndParseGame(gameId)
         gameState.blindPickState.get.pickPhase shouldBe BlindPickPhase.Finished
-        gameState.gamePhase shouldBe GamePhase.CharacterPlacing
+        gameState.gamePhase shouldBe GamePhase.CharacterPicked
       }
     }
   }

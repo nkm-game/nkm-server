@@ -7,4 +7,5 @@ case class GameStartDependencies(
                                   numberOfBansPerPlayer: Int,
                                   numberOfCharactersPerPlayer: Int,
                                   charactersMetadata: Set[NKMCharacterMetadata],
+                                  clockConfig: ClockConfig,
                                 )

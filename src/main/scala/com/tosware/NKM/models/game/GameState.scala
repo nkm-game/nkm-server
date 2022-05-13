@@ -10,6 +10,7 @@ import com.tosware.NKM.models.game.draftpick._
 import scala.util.Random
 
 case class GameState(id: String,
+                     charactersMetadata: Set[NKMCharacterMetadata],
                      hexMap: Option[HexMap],
                      characterIdsOutsideMap: Seq[CharacterId],
                      phase: Phase,
@@ -21,22 +22,25 @@ case class GameState(id: String,
                      numberOfCharactersPerPlayers: Int,
                      draftPickState: Option[DraftPickState],
                      blindPickState: Option[BlindPickState],
+                     clock: Clock,
                     ) {
   def getCurrentPlayerNumber: Int = turn.number % players.length
 
   def getCurrentPlayer: Player = players(getCurrentPlayerNumber)
 
-  def startGame(g: GameStartDependencies)(implicit random: Random): GameState = {
+  def startGame(g: GameStartDependencies): GameState = {
     copy(
+      charactersMetadata = g.charactersMetadata,
       players = g.players,
       hexMap = Some(g.hexMap),
       pickType = g.pickType,
       numberOfBans = g.numberOfBansPerPlayer,
       numberOfCharactersPerPlayers = g.numberOfCharactersPerPlayer,
-      gamePhase = GamePhase.CharacterPick,
+      gamePhase = if(g.pickType == PickType.AllRandom) GamePhase.CharacterPicked else GamePhase.CharacterPick,
       draftPickState = if (g.pickType == PickType.DraftPick) Some(DraftPickState.empty(DraftPickConfig.generate(g))) else None,
       blindPickState = if (g.pickType == PickType.BlindPick) Some(BlindPickState.empty(BlindPickConfig.generate(g))) else None,
-    ).placeCharactersRandomlyIfAllRandom(g.charactersMetadata)
+      clock = Clock.fromConfig(g.clockConfig),
+    )
   }
 
   def placeCharactersRandomlyIfAllRandom(charactersMetadata: Set[NKMCharacterMetadata])(implicit random: Random): GameState = {
@@ -46,7 +50,7 @@ case class GameState(id: String,
         val (player, characters) = x
         player.copy(characters = characters.map(c => NKMCharacter.fromMetadata(java.util.UUID.nameUUIDFromBytes(random.nextBytes(16)).toString, c)).toList)
       })
-      copy(gamePhase = GamePhase.CharacterPlacing, players = playersWithAssignedCharacters, characterIdsOutsideMap = playersWithAssignedCharacters.flatMap(c => c.characters.map(c => c.id)))
+      copy(gamePhase = GamePhase.Running, players = playersWithAssignedCharacters, characterIdsOutsideMap = playersWithAssignedCharacters.flatMap(c => c.characters.map(c => c.id)))
     } else this
   }
 
@@ -69,8 +73,12 @@ case class GameState(id: String,
     val blindPickFinished = blindPickState.fold(false)(_.pickPhase == BlindPickPhase.Finished)
 
     if(draftPickFinished || blindPickFinished) {
-      this.modify(_.gamePhase).setTo(GamePhase.CharacterPlacing)
+      this.modify(_.gamePhase).setTo(GamePhase.CharacterPicked)
     } else this
+  }
+
+  def startPlacingCharacters()(implicit random: Random): GameState = {
+    this.modify(_.gamePhase).setTo(GamePhase.CharacterPlacing).placeCharactersRandomlyIfAllRandom(charactersMetadata)
   }
 
   def surrender(playerId: PlayerId): GameState = {
@@ -114,16 +122,18 @@ case class GameState(id: String,
 object GameState {
   def empty(id: String): GameState = GameState(
     id = id,
+    charactersMetadata = Set(),
     hexMap = None,
-    characterIdsOutsideMap = List(),
+    characterIdsOutsideMap = Seq(),
     phase = Phase(0),
     turn = Turn(0),
-    players = List(),
+    players = Seq(),
     gamePhase = GamePhase.NotStarted,
     pickType = PickType.AllRandom,
     numberOfBans = 0,
     numberOfCharactersPerPlayers = 1,
-    None,
-    None,
+    draftPickState = None,
+    blindPickState = None,
+    clock = Clock.empty(),
   )
 }

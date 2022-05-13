@@ -8,8 +8,11 @@ import com.tosware.NKM.models.game.NKMCharacter.CharacterId
 import com.tosware.NKM.models.game.NKMCharacterMetadata.CharacterMetadataId
 import com.tosware.NKM.models.game.Player.PlayerId
 import com.tosware.NKM.models.game._
+import com.tosware.NKM.models.game.blindpick.BlindPickPhase
+import com.tosware.NKM.models.game.draftpick.DraftPickPhase
 import com.tosware.NKM.services.NKMDataService
 
+import scala.concurrent.duration._
 import scala.util.Random
 
 object Game {
@@ -33,6 +36,13 @@ object Game {
 
   case class MoveCharacter(hexCoordinates: HexCoordinates, characterId: CharacterId) extends Command
 
+  // sent only by self /////////
+  //
+  case class CharacterSelectTimeout(pickNumber: Int) extends Command
+
+  case class EndTurnTimeout(turnNumber: Int) extends Command
+  //////////////////////////////
+
   sealed trait Event {
     val id: String
   }
@@ -45,11 +55,14 @@ object Game {
 
   case class CharacterPicked(id: String, playerId: PlayerId, characterId: CharacterMetadataId) extends Event
 
+  case class PlacingCharactersStarted(id: String) extends Event
+
   case class CharacterPlaced(id: String, hexCoordinates: HexCoordinates, characterId: CharacterId) extends Event
 
   case class CharactersBlindPicked(id: String, playerId: PlayerId, characterId: Set[CharacterMetadataId]) extends Event
 
   case class CharacterMoved(id: String, hexCoordinates: HexCoordinates, characterId: CharacterId) extends Event
+
 
   def props(id: String)(implicit NKMDataService: NKMDataService): Props = Props(new Game(id))
 }
@@ -57,6 +70,7 @@ object Game {
 class Game(id: String)(implicit NKMDataService: NKMDataService) extends PersistentActor with ActorLogging {
 
   import Game._
+  import context.dispatcher
 
   var gameState: GameState = GameState.empty(id)
   implicit val random: Random = new Random(id.hashCode)
@@ -80,6 +94,45 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
           persistAndPublish(e) { _ =>
             gameState = gameState.startGame(gameStartDependencies)
             sender() ! Success()
+            val timeoutTime = gameState.pickType match {
+              case PickType.AllRandom => gameState.clock.config.timeAfterPickMillis.millis
+              case PickType.DraftPick => gameState.clock.config.maxBanTimeMillis.millis
+              case PickType.BlindPick => gameState.clock.config.maxBanTimeMillis.millis
+            }
+            context.system.scheduler.scheduleOnce(timeoutTime) {
+              self ! CharacterSelectTimeout(0)
+            }
+          }
+      }
+    case CharacterSelectTimeout(pickNumber) =>
+      val placingStartedEvent = PlacingCharactersStarted(id)
+      gameState.pickType match {
+        case PickType.AllRandom =>
+          persistAndPublish(placingStartedEvent) { _ =>
+            gameState = gameState.startPlacingCharacters()
+          }
+        case PickType.DraftPick =>
+          val draftPickState = gameState.draftPickState.get
+          if (draftPickState.pickNumber == pickNumber) {
+            draftPickState.pickPhase match {
+              case DraftPickPhase.Banning => ??? // ban nothing by all players that didn't ban
+              case DraftPickPhase.Picking => ??? // surrender player that didn't pick
+              case DraftPickPhase.Finished =>
+                persistAndPublish(placingStartedEvent) { _ =>
+                  gameState = gameState.startPlacingCharacters()
+                }
+            }
+          }
+        case PickType.BlindPick =>
+          val blindPickState = gameState.blindPickState.get
+          if (blindPickState.pickNumber == pickNumber) {
+            blindPickState.pickPhase match {
+              case BlindPickPhase.Picking => // surrender players that didn't pick
+              case BlindPickPhase.Finished =>
+                persistAndPublish(placingStartedEvent) { _ =>
+                  gameState = gameState.startPlacingCharacters()
+                }
+            }
           }
       }
     case Surrender(playerId) =>

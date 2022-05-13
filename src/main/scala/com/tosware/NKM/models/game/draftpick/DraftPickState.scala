@@ -45,6 +45,12 @@ case class DraftPickState(config: DraftPickConfig,
     DraftPickPhase.Picking
   } else DraftPickPhase.Finished
 
+  def pickNumber: Int = pickPhase match {
+    case DraftPickPhase.Banning => 0
+    case DraftPickPhase.Picking => 1 + pickedCharacters.size
+    case DraftPickPhase.Finished => 1 + pickedCharacters.size + 1
+  }
+
   def validateBan(playerId: PlayerId, characters: Set[CharacterMetadataId]): Boolean = {
     if (!characters.forall(config.availableCharacters.contains)) return false
     if (bans(playerId).isDefined) return false
@@ -66,6 +72,5 @@ case class DraftPickState(config: DraftPickConfig,
   def pick(playerId: PlayerId, character: CharacterMetadataId): DraftPickState = {
     copy(characterSelection = characterSelection.updated(playerId, characterSelection(playerId) :+ character))
   }
-
 }
 

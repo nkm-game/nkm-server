@@ -8,7 +8,7 @@ import com.tosware.NKM.NKMTimeouts
 import com.tosware.NKM.actors.NKMData.GetHexMaps
 import com.tosware.NKM.models.CommandResponse._
 import com.tosware.NKM.models.UserState.UserId
-import com.tosware.NKM.models.game.{GameStartDependencies, HexMap, PickType, Player}
+import com.tosware.NKM.models.game.{ClockConfig, GameStartDependencies, HexMap, PickType, Player}
 import com.tosware.NKM.models.lobby.LobbyState
 import com.tosware.NKM.services.NKMDataService
 
@@ -223,13 +223,22 @@ class Lobby(id: String)(implicit NKMDataService: NKMDataService)
       } else {
         val hexMaps = Await.result(nkmData ? GetHexMaps, atMost).asInstanceOf[List[HexMap]]
         log.info("Received game start request")
+        val players = lobbyState.userIds.map(i => Player(i))
+        val playerIds = players.map(_.name)
+        // TODO
+        val clockConfig = lobbyState.pickType match {
+          case PickType.AllRandom => ClockConfig.draftPickConfig(playerIds)
+          case PickType.DraftPick => ClockConfig.draftPickConfig(playerIds)
+          case PickType.BlindPick => ClockConfig.draftPickConfig(playerIds)
+        }
         val deps = GameStartDependencies(
-          players = lobbyState.userIds.map(i => Player(i)),
+          players = players,
           hexMap = hexMaps.filter(m => m.name == lobbyState.chosenHexMapName.get).head,
           pickType = lobbyState.pickType,
           numberOfBansPerPlayer = lobbyState.numberOfBans,
           numberOfCharactersPerPlayer = lobbyState.numberOfCharactersPerPlayer,
-          NKMDataService.getCharactersMetadata.toSet
+          NKMDataService.getCharactersMetadata.toSet,
+          clockConfig = clockConfig
         )
         val r = Await.result(gameActor ? Game.StartGame(deps), atMost).asInstanceOf[CommandResponse]
         sender() ! r
