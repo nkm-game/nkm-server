@@ -226,6 +226,9 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
     case CharactersBlindPicked(_, playerId, characterIds) =>
       gameState = gameState.blindPick(playerId, characterIds)
       log.debug(s"Recovered $playerId blind pick")
+    case PlacingCharactersStarted(_) =>
+      gameState = gameState.startPlacingCharacters()
+      log.debug(s"Recovered start of character placing")
     case CharacterPlaced(_, hexCoordinates, characterId) =>
       gameState = gameState.placeCharacter(hexCoordinates, characterId)
       log.debug(s"Recovered $characterId on $hexCoordinates")
