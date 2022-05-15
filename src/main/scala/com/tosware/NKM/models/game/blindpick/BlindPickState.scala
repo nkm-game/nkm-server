@@ -14,6 +14,8 @@ case class BlindPickState(
                            config: BlindPickConfig,
                            characterSelection: Map[PlayerId, Set[CharacterMetadataId]]
                          ) {
+  def pickingPlayers: Seq[PlayerId] = characterSelection.filter(_._2.size != config.numberOfCharactersPerPlayer).keys.toSeq
+
   def pickPhase: BlindPickPhase =
     if (characterSelection.values.exists(_.size != config.numberOfCharactersPerPlayer)) {
       BlindPickPhase.Picking

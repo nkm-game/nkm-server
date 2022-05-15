@@ -81,20 +81,29 @@ case class GameState(id: String,
     this.modify(_.gamePhase).setTo(GamePhase.CharacterPlacing).placeCharactersRandomlyIfAllRandom(charactersMetadata)
   }
 
-  def surrender(playerId: PlayerId): GameState = {
-    def filterPlayer: Player => Boolean = _.name == playerId
+  def surrender(playerIds: PlayerId*): GameState = {
+    def filterPlayers: Player => Boolean = p => playerIds.contains(p.name)
 
-    this.modify(_.players.eachWhere(filterPlayer).victoryStatus).setTo(VictoryStatus.Lost).checkVictoryStatus()
+    this.modify(_.players.eachWhere(filterPlayers).victoryStatus).setTo(VictoryStatus.Lost).checkVictoryStatus()
   }
 
   def ban(playerId: PlayerId, characterIds: Set[CharacterMetadataId]): GameState =
     copy(draftPickState = draftPickState.map(_.ban(playerId, characterIds)))
 
+  def finishBanningPhase(): GameState =
+    copy(draftPickState = draftPickState.map(_.finishBanning()))
+
   def pick(playerId: PlayerId, characterId: CharacterMetadataId): GameState =
     copy(draftPickState = draftPickState.map(_.pick(playerId, characterId))).checkIfCharacterPickFinished()
 
+  def draftPickTimeout(): GameState =
+    surrender(draftPickState.get.currentPlayerPicking.get)
+
   def blindPick(playerId: PlayerId, characterIds: Set[CharacterMetadataId]): GameState =
     copy(blindPickState = blindPickState.map(_.pick(playerId, characterIds))).checkIfCharacterPickFinished()
+
+  def blindPickTimeout(): GameState =
+    surrender(blindPickState.get.pickingPlayers: _*)
 
   def placeCharacter(targetCellCoordinates: HexCoordinates, characterId: CharacterId): GameState =
     this.modify(_.hexMap.each.cells.each).using {

@@ -15,7 +15,6 @@ case class DraftPickState(config: DraftPickConfig,
                           bans: Map[PlayerId, Option[Set[CharacterMetadataId]]],
                           characterSelection: Map[PlayerId, Seq[CharacterMetadataId]],
                          ) {
-
   def bannedCharacters: Set[CharacterMetadataId] = bans.values.flatten.flatten.toSet
 
   def pickedCharacters: Set[CharacterMetadataId] = characterSelection.values.flatten.toSet
@@ -62,7 +61,6 @@ case class DraftPickState(config: DraftPickConfig,
     copy(bans = bans.updated(playerId, Some(characters)))
   }
 
-
   def validatePick(playerId: PlayerId, character: CharacterMetadataId): Boolean = {
     if (!charactersAvailableToPick.contains(character)) return false
     if (!currentPlayerPicking.contains(playerId)) return false
@@ -72,5 +70,10 @@ case class DraftPickState(config: DraftPickConfig,
   def pick(playerId: PlayerId, character: CharacterMetadataId): DraftPickState = {
     copy(characterSelection = characterSelection.updated(playerId, characterSelection(playerId) :+ character))
   }
+
+  def finishBanning(): DraftPickState = {
+    copy(bans = bans.map { case (playerId, None) => playerId -> Some(Set()) })
+  }
+
 }
 
