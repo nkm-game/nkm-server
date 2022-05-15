@@ -4,8 +4,10 @@ import akka.http.scaladsl.testkit.WSProbe
 import com.tosware.NKM.models.game.blindpick.BlindPickPhase
 import com.tosware.NKM.models.game.draftpick.DraftPickPhase
 import com.tosware.NKM.models.game.ws._
-import com.tosware.NKM.models.game.{GamePhase, PickType, VictoryStatus}
+import com.tosware.NKM.models.game.{ClockConfig, GamePhase, PickType, VictoryStatus}
 import helpers.WSTrait
+
+import scala.concurrent.Await
 
 class WSGameSpec extends WSTrait {
   def sendRequest(request: WebsocketGameRequest)(implicit wsClient: WSProbe): Unit = sendRequestG(request)
@@ -297,6 +299,45 @@ class WSGameSpec extends WSTrait {
         val gameState = fetchAndParseGame(gameId)
         gameState.blindPickState.get.pickPhase shouldBe BlindPickPhase.Finished
         gameState.gamePhase shouldBe GamePhase.CharacterPicked
+      }
+    }
+
+    "handle blind pick timeout when nobody picks" in {
+      val lobbyName = "lobby_name"
+      val hexMapName = "1v1v1"
+      val pickType = PickType.BlindPick
+      val numberOfBans = 0
+      val numberOfCharacters = 2
+      val maxPickTimeMillis = 1
+      val clockConfig = ClockConfig.emptyDraftPickConfig.copy(maxPickTimeMillis = maxPickTimeMillis)
+      var gameId = ""
+      withLobbyWS {
+        authL(0)
+        gameId = createLobby(lobbyName).body
+        setHexMap(gameId, hexMapName)
+        setPickType(gameId, pickType)
+        setNumberOfBans(gameId, numberOfBans)
+        setNumberOfCharacters(gameId, numberOfCharacters)
+        setClockConfig(gameId, clockConfig)
+        authL(1)
+        joinLobby(gameId)
+        authL(2)
+        joinLobby(gameId)
+        authL(0)
+        startGame(gameId).statusCode shouldBe ok
+      }
+
+      withGameWS {
+        auth(0)
+
+        Thread.sleep(maxPickTimeMillis)
+
+        {
+          val gameState = fetchAndParseGame(gameId)
+          gameState.clock.config.maxPickTimeMillis shouldBe maxPickTimeMillis
+          gameState.blindPickState.get.pickPhase shouldBe BlindPickPhase.Picking
+          gameState.players.forall(_.victoryStatus == VictoryStatus.Lost) shouldBe true
+        }
       }
     }
   }

@@ -106,7 +106,7 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
             val timeoutTime = gameState.pickType match {
               case PickType.AllRandom => gameState.clock.config.timeAfterPickMillis.millis
               case PickType.DraftPick => gameState.clock.config.maxBanTimeMillis.millis
-              case PickType.BlindPick => gameState.clock.config.maxBanTimeMillis.millis
+              case PickType.BlindPick => gameState.clock.config.maxPickTimeMillis.millis
             }
             context.system.scheduler.scheduleOnce(timeoutTime) {
               self ! CharacterSelectTimeout(0)

@@ -243,12 +243,6 @@ class Lobby(id: String)(implicit NKMDataService: NKMDataService)
         log.info("Received game start request")
         val players = lobbyState.userIds.map(i => Player(i))
         val playerIds = players.map(_.name)
-        // TODO
-        val clockConfig = lobbyState.pickType match {
-          case PickType.AllRandom => ClockConfig.draftPickConfig(playerIds)
-          case PickType.DraftPick => ClockConfig.draftPickConfig(playerIds)
-          case PickType.BlindPick => ClockConfig.draftPickConfig(playerIds)
-        }
         val deps = GameStartDependencies(
           players = players,
           hexMap = hexMaps.filter(m => m.name == lobbyState.chosenHexMapName.get).head,
@@ -256,7 +250,7 @@ class Lobby(id: String)(implicit NKMDataService: NKMDataService)
           numberOfBansPerPlayer = lobbyState.numberOfBans,
           numberOfCharactersPerPlayer = lobbyState.numberOfCharactersPerPlayer,
           NKMDataService.getCharactersMetadata.toSet,
-          clockConfig = clockConfig
+          clockConfig = lobbyState.clockConfig
         )
         val r = Await.result(gameActor ? Game.StartGame(deps), atMost).asInstanceOf[CommandResponse]
         sender() ! r
