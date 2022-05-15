@@ -1,5 +1,6 @@
 package com.tosware.NKM.models.lobby.ws
 
+import com.tosware.NKM.models.game.ClockConfig
 import enumeratum.values.{StringEnum, StringEnumEntry}
 
 sealed abstract class LobbyResponseType(val value: String) extends StringEnumEntry
@@ -18,6 +19,7 @@ object LobbyResponseType extends StringEnum[LobbyResponseType] {
   case object SetNumberOfBans extends LobbyResponseType("set_number_of_bans")
   case object SetNumberOfCharacters extends LobbyResponseType("set_number_of_characters")
   case object SetLobbyName extends LobbyResponseType("set_lobby_name")
+  case object SetClockConfig extends LobbyResponseType("set_clock_config")
   case object StartGame extends LobbyResponseType("start_game")
 
   case object Error extends LobbyResponseType("error")

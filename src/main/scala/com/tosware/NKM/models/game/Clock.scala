@@ -5,7 +5,8 @@ import com.tosware.NKM.models.game.Player.PlayerId
 object ClockConfig {
   def empty(): ClockConfig =
     ClockConfig(Seq(), 0, 0, 0, 0, 0, 0)
-  def draftPickConfig(playerOrder: Seq[PlayerId]) = ClockConfig(playerOrder, 0, 30000, 0, 45000, 30000, 30000)
+  def emptyDraftPickConfig = ClockConfig(Seq(), 0, 30000, 0, 45000, 30000, 30000)
+  def draftPickConfig(playerOrder: Seq[PlayerId]) = emptyDraftPickConfig.copy(playerOrder = playerOrder)
 
 }
 

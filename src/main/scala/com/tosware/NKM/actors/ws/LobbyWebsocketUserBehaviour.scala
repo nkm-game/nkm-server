@@ -130,6 +130,13 @@ trait LobbyWebsocketUserBehaviour extends WebsocketUserBehaviour {
         val username = authStatus.username.get
         val response = lobbyService.setLobbyName(username, entity)
         resolveResponse(response)
+      case LobbyRoute.SetClockConfig =>
+        implicit val responseType: LobbyResponseType = LobbyResponseType.SetClockConfig
+        val entity = request.requestJson.parseJson.convertTo[SetClockConfigRequest]
+        if(authStatus.username.isEmpty) return unauthorized()
+        val username = authStatus.username.get
+        val response = lobbyService.setClockConfig(username, entity)
+        resolveResponse(response)
       case LobbyRoute.StartGame =>
         implicit val responseType: LobbyResponseType = LobbyResponseType.StartGame
         val entity = request.requestJson.parseJson.convertTo[StartGameRequest]

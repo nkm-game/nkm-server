@@ -111,6 +111,9 @@ trait WSTrait extends UserApiTrait {
   def setLobbyName(lobbyId: String, newName: String): WebsocketLobbyResponse =
     sendWSRequestL(LobbyRoute.SetLobbyName, SetLobbyNameRequest(lobbyId, newName).toJson.toString)
 
+  def setClockConfig(lobbyId: String, newConfig: ClockConfig): WebsocketLobbyResponse =
+    sendWSRequestL(LobbyRoute.SetClockConfig, SetClockConfigRequest(lobbyId, newConfig).toJson.toString)
+
   def startGame(lobbyId: String): WebsocketLobbyResponse =
     sendWSRequestL(LobbyRoute.StartGame, StartGameRequest(lobbyId).toJson.toString)
 

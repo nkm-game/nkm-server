@@ -16,7 +16,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Await, Future}
 
 class LobbyService(implicit db: JdbcBackend.Database, system: ActorSystem, NKMDataService: NKMDataService) extends NKMTimeouts {
-
   import com.tosware.NKM.models.CommandResponse._
 
   def createLobby(name: String, hostUserId: String): CommandResponse = {
@@ -119,6 +118,19 @@ class LobbyService(implicit db: JdbcBackend.Database, system: ActorSystem, NKMDa
     if (!lobbyState.hostUserId.contains(username)) return Failure("You are not the host")
 
     Await.result(lobbyActor ? Lobby.SetLobbyName(request.newName), atMost).asInstanceOf[CommandResponse]
+  }
+
+  def setClockConfig(username: String, request: SetClockConfigRequest): CommandResponse = {
+    val gameActor: ActorRef = system.actorOf(Game.props(request.lobbyId))
+    val gameState = Await.result(gameActor ? Game.GetState, atMost).asInstanceOf[GameState]
+    if (gameState.gamePhase != GamePhase.NotStarted) return Failure("Game is already started")
+
+    val lobbyActor: ActorRef = system.actorOf(Lobby.props(request.lobbyId))
+
+    val lobbyState = Await.result(lobbyActor ? Lobby.GetState, atMost).asInstanceOf[LobbyState]
+    if (!lobbyState.hostUserId.contains(username)) return Failure("You are not the host")
+
+    Await.result(lobbyActor ? Lobby.SetClockConfig(request.newConfig), atMost).asInstanceOf[CommandResponse]
   }
 
 

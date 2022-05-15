@@ -40,6 +40,8 @@ object Lobby {
 
   case class SetLobbyName(name: String) extends Command
 
+  case class SetClockConfig(clockConfig: ClockConfig) extends Command
+
   sealed trait Event {
     val id: String
   }
@@ -59,6 +61,8 @@ object Lobby {
   case class PickTypeSet(id: String, pickType: PickType) extends Event
 
   case class LobbyNameSet(id: String, name: String) extends Event
+
+  case class ClockConfigSet(id: String, clockConfig: ClockConfig) extends Event
 
   def props(id: String)(implicit NKMDataService: NKMDataService): Props = Props(new Lobby(id))
 }
@@ -106,6 +110,9 @@ class Lobby(id: String)(implicit NKMDataService: NKMDataService)
 
   def setLobbyName(name: String): Unit =
     lobbyState = lobbyState.copy(name = Some(name))
+
+  def setClockConfig(clockConfig: ClockConfig): Unit =
+    lobbyState = lobbyState.copy(clockConfig = clockConfig)
 
   def persistAndPublish[A](event: A)(handler: A => Unit): Unit = {
     context.system.eventStream.publish(event)
@@ -217,6 +224,17 @@ class Lobby(id: String)(implicit NKMDataService: NKMDataService)
           sender() ! Success()
         }
       }
+    case SetClockConfig(clockConfig) =>
+      if (!lobbyState.created()) {
+        sender() ! Failure("Lobby is not created")
+      } else {
+        val e = ClockConfigSet(id, clockConfig)
+        persistAndPublish(e) { _ =>
+          setClockConfig(clockConfig)
+          log.info(s"Set clock config: $clockConfig")
+          sender() ! Success()
+        }
+      }
     case StartGame =>
       if (!canStartGame()) {
         sender() ! Failure("Cannot start the game")
@@ -272,6 +290,9 @@ class Lobby(id: String)(implicit NKMDataService: NKMDataService)
     case LobbyNameSet(_, name) =>
       setLobbyName(name)
       log.debug(s"Recovered setting name")
+    case ClockConfigSet(_, clockConfig) =>
+      setClockConfig(clockConfig)
+      log.debug(s"Recovered setting clock config")
     case RecoveryCompleted =>
     case e => log.warning(s"Unknown message: $e")
   }
