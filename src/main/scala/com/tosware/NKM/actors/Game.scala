@@ -85,6 +85,7 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
   implicit val random: Random = new Random(id.hashCode)
 
   def persistAndPublish[A](event: A)(handler: A => Unit): Unit = {
+    log.warning("+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=" + event.toString)
     context.system.eventStream.publish(event)
     persist(event)(handler)
   }

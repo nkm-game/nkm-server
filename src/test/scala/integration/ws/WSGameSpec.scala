@@ -257,5 +257,31 @@ class WSGameSpec extends WSTrait {
         }
       }
     }
+
+    "handle blind pick timeout when one player does not pick" in {
+      val maxPickTimeMillis = 500
+      val numberOfCharacters = 3
+      val gameId = createLobbyForGame(
+        pickType = PickType.BlindPick,
+        numberOfCharacters = numberOfCharacters,
+        clockConfig = ClockConfig.emptyDraftPickConfig.copy(maxPickTimeMillis = maxPickTimeMillis),
+      )
+
+      withGameWS {
+        val availableCharacters = fetchAndParseGame(gameId).blindPickState.get.config.availableCharacters.toSeq
+        auth(0)
+        blindPick(gameId, availableCharacters.take(numberOfCharacters).toSet)
+
+        auth(2)
+        blindPick(gameId, availableCharacters.take(numberOfCharacters).toSet)
+
+        Thread.sleep(maxPickTimeMillis)
+
+        {
+          val gameState = fetchAndParseGame(gameId)
+          gameState.players.map(_.victoryStatus) shouldBe Seq(VictoryStatus.Drawn, VictoryStatus.Lost, VictoryStatus.Drawn)
+        }
+      }
+    }
   }
 }
