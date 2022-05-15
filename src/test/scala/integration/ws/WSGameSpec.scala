@@ -7,8 +7,6 @@ import com.tosware.NKM.models.game.ws._
 import com.tosware.NKM.models.game.{ClockConfig, GamePhase, PickType, VictoryStatus}
 import helpers.WSTrait
 
-import scala.concurrent.Await
-
 class WSGameSpec extends WSTrait {
   def sendRequest(request: WebsocketGameRequest)(implicit wsClient: WSProbe): Unit = sendRequestG(request)
 
@@ -19,6 +17,34 @@ class WSGameSpec extends WSTrait {
   def auth(tokenId: Int)(implicit wsClient: WSProbe): WebsocketGameResponse = authG(tokenId)
 
   def observe(lobbyId: String)(implicit wsClient: WSProbe): WebsocketGameResponse = observeG(lobbyId)
+
+  def createLobbyForGame(lobbyName: String = "lobby_name",
+                  hexMapName: String = "1v1v1",
+                  pickType: PickType = PickType.AllRandom,
+                  numberOfPlayers: Int = 3,
+                  numberOfBans: Int = 0,
+                  numberOfCharacters: Int = 2,
+                  clockConfig: ClockConfig = ClockConfig.emptyDraftPickConfig,
+  ): String = {
+    var gameId = ""
+    withLobbyWS {
+      authL(0)
+      gameId = createLobby(lobbyName).body
+      setHexMap(gameId, hexMapName)
+      setPickType(gameId, pickType)
+      setNumberOfBans(gameId, numberOfBans)
+      setNumberOfCharacters(gameId, numberOfCharacters)
+      setClockConfig(gameId, clockConfig)
+      for (i <- 1 until numberOfPlayers) {
+        authL(i)
+        joinLobby(gameId)
+      }
+      authL(0)
+      startGame(gameId).statusCode shouldBe ok
+    }
+    gameId
+  }
+
 
   "WS" must {
     "respond to invalid requests" in {
@@ -37,24 +63,7 @@ class WSGameSpec extends WSTrait {
     }
 
     "allow observing" in {
-      val lobbyName = "lobby_name"
-      val hexMapName = "Linia"
-      val pickType = PickType.DraftPick
-      val numberOfBans = 1
-      val numberOfCharacters = 4
-      var gameId = ""
-      withLobbyWS {
-        authL(0)
-        gameId = createLobby(lobbyName).body
-        setHexMap(gameId, hexMapName)
-        setPickType(gameId, pickType)
-        setNumberOfBans(gameId, numberOfBans)
-        setNumberOfCharacters(gameId, numberOfCharacters)
-        authL(1)
-        joinLobby(gameId)
-        authL(0)
-        startGame(gameId).statusCode shouldBe ok
-      }
+      val gameId = createLobbyForGame()
 
       withGameWS {
         auth(0)
@@ -68,26 +77,9 @@ class WSGameSpec extends WSTrait {
     }
 
     "allow surrendering during draft pick" in {
-      val lobbyName = "lobby_name"
-      val hexMapName = "1v1v1"
-      val pickType = PickType.DraftPick
-      val numberOfBans = 1
-      val numberOfCharacters = 4
-      var gameId = ""
-      withLobbyWS {
-        authL(0)
-        gameId = createLobby(lobbyName).body
-        setHexMap(gameId, hexMapName)
-        setPickType(gameId, pickType)
-        setNumberOfBans(gameId, numberOfBans)
-        setNumberOfCharacters(gameId, numberOfCharacters)
-        authL(1)
-        joinLobby(gameId)
-        authL(2)
-        joinLobby(gameId)
-        authL(0)
-        startGame(gameId).statusCode shouldBe ok
-      }
+      val gameId = createLobbyForGame(
+        pickType = PickType.DraftPick,
+      )
 
       withGameWS {
         auth(0)
@@ -116,33 +108,17 @@ class WSGameSpec extends WSTrait {
     }
 
     "allow surrendering during game" in {
-      val lobbyName = "lobby_name"
-      val hexMapName = "1v1v1"
-      val pickType = PickType.AllRandom
-      val numberOfBans = 0
-      val numberOfCharacters = 4
-      var gameId = ""
-      withLobbyWS {
-        authL(0)
-        gameId = createLobby(lobbyName).body
-        setHexMap(gameId, hexMapName)
-        setPickType(gameId, pickType)
-        setNumberOfBans(gameId, numberOfBans)
-        setNumberOfCharacters(gameId, numberOfCharacters)
-        authL(1)
-        joinLobby(gameId)
-        authL(2)
-        joinLobby(gameId)
-        authL(0)
-        startGame(gameId).statusCode shouldBe ok
-      }
+      val gameId = createLobbyForGame(
+        pickType = PickType.AllRandom,
+        clockConfig = ClockConfig.emptyDraftPickConfig.copy(timeAfterPickMillis = 1)
+      )
 
       withGameWS {
         auth(0)
 
         {
           val gameState = fetchAndParseGame(gameId)
-          gameState.gamePhase shouldBe GamePhase.CharacterPicked
+          gameState.gamePhase shouldBe GamePhase.Running
           gameState.players(0).victoryStatus shouldBe VictoryStatus.Pending
           gameState.players(1).victoryStatus shouldBe VictoryStatus.Pending
           gameState.players(2).victoryStatus shouldBe VictoryStatus.Pending
@@ -170,26 +146,12 @@ class WSGameSpec extends WSTrait {
     }
 
     "allow banning during draft pick" in {
-      val lobbyName = "lobby_name"
-      val hexMapName = "1v1v1"
-      val pickType = PickType.DraftPick
-      val numberOfBans = 2
-      val numberOfCharacters = 3
-      var gameId = ""
-      withLobbyWS {
-        authL(0)
-        gameId = createLobby(lobbyName).body
-        setHexMap(gameId, hexMapName)
-        setPickType(gameId, pickType)
-        setNumberOfBans(gameId, numberOfBans)
-        setNumberOfCharacters(gameId, numberOfCharacters)
-        authL(1)
-        joinLobby(gameId)
-        authL(2)
-        joinLobby(gameId)
-        authL(0)
-        startGame(gameId).statusCode shouldBe ok
-      }
+      val gameId = createLobbyForGame(
+        pickType = PickType.DraftPick,
+        numberOfPlayers = 3,
+        numberOfBans = 2,
+        numberOfCharacters = 2,
+      )
 
       withGameWS {
         auth(0)
@@ -211,26 +173,12 @@ class WSGameSpec extends WSTrait {
     }
 
     "allow picking during draft pick" in {
-      val lobbyName = "lobby_name"
-      val hexMapName = "1v1v1"
-      val pickType = PickType.DraftPick
-      val numberOfBans = 0
-      val numberOfCharacters = 2
-      var gameId = ""
-      withLobbyWS {
-        authL(0)
-        gameId = createLobby(lobbyName).body
-        setHexMap(gameId, hexMapName)
-        setPickType(gameId, pickType)
-        setNumberOfBans(gameId, numberOfBans)
-        setNumberOfCharacters(gameId, numberOfCharacters)
-        authL(1)
-        joinLobby(gameId)
-        authL(2)
-        joinLobby(gameId)
-        authL(0)
-        startGame(gameId).statusCode shouldBe ok
-      }
+      val gameId = createLobbyForGame(
+        pickType = PickType.DraftPick,
+        numberOfPlayers = 3,
+        numberOfBans = 0,
+        numberOfCharacters = 2,
+      )
 
       withGameWS {
         auth(0)
@@ -262,26 +210,13 @@ class WSGameSpec extends WSTrait {
     }
 
     "allow picking during blind pick" in {
-      val lobbyName = "lobby_name"
-      val hexMapName = "1v1v1"
-      val pickType = PickType.BlindPick
-      val numberOfBans = 0
       val numberOfCharacters = 2
-      var gameId = ""
-      withLobbyWS {
-        authL(0)
-        gameId = createLobby(lobbyName).body
-        setHexMap(gameId, hexMapName)
-        setPickType(gameId, pickType)
-        setNumberOfBans(gameId, numberOfBans)
-        setNumberOfCharacters(gameId, numberOfCharacters)
-        authL(1)
-        joinLobby(gameId)
-        authL(2)
-        joinLobby(gameId)
-        authL(0)
-        startGame(gameId).statusCode shouldBe ok
-      }
+
+      val gameId = createLobbyForGame(
+        pickType = PickType.BlindPick,
+        numberOfPlayers = 3,
+        numberOfCharacters = numberOfCharacters,
+      )
 
       withGameWS {
         auth(0)
@@ -303,29 +238,11 @@ class WSGameSpec extends WSTrait {
     }
 
     "handle blind pick timeout when nobody picks" in {
-      val lobbyName = "lobby_name"
-      val hexMapName = "1v1v1"
-      val pickType = PickType.BlindPick
-      val numberOfBans = 0
-      val numberOfCharacters = 2
       val maxPickTimeMillis = 1
-      val clockConfig = ClockConfig.emptyDraftPickConfig.copy(maxPickTimeMillis = maxPickTimeMillis)
-      var gameId = ""
-      withLobbyWS {
-        authL(0)
-        gameId = createLobby(lobbyName).body
-        setHexMap(gameId, hexMapName)
-        setPickType(gameId, pickType)
-        setNumberOfBans(gameId, numberOfBans)
-        setNumberOfCharacters(gameId, numberOfCharacters)
-        setClockConfig(gameId, clockConfig)
-        authL(1)
-        joinLobby(gameId)
-        authL(2)
-        joinLobby(gameId)
-        authL(0)
-        startGame(gameId).statusCode shouldBe ok
-      }
+      val gameId = createLobbyForGame(
+        pickType = PickType.BlindPick,
+        clockConfig = ClockConfig.emptyDraftPickConfig.copy(maxPickTimeMillis = maxPickTimeMillis)
+      )
 
       withGameWS {
         auth(0)
