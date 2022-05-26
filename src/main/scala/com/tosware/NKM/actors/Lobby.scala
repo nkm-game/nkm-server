@@ -1,6 +1,7 @@
 package com.tosware.NKM.actors
 
 import akka.actor.{ActorLogging, ActorRef, Props}
+import akka.event.LoggingAdapter
 import akka.pattern.ask
 import akka.persistence.journal.Tagged
 import akka.persistence.{PersistentActor, RecoveryCompleted}
@@ -76,7 +77,7 @@ class Lobby(id: String)(implicit NKMDataService: NKMDataService)
 
   override def persistenceId: String = s"lobby-$id"
 
-  override def log = {
+  override def log: LoggingAdapter = {
     akka.event.Logging(context.system, s"${this.getClass}($persistenceId)")
   }
 

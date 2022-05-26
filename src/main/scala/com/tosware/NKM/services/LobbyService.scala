@@ -15,17 +15,14 @@ import slick.jdbc.JdbcBackend
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Await, Future}
 
-class LobbyService(implicit db: JdbcBackend.Database, system: ActorSystem, NKMDataService: NKMDataService) extends NKMTimeouts {
+class LobbyService(lobbiesManagerActor: ActorRef)(implicit db: JdbcBackend.Database,
+                   system: ActorSystem,
+                   NKMDataService: NKMDataService,
+                  ) extends NKMTimeouts {
   import com.tosware.NKM.models.CommandResponse._
 
-  def createLobby(name: String, hostUserId: String): CommandResponse = {
-    val randomId = java.util.UUID.randomUUID.toString
-    val lobbyActor: ActorRef = system.actorOf(Lobby.props(randomId))
-    Await.result(lobbyActor ? Lobby.Create(name, hostUserId), atMost) match {
-      case Success(_) => Success(randomId)
-      case Failure(msg) => Failure(msg)
-    }
-  }
+  def createLobby(name: String, hostUserId: String): CommandResponse =
+    Await.result(lobbiesManagerActor ? Lobby.Create(name, hostUserId), atMost).asInstanceOf[CommandResponse]
 
   def joinLobby(userId: String, request: LobbyJoinRequest): CommandResponse = {
     val gameActor: ActorRef = system.actorOf(Game.props(request.lobbyId))

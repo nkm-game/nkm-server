@@ -1,7 +1,8 @@
 package com.tosware.NKM
 
-import akka.actor.ActorSystem
+import akka.actor.{ActorRef, ActorSystem}
 import akka.http.scaladsl.Http
+import com.tosware.NKM.actors.LobbiesManager
 import com.tosware.NKM.services._
 import com.tosware.NKM.services.http.HttpService
 import com.tosware.NKM.services.http.directives.JwtSecretKey
@@ -15,8 +16,9 @@ object Main extends App with HttpService {
   implicit val system: ActorSystem = ActorSystem("NKMServer")
   implicit val db: JdbcBackend.Database = Database.forConfig("slick.db")
   implicit val NKMDataService: NKMDataService = new NKMDataService()
+  val lobbiesManagerActor: ActorRef = system.actorOf(LobbiesManager.props(NKMDataService))
   implicit val userService: UserService = new UserService()
-  implicit val lobbyService: LobbyService = new LobbyService()
+  implicit val lobbyService: LobbyService = new LobbyService(lobbiesManagerActor)
   implicit val gameService: GameService = new GameService()
 
   implicit val jwtSecretKey: JwtSecretKey = JwtSecretKey(sys.env.getOrElse("JWT_SECRET_KEY", "tmp_jwt_secret_key^*(^(*$#&(*"))
