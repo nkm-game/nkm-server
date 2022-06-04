@@ -116,6 +116,8 @@ class WSGameSpec extends WSTrait {
       withGameWS {
         auth(0)
 
+        Thread.sleep(150)
+
         {
           val gameState = fetchAndParseGame(gameId)
           gameState.gamePhase shouldBe GamePhase.Running

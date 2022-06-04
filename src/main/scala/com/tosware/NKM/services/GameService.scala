@@ -1,6 +1,6 @@
 package com.tosware.NKM.services
 
-import akka.actor.{ActorRef, ActorSystem}
+import akka.actor.ActorRef
 import akka.pattern.ask
 import com.tosware.NKM.NKMTimeouts
 import com.tosware.NKM.actors.Game.GetState
@@ -10,34 +10,45 @@ import com.tosware.NKM.models.game._
 import com.tosware.NKM.models.game.ws.{BanCharactersRequest, BlindPickCharactersRequest, PickCharacterRequest}
 import slick.jdbc.JdbcBackend
 
-import scala.concurrent.{Await, Awaitable, Future}
+import scala.concurrent.{Await, Future}
 
-class GameService(implicit db: JdbcBackend.Database, system: ActorSystem, NKMDataService: NKMDataService) extends NKMTimeouts {
+class GameService(gamesManagerActor: ActorRef)
+                 (implicit db: JdbcBackend.Database, NKMDataService: NKMDataService)
+  extends NKMTimeouts {
   import CommandResponse._
 
+  def getGameActor(gameId: String): ActorRef = {
+    import GamesManager.GetGameActorResponse
+    import GamesManager.Query.GetGameActor
+
+    aw(gamesManagerActor ? GetGameActor(gameId))
+      .asInstanceOf[GetGameActorResponse]
+      .gameActor
+  }
+
   def surrender(username: String, gameId: String): Future[CommandResponse] = {
-    implicit val gameActor: ActorRef = system.actorOf(Game.props(gameId))
+    val gameActor: ActorRef = getGameActor(gameId)
 
     val surrenderFuture = gameActor ? Game.Surrender(username)
     Future.successful(Await.result(surrenderFuture, atMost).asInstanceOf[CommandResponse])
   }
 
   def banCharacters(username: String, request: BanCharactersRequest): Future[CommandResponse] = {
-    implicit val gameActor: ActorRef = system.actorOf(Game.props(request.gameId))
+    val gameActor: ActorRef = getGameActor(request.gameId)
 
     val requestFuture = gameActor ? Game.BanCharacters(username, request.characterIds)
     Future.successful(Await.result(requestFuture, atMost).asInstanceOf[CommandResponse])
   }
 
   def pickCharacter(username: String, request: PickCharacterRequest): Future[CommandResponse] = {
-    implicit val gameActor: ActorRef = system.actorOf(Game.props(request.gameId))
+    val gameActor: ActorRef = getGameActor(request.gameId)
 
     val f = gameActor ? Game.PickCharacter(username, request.characterId)
     Future.successful(Await.result(f, atMost).asInstanceOf[CommandResponse])
   }
 
   def blindPickCharacter(username: String, request: BlindPickCharactersRequest): Future[CommandResponse] = {
-    implicit val gameActor: ActorRef = system.actorOf(Game.props(request.gameId))
+    val gameActor: ActorRef = getGameActor(request.gameId)
 
     val f = gameActor ? Game.BlindPickCharacters(username, request.characterIds)
     Future.successful(Await.result(f, atMost).asInstanceOf[CommandResponse])
@@ -71,11 +82,10 @@ class GameService(implicit db: JdbcBackend.Database, system: ActorSystem, NKMDat
 //    val placeCharacterFuture = gameActor ? Game.PlaceCharacter(request.hexCoordinates, request.characterId)
 //    placeCharacterFuture.mapTo[CommandResponse]
 //  }
-  def getGameState(gameId: String): Future[GameState] = {
-    implicit val gameActor: ActorRef = system.actorOf(Game.props(gameId))
-    getGameState()
-  }
-  def getGameState()(implicit gameActor: ActorRef): Future[GameState] = {
+
+  def getGameState(gameActor: ActorRef): Future[GameState] =
     (gameActor ? GetState).mapTo[GameState]
-  }
+
+  def getGameState(gameId: String): Future[GameState] =
+    getGameState(getGameActor(gameId))
 }

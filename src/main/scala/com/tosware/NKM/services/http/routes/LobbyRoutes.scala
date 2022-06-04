@@ -19,7 +19,7 @@ trait LobbyRoutes extends JwtDirective
       complete(lobbies)
     },
     path(LobbyRoute.Lobby.value / Segment) { (lobbyId: String) =>
-      val lobby = lobbyService.getLobby(lobbyId)
+      val lobby = lobbyService.getLobbyState(lobbyId)
       complete(lobby)
     },
   )

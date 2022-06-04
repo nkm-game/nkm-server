@@ -35,6 +35,7 @@ trait NKMTestTrait
   }
 
   override def afterAll(): Unit = {
+    DBManager.dropAllTables(db)
     db.close()
   }
 }

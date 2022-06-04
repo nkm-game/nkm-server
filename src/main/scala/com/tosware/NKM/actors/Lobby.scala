@@ -6,15 +6,13 @@ import akka.pattern.ask
 import akka.persistence.journal.Tagged
 import akka.persistence.{PersistentActor, RecoveryCompleted}
 import com.tosware.NKM.NKMTimeouts
-import com.tosware.NKM.actors.NKMData.GetHexMaps
 import com.tosware.NKM.models.CommandResponse._
 import com.tosware.NKM.models.UserState.UserId
-import com.tosware.NKM.models.game.{ClockConfig, GameStartDependencies, HexMap, PickType, Player}
+import com.tosware.NKM.models.game.{ClockConfig, GameStartDependencies, PickType, Player}
 import com.tosware.NKM.models.lobby.LobbyState
 import com.tosware.NKM.services.NKMDataService
 
 import java.time.LocalDateTime
-import scala.concurrent.Await
 
 object Lobby {
   sealed trait Query
@@ -23,7 +21,7 @@ object Lobby {
 
   sealed trait Command
 
-  case object StartGame extends Command
+  case class StartGame(gameActor: ActorRef) extends Command
 
   case class Create(name: String, hostUserId: String) extends Command
 
@@ -82,8 +80,6 @@ class Lobby(id: String)(implicit NKMDataService: NKMDataService)
   }
 
   var lobbyState: LobbyState = LobbyState(id)
-  val gameActor: ActorRef = context.system.actorOf(Game.props(id))
-  val nkmData: ActorRef = context.system.actorOf(NKMData.props())
 
   def canStartGame(): Boolean =
     lobbyState.chosenHexMapName.nonEmpty && lobbyState.userIds.length > 1
@@ -236,14 +232,13 @@ class Lobby(id: String)(implicit NKMDataService: NKMDataService)
           sender() ! Success()
         }
       }
-    case StartGame =>
+    case StartGame(gameActor) =>
       if (!canStartGame()) {
         sender() ! Failure("Cannot start the game")
       } else {
-        val hexMaps = Await.result(nkmData ? GetHexMaps, atMost).asInstanceOf[List[HexMap]]
+        val hexMaps = NKMDataService.getHexMaps
         log.info("Received game start request")
         val players = lobbyState.userIds.map(i => Player(i))
-        val playerIds = players.map(_.name)
         val deps = GameStartDependencies(
           players = players,
           hexMap = hexMaps.filter(m => m.name == lobbyState.chosenHexMapName.get).head,
@@ -253,8 +248,7 @@ class Lobby(id: String)(implicit NKMDataService: NKMDataService)
           NKMDataService.getCharactersMetadata.toSet,
           clockConfig = lobbyState.clockConfig
         )
-        val r = Await.result(gameActor ? Game.StartGame(deps), atMost).asInstanceOf[CommandResponse]
-        sender() ! r
+        sender() ! aw(gameActor ? Game.StartGame(deps)).asInstanceOf[CommandResponse]
       }
 
     case e => log.warning(s"Unknown message: $e")

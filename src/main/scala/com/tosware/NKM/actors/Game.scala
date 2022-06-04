@@ -78,6 +78,8 @@ object Game {
 
 class Game(id: String)(implicit NKMDataService: NKMDataService) extends PersistentActor with ActorLogging {
 
+  override def persistenceId: String = s"game-$id"
+
   import Game._
   import context.dispatcher
 
@@ -85,12 +87,9 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
   implicit val random: Random = new Random(id.hashCode)
 
   def persistAndPublish[A](event: A)(handler: A => Unit): Unit = {
-    log.warning("+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=" + event.toString)
     context.system.eventStream.publish(event)
     persist(event)(handler)
   }
-
-  override def persistenceId: String = s"game-$id"
 
   override def receive: Receive = {
     case GetState =>

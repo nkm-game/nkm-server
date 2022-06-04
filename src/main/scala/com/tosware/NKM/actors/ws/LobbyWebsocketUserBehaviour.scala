@@ -72,7 +72,7 @@ trait LobbyWebsocketUserBehaviour extends WebsocketUserBehaviour {
       case LobbyRoute.Lobby =>
         implicit val responseType: LobbyResponseType = LobbyResponseType.Lobby
         val lobbyId = request.requestJson.parseJson.convertTo[GetLobbyRequest].lobbyId
-        val lobby = Await.result(lobbyService.getLobby(lobbyId), atMost)
+        val lobby = Await.result(lobbyService.getLobbyState(lobbyId), atMost)
         ok(lobby.toJson.toString)
       case LobbyRoute.CreateLobby =>
         implicit val responseType: LobbyResponseType = LobbyResponseType.CreateLobby

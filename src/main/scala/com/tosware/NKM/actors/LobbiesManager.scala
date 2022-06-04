@@ -2,7 +2,6 @@ package com.tosware.NKM.actors
 
 import akka.actor.{ActorLogging, ActorRef, Props}
 import akka.event.LoggingAdapter
-import akka.pattern.ask
 import akka.persistence.{PersistentActor, RecoveryCompleted}
 import com.tosware.NKM.NKMTimeouts
 import com.tosware.NKM.actors.LobbiesManager.Event.LobbyCreated
@@ -11,13 +10,11 @@ import com.tosware.NKM.actors.LobbiesManager.Query.GetLobbyActor
 import com.tosware.NKM.models.CommandResponse._
 import com.tosware.NKM.services.NKMDataService
 
-import scala.concurrent.Await
-
 object LobbiesManager {
 
   object Query {
     sealed trait Query
-    case class GetLobbyActor(lobbyId: String)
+    case class GetLobbyActor(lobbyId: String) extends Query
   }
 
   case class GetLobbyActorResponse(lobbyActor: Option[ActorRef])
@@ -27,7 +24,8 @@ object LobbiesManager {
     case class LobbyCreated(lobbyId: String) extends Event
   }
 
-  def props(NKMDataService: NKMDataService): Props = Props(new LobbiesManager(NKMDataService))
+  def props(NKMDataService: NKMDataService): Props =
+    Props(new LobbiesManager(NKMDataService))
 }
 
 class LobbiesManager(NKMDataService: NKMDataService)
@@ -55,13 +53,11 @@ class LobbiesManager(NKMDataService: NKMDataService)
     case createCommand @ Lobby.Create(_, _) =>
       val randomId = java.util.UUID.randomUUID.toString
       val lobbyActor: ActorRef = context.actorOf(Lobby.props(randomId)(NKMDataService))
-      Await.result(lobbyActor ? createCommand, atMost) match {
-        case Success(_) =>
-          persistAndPublish(LobbyCreated(randomId)) { _ =>
-            setLobby(randomId, lobbyActor)
-            sender() ! Success(randomId)
-          }
-        case Failure(msg) => Failure(msg)
+
+      persistAndPublish(LobbyCreated(randomId)) { _ =>
+        lobbyActor ! createCommand
+        sender() ! Success(randomId)
+        setLobby(randomId, lobbyActor)
       }
     case e => log.warning(s"Unknown message: $e")
   }
@@ -72,6 +68,7 @@ class LobbiesManager(NKMDataService: NKMDataService)
       setLobby(lobbyId, lobbyActor)
       log.debug(s"Recovered create of $lobbyId")
     case RecoveryCompleted =>
+    case Success(_) =>
     case e => log.warning(s"Unknown message: $e")
   }
 

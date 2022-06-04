@@ -43,11 +43,19 @@ class WSLobbySpec extends WSTrait
         auth(0)
         val lobbyId = createLobby(lobbyName).body
         observe(lobbyId).statusCode shouldBe ok
-        setLobbyName(lobbyId, "hi") shouldBe WebsocketLobbyResponse(LobbyResponseType.SetLobbyName, ok)
 
+        val possibleResponseTypes = Set(
+          LobbyResponseType.SetLobbyName,
+          LobbyResponseType.Lobby,
+        )
+
+        val setLobbyNameResponse = setLobbyName(lobbyId, "hi")
         val observedResponse = fetchResponse()
-        observedResponse.lobbyResponseType shouldBe LobbyResponseType.Lobby
+
+        setLobbyNameResponse.statusCode shouldBe ok
         observedResponse.statusCode shouldBe ok
+
+        Set(setLobbyNameResponse.lobbyResponseType, observedResponse.lobbyResponseType) shouldBe possibleResponseTypes
       }
     }
 
@@ -62,6 +70,7 @@ class WSLobbySpec extends WSTrait
 
         val response = fetchResponse()
         response.statusCode shouldBe ok
+        response.body.length should not be 0
       }
     }
 
@@ -233,6 +242,7 @@ class WSLobbySpec extends WSTrait
         joinLobby(lobbyId)
         auth(0)
         startGame(lobbyId).statusCode shouldBe ok
+        startGame(lobbyId).statusCode shouldBe nok
 
         Get(s"/api/state/$lobbyId") ~> routes ~> check {
           val gameState = responseAs[GameState]
@@ -244,6 +254,7 @@ class WSLobbySpec extends WSTrait
           gameState.pickType shouldEqual PickType.AllRandom
         }
       }
+
     }
 
     "allow to start a game with all things changed" in {

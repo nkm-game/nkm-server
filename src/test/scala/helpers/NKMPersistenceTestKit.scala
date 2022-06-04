@@ -2,7 +2,7 @@ package helpers
 
 import akka.actor.{ActorRef, ActorSystem}
 import akka.testkit.{ImplicitSender, TestKit}
-import com.tosware.NKM.actors.LobbiesManager
+import com.tosware.NKM.actors.{GamesManager, LobbiesManager}
 import com.tosware.NKM.services.{GameService, LobbyService, NKMDataService, UserService}
 import org.scalatest.wordspec.AnyWordSpecLike
 
@@ -16,12 +16,14 @@ class NKMPersistenceTestKit (_system: ActorSystem) extends TestKit(_system)
 {
   implicit val NKMDataService: NKMDataService = new NKMDataService()
   implicit val userService: UserService = new UserService()
+  val gamesManagerActor: ActorRef = system.actorOf(GamesManager.props(NKMDataService))
   val lobbiesManagerActor: ActorRef = system.actorOf(LobbiesManager.props(NKMDataService))
+  implicit val gameService: GameService = new GameService(gamesManagerActor)
   implicit val lobbyService: LobbyService = new LobbyService(lobbiesManagerActor)
-  implicit val gameService: GameService = new GameService()
   def within2000[T](f: => T): T = within(2000 millis)(f)
 
   override def beforeAll(): Unit = {
     super.beforeAll()
   }
+
 }
