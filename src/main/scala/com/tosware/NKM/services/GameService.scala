@@ -7,7 +7,7 @@ import com.tosware.NKM.actors.Game.GetState
 import com.tosware.NKM.actors._
 import com.tosware.NKM.models.CommandResponse
 import com.tosware.NKM.models.game._
-import com.tosware.NKM.models.game.ws.{BanCharactersRequest, BlindPickCharactersRequest, PickCharacterRequest}
+import com.tosware.NKM.models.game.ws.GameRequest._
 import slick.jdbc.JdbcBackend
 
 import scala.concurrent.{Await, Future}
@@ -33,21 +33,21 @@ class GameService(gamesManagerActor: ActorRef)
     Future.successful(Await.result(surrenderFuture, atMost).asInstanceOf[CommandResponse])
   }
 
-  def banCharacters(username: String, request: BanCharactersRequest): Future[CommandResponse] = {
+  def banCharacters(username: String, request: CharacterSelect.BanCharacters): Future[CommandResponse] = {
     val gameActor: ActorRef = getGameActor(request.gameId)
 
     val requestFuture = gameActor ? Game.BanCharacters(username, request.characterIds)
     Future.successful(Await.result(requestFuture, atMost).asInstanceOf[CommandResponse])
   }
 
-  def pickCharacter(username: String, request: PickCharacterRequest): Future[CommandResponse] = {
+  def pickCharacter(username: String, request: CharacterSelect.PickCharacter): Future[CommandResponse] = {
     val gameActor: ActorRef = getGameActor(request.gameId)
 
     val f = gameActor ? Game.PickCharacter(username, request.characterId)
     Future.successful(Await.result(f, atMost).asInstanceOf[CommandResponse])
   }
 
-  def blindPickCharacter(username: String, request: BlindPickCharactersRequest): Future[CommandResponse] = {
+  def blindPickCharacter(username: String, request: CharacterSelect.BlindPickCharacters): Future[CommandResponse] = {
     val gameActor: ActorRef = getGameActor(request.gameId)
 
     val f = gameActor ? Game.BlindPickCharacters(username, request.characterIds)

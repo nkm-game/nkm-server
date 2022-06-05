@@ -63,7 +63,7 @@ class WSLobbySpec extends WSTrait
       withLobbyWS {
         auth(0)
 
-        val createLobbyRequest = LobbyCreationRequest(lobbyName).toJson.toString
+        val createLobbyRequest = LobbyRequest.LobbyCreation(lobbyName).toJson.toString
         val wsRequest = WebsocketLobbyRequest(LobbyRoute.CreateLobby, createLobbyRequest)
 
         sendRequest(wsRequest)

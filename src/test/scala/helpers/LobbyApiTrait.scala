@@ -1,6 +1,6 @@
 package helpers
 
-import com.tosware.NKM.models.lobby.ws.LobbyCreationRequest
+import com.tosware.NKM.models.lobby.ws.LobbyRequest.LobbyCreation
 
 trait LobbyApiTrait extends UserApiTrait
   {
@@ -9,7 +9,7 @@ trait LobbyApiTrait extends UserApiTrait
     override def beforeEach(): Unit = {
       super.beforeEach()
 
-      Post("/api/create_lobby", LobbyCreationRequest(lobbyName)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check {
+      Post("/api/create_lobby", LobbyCreation(lobbyName)).addHeader(getAuthHeader(tokens(0))) ~> routes ~> check {
         lobbyId = responseAs[String]
       }
     }

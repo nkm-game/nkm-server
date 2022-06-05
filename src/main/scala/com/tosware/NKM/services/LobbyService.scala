@@ -9,7 +9,7 @@ import com.tosware.NKM.NKMTimeouts
 import com.tosware.NKM.actors._
 import com.tosware.NKM.models.game._
 import com.tosware.NKM.models.lobby._
-import com.tosware.NKM.models.lobby.ws._
+import com.tosware.NKM.models.lobby.ws.LobbyRequest._
 import slick.jdbc.JdbcBackend
 
 import scala.concurrent.{Await, Future}
@@ -50,7 +50,7 @@ class LobbyService(lobbiesManagerActor: ActorRef)(
     getLobbyActorOption(lobbyId).isDefined
 
 
-  def joinLobby(userId: String, request: LobbyJoinRequest): CommandResponse = {
+  def joinLobby(userId: String, request: LobbyJoin): CommandResponse = {
     if(!isLobbyCreated(request.lobbyId)) return Failure("Lobby is not created at this id")
 
     val lobbyActor = getLobbyActor(request.lobbyId)
@@ -61,7 +61,7 @@ class LobbyService(lobbiesManagerActor: ActorRef)(
     aw(lobbyActor ? Lobby.UserJoin(userId)).asInstanceOf[CommandResponse]
   }
 
-  def leaveLobby(userId: String, request: LobbyLeaveRequest): CommandResponse = {
+  def leaveLobby(userId: String, request: LobbyLeave): CommandResponse = {
     if(!isLobbyCreated(request.lobbyId)) return Failure("Lobby is not created at this id")
 
     val lobbyActor = getLobbyActor(request.lobbyId)
@@ -72,7 +72,7 @@ class LobbyService(lobbiesManagerActor: ActorRef)(
     Await.result(lobbyActor ? Lobby.UserLeave(userId), atMost).asInstanceOf[CommandResponse]
   }
 
-  def setHexmapName(username: String, request: SetHexMapNameRequest): CommandResponse = {
+  def setHexmapName(username: String, request: SetHexMapName): CommandResponse = {
     if(!isLobbyCreated(request.lobbyId)) return Failure("Lobby is not created at this id")
 
     val lobbyActor = getLobbyActor(request.lobbyId)
@@ -89,7 +89,7 @@ class LobbyService(lobbiesManagerActor: ActorRef)(
     aw(lobbyActor ? Lobby.SetMapName(request.hexMapName)).asInstanceOf[CommandResponse]
   }
 
-  def setNumberOfCharactersPerPlayer(username: String, request: SetNumberOfCharactersPerPlayerRequest): CommandResponse = {
+  def setNumberOfCharactersPerPlayer(username: String, request: SetNumberOfCharactersPerPlayer): CommandResponse = {
     if(!isLobbyCreated(request.lobbyId)) return Failure("Lobby is not created at this id")
 
     val lobbyActor = getLobbyActor(request.lobbyId)
@@ -104,7 +104,7 @@ class LobbyService(lobbiesManagerActor: ActorRef)(
     aw(lobbyActor ? Lobby.SetNumberOfCharactersPerPlayer(request.charactersPerPlayer)).asInstanceOf[CommandResponse]
   }
 
-  def setNumberOfBans(username: String, request: SetNumberOfBansRequest): CommandResponse = {
+  def setNumberOfBans(username: String, request: SetNumberOfBans): CommandResponse = {
     if(!isLobbyCreated(request.lobbyId)) return Failure("Lobby is not created at this id")
 
     val lobbyActor = getLobbyActor(request.lobbyId)
@@ -120,7 +120,7 @@ class LobbyService(lobbiesManagerActor: ActorRef)(
     aw(lobbyActor ? Lobby.SetNumberOfBans(request.numberOfBans)).asInstanceOf[CommandResponse]
   }
 
-  def setPickType(username: String, request: SetPickTypeRequest): CommandResponse = {
+  def setPickType(username: String, request: SetPickType): CommandResponse = {
     if(!isLobbyCreated(request.lobbyId)) return Failure("Lobby is not created at this id")
 
     val lobbyActor = getLobbyActor(request.lobbyId)
@@ -134,7 +134,7 @@ class LobbyService(lobbiesManagerActor: ActorRef)(
     aw(lobbyActor ? Lobby.SetPickType(request.pickType)).asInstanceOf[CommandResponse]
   }
 
-  def setLobbyName(username: String, request: SetLobbyNameRequest): CommandResponse = {
+  def setLobbyName(username: String, request: SetLobbyName): CommandResponse = {
     if(!isLobbyCreated(request.lobbyId)) return Failure("Lobby is not created at this id")
 
     val lobbyActor = getLobbyActor(request.lobbyId)
@@ -148,7 +148,7 @@ class LobbyService(lobbiesManagerActor: ActorRef)(
     aw(lobbyActor ? Lobby.SetLobbyName(request.newName)).asInstanceOf[CommandResponse]
   }
 
-  def setClockConfig(username: String, request: SetClockConfigRequest): CommandResponse = {
+  def setClockConfig(username: String, request: SetClockConfig): CommandResponse = {
     if(!isLobbyCreated(request.lobbyId)) return Failure("Lobby is not created at this id")
 
     val lobbyActor = getLobbyActor(request.lobbyId)
@@ -163,7 +163,7 @@ class LobbyService(lobbiesManagerActor: ActorRef)(
   }
 
 
-  def startGame(username: String, request: StartGameRequest): CommandResponse = {
+  def startGame(username: String, request: StartGame): CommandResponse = {
     if(!isLobbyCreated(request.lobbyId)) return Failure("Lobby is not created at this id")
 
     val lobbyActor = getLobbyActor(request.lobbyId)
