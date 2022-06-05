@@ -16,7 +16,7 @@ class NKMDataService(implicit system: ActorSystem) extends NKMTimeouts
     Await.result(nkmDataActor ? NKMData.GetHexMaps, atMost).asInstanceOf[List[HexMap]]
   }
 
-  def getCharactersMetadata: Seq[NKMCharacterMetadata] = 1 to 10 map (i => {
+  def getCharactersMetadata: Seq[NKMCharacterMetadata] = 1 to 30 map (i => {
     NKMCharacterMetadata(
       name = s"Bot$i",
       initialHealthPoints = 50,
