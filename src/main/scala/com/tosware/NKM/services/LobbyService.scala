@@ -56,7 +56,7 @@ class LobbyService(lobbiesManagerActor: ActorRef)(
     val lobbyActor = getLobbyActor(request.lobbyId)
     val gameState = aw(getGameState(request.lobbyId))
 
-    if (gameState.gamePhase != GamePhase.NotStarted) return Failure("Game is already started")
+    if (gameState.gameStatus != GameStatus.NotStarted) return Failure("Game is already started")
 
     aw(lobbyActor ? Lobby.UserJoin(userId)).asInstanceOf[CommandResponse]
   }
@@ -67,7 +67,7 @@ class LobbyService(lobbiesManagerActor: ActorRef)(
     val lobbyActor = getLobbyActor(request.lobbyId)
     val gameState = aw(getGameState(request.lobbyId))
 
-    if (gameState.gamePhase != GamePhase.NotStarted) return Failure("Game is already started")
+    if (gameState.gameStatus != GameStatus.NotStarted) return Failure("Game is already started")
 
     Await.result(lobbyActor ? Lobby.UserLeave(userId), atMost).asInstanceOf[CommandResponse]
   }
@@ -80,7 +80,7 @@ class LobbyService(lobbiesManagerActor: ActorRef)(
     val gameState = aw(getGameState(request.lobbyId))
     val hexMaps = NKMDataService.getHexMaps
 
-    if (gameState.gamePhase != GamePhase.NotStarted) return Failure("Game is already started")
+    if (gameState.gameStatus != GameStatus.NotStarted) return Failure("Game is already started")
 
     if (!lobbyState.hostUserId.contains(username)) return Failure("You are not the host")
 
@@ -98,7 +98,7 @@ class LobbyService(lobbiesManagerActor: ActorRef)(
 
     if (request.charactersPerPlayer < 1) return Failure("Number of characters has to be more than 0")
 
-    if (gameState.gamePhase != GamePhase.NotStarted) return Failure("Game is already started")
+    if (gameState.gameStatus != GameStatus.NotStarted) return Failure("Game is already started")
     if (!lobbyState.hostUserId.contains(username)) return Failure("You are not the host")
 
     aw(lobbyActor ? Lobby.SetNumberOfCharactersPerPlayer(request.charactersPerPlayer)).asInstanceOf[CommandResponse]
@@ -113,7 +113,7 @@ class LobbyService(lobbiesManagerActor: ActorRef)(
 
     if (request.numberOfBans < 0) return Failure("Number of bans has to be more or equal 0")
 
-    if (gameState.gamePhase != GamePhase.NotStarted) return Failure("Game is already started")
+    if (gameState.gameStatus != GameStatus.NotStarted) return Failure("Game is already started")
 
     if (!lobbyState.hostUserId.contains(username)) return Failure("You are not the host")
 
@@ -127,7 +127,7 @@ class LobbyService(lobbiesManagerActor: ActorRef)(
     val lobbyState = aw(getLobbyState(lobbyActor))
     val gameState = aw(getGameState(request.lobbyId))
 
-    if (gameState.gamePhase != GamePhase.NotStarted) return Failure("Game is already started")
+    if (gameState.gameStatus != GameStatus.NotStarted) return Failure("Game is already started")
 
     if (!lobbyState.hostUserId.contains(username)) return Failure("You are not the host")
 
@@ -141,7 +141,7 @@ class LobbyService(lobbiesManagerActor: ActorRef)(
     val lobbyState = aw(getLobbyState(lobbyActor))
     val gameState = aw(getGameState(request.lobbyId))
 
-    if (gameState.gamePhase != GamePhase.NotStarted) return Failure("Game is already started")
+    if (gameState.gameStatus != GameStatus.NotStarted) return Failure("Game is already started")
 
     if (!lobbyState.hostUserId.contains(username)) return Failure("You are not the host")
 
@@ -155,7 +155,7 @@ class LobbyService(lobbiesManagerActor: ActorRef)(
     val lobbyState = aw(getLobbyState(lobbyActor))
     val gameState = aw(getGameState(request.lobbyId))
 
-    if (gameState.gamePhase != GamePhase.NotStarted) return Failure("Game is already started")
+    if (gameState.gameStatus != GameStatus.NotStarted) return Failure("Game is already started")
 
     if (!lobbyState.hostUserId.contains(username)) return Failure("You are not the host")
 
@@ -177,7 +177,7 @@ class LobbyService(lobbiesManagerActor: ActorRef)(
     val chosenHexMap: HexMap = NKMDataService.getHexMaps.find(_.name == lobbyState.chosenHexMapName.get).get
     if(chosenHexMap.maxNumberOfCharacters < lobbyState.userIds.length) return Failure("There are more players than allowed for this map")
 
-    if (gameState.gamePhase != GamePhase.NotStarted) return Failure("Game is already started")
+    if (gameState.gameStatus != GameStatus.NotStarted) return Failure("Game is already started")
 
     aw(lobbyActor ? Lobby.StartGame(gameService.getGameActor(request.lobbyId))).asInstanceOf[CommandResponse]
   }

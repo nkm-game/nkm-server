@@ -4,7 +4,7 @@ import akka.http.scaladsl.testkit.WSProbe
 import com.tosware.NKM.models.game.blindpick.BlindPickPhase
 import com.tosware.NKM.models.game.draftpick.DraftPickPhase
 import com.tosware.NKM.models.game.ws._
-import com.tosware.NKM.models.game.{ClockConfig, GamePhase, PickType, VictoryStatus}
+import com.tosware.NKM.models.game.{ClockConfig, GameStatus, PickType, VictoryStatus}
 import helpers.WSTrait
 
 class WSGameSpec extends WSTrait {
@@ -86,7 +86,7 @@ class WSGameSpec extends WSTrait {
 
         {
           val gameState = fetchAndParseGame(gameId)
-          gameState.gamePhase shouldBe GamePhase.CharacterPick
+          gameState.gameStatus shouldBe GameStatus.CharacterPick
           gameState.players(0).victoryStatus shouldBe VictoryStatus.Pending
           gameState.players(1).victoryStatus shouldBe VictoryStatus.Pending
           gameState.players(2).victoryStatus shouldBe VictoryStatus.Pending
@@ -96,7 +96,7 @@ class WSGameSpec extends WSTrait {
 
         {
           val gameState = fetchAndParseGame(gameId)
-          gameState.gamePhase shouldBe GamePhase.Finished
+          gameState.gameStatus shouldBe GameStatus.Finished
           gameState.players(0).victoryStatus shouldBe VictoryStatus.Lost
           gameState.players(1).victoryStatus shouldBe VictoryStatus.Drawn
           gameState.players(2).victoryStatus shouldBe VictoryStatus.Drawn
@@ -120,7 +120,7 @@ class WSGameSpec extends WSTrait {
 
         {
           val gameState = fetchAndParseGame(gameId)
-          gameState.gamePhase shouldBe GamePhase.Running
+          gameState.gameStatus shouldBe GameStatus.Running
           gameState.players(0).victoryStatus shouldBe VictoryStatus.Pending
           gameState.players(1).victoryStatus shouldBe VictoryStatus.Pending
           gameState.players(2).victoryStatus shouldBe VictoryStatus.Pending
@@ -207,7 +207,7 @@ class WSGameSpec extends WSTrait {
 
         val gameState = fetchAndParseGame(gameId)
         gameState.draftPickState.get.pickPhase shouldBe DraftPickPhase.Finished
-        gameState.gamePhase shouldBe GamePhase.CharacterPicked
+        gameState.gameStatus shouldBe GameStatus.CharacterPicked
       }
     }
 
@@ -235,7 +235,7 @@ class WSGameSpec extends WSTrait {
 
         val gameState = fetchAndParseGame(gameId)
         gameState.blindPickState.get.pickPhase shouldBe BlindPickPhase.Finished
-        gameState.gamePhase shouldBe GamePhase.CharacterPicked
+        gameState.gameStatus shouldBe GameStatus.CharacterPicked
       }
     }
 

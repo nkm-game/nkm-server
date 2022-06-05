@@ -20,7 +20,7 @@ class UserSpec extends NKMPersistenceTestKit(ActorSystem("UserSpec"))
         val future = user ? GetState
         val state: UserState = Await.result(future.mapTo[UserState], atMost)
         state.login shouldEqual "test"
-        state.registered shouldEqual false
+        state.registered() shouldEqual false
       }
     }
     "be able to register" in {
@@ -34,7 +34,7 @@ class UserSpec extends NKMPersistenceTestKit(ActorSystem("UserSpec"))
         val state: UserState = Await.result(future.mapTo[UserState], atMost)
 
         state.login shouldEqual "test"
-        state.registered shouldEqual true
+        state.registered() shouldEqual true
       }
     }
 

@@ -12,8 +12,8 @@ case class GameStateValidator(gameState: GameState) {
   private def playerFinishedGame(playerId: PlayerId) =
     gameState.players.find(_.name == playerId).get.victoryStatus != VictoryStatus.Pending
 
-  private def gamePhaseIs(gamePhase: GamePhase) =
-    gameState.gamePhase == gamePhase
+  private def gameStatusIs(gameStatus: GameStatus) =
+    gameState.gameStatus == gameStatus
 
   private def banValid(playerId: PlayerId, characterIds: Set[CharacterMetadataId]) =
     gameState.draftPickState.fold(false)(_.validateBan(playerId, characterIds))
@@ -33,37 +33,37 @@ case class GameStateValidator(gameState: GameState) {
   private val pickNotValidMessage = "Pick is not valid."
 
   def validateStartGame(): CommandResponse = {
-    if (!gamePhaseIs(GamePhase.NotStarted)) Failure(gameStartedMessage)
+    if (!gameStatusIs(GameStatus.NotStarted)) Failure(gameStartedMessage)
     else Success()
   }
 
   def validateSurrender(playerId: PlayerId): CommandResponse = {
     if (!playerInGame(playerId)) Failure(playerNotInGameMessage)
-    else if (gamePhaseIs(GamePhase.NotStarted)) Failure(gameNotStartedMessage)
+    else if (gameStatusIs(GameStatus.NotStarted)) Failure(gameNotStartedMessage)
     else if (playerFinishedGame(playerId)) Failure(playerFinishedGameMessage)
     else Success()
   }
 
   def validateBanCharacters(playerId: PlayerId, characterIds: Set[CharacterMetadataId]): CommandResponse = {
     if (!playerInGame(playerId)) Failure(playerNotInGameMessage)
-    else if (gamePhaseIs(GamePhase.NotStarted)) Failure(gameNotStartedMessage)
-    else if (!gamePhaseIs(GamePhase.CharacterPick)) Failure(gameNotInCharacterPickMessage)
+    else if (gameStatusIs(GameStatus.NotStarted)) Failure(gameNotStartedMessage)
+    else if (!gameStatusIs(GameStatus.CharacterPick)) Failure(gameNotInCharacterPickMessage)
     else if (!banValid(playerId, characterIds)) Failure(banNotValidMessage)
     else Success()
   }
 
   def validatePickCharacter(playerId: PlayerId, characterId: CharacterMetadataId): CommandResponse = {
     if (!playerInGame(playerId)) Failure(playerNotInGameMessage)
-    else if (gamePhaseIs(GamePhase.NotStarted)) Failure(gameNotStartedMessage)
-    else if (!gamePhaseIs(GamePhase.CharacterPick)) Failure(gameNotInCharacterPickMessage)
+    else if (gameStatusIs(GameStatus.NotStarted)) Failure(gameNotStartedMessage)
+    else if (!gameStatusIs(GameStatus.CharacterPick)) Failure(gameNotInCharacterPickMessage)
     else if (!characterPickValid(playerId, characterId)) Failure(pickNotValidMessage)
     else Success()
   }
 
   def validateBlindPickCharacters(playerId: PlayerId, characterIds: Set[CharacterMetadataId]): CommandResponse = {
     if (!playerInGame(playerId)) Failure(playerNotInGameMessage)
-    else if (gamePhaseIs(GamePhase.NotStarted)) Failure(gameNotStartedMessage)
-    else if (!gamePhaseIs(GamePhase.CharacterPick)) Failure(gameNotInCharacterPickMessage)
+    else if (gameStatusIs(GameStatus.NotStarted)) Failure(gameNotStartedMessage)
+    else if (!gameStatusIs(GameStatus.CharacterPick)) Failure(gameNotInCharacterPickMessage)
     else if (!characterBlindPickValid(playerId, characterIds)) Failure(pickNotValidMessage)
     else Success()
   }

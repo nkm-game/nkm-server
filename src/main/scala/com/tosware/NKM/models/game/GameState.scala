@@ -16,7 +16,7 @@ case class GameState(id: String,
                      phase: Phase,
                      turn: Turn,
                      players: Seq[Player],
-                     gamePhase: GamePhase,
+                     gameStatus: GameStatus,
                      pickType: PickType,
                      numberOfBans: Int,
                      numberOfCharactersPerPlayers: Int,
@@ -36,7 +36,7 @@ case class GameState(id: String,
       pickType = g.pickType,
       numberOfBans = g.numberOfBansPerPlayer,
       numberOfCharactersPerPlayers = g.numberOfCharactersPerPlayer,
-      gamePhase = if(g.pickType == PickType.AllRandom) GamePhase.CharacterPicked else GamePhase.CharacterPick,
+      gameStatus = if(g.pickType == PickType.AllRandom) GameStatus.CharacterPicked else GameStatus.CharacterPick,
       draftPickState = if (g.pickType == PickType.DraftPick) Some(DraftPickState.empty(DraftPickConfig.generate(g))) else None,
       blindPickState = if (g.pickType == PickType.BlindPick) Some(BlindPickState.empty(BlindPickConfig.generate(g))) else None,
       clock = Clock.fromConfig(g.clockConfig),
@@ -50,21 +50,21 @@ case class GameState(id: String,
         val (player, characters) = x
         player.copy(characters = characters.map(c => NKMCharacter.fromMetadata(java.util.UUID.nameUUIDFromBytes(random.nextBytes(16)).toString, c)).toList)
       })
-      copy(gamePhase = GamePhase.Running, players = playersWithAssignedCharacters, characterIdsOutsideMap = playersWithAssignedCharacters.flatMap(c => c.characters.map(c => c.id)))
+      copy(gameStatus = GameStatus.Running, players = playersWithAssignedCharacters, characterIdsOutsideMap = playersWithAssignedCharacters.flatMap(c => c.characters.map(c => c.id)))
     } else this
   }
 
   def checkVictoryStatus(): GameState = {
     def filterPendingPlayers: Player => Boolean = _.victoryStatus == VictoryStatus.Pending
 
-    if (gamePhase == GamePhase.CharacterPick && players.count(_.victoryStatus == VictoryStatus.Lost) > 0) {
+    if (gameStatus == GameStatus.CharacterPick && players.count(_.victoryStatus == VictoryStatus.Lost) > 0) {
       this.modify(_.players.eachWhere(filterPendingPlayers).victoryStatus)
         .setTo(VictoryStatus.Drawn)
-        .modify(_.gamePhase).setTo(GamePhase.Finished)
+        .modify(_.gameStatus).setTo(GameStatus.Finished)
     } else if (players.count(_.victoryStatus == VictoryStatus.Pending) == 1) {
       this.modify(_.players.eachWhere(filterPendingPlayers).victoryStatus)
         .setTo(VictoryStatus.Won)
-        .modify(_.gamePhase).setTo(GamePhase.Finished)
+        .modify(_.gameStatus).setTo(GameStatus.Finished)
     } else this
   }
 
@@ -73,12 +73,12 @@ case class GameState(id: String,
     val blindPickFinished = blindPickState.fold(false)(_.pickPhase == BlindPickPhase.Finished)
 
     if(draftPickFinished || blindPickFinished) {
-      this.modify(_.gamePhase).setTo(GamePhase.CharacterPicked)
+      this.modify(_.gameStatus).setTo(GameStatus.CharacterPicked)
     } else this
   }
 
   def startPlacingCharacters()(implicit random: Random): GameState = {
-    this.modify(_.gamePhase).setTo(GamePhase.CharacterPlacing).placeCharactersRandomlyIfAllRandom(charactersMetadata)
+    this.modify(_.gameStatus).setTo(GameStatus.CharacterPlacing).placeCharactersRandomlyIfAllRandom(charactersMetadata)
   }
 
   def surrender(playerIds: PlayerId*): GameState = {
@@ -137,7 +137,7 @@ object GameState {
     phase = Phase(0),
     turn = Turn(0),
     players = Seq(),
-    gamePhase = GamePhase.NotStarted,
+    gameStatus = GameStatus.NotStarted,
     pickType = PickType.AllRandom,
     numberOfBans = 0,
     numberOfCharactersPerPlayers = 1,

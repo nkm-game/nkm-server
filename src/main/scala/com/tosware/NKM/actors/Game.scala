@@ -114,7 +114,7 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
           }
       }
     case CharacterSelectTimeout(pickNumber) =>
-      if(Seq(GamePhase.CharacterPick, GamePhase.CharacterPicked).contains(gameState.gamePhase)) {
+      if(Seq(GameStatus.CharacterPick, GameStatus.CharacterPicked).contains(gameState.gameStatus)) {
         val placingStartedEvent = PlacingCharactersStarted(id)
         gameState.pickType match {
           case PickType.AllRandom =>
