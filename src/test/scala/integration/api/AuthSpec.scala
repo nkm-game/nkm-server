@@ -38,7 +38,7 @@ class AuthSpec extends ApiTrait
         status shouldBe OK
 
         val token = responseAs[String]
-        JwtSprayJson.decode(token, jwtSecretKey.value, Seq(JwtAlgorithm.HS256)) match {
+        JwtSprayJson.decode(token, deps.jwtSecretKey.value, Seq(JwtAlgorithm.HS256)) match {
           case Success(claim) => claim.content.parseJson.convertTo[JwtContent] shouldEqual JwtContent("test")
           case _ => fail()
         }

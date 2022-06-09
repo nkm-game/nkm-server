@@ -34,6 +34,8 @@ class GamesManager(NKMDataService: NKMDataService)
 
   override def log: LoggingAdapter = akka.event.Logging(context.system, s"${this.getClass}($persistenceId)")
 
+  override def preStart(): Unit = log.info("Games manager started")
+
   var games: Map[String, ActorRef] = Map()
 
   def setGame(gameId: String): Unit = {

@@ -6,39 +6,39 @@ import akka.http.scaladsl.server.Route
 import com.tosware.NKM.serializers.NKMJsonProtocol
 import com.tosware.NKM.services.http.directives._
 import com.tosware.NKM.services.http.routes._
-import com.tosware.NKM.{CORSHandler, NKMTimeouts}
+import com.tosware.NKM.{CORSHandler, NKMDependencies, NKMTimeouts}
 
-trait HttpService
+class HttpService(deps: NKMDependencies)
   extends CORSHandler
     with SprayJsonSupport
     with NKMJsonProtocol
     with NKMTimeouts
-    with JwtDirective
     with LoggingDirective
-    with WebsocketRoutes
-    with AuthRoutes
-    with LobbyRoutes
-    with GameRoutes
-    with NKMDataRoutes
 {
+  val authRoutes = new AuthRoutes(deps)
+  val lobbyRoutes = new LobbyRoutes(deps)
+  val gameRoutes = new GameRoutes(deps)
+  val nkmDataRoutes = new NKMDataRoutes(deps)
+  val websocketRoutes = new WebsocketRoutes(deps)
+
   val routes: Route = {
     logRequestResponse {
       corsHandler {
         concat(
           pathPrefix("ws") {
-            websocketRoutes
+            websocketRoutes.websocketRoutes
           },
           pathPrefix("api") {
             get {
               concat(
-                lobbyGetRoutes,
-                gameGetRoutes,
-                nkmDataGetRoutes,
+                lobbyRoutes.lobbyGetRoutes,
+                gameRoutes.gameGetRoutes,
+                nkmDataRoutes.nkmDataGetRoutes,
               )
             } ~
               post {
                 concat(
-                  authPostRoutes,
+                  authRoutes.authPostRoutes,
                 )
               }
           }
@@ -46,5 +46,4 @@ trait HttpService
       }
     }
   }
-
 }

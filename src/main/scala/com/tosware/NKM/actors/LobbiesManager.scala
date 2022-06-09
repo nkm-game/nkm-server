@@ -37,6 +37,8 @@ class LobbiesManager(NKMDataService: NKMDataService)
 
   override def log: LoggingAdapter = akka.event.Logging(context.system, s"${this.getClass}($persistenceId)")
 
+  override def preStart(): Unit = log.info("Lobbies manager started")
+
   var lobbies: Map[String, ActorRef] = Map()
 
   def setLobby(lobbyId: String, lobbyActor: ActorRef): Unit =

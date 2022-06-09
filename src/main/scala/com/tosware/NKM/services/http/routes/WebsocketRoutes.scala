@@ -6,18 +6,17 @@ import akka.http.scaladsl.model.ws.{Message, TextMessage}
 import akka.http.scaladsl.server.Directives._
 import akka.stream.OverflowStrategy
 import akka.stream.scaladsl.{Flow, Sink, Source}
+import com.tosware.NKM.NKMDependencies
 import com.tosware.NKM.actors.ws._
-import com.tosware.NKM.services.http.directives.JwtDirective
+import com.tosware.NKM.services.http.directives.{JwtDirective, JwtSecretKey}
 import com.tosware.NKM.services.{GameService, LobbyService}
 
-trait WebsocketRoutes extends JwtDirective
+class WebsocketRoutes(deps: NKMDependencies) extends JwtDirective
 {
-  implicit val system: ActorSystem
-  implicit val lobbyService: LobbyService
-  implicit val gameService: GameService
-
-  lazy val lobbySessionActor = system.actorOf(LobbySessionActor.props(), "lobby_session")
-  lazy val gameSessionActor = system.actorOf(GameSessionActor.props(), "game_session")
+  implicit val jwtSecretKey: JwtSecretKey = deps.jwtSecretKey
+  implicit val system: ActorSystem = deps.system
+  implicit val lobbyService: LobbyService = deps.lobbyService
+  implicit val gameService: GameService = deps.gameService
 
   // new connection - new user actor
   def newUser(userActor: ActorRef) = {
@@ -44,11 +43,11 @@ trait WebsocketRoutes extends JwtDirective
   val websocketRoutes = concat (
     path("lobby") {
       // new connection - new user actor
-      handleWebSocketMessages(newUser(system.actorOf(WebsocketUser.lobbyProps(lobbySessionActor))))
+      handleWebSocketMessages(newUser(system.actorOf(WebsocketUser.lobbyProps(deps.lobbySessionActor))))
     },
     path("game") {
       // new connection - new user actor
-      handleWebSocketMessages(newUser(system.actorOf(WebsocketUser.gameProps(gameSessionActor))))
+      handleWebSocketMessages(newUser(system.actorOf(WebsocketUser.gameProps(deps.gameSessionActor))))
     },
   )
 }

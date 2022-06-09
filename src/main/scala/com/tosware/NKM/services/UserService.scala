@@ -5,12 +5,11 @@ import akka.pattern.ask
 import akka.persistence.jdbc.query.scaladsl.JdbcReadJournal
 import akka.persistence.query.PersistenceQuery
 import akka.stream.scaladsl.Sink
+import com.tosware.NKM.NKMTimeouts
 import com.tosware.NKM.actors.User
 import com.tosware.NKM.actors.User._
 import com.tosware.NKM.models.{Credentials, RegisterRequest}
-import com.tosware.NKM.{DBManager, NKMTimeouts}
 import slick.jdbc.JdbcBackend
-import slick.jdbc.MySQLProfile.api._
 
 import scala.concurrent.Await
 
@@ -20,10 +19,10 @@ object UserService {
   case object InvalidCredentials extends Event
 }
 
-class UserService(implicit db: JdbcBackend.Database) extends NKMTimeouts {
+class UserService(implicit db: JdbcBackend.Database, system: ActorSystem) extends NKMTimeouts {
   import UserService._
 
-  def authenticate(creds: Credentials)(implicit system: ActorSystem): Event = {
+  def authenticate(creds: Credentials): Event = {
     val userActor: ActorRef = system.actorOf(User.props(creds.login))
     Await.result(userActor ? CheckLogin(creds.password), atMost) match {
       case LoginSuccess => LoggedIn(creds.login)
@@ -31,7 +30,7 @@ class UserService(implicit db: JdbcBackend.Database) extends NKMTimeouts {
     }
   }
 
-  def register(request: RegisterRequest)(implicit system: ActorSystem): RegisterEvent = {
+  def register(request: RegisterRequest): RegisterEvent = {
     val readJournal: JdbcReadJournal = PersistenceQuery(system).readJournalFor[JdbcReadJournal](JdbcReadJournal.Identifier)
     val userActor: ActorRef = system.actorOf(User.props(request.login))
     val allEmailsFuture = readJournal.

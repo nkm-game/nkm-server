@@ -1,10 +1,9 @@
 package helpers
 
-import akka.actor.{ActorRef, ActorSystem, PoisonPill}
+import akka.actor.ActorSystem
 import akka.http.scaladsl.testkit.{RouteTestTimeout, ScalatestRouteTest}
-import com.tosware.NKM.actors.{GamesManager, LobbiesManager}
+import com.tosware.NKM.NKMDependencies
 import com.tosware.NKM.services.http.HttpService
-import com.tosware.NKM.services.{GameService, LobbyService, NKMDataService, UserService}
 import org.slf4j.{Logger, LoggerFactory}
 
 import scala.concurrent.duration.DurationInt
@@ -12,14 +11,12 @@ import scala.concurrent.duration.DurationInt
 trait ApiTrait
     extends NKMTestTrait
       with ScalatestRouteTest
-      with HttpService
   {
-    implicit val NKMDataService: NKMDataService = new NKMDataService()
-    implicit val userService: UserService = new UserService()
-    val gamesManagerActor: ActorRef = system.actorOf(GamesManager.props(NKMDataService))
-    val lobbiesManagerActor: ActorRef = system.actorOf(LobbiesManager.props(NKMDataService))
-    implicit val gameService: GameService = new GameService(gamesManagerActor)
-    implicit val lobbyService: LobbyService = new LobbyService(lobbiesManagerActor)
+    private var _depsOption: Option[NKMDependencies] = None
+    def deps = _depsOption.get
+    private var _httpServiceOption: Option[HttpService] = None
+    def httpService = _httpServiceOption.get
+    def routes = httpService.routes
 
     implicit def default(implicit system: ActorSystem): RouteTestTimeout = RouteTestTimeout(5.seconds)
     val logger: Logger = LoggerFactory.getLogger(getClass)
@@ -28,15 +25,14 @@ trait ApiTrait
       super.beforeAll()
     }
 
-    override def afterAll(): Unit = {
-      super.afterAll()
-    }
-
     override def beforeEach(): Unit = {
       super.beforeEach()
+      _depsOption = Some(new NKMDependencies(system, db))
+      _httpServiceOption = Some(new HttpService(deps))
     }
 
     override def afterEach(): Unit = {
+      deps.cleanup()
       super.afterEach()
     }
 }

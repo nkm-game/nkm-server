@@ -20,7 +20,6 @@ trait NKMTestTrait
     with NKMTimeouts
     with SprayJsonSupport {
   implicit val db: JdbcBackend.Database = Database.forConfig("slick.db")
-  implicit val jwtSecretKey: JwtSecretKey = JwtSecretKey("jwt_test_key")
 
   override def beforeAll(): Unit = {
     val config: Config = ConfigFactory.load()
@@ -32,10 +31,6 @@ trait NKMTestTrait
   override def beforeEach(): Unit = {
     DBManager.dropAllTables(db)
     DBManager.createNeededTables(db)
-  }
-
-  override def afterAll(): Unit = {
-    DBManager.dropAllTables(db)
-    db.close()
+//    println("FATAL: tables created")
   }
 }

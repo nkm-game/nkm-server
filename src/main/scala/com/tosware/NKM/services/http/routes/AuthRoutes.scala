@@ -4,17 +4,18 @@ import akka.actor.ActorSystem
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
+import com.tosware.NKM.NKMDependencies
 import com.tosware.NKM.actors.User.{RegisterFailure, RegisterSuccess}
 import com.tosware.NKM.models.{Credentials, RegisterRequest}
 import com.tosware.NKM.services.UserService
 import com.tosware.NKM.services.UserService.{InvalidCredentials, LoggedIn}
-import com.tosware.NKM.services.http.directives.JwtDirective
+import com.tosware.NKM.services.http.directives.{JwtDirective, JwtSecretKey}
 
-trait AuthRoutes extends JwtDirective
+class AuthRoutes(deps: NKMDependencies) extends JwtDirective
     with SprayJsonSupport
 {
-  implicit val system: ActorSystem
-  implicit val userService: UserService
+  val jwtSecretKey: JwtSecretKey = deps.jwtSecretKey
+  val userService: UserService = deps.userService
 
   val authPostRoutes = concat(
     path("register") {
@@ -37,5 +38,4 @@ trait AuthRoutes extends JwtDirective
       }
     }
   )
-
 }
