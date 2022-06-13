@@ -72,7 +72,10 @@ case class DraftPickState(config: DraftPickConfig,
   }
 
   def finishBanning(): DraftPickState = {
-    copy(bans = bans.map { case (playerId, None) => playerId -> Some(Set()) })
+    copy(bans = bans.map {
+      case (playerId, None) => playerId -> Some(Set())
+      case x => x
+    })
   }
 
   def toView(forPlayerOpt: Option[PlayerId]): DraftPickStateView = {
