@@ -4,7 +4,7 @@ import akka.http.scaladsl.testkit.WSProbe
 import com.tosware.NKM.models.game.blindpick.BlindPickPhase
 import com.tosware.NKM.models.game.draftpick.DraftPickPhase
 import com.tosware.NKM.models.game.ws._
-import com.tosware.NKM.models.game.{ClockConfig, GameStatus, PickType, VictoryStatus}
+import com.tosware.NKM.models.game.{ClockConfig, GameStatus, NKMCharacterMetadata, PickType, VictoryStatus}
 import helpers.WSTrait
 
 class WSGameSpec extends WSTrait {
@@ -211,6 +211,51 @@ class WSGameSpec extends WSTrait {
       }
     }
 
+    "hide draft pick information during ban phase" in {
+      val gameId = createLobbyForGame(
+        pickType = PickType.DraftPick,
+        numberOfPlayers = 3,
+        numberOfBans = 2,
+        numberOfCharacters = 2,
+      )
+
+      withGameWS {
+        val availableCharacters = fetchAndParseGame(gameId).draftPickState.get.config.availableCharacters
+        val player0Bans = Set.empty[NKMCharacterMetadata.CharacterMetadataId]
+        val player1Bans = Set(availableCharacters.head, availableCharacters.tail.head)
+        val player2Bans = Set(availableCharacters.head)
+
+        auth(0)
+        ban(gameId, player0Bans).statusCode shouldBe ok
+
+        auth(1)
+        ban(gameId, player1Bans).statusCode shouldBe ok
+
+        // check
+        auth(0)
+        fetchAndParseGame(gameId).draftPickState.get.bans shouldBe
+          Map(usernames(0) -> Some(player0Bans), usernames(1) -> None, usernames(2) -> None)
+        auth(1)
+        fetchAndParseGame(gameId).draftPickState.get.bans shouldBe
+          Map(usernames(0) -> None, usernames(1) -> Some(player1Bans), usernames(2) -> None)
+        auth(2)
+        fetchAndParseGame(gameId).draftPickState.get.bans shouldBe
+          Map(usernames(0) -> None, usernames(1) -> None, usernames(2) -> None)
+
+        auth(2)
+        ban(gameId, Set(availableCharacters.head)).statusCode shouldBe ok
+
+        // check
+        val finalBans = Map(usernames(0) -> Some(player0Bans), usernames(1) -> Some(player1Bans), usernames(2) -> Some(player2Bans))
+        auth(0)
+        fetchAndParseGame(gameId).draftPickState.get.bans shouldBe finalBans
+        auth(1)
+        fetchAndParseGame(gameId).draftPickState.get.bans shouldBe finalBans
+        auth(2)
+        fetchAndParseGame(gameId).draftPickState.get.bans shouldBe finalBans
+      }
+    }
+
     "allow picking during blind pick" in {
       val numberOfCharacters = 2
 
@@ -223,19 +268,68 @@ class WSGameSpec extends WSTrait {
       withGameWS {
         auth(0)
         val availableCharacters = fetchAndParseGame(gameId).blindPickState.get.config.availableCharacters.toSeq
+        val charactersToPick = availableCharacters.take(numberOfCharacters).toSet
 
-        blindPick(gameId, availableCharacters.take(numberOfCharacters).toSet).statusCode shouldBe ok
-        blindPick(gameId, availableCharacters.take(numberOfCharacters).toSet).statusCode shouldBe nok
+        blindPick(gameId, charactersToPick).statusCode shouldBe ok
+        blindPick(gameId, charactersToPick).statusCode shouldBe nok
 
         auth(2)
-        blindPick(gameId, availableCharacters.take(numberOfCharacters).toSet).statusCode shouldBe ok
+        blindPick(gameId, charactersToPick).statusCode shouldBe ok
 
         auth(1)
-        blindPick(gameId, availableCharacters.take(numberOfCharacters).toSet).statusCode shouldBe ok
+        blindPick(gameId, charactersToPick).statusCode shouldBe ok
 
         val gameState = fetchAndParseGame(gameId)
         gameState.blindPickState.get.pickPhase shouldBe BlindPickPhase.Finished
         gameState.gameStatus shouldBe GameStatus.CharacterPicked
+      }
+    }
+
+    "hide blind pick information of other players picks during picking" in {
+      val numberOfCharacters = 2
+
+      val gameId = createLobbyForGame(
+        pickType = PickType.BlindPick,
+        numberOfPlayers = 3,
+        numberOfCharacters = numberOfCharacters,
+      )
+
+      withGameWS {
+        auth(0)
+        val availableCharacters = fetchAndParseGame(gameId).blindPickState.get.config.availableCharacters.toSeq
+        val charactersToPick = availableCharacters.take(numberOfCharacters).toSet
+
+        blindPick(gameId, charactersToPick).statusCode shouldBe ok
+
+        auth(2)
+        blindPick(gameId, charactersToPick).statusCode shouldBe ok
+
+
+        // check
+        auth(0)
+        fetchAndParseGame(gameId).blindPickState.get.characterSelection shouldBe
+          Map(usernames(0) -> charactersToPick, usernames(1) -> Set(), usernames(2) -> Set())
+
+        auth(1)
+        fetchAndParseGame(gameId).blindPickState.get.characterSelection shouldBe
+          Map(usernames(0) -> Set(), usernames(1) -> Set(), usernames(2) -> Set())
+
+        auth(2)
+        fetchAndParseGame(gameId).blindPickState.get.characterSelection shouldBe
+          Map(usernames(0) -> Set(), usernames(1) -> Set(), usernames(2) -> charactersToPick)
+
+        // finish picking
+        auth(1)
+        blindPick(gameId, charactersToPick).statusCode shouldBe ok
+
+        // check after picking
+        val finalMap = Map(usernames(0) -> charactersToPick, usernames(1) -> charactersToPick, usernames(2) -> charactersToPick)
+        auth(0)
+        fetchAndParseGame(gameId).blindPickState.get.characterSelection shouldBe finalMap
+        auth(1)
+        fetchAndParseGame(gameId).blindPickState.get.characterSelection shouldBe finalMap
+        auth(2)
+        fetchAndParseGame(gameId).blindPickState.get.characterSelection shouldBe finalMap
       }
     }
 

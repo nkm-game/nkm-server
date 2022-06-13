@@ -75,5 +75,27 @@ case class DraftPickState(config: DraftPickConfig,
     copy(bans = bans.map { case (playerId, None) => playerId -> Some(Set()) })
   }
 
+  def toView(forPlayerOpt: Option[PlayerId]): DraftPickStateView = {
+    val bansFiltered =
+      if(pickPhase == DraftPickPhase.Banning)
+        if(forPlayerOpt.isEmpty)
+          Map.empty[PlayerId, Option[Set[CharacterMetadataId]]]
+        else // show only bans from player watching
+          config.playersPicking.map(x => x -> None).toMap
+            .updated(forPlayerOpt.get, bans(forPlayerOpt.get))
+      else
+        bans
+    DraftPickStateView(config, bansFiltered, characterSelection, bannedCharacters, pickedCharacters, charactersAvailableToPick, currentPlayerPicking, pickPhase)
+  }
 }
 
+case class DraftPickStateView(
+                               config: DraftPickConfig,
+                               bans: Map[PlayerId, Option[Set[CharacterMetadataId]]],
+                               characterSelection: Map[PlayerId, Seq[CharacterMetadataId]],
+                               bannedCharacters: Set[CharacterMetadataId],
+                               pickedCharacters: Set[CharacterMetadataId],
+                               charactersAvailableToPick: Set[CharacterMetadataId],
+                               currentPlayerPicking: Option[PlayerId],
+                               pickPhase: DraftPickPhase,
+                             )

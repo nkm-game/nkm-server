@@ -59,6 +59,7 @@ trait GameWebsocketUserBehaviour extends WebsocketUserBehaviour {
         authenticateToken(token) match {
           case Some(username) =>
             userActor ! WebsocketUser.Authenticate(username)
+            session ! SessionActor.Authenticate(username, outgoing)
             WebsocketGameResponse(GameResponseType.Auth, StatusCodes.OK.intValue, username)
           case None =>
             WebsocketGameResponse(GameResponseType.Auth, StatusCodes.Unauthorized.intValue, "Invalid token.")
@@ -69,8 +70,8 @@ trait GameWebsocketUserBehaviour extends WebsocketUserBehaviour {
         WebsocketGameResponse(GameResponseType.Observe, StatusCodes.OK.intValue)
       case GameRoute.GetState =>
         val gameId = request.requestJson.parseJson.convertTo[GetState].gameId
-        val gameState = Await.result(gameService.getGameState(gameId), atMost)
-        WebsocketGameResponse(GameResponseType.State, StatusCodes.OK.intValue, gameState.toJson.toString)
+        val gameStateView = Await.result(gameService.getGameStateView(gameId, authStatus.username), atMost)
+        WebsocketGameResponse(GameResponseType.State, StatusCodes.OK.intValue, gameStateView.toJson.toString)
       case GameRoute.Pause => ???
       case GameRoute.Surrender =>
         val gameId = request.requestJson.parseJson.convertTo[Surrender].gameId

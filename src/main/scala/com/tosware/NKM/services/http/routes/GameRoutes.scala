@@ -14,7 +14,7 @@ class GameRoutes(deps: NKMDependencies) extends JwtDirective
 
   val gameGetRoutes = concat(
     path("state"/ Segment) { (gameId: String) =>
-      complete(gameService.getGameState(gameId))
+      complete(gameService.getGameStateView(gameId, None))
     },
   )
 }

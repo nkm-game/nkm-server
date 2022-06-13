@@ -20,6 +20,8 @@ object Game {
 
   case object GetState extends Query
 
+  case class GetStateView(forPlayer: Option[PlayerId]) extends Query
+
   sealed trait Command
 
   case class StartGame(gameStartDependencies: GameStartDependencies) extends Command
@@ -93,8 +95,12 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
 
   override def receive: Receive = {
     case GetState =>
-      log.warning(gameState.toString)
+      log.debug(s"GAME STATE REQUEST: ${gameState.toString}")
       sender() ! gameState
+    case GetStateView(forPlayer) =>
+      val gameStateView = gameState.toView(forPlayer)
+      log.debug(s"GAME STATE VIEW REQUEST: ${gameStateView.toString}")
+      sender() ! gameStateView
     case StartGame(gameStartDependencies) =>
       GameStateValidator(gameState).validateStartGame() match {
         case failure @ Failure(_) => sender() ! failure

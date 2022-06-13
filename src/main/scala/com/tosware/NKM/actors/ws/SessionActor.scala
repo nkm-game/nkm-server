@@ -7,7 +7,8 @@ import com.tosware.NKM.serializers.NKMJsonProtocol
 import scala.collection.mutable
 
 object SessionActor {
-  case class Observe(sessionId: String, websocketUserOutput: ActorRef)
+  case class Observe(gameId: String, websocketUserOutputActor: ActorRef)
+  case class Authenticate(username: String, websocketUserOutputActor: ActorRef)
 }
 
 
@@ -20,22 +21,31 @@ trait SessionActor
   import SessionActor._
 
   // user can observe only one lobby at once
-  private val sessionIdByObserver = mutable.Map.empty[ActorRef, String]
-  private def observersBySessionId() = sessionIdByObserver.groupMap(_._2)(_._1)
+  private val gameIdByObserver = mutable.Map.empty[ActorRef, String]
+  private val authStatusByObserver = mutable.Map.empty[ActorRef, Option[String]]
+  private def observersByGameId() = gameIdByObserver.groupMap(_._2)(_._1)
 
-  private def observe(sessionId: String, user: ActorRef): Unit =
-    sessionIdByObserver(user) = sessionId
+  private def observe(gameId: String, websocketUserOutputActor: ActorRef): Unit =
+    gameIdByObserver(websocketUserOutputActor) = gameId
 
-  private def stopObserving(user: ActorRef): Unit =
-    sessionIdByObserver.remove(user)
+  private def stopObserving(websocketUserOutputActor: ActorRef): Unit =
+    gameIdByObserver.remove(websocketUserOutputActor)
 
-  def getObservers(sessionId: String): Set[ActorRef] =
-    observersBySessionId().getOrElse(sessionId, Set.empty).toSet
+  private def authenticate(username: String, websocketUserOutputActor: ActorRef): Unit =
+    authStatusByObserver(websocketUserOutputActor) = Some(username)
+
+  def getObservers(gameId: String): Set[ActorRef] =
+    observersByGameId().getOrElse(gameId, Set.empty).toSet
+
+  def getAuthStatus(websocketUserOutputActor: ActorRef): Option[String] =
+    authStatusByObserver.get(websocketUserOutputActor).flatten
 
   def receive: Receive = {
-    case Observe(sessionId, user) =>
-      observe(sessionId, user)
+    case Observe(gameId, userActor) =>
+      observe(gameId, userActor)
       context.watch(sender())
+    case Authenticate(username, userActor) =>
+      authenticate(username, userActor)
     case Terminated(user) =>
       stopObserving(user)
   }

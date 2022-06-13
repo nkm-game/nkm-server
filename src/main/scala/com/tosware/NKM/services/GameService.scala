@@ -3,9 +3,10 @@ package com.tosware.NKM.services
 import akka.actor.ActorRef
 import akka.pattern.ask
 import com.tosware.NKM.NKMTimeouts
-import com.tosware.NKM.actors.Game.GetState
+import com.tosware.NKM.actors.Game.{GetState, GetStateView}
 import com.tosware.NKM.actors._
 import com.tosware.NKM.models.CommandResponse
+import com.tosware.NKM.models.game.Player.PlayerId
 import com.tosware.NKM.models.game._
 import com.tosware.NKM.models.game.ws.GameRequest._
 import slick.jdbc.JdbcBackend
@@ -88,4 +89,10 @@ class GameService(gamesManagerActor: ActorRef)
 
   def getGameState(gameId: String): Future[GameState] =
     getGameState(getGameActor(gameId))
+
+  def getGameStateView(gameActor: ActorRef, forPlayer: Option[PlayerId]): Future[GameStateView] =
+    (gameActor ? GetStateView(forPlayer)).mapTo[GameStateView]
+
+  def getGameStateView(gameId: String, forPlayer: Option[PlayerId]): Future[GameStateView] =
+    getGameStateView(getGameActor(gameId), forPlayer)
 }

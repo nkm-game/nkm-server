@@ -7,8 +7,6 @@ import com.tosware.NKM.models.lobby.ws._
 import com.tosware.NKM.services.LobbyService
 import spray.json._
 
-import scala.concurrent.Await
-
 object LobbySessionActor {
   def props()(implicit lobbyService: LobbyService): Props = Props(new LobbySessionActor)
 }
@@ -24,7 +22,7 @@ class LobbySessionActor(implicit val lobbyService: LobbyService)
   override def receive: Receive = super.receive.orElse[Any, Unit]{
     case e: Lobby.Event =>
       val lobbyId = e.id
-      val lobbyState = Await.result(lobbyService.getLobbyState(lobbyId), atMost)
+      val lobbyState = aw(lobbyService.getLobbyState(lobbyId))
       val response = WebsocketLobbyResponse(LobbyResponseType.Lobby, StatusCodes.OK.intValue, lobbyState.toJson.toString)
       getObservers(lobbyId).foreach(_ ! WebsocketUser.OutgoingMessage(response.toJson.toString))
   }

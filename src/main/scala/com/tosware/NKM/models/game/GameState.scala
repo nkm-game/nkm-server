@@ -126,6 +126,25 @@ case class GameState(id: String,
 
   def setMap(hexMap: HexMap): GameState =
     copy(hexMap = Some(hexMap))
+
+  def toView(forPlayer: Option[PlayerId]): GameStateView =
+    GameStateView(
+      id,
+      charactersMetadata,
+      hexMap,
+      characterIdsOutsideMap,
+      phase,
+      turn,
+      players,
+      gameStatus,
+      pickType,
+      numberOfBans,
+      numberOfCharactersPerPlayers,
+      draftPickState.map(_.toView(forPlayer)),
+      blindPickState.map(_.toView(forPlayer)),
+      clock,
+      getCurrentPlayer.name,
+    )
 }
 
 object GameState {
@@ -146,3 +165,21 @@ object GameState {
     clock = Clock.empty(),
   )
 }
+
+case class GameStateView(
+                          id: String,
+                          charactersMetadata: Set[NKMCharacterMetadata],
+                          hexMap: Option[HexMap],
+                          characterIdsOutsideMap: Seq[CharacterId],
+                          phase: Phase,
+                          turn: Turn,
+                          players: Seq[Player],
+                          gameStatus: GameStatus,
+                          pickType: PickType,
+                          numberOfBans: Int,
+                          numberOfCharactersPerPlayers: Int,
+                          draftPickState: Option[DraftPickStateView],
+                          blindPickState: Option[BlindPickStateView],
+                          clock: Clock,
+                          currentPlayerId: PlayerId,
+                        )

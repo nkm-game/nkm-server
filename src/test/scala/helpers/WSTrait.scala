@@ -134,9 +134,9 @@ trait WSTrait extends UserApiTrait {
   def fetchGame(gameId: String): WebsocketGameResponse =
     sendWSRequestG(GameRoute.GetState, GetState(gameId).toJson.toString)
 
-  def fetchAndParseGame(gameId: String): GameState = {
+  def fetchAndParseGame(gameId: String): GameStateView = {
     val gameResponse = fetchGame(gameId)
     gameResponse.statusCode shouldBe StatusCodes.OK.intValue
-    gameResponse.body.parseJson.convertTo[GameState]
+    gameResponse.body.parseJson.convertTo[GameStateView]
   }
 }
