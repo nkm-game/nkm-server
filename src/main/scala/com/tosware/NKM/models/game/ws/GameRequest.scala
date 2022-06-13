@@ -7,25 +7,25 @@ object GameRequest {
   sealed trait GameRequest
   object General {
     final case class Auth(token: String) extends GameRequest
-    final case class Observe(gameId: String) extends GameRequest
-    final case class GetState(gameId: String) extends GameRequest
-    final case class Pause(gameId: String) extends GameRequest
-    final case class Surrender(gameId: String) extends GameRequest
+    final case class Observe(lobbyId: String) extends GameRequest
+    final case class GetState(lobbyId: String) extends GameRequest
+    final case class Pause(lobbyId: String) extends GameRequest
+    final case class Surrender(lobbyId: String) extends GameRequest
   }
   object CharacterSelect {
-    final case class BanCharacters(gameId: String, characterIds: Set[CharacterMetadataId]) extends GameRequest
-    final case class PickCharacter(gameId: String, characterId: CharacterMetadataId) extends GameRequest
-    final case class BlindPickCharacters(gameId: String, characterIds: Set[CharacterMetadataId]) extends GameRequest
+    final case class BanCharacters(lobbyId: String, characterIds: Set[CharacterMetadataId]) extends GameRequest
+    final case class PickCharacter(lobbyId: String, characterId: CharacterMetadataId) extends GameRequest
+    final case class BlindPickCharacters(lobbyId: String, characterIds: Set[CharacterMetadataId]) extends GameRequest
   }
   object Action {
-    final case class PlaceCharacters(gameId: String, coordinatesToCharacterIdMap: Map[HexCoordinates, String]) extends GameRequest
-    final case class EndTurn(gameId: String) extends GameRequest
-    final case class Move(gameId: String, path: Seq[HexCoordinates], characterId: String) extends GameRequest
-    final case class BasicAttack(gameId: String, characterThatAttacksId: String, targetCharacterId: String) extends GameRequest
-    final case class UseAbility(gameId: String, useAbilityData: String) extends GameRequest
+    final case class PlaceCharacters(lobbyId: String, coordinatesToCharacterIdMap: Map[HexCoordinates, String]) extends GameRequest
+    final case class EndTurn(lobbyId: String) extends GameRequest
+    final case class Move(lobbyId: String, path: Seq[HexCoordinates], characterId: String) extends GameRequest
+    final case class BasicAttack(lobbyId: String, characterThatAttacksId: String, targetCharacterId: String) extends GameRequest
+    final case class UseAbility(lobbyId: String, useAbilityData: String) extends GameRequest
   }
   object Chat {
-    final case class SendChatMessage(gameId: String, message: String) extends GameRequest
-    final case class ExecuteCommand(gameId: String, command: String) extends GameRequest
+    final case class SendChatMessage(lobbyId: String, message: String) extends GameRequest
+    final case class ExecuteCommand(lobbyId: String, command: String) extends GameRequest
   }
 }

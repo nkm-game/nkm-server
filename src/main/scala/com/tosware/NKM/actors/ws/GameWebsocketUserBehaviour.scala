@@ -65,20 +65,20 @@ trait GameWebsocketUserBehaviour extends WebsocketUserBehaviour {
             WebsocketGameResponse(GameResponseType.Auth, StatusCodes.Unauthorized.intValue, "Invalid token.")
         }
       case GameRoute.Observe =>
-        val gameId = request.requestJson.parseJson.convertTo[Observe].gameId
-        session ! SessionActor.Observe(gameId, outgoing)
+        val lobbyId = request.requestJson.parseJson.convertTo[Observe].lobbyId
+        session ! SessionActor.Observe(lobbyId, outgoing)
         WebsocketGameResponse(GameResponseType.Observe, StatusCodes.OK.intValue)
       case GameRoute.GetState =>
-        val gameId = request.requestJson.parseJson.convertTo[GetState].gameId
-        val gameStateView = Await.result(gameService.getGameStateView(gameId, authStatus.username), atMost)
+        val lobbyId = request.requestJson.parseJson.convertTo[GetState].lobbyId
+        val gameStateView = Await.result(gameService.getGameStateView(lobbyId, authStatus.username), atMost)
         WebsocketGameResponse(GameResponseType.State, StatusCodes.OK.intValue, gameStateView.toJson.toString)
       case GameRoute.Pause => ???
       case GameRoute.Surrender =>
-        val gameId = request.requestJson.parseJson.convertTo[Surrender].gameId
+        val lobbyId = request.requestJson.parseJson.convertTo[Surrender].lobbyId
         implicit val responseType: GameResponseType = GameResponseType.Surrender
         if (authStatus.username.isEmpty) return unauthorized()
         val username = authStatus.username.get
-        val response = Await.result(gameService.surrender(username, gameId), atMost)
+        val response = Await.result(gameService.surrender(username, lobbyId), atMost)
         resolveResponse(response)
       case GameRoute.BanCharacters =>
         val banCharactersRequest = request.requestJson.parseJson.convertTo[BanCharacters]

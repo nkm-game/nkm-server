@@ -18,38 +18,38 @@ class GameService(gamesManagerActor: ActorRef)
   extends NKMTimeouts {
   import CommandResponse._
 
-  def getGameActor(gameId: String): ActorRef = {
+  def getGameActor(lobbyId: String): ActorRef = {
     import GamesManager.GetGameActorResponse
     import GamesManager.Query.GetGameActor
 
-    aw(gamesManagerActor ? GetGameActor(gameId))
+    aw(gamesManagerActor ? GetGameActor(lobbyId))
       .asInstanceOf[GetGameActorResponse]
       .gameActor
   }
 
-  def surrender(username: String, gameId: String): Future[CommandResponse] = {
-    val gameActor: ActorRef = getGameActor(gameId)
+  def surrender(username: String, lobbyId: String): Future[CommandResponse] = {
+    val gameActor: ActorRef = getGameActor(lobbyId)
 
     val surrenderFuture = gameActor ? Game.Surrender(username)
     Future.successful(Await.result(surrenderFuture, atMost).asInstanceOf[CommandResponse])
   }
 
   def banCharacters(username: String, request: CharacterSelect.BanCharacters): Future[CommandResponse] = {
-    val gameActor: ActorRef = getGameActor(request.gameId)
+    val gameActor: ActorRef = getGameActor(request.lobbyId)
 
     val requestFuture = gameActor ? Game.BanCharacters(username, request.characterIds)
     Future.successful(Await.result(requestFuture, atMost).asInstanceOf[CommandResponse])
   }
 
   def pickCharacter(username: String, request: CharacterSelect.PickCharacter): Future[CommandResponse] = {
-    val gameActor: ActorRef = getGameActor(request.gameId)
+    val gameActor: ActorRef = getGameActor(request.lobbyId)
 
     val f = gameActor ? Game.PickCharacter(username, request.characterId)
     Future.successful(Await.result(f, atMost).asInstanceOf[CommandResponse])
   }
 
   def blindPickCharacter(username: String, request: CharacterSelect.BlindPickCharacters): Future[CommandResponse] = {
-    val gameActor: ActorRef = getGameActor(request.gameId)
+    val gameActor: ActorRef = getGameActor(request.lobbyId)
 
     val f = gameActor ? Game.BlindPickCharacters(username, request.characterIds)
     Future.successful(Await.result(f, atMost).asInstanceOf[CommandResponse])
@@ -57,8 +57,8 @@ class GameService(gamesManagerActor: ActorRef)
 
   // TODO: check for placing on spawn or if character is owned by user
 //  def placeCharacters(userId: String, request: PlaceCharactersRequest): Future[CommandResponse] = {
-//    val gameActor: ActorRef = system.actorOf(Game.props(request.gameId))
-//    val gameStateFuture = getGameState(request.gameId)
+//    val gameActor: ActorRef = system.actorOf(Game.props(request.lobbyId))
+//    val gameStateFuture = getGameState(request.lobbyId)
 //    val gameState = Await.result(gameStateFuture, atMost)
 //
 //    if(gameState.gamePhase != GamePhase.CharacterPlacing) return Future.successful(CommandResponse.Failure)
@@ -87,12 +87,12 @@ class GameService(gamesManagerActor: ActorRef)
   def getGameState(gameActor: ActorRef): Future[GameState] =
     (gameActor ? GetState).mapTo[GameState]
 
-  def getGameState(gameId: String): Future[GameState] =
-    getGameState(getGameActor(gameId))
+  def getGameState(lobbyId: String): Future[GameState] =
+    getGameState(getGameActor(lobbyId))
 
   def getGameStateView(gameActor: ActorRef, forPlayer: Option[PlayerId]): Future[GameStateView] =
     (gameActor ? GetStateView(forPlayer)).mapTo[GameStateView]
 
-  def getGameStateView(gameId: String, forPlayer: Option[PlayerId]): Future[GameStateView] =
-    getGameStateView(getGameActor(gameId), forPlayer)
+  def getGameStateView(lobbyId: String, forPlayer: Option[PlayerId]): Future[GameStateView] =
+    getGameStateView(getGameActor(lobbyId), forPlayer)
 }

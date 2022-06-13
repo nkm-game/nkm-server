@@ -7,7 +7,7 @@ import com.tosware.NKM.serializers.NKMJsonProtocol
 import scala.collection.mutable
 
 object SessionActor {
-  case class Observe(gameId: String, websocketUserOutputActor: ActorRef)
+  case class Observe(lobbyId: String, websocketUserOutputActor: ActorRef)
   case class Authenticate(username: String, websocketUserOutputActor: ActorRef)
 }
 
@@ -21,28 +21,28 @@ trait SessionActor
   import SessionActor._
 
   // user can observe only one lobby at once
-  private val gameIdByObserver = mutable.Map.empty[ActorRef, String]
+  private val lobbyIdByObserver = mutable.Map.empty[ActorRef, String]
   private val authStatusByObserver = mutable.Map.empty[ActorRef, Option[String]]
-  private def observersByGameId() = gameIdByObserver.groupMap(_._2)(_._1)
+  private def observersBylobbyId() = lobbyIdByObserver.groupMap(_._2)(_._1)
 
-  private def observe(gameId: String, websocketUserOutputActor: ActorRef): Unit =
-    gameIdByObserver(websocketUserOutputActor) = gameId
+  private def observe(lobbyId: String, websocketUserOutputActor: ActorRef): Unit =
+    lobbyIdByObserver(websocketUserOutputActor) = lobbyId
 
   private def stopObserving(websocketUserOutputActor: ActorRef): Unit =
-    gameIdByObserver.remove(websocketUserOutputActor)
+    lobbyIdByObserver.remove(websocketUserOutputActor)
 
   private def authenticate(username: String, websocketUserOutputActor: ActorRef): Unit =
     authStatusByObserver(websocketUserOutputActor) = Some(username)
 
-  def getObservers(gameId: String): Set[ActorRef] =
-    observersByGameId().getOrElse(gameId, Set.empty).toSet
+  def getObservers(lobbyId: String): Set[ActorRef] =
+    observersBylobbyId().getOrElse(lobbyId, Set.empty).toSet
 
   def getAuthStatus(websocketUserOutputActor: ActorRef): Option[String] =
     authStatusByObserver.get(websocketUserOutputActor).flatten
 
   def receive: Receive = {
-    case Observe(gameId, userActor) =>
-      observe(gameId, userActor)
+    case Observe(lobbyId, userActor) =>
+      observe(lobbyId, userActor)
       context.watch(sender())
     case Authenticate(username, userActor) =>
       authenticate(username, userActor)

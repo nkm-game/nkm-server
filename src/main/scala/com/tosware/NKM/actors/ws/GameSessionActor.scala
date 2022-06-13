@@ -22,12 +22,12 @@ class GameSessionActor(implicit gameService: GameService)
 
   override def receive: Receive = super.receive.orElse[Any, Unit]{
     case e: Game.Event =>
-      val gameId = e.id
+      val lobbyId = e.id
 
       // TODO: use async proprely
-      getObservers(gameId).foreach { ob =>
+      getObservers(lobbyId).foreach { ob =>
         val authStatus = getAuthStatus(ob)
-        val gameState = aw(gameService.getGameStateView(gameId, authStatus))
+        val gameState = aw(gameService.getGameStateView(lobbyId, authStatus))
         val response = WebsocketGameResponse(GameResponseType.State, StatusCodes.OK.intValue, gameState.toJson.toString)
         ob ! WebsocketUser.OutgoingMessage(response.toJson.toString)
       }

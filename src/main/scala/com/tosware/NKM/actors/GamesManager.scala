@@ -12,14 +12,14 @@ import com.tosware.NKM.services.NKMDataService
 object GamesManager {
   object Query {
     sealed trait Query
-    case class GetGameActor(gameId: String) extends Query
+    case class GetGameActor(lobbyId: String) extends Query
   }
 
   case class GetGameActorResponse(gameActor: ActorRef)
 
   sealed trait Event
   object Event {
-    case class GameTracked(gameId: String) extends Event
+    case class GameTracked(lobbyId: String) extends Event
   }
 
   def props(NKMDataService: NKMDataService): Props = Props(new GamesManager(NKMDataService))
@@ -38,9 +38,9 @@ class GamesManager(NKMDataService: NKMDataService)
 
   var games: Map[String, ActorRef] = Map()
 
-  def setGame(gameId: String): Unit = {
-    val gameActor: ActorRef = context.actorOf(Game.props(gameId)(NKMDataService))
-    games = games.updated(gameId, gameActor)
+  def setGame(lobbyId: String): Unit = {
+    val gameActor: ActorRef = context.actorOf(Game.props(lobbyId)(NKMDataService))
+    games = games.updated(lobbyId, gameActor)
   }
 
   def persistAndPublish[A](event: A)(handler: A => Unit): Unit = {
@@ -50,22 +50,22 @@ class GamesManager(NKMDataService: NKMDataService)
   }
 
   override def receive: Receive = {
-    case GetGameActor(gameId) =>
-      if (games.isDefinedAt(gameId)) {
-        sender() ! GetGameActorResponse(games(gameId))
+    case GetGameActor(lobbyId) =>
+      if (games.isDefinedAt(lobbyId)) {
+        sender() ! GetGameActorResponse(games(lobbyId))
       } else {
-        persistAndPublish(GameTracked(gameId)) { _ =>
-          setGame(gameId)
-          sender() ! GetGameActorResponse(games(gameId))
+        persistAndPublish(GameTracked(lobbyId)) { _ =>
+          setGame(lobbyId)
+          sender() ! GetGameActorResponse(games(lobbyId))
         }
       }
     case e => log.warning(s"Unknown message: $e")
   }
 
   override def receiveRecover: Receive = {
-    case GameTracked(gameId) =>
-      setGame(gameId)
-      log.debug(s"Recovered create of $gameId")
+    case GameTracked(lobbyId) =>
+      setGame(lobbyId)
+      log.debug(s"Recovered create of $lobbyId")
     case RecoveryCompleted =>
     case e => log.warning(s"Unknown message: $e")
   }

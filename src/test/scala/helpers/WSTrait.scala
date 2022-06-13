@@ -74,8 +74,8 @@ trait WSTrait extends UserApiTrait {
   def observeL(lobbyId: String): WebsocketLobbyResponse =
     sendWSRequestL(LobbyRoute.Observe, LobbyRequest.Observe(lobbyId).toJson.toString)
 
-  def observeG(gameId: String): WebsocketGameResponse =
-    sendWSRequestG(GameRoute.Observe, GameRequest.General.Observe(gameId).toJson.toString)
+  def observeG(lobbyId: String): WebsocketGameResponse =
+    sendWSRequestG(GameRoute.Observe, GameRequest.General.Observe(lobbyId).toJson.toString)
 
   def createLobby(lobbyName: String): WebsocketLobbyResponse =
     sendWSRequestL(LobbyRoute.CreateLobby, LobbyRequest.LobbyCreation(lobbyName).toJson.toString)
@@ -119,23 +119,23 @@ trait WSTrait extends UserApiTrait {
     lobbyResponse.body.parseJson.convertTo[LobbyState]
   }
 
-  def surrender(gameId: String): WebsocketGameResponse =
-    sendWSRequestG(GameRoute.Surrender, Surrender(gameId).toJson.toString)
+  def surrender(lobbyId: String): WebsocketGameResponse =
+    sendWSRequestG(GameRoute.Surrender, Surrender(lobbyId).toJson.toString)
 
-  def ban(gameId: String, characterIds: Set[CharacterMetadataId]): WebsocketGameResponse =
-    sendWSRequestG(GameRoute.BanCharacters, BanCharacters(gameId, characterIds).toJson.toString)
+  def ban(lobbyId: String, characterIds: Set[CharacterMetadataId]): WebsocketGameResponse =
+    sendWSRequestG(GameRoute.BanCharacters, BanCharacters(lobbyId, characterIds).toJson.toString)
 
-  def pick(gameId: String, characterId: CharacterMetadataId): WebsocketGameResponse =
-    sendWSRequestG(GameRoute.PickCharacter, PickCharacter(gameId, characterId).toJson.toString)
+  def pick(lobbyId: String, characterId: CharacterMetadataId): WebsocketGameResponse =
+    sendWSRequestG(GameRoute.PickCharacter, PickCharacter(lobbyId, characterId).toJson.toString)
 
-  def blindPick(gameId: String, characterIds: Set[CharacterMetadataId]): WebsocketGameResponse =
-    sendWSRequestG(GameRoute.BlindPickCharacters, BlindPickCharacters(gameId, characterIds).toJson.toString)
+  def blindPick(lobbyId: String, characterIds: Set[CharacterMetadataId]): WebsocketGameResponse =
+    sendWSRequestG(GameRoute.BlindPickCharacters, BlindPickCharacters(lobbyId, characterIds).toJson.toString)
 
-  def fetchGame(gameId: String): WebsocketGameResponse =
-    sendWSRequestG(GameRoute.GetState, GetState(gameId).toJson.toString)
+  def fetchGame(lobbyId: String): WebsocketGameResponse =
+    sendWSRequestG(GameRoute.GetState, GetState(lobbyId).toJson.toString)
 
-  def fetchAndParseGame(gameId: String): GameStateView = {
-    val gameResponse = fetchGame(gameId)
+  def fetchAndParseGame(lobbyId: String): GameStateView = {
+    val gameResponse = fetchGame(lobbyId)
     gameResponse.statusCode shouldBe StatusCodes.OK.intValue
     gameResponse.body.parseJson.convertTo[GameStateView]
   }
