@@ -18,7 +18,7 @@ class UserSpec extends NKMPersistenceTestKit(ActorSystem("UserSpec"))
       val user: ActorRef = system.actorOf(User.props("test"))
       within2000 {
         val future = user ? GetState
-        val state: UserState = Await.result(future.mapTo[UserState], atMost)
+        val state: UserState = aw(future.mapTo[UserState])
         state.login shouldEqual "test"
         state.registered() shouldEqual false
       }
@@ -27,11 +27,11 @@ class UserSpec extends NKMPersistenceTestKit(ActorSystem("UserSpec"))
       val user: ActorRef = system.actorOf(User.props("test"))
       within2000 {
         val registerFuture = user ? Register("test@example.com","password")
-        val response = Await.result(registerFuture.mapTo[RegisterEvent], atMost)
+        val response = aw(registerFuture.mapTo[RegisterEvent])
         response shouldBe RegisterSuccess
 
         val future = user ? GetState
-        val state: UserState = Await.result(future.mapTo[UserState], atMost)
+        val state: UserState = aw(future.mapTo[UserState])
 
         state.login shouldEqual "test"
         state.registered() shouldEqual true
@@ -42,11 +42,11 @@ class UserSpec extends NKMPersistenceTestKit(ActorSystem("UserSpec"))
       val user: ActorRef = system.actorOf(User.props("test"))
       within2000 {
         val registerFuture = user ? Register("test@example.com","password")
-        val response = Await.result(registerFuture.mapTo[RegisterEvent], atMost)
+        val response = aw(registerFuture.mapTo[RegisterEvent])
         response shouldBe RegisterSuccess
 
         val registerFuture2 = user ? Register("test@example.com","password")
-        val response2 = Await.result(registerFuture2.mapTo[RegisterEvent], atMost)
+        val response2 = aw(registerFuture2.mapTo[RegisterEvent])
         response2 shouldBe RegisterFailure
       }
     }
@@ -55,11 +55,11 @@ class UserSpec extends NKMPersistenceTestKit(ActorSystem("UserSpec"))
       val user: ActorRef = system.actorOf(User.props("test3"))
       within2000 {
         val registerFuture = user ? Register("test@example.com","password")
-        val response = Await.result(registerFuture.mapTo[RegisterEvent], atMost)
+        val response = aw(registerFuture.mapTo[RegisterEvent])
         response shouldBe RegisterSuccess
 
         val loginCheckFuture = user ? CheckLogin("password")
-        val loginCheckResponse = Await.result(loginCheckFuture.mapTo[LoginEvent], atMost)
+        val loginCheckResponse = aw(loginCheckFuture.mapTo[LoginEvent])
         loginCheckResponse shouldBe LoginSuccess
       }
     }
@@ -68,11 +68,11 @@ class UserSpec extends NKMPersistenceTestKit(ActorSystem("UserSpec"))
       val user: ActorRef = system.actorOf(User.props("test4"))
         within2000 {
         val registerFuture = user ? Register("test@example.com","password")
-        val response = Await.result(registerFuture.mapTo[RegisterEvent], atMost)
+        val response = aw(registerFuture.mapTo[RegisterEvent])
         response shouldBe RegisterSuccess
 
         val loginCheckFuture = user ? CheckLogin("password1")
-        val loginCheckResponse = Await.result(loginCheckFuture.mapTo[LoginEvent], atMost)
+        val loginCheckResponse = aw(loginCheckFuture.mapTo[LoginEvent])
         loginCheckResponse shouldBe LoginFailure
       }
     }
@@ -81,7 +81,7 @@ class UserSpec extends NKMPersistenceTestKit(ActorSystem("UserSpec"))
       val user: ActorRef = system.actorOf(User.props("test5"))
       within2000 {
         val loginCheckFuture = user ? CheckLogin("password")
-        val loginCheckResponse = Await.result(loginCheckFuture.mapTo[LoginEvent], atMost)
+        val loginCheckResponse = aw(loginCheckFuture.mapTo[LoginEvent])
         loginCheckResponse shouldBe LoginFailure
       }
     }

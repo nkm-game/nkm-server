@@ -24,7 +24,7 @@ class UserService(implicit db: JdbcBackend.Database, system: ActorSystem) extend
 
   def authenticate(creds: Credentials): Event = {
     val userActor: ActorRef = system.actorOf(User.props(creds.login))
-    Await.result(userActor ? CheckLogin(creds.password), atMost) match {
+    aw(userActor ? CheckLogin(creds.password)) match {
       case LoginSuccess => LoggedIn(creds.login)
       case LoginFailure => InvalidCredentials
     }
@@ -38,10 +38,10 @@ class UserService(implicit db: JdbcBackend.Database, system: ActorSystem) extend
       .map(_.event.asInstanceOf[RegisterSuccess].email)
       .runWith(Sink.seq[String])
 
-    val allEmails = Await.result(allEmailsFuture, atMost)
+    val allEmails = aw(allEmailsFuture)
     val emailExists = allEmails.contains(request.email)
 
     if(emailExists) RegisterFailure
-    else Await.result(userActor ? Register(request.email, request.password), atMost).asInstanceOf[RegisterEvent]
+    else aw(userActor ? Register(request.email, request.password)).asInstanceOf[RegisterEvent]
   }
 }

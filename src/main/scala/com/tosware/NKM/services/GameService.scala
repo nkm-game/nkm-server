@@ -31,28 +31,28 @@ class GameService(gamesManagerActor: ActorRef)
     val gameActor: ActorRef = getGameActor(lobbyId)
 
     val surrenderFuture = gameActor ? Game.Surrender(username)
-    Future.successful(Await.result(surrenderFuture, atMost).asInstanceOf[CommandResponse])
+    Future.successful(aw(surrenderFuture).asInstanceOf[CommandResponse])
   }
 
   def banCharacters(username: String, request: CharacterSelect.BanCharacters): Future[CommandResponse] = {
     val gameActor: ActorRef = getGameActor(request.lobbyId)
 
     val requestFuture = gameActor ? Game.BanCharacters(username, request.characterIds)
-    Future.successful(Await.result(requestFuture, atMost).asInstanceOf[CommandResponse])
+    Future.successful(aw(requestFuture).asInstanceOf[CommandResponse])
   }
 
   def pickCharacter(username: String, request: CharacterSelect.PickCharacter): Future[CommandResponse] = {
     val gameActor: ActorRef = getGameActor(request.lobbyId)
 
     val f = gameActor ? Game.PickCharacter(username, request.characterId)
-    Future.successful(Await.result(f, atMost).asInstanceOf[CommandResponse])
+    Future.successful(aw(f).asInstanceOf[CommandResponse])
   }
 
   def blindPickCharacter(username: String, request: CharacterSelect.BlindPickCharacters): Future[CommandResponse] = {
     val gameActor: ActorRef = getGameActor(request.lobbyId)
 
     val f = gameActor ? Game.BlindPickCharacters(username, request.characterIds)
-    Future.successful(Await.result(f, atMost).asInstanceOf[CommandResponse])
+    Future.successful(aw(f).asInstanceOf[CommandResponse])
   }
 
   // TODO: check for placing on spawn or if character is owned by user

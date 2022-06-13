@@ -13,7 +13,7 @@ class NKMDataService(implicit system: ActorSystem) extends NKMTimeouts
   val nkmDataActor: ActorRef = system.actorOf(NKMData.props())
 
   def getHexMaps: List[HexMap] = {
-    Await.result(nkmDataActor ? NKMData.GetHexMaps, atMost).asInstanceOf[List[HexMap]]
+    aw(nkmDataActor ? NKMData.GetHexMaps).asInstanceOf[List[HexMap]]
   }
 
   def getCharactersMetadata: Seq[NKMCharacterMetadata] = 1 to 30 map (i => {

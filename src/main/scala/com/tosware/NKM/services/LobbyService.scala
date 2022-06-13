@@ -69,7 +69,7 @@ class LobbyService(lobbiesManagerActor: ActorRef)(
 
     if (gameState.gameStatus != GameStatus.NotStarted) return Failure("Game is already started")
 
-    Await.result(lobbyActor ? Lobby.UserLeave(userId), atMost).asInstanceOf[CommandResponse]
+    aw(lobbyActor ? Lobby.UserLeave(userId)).asInstanceOf[CommandResponse]
   }
 
   def setHexmapName(username: String, request: SetHexMapName): CommandResponse = {
@@ -183,6 +183,7 @@ class LobbyService(lobbiesManagerActor: ActorRef)(
   }
 
   def getAllLobbies(): Future[Seq[LobbyState]] = {
+    // TODO: use lobbies manager
     val readJournal = PersistenceQuery(system).readJournalFor[JdbcReadJournal](JdbcReadJournal.Identifier)
     val lobbyIdsFuture = readJournal.
       currentEventsByTag("lobby", 0)
@@ -190,7 +191,7 @@ class LobbyService(lobbiesManagerActor: ActorRef)(
       .map(_.id)
       .runWith(Sink.seq[String])
 
-    val lobbyIds = Await.result(lobbyIdsFuture, atMost)
+    val lobbyIds = aw(lobbyIdsFuture)
 
     val lobbyActors = lobbyIds.map(lobbyId => system.actorOf(Lobby.props(lobbyId)))
     implicit val ec: scala.concurrent.ExecutionContext = system.dispatcher

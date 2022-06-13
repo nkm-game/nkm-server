@@ -70,7 +70,7 @@ trait GameWebsocketUserBehaviour extends WebsocketUserBehaviour {
         WebsocketGameResponse(GameResponseType.Observe, StatusCodes.OK.intValue)
       case GameRoute.GetState =>
         val lobbyId = request.requestJson.parseJson.convertTo[GetState].lobbyId
-        val gameStateView = Await.result(gameService.getGameStateView(lobbyId, authStatus.username), atMost)
+        val gameStateView = aw(gameService.getGameStateView(lobbyId, authStatus.username))
         WebsocketGameResponse(GameResponseType.State, StatusCodes.OK.intValue, gameStateView.toJson.toString)
       case GameRoute.Pause => ???
       case GameRoute.Surrender =>
@@ -78,28 +78,28 @@ trait GameWebsocketUserBehaviour extends WebsocketUserBehaviour {
         implicit val responseType: GameResponseType = GameResponseType.Surrender
         if (authStatus.username.isEmpty) return unauthorized()
         val username = authStatus.username.get
-        val response = Await.result(gameService.surrender(username, lobbyId), atMost)
+        val response = aw(gameService.surrender(username, lobbyId))
         resolveResponse(response)
       case GameRoute.BanCharacters =>
         val banCharactersRequest = request.requestJson.parseJson.convertTo[BanCharacters]
         implicit val responseType: GameResponseType = GameResponseType.BanCharacters
         if (authStatus.username.isEmpty) return unauthorized()
         val username = authStatus.username.get
-        val response = Await.result(gameService.banCharacters(username, banCharactersRequest), atMost)
+        val response = aw(gameService.banCharacters(username, banCharactersRequest))
         resolveResponse(response)
       case GameRoute.PickCharacter =>
         val pickCharacterRequest = request.requestJson.parseJson.convertTo[PickCharacter]
         implicit val responseType: GameResponseType = GameResponseType.PickCharacter
         if (authStatus.username.isEmpty) return unauthorized()
         val username = authStatus.username.get
-        val response = Await.result(gameService.pickCharacter(username, pickCharacterRequest), atMost)
+        val response = aw(gameService.pickCharacter(username, pickCharacterRequest))
         resolveResponse(response)
       case GameRoute.BlindPickCharacters =>
         val blindPickCharacterRequest = request.requestJson.parseJson.convertTo[BlindPickCharacters]
         implicit val responseType: GameResponseType = GameResponseType.BlindPickCharacters
         if (authStatus.username.isEmpty) return unauthorized()
         val username = authStatus.username.get
-        val response = Await.result(gameService.blindPickCharacter(username, blindPickCharacterRequest), atMost)
+        val response = aw(gameService.blindPickCharacter(username, blindPickCharacterRequest))
         resolveResponse(response)
       case GameRoute.PlaceCharacters => ???
       case GameRoute.EndTurn => ???
