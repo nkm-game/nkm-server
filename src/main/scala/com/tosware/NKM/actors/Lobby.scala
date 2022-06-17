@@ -104,6 +104,7 @@ class Lobby(id: String)(implicit NKMDataService: NKMDataService)
 
   def setPickType(pickType: PickType): Unit =
     lobbyState = lobbyState.copy(pickType = pickType)
+      .copy(clockConfig = ClockConfig.defaultForPickType(pickType))
 
   def setLobbyName(name: String): Unit =
     lobbyState = lobbyState.copy(name = Some(name))
@@ -238,7 +239,11 @@ class Lobby(id: String)(implicit NKMDataService: NKMDataService)
       } else {
         val hexMaps = NKMDataService.getHexMaps
         log.info("Received game start request")
-        val players = lobbyState.userIds.map(i => Player(i))
+        val hostUserId = lobbyState.hostUserId.get
+        val players: List[Player] = lobbyState.userIds.map(i => Player(i)).map {
+          case p: Player if p.name == hostUserId => p.copy(isHost = true)
+          case p: Player => p
+        }
         val deps = GameStartDependencies(
           players = players,
           hexMap = hexMaps.filter(m => m.name == lobbyState.chosenHexMapName.get).head,

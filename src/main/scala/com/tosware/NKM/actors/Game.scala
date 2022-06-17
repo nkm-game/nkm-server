@@ -12,6 +12,8 @@ import com.tosware.NKM.models.game.blindpick.BlindPickPhase
 import com.tosware.NKM.models.game.draftpick.DraftPickPhase
 import com.tosware.NKM.services.NKMDataService
 
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 import scala.concurrent.duration._
 import scala.util.Random
 
@@ -25,6 +27,8 @@ object Game {
   sealed trait Command
 
   case class StartGame(gameStartDependencies: GameStartDependencies) extends Command
+
+  case class Pause(playerId: PlayerId) extends Command
 
   case class Surrender(playerId: PlayerId) extends Command
 
@@ -48,6 +52,11 @@ object Game {
   sealed trait Event {
     val id: String
   }
+  case class TimeDecreased(id: String, playerId: String, time: Long) extends Event
+
+  case class GamePaused(id: String) extends Event
+
+  case class GameUnpaused(id: String) extends Event
 
   case class GameStarted(id: String, gameStartDependencies: GameStartDependencies) extends Event
 
@@ -79,18 +88,26 @@ object Game {
 }
 
 class Game(id: String)(implicit NKMDataService: NKMDataService) extends PersistentActor with ActorLogging {
-
-  override def persistenceId: String = s"game-$id"
-
   import Game._
   import context.dispatcher
 
-  var gameState: GameState = GameState.empty(id)
+  override def persistenceId: String = s"game-$id"
+
   implicit val random: Random = new Random(id.hashCode)
 
+  var gameState: GameState = GameState.empty(id)
+  var lastTimestamp = Instant.now()
+
+  def millisSinceLastMove(): Long = ChronoUnit.MILLIS.between(lastTimestamp, Instant.now())
+
+  def persistAndPublishAll[A](events: Seq[A])(handler: A => Unit): Unit = {
+    persistAll(events)(handler)
+    events.foreach(context.system.eventStream.publish)
+  }
+
   def persistAndPublish[A](event: A)(handler: A => Unit): Unit = {
-    context.system.eventStream.publish(event)
     persist(event)(handler)
+    context.system.eventStream.publish(event)
   }
 
   override def receive: Receive = {
@@ -160,6 +177,28 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
               }
             }
         }
+      }
+    case Pause(playerId) =>
+      GameStateValidator(gameState).validatePause(playerId) match {
+        case failure @ Failure(_) => sender() ! failure
+        case Success(_) =>
+          if(gameState.clock.isRunning) {
+            val timeToDecrease: Long = millisSinceLastMove()
+            val playerToDecreaseTime = gameState.getCurrentPlayer.id
+            val es = Seq(TimeDecreased(id, playerToDecreaseTime, timeToDecrease), GamePaused(id))
+            persistAndPublishAll(es) { _ =>
+              log.warning(gameState.players.toString)
+              log.warning(gameState.clock.toString)
+              gameState = gameState.decreaseTime(playerToDecreaseTime, timeToDecrease).pause()
+              sender() ! Success()
+            }
+          } else {
+            val e = GameUnpaused(id)
+            persistAndPublish(e) { _ =>
+              gameState = gameState.unpause()
+              sender() ! Success()
+            }
+          }
       }
     case Surrender(playerId) =>
       GameStateValidator(gameState).validateSurrender(playerId) match {

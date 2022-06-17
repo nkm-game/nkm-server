@@ -72,7 +72,13 @@ trait GameWebsocketUserBehaviour extends WebsocketUserBehaviour {
         val lobbyId = request.requestJson.parseJson.convertTo[GetState].lobbyId
         val gameStateView = aw(gameService.getGameStateView(lobbyId, authStatus.username))
         WebsocketGameResponse(GameResponseType.State, StatusCodes.OK.intValue, gameStateView.toJson.toString)
-      case GameRoute.Pause => ???
+      case GameRoute.Pause =>
+        val lobbyId = request.requestJson.parseJson.convertTo[Pause].lobbyId
+        implicit val responseType: GameResponseType = GameResponseType.Pause
+        if (authStatus.username.isEmpty) return unauthorized()
+        val username = authStatus.username.get
+        val response = aw(gameService.pause(username, lobbyId))
+        resolveResponse(response)
       case GameRoute.Surrender =>
         val lobbyId = request.requestJson.parseJson.convertTo[Surrender].lobbyId
         implicit val responseType: GameResponseType = GameResponseType.Surrender

@@ -9,6 +9,9 @@ case class GameStateValidator(gameState: GameState) {
   private def playerInGame(playerId: PlayerId) =
     gameState.players.exists(_.name == playerId)
 
+  private def playerIsHost(playerId: PlayerId) =
+    gameState.getHost.name == playerId
+
   private def playerFinishedGame(playerId: PlayerId) =
     gameState.players.find(_.name == playerId).get.victoryStatus != VictoryStatus.Pending
 
@@ -24,6 +27,7 @@ case class GameStateValidator(gameState: GameState) {
   private def characterBlindPickValid(playerId: PlayerId, characterIds: Set[CharacterMetadataId]) =
     gameState.blindPickState.fold(false)(_.validatePick(playerId, characterIds))
 
+  private val playerNotHostMessage = "Player is not a host."
   private val gameStartedMessage = "Game is started."
   private val gameNotStartedMessage = "Game is not started."
   private val playerNotInGameMessage = "This player is not in the game."
@@ -35,6 +39,11 @@ case class GameStateValidator(gameState: GameState) {
   def validateStartGame(): CommandResponse = {
     if (!gameStatusIs(GameStatus.NotStarted)) Failure(gameStartedMessage)
     else Success()
+  }
+
+  def validatePause(playerId: PlayerId): CommandResponse = {
+    if (!playerIsHost(playerId)) Failure(playerNotHostMessage)
+    Success()
   }
 
   def validateSurrender(playerId: PlayerId): CommandResponse = {

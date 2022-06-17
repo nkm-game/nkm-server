@@ -226,7 +226,7 @@ class WSLobbySpec extends WSTrait
       withLobbyWS {
         auth(0)
         val lobbyId = createLobby(lobbyName).body
-        val newConfig = ClockConfig.emptyDraftPickConfig.copy(maxBanTimeMillis = 500)
+        val newConfig = ClockConfig.defaultForPickType(PickType.DraftPick).copy(maxBanTimeMillis = 500)
         setClockConfig(lobbyId, newConfig).statusCode shouldBe ok
         fetchAndParseLobby(lobbyId).clockConfig shouldBe newConfig
       }

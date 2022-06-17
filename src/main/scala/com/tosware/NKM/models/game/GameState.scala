@@ -24,6 +24,8 @@ case class GameState(id: String,
                      blindPickState: Option[BlindPickState],
                      clock: Clock,
                     ) {
+  def getHost: Player = players.find(_.isHost).get
+
   def getCurrentPlayerNumber: Int = turn.number % players.length
 
   def getCurrentPlayer: Player = players(getCurrentPlayerNumber)
@@ -39,7 +41,7 @@ case class GameState(id: String,
       gameStatus = if(g.pickType == PickType.AllRandom) GameStatus.CharacterPicked else GameStatus.CharacterPick,
       draftPickState = if (g.pickType == PickType.DraftPick) Some(DraftPickState.empty(DraftPickConfig.generate(g))) else None,
       blindPickState = if (g.pickType == PickType.BlindPick) Some(BlindPickState.empty(BlindPickConfig.generate(g))) else None,
-      clock = Clock.fromConfig(g.clockConfig),
+      clock = Clock.fromConfig(g.clockConfig, playerOrder = g.players.map(_.name)),
     )
   }
 
@@ -80,6 +82,18 @@ case class GameState(id: String,
   def startPlacingCharacters()(implicit random: Random): GameState = {
     this.modify(_.gameStatus).setTo(GameStatus.CharacterPlacing).placeCharactersRandomlyIfAllRandom(charactersMetadata)
   }
+
+  def decreaseTime(playerId: PlayerId, timeMillis: Long): GameState =
+    copy(clock = clock.decreaseTime(playerId, timeMillis))
+
+  def increaseTime(playerId: PlayerId, timeMillis: Long): GameState =
+    copy(clock = clock.increaseTime(playerId, timeMillis))
+
+  def pause(): GameState =
+    copy(clock = clock.pause())
+
+  def unpause(): GameState =
+    copy(clock = clock.unpause())
 
   def surrender(playerIds: PlayerId*): GameState = {
     def filterPlayers: Player => Boolean = p => playerIds.contains(p.name)
@@ -162,7 +176,7 @@ object GameState {
     numberOfCharactersPerPlayers = 1,
     draftPickState = None,
     blindPickState = None,
-    clock = Clock.empty(),
+    clock = Clock.fromConfig(ClockConfig.defaultForPickType(PickType.AllRandom), Seq()),
   )
 }
 

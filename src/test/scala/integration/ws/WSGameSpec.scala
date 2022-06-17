@@ -20,11 +20,11 @@ class WSGameSpec extends WSTrait {
 
   def createLobbyForGame(lobbyName: String = "lobby_name",
                   hexMapName: String = "1v1v1",
-                  pickType: PickType = PickType.AllRandom,
+                  pickType: PickType = PickType.DraftPick,
                   numberOfPlayers: Int = 3,
                   numberOfBans: Int = 0,
                   numberOfCharacters: Int = 2,
-                  clockConfig: ClockConfig = ClockConfig.emptyDraftPickConfig,
+                  clockConfig: ClockConfig = ClockConfig.defaultForPickType(PickType.DraftPick),
   ): String = {
     var lobbyId = ""
     withLobbyWS {
@@ -110,7 +110,7 @@ class WSGameSpec extends WSTrait {
     "allow surrendering during game" in {
       val lobbyId = createLobbyForGame(
         pickType = PickType.AllRandom,
-        clockConfig = ClockConfig.emptyDraftPickConfig.copy(timeAfterPickMillis = 1)
+        clockConfig = ClockConfig.defaultForPickType(PickType.AllRandom).copy(timeAfterPickMillis = 1),
       )
 
       withGameWS {
@@ -337,7 +337,7 @@ class WSGameSpec extends WSTrait {
       val maxPickTimeMillis = 1
       val lobbyId = createLobbyForGame(
         pickType = PickType.BlindPick,
-        clockConfig = ClockConfig.emptyDraftPickConfig.copy(maxPickTimeMillis = maxPickTimeMillis)
+        clockConfig = ClockConfig.defaultForPickType(PickType.BlindPick).copy(maxPickTimeMillis = maxPickTimeMillis),
       )
 
       withGameWS {
@@ -361,7 +361,7 @@ class WSGameSpec extends WSTrait {
       val lobbyId = createLobbyForGame(
         pickType = PickType.BlindPick,
         numberOfCharacters = numberOfCharacters,
-        clockConfig = ClockConfig.emptyDraftPickConfig.copy(maxPickTimeMillis = maxPickTimeMillis),
+        clockConfig = ClockConfig.defaultForPickType(PickType.BlindPick).copy(maxPickTimeMillis = maxPickTimeMillis),
       )
 
       withGameWS {
@@ -378,6 +378,55 @@ class WSGameSpec extends WSTrait {
           val gameState = fetchAndParseGame(lobbyId)
           gameState.players.map(_.victoryStatus) shouldBe Seq(VictoryStatus.Drawn, VictoryStatus.Lost, VictoryStatus.Drawn)
         }
+      }
+    }
+
+    "allow pausing with blind pick" in {
+      val numberOfCharacters = 2
+
+      val lobbyId = createLobbyForGame(
+        pickType = PickType.BlindPick,
+        numberOfPlayers = 3,
+        numberOfCharacters = numberOfCharacters,
+      )
+
+      withGameWS {
+        auth(0)
+        val availableCharacters = fetchAndParseGame(lobbyId).blindPickState.get.config.availableCharacters.toSeq
+        val charactersToPick = availableCharacters.take(numberOfCharacters).toSet
+
+        blindPick(lobbyId, charactersToPick).statusCode shouldBe ok
+        blindPick(lobbyId, charactersToPick).statusCode shouldBe nok
+
+        pause(lobbyId)
+
+        {
+          val gameState = fetchAndParseGame(lobbyId)
+          gameState.clock.isRunning shouldBe false
+
+          val playerTimes = (0 to 2).map(i => gameState.clock.playerTimes(usernames(i)))
+          playerTimes.toSet.size shouldBe 1 // times elapsed should be the same for all players in blind pick
+        }
+
+        pause(lobbyId)
+
+        {
+          val gameState = fetchAndParseGame(lobbyId)
+          gameState.clock.isRunning shouldBe true
+        }
+
+        auth(2)
+        blindPick(lobbyId, charactersToPick).statusCode shouldBe ok
+
+        auth(1)
+        blindPick(lobbyId, charactersToPick).statusCode shouldBe ok
+
+        {
+          val gameState = fetchAndParseGame(lobbyId)
+          gameState.blindPickState.get.pickPhase shouldBe BlindPickPhase.Finished
+          gameState.gameStatus shouldBe GameStatus.CharacterPicked
+        }
+
       }
     }
   }

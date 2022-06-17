@@ -4,14 +4,15 @@ import com.tosware.NKM.models.game.Player.PlayerId
 
 object ClockConfig {
   def empty(): ClockConfig =
-    ClockConfig(Seq(), 0, 0, 0, 0, 0, 0)
-  def emptyDraftPickConfig = ClockConfig(Seq(), 0, 30000, 0, 45000, 30000, 30000)
-  def draftPickConfig(playerOrder: Seq[PlayerId]) = emptyDraftPickConfig.copy(playerOrder = playerOrder)
-
+    ClockConfig(0, 0, 0, 0, 0, 0)
+  def defaultForPickType(pickType: PickType) = pickType match {
+    case PickType.AllRandom => ClockConfig(5000, 30000, 0, 0, 0, 30000)
+    case PickType.DraftPick => ClockConfig(5000, 30000, 0, 45000, 30000, 30000)
+    case PickType.BlindPick => ClockConfig(5000, 30000, 0, 0, 30000, 10000)
+  }
 }
 
 case class ClockConfig(
-                        playerOrder: Seq[PlayerId],
                         initialTimeMillis: Long,
                         timePerMoveMillis: Long,
                         incrementMillis: Long,
@@ -19,25 +20,21 @@ case class ClockConfig(
                         maxPickTimeMillis: Long,
                         timeAfterPickMillis: Long,
                       ) {
-  def initialPlayerTimes: Map[PlayerId, Long] =
-    playerOrder.map(p => p -> initialTimeMillis).toMap
-
 }
 
 object Clock {
-  def empty(): Clock = {
-    def config = ClockConfig.empty()
-    Clock(config, config.initialPlayerTimes)
-  }
+  def fromConfig(config: ClockConfig, playerOrder: Seq[PlayerId]): Clock =
+    Clock(config, playerOrder.map(p => p -> config.initialTimeMillis).toMap)
 
-  def fromConfig(config: ClockConfig): Clock =
-    Clock(config, config.initialPlayerTimes)
+  def empty(playerOrder: Seq[PlayerId]): Clock =
+    fromConfig(ClockConfig.empty(), playerOrder)
 
 }
 
 case class Clock(
                   config: ClockConfig,
                   playerTimes: Map[PlayerId, Long],
+                  isRunning: Boolean = true,
                 ) {
   def decreaseTime(playerId: PlayerId, timeMillis: Long): Clock = {
     val newTime = Math.max(playerTimes(playerId) - timeMillis, 0)
@@ -47,5 +44,12 @@ case class Clock(
   def increaseTime(playerId: PlayerId, timeMillis: Long): Clock = {
     val newTime = playerTimes(playerId) + timeMillis
     copy(playerTimes = playerTimes.updated(playerId, newTime))
+  }
+
+  def pause(): Clock = {
+    copy(isRunning = false)
+  }
+  def unpause(): Clock = {
+    copy(isRunning = true)
   }
 }

@@ -8,4 +8,8 @@ object Player {
 
 case class Player(name: PlayerId,
                   characters: List[NKMCharacter] = List(),
-                  victoryStatus: VictoryStatus = VictoryStatus.Pending)
+                  victoryStatus: VictoryStatus = VictoryStatus.Pending,
+                  isHost: Boolean = false,
+                 ) {
+  def id: PlayerId = name
+}
