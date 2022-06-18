@@ -5,7 +5,7 @@ import com.tosware.NKM.models.game.Player.PlayerId
 object ClockConfig {
   def empty(): ClockConfig =
     ClockConfig(0, 0, 0, 0, 0, 0)
-  def defaultForPickType(pickType: PickType) = pickType match {
+  def defaultForPickType(pickType: PickType): ClockConfig = pickType match {
     case PickType.AllRandom => ClockConfig(5000, 30000, 0, 0, 0, 30000)
     case PickType.DraftPick => ClockConfig(5000, 30000, 0, 45000, 30000, 30000)
     case PickType.BlindPick => ClockConfig(5000, 30000, 0, 0, 30000, 10000)

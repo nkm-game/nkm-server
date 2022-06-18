@@ -2,7 +2,6 @@ package helpers
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import com.tosware.NKM.serializers.NKMJsonProtocol
-import com.tosware.NKM.services.http.directives.JwtSecretKey
 import com.tosware.NKM.{DBManager, NKMTimeouts}
 import com.typesafe.config.{Config, ConfigFactory}
 import org.scalatest.matchers.should.Matchers

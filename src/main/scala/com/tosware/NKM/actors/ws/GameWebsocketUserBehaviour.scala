@@ -1,6 +1,7 @@
 package com.tosware.NKM.actors.ws
 
 import akka.actor.ActorRef
+import akka.event.Logging.{DebugLevel, LogLevel, WarningLevel}
 import akka.http.scaladsl.model.StatusCodes
 import com.tosware.NKM.models.CommandResponse.{CommandResponse, Failure, Success}
 import com.tosware.NKM.models.game.ws._
@@ -20,9 +21,12 @@ trait GameWebsocketUserBehaviour extends WebsocketUserBehaviour {
   override def parseIncomingMessage(outgoing: ActorRef, username: Option[String], text: String): Unit =
     try {
       val request = text.parseJson.convertTo[WebsocketGameRequest]
-      log.info(s"Request: $request")
+      log.info(s"${request.requestPath}")
+      log.debug(s"Request: $request")
       val response = parseWebsocketGameRequest(request, outgoing, self, AuthStatus(username))
-      log.info(s"Response: $response")
+      log.info(s"${response.gameResponseType}(${response.statusCode})")
+      val responseLogLevel = if(response.statusCode == StatusCodes.OK.intValue) DebugLevel else WarningLevel
+      log.log(responseLogLevel, s"Response: $response")
       outgoing ! OutgoingMessage(response.toJson.toString)
     }
     catch {

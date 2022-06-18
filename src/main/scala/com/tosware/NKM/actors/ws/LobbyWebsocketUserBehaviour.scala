@@ -21,9 +21,11 @@ trait LobbyWebsocketUserBehaviour extends WebsocketUserBehaviour {
   override def parseIncomingMessage(outgoing: ActorRef, username: Option[String], text: String): Unit =
     try {
       val request = text.parseJson.convertTo[WebsocketLobbyRequest]
-      log.info(s"Request: $request")
+      log.info(s"${request.requestPath}")
+      log.debug(s"Request: $request")
       val response = parseWebsocketLobbyRequest(request, outgoing, self, AuthStatus(username))
-      log.info(s"Response: $response")
+      log.info(s"${response.lobbyResponseType}(${response.statusCode})")
+      log.debug(s"Response: $response")
       outgoing ! OutgoingMessage(response.toJson.toString)
     }
     catch {

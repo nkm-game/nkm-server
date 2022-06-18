@@ -1,5 +1,6 @@
 package com.tosware.NKM.models.game
 
+import akka.util.Collections
 import com.softwaremill.quicklens._
 import com.tosware.NKM.models.game.NKMCharacter.CharacterId
 import com.tosware.NKM.models.game.NKMCharacterMetadata.CharacterMetadataId
@@ -7,6 +8,7 @@ import com.tosware.NKM.models.game.Player.PlayerId
 import com.tosware.NKM.models.game.blindpick._
 import com.tosware.NKM.models.game.draftpick._
 
+import scala.collection.immutable.{AbstractSeq, LinearSeq}
 import scala.util.Random
 
 case class GameState(id: String,
@@ -30,6 +32,18 @@ case class GameState(id: String,
 
   def getCurrentPlayer: Player = players(getCurrentPlayerNumber)
 
+  def timeoutNumber: Int = gameStatus match {
+    case GameStatus.NotStarted => 0
+    case GameStatus.CharacterPick | GameStatus.CharacterPicked =>
+      pickType match {
+        case PickType.AllRandom => 0
+        case PickType.DraftPick => draftPickState.fold(0)(_.pickNumber)
+        case PickType.BlindPick => blindPickState.fold(0)(_.pickNumber)
+      }
+    case GameStatus.CharacterPlacing | GameStatus.Running | GameStatus.Finished =>
+      turn.number
+  }
+
   def startGame(g: GameStartDependencies): GameState = {
     copy(
       charactersMetadata = g.charactersMetadata,
@@ -38,7 +52,7 @@ case class GameState(id: String,
       pickType = g.pickType,
       numberOfBans = g.numberOfBansPerPlayer,
       numberOfCharactersPerPlayers = g.numberOfCharactersPerPlayer,
-      gameStatus = if(g.pickType == PickType.AllRandom) GameStatus.CharacterPicked else GameStatus.CharacterPick,
+      gameStatus = if (g.pickType == PickType.AllRandom) GameStatus.CharacterPicked else GameStatus.CharacterPick,
       draftPickState = if (g.pickType == PickType.DraftPick) Some(DraftPickState.empty(DraftPickConfig.generate(g))) else None,
       blindPickState = if (g.pickType == PickType.BlindPick) Some(BlindPickState.empty(BlindPickConfig.generate(g))) else None,
       clock = Clock.fromConfig(g.clockConfig, playerOrder = g.players.map(_.name)),
@@ -88,6 +102,12 @@ case class GameState(id: String,
 
   def increaseTime(playerId: PlayerId, timeMillis: Long): GameState =
     copy(clock = clock.increaseTime(playerId, timeMillis))
+
+  def decreaseTimeForAll(playerIds: Seq[PlayerId], timeMillis: Long): GameState =
+    playerIds match {
+      case h :: t => decreaseTime(h, timeMillis).decreaseTimeForAll(t, timeMillis)
+      case Nil => this
+    }
 
   def pause(): GameState =
     copy(clock = clock.pause())

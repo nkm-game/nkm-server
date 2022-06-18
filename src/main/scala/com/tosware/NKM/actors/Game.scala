@@ -81,6 +81,10 @@ object Game {
   case class DraftPickTimedOut(id: String) extends Event
 
   case class BlindPickTimedOut(id: String) extends Event
+
+  case class TimeAfterPickTimedOut(id: String) extends Event
+
+  case class TurnTimedOut(id: String) extends Event
   //////////////////////////////
 
 
@@ -101,13 +105,51 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
   def millisSinceLastMove(): Long = ChronoUnit.MILLIS.between(lastTimestamp, Instant.now())
 
   def persistAndPublishAll[A](events: Seq[A])(handler: A => Unit): Unit = {
+    log.warning("EVENT " + events.toString)
     persistAll(events)(handler)
     events.foreach(context.system.eventStream.publish)
   }
 
   def persistAndPublish[A](event: A)(handler: A => Unit): Unit = {
+    log.warning("EVENT " + event.toString)
     persist(event)(handler)
     context.system.eventStream.publish(event)
+  }
+
+  def scheduleDefault(): Unit = {
+    val clockConfig = gameState.clock.config
+
+    if(Seq(GameStatus.NotStarted, GameStatus.Finished).contains(gameState.gameStatus)) {
+      return
+    }
+
+    val timeout = gameState.gameStatus match {
+      case GameStatus.NotStarted => ???
+      case GameStatus.CharacterPick => gameState.pickType match {
+        case PickType.AllRandom => ???
+        case PickType.DraftPick => gameState.draftPickState.get.pickPhase match {
+          case DraftPickPhase.Banning => clockConfig.maxBanTimeMillis.millis
+          case DraftPickPhase.Picking => clockConfig.maxPickTimeMillis.millis
+          case DraftPickPhase.Finished => ???
+        }
+        case PickType.BlindPick => gameState.blindPickState.get.pickPhase match {
+          case BlindPickPhase.Picking => clockConfig.maxPickTimeMillis.millis
+          case BlindPickPhase.Finished => ???
+        }
+      }
+      case GameStatus.CharacterPicked => clockConfig.timeAfterPickMillis.millis
+      case GameStatus.CharacterPlacing => gameState.clock.playerTimes(gameState.getCurrentPlayer.id).millis
+      case GameStatus.Running => gameState.clock.playerTimes(gameState.getCurrentPlayer.id).millis
+      case GameStatus.Finished => ???
+    }
+    val eventToSchedule = gameState.gameStatus match {
+      case GameStatus.NotStarted => ???
+      case GameStatus.CharacterPick | GameStatus.CharacterPicked =>
+        CharacterSelectTimeout(gameState.timeoutNumber)
+      case GameStatus.CharacterPlacing | GameStatus.Running | GameStatus.Finished =>
+        EndTurnTimeout(gameState.turn.number)
+    }
+    context.system.scheduler.scheduleOnce(timeout)(self ! eventToSchedule)
   }
 
   override def receive: Receive = {
@@ -126,40 +168,40 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
           persistAndPublish(e) { _ =>
             gameState = gameState.startGame(gameStartDependencies)
             sender() ! Success()
-            val timeoutTime = gameState.pickType match {
-              case PickType.AllRandom => gameState.clock.config.timeAfterPickMillis.millis
-              case PickType.DraftPick => gameState.clock.config.maxBanTimeMillis.millis
-              case PickType.BlindPick => gameState.clock.config.maxPickTimeMillis.millis
-            }
-            context.system.scheduler.scheduleOnce(timeoutTime) {
-              self ! CharacterSelectTimeout(0)
-            }
+            scheduleDefault()
           }
       }
     case CharacterSelectTimeout(pickNumber) =>
       if(Seq(GameStatus.CharacterPick, GameStatus.CharacterPicked).contains(gameState.gameStatus)) {
-        val placingStartedEvent = PlacingCharactersStarted(id)
+        def startPlacingCharactersAfterTimeout(): Unit =
+          persistAndPublishAll(Seq(TimeAfterPickTimedOut(id), PlacingCharactersStarted(id))) { _ =>
+            gameState = gameState.startPlacingCharacters()
+          }
+
+        def banningPhaseTimeout(): Unit =
+          persistAndPublish(BanningPhaseTimedOut(id))(_ => gameState = gameState.finishBanningPhase())
+
+        def draftPickTimeout(): Unit =
+          persistAndPublish(DraftPickTimedOut(id))(_ => gameState = gameState.draftPickTimeout())
+
+        def blindPickTimeout(): Unit =
+          persistAndPublish(BlindPickTimedOut(id)) { _ =>
+            gameState = gameState.blindPickTimeout()
+          }
+
         gameState.pickType match {
           case PickType.AllRandom =>
-            persistAndPublish(placingStartedEvent) { _ =>
-              gameState = gameState.startPlacingCharacters()
-            }
+            startPlacingCharactersAfterTimeout()
           case PickType.DraftPick =>
             val draftPickState = gameState.draftPickState.get
             if (draftPickState.pickNumber == pickNumber) {
               draftPickState.pickPhase match {
                 case DraftPickPhase.Banning =>
-                  persistAndPublish(BanningPhaseTimedOut(id)) { _ =>
-                    gameState = gameState.finishBanningPhase()
-                  }
+                  banningPhaseTimeout()
                 case DraftPickPhase.Picking =>
-                  persistAndPublish(DraftPickTimedOut(id)) { _ =>
-                    gameState = gameState.draftPickTimeout()
-                  }
+                  draftPickTimeout()
                 case DraftPickPhase.Finished =>
-                  persistAndPublish(placingStartedEvent) { _ =>
-                    gameState = gameState.startPlacingCharacters()
-                  }
+                  startPlacingCharactersAfterTimeout()
               }
             }
           case PickType.BlindPick =>
@@ -167,29 +209,32 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
             if (blindPickState.pickNumber == pickNumber) {
               blindPickState.pickPhase match {
                 case BlindPickPhase.Picking =>
-                  persistAndPublish(BlindPickTimedOut(id)) { _ =>
-                    gameState = gameState.blindPickTimeout()
-                  }
+                  blindPickTimeout()
                 case BlindPickPhase.Finished =>
-                  persistAndPublish(placingStartedEvent) { _ =>
-                    gameState = gameState.startPlacingCharacters()
-                  }
+                  startPlacingCharactersAfterTimeout()
               }
             }
         }
       }
+      scheduleDefault()
     case Pause(playerId) =>
       GameStateValidator(gameState).validatePause(playerId) match {
         case failure @ Failure(_) => sender() ! failure
         case Success(_) =>
           if(gameState.clock.isRunning) {
             val timeToDecrease: Long = millisSinceLastMove()
-            val playerToDecreaseTime = gameState.getCurrentPlayer.id
-            val es = Seq(TimeDecreased(id, playerToDecreaseTime, timeToDecrease), GamePaused(id))
+            val isBlindPickingPhase = gameState.blindPickState.fold(false)(_.pickPhase == BlindPickPhase.Picking)
+            val isDraftBanningPhase = gameState.draftPickState.fold(false)(_.pickPhase == DraftPickPhase.Banning)
+            val isAfterPickPhase = gameState.gameStatus == GameStatus.CharacterPicked
+            val playersToDecreaseTime =
+              if(isBlindPickingPhase || isDraftBanningPhase || isAfterPickPhase)
+                gameState.players.map(_.id)
+              else
+                Seq(gameState.getCurrentPlayer.id)
+
+            val es = playersToDecreaseTime.map(p => TimeDecreased(id, p, timeToDecrease)) :+ GamePaused(id)
             persistAndPublishAll(es) { _ =>
-              log.warning(gameState.players.toString)
-              log.warning(gameState.clock.toString)
-              gameState = gameState.decreaseTime(playerToDecreaseTime, timeToDecrease).pause()
+              gameState = gameState.decreaseTimeForAll(playersToDecreaseTime, timeToDecrease).pause()
               sender() ! Success()
             }
           } else {
@@ -197,6 +242,7 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
             persistAndPublish(e) { _ =>
               gameState = gameState.unpause()
               sender() ! Success()
+              scheduleDefault()
             }
           }
       }
@@ -280,16 +326,18 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
     case CharacterMoved(_, hexCoordinates, characterId) =>
       gameState = gameState.moveCharacter(hexCoordinates, characterId)
       log.debug(s"Recovered $characterId to $hexCoordinates")
-    case BanningPhaseTimedOut(_) => // TODO: start a timer
+    case BanningPhaseTimedOut(_) =>
       log.debug(s"Recovered banning phase timeout")
       gameState = gameState.finishBanningPhase()
-    case DraftPickTimedOut(_) => // TODO: start a timer
+    case DraftPickTimedOut(_) =>
       log.debug(s"Recovered draft pick timeout")
       gameState = gameState.draftPickTimeout()
-    case BlindPickTimedOut(_) => // TODO: start a timer
+    case BlindPickTimedOut(_) =>
       log.debug(s"Recovered blind pick timeout")
       gameState = gameState.blindPickTimeout()
     case RecoveryCompleted =>
+      // start a timer
+      scheduleDefault()
     case e => log.warning(s"Unknown message: $e")
   }
 

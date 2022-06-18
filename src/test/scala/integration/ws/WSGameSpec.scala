@@ -24,9 +24,10 @@ class WSGameSpec extends WSTrait {
                   numberOfPlayers: Int = 3,
                   numberOfBans: Int = 0,
                   numberOfCharacters: Int = 2,
-                  clockConfig: ClockConfig = ClockConfig.defaultForPickType(PickType.DraftPick),
+                  clockConfigOpt: Option[ClockConfig] = None,
   ): String = {
     var lobbyId = ""
+    val clockConfig = clockConfigOpt.getOrElse(ClockConfig.defaultForPickType(pickType))
     withLobbyWS {
       authL(0)
       lobbyId = createLobby(lobbyName).body
@@ -110,7 +111,7 @@ class WSGameSpec extends WSTrait {
     "allow surrendering during game" in {
       val lobbyId = createLobbyForGame(
         pickType = PickType.AllRandom,
-        clockConfig = ClockConfig.defaultForPickType(PickType.AllRandom).copy(timeAfterPickMillis = 1),
+        clockConfigOpt = Some(ClockConfig.defaultForPickType(PickType.AllRandom).copy(timeAfterPickMillis = 1)),
       )
 
       withGameWS {
@@ -337,7 +338,7 @@ class WSGameSpec extends WSTrait {
       val maxPickTimeMillis = 1
       val lobbyId = createLobbyForGame(
         pickType = PickType.BlindPick,
-        clockConfig = ClockConfig.defaultForPickType(PickType.BlindPick).copy(maxPickTimeMillis = maxPickTimeMillis),
+        clockConfigOpt = Some(ClockConfig.defaultForPickType(PickType.BlindPick).copy(maxPickTimeMillis = maxPickTimeMillis)),
       )
 
       withGameWS {
@@ -361,7 +362,7 @@ class WSGameSpec extends WSTrait {
       val lobbyId = createLobbyForGame(
         pickType = PickType.BlindPick,
         numberOfCharacters = numberOfCharacters,
-        clockConfig = ClockConfig.defaultForPickType(PickType.BlindPick).copy(maxPickTimeMillis = maxPickTimeMillis),
+        clockConfigOpt = Some(ClockConfig.defaultForPickType(PickType.BlindPick).copy(maxPickTimeMillis = maxPickTimeMillis)),
       )
 
       withGameWS {
@@ -388,6 +389,7 @@ class WSGameSpec extends WSTrait {
         pickType = PickType.BlindPick,
         numberOfPlayers = 3,
         numberOfCharacters = numberOfCharacters,
+        clockConfigOpt = Some(ClockConfig.defaultForPickType(PickType.BlindPick).copy(timeAfterPickMillis = 500)),
       )
 
       withGameWS {
@@ -396,7 +398,6 @@ class WSGameSpec extends WSTrait {
         val charactersToPick = availableCharacters.take(numberOfCharacters).toSet
 
         blindPick(lobbyId, charactersToPick).statusCode shouldBe ok
-        blindPick(lobbyId, charactersToPick).statusCode shouldBe nok
 
         pause(lobbyId)
 
@@ -405,7 +406,9 @@ class WSGameSpec extends WSTrait {
           gameState.clock.isRunning shouldBe false
 
           val playerTimes = (0 to 2).map(i => gameState.clock.playerTimes(usernames(i)))
-          playerTimes.toSet.size shouldBe 1 // times elapsed should be the same for all players in blind pick
+          playerTimes.toSet should have size 1 // times elapsed should be the same for all players in blind pick
+
+          fetchAndParseGame(lobbyId).clock.playerTimes(usernames(0)) shouldBe playerTimes(0)
         }
 
         pause(lobbyId)
@@ -413,7 +416,10 @@ class WSGameSpec extends WSTrait {
         {
           val gameState = fetchAndParseGame(lobbyId)
           gameState.clock.isRunning shouldBe true
+          val playerTimes = (0 to 2).map(i => gameState.clock.playerTimes(usernames(i)))
+          playerTimes.toSet should have size 1 // times elapsed should be the same for all players in blind pick
         }
+
 
         auth(2)
         blindPick(lobbyId, charactersToPick).statusCode shouldBe ok
@@ -423,10 +429,108 @@ class WSGameSpec extends WSTrait {
 
         {
           val gameState = fetchAndParseGame(lobbyId)
-          gameState.blindPickState.get.pickPhase shouldBe BlindPickPhase.Finished
           gameState.gameStatus shouldBe GameStatus.CharacterPicked
         }
 
+        auth(0)
+        pause(lobbyId)
+
+        Thread.sleep(1000)
+
+        {
+          val gameState = fetchAndParseGame(lobbyId)
+          gameState.clock.isRunning shouldBe false
+          gameState.gameStatus shouldBe GameStatus.CharacterPicked
+
+          val playerTimes = (0 to 2).map(i => gameState.clock.playerTimes(usernames(i)))
+          playerTimes.toSet should have size 1 // times elapsed should be the same for all players after pick
+        }
+
+        pause(lobbyId)
+        Thread.sleep(1000)
+
+        {
+          val gameState = fetchAndParseGame(lobbyId)
+          gameState.clock.isRunning shouldBe true
+          gameState.gameStatus shouldBe GameStatus.CharacterPlacing
+          val playerTimes = (0 to 2).map(i => gameState.clock.playerTimes(usernames(i)))
+          playerTimes.toSet should have size 1 // times elapsed should be the same for all players in character placing
+        }
+      }
+    }
+
+    "allow pausing with draft pick" in {
+      val lobbyId = createLobbyForGame(
+        pickType = PickType.DraftPick,
+        numberOfPlayers = 3,
+        numberOfBans = 2,
+        numberOfCharacters = 2,
+        clockConfigOpt = Some(ClockConfig.defaultForPickType(PickType.DraftPick).copy(timeAfterPickMillis = 500)),
+      )
+
+      withGameWS {
+        val availableCharacters = fetchAndParseGame(lobbyId).draftPickState.get.config.availableCharacters.toSeq
+
+        auth(0)
+        ban(lobbyId, Set()).statusCode shouldBe ok
+
+        auth(1)
+        ban(lobbyId, Set(availableCharacters(8), availableCharacters(9))).statusCode shouldBe ok
+
+        auth(0)
+        pause(lobbyId)
+
+        {
+          val gameState = fetchAndParseGame(lobbyId)
+          gameState.clock.isRunning shouldBe false
+
+          val playerTimes = (0 to 2).map(i => gameState.clock.playerTimes(usernames(i)))
+          playerTimes.toSet should have size 1 // times elapsed should be the same for all players in ban phase
+
+          fetchAndParseGame(lobbyId).clock.playerTimes(usernames(0)) shouldBe playerTimes(0)
+        }
+
+        pause(lobbyId)
+
+        auth(2)
+        ban(lobbyId, Set(availableCharacters(10))).statusCode shouldBe ok
+
+        auth(0)
+
+        pause(lobbyId)
+
+        {
+          val gameState = fetchAndParseGame(lobbyId)
+          gameState.clock.isRunning shouldBe false
+
+          val playerTimes = (0 to 2).map(i => gameState.clock.playerTimes(usernames(i)))
+
+          fetchAndParseGame(lobbyId).clock.playerTimes(usernames(0)) shouldBe playerTimes(0)
+          playerTimes(0) should be < playerTimes(1) // each player pick time is individual
+        }
+
+        pause(lobbyId)
+
+        pick(lobbyId, availableCharacters(0)).statusCode shouldBe ok
+
+        auth(1)
+        pick(lobbyId, availableCharacters(1)).statusCode shouldBe ok
+
+        auth(2)
+        pick(lobbyId, availableCharacters(2)).statusCode shouldBe ok
+        pick(lobbyId, availableCharacters(3)).statusCode shouldBe ok
+
+        auth(1)
+        pick(lobbyId, availableCharacters(4)).statusCode shouldBe ok
+
+        auth(0)
+        pick(lobbyId, availableCharacters(5)).statusCode shouldBe ok
+
+        {
+          val gameState = fetchAndParseGame(lobbyId)
+          gameState.draftPickState.get.pickPhase shouldBe DraftPickPhase.Finished
+          gameState.gameStatus shouldBe GameStatus.CharacterPicked
+        }
       }
     }
   }
