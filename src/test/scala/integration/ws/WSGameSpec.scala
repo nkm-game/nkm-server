@@ -348,7 +348,7 @@ class WSGameSpec extends WSTrait {
 
         {
           val gameState = fetchAndParseGame(lobbyId)
-          gameState.clock.config.maxPickTimeMillis shouldBe maxPickTimeMillis
+          gameState.clockConfig.maxPickTimeMillis shouldBe maxPickTimeMillis
           gameState.blindPickState.get.pickPhase shouldBe BlindPickPhase.Picking
           println(gameState.players)
           gameState.players.forall(_.victoryStatus == VictoryStatus.Lost) shouldBe true

@@ -1,6 +1,6 @@
 package com.tosware.NKM.actors
 
-import akka.actor.{ActorLogging, Props}
+import akka.actor.{ActorLogging, Cancellable, Props}
 import akka.persistence.{PersistentActor, RecoveryCompleted}
 import com.tosware.NKM.models.CommandResponse._
 import com.tosware.NKM.models.GameStateValidator
@@ -52,6 +52,8 @@ object Game {
   sealed trait Event {
     val id: String
   }
+  case class PickTimeDecreased(id: String, time: Long) extends Event
+
   case class TimeDecreased(id: String, playerId: String, time: Long) extends Event
 
   case class GamePaused(id: String) extends Event
@@ -100,7 +102,10 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
   implicit val random: Random = new Random(id.hashCode)
 
   var gameState: GameState = GameState.empty(id)
-  var lastTimestamp = Instant.now()
+  var lastTimestamp: Instant = Instant.now()
+  var scheduledTimeout: Cancellable = Cancellable.alreadyCancelled
+
+  def updateTimestamp(): Unit = lastTimestamp = Instant.now()
 
   def millisSinceLastMove(): Long = ChronoUnit.MILLIS.between(lastTimestamp, Instant.now())
 
@@ -117,39 +122,27 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
   }
 
   def scheduleDefault(): Unit = {
-    val clockConfig = gameState.clock.config
-
-    if(Seq(GameStatus.NotStarted, GameStatus.Finished).contains(gameState.gameStatus)) {
+    if(Seq(GameStatus.NotStarted, GameStatus.Finished).contains(gameState.gameStatus))
       return
-    }
 
     val timeout = gameState.gameStatus match {
-      case GameStatus.NotStarted => ???
-      case GameStatus.CharacterPick => gameState.pickType match {
-        case PickType.AllRandom => ???
-        case PickType.DraftPick => gameState.draftPickState.get.pickPhase match {
-          case DraftPickPhase.Banning => clockConfig.maxBanTimeMillis.millis
-          case DraftPickPhase.Picking => clockConfig.maxPickTimeMillis.millis
-          case DraftPickPhase.Finished => ???
-        }
-        case PickType.BlindPick => gameState.blindPickState.get.pickPhase match {
-          case BlindPickPhase.Picking => clockConfig.maxPickTimeMillis.millis
-          case BlindPickPhase.Finished => ???
-        }
-      }
-      case GameStatus.CharacterPicked => clockConfig.timeAfterPickMillis.millis
-      case GameStatus.CharacterPlacing => gameState.clock.playerTimes(gameState.getCurrentPlayer.id).millis
-      case GameStatus.Running => gameState.clock.playerTimes(gameState.getCurrentPlayer.id).millis
-      case GameStatus.Finished => ???
+      case GameStatus.NotStarted | GameStatus.Finished => ???
+      case GameStatus.CharacterPick | GameStatus.CharacterPicked =>
+        gameState.clock.pickTime.millis
+      case GameStatus.CharacterPlacing | GameStatus.Running =>
+        gameState.currentPlayerTime.millis
     }
-    val eventToSchedule = gameState.gameStatus match {
-      case GameStatus.NotStarted => ???
+
+    val eventToSchedule: Command = gameState.gameStatus match {
+      case GameStatus.NotStarted | GameStatus.Finished => ???
       case GameStatus.CharacterPick | GameStatus.CharacterPicked =>
         CharacterSelectTimeout(gameState.timeoutNumber)
-      case GameStatus.CharacterPlacing | GameStatus.Running | GameStatus.Finished =>
+      case GameStatus.CharacterPlacing | GameStatus.Running =>
         EndTurnTimeout(gameState.turn.number)
     }
-    context.system.scheduler.scheduleOnce(timeout)(self ! eventToSchedule)
+    scheduledTimeout.cancel()
+    scheduledTimeout = context.system.scheduler.scheduleOnce(timeout)(self ! eventToSchedule)
+    updateTimestamp()
   }
 
   override def receive: Receive = {
@@ -226,16 +219,20 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
             val isBlindPickingPhase = gameState.blindPickState.fold(false)(_.pickPhase == BlindPickPhase.Picking)
             val isDraftBanningPhase = gameState.draftPickState.fold(false)(_.pickPhase == DraftPickPhase.Banning)
             val isAfterPickPhase = gameState.gameStatus == GameStatus.CharacterPicked
-            val playersToDecreaseTime =
-              if(isBlindPickingPhase || isDraftBanningPhase || isAfterPickPhase)
-                gameState.players.map(_.id)
-              else
-                Seq(gameState.getCurrentPlayer.id)
+            val isPickTime = isBlindPickingPhase || isDraftBanningPhase || isAfterPickPhase
 
-            val es = playersToDecreaseTime.map(p => TimeDecreased(id, p, timeToDecrease)) :+ GamePaused(id)
-            persistAndPublishAll(es) { _ =>
-              gameState = gameState.decreaseTimeForAll(playersToDecreaseTime, timeToDecrease).pause()
-              sender() ! Success()
+            if(isPickTime) {
+              persistAndPublishAll(Seq(PickTimeDecreased(id, timeToDecrease), GamePaused(id))) { _ =>
+                scheduledTimeout.cancel()
+                gameState = gameState.decreasePickTime(timeToDecrease).pause()
+                sender() ! Success()
+              }
+            } else {
+              persistAndPublishAll(Seq(TimeDecreased(id, gameState.currentPlayer.id, timeToDecrease), GamePaused(id))) { _ =>
+                scheduledTimeout.cancel()
+                gameState = gameState.decreaseTime(gameState.currentPlayer.id, timeToDecrease).pause()
+                sender() ! Success()
+              }
             }
           } else {
             val e = GameUnpaused(id)

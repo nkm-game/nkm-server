@@ -2,40 +2,28 @@ package com.tosware.NKM.models.game
 
 import com.tosware.NKM.models.game.Player.PlayerId
 
-object ClockConfig {
-  def empty(): ClockConfig =
-    ClockConfig(0, 0, 0, 0, 0, 0)
-  def defaultForPickType(pickType: PickType): ClockConfig = pickType match {
-    case PickType.AllRandom => ClockConfig(5000, 30000, 0, 0, 0, 30000)
-    case PickType.DraftPick => ClockConfig(5000, 30000, 0, 45000, 30000, 30000)
-    case PickType.BlindPick => ClockConfig(5000, 30000, 0, 0, 30000, 10000)
-  }
-}
-
-case class ClockConfig(
-                        initialTimeMillis: Long,
-                        timePerMoveMillis: Long,
-                        incrementMillis: Long,
-                        maxBanTimeMillis: Long,
-                        maxPickTimeMillis: Long,
-                        timeAfterPickMillis: Long,
-                      ) {
-}
-
 object Clock {
   def fromConfig(config: ClockConfig, playerOrder: Seq[PlayerId]): Clock =
-    Clock(config, playerOrder.map(p => p -> config.initialTimeMillis).toMap)
+    Clock(playerOrder.map(p => p -> config.initialTimeMillis).toMap)
 
   def empty(playerOrder: Seq[PlayerId]): Clock =
     fromConfig(ClockConfig.empty(), playerOrder)
-
 }
 
 case class Clock(
-                  config: ClockConfig,
                   playerTimes: Map[PlayerId, Long],
+                  pickTime: Long = 0,
                   isRunning: Boolean = true,
                 ) {
+  def setPickTime(timeMillis: Long): Clock =
+    copy(pickTime = timeMillis)
+
+  def setTime(playerId: PlayerId, timeMillis: Long): Clock =
+    copy(playerTimes = playerTimes.updated(playerId, timeMillis))
+
+  def decreasePickTime(timeMillis: Long): Clock =
+    copy(pickTime = Math.max(pickTime - timeMillis, 0))
+
   def decreaseTime(playerId: PlayerId, timeMillis: Long): Clock = {
     val newTime = Math.max(playerTimes(playerId) - timeMillis, 0)
     copy(playerTimes = playerTimes.updated(playerId, newTime))
@@ -53,3 +41,4 @@ case class Clock(
     copy(isRunning = true)
   }
 }
+

@@ -10,7 +10,7 @@ case class GameStateValidator(gameState: GameState) {
     gameState.players.exists(_.name == playerId)
 
   private def playerIsHost(playerId: PlayerId) =
-    gameState.getHost.name == playerId
+    gameState.host.name == playerId
 
   private def playerFinishedGame(playerId: PlayerId) =
     gameState.players.find(_.name == playerId).get.victoryStatus != VictoryStatus.Pending

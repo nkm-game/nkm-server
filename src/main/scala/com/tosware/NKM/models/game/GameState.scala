@@ -1,6 +1,5 @@
 package com.tosware.NKM.models.game
 
-import akka.util.Collections
 import com.softwaremill.quicklens._
 import com.tosware.NKM.models.game.NKMCharacter.CharacterId
 import com.tosware.NKM.models.game.NKMCharacterMetadata.CharacterMetadataId
@@ -8,7 +7,6 @@ import com.tosware.NKM.models.game.Player.PlayerId
 import com.tosware.NKM.models.game.blindpick._
 import com.tosware.NKM.models.game.draftpick._
 
-import scala.collection.immutable.{AbstractSeq, LinearSeq}
 import scala.util.Random
 
 case class GameState(id: String,
@@ -24,13 +22,18 @@ case class GameState(id: String,
                      numberOfCharactersPerPlayers: Int,
                      draftPickState: Option[DraftPickState],
                      blindPickState: Option[BlindPickState],
+                     clockConfig: ClockConfig,
                      clock: Clock,
                     ) {
-  def getHost: Player = players.find(_.isHost).get
+  def host: Player = players.find(_.isHost).get
 
-  def getCurrentPlayerNumber: Int = turn.number % players.length
+  def currentPlayerNumber: Int = turn.number % players.length
 
-  def getCurrentPlayer: Player = players(getCurrentPlayerNumber)
+  def isInChampionSelect: Boolean = Seq(GameStatus.CharacterPick, GameStatus.CharacterPicked).contains(gameStatus)
+
+  def currentPlayer: Player = players(currentPlayerNumber)
+
+  def currentPlayerTime: Long = clock.playerTimes(currentPlayer.id)
 
   def timeoutNumber: Int = gameStatus match {
     case GameStatus.NotStarted => 0
@@ -44,6 +47,15 @@ case class GameState(id: String,
       turn.number
   }
 
+  def initializeCharacterPick(): GameState = {
+    val pickTime = pickType match {
+      case PickType.AllRandom => clockConfig.timeAfterPickMillis
+      case PickType.DraftPick => clockConfig.maxBanTimeMillis
+      case PickType.BlindPick => clockConfig.maxPickTimeMillis
+    }
+    copy(clock = clock.setPickTime(pickTime))
+  }
+
   def startGame(g: GameStartDependencies): GameState = {
     copy(
       charactersMetadata = g.charactersMetadata,
@@ -55,8 +67,9 @@ case class GameState(id: String,
       gameStatus = if (g.pickType == PickType.AllRandom) GameStatus.CharacterPicked else GameStatus.CharacterPick,
       draftPickState = if (g.pickType == PickType.DraftPick) Some(DraftPickState.empty(DraftPickConfig.generate(g))) else None,
       blindPickState = if (g.pickType == PickType.BlindPick) Some(BlindPickState.empty(BlindPickConfig.generate(g))) else None,
+      clockConfig = g.clockConfig,
       clock = Clock.fromConfig(g.clockConfig, playerOrder = g.players.map(_.name)),
-    )
+    ).initializeCharacterPick()
   }
 
   def placeCharactersRandomlyIfAllRandom(charactersMetadata: Set[NKMCharacterMetadata])(implicit random: Random): GameState = {
@@ -84,12 +97,21 @@ case class GameState(id: String,
     } else this
   }
 
+  def checkIfBanningFinished(): GameState = {
+    val banningFinished = draftPickState.fold(false)(_.pickPhase != DraftPickPhase.Banning)
+
+    if(banningFinished) finishBanningPhase() else this
+  }
+
   def checkIfCharacterPickFinished(): GameState = {
     val draftPickFinished = draftPickState.fold(false)(_.pickPhase == DraftPickPhase.Finished)
     val blindPickFinished = blindPickState.fold(false)(_.pickPhase == BlindPickPhase.Finished)
 
     if(draftPickFinished || blindPickFinished) {
-      this.modify(_.gameStatus).setTo(GameStatus.CharacterPicked)
+      copy(
+        gameStatus = GameStatus.CharacterPicked,
+        clock = clock.setPickTime(clockConfig.timeAfterPickMillis),
+      )
     } else this
   }
 
@@ -97,17 +119,14 @@ case class GameState(id: String,
     this.modify(_.gameStatus).setTo(GameStatus.CharacterPlacing).placeCharactersRandomlyIfAllRandom(charactersMetadata)
   }
 
+  def decreasePickTime(timeMillis: Long): GameState =
+    copy(clock = clock.decreasePickTime(timeMillis))
+
   def decreaseTime(playerId: PlayerId, timeMillis: Long): GameState =
     copy(clock = clock.decreaseTime(playerId, timeMillis))
 
   def increaseTime(playerId: PlayerId, timeMillis: Long): GameState =
     copy(clock = clock.increaseTime(playerId, timeMillis))
-
-  def decreaseTimeForAll(playerIds: Seq[PlayerId], timeMillis: Long): GameState =
-    playerIds match {
-      case h :: t => decreaseTime(h, timeMillis).decreaseTimeForAll(t, timeMillis)
-      case Nil => this
-    }
 
   def pause(): GameState =
     copy(clock = clock.pause())
@@ -125,10 +144,16 @@ case class GameState(id: String,
     copy(draftPickState = draftPickState.map(_.ban(playerId, characterIds)))
 
   def finishBanningPhase(): GameState =
-    copy(draftPickState = draftPickState.map(_.finishBanning()))
+    copy(
+      draftPickState = draftPickState.map(_.finishBanning()),
+      clock = clock.setPickTime(clockConfig.maxPickTimeMillis),
+    )
 
   def pick(playerId: PlayerId, characterId: CharacterMetadataId): GameState =
-    copy(draftPickState = draftPickState.map(_.pick(playerId, characterId))).checkIfCharacterPickFinished()
+    copy(
+      draftPickState = draftPickState.map(_.pick(playerId, characterId)),
+      clock = clock.setPickTime(clockConfig.maxPickTimeMillis),
+    ).checkIfCharacterPickFinished()
 
   def draftPickTimeout(): GameState =
     surrender(draftPickState.get.currentPlayerPicking.get)
@@ -176,28 +201,35 @@ case class GameState(id: String,
       numberOfCharactersPerPlayers,
       draftPickState.map(_.toView(forPlayer)),
       blindPickState.map(_.toView(forPlayer)),
+      clockConfig,
       clock,
-      getCurrentPlayer.name,
+      currentPlayer.name,
     )
 }
 
 object GameState {
-  def empty(id: String): GameState = GameState(
-    id = id,
-    charactersMetadata = Set(),
-    hexMap = None,
-    characterIdsOutsideMap = Seq(),
-    phase = Phase(0),
-    turn = Turn(0),
-    players = Seq(),
-    gameStatus = GameStatus.NotStarted,
-    pickType = PickType.AllRandom,
-    numberOfBans = 0,
-    numberOfCharactersPerPlayers = 1,
-    draftPickState = None,
-    blindPickState = None,
-    clock = Clock.fromConfig(ClockConfig.defaultForPickType(PickType.AllRandom), Seq()),
-  )
+  def empty(id: String): GameState = {
+    val defaultPickType = PickType.AllRandom
+    val defaultClockConfig = ClockConfig.defaultForPickType(defaultPickType)
+
+    GameState(
+      id = id,
+      charactersMetadata = Set(),
+      hexMap = None,
+      characterIdsOutsideMap = Seq(),
+      phase = Phase(0),
+      turn = Turn(0),
+      players = Seq(),
+      gameStatus = GameStatus.NotStarted,
+      pickType = defaultPickType,
+      numberOfBans = 0,
+      numberOfCharactersPerPlayers = 1,
+      draftPickState = None,
+      blindPickState = None,
+      clockConfig = defaultClockConfig,
+      clock = Clock.fromConfig(defaultClockConfig, Seq()),
+    )
+  }
 }
 
 case class GameStateView(
@@ -214,6 +246,7 @@ case class GameStateView(
                           numberOfCharactersPerPlayers: Int,
                           draftPickState: Option[DraftPickStateView],
                           blindPickState: Option[BlindPickStateView],
+                          clockConfig: ClockConfig,
                           clock: Clock,
                           currentPlayerId: PlayerId,
                         )
