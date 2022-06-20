@@ -234,26 +234,62 @@ class WSGameSpec extends WSTrait {
 
         // check
         auth(0)
-        fetchAndParseGame(lobbyId).draftPickState.get.bans shouldBe
-          Map(usernames(0) -> Some(player0Bans), usernames(1) -> None, usernames(2) -> None)
+
+        {
+          val game = fetchAndParseGame(lobbyId)
+          game.draftPickState.get.bannedCharacters shouldBe Set()
+          game.draftPickState.get.bans shouldBe
+            Map(usernames(0) -> Some(player0Bans), usernames(1) -> None, usernames(2) -> None)
+        }
+
         auth(1)
-        fetchAndParseGame(lobbyId).draftPickState.get.bans shouldBe
-          Map(usernames(0) -> None, usernames(1) -> Some(player1Bans), usernames(2) -> None)
+
+        {
+          val game = fetchAndParseGame(lobbyId)
+          game.draftPickState.get.bannedCharacters shouldBe Set()
+          game.draftPickState.get.bans shouldBe
+            Map(usernames(0) -> None, usernames(1) -> Some(player1Bans), usernames(2) -> None)
+        }
+
         auth(2)
-        fetchAndParseGame(lobbyId).draftPickState.get.bans shouldBe
-          Map(usernames(0) -> None, usernames(1) -> None, usernames(2) -> None)
+
+        {
+          val game = fetchAndParseGame(lobbyId)
+          game.draftPickState.get.bannedCharacters shouldBe Set()
+          game.draftPickState.get.bans shouldBe
+            Map(usernames(0) -> None, usernames(1) -> None, usernames(2) -> None)
+        }
 
         auth(2)
         ban(lobbyId, Set(availableCharacters.head)).statusCode shouldBe ok
 
         // check
         val finalBans = Map(usernames(0) -> Some(player0Bans), usernames(1) -> Some(player1Bans), usernames(2) -> Some(player2Bans))
+        val allFinalBans = player0Bans ++ player1Bans ++ player2Bans
         auth(0)
-        fetchAndParseGame(lobbyId).draftPickState.get.bans shouldBe finalBans
+
+        {
+          val game = fetchAndParseGame(lobbyId)
+          game.draftPickState.get.bannedCharacters shouldBe allFinalBans
+          game.draftPickState.get.bans shouldBe finalBans
+        }
+
         auth(1)
-        fetchAndParseGame(lobbyId).draftPickState.get.bans shouldBe finalBans
+
+        {
+          val game = fetchAndParseGame(lobbyId)
+          game.draftPickState.get.bannedCharacters shouldBe allFinalBans
+          game.draftPickState.get.bans shouldBe finalBans
+        }
+
         auth(2)
-        fetchAndParseGame(lobbyId).draftPickState.get.bans shouldBe finalBans
+
+        {
+          val game = fetchAndParseGame(lobbyId)
+          game.draftPickState.get.bannedCharacters shouldBe allFinalBans
+          game.draftPickState.get.bans shouldBe finalBans
+        }
+
       }
     }
 
