@@ -237,7 +237,7 @@ class WSGameSpec extends WSTrait {
 
         {
           val game = fetchAndParseGame(lobbyId)
-          game.draftPickState.get.bannedCharacters shouldBe Set()
+          game.draftPickState.get.bannedCharacters shouldBe player0Bans
           game.draftPickState.get.bans shouldBe
             Map(usernames(0) -> Some(player0Bans), usernames(1) -> None, usernames(2) -> None)
         }
@@ -246,7 +246,7 @@ class WSGameSpec extends WSTrait {
 
         {
           val game = fetchAndParseGame(lobbyId)
-          game.draftPickState.get.bannedCharacters shouldBe Set()
+          game.draftPickState.get.bannedCharacters shouldBe player1Bans
           game.draftPickState.get.bans shouldBe
             Map(usernames(0) -> None, usernames(1) -> Some(player1Bans), usernames(2) -> None)
         }

@@ -89,13 +89,9 @@ case class DraftPickState(config: DraftPickConfig,
       else
         bans
 
-    val bannedCharactersFiltered =
-      if(pickPhase == DraftPickPhase.Banning)
-        Set.empty[CharacterMetadataId]
-      else
-        bannedCharacters
+    val bannedCharactersFiltered = bansFiltered.values.flatten.flatten.toSet
 
-      DraftPickStateView(config, bansFiltered, characterSelection, bannedCharactersFiltered, pickedCharacters, charactersAvailableToPick, currentPlayerPicking, pickPhase)
+    DraftPickStateView(config, bansFiltered, characterSelection, bannedCharactersFiltered, pickedCharacters, charactersAvailableToPick, currentPlayerPicking, pickPhase)
   }
 }
 
