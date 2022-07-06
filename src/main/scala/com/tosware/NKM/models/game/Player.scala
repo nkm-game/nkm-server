@@ -7,7 +7,7 @@ object Player {
 }
 
 case class Player(name: PlayerId,
-                  characters: List[NKMCharacter] = List(),
+                  characters: Set[NKMCharacter] = Set.empty,
                   victoryStatus: VictoryStatus = VictoryStatus.Pending,
                   isHost: Boolean = false,
                  ) {

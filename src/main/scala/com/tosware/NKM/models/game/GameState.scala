@@ -12,10 +12,11 @@ import scala.util.Random
 case class GameState(id: String,
                      charactersMetadata: Set[NKMCharacterMetadata],
                      hexMap: Option[HexMap],
-                     characterIdsOutsideMap: Seq[CharacterId],
+                     characterIdsOutsideMap: Set[CharacterId],
                      phase: Phase,
                      turn: Turn,
                      players: Seq[Player],
+                     playerIdsThatPlacedCharacters: Set[PlayerId],
                      gameStatus: GameStatus,
                      pickType: PickType,
                      numberOfBans: Int,
@@ -27,13 +28,25 @@ case class GameState(id: String,
                     ) {
   def host: Player = players.find(_.isHost).get
 
-  def currentPlayerNumber: Int = turn.number % players.length
+  def currentPlayerNumber: Int = turn.number % players.size
+
+  def playerNumber(playerId: PlayerId): Int = players.indexWhere(_.id == playerId)
+
+  def playerById(playerId: PlayerId): Option[Player] = players.find(_.id == playerId)
 
   def isInChampionSelect: Boolean = Seq(GameStatus.CharacterPick, GameStatus.CharacterPicked).contains(gameStatus)
 
   def currentPlayer: Player = players(currentPlayerNumber)
 
   def currentPlayerTime: Long = clock.playerTimes(currentPlayer.id)
+
+  def characterPickFinished: Boolean =  {
+    val draftPickFinished = draftPickState.fold(false)(_.pickPhase == DraftPickPhase.Finished)
+    val blindPickFinished = blindPickState.fold(false)(_.pickPhase == BlindPickPhase.Finished)
+    draftPickFinished || blindPickFinished
+  }
+
+  def placingCharactersFinished: Boolean = playerIdsThatPlacedCharacters.size == players.size
 
   def timeoutNumber: Int = gameStatus match {
     case GameStatus.NotStarted => 0
@@ -77,9 +90,14 @@ case class GameState(id: String,
       val pickedCharacters = random.shuffle(charactersMetadata).grouped(numberOfCharactersPerPlayers).take(players.length)
       val playersWithAssignedCharacters = players.zip(pickedCharacters).map(x => {
         val (player, characters) = x
-        player.copy(characters = characters.map(c => NKMCharacter.fromMetadata(java.util.UUID.nameUUIDFromBytes(random.nextBytes(16)).toString, c)).toList)
+        player.copy(characters = characters.map(c => NKMCharacter.fromMetadata(java.util.UUID.nameUUIDFromBytes(random.nextBytes(16)).toString, c)))
       })
-      copy(gameStatus = GameStatus.Running, players = playersWithAssignedCharacters, characterIdsOutsideMap = playersWithAssignedCharacters.flatMap(c => c.characters.map(c => c.id)))
+      copy(
+        gameStatus = GameStatus.Running,
+        players = playersWithAssignedCharacters,
+        playerIdsThatPlacedCharacters = players.map(_.id).toSet,
+        characterIdsOutsideMap = playersWithAssignedCharacters.flatMap(c => c.characters.map(c => c.id)).toSet
+      )
     } else this
   }
 
@@ -104,10 +122,7 @@ case class GameState(id: String,
   }
 
   def checkIfCharacterPickFinished(): GameState = {
-    val draftPickFinished = draftPickState.fold(false)(_.pickPhase == DraftPickPhase.Finished)
-    val blindPickFinished = blindPickState.fold(false)(_.pickPhase == BlindPickPhase.Finished)
-
-    if(draftPickFinished || blindPickFinished) {
+    if(characterPickFinished) {
       copy(
         gameStatus = GameStatus.CharacterPicked,
         clock = clock.setPickTime(clockConfig.timeAfterPickMillis),
@@ -164,12 +179,24 @@ case class GameState(id: String,
   def blindPickTimeout(): GameState =
     surrender(blindPickState.get.pickingPlayers: _*)
 
+  def checkIfPlacingCharactersFinished(): GameState = {
+    if(placingCharactersFinished) {
+      copy(gameStatus = GameStatus.Running)
+    } else this
+  }
+
+  def placeCharacters(playerId: PlayerId, coordinatesToCharacterIdMap: Map[HexCoordinates, CharacterId]): GameState =
+    coordinatesToCharacterIdMap.foldLeft(this){case (acc, (coordinate, characterId)) => acc.placeCharacter(coordinate, characterId)}
+      .copy(playerIdsThatPlacedCharacters = playerIdsThatPlacedCharacters + playerId)
+      .checkIfPlacingCharactersFinished()
+
+
   def placeCharacter(targetCellCoordinates: HexCoordinates, characterId: CharacterId): GameState =
     this.modify(_.hexMap.each.cells.each).using {
       case cell if cell.coordinates == targetCellCoordinates => HexCell(cell.coordinates, cell.cellType, Some(characterId), cell.effects, cell.spawnNumber)
       case cell => cell
     }.modify(_.characterIdsOutsideMap).using(_.filter(_ != characterId))
-      .modify(_.turn).using(oldTurn => Turn(oldTurn.number + 1))
+//      .modify(_.turn).using(oldTurn => Turn(oldTurn.number + 1))
 
   def moveCharacter(parentCellCoordinates: HexCoordinates, characterId: String): GameState = {
     val parentCell = hexMap.get.cells.find(_.characterId.contains(characterId)).getOrElse {
@@ -195,6 +222,7 @@ case class GameState(id: String,
       phase,
       turn,
       players,
+      playerIdsThatPlacedCharacters,
       gameStatus,
       pickType,
       numberOfBans,
@@ -203,7 +231,7 @@ case class GameState(id: String,
       blindPickState.map(_.toView(forPlayer)),
       clockConfig,
       clock,
-      currentPlayer.name,
+      currentPlayer.id,
     )
 }
 
@@ -216,10 +244,11 @@ object GameState {
       id = id,
       charactersMetadata = Set(),
       hexMap = None,
-      characterIdsOutsideMap = Seq(),
+      characterIdsOutsideMap = Set(),
       phase = Phase(0),
       turn = Turn(0),
       players = Seq(),
+      playerIdsThatPlacedCharacters = Set(),
       gameStatus = GameStatus.NotStarted,
       pickType = defaultPickType,
       numberOfBans = 0,
@@ -236,10 +265,11 @@ case class GameStateView(
                           id: String,
                           charactersMetadata: Set[NKMCharacterMetadata],
                           hexMap: Option[HexMap],
-                          characterIdsOutsideMap: Seq[CharacterId],
+                          characterIdsOutsideMap: Set[CharacterId],
                           phase: Phase,
                           turn: Turn,
                           players: Seq[Player],
+                          playerIdsThatPlacedCharacters: Set[PlayerId],
                           gameStatus: GameStatus,
                           pickType: PickType,
                           numberOfBans: Int,

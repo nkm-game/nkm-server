@@ -1,6 +1,7 @@
 package com.tosware.NKM.models.game.ws
 
 import com.tosware.NKM.models.game.HexCoordinates
+import com.tosware.NKM.models.game.NKMCharacter.CharacterId
 import com.tosware.NKM.models.game.NKMCharacterMetadata.CharacterMetadataId
 
 object GameRequest {
@@ -18,10 +19,10 @@ object GameRequest {
     final case class BlindPickCharacters(lobbyId: String, characterIds: Set[CharacterMetadataId]) extends GameRequest
   }
   object Action {
-    final case class PlaceCharacters(lobbyId: String, coordinatesToCharacterIdMap: Map[HexCoordinates, String]) extends GameRequest
+    final case class PlaceCharacters(lobbyId: String, coordinatesToCharacterIdMap: Map[HexCoordinates, CharacterId]) extends GameRequest
     final case class EndTurn(lobbyId: String) extends GameRequest
-    final case class Move(lobbyId: String, path: Seq[HexCoordinates], characterId: String) extends GameRequest
-    final case class BasicAttack(lobbyId: String, characterThatAttacksId: String, targetCharacterId: String) extends GameRequest
+    final case class Move(lobbyId: String, path: Seq[HexCoordinates], characterId: CharacterId) extends GameRequest
+    final case class BasicAttack(lobbyId: String, characterThatAttacksId: CharacterId, targetCharacterId: CharacterId) extends GameRequest
     final case class UseAbility(lobbyId: String, useAbilityData: String) extends GameRequest
   }
   object Chat {

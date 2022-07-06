@@ -62,6 +62,14 @@ class GameService(gamesManagerActor: ActorRef)
     Future.successful(aw(f).asInstanceOf[CommandResponse])
   }
 
+
+  def placeCharacters(username: String, request: Action.PlaceCharacters): Future[CommandResponse] = {
+    val gameActor: ActorRef = getGameActor(request.lobbyId)
+
+    val f = gameActor ? Game.PlaceCharacters(username, request.coordinatesToCharacterIdMap)
+    Future.successful(aw(f).asInstanceOf[CommandResponse])
+
+  }
   // TODO: check for placing on spawn or if character is owned by user
 //  def placeCharacters(userId: String, request: PlaceCharactersRequest): Future[CommandResponse] = {
 //    val gameActor: ActorRef = system.actorOf(Game.props(request.lobbyId))

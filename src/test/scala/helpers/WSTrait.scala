@@ -4,6 +4,7 @@ import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.testkit.WSProbe
 import com.tosware.NKM.models.game.NKMCharacterMetadata.CharacterMetadataId
 import com.tosware.NKM.models.game._
+import com.tosware.NKM.models.game.ws.GameRequest.Action.PlaceCharacters
 import com.tosware.NKM.models.game.ws.GameRequest.General._
 import com.tosware.NKM.models.game.ws.GameRequest.CharacterSelect._
 import com.tosware.NKM.models.game.ws._
@@ -133,6 +134,9 @@ trait WSTrait extends UserApiTrait {
 
   def blindPick(lobbyId: String, characterIds: Set[CharacterMetadataId]): WebsocketGameResponse =
     sendWSRequestG(GameRoute.BlindPickCharacters, BlindPickCharacters(lobbyId, characterIds).toJson.toString)
+
+  def placeCharacters(lobbyId: String, coordinatesToCharacterIdMap: Map[HexCoordinates, String]): WebsocketGameResponse =
+    sendWSRequestG(GameRoute.PlaceCharacters, PlaceCharacters(lobbyId, coordinatesToCharacterIdMap).toJson.toString)
 
   def fetchGame(lobbyId: String): WebsocketGameResponse =
     sendWSRequestG(GameRoute.GetState, GetState(lobbyId).toJson.toString)

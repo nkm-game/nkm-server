@@ -1,5 +1,6 @@
 package com.tosware.NKM.models.game
 
+import com.tosware.NKM.models.game.NKMCharacter.CharacterId
 import enumeratum._
 
 case class HexCellEffect(cooldown: Int)
@@ -18,6 +19,6 @@ case class HexCoordinates(x: Int, z: Int)
 
 case class HexCell(coordinates: HexCoordinates,
                    cellType: HexCellType,
-                   characterId: Option[String],
+                   characterId: Option[CharacterId],
                    effects: List[HexCellEffect],
                    spawnNumber: Option[Int])
