@@ -1,5 +1,6 @@
 package com.tosware.NKM.models.game
 
+import com.tosware.NKM.models.game.HexCellType.Normal
 import com.tosware.NKM.models.game.NKMCharacter.CharacterId
 import enumeratum._
 
@@ -17,8 +18,20 @@ object HexCellType extends Enum[HexCellType] {
 
 case class HexCoordinates(x: Int, z: Int)
 
-case class HexCell(coordinates: HexCoordinates,
-                   cellType: HexCellType,
-                   characterId: Option[CharacterId],
-                   effects: List[HexCellEffect],
-                   spawnNumber: Option[Int])
+object HexCell {
+  def empty
+  (
+    coordinates: HexCoordinates,
+    cellType: HexCellType = Normal,
+    spawnNumber: Option[Int] = None,
+  ): HexCell = HexCell(coordinates, cellType, None, Seq.empty, spawnNumber)
+}
+
+case class HexCell
+(
+  coordinates: HexCoordinates,
+  cellType: HexCellType,
+  characterId: Option[CharacterId],
+  effects: Seq[HexCellEffect],
+  spawnNumber: Option[Int],
+)

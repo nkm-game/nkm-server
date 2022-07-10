@@ -1,20 +1,13 @@
 package com.tosware.NKM.services
 
-import akka.actor.{ActorRef, ActorSystem}
-import akka.pattern.ask
-import com.tosware.NKM.NKMTimeouts
-import com.tosware.NKM.actors.NKMData
+import akka.actor.ActorSystem
+import com.tosware.NKM.{HexMapProvider, NKMTimeouts}
 import com.tosware.NKM.models.game.{HexMap, NKMCharacterMetadata}
-
-import scala.concurrent.Await
 
 class NKMDataService(implicit system: ActorSystem) extends NKMTimeouts
 {
-  val nkmDataActor: ActorRef = system.actorOf(NKMData.props())
 
-  def getHexMaps: List[HexMap] = {
-    aw(nkmDataActor ? NKMData.GetHexMaps).asInstanceOf[List[HexMap]]
-  }
+  def getHexMaps: Seq[HexMap] = HexMapProvider().getHexMaps
 
   def getCharactersMetadata: Seq[NKMCharacterMetadata] = 1 to 30 map (i => {
     NKMCharacterMetadata(

@@ -17,7 +17,7 @@ class PublicDataSpec extends ApiTrait
     "return hexmaps" in {
       Get("/api/maps") ~> Route.seal(routes) ~> check {
         status shouldEqual OK
-        val hexmaps = responseAs[List[HexMap]]
+        val hexmaps = responseAs[Seq[HexMap]]
         hexmaps.length should be > 1
       }
     }
