@@ -1,5 +1,6 @@
 package com.tosware.NKM.models.game
 
+import com.tosware.NKM.models.game.NKMCharacter.CharacterId
 import com.tosware.NKM.models.game.Player._
 
 object Player {
@@ -12,4 +13,5 @@ case class Player(name: PlayerId,
                   isHost: Boolean = false,
                  ) {
   def id: PlayerId = name
+  def characterIds: Set[CharacterId] = characters.map(_.id)
 }

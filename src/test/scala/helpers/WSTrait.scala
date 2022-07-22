@@ -2,11 +2,13 @@ package helpers
 
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.testkit.WSProbe
+import com.tosware.NKM.models.game.{ClockConfig, GameStateView, HexCoordinates, PickType}
+import com.tosware.NKM.models.game.NKMCharacter.CharacterId
 import com.tosware.NKM.models.game.NKMCharacterMetadata.CharacterMetadataId
-import com.tosware.NKM.models.game._
-import com.tosware.NKM.models.game.ws.GameRequest.Action.PlaceCharacters
-import com.tosware.NKM.models.game.ws.GameRequest.General._
+//import com.tosware.NKM.models.game._
+import com.tosware.NKM.models.game.ws.GameRequest.Action.{Move, PlaceCharacters}
 import com.tosware.NKM.models.game.ws.GameRequest.CharacterSelect._
+import com.tosware.NKM.models.game.ws.GameRequest.General._
 import com.tosware.NKM.models.game.ws._
 import com.tosware.NKM.models.lobby.LobbyState
 import com.tosware.NKM.models.lobby.ws._
@@ -135,8 +137,11 @@ trait WSTrait extends UserApiTrait {
   def blindPick(lobbyId: String, characterIds: Set[CharacterMetadataId]): WebsocketGameResponse =
     sendWSRequestG(GameRoute.BlindPickCharacters, BlindPickCharacters(lobbyId, characterIds).toJson.toString)
 
-  def placeCharacters(lobbyId: String, coordinatesToCharacterIdMap: Map[HexCoordinates, String]): WebsocketGameResponse =
+  def placeCharacters(lobbyId: String, coordinatesToCharacterIdMap: Map[HexCoordinates, CharacterId]): WebsocketGameResponse =
     sendWSRequestG(GameRoute.PlaceCharacters, PlaceCharacters(lobbyId, coordinatesToCharacterIdMap).toJson.toString)
+
+  def moveCharacter(lobbyId: String, path: Seq[HexCoordinates], characterId: CharacterId): WebsocketGameResponse =
+    sendWSRequestG(GameRoute.Move, Move(lobbyId, path, characterId).toJson.toString)
 
   def fetchGame(lobbyId: String): WebsocketGameResponse =
     sendWSRequestG(GameRoute.GetState, GetState(lobbyId).toJson.toString)

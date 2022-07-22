@@ -15,7 +15,7 @@ case class NaturesBeauty(initialState: AbilityState) extends Ability {
   override val metadataId = getClass.getSimpleName
   override val id = java.util.UUID.randomUUID.toString
   override val state = initialState
-  override val rangeCells = gameState => state.currentParentCharacter.getBasicAttackCells(gameState)
+  override val rangeCells = gameState => state.currentParentCharacter.getBasicAttackCells()(gameState)
   override val targetsInRange = gameState =>
     rangeCells(gameState)
       .filter(c => c.characterId.nonEmpty

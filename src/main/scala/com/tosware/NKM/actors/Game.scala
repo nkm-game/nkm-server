@@ -40,7 +40,7 @@ object Game {
 
   case class PlaceCharacters(playerId: PlayerId, coordinatesToCharacterIdMap: Map[HexCoordinates, CharacterId]) extends Command
 
-  case class MoveCharacter(hexCoordinates: HexCoordinates, characterId: CharacterId) extends Command
+  case class MoveCharacter(playerId: PlayerId, path: Seq[HexCoordinates], characterId: CharacterId) extends Command
 
   // sent only by self /////////
   //
@@ -74,7 +74,7 @@ object Game {
 
   case class CharactersBlindPicked(id: String, playerId: PlayerId, characterId: Set[CharacterMetadataId]) extends Event
 
-  case class CharacterMoved(id: String, hexCoordinates: HexCoordinates, characterId: CharacterId) extends Event
+  case class CharacterMoved(id: String, playerId: PlayerId, path: Seq[HexCoordinates], characterId: CharacterId) extends Event
 
   // CLOCK TIMEOUTS /////////////////////
   //
@@ -101,7 +101,7 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
 
   implicit val random: Random = new Random(id.hashCode)
 
-  var gameState: GameState = GameState.empty(id)
+  implicit var gameState: GameState = GameState.empty(id)
   var lastTimestamp: Instant = Instant.now()
   var scheduledTimeout: Cancellable = Cancellable.alreadyCancelled
 
@@ -154,7 +154,7 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
       log.debug(s"GAME STATE VIEW REQUEST: ${gameStateView.toString}")
       sender() ! gameStateView
     case StartGame(gameStartDependencies) =>
-      GameStateValidator(gameState).validateStartGame() match {
+      GameStateValidator().validateStartGame() match {
         case failure @ Failure(_) => sender() ! failure
         case Success(_) =>
           val e = GameStarted(id, gameStartDependencies)
@@ -211,7 +211,7 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
       }
       scheduleDefault()
     case Pause(playerId) =>
-      GameStateValidator(gameState).validatePause(playerId) match {
+      GameStateValidator().validatePause(playerId) match {
         case failure @ Failure(_) => sender() ! failure
         case Success(_) =>
           if(gameState.clock.isRunning) {
@@ -244,7 +244,7 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
           }
       }
     case Surrender(playerId) =>
-      GameStateValidator(gameState).validateSurrender(playerId) match {
+      GameStateValidator().validateSurrender(playerId) match {
         case failure @ Failure(_) => sender() ! failure
         case Success(_) =>
           val e = Surrendered(id, playerId)
@@ -254,7 +254,7 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
           }
       }
     case BanCharacters(playerId, characterIds) =>
-      GameStateValidator(gameState).validateBanCharacters(playerId, characterIds) match {
+      GameStateValidator().validateBanCharacters(playerId, characterIds) match {
         case failure @ Failure(_) => sender() ! failure
         case Success(_) =>
           val e = CharactersBanned(id, playerId, characterIds)
@@ -264,7 +264,7 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
           }
       }
     case PickCharacter(playerId, characterId) =>
-      GameStateValidator(gameState).validatePickCharacter(playerId, characterId) match {
+      GameStateValidator().validatePickCharacter(playerId, characterId) match {
         case failure @ Failure(_) => sender() ! failure
         case Success(_) =>
           val e = CharacterPicked(id, playerId, characterId)
@@ -274,7 +274,7 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
           }
       }
     case BlindPickCharacters(playerId, characterIds) =>
-      GameStateValidator(gameState).validateBlindPickCharacters(playerId, characterIds) match {
+      GameStateValidator().validateBlindPickCharacters(playerId, characterIds) match {
         case failure @ Failure(_) => sender() ! failure
         case Success(_) =>
           val e = CharactersBlindPicked(id, playerId, characterIds)
@@ -286,7 +286,7 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
           }
       }
     case PlaceCharacters(playerId, coordinatesToCharacterIdMap) =>
-      GameStateValidator(gameState).validatePlacingCharacters(playerId, coordinatesToCharacterIdMap) match {
+      GameStateValidator().validatePlacingCharacters(playerId, coordinatesToCharacterIdMap) match {
         case failure @ Failure(_) => sender() ! failure
         case Success(_) =>
           val e = CharactersPlaced(id, playerId, coordinatesToCharacterIdMap)
@@ -295,11 +295,15 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
             sender() ! Success()
           }
       }
-    case MoveCharacter(hexCoordinates, characterId) =>
-      val e = CharacterMoved(id, hexCoordinates, characterId)
-      persistAndPublish(e) { _ =>
-        gameState = gameState.moveCharacter(hexCoordinates, characterId)
-        sender() ! Success()
+    case MoveCharacter(playerId, path, characterId) =>
+      GameStateValidator().validateMoveCharacter(playerId, path, characterId) match {
+        case failure @ Failure(_) => sender() ! failure
+        case Success(_) =>
+          val e = CharacterMoved(id, playerId, path, characterId)
+          persistAndPublish(e) { _ =>
+            gameState = gameState.moveCharacter(playerId, path, characterId)
+            sender() ! Success()
+          }
       }
     case e => log.warning(s"Unknown message: $e")
   }
@@ -326,8 +330,8 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
     case CharactersPlaced(_, playerId, coordinatesToCharacterIdMap) =>
       gameState = gameState.placeCharacters(playerId, coordinatesToCharacterIdMap)
       log.debug(s"Recovered placing characters by $playerId to $coordinatesToCharacterIdMap")
-    case CharacterMoved(_, hexCoordinates, characterId) =>
-      gameState = gameState.moveCharacter(hexCoordinates, characterId)
+    case CharacterMoved(_, playerId, hexCoordinates, characterId) =>
+      gameState = gameState.moveCharacter(playerId, hexCoordinates, characterId)
       log.debug(s"Recovered $characterId to $hexCoordinates")
     case BanningPhaseTimedOut(_) =>
       log.debug(s"Recovered banning phase timeout")

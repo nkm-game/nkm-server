@@ -6,7 +6,7 @@ import com.tosware.NKM.models.game.NKMCharacterMetadata.CharacterMetadataId
 import com.tosware.NKM.models.game.Player.PlayerId
 import com.tosware.NKM.models.game._
 
-case class GameStateValidator(gameState: GameState) {
+case class GameStateValidator()(implicit gameState: GameState) {
   private def playerInGame(playerId: PlayerId) =
     gameState.players.exists(_.name == playerId)
 
@@ -41,64 +41,85 @@ case class GameStateValidator(gameState: GameState) {
     (true, "")
   }
 
-  private val playerNotHostMessage = "Player is not a host."
-  private val gameStartedMessage = "Game is started."
-  private val gameNotStartedMessage = "Game is not started."
-  private val playerNotInGameMessage = "This player is not in the game."
-  private val playerFinishedGameMessage = "This player already finished the game."
-  private val gameNotInCharacterPickMessage = "Game is not in character pick phase."
-  private val gameNotInCharacterPlacingMessage = "Game is not in character placing phase."
-  private val banNotValidMessage = "Ban is not valid."
-  private val pickNotValidMessage = "Pick is not valid."
+  private object Message {
+    val playerNotHost = "Player is not a host."
+    val gameStarted = "Game is started."
+    val gameNotStarted = "Game is not started."
+    val playerNotInGame = "This player is not in the game."
+    val playerFinishedGame = "This player already finished the game."
+    val gameNotInCharacterPick = "Game is not in character pick phase."
+    val gameNotInCharacterPlacing = "Game is not in character placing phase."
+    val banNotValid = "Ban is not valid."
+    val pickNotValid = "Pick is not valid."
+    val notYourTurn = "This is not your turn."
+  }
 
   def validateStartGame(): CommandResponse = {
-    if (!gameStatusIs(GameStatus.NotStarted)) Failure(gameStartedMessage)
+    if (!gameStatusIs(GameStatus.NotStarted)) Failure(Message.gameStarted)
     else Success()
   }
 
   def validatePause(playerId: PlayerId): CommandResponse = {
-    if (!playerIsHost(playerId)) Failure(playerNotHostMessage)
+    if (!playerIsHost(playerId)) Failure(Message.playerNotHost)
     Success()
   }
 
   def validateSurrender(playerId: PlayerId): CommandResponse = {
-    if (!playerInGame(playerId)) Failure(playerNotInGameMessage)
-    else if (gameStatusIs(GameStatus.NotStarted)) Failure(gameNotStartedMessage)
-    else if (playerFinishedGame(playerId)) Failure(playerFinishedGameMessage)
+    if (!playerInGame(playerId)) Failure(Message.playerNotInGame)
+    else if (gameStatusIs(GameStatus.NotStarted)) Failure(Message.gameNotStarted)
+    else if (playerFinishedGame(playerId)) Failure(Message.playerFinishedGame)
     else Success()
   }
 
   def validateBanCharacters(playerId: PlayerId, characterIds: Set[CharacterMetadataId]): CommandResponse = {
-    if (!playerInGame(playerId)) Failure(playerNotInGameMessage)
-    else if (gameStatusIs(GameStatus.NotStarted)) Failure(gameNotStartedMessage)
-    else if (!gameStatusIs(GameStatus.CharacterPick)) Failure(gameNotInCharacterPickMessage)
-    else if (!banValid(playerId, characterIds)) Failure(banNotValidMessage)
+    if (!playerInGame(playerId)) Failure(Message.playerNotInGame)
+    else if (gameStatusIs(GameStatus.NotStarted)) Failure(Message.gameNotStarted)
+    else if (!gameStatusIs(GameStatus.CharacterPick)) Failure(Message.gameNotInCharacterPick)
+    else if (!banValid(playerId, characterIds)) Failure(Message.banNotValid)
     else Success()
   }
 
   def validatePickCharacter(playerId: PlayerId, characterId: CharacterMetadataId): CommandResponse = {
-    if (!playerInGame(playerId)) Failure(playerNotInGameMessage)
-    else if (gameStatusIs(GameStatus.NotStarted)) Failure(gameNotStartedMessage)
-    else if (!gameStatusIs(GameStatus.CharacterPick)) Failure(gameNotInCharacterPickMessage)
-    else if (!characterPickValid(playerId, characterId)) Failure(pickNotValidMessage)
+    if (!playerInGame(playerId)) Failure(Message.playerNotInGame)
+    else if (gameStatusIs(GameStatus.NotStarted)) Failure(Message.gameNotStarted)
+    else if (!gameStatusIs(GameStatus.CharacterPick)) Failure(Message.gameNotInCharacterPick)
+    else if (!characterPickValid(playerId, characterId)) Failure(Message.pickNotValid)
     else Success()
   }
 
   def validateBlindPickCharacters(playerId: PlayerId, characterIds: Set[CharacterMetadataId]): CommandResponse = {
-    if (!playerInGame(playerId)) Failure(playerNotInGameMessage)
-    else if (gameStatusIs(GameStatus.NotStarted)) Failure(gameNotStartedMessage)
-    else if (!gameStatusIs(GameStatus.CharacterPick)) Failure(gameNotInCharacterPickMessage)
-    else if (!characterBlindPickValid(playerId, characterIds)) Failure(pickNotValidMessage)
+    if (!playerInGame(playerId)) Failure(Message.playerNotInGame)
+    else if (gameStatusIs(GameStatus.NotStarted)) Failure(Message.gameNotStarted)
+    else if (!gameStatusIs(GameStatus.CharacterPick)) Failure(Message.gameNotInCharacterPick)
+    else if (!characterBlindPickValid(playerId, characterIds)) Failure(Message.pickNotValid)
     else Success()
   }
 
   def validatePlacingCharacters(playerId: PlayerId, coordinatesToCharacterIdMap: Map[HexCoordinates, CharacterId]): CommandResponse = {
-    if (!playerInGame(playerId)) Failure(playerNotInGameMessage)
-    else if (gameStatusIs(GameStatus.NotStarted)) Failure(gameNotStartedMessage)
-    else if (!gameStatusIs(GameStatus.CharacterPlacing)) Failure(gameNotInCharacterPlacingMessage)
+    if (!playerInGame(playerId)) Failure(Message.playerNotInGame)
+    else if (gameStatusIs(GameStatus.NotStarted)) Failure(Message.gameNotStarted)
+    else if (!gameStatusIs(GameStatus.CharacterPlacing)) Failure(Message.gameNotInCharacterPlacing)
     else charactersPlacingValid(playerId, coordinatesToCharacterIdMap) match {
       case (true, _) => Success()
       case (false, msg) => Failure(msg)
     }
   }
+
+  def validateMoveCharacter(playerId: PlayerId, path: Seq[HexCoordinates], characterId: CharacterId): CommandResponse = {
+    if (!playerInGame(playerId)) Failure(Message.playerNotInGame)
+    else if (gameStatusIs(GameStatus.NotStarted)) Failure(Message.gameNotStarted)
+    else if (gameState.currentPlayer.id != playerId) Failure(Message.notYourTurn)
+    else if (path.size < 2) Failure("Empty moves are disallowed.")
+    else {
+      val character = gameState.characterById(characterId).get
+      val parentCell = character.getParentCell()
+      if (!gameState.playerById(playerId).get.characterIds.contains(playerId)) Failure("You do not own this character.")
+      else if (gameState.characterIdsOutsideMap.contains(characterId)) Failure("Character outside map.")
+      else if (!parentCell.map(_.coordinates).contains(path.head)) Failure("Path has to start with characters parent cell.")
+      else if (path.size - 1 > character.state.speed) Failure("You cannot move above speed range.")
+      else if (path.toSet.size != path.size) Failure("You cannot visit several cells in one move.")
+      else Success()
+    }
+  }
+
 }

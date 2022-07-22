@@ -36,8 +36,8 @@ trait Ability {
   val metadataId: String
   val state: AbilityState
   val parentBaseAttackOverride: Option[(GameState, NKMCharacter) => GameState] = None
-  val rangeCells: GameState => List[HexCell]
-  val targetsInRange: GameState => List[HexCell]
+  val rangeCells: GameState => Set[HexCell]
+  val targetsInRange: GameState => Set[HexCell]
   val canBeUsed: GameState => Boolean = _ => false
   val use: (GameState, Option[NKMCharacter], Option[HexCell]) => GameState = (gameState, _, _) => gameState
 }

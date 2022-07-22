@@ -40,6 +40,10 @@ case class GameState(id: String,
 
   def currentPlayerTime: Long = clock.playerTimes(currentPlayer.id)
 
+  def characters: Seq[NKMCharacter] = players.flatMap(_.characters)
+
+  def characterById(characterId: CharacterId): Option[NKMCharacter] = characters.find(_.id == characterId)
+
   def characterPickFinished: Boolean =  {
     val draftPickFinished = draftPickState.fold(false)(_.pickPhase == DraftPickPhase.Finished)
     val blindPickFinished = blindPickState.fold(false)(_.pickPhase == BlindPickPhase.Finished)
@@ -85,18 +89,12 @@ case class GameState(id: String,
     ).initializeCharacterPick()
   }
 
-  def placeCharactersRandomlyIfAllRandom(charactersMetadata: Set[NKMCharacterMetadata])(implicit random: Random): GameState = {
+  def placeCharactersRandomlyIfAllRandom()(implicit random: Random): GameState = {
     if (pickType == PickType.AllRandom) {
-      val pickedCharacters = random.shuffle(charactersMetadata).grouped(numberOfCharactersPerPlayers).take(players.length)
-      val playersWithAssignedCharacters = players.zip(pickedCharacters).map(x => {
-        val (player, characters) = x
-        player.copy(characters = characters.map(c => NKMCharacter.fromMetadata(java.util.UUID.nameUUIDFromBytes(random.nextBytes(16)).toString, c)))
-      })
-      copy(
+      // TODO: place characters as now they are outside of the map
+      assignCharactersToPlayers().copy(
         gameStatus = GameStatus.Running,
-        players = playersWithAssignedCharacters,
         playerIdsThatPlacedCharacters = players.map(_.id).toSet,
-        characterIdsOutsideMap = playersWithAssignedCharacters.flatMap(c => c.characters.map(c => c.id)).toSet
       )
     } else this
   }
@@ -121,18 +119,46 @@ case class GameState(id: String,
     if(banningFinished) finishBanningPhase() else this
   }
 
-  def checkIfCharacterPickFinished(): GameState = {
+  def generateCharacter(characterMetadataId: CharacterMetadataId)(implicit random: Random): NKMCharacter = {
+    val characterId = java.util.UUID.nameUUIDFromBytes(random.nextBytes(16)).toString
+    val metadata = charactersMetadata.find(_.id == characterMetadataId).get
+    NKMCharacter.fromMetadata(characterId, metadata)
+  }
+
+  def assignCharactersToPlayers()(implicit random: Random): GameState = {
+    val characterSelection: Map[PlayerId, Iterable[CharacterMetadataId]] = pickType match {
+      case PickType.AllRandom =>
+        val pickedCharacters = random
+          .shuffle(charactersMetadata.map(_.id))
+          .grouped(numberOfCharactersPerPlayers)
+          .take(players.length)
+        players.map(_.id).zip(pickedCharacters).toMap
+      case PickType.DraftPick =>
+        draftPickState.get.characterSelection
+      case PickType.BlindPick =>
+        blindPickState.get.characterSelection
+    }
+    val playersWithAssignedCharacters =
+      players.map(p => p.copy(characters = characterSelection(p.id).map(c => generateCharacter(c)).toSet))
+
+    copy(
+      players = playersWithAssignedCharacters,
+      characterIdsOutsideMap = playersWithAssignedCharacters.flatMap(c => c.characters.map(c => c.id)).toSet
+    )
+  }
+
+  def checkIfCharacterPickFinished()(implicit random: Random): GameState = {
     if(characterPickFinished) {
       copy(
         gameStatus = GameStatus.CharacterPicked,
         clock = clock.setPickTime(clockConfig.timeAfterPickMillis),
-      )
+      ).assignCharactersToPlayers()
     } else this
   }
 
-  def startPlacingCharacters()(implicit random: Random): GameState = {
-    this.modify(_.gameStatus).setTo(GameStatus.CharacterPlacing).placeCharactersRandomlyIfAllRandom(charactersMetadata)
-  }
+  def startPlacingCharacters()(implicit random: Random): GameState =
+    this.modify(_.gameStatus).setTo(GameStatus.CharacterPlacing)
+      .placeCharactersRandomlyIfAllRandom()
 
   def decreasePickTime(timeMillis: Long): GameState =
     copy(clock = clock.decreasePickTime(timeMillis))
@@ -164,7 +190,7 @@ case class GameState(id: String,
       clock = clock.setPickTime(clockConfig.maxPickTimeMillis),
     )
 
-  def pick(playerId: PlayerId, characterId: CharacterMetadataId): GameState =
+  def pick(playerId: PlayerId, characterId: CharacterMetadataId)(implicit random: Random): GameState =
     copy(
       draftPickState = draftPickState.map(_.pick(playerId, characterId)),
       clock = clock.setPickTime(clockConfig.maxPickTimeMillis),
@@ -173,7 +199,7 @@ case class GameState(id: String,
   def draftPickTimeout(): GameState =
     surrender(draftPickState.get.currentPlayerPicking.get)
 
-  def blindPick(playerId: PlayerId, characterIds: Set[CharacterMetadataId]): GameState =
+  def blindPick(playerId: PlayerId, characterIds: Set[CharacterMetadataId])(implicit random: Random): GameState =
     copy(blindPickState = blindPickState.map(_.pick(playerId, characterIds))).checkIfCharacterPickFinished()
 
   def blindPickTimeout(): GameState =
@@ -198,7 +224,10 @@ case class GameState(id: String,
     }.modify(_.characterIdsOutsideMap).using(_.filter(_ != characterId))
 //      .modify(_.turn).using(oldTurn => Turn(oldTurn.number + 1))
 
-  def moveCharacter(parentCellCoordinates: HexCoordinates, characterId: String): GameState = {
+  def moveCharacter(playerId: PlayerId, path: Seq[HexCoordinates], characterId: String): GameState =
+    path.tail.foldLeft(this){case (acc, coordinate) => acc.moveCharacterSingle(playerId, coordinate, characterId)}
+
+  def moveCharacterSingle(playerId: PlayerId, parentCellCoordinates: HexCoordinates, characterId: String): GameState = {
     val parentCell = hexMap.get.cells.find(_.characterId.contains(characterId)).getOrElse {
       // TODO      log.error(s"Unable to move character $characterId to $parentCellCoordinates")
       return this

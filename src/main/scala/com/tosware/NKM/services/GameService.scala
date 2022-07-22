@@ -11,11 +11,12 @@ import com.tosware.NKM.models.game._
 import com.tosware.NKM.models.game.ws.GameRequest._
 import slick.jdbc.JdbcBackend
 
-import scala.concurrent.{Await, Future}
+import scala.concurrent.Future
 
 class GameService(gamesManagerActor: ActorRef)
                  (implicit db: JdbcBackend.Database, NKMDataService: NKMDataService)
   extends NKMTimeouts {
+
   import CommandResponse._
 
   def getGameActor(lobbyId: String): ActorRef = {
@@ -68,36 +69,14 @@ class GameService(gamesManagerActor: ActorRef)
 
     val f = gameActor ? Game.PlaceCharacters(username, request.coordinatesToCharacterIdMap)
     Future.successful(aw(f).asInstanceOf[CommandResponse])
-
   }
-  // TODO: check for placing on spawn or if character is owned by user
-//  def placeCharacters(userId: String, request: PlaceCharactersRequest): Future[CommandResponse] = {
-//    val gameActor: ActorRef = system.actorOf(Game.props(request.lobbyId))
-//    val gameStateFuture = getGameState(request.lobbyId)
-//    val gameState = Await.result(gameStateFuture, atMost)
-//
-//    if(gameState.gamePhase != GamePhase.CharacterPlacing) return Future.successful(CommandResponse.Failure)
-//    if(gameState.getCurrentPlayer.name != userId) return Future.successful(CommandResponse.Failure)
-//
-//    val isCharacterInCharactersOutsideMap = gameState.characterIdsOutsideMap.contains(request.characterId)
-//    if(!isCharacterInCharactersOutsideMap) return Future.successful(CommandResponse.Failure)
-//
-//    val isCharacterOfCurrentPlayer = gameState.getCurrentPlayer.characters.map(_.id).contains(request.characterId)
-//    if(!isCharacterOfCurrentPlayer) return Future.successful(CommandResponse.Failure)
-//
-//    val targetCellOption = gameState.hexMap.get.getCell(request.hexCoordinates)
-//    if(targetCellOption.isEmpty) return Future.successful(CommandResponse.Failure)
-//
-//    val targetCell = targetCellOption.get
-//    val isTargetCellEmpty = targetCell.characterId.isEmpty
-//    if(!isTargetCellEmpty) return Future.successful(CommandResponse.Failure)
-//
-//    if(!gameState.hexMap.get.getSpawnPointsByNumber(gameState.getCurrentPlayerNumber).contains(targetCell))
-//      return Future.successful(CommandResponse.Failure)
-//
-//    val placeCharacterFuture = gameActor ? Game.PlaceCharacter(request.hexCoordinates, request.characterId)
-//    placeCharacterFuture.mapTo[CommandResponse]
-//  }
+
+  def moveCharacter(username: String, request: Action.Move): Future[CommandResponse] = {
+    val gameActor: ActorRef = getGameActor(request.lobbyId)
+
+    val f = gameActor ? Game.MoveCharacter(username, request.path, request.characterId)
+    Future.successful(aw(f).asInstanceOf[CommandResponse])
+  }
 
   def getGameState(gameActor: ActorRef): Future[GameState] =
     (gameActor ? GetState).mapTo[GameState]
