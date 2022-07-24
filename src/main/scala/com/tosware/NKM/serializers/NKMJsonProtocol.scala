@@ -1,5 +1,7 @@
 package com.tosware.NKM.serializers
 
+import com.tosware.NKM.models.game.HexCoordinates
+import com.tosware.NKM.models.game.NKMCharacter.CharacterId
 import pl.iterators.kebs.json.{KebsEnumFormats, KebsSpray}
 import spray.json._
 
@@ -27,5 +29,17 @@ trait NKMJsonProtocol
     private val formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
     private val deserializationErrorMessage =
       s"Expected date time in ISO offset date time format ex. ${LocalDateTime.now().format(formatter)}"
+  }
+
+  implicit object CoordinatesCharacterMapFormat extends RootJsonFormat[Map[HexCoordinates, CharacterId]] {
+    override def write(obj: Map[HexCoordinates, CharacterId]) = {
+      val m: List[JsField] = obj.map{case (coordinates, characterId) => (coordinates.toJson.toString(), JsString(characterId))}.toList
+      JsObject(m:_*)
+    }
+
+    override def read(json: JsValue) = json match {
+      case JsObject(fields) => fields.map{case (coordinates, characterId) => (coordinates.parseJson.convertTo[HexCoordinates], characterId.convertTo[String])}
+      case x => deserializationError(s"Expected object, but got $x.")
+    }
   }
 }
