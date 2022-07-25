@@ -386,7 +386,7 @@ class WSGameSpec extends WSTrait {
           val gameState = fetchAndParseGame(lobbyId)
           gameState.clockConfig.maxPickTimeMillis shouldBe maxPickTimeMillis
           gameState.blindPickState.get.pickPhase shouldBe BlindPickPhase.Picking
-          println(gameState.players)
+          logger.info(gameState.players.toString())
           gameState.players.forall(_.victoryStatus == VictoryStatus.Lost) shouldBe true
         }
       }
@@ -664,28 +664,7 @@ class WSGameSpec extends WSTrait {
         // TODO
 //        moveCharacter(lobbyId, hexMap.getSpawnPointsByNumber(0).)
       }
-      // disallow if character is grounded
-
-      // disallow if character is snared
-
-      // disallow if character is stunned
-
-      // disallow empty move
-
-      // allow move within speed range
-
-      // disallow move above speed range
-
-      // disallow move into the same position
-
-      // disallow move that visits another cell more than once
-
-      // disallow move if character already moved
-
-      // disallow move if there is an obstacle on path
-
-      // disallow move if cell at the end is not free to move
-      fail
+      fail()
     }
   }
 }

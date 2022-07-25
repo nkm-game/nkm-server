@@ -96,7 +96,7 @@ class UserSpec extends NKMPersistenceTestKit(ActorSystem("UserSpec"))
 //        val createLobbyFuture = user ? CreateLobby("test lobby name")
 //        val createLobbyResponse = Await.result(createLobbyFuture.mapTo[Event], atMost)
 //        createLobbyResponse match {
-//          case LobbyCreated(lobbyId) => println(s"Created lobby with id $lobbyId")
+//          case LobbyCreated(lobbyId) => logger.info(s"Created lobby with id $lobbyId")
 //          case other => fail(other.toString)
 //        }
 //      }

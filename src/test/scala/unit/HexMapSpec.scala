@@ -1,14 +1,17 @@
 package unit
 
 import com.tosware.NKM.HexMapProvider
+import com.tosware.NKM.Main.getClass
 import com.tosware.NKM.models.game.HexCellType._
 import com.tosware.NKM.models.game.{HexCell, HexCellType, HexCoordinates, HexMap}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
+import org.slf4j.{Logger, LoggerFactory}
 
 class HexMapSpec
   extends AnyWordSpecLike
     with Matchers {
+  val logger: Logger = LoggerFactory.getLogger(getClass)
   "HexMap" must {
     "display text Ui in test map" in {
       val cells: Set[HexCell] = {
@@ -50,7 +53,7 @@ class HexMapSpec
     // use for visualisation
     "display text Ui in other maps" in {
       val hexMaps = HexMapProvider().getHexMaps
-      println(hexMaps.map(_.toTextUi))
+      logger.info(hexMaps.map(_.toTextUi).toString())
     }
   }
 }

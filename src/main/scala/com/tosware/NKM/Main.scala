@@ -7,6 +7,7 @@ import com.tosware.NKM.services._
 import com.tosware.NKM.services.http.HttpService
 import com.tosware.NKM.services.http.directives.JwtSecretKey
 import com.typesafe.config.{Config, ConfigFactory}
+import org.slf4j.{Logger, LoggerFactory}
 import slick.jdbc.JdbcBackend
 import slick.jdbc.JdbcBackend.Database
 
@@ -15,6 +16,7 @@ import scala.language.postfixOps
 object Main extends App {
   val db: JdbcBackend.Database = Database.forConfig("slick.db")
   val port = sys.env.getOrElse("PORT", "8080").toInt
+  val logger: Logger = LoggerFactory.getLogger(getClass)
 
   try {
     val config: Config = ConfigFactory.load()
@@ -28,10 +30,10 @@ object Main extends App {
     val httpService = new HttpService(deps)
 
     Http().newServerAt("0.0.0.0", port).bind(httpService.routes)
-    println("Started http server")
+    logger.info("Started http server")
   } catch {
     case e: Throwable =>
-      println(e.printStackTrace())
+      e.printStackTrace()
       System.exit(1)
   }
 }

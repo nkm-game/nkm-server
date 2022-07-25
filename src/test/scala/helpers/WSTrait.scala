@@ -35,12 +35,12 @@ trait WSTrait extends UserApiTrait {
   def withGameWS[T](body: => T): T = withWS(wsGameUri, body)
 
   def sendRequestL(request: WebsocketLobbyRequest): Unit = {
-    println(request.toJson.toString)
+    logger.info(request.toJson.toString)
     wsClient.sendMessage(request.toJson.toString)
   }
 
   def sendRequestG(request: WebsocketGameRequest): Unit = {
-    println(request.toJson.toString)
+    logger.info(request.toJson.toString)
     wsClient.sendMessage(request.toJson.toString)
   }
 
