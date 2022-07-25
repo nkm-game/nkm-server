@@ -7,6 +7,7 @@ import com.tosware.NKM.models.game.PickType.BlindPick
 import com.tosware.NKM.models.game._
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
+import org.slf4j.{Logger, LoggerFactory}
 
 import scala.util.Random
 
@@ -14,6 +15,7 @@ class GameStateValidatorSpec
   extends AnyWordSpecLike
     with Matchers {
   implicit val random: Random = new Random()
+  val logger: Logger = LoggerFactory.getLogger(getClass)
 
   val cells: Set[HexCell] = {
     Set(
@@ -45,44 +47,47 @@ class GameStateValidatorSpec
       }
   }
 
-  val hexMap = HexMap("test", cells)
-  val playerIds = Seq("p0", "p1")
-  val gameStateDeps = GameStartDependencies(
+  private val hexMap = HexMap("test", cells)
+  private val playerIds = Seq("p0", "p1")
+  private val gameStateDeps = GameStartDependencies(
     players = playerIds.map(n => Player(n)),
     hexMap = hexMap,
     pickType = BlindPick,
     numberOfBansPerPlayer = 0,
     numberOfCharactersPerPlayer = 1,
-    charactersMetadata = Set(NKMCharacterMetadata.empty().copy(initialSpeed = 4)),
+    charactersMetadata = Set(NKMCharacterMetadata.empty().copy(initialSpeed = 3)),
     clockConfig = ClockConfig.empty()
   )
 
-  val placingGameState = GameState.empty("test")
+  private val placingGameState = GameState.empty("test")
     .startGame(gameStateDeps)
     .blindPick(playerIds(0), Set(gameStateDeps.charactersMetadata.head.id))
     .blindPick(playerIds(1), Set(gameStateDeps.charactersMetadata.head.id))
     .startPlacingCharacters()
 
-  def getCharacterId(playerId: Int) = placingGameState.players(playerId).characters.head.id
+  private def getCharacterId(playerId: Int) = placingGameState.players(playerId).characters.head.id
 
-  val runningGameState = placingGameState
+  private val runningGameState = placingGameState
     .placeCharacters(playerIds(0), Map(hexMap.getSpawnPointsByNumber(0).head.coordinates -> getCharacterId(0)))
     .placeCharacters(playerIds(1), Map(hexMap.getSpawnPointsByNumber(1).head.coordinates -> getCharacterId(1)))
 
-  val validator = GameStateValidator()(runningGameState)
+  private val validator = GameStateValidator()(runningGameState)
 
-  def toCoordinateSeq(tuples: Seq[(Int, Int)]) = tuples.map{case (x, z) => HexCoordinates(x, z)}
+  private def toCoordinateSeq(tuples: Seq[(Int, Int)]) = tuples.map{case (x, z) => HexCoordinates(x, z)}
 
   "GameStateValidator" must {
-    println(hexMap.toTextUi)
+    logger.info(hexMap.toTextUi)
     "validate moving characters and" when {
       "allow move within speed range" in {
         validator.validateMoveCharacter(playerIds(0),
           toCoordinateSeq(Seq((0, 0), (1, 0))),
           getCharacterId(0)
         ) match {
-          case Success(_) => fail()
-          case Failure(_) =>
+          case Success(_) =>
+          case Failure(m) => {
+            logger.error(m)
+            fail()
+          }
         }
       }
 
@@ -108,7 +113,7 @@ class GameStateValidatorSpec
           getCharacterId(0)
         ) match {
           case Success(_) => fail()
-          case Failure(_) =>
+          case Failure(m) => logger.info(m)
         }
 
         validator.validateMoveCharacter(playerIds(0),
@@ -116,7 +121,7 @@ class GameStateValidatorSpec
           getCharacterId(0)
         ) match {
           case Success(_) => fail()
-          case Failure(_) =>
+          case Failure(m) => logger.info(m)
         }
       }
 
@@ -126,7 +131,7 @@ class GameStateValidatorSpec
           getCharacterId(0)
         ) match {
           case Success(_) => fail()
-          case Failure(_) =>
+          case Failure(m) => logger.info(m)
         }
       }
 
@@ -136,7 +141,7 @@ class GameStateValidatorSpec
           getCharacterId(1)
         ) match {
           case Success(_) => fail()
-          case Failure(_) =>
+          case Failure(m) => logger.info(m)
         }
       }
 
@@ -146,7 +151,7 @@ class GameStateValidatorSpec
           getCharacterId(1)
         ) match {
           case Success(_) => fail()
-          case Failure(_) =>
+          case Failure(m) => logger.info(m)
         }
       }
 
@@ -157,7 +162,7 @@ class GameStateValidatorSpec
           getCharacterId(0)
         ) match {
           case Success(_) => fail()
-          case Failure(_) =>
+          case Failure(m) => logger.info(m)
         }
       }
 
@@ -167,7 +172,7 @@ class GameStateValidatorSpec
           getCharacterId(0)
         ) match {
           case Success(_) => fail()
-          case Failure(_) =>
+          case Failure(m) => logger.info(m)
         }
       }
 
@@ -177,7 +182,7 @@ class GameStateValidatorSpec
           getCharacterId(0)
         ) match {
           case Success(_) => fail()
-          case Failure(_) =>
+          case Failure(m) => logger.info(m)
         }
       }
 
@@ -191,7 +196,7 @@ class GameStateValidatorSpec
           getCharacterId(0)
         ) match {
           case Success(_) => fail()
-          case Failure(_) =>
+          case Failure(m) => logger.info(m)
         }
       }
 
@@ -201,7 +206,17 @@ class GameStateValidatorSpec
           getCharacterId(0)
         ) match {
           case Success(_) => fail()
-          case Failure(_) =>
+          case Failure(m) => logger.info(m)
+        }
+      }
+
+      "disallow move if moving to not adjacent cell" in {
+        validator.validateMoveCharacter(playerIds(0),
+          toCoordinateSeq(Seq((0, 0), (0, 2))),
+          getCharacterId(0)
+        ) match {
+          case Success(_) => fail()
+          case Failure(m) => logger.info(m)
         }
       }
     }

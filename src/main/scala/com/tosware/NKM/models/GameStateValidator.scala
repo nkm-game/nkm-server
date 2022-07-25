@@ -113,7 +113,7 @@ case class GameStateValidator()(implicit gameState: GameState) {
     else {
       val character = gameState.characterById(characterId).get
       val parentCell = character.getParentCell()
-      if (!gameState.playerById(playerId).get.characterIds.contains(playerId)) Failure("You do not own this character.")
+      if (!gameState.playerById(playerId).get.characterIds.contains(characterId)) Failure("You do not own this character.")
       else if (gameState.characterIdsOutsideMap.contains(characterId)) Failure("Character outside map.")
       else if (!parentCell.map(_.coordinates).contains(path.head)) Failure("Path has to start with characters parent cell.")
       else if (path.size - 1 > character.state.speed) Failure("You cannot move above speed range.")

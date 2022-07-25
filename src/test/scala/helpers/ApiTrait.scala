@@ -19,7 +19,6 @@ trait ApiTrait
     def routes = httpService.routes
 
     implicit def default(implicit system: ActorSystem): RouteTestTimeout = RouteTestTimeout(5.seconds)
-    val logger: Logger = LoggerFactory.getLogger(getClass)
 
     override def beforeAll(): Unit = {
       super.beforeAll()
