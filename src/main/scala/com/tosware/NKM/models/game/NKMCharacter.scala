@@ -29,15 +29,12 @@ case class NKMCharacter
   state: NKMCharacterState,
 )
 {
-  def getBasicAttackCells()(implicit gameState: GameState): Set[HexCell] = defaultGetBasicAttackCells()
+  def basicAttackCells(implicit gameState: GameState): Set[HexCell] = defaultGetBasicAttackCells
 
-  def getParentCell()(implicit gameState: GameState): Option[HexCell] = {
-    if(gameState.characterIdsOutsideMap.contains(id)) return None
-    Some(gameState.hexMap.get.cells.filter(c => c.characterId.nonEmpty && c.characterId.get == id).head)
-  }
+  def parentCell(implicit gameState: GameState): Option[HexCell] =
+    gameState.hexMap.get.getCellOfCharacter(id)
 
-  def defaultGetBasicAttackCells()(implicit gameState: GameState): Set[HexCell] = {
-    val parentCell = getParentCell()
+  def defaultGetBasicAttackCells(implicit gameState: GameState): Set[HexCell] = {
     ???
   }
 }

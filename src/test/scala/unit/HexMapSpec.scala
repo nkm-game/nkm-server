@@ -1,9 +1,8 @@
 package unit
 
 import com.tosware.NKM.HexMapProvider
-import com.tosware.NKM.Main.getClass
 import com.tosware.NKM.models.game.HexCellType._
-import com.tosware.NKM.models.game.{HexCell, HexCellType, HexCoordinates, HexMap}
+import com.tosware.NKM.models.game.{HexMap, HexUtils}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 import org.slf4j.{Logger, LoggerFactory}
@@ -14,8 +13,7 @@ class HexMapSpec
   val logger: Logger = LoggerFactory.getLogger(getClass)
   "HexMap" must {
     "display text Ui in test map" in {
-      val cells: Set[HexCell] = {
-        Set(
+      val hexParams: Set[Any] = Set(
           (-1, 1, Wall),
           (0, 1, Wall),
           (1, 1, Wall),
@@ -31,12 +29,7 @@ class HexMapSpec
           (3, -1, Wall),
           (4, -1, Wall),
         )
-        .map{
-          case (x: Int, y: Int) => HexCell.empty(HexCoordinates(x, y))
-          case (x: Int, y: Int, t: HexCellType) => HexCell.empty(HexCoordinates(x, y), t)
-          case (x: Int, y: Int, t: HexCellType, i: Int) => HexCell.empty(HexCoordinates(x, y), t, Some(i))
-        }
-      }
+      val cells = HexUtils.hexCellParamsToCells(hexParams)
 
       val hexMap = HexMap("test", cells)
       val expected =

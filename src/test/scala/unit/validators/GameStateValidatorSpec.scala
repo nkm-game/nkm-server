@@ -16,9 +16,7 @@ class GameStateValidatorSpec
     with Matchers {
   implicit val random: Random = new Random()
   val logger: Logger = LoggerFactory.getLogger(getClass)
-
-  val cells: Set[HexCell] = {
-    Set(
+  val hexParams: Set[Any] = Set(
       (-2, 2, Wall),
       (-1, 2, Wall),
       (0, 2, Wall),
@@ -40,12 +38,8 @@ class GameStateValidatorSpec
       (3, -1, Wall),
       (4, -1, Wall),
     )
-      .map{
-        case (x: Int, y: Int) => HexCell.empty(HexCoordinates(x, y))
-        case (x: Int, y: Int, t: HexCellType) => HexCell.empty(HexCoordinates(x, y), t)
-        case (x: Int, y: Int, t: HexCellType, i: Int) => HexCell.empty(HexCoordinates(x, y), t, Some(i))
-      }
-  }
+
+  val cells: Set[HexCell] = HexUtils.hexCellParamsToCells(hexParams)
 
   private val hexMap = HexMap("test", cells)
   private val playerIds = Seq("p0", "p1")

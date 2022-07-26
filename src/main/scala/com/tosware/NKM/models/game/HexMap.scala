@@ -1,5 +1,7 @@
 package com.tosware.NKM.models.game
 
+import com.tosware.NKM.models.game.NKMCharacter.CharacterId
+
 object HexMap {
   def empty(): HexMap = HexMap("Empty HexMap", Set.empty)
 }
@@ -12,6 +14,9 @@ case class HexMap(name: String, cells: Set[HexCell]) {
   def getSpawnPointsByNumber(n: Int): Set[HexCell] = getSpawnPoints.filter(_.spawnNumber.forall(_ == n))
 
   def maxNumberOfCharacters: Int = getSpawnPoints.map(_.spawnNumber.get).size
+
+  def getCellOfCharacter(id: CharacterId): Option[HexCell] =
+    cells.find(c => c.characterId.nonEmpty && c.characterId.get == id)
 
   def toTextUi: String = {
     val coords = cells.map(_.coordinates)

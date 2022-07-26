@@ -112,7 +112,7 @@ case class GameStateValidator()(implicit gameState: GameState) {
     else if (path.size < 2) Failure("Empty moves are disallowed.")
     else {
       val character = gameState.characterById(characterId).get
-      val parentCell = character.getParentCell()
+      val parentCell = character.parentCell
       if (!gameState.playerById(playerId).get.characterIds.contains(characterId)) Failure("You do not own this character.")
       else if (gameState.characterIdsOutsideMap.contains(characterId)) Failure("Character outside map.")
       else if (!parentCell.map(_.coordinates).contains(path.head)) Failure("Path has to start with characters parent cell.")

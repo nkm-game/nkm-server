@@ -16,7 +16,10 @@ object HexCellType extends Enum[HexCellType] {
   case object SpawnPoint extends HexCellType
 }
 
-case class HexCoordinates(x: Int, z: Int)
+case class HexCoordinates(x: Int, z: Int) {
+  def y: Int = -x - z
+
+}
 
 object HexCell {
   def empty
