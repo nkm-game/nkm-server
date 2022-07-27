@@ -1,28 +1,14 @@
 package com.tosware.NKM.providers
 
 import com.tosware.NKM.models.game._
+import com.tosware.NKM.models.game.effects.{GroundEffect, SnareEffect, StunEffect}
 import com.tosware.NKM.serializers.NKMJsonProtocol
 
 case class CharacterEffectMetadatasProvider() extends NKMJsonProtocol {
   def getCharacterEffectMetadatas: Seq[CharacterEffectMetadata] = Seq(
-    CharacterEffectMetadata(
-      name = CharacterEffectName.Snare,
-      effectType = CharacterEffectType.Negative,
-      description = "This character cannot basic move.",
-      isCc = true,
-    ),
-    CharacterEffectMetadata(
-      name = CharacterEffectName.Stun,
-      effectType = CharacterEffectType.Negative,
-      description = "This character cannot take action.",
-      isCc = true,
-    ),
-    CharacterEffectMetadata(
-      name = CharacterEffectName.Ground,
-      effectType = CharacterEffectType.Negative,
-      description = "This character is grounded and cannot move.",
-      isCc = true,
-    ),
+    GroundEffect.metadata,
+    SnareEffect.metadata,
+    StunEffect.metadata,
     CharacterEffectMetadata(
       name = CharacterEffectName.Poison,
       effectType = CharacterEffectType.Negative,

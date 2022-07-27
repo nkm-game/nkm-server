@@ -1,5 +1,7 @@
 package com.tosware.NKM.models.game
 
+import com.softwaremill.quicklens._
+
 import NKMCharacter._
 import NKMCharacterMetadata.CharacterMetadataId
 
@@ -29,7 +31,9 @@ case class NKMCharacter
   state: NKMCharacterState,
 )
 {
-  def canMove: Boolean = true
+  val basicMoveImpairmentCcNames = Seq(CharacterEffectName.Stun, CharacterEffectName.Ground, CharacterEffectName.Snare)
+
+  def canBasicMove: Boolean = state.effects.exists(e => basicMoveImpairmentCcNames.contains(e.metadata.name))
 
   def basicAttackCells(implicit gameState: GameState): Set[HexCell] = defaultGetBasicAttackCells
 
@@ -39,6 +43,9 @@ case class NKMCharacter
   def defaultGetBasicAttackCells(implicit gameState: GameState): Set[HexCell] = {
     ???
   }
+
+  def addEffect(effect: CharacterEffect): NKMCharacter =
+    this.modify(_.state.effects).using(e => e :+ effect)
 
   def toView: NKMCharacterView = NKMCharacterView(
     id = id,

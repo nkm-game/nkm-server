@@ -5,6 +5,7 @@ import com.tosware.NKM.models.GameStateValidator
 import com.tosware.NKM.models.game.HexCellType.{SpawnPoint, Wall}
 import com.tosware.NKM.models.game.PickType.BlindPick
 import com.tosware.NKM.models.game._
+import com.tosware.NKM.models.game.effects.{GroundEffect, SnareEffect, StunEffect}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 import org.slf4j.{Logger, LoggerFactory}
@@ -76,7 +77,7 @@ class GameStateValidatorSpec
     logger.info(hexMap.toTextUi)
     "validate moving characters and" when {
       "allow move within speed range" in {
-        validator.validateMoveCharacter(playerIds(0),
+        validator.validateBasicMoveCharacter(playerIds(0),
           toCoordinateSeq(Seq((0, 0), (1, 0))),
           getCharacterId(0)
         ) match {
@@ -93,19 +94,46 @@ class GameStateValidatorSpec
       }
 
       "disallow if character is grounded" in {
-        fail()
+        val newGameState = runningGameState.addEffect(getCharacterId(0), GroundEffect(1))
+
+        GameStateValidator()(newGameState).validateBasicMoveCharacter(
+          playerIds(0),
+          toCoordinateSeq(Seq((0, 0), (1, 0))),
+          getCharacterId(0)
+        ) match {
+          case Success(_) => fail()
+          case Failure(m) => logger.info(m)
+        }
       }
 
       "disallow if character is snared" in {
-        fail()
+        val newGameState = runningGameState.addEffect(getCharacterId(0), SnareEffect(1))
+
+        GameStateValidator()(newGameState).validateBasicMoveCharacter(
+          playerIds(0),
+          toCoordinateSeq(Seq((0, 0), (1, 0))),
+          getCharacterId(0)
+        ) match {
+          case Success(_) => fail()
+          case Failure(m) => logger.info(m)
+        }
       }
 
       "disallow character is stunned" in {
-        fail()
+        val newGameState = runningGameState.addEffect(getCharacterId(0), StunEffect(1))
+
+        GameStateValidator()(newGameState).validateBasicMoveCharacter(
+          playerIds(0),
+          toCoordinateSeq(Seq((0, 0), (1, 0))),
+          getCharacterId(0)
+        ) match {
+          case Success(_) => fail()
+          case Failure(m) => logger.info(m)
+        }
       }
 
       "disallow empty moves" in {
-        validator.validateMoveCharacter(playerIds(0),
+        validator.validateBasicMoveCharacter(playerIds(0),
           toCoordinateSeq(Seq()),
           getCharacterId(0)
         ) match {
@@ -113,7 +141,7 @@ class GameStateValidatorSpec
           case Failure(m) => logger.info(m)
         }
 
-        validator.validateMoveCharacter(playerIds(0),
+        validator.validateBasicMoveCharacter(playerIds(0),
           toCoordinateSeq(Seq((0, 0))),
           getCharacterId(0)
         ) match {
@@ -123,7 +151,7 @@ class GameStateValidatorSpec
       }
 
       "disallow move from other cell than characters" in {
-        validator.validateMoveCharacter(playerIds(0),
+        validator.validateBasicMoveCharacter(playerIds(0),
           toCoordinateSeq(Seq((1, 0), (2, 0))),
           getCharacterId(0)
         ) match {
@@ -133,7 +161,7 @@ class GameStateValidatorSpec
       }
 
       "disallow move outside of turn" in {
-        validator.validateMoveCharacter(playerIds(1),
+        validator.validateBasicMoveCharacter(playerIds(1),
           toCoordinateSeq(Seq((3, 0), (2, 0))),
           getCharacterId(1)
         ) match {
@@ -143,7 +171,7 @@ class GameStateValidatorSpec
       }
 
       "disallow move foreign characters" in {
-        validator.validateMoveCharacter(playerIds(0),
+        validator.validateBasicMoveCharacter(playerIds(0),
           toCoordinateSeq(Seq((3, 0), (2, 0))),
           getCharacterId(1)
         ) match {
@@ -154,7 +182,7 @@ class GameStateValidatorSpec
 
 
       "disallow move above speed range" in {
-        validator.validateMoveCharacter(playerIds(0),
+        validator.validateBasicMoveCharacter(playerIds(0),
           toCoordinateSeq(Seq((0, 0), (1, 0), (2, 0), (2, 1), (2, 2))),
           getCharacterId(0)
         ) match {
@@ -164,7 +192,7 @@ class GameStateValidatorSpec
       }
 
       "disallow move into the same position" in {
-        validator.validateMoveCharacter(playerIds(0),
+        validator.validateBasicMoveCharacter(playerIds(0),
           toCoordinateSeq(Seq((0, 0), (1, 0), (0, 0))),
           getCharacterId(0)
         ) match {
@@ -174,7 +202,7 @@ class GameStateValidatorSpec
       }
 
       "disallow move that visits another cell more than once" in {
-        validator.validateMoveCharacter(playerIds(0),
+        validator.validateBasicMoveCharacter(playerIds(0),
           toCoordinateSeq(Seq((0, 0), (1, 0), (2, 0), (1, 0))),
           getCharacterId(0)
         ) match {
@@ -188,7 +216,7 @@ class GameStateValidatorSpec
       }
 
       "disallow move if there is an obstacle on path" in {
-        validator.validateMoveCharacter(playerIds(0),
+        validator.validateBasicMoveCharacter(playerIds(0),
           toCoordinateSeq(Seq((0, 0), (1, -1), (1, 0))),
           getCharacterId(0)
         ) match {
@@ -198,7 +226,7 @@ class GameStateValidatorSpec
       }
 
       "disallow move if cell at the end is not free to move" in {
-        validator.validateMoveCharacter(playerIds(0),
+        validator.validateBasicMoveCharacter(playerIds(0),
           toCoordinateSeq(Seq((0, 0), (1, -1))),
           getCharacterId(0)
         ) match {
@@ -208,7 +236,7 @@ class GameStateValidatorSpec
       }
 
       "disallow move if moving to not adjacent cell" in {
-        validator.validateMoveCharacter(playerIds(0),
+        validator.validateBasicMoveCharacter(playerIds(0),
           toCoordinateSeq(Seq((0, 0), (0, 2))),
           getCharacterId(0)
         ) match {

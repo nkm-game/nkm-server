@@ -105,7 +105,7 @@ case class GameStateValidator()(implicit gameState: GameState) {
     }
   }
 
-  def validateMoveCharacter(playerId: PlayerId, path: Seq[HexCoordinates], characterId: CharacterId): CommandResponse = {
+  def validateBasicMoveCharacter(playerId: PlayerId, path: Seq[HexCoordinates], characterId: CharacterId): CommandResponse = {
     if (!playerInGame(playerId)) Failure(Message.playerNotInGame)
     else if (gameStatusIs(GameStatus.NotStarted)) Failure(Message.gameNotStarted)
     else if (gameState.currentPlayer.id != playerId) Failure(Message.notYourTurn)
@@ -118,6 +118,7 @@ case class GameStateValidator()(implicit gameState: GameState) {
       else if (!parentCell.map(_.coordinates).contains(path.head)) Failure("Path has to start with characters parent cell.")
       else if (path.size - 1 > character.state.speed) Failure("You cannot move above speed range.")
       else if (path.toSet.size != path.size) Failure("You cannot visit several cells in one move.")
+      else if (character.canBasicMove) Failure("This character cannot move.")
       else Success()
     }
   }

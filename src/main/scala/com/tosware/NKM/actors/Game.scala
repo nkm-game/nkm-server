@@ -296,7 +296,7 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
           }
       }
     case MoveCharacter(playerId, path, characterId) =>
-      GameStateValidator().validateMoveCharacter(playerId, path, characterId) match {
+      GameStateValidator().validateBasicMoveCharacter(playerId, path, characterId) match {
         case failure @ Failure(_) => sender() ! failure
         case Success(_) =>
           val e = CharacterMoved(id, playerId, path, characterId)

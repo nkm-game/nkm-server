@@ -242,6 +242,12 @@ case class GameState(id: String,
   def setMap(hexMap: HexMap): GameState =
     copy(hexMap = Some(hexMap))
 
+  def addEffect(characterId: CharacterId, characterEffect: CharacterEffect): GameState =
+    this.modify(_.players.each.characters.each).using {
+      case character if character.id == characterId => character.addEffect(characterEffect)
+      case character => character
+    }
+
   def toView(forPlayer: Option[PlayerId]): GameStateView =
     GameStateView(
       id,
