@@ -2,32 +2,34 @@ package integration.api
 
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.server.Route
-import com.tosware.NKM.models._
-import com.tosware.NKM.models.game.{HexMap, NKMCharacterMetadata}
+import akka.http.scaladsl.unmarshalling.FromResponseUnmarshaller
+import com.tosware.NKM.models.game.{AbilityMetadata, CharacterEffectMetadata, HexCellEffect, HexMap, NKMCharacterMetadata}
 import helpers.ApiTrait
-import pdi.jwt.{JwtAlgorithm, JwtSprayJson}
-import spray.json._
 
 import scala.language.postfixOps
-import scala.util.Success
+import scala.reflect.ClassTag
 
 class PublicDataSpec extends ApiTrait
 {
   "API" must {
-    "return hexmaps" in {
-      Get("/api/maps") ~> Route.seal(routes) ~> check {
+    def assertDataExists[B <: Iterable[_]: FromResponseUnmarshaller: ClassTag](route: String) = {
+      Get(route) ~> Route.seal(routes) ~> check {
         status shouldEqual OK
-        val hexmaps = responseAs[Seq[HexMap]]
-        hexmaps.length should be > 1
+        val data = responseAs[B]
+        data.size should be > 0
       }
     }
 
-    "return character metadatas" in {
-      Get("/api/characters") ~> Route.seal(routes) ~> check {
-        status shouldEqual OK
-        val characters = responseAs[List[NKMCharacterMetadata]]
-        characters.length should be > 1
-      }
-    }
+    "return hexmaps" in
+      assertDataExists[Seq[HexMap]]("/api/maps")
+
+    "return character metadatas" in
+      assertDataExists[Seq[NKMCharacterMetadata]]("/api/characters")
+
+    "return ability metadatas" in
+      assertDataExists[Seq[AbilityMetadata]]("/api/abilities")
+
+    "return character effect metadatas" in
+      assertDataExists[Seq[CharacterEffectMetadata]]("/api/character_effects")
   }
 }

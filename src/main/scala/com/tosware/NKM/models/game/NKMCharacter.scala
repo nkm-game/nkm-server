@@ -16,7 +16,7 @@ object NKMCharacter {
         basicAttackRange = NKMCharacterMetadata.initialBasicAttackRange,
         speed = NKMCharacterMetadata.initialSpeed,
         psychicalDefense = NKMCharacterMetadata.initialPsychicalDefense,
-        magicalDefense = NKMCharacterMetadata.initialMagicalDefense
+        magicalDefense = NKMCharacterMetadata.initialMagicalDefense,
       )
     )
   }
@@ -29,6 +29,8 @@ case class NKMCharacter
   state: NKMCharacterState,
 )
 {
+  def canMove: Boolean = true
+
   def basicAttackCells(implicit gameState: GameState): Set[HexCell] = defaultGetBasicAttackCells
 
   def parentCell(implicit gameState: GameState): Option[HexCell] =
@@ -37,4 +39,17 @@ case class NKMCharacter
   def defaultGetBasicAttackCells(implicit gameState: GameState): Set[HexCell] = {
     ???
   }
+
+  def toView: NKMCharacterView = NKMCharacterView(
+    id = id,
+    metadataId = metadataId,
+    state = state.toView,
+  )
 }
+
+case class NKMCharacterView
+(
+  id: CharacterId,
+  metadataId: CharacterMetadataId,
+  state: NKMCharacterStateView,
+)

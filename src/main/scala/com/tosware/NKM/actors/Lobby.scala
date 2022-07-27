@@ -250,7 +250,7 @@ class Lobby(id: String)(implicit NKMDataService: NKMDataService)
           pickType = lobbyState.pickType,
           numberOfBansPerPlayer = lobbyState.numberOfBans,
           numberOfCharactersPerPlayer = lobbyState.numberOfCharactersPerPlayer,
-          NKMDataService.getCharactersMetadata.toSet,
+          NKMDataService.getCharacterMetadatas.toSet,
           clockConfig = lobbyState.clockConfig
         )
         sender() ! aw(gameActor ? Game.StartGame(deps)).asInstanceOf[CommandResponse]

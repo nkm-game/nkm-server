@@ -1,4 +1,4 @@
-package com.tosware.NKM
+package com.tosware.NKM.providers
 
 import com.tosware.NKM.models.game.HexMap
 import com.tosware.NKM.serializers.NKMJsonProtocol
@@ -7,7 +7,7 @@ import spray.json._
 import java.io.File
 import java.util.jar.JarFile
 import scala.io.Source
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.EnumerationHasAsScala
 
 case class HexMapProvider() extends NKMJsonProtocol {
   def getHexMaps: Seq[HexMap] = {

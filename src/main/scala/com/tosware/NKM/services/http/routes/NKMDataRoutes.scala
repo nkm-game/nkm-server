@@ -17,7 +17,14 @@ class NKMDataRoutes(deps: NKMDependencies) extends JwtDirective
       complete(NKMDataService.getHexMaps)
     },
     path("characters") {
-      complete(NKMDataService.getCharactersMetadata)
+      complete(NKMDataService.getCharacterMetadatas)
+    },
+    path("abilities") {
+      complete(NKMDataService.getAbilityMetadatas)
+    },
+
+    path("character_effects") {
+      complete(NKMDataService.getCharacterEffectMetadatas)
     },
   )
 }

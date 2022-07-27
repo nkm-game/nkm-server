@@ -1,10 +1,10 @@
-package com.tosware.NKM
+package com.tosware.NKM.providers
 
 import com.tosware.NKM.models.game.NKMCharacterMetadata
 import com.tosware.NKM.serializers.NKMJsonProtocol
 
-case class CharactersMetadataProvider() extends NKMJsonProtocol {
-  def getCharactersMetadata: Seq[NKMCharacterMetadata] = 1 to 30 map (i => {
+case class CharacterMetadatasProvider() extends NKMJsonProtocol {
+  def getCharacterMetadatas: Seq[NKMCharacterMetadata] = 1 to 30 map (i => {
     NKMCharacterMetadata(
       name = s"Bot$i",
       initialHealthPoints = 50,

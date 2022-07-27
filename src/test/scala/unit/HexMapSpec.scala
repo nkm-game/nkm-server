@@ -1,8 +1,8 @@
 package unit
 
-import com.tosware.NKM.HexMapProvider
 import com.tosware.NKM.models.game.HexCellType._
 import com.tosware.NKM.models.game.{HexMap, HexUtils}
+import com.tosware.NKM.providers.HexMapProvider
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 import org.slf4j.{Logger, LoggerFactory}

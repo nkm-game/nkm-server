@@ -42,6 +42,9 @@ class GameStateValidatorSpec
   val cells: Set[HexCell] = HexUtils.hexCellParamsToCells(hexParams)
 
   private val hexMap = HexMap("test", cells)
+
+  def spawnCoordinates(playerIndex: Int) = hexMap.getSpawnPointsByNumber(playerIndex).head.coordinates
+
   private val playerIds = Seq("p0", "p1")
   private val gameStateDeps = GameStartDependencies(
     players = playerIds.map(n => Player(n)),
@@ -59,11 +62,11 @@ class GameStateValidatorSpec
     .blindPick(playerIds(1), Set(gameStateDeps.charactersMetadata.head.id))
     .startPlacingCharacters()
 
-  private def getCharacterId(playerId: Int) = placingGameState.players(playerId).characters.head.id
+  private def getCharacterId(playerIndex: Int) = placingGameState.players(playerIndex).characters.head.id
 
   private val runningGameState = placingGameState
-    .placeCharacters(playerIds(0), Map(hexMap.getSpawnPointsByNumber(0).head.coordinates -> getCharacterId(0)))
-    .placeCharacters(playerIds(1), Map(hexMap.getSpawnPointsByNumber(1).head.coordinates -> getCharacterId(1)))
+    .placeCharacters(playerIds(0), Map(spawnCoordinates(0) -> getCharacterId(0)))
+    .placeCharacters(playerIds(1), Map(spawnCoordinates(1) -> getCharacterId(1)))
 
   private val validator = GameStateValidator()(runningGameState)
 
@@ -213,6 +216,33 @@ class GameStateValidatorSpec
           case Failure(m) => logger.info(m)
         }
       }
+    }
+
+    "validate attacking characters and" when {
+      "allow if character is in attack range" in {
+        fail()
+      }
+
+      "disallow if character is not on the map" in {
+        fail()
+      }
+
+      "disallow if character is grounded" in {
+        fail()
+      }
+
+      "disallow if character is snared" in {
+        fail()
+      }
+
+      "disallow character is stunned" in {
+        fail()
+      }
+
+      "disallow if character is not in attack range" in {
+        fail()
+      }
+
     }
   }
 }
