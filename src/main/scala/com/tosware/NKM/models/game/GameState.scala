@@ -250,6 +250,13 @@ case class GameState(id: String,
       case character => character
     }
 
+  def removeCharacterFromMap(characterId: CharacterId): GameState = {
+    this.modify(_.hexMap.each.cells.each).using {
+      case cell if cell.characterId.contains(characterId) => HexCell(cell.coordinates, cell.cellType, None, cell.effects, cell.spawnNumber)
+      case cell => cell
+    }.modify(_.characterIdsOutsideMap).setTo(characterIdsOutsideMap + characterId)
+  }
+
   def toView(forPlayer: Option[PlayerId]): GameStateView =
     GameStateView(
       id,

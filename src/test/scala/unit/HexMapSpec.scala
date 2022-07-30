@@ -44,9 +44,9 @@ class HexMapSpec
     }
 
     // use for visualisation
-    "display text Ui in other maps" in {
-      val hexMaps = HexMapProvider().getHexMaps
-      logger.info(hexMaps.map(_.toTextUi).toString())
-    }
+//    "display text Ui in other maps" in {
+//      val hexMaps = HexMapProvider().getHexMaps
+//      logger.info(hexMaps.map(_.toTextUi).toString())
+//    }
   }
 }

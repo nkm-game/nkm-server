@@ -97,7 +97,12 @@ class GameStateValidatorSpec
       }
 
       "disallow if character is not on the map" in {
-        fail()
+        val newGameState = runningGameState.removeCharacterFromMap(getCharacterId(0))
+        val result =  GameStateValidator()(newGameState).validateBasicMoveCharacter(playerIds(0),
+          CoordinateSeq((0, 0), (1, 0)),
+          getCharacterId(0)
+        )
+        assertCommandFailure(result)
       }
 
       "disallow if character is grounded" in {
@@ -238,7 +243,13 @@ class GameStateValidatorSpec
       }
 
       "disallow if character is not on the map" in {
-        fail()
+        val newGameState = moveGameState.removeCharacterFromMap(getCharacterId(0))
+
+        val result = GameStateValidator()(newGameState).validateBasicAttackCharacter(playerIds(0),
+          getCharacterId(0),
+          getCharacterId(1),
+        )
+        assertCommandFailure(result)
       }
 
       "allow if character is grounded" in {
