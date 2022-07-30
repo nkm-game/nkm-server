@@ -1,4 +1,4 @@
-package com.tosware.NKM.models.game
+package com.tosware.NKM.models.game.hex
 
 import com.tosware.NKM.models.game.NKMCharacter.CharacterId
 

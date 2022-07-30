@@ -1,7 +1,7 @@
 package com.tosware.NKM.serializers
 
-import com.tosware.NKM.models.game.HexCoordinates
 import com.tosware.NKM.models.game.NKMCharacter.CharacterId
+import com.tosware.NKM.models.game.hex.HexCoordinates
 import pl.iterators.kebs.json.{KebsEnumFormats, KebsSpray}
 import spray.json._
 

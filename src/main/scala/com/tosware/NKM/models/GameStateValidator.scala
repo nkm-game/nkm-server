@@ -5,6 +5,7 @@ import com.tosware.NKM.models.game.NKMCharacter.CharacterId
 import com.tosware.NKM.models.game.NKMCharacterMetadata.CharacterMetadataId
 import com.tosware.NKM.models.game.Player.PlayerId
 import com.tosware.NKM.models.game._
+import com.tosware.NKM.models.game.hex.HexCoordinates
 
 case class GameStateValidator()(implicit gameState: GameState) {
   private def playerInGame(playerId: PlayerId) =
@@ -114,11 +115,29 @@ case class GameStateValidator()(implicit gameState: GameState) {
       val character = gameState.characterById(characterId).get
       val parentCell = character.parentCell
       if (!gameState.playerById(playerId).get.characterIds.contains(characterId)) Failure("You do not own this character.")
+      else if (!character.canBasicMove) Failure("This character is unable to basic move.")
       else if (gameState.characterIdsOutsideMap.contains(characterId)) Failure("Character outside map.")
       else if (!parentCell.map(_.coordinates).contains(path.head)) Failure("Path has to start with characters parent cell.")
       else if (path.size - 1 > character.state.speed) Failure("You cannot move above speed range.")
       else if (path.toSet.size != path.size) Failure("You cannot visit several cells in one move.")
-      else if (character.canBasicMove) Failure("This character cannot move.")
+      else Success()
+    }
+  }
+
+  def validateBasicAttackCharacter(playerId: PlayerId, characterId: CharacterId, targetCharacterId: CharacterId): CommandResponse = {
+    if (!playerInGame(playerId)) Failure(Message.playerNotInGame)
+    else if (gameStatusIs(GameStatus.NotStarted)) Failure(Message.gameNotStarted)
+    else if (gameState.currentPlayer.id != playerId) Failure(Message.notYourTurn)
+    else {
+      val character = gameState.characterById(characterId).get
+      val targetCharacter = gameState.characterById(targetCharacterId).get
+      val targetParentCell = targetCharacter.parentCell
+      if (!gameState.playerById(playerId).get.characterIds.contains(characterId)) Failure("You do not own this character.")
+      else if (!character.canBasicAttack) Failure("This character is unable to basic attack.")
+      else if (gameState.characterIdsOutsideMap.contains(characterId)) Failure("Character outside map.")
+      else if (gameState.characterIdsOutsideMap.contains(targetCharacterId)) Failure("Target character outside map.")
+      else if (!character.basicAttackCells.contains(targetParentCell.get.coordinates)) Failure("Target character not in range.")
+      else if (character.owner == targetCharacter.owner) Failure("This character cannot attack friendly characters.")
       else Success()
     }
   }

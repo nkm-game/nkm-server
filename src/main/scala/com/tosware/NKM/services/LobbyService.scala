@@ -8,6 +8,7 @@ import akka.stream.scaladsl.Sink
 import com.tosware.NKM.NKMTimeouts
 import com.tosware.NKM.actors._
 import com.tosware.NKM.models.game._
+import com.tosware.NKM.models.game.hex.HexMap
 import com.tosware.NKM.models.lobby._
 import com.tosware.NKM.models.lobby.ws.LobbyRequest._
 import slick.jdbc.JdbcBackend

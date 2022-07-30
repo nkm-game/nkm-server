@@ -2,10 +2,12 @@ package unit.validators
 
 import com.tosware.NKM.models.CommandResponse._
 import com.tosware.NKM.models.GameStateValidator
-import com.tosware.NKM.models.game.HexCellType.{SpawnPoint, Wall}
 import com.tosware.NKM.models.game.PickType.BlindPick
 import com.tosware.NKM.models.game._
-import com.tosware.NKM.models.game.effects.{GroundEffect, SnareEffect, StunEffect}
+import com.tosware.NKM.models.game.effects._
+import com.tosware.NKM.models.game.hex.HexCellType._
+import com.tosware.NKM.models.game.hex.HexUtils.CoordinateSeq
+import com.tosware.NKM.models.game.hex._
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 import org.slf4j.{Logger, LoggerFactory}
@@ -53,7 +55,7 @@ class GameStateValidatorSpec
     pickType = BlindPick,
     numberOfBansPerPlayer = 0,
     numberOfCharactersPerPlayer = 1,
-    charactersMetadata = Set(NKMCharacterMetadata.empty().copy(initialSpeed = 3)),
+    charactersMetadata = Set(NKMCharacterMetadata.empty().copy(initialSpeed = 3, initialBasicAttackRange = 1)),
     clockConfig = ClockConfig.empty()
   )
 
@@ -71,22 +73,27 @@ class GameStateValidatorSpec
 
   private val validator = GameStateValidator()(runningGameState)
 
-  private def toCoordinateSeq(tuples: Seq[(Int, Int)]) = tuples.map{case (x, z) => HexCoordinates(x, z)}
+  private def assertCommandSuccess(c: CommandResponse): Unit = c match {
+    case Success(_) =>
+    case Failure(m) =>
+      logger.error(m)
+      fail()
+  }
+
+  private def assertCommandFailure(c: CommandResponse): Unit = c match {
+    case Success(_) => fail()
+    case Failure(m) => logger.info(m)
+  }
 
   "GameStateValidator" must {
     logger.info(hexMap.toTextUi)
     "validate moving characters and" when {
       "allow move within speed range" in {
-        validator.validateBasicMoveCharacter(playerIds(0),
-          toCoordinateSeq(Seq((0, 0), (1, 0))),
+        val result = validator.validateBasicMoveCharacter(playerIds(0),
+          CoordinateSeq((0, 0), (1, 0)),
           getCharacterId(0)
-        ) match {
-          case Success(_) =>
-          case Failure(m) => {
-            logger.error(m)
-            fail()
-          }
-        }
+        )
+        assertCommandSuccess(result)
       }
 
       "disallow if character is not on the map" in {
@@ -96,119 +103,97 @@ class GameStateValidatorSpec
       "disallow if character is grounded" in {
         val newGameState = runningGameState.addEffect(getCharacterId(0), GroundEffect(1))
 
-        GameStateValidator()(newGameState).validateBasicMoveCharacter(
+        val result = GameStateValidator()(newGameState).validateBasicMoveCharacter(
           playerIds(0),
-          toCoordinateSeq(Seq((0, 0), (1, 0))),
+          CoordinateSeq((0, 0), (1, 0)),
           getCharacterId(0)
-        ) match {
-          case Success(_) => fail()
-          case Failure(m) => logger.info(m)
-        }
+        )
+        assertCommandFailure(result)
       }
 
       "disallow if character is snared" in {
         val newGameState = runningGameState.addEffect(getCharacterId(0), SnareEffect(1))
 
-        GameStateValidator()(newGameState).validateBasicMoveCharacter(
+        val result = GameStateValidator()(newGameState).validateBasicMoveCharacter(
           playerIds(0),
-          toCoordinateSeq(Seq((0, 0), (1, 0))),
+          CoordinateSeq((0, 0), (1, 0)),
           getCharacterId(0)
-        ) match {
-          case Success(_) => fail()
-          case Failure(m) => logger.info(m)
-        }
+        )
+        assertCommandFailure(result)
       }
 
-      "disallow character is stunned" in {
+      "disallow if character is stunned" in {
         val newGameState = runningGameState.addEffect(getCharacterId(0), StunEffect(1))
 
-        GameStateValidator()(newGameState).validateBasicMoveCharacter(
+        val result = GameStateValidator()(newGameState).validateBasicMoveCharacter(
           playerIds(0),
-          toCoordinateSeq(Seq((0, 0), (1, 0))),
+          CoordinateSeq((0, 0), (1, 0)),
           getCharacterId(0)
-        ) match {
-          case Success(_) => fail()
-          case Failure(m) => logger.info(m)
-        }
+        )
+        assertCommandFailure(result)
       }
 
       "disallow empty moves" in {
-        validator.validateBasicMoveCharacter(playerIds(0),
-          toCoordinateSeq(Seq()),
+        val result = validator.validateBasicMoveCharacter(playerIds(0),
+          CoordinateSeq(),
           getCharacterId(0)
-        ) match {
-          case Success(_) => fail()
-          case Failure(m) => logger.info(m)
-        }
+        )
+        assertCommandFailure(result)
 
-        validator.validateBasicMoveCharacter(playerIds(0),
-          toCoordinateSeq(Seq((0, 0))),
+        val result2 = validator.validateBasicMoveCharacter(playerIds(0),
+          CoordinateSeq((0, 0)),
           getCharacterId(0)
-        ) match {
-          case Success(_) => fail()
-          case Failure(m) => logger.info(m)
-        }
+        )
+        assertCommandFailure(result2)
       }
 
       "disallow move from other cell than characters" in {
-        validator.validateBasicMoveCharacter(playerIds(0),
-          toCoordinateSeq(Seq((1, 0), (2, 0))),
+        val result = validator.validateBasicMoveCharacter(playerIds(0),
+          CoordinateSeq((1, 0), (2, 0)),
           getCharacterId(0)
-        ) match {
-          case Success(_) => fail()
-          case Failure(m) => logger.info(m)
-        }
+        )
+        assertCommandFailure(result)
       }
 
       "disallow move outside of turn" in {
-        validator.validateBasicMoveCharacter(playerIds(1),
-          toCoordinateSeq(Seq((3, 0), (2, 0))),
+        val result = validator.validateBasicMoveCharacter(playerIds(1),
+          CoordinateSeq((3, 0), (2, 0)),
           getCharacterId(1)
-        ) match {
-          case Success(_) => fail()
-          case Failure(m) => logger.info(m)
-        }
+        )
+        assertCommandFailure(result)
       }
 
       "disallow move foreign characters" in {
-        validator.validateBasicMoveCharacter(playerIds(0),
-          toCoordinateSeq(Seq((3, 0), (2, 0))),
+        val result = validator.validateBasicMoveCharacter(playerIds(0),
+          CoordinateSeq((3, 0), (2, 0)),
           getCharacterId(1)
-        ) match {
-          case Success(_) => fail()
-          case Failure(m) => logger.info(m)
-        }
+        )
+        assertCommandFailure(result)
       }
 
 
       "disallow move above speed range" in {
-        validator.validateBasicMoveCharacter(playerIds(0),
-          toCoordinateSeq(Seq((0, 0), (1, 0), (2, 0), (2, 1), (2, 2))),
+        val result = validator.validateBasicMoveCharacter(playerIds(0),
+          CoordinateSeq((0, 0), (1, 0), (2, 0), (2, 1), (2, 2)),
           getCharacterId(0)
-        ) match {
-          case Success(_) => fail()
-          case Failure(m) => logger.info(m)
-        }
+        )
+        assertCommandFailure(result)
       }
 
       "disallow move into the same position" in {
-        validator.validateBasicMoveCharacter(playerIds(0),
-          toCoordinateSeq(Seq((0, 0), (1, 0), (0, 0))),
+        val result = validator.validateBasicMoveCharacter(playerIds(0),
+          CoordinateSeq((0, 0), (1, 0), (0, 0)),
           getCharacterId(0)
-        ) match {
-          case Success(_) => fail()
-          case Failure(m) => logger.info(m)
-        }
+        )
+        assertCommandFailure(result)
       }
 
       "disallow move that visits another cell more than once" in {
-        validator.validateBasicMoveCharacter(playerIds(0),
-          toCoordinateSeq(Seq((0, 0), (1, 0), (2, 0), (1, 0))),
+        val result = validator.validateBasicMoveCharacter(playerIds(0),
+          CoordinateSeq((0, 0), (1, 0), (2, 0), (1, 0)),
           getCharacterId(0)
-        ) match {
-          case Success(_) => fail()
-          case Failure(m) => logger.info(m)
-        }
+        )
+        assertCommandFailure(result)
       }
 
       "disallow move if character cannot move (already moved or made other actions)" in {
@@ -216,61 +201,98 @@ class GameStateValidatorSpec
       }
 
       "disallow move if there is an obstacle on path" in {
-        validator.validateBasicMoveCharacter(playerIds(0),
-          toCoordinateSeq(Seq((0, 0), (1, -1), (1, 0))),
+        val result = validator.validateBasicMoveCharacter(playerIds(0),
+          CoordinateSeq((0, 0), (1, -1), (1, 0)),
           getCharacterId(0)
-        ) match {
-          case Success(_) => fail()
-          case Failure(m) => logger.info(m)
-        }
+        )
+        assertCommandFailure(result)
       }
 
       "disallow move if cell at the end is not free to move" in {
-        validator.validateBasicMoveCharacter(playerIds(0),
-          toCoordinateSeq(Seq((0, 0), (1, -1))),
+        val result = validator.validateBasicMoveCharacter(playerIds(0),
+          CoordinateSeq((0, 0), (1, -1)),
           getCharacterId(0)
-        ) match {
-          case Success(_) => fail()
-          case Failure(m) => logger.info(m)
-        }
+        )
+        assertCommandFailure(result)
       }
 
       "disallow move if moving to not adjacent cell" in {
-        validator.validateBasicMoveCharacter(playerIds(0),
-          toCoordinateSeq(Seq((0, 0), (0, 2))),
+        val result = validator.validateBasicMoveCharacter(playerIds(0),
+          CoordinateSeq((0, 0), (0, 2)),
           getCharacterId(0)
-        ) match {
-          case Success(_) => fail()
-          case Failure(m) => logger.info(m)
-        }
+        )
+        assertCommandFailure(result)
       }
     }
 
     "validate attacking characters and" when {
+      val moveGameState = runningGameState.moveCharacter(CoordinateSeq((0, 0), (1, 0), (2, 0)), getCharacterId(0))
+
       "allow if character is in attack range" in {
-        fail()
+        val result = GameStateValidator()(moveGameState).validateBasicAttackCharacter(playerIds(0),
+          getCharacterId(0),
+          getCharacterId(1),
+        )
+
+        assertCommandSuccess(result)
       }
 
       "disallow if character is not on the map" in {
         fail()
       }
 
-      "disallow if character is grounded" in {
-        fail()
+      "allow if character is grounded" in {
+        val newGameState = moveGameState.addEffect(getCharacterId(0), GroundEffect(1))
+
+        val result = GameStateValidator()(newGameState).validateBasicAttackCharacter(
+          playerIds(0),
+          getCharacterId(0),
+          getCharacterId(1),
+        )
+        assertCommandSuccess(result)
       }
 
-      "disallow if character is snared" in {
-        fail()
+      "allow if character is snared" in {
+        val newGameState = moveGameState.addEffect(getCharacterId(0), SnareEffect(1))
+
+        val result = GameStateValidator()(newGameState).validateBasicAttackCharacter(
+          playerIds(0),
+          getCharacterId(0),
+          getCharacterId(1),
+        )
+        assertCommandSuccess(result)
       }
 
       "disallow character is stunned" in {
-        fail()
+        val newGameState = moveGameState.addEffect(getCharacterId(0), StunEffect(1))
+
+        val result = GameStateValidator()(newGameState).validateBasicAttackCharacter(
+          playerIds(0),
+          getCharacterId(0),
+          getCharacterId(1),
+        )
+        assertCommandFailure(result)
+      }
+
+      "disallow character is disarmed" in {
+        val newGameState = moveGameState.addEffect(getCharacterId(0), DisarmEffect(1))
+
+        val result = GameStateValidator()(newGameState).validateBasicAttackCharacter(
+          playerIds(0),
+          getCharacterId(0),
+          getCharacterId(1),
+        )
+        assertCommandFailure(result)
       }
 
       "disallow if character is not in attack range" in {
-        fail()
-      }
+        val result = validator.validateBasicAttackCharacter(playerIds(0),
+          getCharacterId(0),
+          getCharacterId(1),
+        )
 
+        assertCommandFailure(result)
+      }
     }
   }
 }

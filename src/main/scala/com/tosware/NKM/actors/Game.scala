@@ -10,6 +10,7 @@ import com.tosware.NKM.models.game.Player.PlayerId
 import com.tosware.NKM.models.game._
 import com.tosware.NKM.models.game.blindpick.BlindPickPhase
 import com.tosware.NKM.models.game.draftpick.DraftPickPhase
+import com.tosware.NKM.models.game.hex.HexCoordinates
 import com.tosware.NKM.services.NKMDataService
 
 import java.time.Instant
@@ -301,7 +302,7 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
         case Success(_) =>
           val e = CharacterMoved(id, playerId, path, characterId)
           persistAndPublish(e) { _ =>
-            gameState = gameState.moveCharacter(playerId, path, characterId)
+            gameState = gameState.moveCharacter(path, characterId)
             sender() ! Success()
           }
       }
@@ -331,7 +332,7 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
       gameState = gameState.placeCharacters(playerId, coordinatesToCharacterIdMap)
       log.debug(s"Recovered placing characters by $playerId to $coordinatesToCharacterIdMap")
     case CharacterMoved(_, playerId, hexCoordinates, characterId) =>
-      gameState = gameState.moveCharacter(playerId, hexCoordinates, characterId)
+      gameState = gameState.moveCharacter(hexCoordinates, characterId)
       log.debug(s"Recovered $characterId to $hexCoordinates")
     case BanningPhaseTimedOut(_) =>
       log.debug(s"Recovered banning phase timeout")

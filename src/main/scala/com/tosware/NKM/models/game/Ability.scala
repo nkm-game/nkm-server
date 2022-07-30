@@ -2,6 +2,7 @@ package com.tosware.NKM.models.game
 
 import com.tosware.NKM.models.game.Ability._
 import com.tosware.NKM.models.game.NKMCharacter.CharacterId
+import com.tosware.NKM.models.game.hex.{HexCell, HexCoordinates}
 import enumeratum._
 
 object Ability {
@@ -45,8 +46,8 @@ trait Ability {
   val metadataId: AbilityMetadataId
   val state: AbilityState
   val parentBaseAttackOverride: Option[(GameState, NKMCharacter) => GameState] = None
-  val rangeCells: GameState => Set[HexCell]
-  val targetsInRange: GameState => Set[HexCell]
+  val rangeCells: GameState => Set[HexCoordinates]
+  val targetsInRange: GameState => Set[HexCoordinates]
   val canBeUsed: GameState => Boolean = _ => false
-  val use: (GameState, Option[NKMCharacter], Option[HexCell]) => GameState = (gameState, _, _) => gameState
+  val use: (GameState, Option[NKMCharacter], Option[HexCoordinates]) => GameState = (gameState, _, _) => gameState
 }

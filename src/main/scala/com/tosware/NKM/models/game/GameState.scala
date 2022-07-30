@@ -6,6 +6,7 @@ import com.tosware.NKM.models.game.NKMCharacterMetadata.CharacterMetadataId
 import com.tosware.NKM.models.game.Player.PlayerId
 import com.tosware.NKM.models.game.blindpick._
 import com.tosware.NKM.models.game.draftpick._
+import com.tosware.NKM.models.game.hex.{HexCell, HexCoordinates, HexMap}
 
 import scala.util.Random
 
@@ -224,11 +225,12 @@ case class GameState(id: String,
     }.modify(_.characterIdsOutsideMap).using(_.filter(_ != characterId))
 //      .modify(_.turn).using(oldTurn => Turn(oldTurn.number + 1))
 
-  def moveCharacter(playerId: PlayerId, path: Seq[HexCoordinates], characterId: String): GameState =
-    path.tail.foldLeft(this){case (acc, coordinate) => acc.moveCharacterSingle(playerId, coordinate, characterId)}
+  def moveCharacter(path: Seq[HexCoordinates], characterId: CharacterId): GameState =
+    path.tail.foldLeft(this){case (acc, coordinate) => acc.moveCharacterSingle(coordinate, characterId)}
 
-  def moveCharacterSingle(playerId: PlayerId, parentCellCoordinates: HexCoordinates, characterId: String): GameState = {
+  def moveCharacterSingle(parentCellCoordinates: HexCoordinates, characterId: CharacterId): GameState = {
     val parentCell = hexMap.get.cells.find(_.characterId.contains(characterId)).getOrElse {
+      // case if character dies on the way?
       // TODO      log.error(s"Unable to move character $characterId to $parentCellCoordinates")
       return this
     }

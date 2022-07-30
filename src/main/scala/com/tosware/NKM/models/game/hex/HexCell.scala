@@ -1,25 +1,9 @@
-package com.tosware.NKM.models.game
+package com.tosware.NKM.models.game.hex
 
-import com.tosware.NKM.models.game.HexCellType.Normal
 import com.tosware.NKM.models.game.NKMCharacter.CharacterId
-import enumeratum._
+import com.tosware.NKM.models.game.hex.HexCellType.Normal
 
 case class HexCellEffect(cooldown: Int)
-
-sealed trait HexCellType extends EnumEntry
-object HexCellType extends Enum[HexCellType] {
-  val values = findValues
-
-  case object Transparent extends HexCellType
-  case object Normal extends HexCellType
-  case object Wall extends HexCellType
-  case object SpawnPoint extends HexCellType
-}
-
-case class HexCoordinates(x: Int, z: Int) {
-  def y: Int = -x - z
-
-}
 
 object HexCell {
   def empty
@@ -37,4 +21,7 @@ case class HexCell
   characterId: Option[CharacterId],
   effects: Seq[HexCellEffect],
   spawnNumber: Option[Int],
-)
+) {
+  def isEmpty: Boolean = characterId.isEmpty
+  def isFreeToStand: Boolean = isEmpty && cellType != HexCellType.Wall
+}

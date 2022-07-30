@@ -22,7 +22,6 @@ class NKMDataRoutes(deps: NKMDependencies) extends JwtDirective
     path("abilities") {
       complete(NKMDataService.getAbilityMetadatas)
     },
-
     path("character_effects") {
       complete(NKMDataService.getCharacterEffectMetadatas)
     },

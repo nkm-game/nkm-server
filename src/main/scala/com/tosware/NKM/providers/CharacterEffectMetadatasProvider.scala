@@ -1,7 +1,7 @@
 package com.tosware.NKM.providers
 
 import com.tosware.NKM.models.game._
-import com.tosware.NKM.models.game.effects.{GroundEffect, SnareEffect, StunEffect}
+import com.tosware.NKM.models.game.effects.{DisarmEffect, GroundEffect, SnareEffect, StunEffect}
 import com.tosware.NKM.serializers.NKMJsonProtocol
 
 case class CharacterEffectMetadatasProvider() extends NKMJsonProtocol {
@@ -9,6 +9,7 @@ case class CharacterEffectMetadatasProvider() extends NKMJsonProtocol {
     GroundEffect.metadata,
     SnareEffect.metadata,
     StunEffect.metadata,
+    DisarmEffect.metadata,
     CharacterEffectMetadata(
       name = CharacterEffectName.Poison,
       effectType = CharacterEffectType.Negative,
@@ -18,12 +19,6 @@ case class CharacterEffectMetadatasProvider() extends NKMJsonProtocol {
       name = CharacterEffectName.Fly,
       effectType = CharacterEffectType.Positive,
       description = "This character can fly.",
-    ),
-    CharacterEffectMetadata(
-      name = CharacterEffectName.Disarm,
-      effectType = CharacterEffectType.Negative,
-      description = "This character is disarmed and cannot use basic attacks.",
-      isCc = true,
     ),
     CharacterEffectMetadata(
       name = CharacterEffectName.Silence,

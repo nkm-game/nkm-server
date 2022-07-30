@@ -1,8 +1,9 @@
 package com.tosware.NKM.services
 
-import com.tosware.NKM.models.game.{AbilityMetadata, CharacterEffectMetadata, HexMap, NKMCharacterMetadata}
+import com.tosware.NKM.models.game.{AbilityMetadata, CharacterEffectMetadata, NKMCharacterMetadata}
 import com.tosware.NKM.providers._
 import com.tosware.NKM.NKMTimeouts
+import com.tosware.NKM.models.game.hex.HexMap
 
 class NKMDataService extends NKMTimeouts
 {

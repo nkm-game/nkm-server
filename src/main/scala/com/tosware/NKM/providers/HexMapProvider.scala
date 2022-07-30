@@ -1,6 +1,6 @@
 package com.tosware.NKM.providers
 
-import com.tosware.NKM.models.game.HexMap
+import com.tosware.NKM.models.game.hex.HexMap
 import com.tosware.NKM.serializers.NKMJsonProtocol
 import spray.json._
 

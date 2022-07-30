@@ -3,8 +3,9 @@ package integration.ws
 import akka.http.scaladsl.testkit.WSProbe
 import com.tosware.NKM.models.game.blindpick.BlindPickPhase
 import com.tosware.NKM.models.game.draftpick.DraftPickPhase
+import com.tosware.NKM.models.game.hex.{HexCellType, HexUtils}
 import com.tosware.NKM.models.game.ws._
-import com.tosware.NKM.models.game.{ClockConfig, GameStatus, HexCellType, HexUtils, NKMCharacterMetadata, PickType, VictoryStatus}
+import com.tosware.NKM.models.game.{ClockConfig, GameStatus, NKMCharacterMetadata, PickType, VictoryStatus}
 import helpers.WSTrait
 
 class WSGameSpec extends WSTrait {
