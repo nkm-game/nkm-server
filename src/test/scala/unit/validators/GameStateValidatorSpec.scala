@@ -205,6 +205,16 @@ class GameStateValidatorSpec
         fail()
       }
 
+      "disallow move if other character took action in turn" in {
+          val newGameState = runningGameState.takeActionWithCharacter("test_nonexistent_id")
+
+          val result = GameStateValidator()(newGameState).validateBasicMoveCharacter(playerIds(0),
+            CoordinateSeq((0, 0), (1, 0)),
+            getCharacterId(0)
+          )
+          assertCommandFailure(result)
+      }
+
       "disallow move if there is an obstacle on path" in {
         val result = validator.validateBasicMoveCharacter(playerIds(0),
           CoordinateSeq((0, 0), (1, -1), (1, 0)),
@@ -231,7 +241,7 @@ class GameStateValidatorSpec
     }
 
     "validate attacking characters and" when {
-      val moveGameState = runningGameState.moveCharacter(CoordinateSeq((0, 0), (1, 0), (2, 0)), getCharacterId(0))
+      val moveGameState = runningGameState.basicMoveCharacter(CoordinateSeq((0, 0), (1, 0), (2, 0)), getCharacterId(0))
 
       "allow if character is in attack range" in {
         val result = GameStateValidator()(moveGameState).validateBasicAttackCharacter(playerIds(0),
@@ -302,6 +312,21 @@ class GameStateValidatorSpec
           getCharacterId(1),
         )
 
+        assertCommandFailure(result)
+      }
+
+      "disallow move if character cannot attack (already attacked or made other actions)" in {
+        fail()
+      }
+
+      "disallow move if other character took action in turn" in {
+        val newGameState = moveGameState.takeActionWithCharacter("test_nonexistent_id")
+
+        val result = GameStateValidator()(newGameState).validateBasicAttackCharacter(
+          playerIds(0),
+          getCharacterId(0),
+          getCharacterId(1),
+        )
         assertCommandFailure(result)
       }
     }

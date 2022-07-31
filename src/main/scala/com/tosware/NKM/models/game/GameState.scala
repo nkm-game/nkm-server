@@ -15,6 +15,8 @@ case class GameState(id: String,
                      charactersMetadata: Set[NKMCharacterMetadata],
                      hexMap: Option[HexMap],
                      characterIdsOutsideMap: Set[CharacterId],
+                     characterIdsThatTookActionThisPhase: Set[CharacterId],
+                     characterTakingActionThisTurn: Option[CharacterId],
                      phase: Phase,
                      turn: Turn,
                      players: Seq[Player],
@@ -42,7 +44,7 @@ case class GameState(id: String,
 
   def currentPlayerTime: Long = clock.playerTimes(currentPlayer.id)
 
-  def characters: Seq[NKMCharacter] = players.flatMap(_.characters)
+  def characters: Set[NKMCharacter] = players.flatMap(_.characters).toSet
 
   def characterById(characterId: CharacterId): Option[NKMCharacter] = characters.find(_.id == characterId)
 
@@ -224,10 +226,11 @@ case class GameState(id: String,
       case cell if cell.coordinates == targetCellCoordinates => HexCell(cell.coordinates, cell.cellType, Some(characterId), cell.effects, cell.spawnNumber)
       case cell => cell
     }.modify(_.characterIdsOutsideMap).using(_.filter(_ != characterId))
-//      .modify(_.turn).using(oldTurn => Turn(oldTurn.number + 1))
 
-  def moveCharacter(path: Seq[HexCoordinates], characterId: CharacterId): GameState =
-    path.tail.foldLeft(this){case (acc, coordinate) => acc.moveCharacterSingle(coordinate, characterId)}
+  def basicMoveCharacter(path: Seq[HexCoordinates], characterId: CharacterId): GameState = {
+    val newGameState = takeActionWithCharacter(characterId)
+    path.tail.foldLeft(newGameState){case (acc, coordinate) => acc.moveCharacterSingle(coordinate, characterId)}
+  }
 
   def moveCharacterSingle(parentCellCoordinates: HexCoordinates, characterId: CharacterId): GameState = {
     val parentCell = hexMap.get.cells.find(_.characterId.contains(characterId)).getOrElse {
@@ -243,9 +246,10 @@ case class GameState(id: String,
   }
 
   def basicAttack(attackingCharacterId: CharacterId, targetCharacterId: CharacterId) = {
+    val newGameState = takeActionWithCharacter(attackingCharacterId)
     val attackingCharacter = characterById(attackingCharacterId).get
 
-    this.modify(_.players.each.characters.each).using {
+    newGameState.modify(_.players.each.characters.each).using {
       case character if character.id == targetCharacterId =>
         character.receiveDamage(Damage(attackingCharacterId, DamageType.Physical, attackingCharacter.state.attackPoints))
       case character => character
@@ -268,12 +272,34 @@ case class GameState(id: String,
     }.modify(_.characterIdsOutsideMap).setTo(characterIdsOutsideMap + characterId)
   }
 
+  def takeActionWithCharacter(characterId: CharacterId): GameState = this.modify(_.characterTakingActionThisTurn).setTo(Some(characterId))
+
+  def endTurn(): GameState =
+    this.modify(_.characterIdsThatTookActionThisPhase).using(c => c + characterTakingActionThisTurn.get)
+      .modify(_.characterTakingActionThisTurn).setTo(None)
+      .modify(_.turn).using(oldTurn => Turn(oldTurn.number + 1))
+      .finishPhaseIfEveryCharacterTookAction()
+
+  def passTurn(characterId: CharacterId): GameState =
+    takeActionWithCharacter(characterId).endTurn()
+
+  def finishPhase(): GameState =
+    this.modify(_.characterIdsThatTookActionThisPhase).setTo(Set.empty)
+      .modify(_.phase).using(oldPhase => Phase(oldPhase.number + 1))
+
+  def finishPhaseIfEveryCharacterTookAction(): GameState =
+    if(characterIdsThatTookActionThisPhase == characters.map(_.id))
+      this.finishPhase()
+    else this
+
   def toView(forPlayer: Option[PlayerId]): GameStateView =
     GameStateView(
       id,
       charactersMetadata,
       hexMap,
       characterIdsOutsideMap,
+      characterIdsThatTookActionThisPhase,
+      characterTakingActionThisTurn,
       phase,
       turn,
       players.map(_.toView),
@@ -288,6 +314,20 @@ case class GameState(id: String,
       clock,
       currentPlayer.id,
     )
+
+  def shortInfo: String =
+    s"""
+      | id: $id
+      | hexMap: ${hexMap.fold("None")(_.toString)}
+      | characterIdsOutsideMap: $characterIdsOutsideMap
+      | characterIdsThatTookActionThisPhase: $characterIdsThatTookActionThisPhase
+      | characterTakingActionThisTurn: $characterTakingActionThisTurn
+      | phase: $phase
+      | turn: $turn
+      | players: $players
+      | gameStatus: $gameStatus
+      | currentPlayerId: ${if(players.nonEmpty) currentPlayer.id else "None"}
+      |""".stripMargin
 }
 
 object GameState {
@@ -300,6 +340,8 @@ object GameState {
       charactersMetadata = Set(),
       hexMap = None,
       characterIdsOutsideMap = Set(),
+      characterIdsThatTookActionThisPhase = Set(),
+      characterTakingActionThisTurn = None,
       phase = Phase(0),
       turn = Turn(0),
       players = Seq(),
@@ -321,6 +363,8 @@ case class GameStateView(
                           charactersMetadata: Set[NKMCharacterMetadata],
                           hexMap: Option[HexMap],
                           characterIdsOutsideMap: Set[CharacterId],
+                          characterIdsThatTookActionThisPhase: Set[CharacterId],
+                          characterTakingActionThisTurn: Option[CharacterId],
                           phase: Phase,
                           turn: Turn,
                           players: Seq[PlayerView],

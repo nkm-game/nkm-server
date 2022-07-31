@@ -118,7 +118,13 @@ trait GameWebsocketUserBehaviour extends WebsocketUserBehaviour {
         val username = authStatus.username.get
         val response = aw(gameService.placeCharacters(username, placeCharactersRequest))
         resolveResponse(response)
-      case GameRoute.EndTurn => ???
+      case GameRoute.EndTurn =>
+        val endTurnRequest = request.requestJson.parseJson.convertTo[EndTurn]
+        implicit val responseType: GameResponseType = GameResponseType.EndTurn
+        if (authStatus.username.isEmpty) return unauthorized()
+        val username = authStatus.username.get
+        val response = aw(gameService.endTurn(username, endTurnRequest))
+        resolveResponse(response)
       case GameRoute.Move =>
         val moveCharacterRequest = request.requestJson.parseJson.convertTo[Move]
         implicit val responseType: GameResponseType = GameResponseType.Move

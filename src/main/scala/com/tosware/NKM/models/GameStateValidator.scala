@@ -106,6 +106,14 @@ case class GameStateValidator()(implicit gameState: GameState) {
     }
   }
 
+  def validateEndTurn(playerId: PlayerId): CommandResponse =
+    if (!playerInGame(playerId)) Failure(Message.playerNotInGame)
+    else if (gameStatusIs(GameStatus.NotStarted)) Failure(Message.gameNotStarted)
+    else if (gameState.currentPlayer.id != playerId) Failure(Message.notYourTurn)
+    else if (gameState.characterTakingActionThisTurn.isEmpty) Failure("No character took action this turn.")
+    else Success()
+
+
   def validateBasicMoveCharacter(playerId: PlayerId, path: Seq[HexCoordinates], characterId: CharacterId): CommandResponse = {
     if (!playerInGame(playerId)) Failure(Message.playerNotInGame)
     else if (gameStatusIs(GameStatus.NotStarted)) Failure(Message.gameNotStarted)
@@ -115,6 +123,7 @@ case class GameStateValidator()(implicit gameState: GameState) {
       val character = gameState.characterById(characterId).get
       val parentCell = character.parentCell
       if (!gameState.playerById(playerId).get.characterIds.contains(characterId)) Failure("You do not own this character.")
+      else if (gameState.characterTakingActionThisTurn.fold(false)(_ != characterId)) Failure("Other character already took action this turn.")
       else if (!character.canBasicMove) Failure("This character is unable to basic move.")
       else if (gameState.characterIdsOutsideMap.contains(characterId)) Failure("Character outside map.")
       else if (!parentCell.map(_.coordinates).contains(path.head)) Failure("Path has to start with characters parent cell.")
@@ -133,6 +142,7 @@ case class GameStateValidator()(implicit gameState: GameState) {
       val targetCharacter = gameState.characterById(targetCharacterId).get
       val targetParentCell = targetCharacter.parentCell
       if (!gameState.playerById(playerId).get.characterIds.contains(characterId)) Failure("You do not own this character.")
+      else if (gameState.characterTakingActionThisTurn.fold(false)(_ != characterId)) Failure("Other character already took action this turn.")
       else if (!character.canBasicAttack) Failure("This character is unable to basic attack.")
       else if (gameState.characterIdsOutsideMap.contains(characterId)) Failure("Character outside map.")
       else if (gameState.characterIdsOutsideMap.contains(targetCharacterId)) Failure("Target character outside map.")

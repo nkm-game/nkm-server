@@ -5,7 +5,7 @@ import com.tosware.NKM.models.game.blindpick.BlindPickPhase
 import com.tosware.NKM.models.game.draftpick.DraftPickPhase
 import com.tosware.NKM.models.game.hex.{HexCellType, HexCoordinates, HexUtils}
 import com.tosware.NKM.models.game.ws._
-import com.tosware.NKM.models.game.{ClockConfig, GameStatus, NKMCharacterMetadata, PickType, VictoryStatus}
+import com.tosware.NKM.models.game.{ClockConfig, GameStatus, NKMCharacter, NKMCharacterMetadata, NKMCharacterView, PickType, VictoryStatus}
 import helpers.WSTrait
 
 class WSGameSpec extends WSTrait {
@@ -700,18 +700,7 @@ class WSGameSpec extends WSTrait {
         Thread.sleep(150)
 
         {
-          val (hexMap, players) = {
-            val gameState = fetchAndParseGame(lobbyId)
-            gameState.gameStatus shouldBe GameStatus.CharacterPlacing
-            (gameState.hexMap.get, gameState.players)
-          }
-
-//          (0 until numberOfPlayers) foreach { i =>
-//            auth(i)
-//            val spawnPoints = hexMap.getSpawnPointsByNumber(i)
-//            logger.error(i.toString)
-//            logger.error(spawnPoints.map(_.coordinates).toString)
-//          }
+          val players = fetchAndParseGame(lobbyId).players
 
           val characterId0 = players(0).characters.map(_.id).head
           val characterId1 = players(1).characters.map(_.id).head
@@ -728,10 +717,86 @@ class WSGameSpec extends WSTrait {
 
         val characterToMove = gameState.players(0).characters.head
         val characterToAttack = gameState.players(1).characters.head
-        val characterCell = gameState.hexMap.get.getCellOfCharacter(characterToMove.id).get
-        val targetCell = HexUtils.getAdjacentCells(gameState.hexMap.get.cells, characterCell.coordinates)
-          .filter(c => c.cellType == HexCellType.Normal).head
+
         basicAttackCharacter(lobbyId, characterToMove.id, characterToAttack.id).statusCode shouldBe ok
+      }
+    }
+
+    "allow turn ending" in {
+      val numberOfPlayers = 2
+      val numberOfCharacters = 1
+
+      val lobbyId = createLobbyForGame(
+        hexMapName = "TestMap",
+        pickType = PickType.BlindPick,
+        numberOfPlayers = numberOfPlayers,
+        numberOfCharacters = numberOfCharacters,
+        clockConfigOpt = Some(ClockConfig.defaultForPickType(PickType.BlindPick).copy(timeAfterPickMillis = 1)),
+      )
+
+      withGameWS {
+        endTurn(lobbyId).statusCode shouldBe unauthorized
+        auth(0)
+        endTurn(lobbyId).statusCode shouldBe nok
+        val availableCharacters = fetchAndParseGame(lobbyId).blindPickState.get.config.availableCharacters.toSeq
+        val charactersToPick = availableCharacters.take(numberOfCharacters).toSet
+
+        for (i <- 0 until numberOfPlayers) {
+          auth(i)
+          blindPick(lobbyId, charactersToPick).statusCode shouldBe ok
+        }
+        endTurn(lobbyId).statusCode shouldBe nok
+
+        Thread.sleep(150)
+
+        val (character0, character1) = {
+          val gameState = fetchAndParseGame(lobbyId)
+
+          val character0 = gameState.players(0).characters.head
+          val character1 = gameState.players(1).characters.head
+          (character0, character1)
+        }
+
+        {
+          auth(0)
+          placeCharacters(lobbyId, Map(HexCoordinates(3, 10) -> character0.id)).statusCode shouldBe ok
+          endTurn(lobbyId).statusCode shouldBe nok
+          auth(1)
+          placeCharacters(lobbyId, Map(HexCoordinates(6, 10) -> character1.id)).statusCode shouldBe ok
+          endTurn(lobbyId).statusCode shouldBe nok
+        }
+
+        auth(0)
+
+        {
+          val gameState = fetchAndParseGame(lobbyId)
+
+          gameState.turn.number shouldBe 0
+          gameState.phase.number shouldBe 0
+        }
+
+        endTurn(lobbyId).statusCode shouldBe nok
+        basicAttackCharacter(lobbyId, character0.id, character1.id).statusCode shouldBe ok
+        endTurn(lobbyId).statusCode shouldBe ok
+        endTurn(lobbyId).statusCode shouldBe nok
+
+        {
+          val gameState = fetchAndParseGame(lobbyId)
+          gameState.turn.number shouldBe 1
+          gameState.phase.number shouldBe 0
+        }
+
+        auth(1)
+        endTurn(lobbyId).statusCode shouldBe nok
+        basicAttackCharacter(lobbyId, character1.id, character0.id).statusCode shouldBe ok
+        endTurn(lobbyId).statusCode shouldBe ok
+        endTurn(lobbyId).statusCode shouldBe nok
+
+        {
+          val gameState = fetchAndParseGame(lobbyId)
+          gameState.turn.number shouldBe 2
+          gameState.phase.number shouldBe 1
+        }
       }
     }
   }

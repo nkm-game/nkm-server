@@ -11,6 +11,7 @@ import com.tosware.NKM.models.game._
 import com.tosware.NKM.models.game.blindpick.BlindPickPhase
 import com.tosware.NKM.models.game.draftpick.DraftPickPhase
 import com.tosware.NKM.models.game.hex.HexCoordinates
+import com.tosware.NKM.models.game.hex.HexUtils.pprint
 import com.tosware.NKM.services.NKMDataService
 
 import java.time.Instant
@@ -41,6 +42,8 @@ object Game {
   case class BlindPickCharacters(playerId: PlayerId, characterId: Set[CharacterMetadataId]) extends Command
 
   case class PlaceCharacters(playerId: PlayerId, coordinatesToCharacterIdMap: Map[HexCoordinates, CharacterId]) extends Command
+
+  case class EndTurn(playerId: PlayerId) extends Command
 
   case class MoveCharacter(playerId: PlayerId, path: Seq[HexCoordinates], characterId: CharacterId) extends Command
 
@@ -77,6 +80,8 @@ object Game {
   case class CharactersPlaced(id: GameId, playerId: PlayerId, coordinatesToCharacterIdMap: Map[HexCoordinates, CharacterId]) extends Event
 
   case class CharactersBlindPicked(id: GameId, playerId: PlayerId, characterId: Set[CharacterMetadataId]) extends Event
+
+  case class TurnEnded(id: GameId, playerId: PlayerId) extends Event
 
   case class CharacterMoved(id: GameId, playerId: PlayerId, path: Seq[HexCoordinates], characterId: CharacterId) extends Event
 
@@ -301,13 +306,23 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
             sender() ! Success()
           }
       }
+    case EndTurn(playerId) =>
+      GameStateValidator().validateEndTurn(playerId) match {
+        case failure @ Failure(_) => sender() ! failure
+        case Success(_) =>
+          val e = TurnEnded(id, playerId)
+          persistAndPublish(e) { _ =>
+            gameState = gameState.endTurn()
+            sender() ! Success()
+          }
+      }
     case MoveCharacter(playerId, path, characterId) =>
       GameStateValidator().validateBasicMoveCharacter(playerId, path, characterId) match {
         case failure @ Failure(_) => sender() ! failure
         case Success(_) =>
           val e = CharacterMoved(id, playerId, path, characterId)
           persistAndPublish(e) { _ =>
-            gameState = gameState.moveCharacter(path, characterId)
+            gameState = gameState.basicMoveCharacter(path, characterId)
             sender() ! Success()
           }
       }
@@ -346,8 +361,11 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
     case CharactersPlaced(_, playerId, coordinatesToCharacterIdMap) =>
       gameState = gameState.placeCharacters(playerId, coordinatesToCharacterIdMap)
       log.debug(s"Recovered placing characters by $playerId to $coordinatesToCharacterIdMap")
+    case TurnEnded(_, _) =>
+      gameState = gameState.endTurn()
+      log.debug(s"Recovered turn end")
     case CharacterMoved(_, _, hexCoordinates, characterId) =>
-      gameState = gameState.moveCharacter(hexCoordinates, characterId)
+      gameState = gameState.basicMoveCharacter(hexCoordinates, characterId)
       log.debug(s"Recovered $characterId to $hexCoordinates")
     case CharacterBasicAttacked(_, _, attackingCharacterId, targetCharacterId) =>
       gameState = gameState.basicAttack(attackingCharacterId, targetCharacterId)
