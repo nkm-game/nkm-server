@@ -3,7 +3,7 @@ package integration.ws
 import akka.http.scaladsl.testkit.WSProbe
 import com.tosware.NKM.models.game.blindpick.BlindPickPhase
 import com.tosware.NKM.models.game.draftpick.DraftPickPhase
-import com.tosware.NKM.models.game.hex.{HexCellType, HexUtils}
+import com.tosware.NKM.models.game.hex.{HexCellType, HexCoordinates, HexUtils}
 import com.tosware.NKM.models.game.ws._
 import com.tosware.NKM.models.game.{ClockConfig, GameStatus, NKMCharacterMetadata, PickType, VictoryStatus}
 import helpers.WSTrait
@@ -672,6 +672,66 @@ class WSGameSpec extends WSTrait {
           .filter(c => c.cellType == HexCellType.Normal).head
         moveCharacter(lobbyId, Seq(characterCell, targetCell).map(_.coordinates), characterToMove.id).statusCode shouldBe ok
         moveCharacter(lobbyId, Seq(characterCell, targetCell).map(_.coordinates), characterToMove.id).statusCode shouldBe nok
+      }
+    }
+
+    "allow basic attacking with characters" in {
+      val numberOfPlayers = 2
+      val numberOfCharacters = 1
+
+      val lobbyId = createLobbyForGame(
+        hexMapName = "TestMap",
+        pickType = PickType.BlindPick,
+        numberOfPlayers = numberOfPlayers,
+        numberOfCharacters = numberOfCharacters,
+        clockConfigOpt = Some(ClockConfig.defaultForPickType(PickType.BlindPick).copy(timeAfterPickMillis = 1)),
+      )
+
+      withGameWS {
+        auth(0)
+        val availableCharacters = fetchAndParseGame(lobbyId).blindPickState.get.config.availableCharacters.toSeq
+        val charactersToPick = availableCharacters.take(numberOfCharacters).toSet
+
+        for (i <- 0 until numberOfPlayers) {
+          auth(i)
+          blindPick(lobbyId, charactersToPick).statusCode shouldBe ok
+        }
+
+        Thread.sleep(150)
+
+        {
+          val (hexMap, players) = {
+            val gameState = fetchAndParseGame(lobbyId)
+            gameState.gameStatus shouldBe GameStatus.CharacterPlacing
+            (gameState.hexMap.get, gameState.players)
+          }
+
+//          (0 until numberOfPlayers) foreach { i =>
+//            auth(i)
+//            val spawnPoints = hexMap.getSpawnPointsByNumber(i)
+//            logger.error(i.toString)
+//            logger.error(spawnPoints.map(_.coordinates).toString)
+//          }
+
+          val characterId0 = players(0).characters.map(_.id).head
+          val characterId1 = players(1).characters.map(_.id).head
+
+          auth(0)
+          placeCharacters(lobbyId, Map(HexCoordinates(3, 10) -> characterId0)).statusCode shouldBe ok
+          auth(1)
+          placeCharacters(lobbyId, Map(HexCoordinates(6, 10) -> characterId1)).statusCode shouldBe ok
+        }
+
+        auth(0)
+
+        val gameState = fetchAndParseGame(lobbyId)
+
+        val characterToMove = gameState.players(0).characters.head
+        val characterToAttack = gameState.players(1).characters.head
+        val characterCell = gameState.hexMap.get.getCellOfCharacter(characterToMove.id).get
+        val targetCell = HexUtils.getAdjacentCells(gameState.hexMap.get.cells, characterCell.coordinates)
+          .filter(c => c.cellType == HexCellType.Normal).head
+        basicAttackCharacter(lobbyId, characterToMove.id, characterToAttack.id).statusCode shouldBe ok
       }
     }
   }

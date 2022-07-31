@@ -19,6 +19,7 @@ import scala.concurrent.duration._
 import scala.util.Random
 
 object Game {
+  type GameId = String
   sealed trait Query
 
   case object GetState extends Query
@@ -43,6 +44,8 @@ object Game {
 
   case class MoveCharacter(playerId: PlayerId, path: Seq[HexCoordinates], characterId: CharacterId) extends Command
 
+  case class BasicAttackCharacter(playerId: PlayerId, attackingCharacterId: CharacterId, targetCharacterId: CharacterId) extends Command
+
   // sent only by self /////////
   //
   case class CharacterSelectTimeout(pickNumber: Int) extends Command
@@ -51,31 +54,33 @@ object Game {
   //////////////////////////////
 
   sealed trait Event {
-    val id: String
+    val id: GameId
   }
-  case class PickTimeDecreased(id: String, time: Long) extends Event
+  case class PickTimeDecreased(id: GameId, time: Long) extends Event
 
-  case class TimeDecreased(id: String, playerId: String, time: Long) extends Event
+  case class TimeDecreased(id: GameId, playerId: PlayerId, time: Long) extends Event
 
-  case class GamePaused(id: String) extends Event
+  case class GamePaused(id: GameId) extends Event
 
-  case class GameUnpaused(id: String) extends Event
+  case class GameUnpaused(id: GameId) extends Event
 
-  case class GameStarted(id: String, gameStartDependencies: GameStartDependencies) extends Event
+  case class GameStarted(id: GameId, gameStartDependencies: GameStartDependencies) extends Event
 
-  case class Surrendered(id: String, playerId: PlayerId) extends Event
+  case class Surrendered(id: GameId, playerId: PlayerId) extends Event
 
-  case class CharactersBanned(id: String, playerId: PlayerId, characterIds: Set[CharacterMetadataId]) extends Event
+  case class CharactersBanned(id: GameId, playerId: PlayerId, characterIds: Set[CharacterMetadataId]) extends Event
 
-  case class CharacterPicked(id: String, playerId: PlayerId, characterId: CharacterMetadataId) extends Event
+  case class CharacterPicked(id: GameId, playerId: PlayerId, characterId: CharacterMetadataId) extends Event
 
-  case class PlacingCharactersStarted(id: String) extends Event
+  case class PlacingCharactersStarted(id: GameId) extends Event
 
-  case class CharactersPlaced(id: String, playerId: PlayerId, coordinatesToCharacterIdMap: Map[HexCoordinates, CharacterId]) extends Event
+  case class CharactersPlaced(id: GameId, playerId: PlayerId, coordinatesToCharacterIdMap: Map[HexCoordinates, CharacterId]) extends Event
 
-  case class CharactersBlindPicked(id: String, playerId: PlayerId, characterId: Set[CharacterMetadataId]) extends Event
+  case class CharactersBlindPicked(id: GameId, playerId: PlayerId, characterId: Set[CharacterMetadataId]) extends Event
 
-  case class CharacterMoved(id: String, playerId: PlayerId, path: Seq[HexCoordinates], characterId: CharacterId) extends Event
+  case class CharacterMoved(id: GameId, playerId: PlayerId, path: Seq[HexCoordinates], characterId: CharacterId) extends Event
+
+  case class CharacterBasicAttacked(id: GameId, playerId: PlayerId, attackingCharacterId: CharacterId, targetCharacterId: CharacterId) extends Event
 
   // CLOCK TIMEOUTS /////////////////////
   //
@@ -306,6 +311,16 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
             sender() ! Success()
           }
       }
+    case BasicAttackCharacter(playerId, attackingCharacterId, targetCharacterId) =>
+      GameStateValidator().validateBasicAttackCharacter(playerId, attackingCharacterId, targetCharacterId) match {
+        case failure @ Failure(_) => sender() ! failure
+        case Success(_) =>
+          val e = CharacterBasicAttacked(id, playerId, attackingCharacterId, targetCharacterId)
+          persistAndPublish(e) { _ =>
+            gameState = gameState.basicAttack(attackingCharacterId, targetCharacterId)
+            sender() ! Success()
+          }
+      }
     case e => log.warning(s"Unknown message: $e")
   }
 
@@ -331,9 +346,12 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
     case CharactersPlaced(_, playerId, coordinatesToCharacterIdMap) =>
       gameState = gameState.placeCharacters(playerId, coordinatesToCharacterIdMap)
       log.debug(s"Recovered placing characters by $playerId to $coordinatesToCharacterIdMap")
-    case CharacterMoved(_, playerId, hexCoordinates, characterId) =>
+    case CharacterMoved(_, _, hexCoordinates, characterId) =>
       gameState = gameState.moveCharacter(hexCoordinates, characterId)
       log.debug(s"Recovered $characterId to $hexCoordinates")
+    case CharacterBasicAttacked(_, _, attackingCharacterId, targetCharacterId) =>
+      gameState = gameState.basicAttack(attackingCharacterId, targetCharacterId)
+      log.debug(s"Recovered basic attack of $attackingCharacterId to $targetCharacterId")
     case BanningPhaseTimedOut(_) =>
       log.debug(s"Recovered banning phase timeout")
       gameState = gameState.finishBanningPhase()
@@ -346,7 +364,7 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
     case RecoveryCompleted =>
       // start a timer
       scheduleDefault()
-    case e => log.warning(s"Unknown message: $e")
+    case e => log.error(s"Unknown message: $e")
   }
 
   override def receiveCommand: Receive = {

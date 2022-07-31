@@ -1,6 +1,7 @@
 package com.tosware.NKM.models.game
 
 import com.softwaremill.quicklens._
+import com.tosware.NKM.models.{Damage, DamageType}
 import com.tosware.NKM.models.game.NKMCharacter.CharacterId
 import com.tosware.NKM.models.game.NKMCharacterMetadata.CharacterMetadataId
 import com.tosware.NKM.models.game.Player.PlayerId
@@ -238,6 +239,16 @@ case class GameState(id: String,
       case cell if cell == parentCell => HexCell(cell.coordinates, cell.cellType, None, cell.effects, cell.spawnNumber)
       case cell if cell.coordinates == parentCellCoordinates => HexCell(cell.coordinates, cell.cellType, Some(characterId), cell.effects, cell.spawnNumber)
       case cell => cell
+    }
+  }
+
+  def basicAttack(attackingCharacterId: CharacterId, targetCharacterId: CharacterId) = {
+    val attackingCharacter = characterById(attackingCharacterId).get
+
+    this.modify(_.players.each.characters.each).using {
+      case character if character.id == targetCharacterId =>
+        character.receiveDamage(Damage(attackingCharacterId, DamageType.Physical, attackingCharacter.state.attackPoints))
+      case character => character
     }
   }
 

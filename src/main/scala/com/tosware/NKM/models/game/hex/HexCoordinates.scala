@@ -22,5 +22,7 @@ case class HexCoordinates(x: Int, z: Int) {
   def getLines(directions: Set[HexDirection], size: Int): Set[HexCoordinates] =
     directions.flatMap(d => getLine(d, size))
 
+  def toTuple: (Int, Int) = (x, z)
+
 }
 

@@ -22,7 +22,7 @@ object GameRequest {
     final case class PlaceCharacters(lobbyId: String, coordinatesToCharacterIdMap: Map[HexCoordinates, CharacterId]) extends GameRequest
     final case class EndTurn(lobbyId: String) extends GameRequest
     final case class Move(lobbyId: String, path: Seq[HexCoordinates], characterId: CharacterId) extends GameRequest
-    final case class BasicAttack(lobbyId: String, characterThatAttacksId: CharacterId, targetCharacterId: CharacterId) extends GameRequest
+    final case class BasicAttack(lobbyId: String, attackingCharacterId: CharacterId, targetCharacterId: CharacterId) extends GameRequest
     final case class UseAbility(lobbyId: String, useAbilityData: String) extends GameRequest
   }
   object Chat {

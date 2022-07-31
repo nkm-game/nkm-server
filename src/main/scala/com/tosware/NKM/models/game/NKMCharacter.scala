@@ -3,6 +3,7 @@ package com.tosware.NKM.models.game
 import com.softwaremill.quicklens._
 import NKMCharacter._
 import NKMCharacterMetadata.CharacterMetadataId
+import com.tosware.NKM.models.{Damage, DamageType}
 import com.tosware.NKM.models.game.hex._
 
 object NKMCharacter {
@@ -18,7 +19,7 @@ object NKMCharacter {
         attackPoints = metadata.initialAttackPoints,
         basicAttackRange = metadata.initialBasicAttackRange,
         speed = metadata.initialSpeed,
-        psychicalDefense = metadata.initialPsychicalDefense,
+        physicalDefense = metadata.initialPsychicalDefense,
         magicalDefense = metadata.initialMagicalDefense,
       )
     )
@@ -54,6 +55,31 @@ case class NKMCharacter
       case AttackType.Melee => parentCoordinates.getLines(HexDirection.values.toSet, state.basicAttackRange) // TODO: stop at walls and characters
       case AttackType.Ranged => parentCoordinates.getLines(HexDirection.values.toSet, state.basicAttackRange)
     }
+  }
+
+  def receiveDamage(damage: Damage): NKMCharacter = {
+    val defense = damage.damageType match {
+      case DamageType.Physical => state.physicalDefense
+      case DamageType.Magical => state.magicalDefense
+      case DamageType.True => 0
+    }
+
+    val reduction = damage.amount * defense / 100f
+    val damageAfterReduction: Int = damage.amount - reduction.toInt
+    if (damageAfterReduction <= 0) return this
+
+    if(state.shield >= damageAfterReduction) {
+      val newShield = state.shield - damageAfterReduction
+      this.modify(_.state.shield).setTo(newShield)
+    }
+    else {
+      val damageAfterShield = damageAfterReduction - state.shield
+      val newShield = 0
+      val newHp = state.healthPoints - damageAfterShield
+      this.modify(_.state.shield).setTo(newShield)
+        .modify(_.state.healthPoints).setTo(newHp)
+    }
+
   }
 
   def addEffect(effect: CharacterEffect): NKMCharacter =

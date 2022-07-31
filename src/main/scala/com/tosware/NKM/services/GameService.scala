@@ -78,6 +78,13 @@ class GameService(gamesManagerActor: ActorRef)
     Future.successful(aw(f).asInstanceOf[CommandResponse])
   }
 
+  def basicAttackCharacter(username: String, request: Action.BasicAttack): Future[CommandResponse] = {
+    val gameActor: ActorRef = getGameActor(request.lobbyId)
+
+    val f = gameActor ? Game.BasicAttackCharacter(username, request.attackingCharacterId, request.targetCharacterId)
+    Future.successful(aw(f).asInstanceOf[CommandResponse])
+  }
+
   def getGameState(gameActor: ActorRef): Future[GameState] =
     (gameActor ? GetState).mapTo[GameState]
 

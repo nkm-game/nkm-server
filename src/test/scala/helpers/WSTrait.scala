@@ -6,6 +6,7 @@ import com.tosware.NKM.models.game.{ClockConfig, GameStateView, PickType}
 import com.tosware.NKM.models.game.NKMCharacter.CharacterId
 import com.tosware.NKM.models.game.NKMCharacterMetadata.CharacterMetadataId
 import com.tosware.NKM.models.game.hex.HexCoordinates
+import com.tosware.NKM.models.game.ws.GameRequest.Action.BasicAttack
 //import com.tosware.NKM.models.game._
 import com.tosware.NKM.models.game.ws.GameRequest.Action.{Move, PlaceCharacters}
 import com.tosware.NKM.models.game.ws.GameRequest.CharacterSelect._
@@ -143,6 +144,9 @@ trait WSTrait extends UserApiTrait {
 
   def moveCharacter(lobbyId: String, path: Seq[HexCoordinates], characterId: CharacterId): WebsocketGameResponse =
     sendWSRequestG(GameRoute.Move, Move(lobbyId, path, characterId).toJson.toString)
+
+  def basicAttackCharacter(lobbyId: String, attackingCharacterId: CharacterId, targetCharacterId: CharacterId): WebsocketGameResponse =
+    sendWSRequestG(GameRoute.BasicAttack, BasicAttack(lobbyId, attackingCharacterId, targetCharacterId).toJson.toString)
 
   def fetchGame(lobbyId: String): WebsocketGameResponse =
     sendWSRequestG(GameRoute.GetState, GetState(lobbyId).toJson.toString)
