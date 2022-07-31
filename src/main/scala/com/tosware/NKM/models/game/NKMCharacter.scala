@@ -48,6 +48,12 @@ case class NKMCharacter
   def owner(implicit gameState: GameState): Player =
     gameState.players.find(_.characterIds.contains(id)).get
 
+  def isEnemyFor(characterId: CharacterId)(implicit gameState: GameState): Boolean =
+    gameState.characterById(characterId).get.owner != owner
+
+  def isFriendFor(characterId: CharacterId)(implicit gameState: GameState): Boolean =
+    gameState.characterById(characterId).get.owner == owner
+
   def defaultGetBasicAttackCells(implicit gameState: GameState): Set[HexCoordinates] = {
     if(parentCell.isEmpty) return Set.empty
     val parentCoordinates = parentCell.get.coordinates

@@ -96,6 +96,15 @@ class GameStateValidatorSpec
         assertCommandSuccess(result)
       }
 
+      "allow move over friendly characters" in {
+        fail()
+//        val result = validator.validateBasicMoveCharacter(playerIds(0),
+//          CoordinateSeq((0, 0), (1, 0)),
+//          getCharacterId(0)
+//        )
+//        assertCommandSuccess(result)
+      }
+
       "disallow if character is not on the map" in {
         val newGameState = runningGameState.removeCharacterFromMap(getCharacterId(0))
         val result =  GameStateValidator()(newGameState).validateBasicMoveCharacter(playerIds(0),

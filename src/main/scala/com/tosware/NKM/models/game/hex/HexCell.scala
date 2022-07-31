@@ -1,5 +1,6 @@
 package com.tosware.NKM.models.game.hex
 
+import com.tosware.NKM.models.game.GameState
 import com.tosware.NKM.models.game.NKMCharacter.CharacterId
 import com.tosware.NKM.models.game.hex.HexCellType.Normal
 
@@ -24,4 +25,6 @@ case class HexCell
 ) {
   def isEmpty: Boolean = characterId.isEmpty
   def isFreeToStand: Boolean = isEmpty && cellType != HexCellType.Wall
+  def isFreeToMove(forCharacterId: CharacterId)(implicit gameState: GameState): Boolean =
+    cellType != HexCellType.Wall && characterId.flatMap(cid => gameState.characterById(cid)).fold(true)(_.isFriendFor(forCharacterId))
 }
