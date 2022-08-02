@@ -4,6 +4,7 @@ case class NKMCharacterState
 (
   name: String,
   attackType: AttackType,
+  maxHealthPoints: Int,
   healthPoints: Int,
   attackPoints: Int,
   basicAttackRange: Int,
@@ -17,6 +18,7 @@ case class NKMCharacterState
   def toView: NKMCharacterStateView = NKMCharacterStateView(
     name = name,
     attackType: AttackType,
+    maxHealthPoints = maxHealthPoints,
     healthPoints = healthPoints,
     attackPoints = attackPoints,
     basicAttackRange = basicAttackRange,
@@ -28,11 +30,11 @@ case class NKMCharacterState
   )
 }
 
-
 case class NKMCharacterStateView
 (
   name: String,
   attackType: AttackType,
+  maxHealthPoints: Int,
   healthPoints: Int,
   attackPoints: Int,
   basicAttackRange: Int,

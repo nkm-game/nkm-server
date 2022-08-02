@@ -39,13 +39,13 @@ case class CharacterEffectMetadata
   description: String,
   isCc: Boolean = false,
 ) {
-  def id: CharacterEffectId = name.toString
+  def id: CharacterEffectMetadataId = name.toString
 }
 
 trait CharacterEffect {
+  val id: CharacterEffectId = java.util.UUID.randomUUID.toString
   val metadata: CharacterEffectMetadata
   val cooldown: Int
-  val id: CharacterEffectId = java.util.UUID.randomUUID.toString
   val state: CharacterEffectState = CharacterEffectState(cooldown)
 }
 

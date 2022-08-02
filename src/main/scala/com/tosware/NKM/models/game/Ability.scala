@@ -21,33 +21,35 @@ object AbilityType extends Enum[AbilityType] {
 
 case class AbilityMetadata
 (
-  abilityType: AbilityType,
   name: String,
+  abilityType: AbilityType,
   description: String,
   cooldown: Int = 0,
-  parentCanAttackAllies: Boolean = false,
 ) {
   val id: AbilityMetadataId = name
 }
 
 case class AbilityState
 (
-  currentParentCharacterId: CharacterId,
-  currentCooldown: Int = 0,
-  currentRangeCells: Seq[HexCoordinates],
-  currentTargetsInRange: Seq[HexCoordinates],
-  currentCanBeUsed: Boolean,
-  currentDescription: String,
+  parentCharacterId: CharacterId,
+  cooldown: Int = 0,
+  parentCanAttackAllies: Boolean = false,
 )
 
+trait BasicAttackOverride {
+  def basicAttackCells(implicit gameState: GameState): Set[HexCoordinates]
+  def basicAttackTargets(implicit gameState: GameState): Set[HexCoordinates]
+  def basicAttack(targetCharacterId: CharacterId)(implicit gameState: GameState): GameState
+}
 
 trait Ability {
-  val id: AbilityId
-  val metadataId: AbilityMetadataId
-  val state: AbilityState
-  val parentBaseAttackOverride: Option[(GameState, NKMCharacter) => GameState] = None
-  val rangeCells: GameState => Set[HexCoordinates]
-  val targetsInRange: GameState => Set[HexCoordinates]
-  val canBeUsed: GameState => Boolean = _ => false
-  val use: (GameState, Option[NKMCharacter], Option[HexCoordinates]) => GameState = (gameState, _, _) => gameState
+  def id: AbilityId = java.util.UUID.randomUUID.toString
+  def metadata: AbilityMetadata
+  def state: AbilityState
+  def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates]
+  def targetsInRange(implicit gameState: GameState): Set[HexCoordinates]
+  def canBeUsed(implicit gameState: GameState): Boolean = false
+  def use(targetIds: Seq[String])(implicit gameState: GameState): GameState = gameState
+  def parentCharacter(implicit gameState: GameState): NKMCharacter =
+    gameState.characters.find(_.state.abilities.map(_.id).contains(id)).get
 }

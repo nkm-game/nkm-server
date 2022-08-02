@@ -249,11 +249,7 @@ case class GameState(id: String,
     val newGameState = takeActionWithCharacter(attackingCharacterId)
     val attackingCharacter = characterById(attackingCharacterId).get
 
-    newGameState.modify(_.players.each.characters.each).using {
-      case character if character.id == targetCharacterId =>
-        character.receiveDamage(Damage(attackingCharacterId, DamageType.Physical, attackingCharacter.state.attackPoints))
-      case character => character
-    }
+    attackingCharacter.basicAttack(targetCharacterId)(newGameState)
   }
 
   def setMap(hexMap: HexMap): GameState =

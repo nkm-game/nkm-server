@@ -1,5 +1,8 @@
 package com.tosware.NKM.models.game.hex
 
+import com.tosware.NKM.models.game.{GameState, NKMCharacter}
+import com.tosware.NKM.models.game.NKMCharacter.CharacterId
+
 import scala.math.abs
 
 object HexUtils {
@@ -25,4 +28,43 @@ object HexUtils {
 
   def CoordinateSeq(tuples: (Int, Int)*): Seq[HexCoordinates] = tuples.map{case (x, z) => HexCoordinates(x, z)}
   def CoordinateSet(tuples: (Int, Int)*): Set[HexCoordinates] = CoordinateSeq(tuples: _*).toSet
+
+  implicit class HexCoordinatesSetUtils(coords: Set[HexCoordinates])(implicit gameState: GameState) {
+    def toCells: Set[HexCell] =
+      gameState.hexMap.get.cells.filter(c => coords.contains(c.coordinates))
+
+    def characters: Set[NKMCharacter] =
+      toCells.characters
+
+    def whereFriendsOf(characterId: CharacterId): Set[HexCoordinates] =
+      toCells.friendsOf(characterId).map(_.parentCell.get.coordinates)
+
+    def whereEnemiesOf(characterId: CharacterId): Set[HexCoordinates] =
+      toCells.enemiesOf(characterId).map(_.parentCell.get.coordinates)
+  }
+
+  implicit class HexCoordinatesSeqUtils(coords: Seq[HexCoordinates])(implicit gameState: GameState) {
+    def toCells: Seq[HexCell] =
+      coords.flatMap(c => gameState.hexMap.get.getCell(c))
+  }
+
+  implicit class CharacterIdSetUtils(ids: Set[CharacterId])(implicit gameState: GameState) {
+    def toCharacters: Set[NKMCharacter] =
+      ids.flatMap(id => gameState.characters.find(_.id == id))
+  }
+
+  implicit class HexCellUtils(cells: Set[HexCell])(implicit gameState: GameState) {
+    def characterIds: Set[CharacterId] =
+      cells.flatMap(_.characterId)
+
+    def characters: Set[NKMCharacter] =
+      characterIds.toCharacters
+
+    def friendsOf(characterId: CharacterId): Set[NKMCharacter] =
+      characters.filter(_.isFriendFor(characterId))
+
+    def enemiesOf(characterId: CharacterId): Set[NKMCharacter] =
+      characters.filter(_.isEnemyFor(characterId))
+  }
 }
+

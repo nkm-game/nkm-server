@@ -1,10 +1,11 @@
 package com.tosware.NKM.models.game
 
 import com.softwaremill.quicklens._
-import NKMCharacter._
-import NKMCharacterMetadata.CharacterMetadataId
-import com.tosware.NKM.models.{Damage, DamageType}
+import com.tosware.NKM.models.game.NKMCharacter._
+import com.tosware.NKM.models.game.NKMCharacterMetadata.CharacterMetadataId
+import com.tosware.NKM.models.game.hex.HexUtils._
 import com.tosware.NKM.models.game.hex._
+import com.tosware.NKM.models.{Damage, DamageType}
 
 object NKMCharacter {
   type CharacterId = String
@@ -15,6 +16,7 @@ object NKMCharacter {
       state = NKMCharacterState(
         name = metadata.name,
         attackType = metadata.attackType,
+        maxHealthPoints = metadata.initialHealthPoints,
         healthPoints = metadata.initialHealthPoints,
         attackPoints = metadata.initialAttackPoints,
         basicAttackRange = metadata.initialBasicAttackRange,
@@ -40,8 +42,6 @@ case class NKMCharacter
 
   def canBasicAttack: Boolean = !state.effects.exists(e => basicAttackImpairmentCcNames.contains(e.metadata.name))
 
-  def basicAttackCells(implicit gameState: GameState): Set[HexCoordinates] = defaultGetBasicAttackCells
-
   def parentCell(implicit gameState: GameState): Option[HexCell] =
     gameState.hexMap.get.getCellOfCharacter(id)
 
@@ -54,7 +54,21 @@ case class NKMCharacter
   def isFriendFor(characterId: CharacterId)(implicit gameState: GameState): Boolean =
     gameState.characterById(characterId).get.owner == owner
 
-  def defaultGetBasicAttackCells(implicit gameState: GameState): Set[HexCoordinates] = {
+  def basicAttackOverride: Option[BasicAttackOverride] =
+    state.abilities.collectFirst {
+      case o: BasicAttackOverride => o
+    }
+
+  def basicAttackCellCoords(implicit gameState: GameState): Set[HexCoordinates] =
+    basicAttackOverride.fold(defaultBasicAttackCells)(_.basicAttackCells)
+
+  def basicAttackTargets(implicit gameState: GameState): Set[HexCoordinates] =
+    basicAttackOverride.fold(defaultBasicAttackTargets)(_.basicAttackTargets)
+
+  def basicAttack(targetCharacterId: CharacterId)(implicit gameState: GameState): GameState =
+    basicAttackOverride.fold(defaultBasicAttack(targetCharacterId))(_.basicAttack(targetCharacterId))
+
+  def defaultBasicAttackCells(implicit gameState: GameState): Set[HexCoordinates] = {
     if(parentCell.isEmpty) return Set.empty
     val parentCoordinates = parentCell.get.coordinates
     state.attackType match {
@@ -62,6 +76,19 @@ case class NKMCharacter
       case AttackType.Ranged => parentCoordinates.getLines(HexDirection.values.toSet, state.basicAttackRange)
     }
   }
+
+  def defaultBasicAttackTargets(implicit gameState: GameState): Set[HexCoordinates] =
+    basicAttackCellCoords.whereEnemiesOf(id)
+
+  def defaultBasicAttack(targetCharacterId: CharacterId)(implicit gameState: GameState): GameState =
+    gameState.modify(_.players.each.characters.each).using {
+      case character if character.id == targetCharacterId =>
+        character.receiveDamage(Damage(id, DamageType.Physical, state.attackPoints))
+      case character => character
+    }
+
+  def heal(amount: Int): NKMCharacter =
+    this.modify(_.state.healthPoints).using(oldHp => math.min(oldHp + amount, state.maxHealthPoints))
 
   def receiveDamage(damage: Damage): NKMCharacter = {
     val defense = damage.damageType match {

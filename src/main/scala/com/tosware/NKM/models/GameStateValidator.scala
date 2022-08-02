@@ -6,6 +6,7 @@ import com.tosware.NKM.models.game.NKMCharacterMetadata.CharacterMetadataId
 import com.tosware.NKM.models.game.Player.PlayerId
 import com.tosware.NKM.models.game._
 import com.tosware.NKM.models.game.hex.HexCoordinates
+import com.tosware.NKM.models.game.hex.HexUtils._
 
 case class GameStateValidator()(implicit gameState: GameState) {
   private def playerInGame(playerId: PlayerId) =
@@ -122,7 +123,7 @@ case class GameStateValidator()(implicit gameState: GameState) {
     else {
       val character = gameState.characterById(characterId).get
       val parentCell = character.parentCell
-      val pathCells = path.flatMap(c => gameState.hexMap.get.getCell(c))
+      val pathCells = path.toCells
       println(pathCells.map(_.isFreeToMove(characterId)))
       if (pathCells.size != path.size) Failure("Not all cells exist on the map.")
       else if (pathCells.exists(c => !c.isFreeToMove(characterId))) Failure("Some of the cells in the path are not free to move.")
@@ -150,7 +151,7 @@ case class GameStateValidator()(implicit gameState: GameState) {
       else if (!character.canBasicAttack) Failure("This character is unable to basic attack.")
       else if (gameState.characterIdsOutsideMap.contains(characterId)) Failure("Character outside map.")
       else if (gameState.characterIdsOutsideMap.contains(targetCharacterId)) Failure("Target character outside map.")
-      else if (!character.basicAttackCells.contains(targetParentCell.get.coordinates)) Failure("Target character not in range.")
+      else if (!character.basicAttackCellCoords.contains(targetParentCell.get.coordinates)) Failure("Target character not in range.")
       else if (character.owner == targetCharacter.owner) Failure("This character cannot attack friendly characters.")
       else Success()
     }
