@@ -8,6 +8,8 @@ import com.tosware.NKM.models.game.effects._
 import com.tosware.NKM.models.game.hex.HexCellType._
 import com.tosware.NKM.models.game.hex.HexUtils.CoordinateSeq
 import com.tosware.NKM.models.game.hex._
+import com.tosware.NKM.providers.HexMapProvider
+import com.tosware.NKM.providers.HexMapProvider.TestHexMapName
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 import org.slf4j.{Logger, LoggerFactory}
@@ -19,33 +21,7 @@ class GameStateValidatorSpec
     with Matchers {
   implicit val random: Random = new Random()
   val logger: Logger = LoggerFactory.getLogger(getClass)
-  val hexParams: Set[Any] = Set(
-      (-2, 2, Wall),
-      (-1, 2, Wall),
-      (0, 2, Wall),
-      (1, 2, Wall),
-      (2, 2, Wall),
-      (3, 2, Wall),
-      (-1, 1),
-      (0, 1),
-      (1, 1),
-      (2, 1),
-      (3, 1),
-      (0, 0, SpawnPoint, 0),
-      (1, 0),
-      (2, 0),
-      (3, 0, SpawnPoint, 1),
-      (0, -1, Wall),
-      (1, -1, Wall),
-      (2, -1, Wall),
-      (3, -1, Wall),
-      (4, -1, Wall),
-    )
-
-  val cells: Set[HexCell] = HexUtils.hexCellParamsToCells(hexParams)
-
-  private val hexMap = HexMap("test", cells)
-
+  val hexMap = HexMapProvider().getTestHexMaps.find(_.name == TestHexMapName.Simple1v1.toString).get
   def spawnCoordinates(playerIndex: Int) = hexMap.getSpawnPointsByNumber(playerIndex).head.coordinates
 
   private val playerIds = Seq("p0", "p1")
