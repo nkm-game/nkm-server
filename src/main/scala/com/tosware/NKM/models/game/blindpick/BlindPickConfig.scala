@@ -1,7 +1,7 @@
 package com.tosware.NKM.models.game.blindpick
 
 import com.tosware.NKM.models.game.GameStartDependencies
-import com.tosware.NKM.models.game.NKMCharacterMetadata.CharacterMetadataId
+import com.tosware.NKM.models.game.CharacterMetadata.CharacterMetadataId
 import com.tosware.NKM.models.game.Player.PlayerId
 
 

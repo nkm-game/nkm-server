@@ -5,7 +5,7 @@ import akka.persistence.{PersistentActor, RecoveryCompleted}
 import com.tosware.NKM.models.CommandResponse._
 import com.tosware.NKM.models.GameStateValidator
 import com.tosware.NKM.models.game.NKMCharacter.CharacterId
-import com.tosware.NKM.models.game.NKMCharacterMetadata.CharacterMetadataId
+import com.tosware.NKM.models.game.CharacterMetadata.CharacterMetadataId
 import com.tosware.NKM.models.game.Player.PlayerId
 import com.tosware.NKM.models.game._
 import com.tosware.NKM.models.game.blindpick.BlindPickPhase

@@ -2,14 +2,14 @@ package com.tosware.NKM.models.game
 
 import com.softwaremill.quicklens._
 import com.tosware.NKM.models.game.NKMCharacter._
-import com.tosware.NKM.models.game.NKMCharacterMetadata.CharacterMetadataId
+import com.tosware.NKM.models.game.CharacterMetadata.CharacterMetadataId
 import com.tosware.NKM.models.game.hex.HexUtils._
 import com.tosware.NKM.models.game.hex._
 import com.tosware.NKM.models.{Damage, DamageType}
 
 object NKMCharacter {
   type CharacterId = String
-  def fromMetadata(characterId: CharacterId, metadata: NKMCharacterMetadata) = {
+  def fromMetadata(characterId: CharacterId, metadata: CharacterMetadata) = {
     NKMCharacter(
       id = characterId,
       metadataId = metadata.id,

@@ -1,7 +1,7 @@
 package com.tosware.NKM.models.game.ws
 
 import com.tosware.NKM.models.game.NKMCharacter.CharacterId
-import com.tosware.NKM.models.game.NKMCharacterMetadata.CharacterMetadataId
+import com.tosware.NKM.models.game.CharacterMetadata.CharacterMetadataId
 import com.tosware.NKM.models.game.hex.HexCoordinates
 
 object GameRequest {

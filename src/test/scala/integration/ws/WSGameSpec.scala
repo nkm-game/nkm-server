@@ -5,7 +5,7 @@ import com.tosware.NKM.models.game.blindpick.BlindPickPhase
 import com.tosware.NKM.models.game.draftpick.DraftPickPhase
 import com.tosware.NKM.models.game.hex.{HexCellType, HexCoordinates, HexUtils}
 import com.tosware.NKM.models.game.ws._
-import com.tosware.NKM.models.game.{ClockConfig, GameStatus, NKMCharacter, NKMCharacterMetadata, NKMCharacterView, PickType, VictoryStatus}
+import com.tosware.NKM.models.game.{ClockConfig, GameStatus, NKMCharacter, CharacterMetadata, NKMCharacterView, PickType, VictoryStatus}
 import helpers.WSTrait
 
 class WSGameSpec extends WSTrait {
@@ -223,7 +223,7 @@ class WSGameSpec extends WSTrait {
 
       withGameWS {
         val availableCharacters = fetchAndParseGame(lobbyId).draftPickState.get.config.availableCharacters
-        val player0Bans = Set.empty[NKMCharacterMetadata.CharacterMetadataId]
+        val player0Bans = Set.empty[CharacterMetadata.CharacterMetadataId]
         val player1Bans = Set(availableCharacters.head, availableCharacters.tail.head)
         val player2Bans = Set(availableCharacters.head)
 

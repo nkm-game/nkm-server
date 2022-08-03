@@ -1,5 +1,6 @@
 package com.tosware.NKM.providers
 
+import com.tosware.NKM.models.game.AbilityType.Normal
 import com.tosware.NKM.models.game.AttackType.findValues
 import com.tosware.NKM.models.game.hex.HexCellType.{SpawnPoint, Wall}
 import com.tosware.NKM.models.game.hex.{HexCell, HexMap, HexUtils}
@@ -61,10 +62,14 @@ case class HexMapProvider() extends NKMJsonProtocol {
       (1, 1),
       (2, 1),
       (3, 1),
+      (-2, 0),
+      (-1, 0, SpawnPoint, 0),
       (0, 0, SpawnPoint, 0),
       (1, 0),
       (2, 0),
       (3, 0, SpawnPoint, 1),
+      (4, 0, SpawnPoint, 1),
+      (5, 0),
       (0, -1, Wall),
       (1, -1, Wall),
       (2, -1, Wall),

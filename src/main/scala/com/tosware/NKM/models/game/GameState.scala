@@ -3,7 +3,7 @@ package com.tosware.NKM.models.game
 import com.softwaremill.quicklens._
 import com.tosware.NKM.models.{Damage, DamageType}
 import com.tosware.NKM.models.game.NKMCharacter.CharacterId
-import com.tosware.NKM.models.game.NKMCharacterMetadata.CharacterMetadataId
+import com.tosware.NKM.models.game.CharacterMetadata.CharacterMetadataId
 import com.tosware.NKM.models.game.Player.PlayerId
 import com.tosware.NKM.models.game.blindpick._
 import com.tosware.NKM.models.game.draftpick._
@@ -12,7 +12,7 @@ import com.tosware.NKM.models.game.hex.{HexCell, HexCoordinates, HexMap}
 import scala.util.Random
 
 case class GameState(id: String,
-                     charactersMetadata: Set[NKMCharacterMetadata],
+                     charactersMetadata: Set[CharacterMetadata],
                      hexMap: Option[HexMap],
                      characterIdsOutsideMap: Set[CharacterId],
                      characterIdsThatTookActionThisPhase: Set[CharacterId],
@@ -209,11 +209,10 @@ case class GameState(id: String,
   def blindPickTimeout(): GameState =
     surrender(blindPickState.get.pickingPlayers: _*)
 
-  def checkIfPlacingCharactersFinished(): GameState = {
+  def checkIfPlacingCharactersFinished(): GameState =
     if(placingCharactersFinished) {
       copy(gameStatus = GameStatus.Running)
     } else this
-  }
 
   def placeCharacters(playerId: PlayerId, coordinatesToCharacterIdMap: Map[HexCoordinates, CharacterId]): GameState =
     coordinatesToCharacterIdMap.foldLeft(this){case (acc, (coordinate, characterId)) => acc.placeCharacter(coordinate, characterId)}
@@ -359,7 +358,7 @@ object GameState {
 
 case class GameStateView(
                           id: String,
-                          charactersMetadata: Set[NKMCharacterMetadata],
+                          charactersMetadata: Set[CharacterMetadata],
                           hexMap: Option[HexMap],
                           characterIdsOutsideMap: Set[CharacterId],
                           characterIdsThatTookActionThisPhase: Set[CharacterId],

@@ -59,7 +59,10 @@ object HexUtils {
       ids.flatMap(id => gameState.characters.find(_.id == id))
   }
 
-  implicit class HexCellUtils(cells: Set[HexCell])(implicit gameState: GameState) {
+  implicit class HexCellSetUtils(cells: Set[HexCell])(implicit gameState: GameState) {
+    def toCoords: Set[HexCoordinates] =
+      cells.map(_.coordinates)
+
     def characterIds: Set[CharacterId] =
       cells.flatMap(_.characterId)
 

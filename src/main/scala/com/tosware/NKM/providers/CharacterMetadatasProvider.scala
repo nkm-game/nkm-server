@@ -1,13 +1,13 @@
 package com.tosware.NKM.providers
 
 import com.tosware.NKM.models.game.abilities.aqua._
-import com.tosware.NKM.models.game.{AttackType, NKMCharacterMetadata}
+import com.tosware.NKM.models.game.{AttackType, CharacterMetadata}
 import com.tosware.NKM.serializers.NKMJsonProtocol
 
 case class CharacterMetadatasProvider() extends NKMJsonProtocol {
 
-  def getCharacterMetadatas: Seq[NKMCharacterMetadata] = Seq(
-    NKMCharacterMetadata(
+  def getCharacterMetadatas: Seq[CharacterMetadata] = Seq(
+    CharacterMetadata(
       name = "Aqua",
       attackType = AttackType.Ranged,
       initialHealthPoints = 58,
@@ -22,7 +22,7 @@ case class CharacterMetadatasProvider() extends NKMJsonProtocol {
         Resurrection.metadata.id,
       )
     ),
-    NKMCharacterMetadata(
+    CharacterMetadata(
       name = "Asuna",
       attackType = AttackType.Melee,
       initialHealthPoints = 66,
@@ -33,7 +33,7 @@ case class CharacterMetadatasProvider() extends NKMJsonProtocol {
       initialMagicalDefense = 10,
       initialAbilitiesMetadataIds = Seq.empty
     ),
-    NKMCharacterMetadata(
+    CharacterMetadata(
       name = "Dekomori Sanae",
       attackType = AttackType.Ranged,
       initialHealthPoints = 46,
@@ -44,7 +44,7 @@ case class CharacterMetadatasProvider() extends NKMJsonProtocol {
       initialMagicalDefense = 15,
       initialAbilitiesMetadataIds = Seq.empty
     ),
-    NKMCharacterMetadata(
+    CharacterMetadata(
       name = "Gilgamesh",
       attackType = AttackType.Ranged,
       initialHealthPoints = 51,
@@ -55,7 +55,7 @@ case class CharacterMetadatasProvider() extends NKMJsonProtocol {
       initialMagicalDefense = 15,
       initialAbilitiesMetadataIds = Seq.empty
     ),
-    NKMCharacterMetadata(
+    CharacterMetadata(
       name = "Hanekawa Tsubasa",
       attackType = AttackType.Melee,
       initialHealthPoints = 70,
@@ -66,7 +66,7 @@ case class CharacterMetadatasProvider() extends NKMJsonProtocol {
       initialMagicalDefense = 15,
       initialAbilitiesMetadataIds = Seq.empty
     ),
-    NKMCharacterMetadata(
+    CharacterMetadata(
       name = "Hecate",
       attackType = AttackType.Ranged,
       initialHealthPoints = 59,
@@ -77,7 +77,7 @@ case class CharacterMetadatasProvider() extends NKMJsonProtocol {
       initialMagicalDefense = 20,
       initialAbilitiesMetadataIds = Seq.empty
     ),
-    NKMCharacterMetadata(
+    CharacterMetadata(
       name = "Rem",
       attackType = AttackType.Melee,
       initialHealthPoints = 54,
@@ -88,7 +88,7 @@ case class CharacterMetadatasProvider() extends NKMJsonProtocol {
       initialMagicalDefense = 15,
       initialAbilitiesMetadataIds = Seq.empty
     ),
-    NKMCharacterMetadata(
+    CharacterMetadata(
       name = "Roronoa Zoro",
       attackType = AttackType.Melee,
       initialHealthPoints = 87,
@@ -99,7 +99,7 @@ case class CharacterMetadatasProvider() extends NKMJsonProtocol {
       initialMagicalDefense = 25,
       initialAbilitiesMetadataIds = Seq.empty
     ),
-    NKMCharacterMetadata(
+    CharacterMetadata(
       name = "Sinon",
       attackType = AttackType.Ranged,
       initialHealthPoints = 43,
@@ -110,7 +110,7 @@ case class CharacterMetadatasProvider() extends NKMJsonProtocol {
       initialMagicalDefense = 5,
       initialAbilitiesMetadataIds = Seq.empty
     ),
-    NKMCharacterMetadata(
+    CharacterMetadata(
       name = "Yasaka Mahiro",
       attackType = AttackType.Ranged,
       initialHealthPoints = 48,
@@ -121,7 +121,7 @@ case class CharacterMetadatasProvider() extends NKMJsonProtocol {
       initialMagicalDefense = 15,
       initialAbilitiesMetadataIds = Seq.empty
     ),
-    NKMCharacterMetadata(
+    CharacterMetadata(
       name = "Crona",
       attackType = AttackType.Melee,
       initialHealthPoints = 78,
@@ -132,7 +132,7 @@ case class CharacterMetadatasProvider() extends NKMJsonProtocol {
       initialMagicalDefense = 35,
       initialAbilitiesMetadataIds = Seq.empty
     ),
-    NKMCharacterMetadata(
+    CharacterMetadata(
       name = "Itsuka Kotori",
       attackType = AttackType.Melee,
       initialHealthPoints = 55,
@@ -143,7 +143,7 @@ case class CharacterMetadatasProvider() extends NKMJsonProtocol {
       initialMagicalDefense = 25,
       initialAbilitiesMetadataIds = Seq.empty
     ),
-    NKMCharacterMetadata(
+    CharacterMetadata(
       name = "『 』",
       attackType = AttackType.Melee,
       initialHealthPoints = 42,
@@ -154,7 +154,7 @@ case class CharacterMetadatasProvider() extends NKMJsonProtocol {
       initialMagicalDefense = 5,
       initialAbilitiesMetadataIds = Seq.empty
     ),
-    NKMCharacterMetadata(
+    CharacterMetadata(
       name = "Shana",
       attackType = AttackType.Melee,
       initialHealthPoints = 62,
@@ -165,7 +165,7 @@ case class CharacterMetadatasProvider() extends NKMJsonProtocol {
       initialMagicalDefense = 20,
       initialAbilitiesMetadataIds = Seq.empty
     ),
-    NKMCharacterMetadata(
+    CharacterMetadata(
       name = "Yoshino",
       attackType = AttackType.Melee,
       initialHealthPoints = 91,
@@ -176,7 +176,7 @@ case class CharacterMetadatasProvider() extends NKMJsonProtocol {
       initialMagicalDefense = 45,
       initialAbilitiesMetadataIds = Seq.empty
     ),
-    NKMCharacterMetadata(
+    CharacterMetadata(
       name = "Kurogane Ikki",
       attackType = AttackType.Melee,
       initialHealthPoints = 63,
@@ -187,7 +187,7 @@ case class CharacterMetadatasProvider() extends NKMJsonProtocol {
       initialMagicalDefense = 20,
       initialAbilitiesMetadataIds = Seq.empty
     ),
-    NKMCharacterMetadata(
+    CharacterMetadata(
       name = "Llenn",
       attackType = AttackType.Ranged,
       initialHealthPoints = 51,
@@ -198,7 +198,7 @@ case class CharacterMetadatasProvider() extends NKMJsonProtocol {
       initialMagicalDefense = 10,
       initialAbilitiesMetadataIds = Seq.empty
     ),
-    NKMCharacterMetadata(
+    CharacterMetadata(
       name = "Kirito",
       attackType = AttackType.Melee,
       initialHealthPoints = 63,
@@ -209,7 +209,7 @@ case class CharacterMetadatasProvider() extends NKMJsonProtocol {
       initialMagicalDefense = 15,
       initialAbilitiesMetadataIds = Seq.empty
     ),
-    NKMCharacterMetadata(
+    CharacterMetadata(
       name = "Monkey D. Luffy",
       attackType = AttackType.Melee,
       initialHealthPoints = 59,
@@ -220,7 +220,7 @@ case class CharacterMetadatasProvider() extends NKMJsonProtocol {
       initialMagicalDefense = 15,
       initialAbilitiesMetadataIds = Seq.empty
     ),
-    NKMCharacterMetadata(
+    CharacterMetadata(
       name = "Nibutani Shinka",
       attackType = AttackType.Ranged,
       initialHealthPoints = 68,
@@ -231,7 +231,7 @@ case class CharacterMetadatasProvider() extends NKMJsonProtocol {
       initialMagicalDefense = 20,
       initialAbilitiesMetadataIds = Seq.empty
     ),
-    NKMCharacterMetadata(
+    CharacterMetadata(
       name = "Sakai Yuuji",
       attackType = AttackType.Melee,
       initialHealthPoints = 70,
@@ -242,7 +242,7 @@ case class CharacterMetadatasProvider() extends NKMJsonProtocol {
       initialMagicalDefense = 20,
       initialAbilitiesMetadataIds = Seq.empty
     ),
-    NKMCharacterMetadata(
+    CharacterMetadata(
       name = "Carmel Wilhelmina",
       attackType = AttackType.Ranged,
       initialHealthPoints = 87,
@@ -253,7 +253,7 @@ case class CharacterMetadatasProvider() extends NKMJsonProtocol {
       initialMagicalDefense = 40,
       initialAbilitiesMetadataIds = Seq.empty
     ),
-    NKMCharacterMetadata(
+    CharacterMetadata(
       name = "Ryuko Matoi",
       attackType = AttackType.Melee,
       initialHealthPoints = 67,
@@ -264,7 +264,7 @@ case class CharacterMetadatasProvider() extends NKMJsonProtocol {
       initialMagicalDefense = 10,
       initialAbilitiesMetadataIds = Seq.empty
     ),
-    NKMCharacterMetadata(
+    CharacterMetadata(
       name = "Liones Elizabeth",
       attackType = AttackType.Melee,
       initialHealthPoints = 63,
@@ -275,7 +275,7 @@ case class CharacterMetadatasProvider() extends NKMJsonProtocol {
       initialMagicalDefense = 15,
       initialAbilitiesMetadataIds = Seq.empty
     ),
-    NKMCharacterMetadata(
+    CharacterMetadata(
       name = "Satou Kazuma",
       attackType = AttackType.Melee,
       initialHealthPoints = 66,
@@ -286,7 +286,7 @@ case class CharacterMetadatasProvider() extends NKMJsonProtocol {
       initialMagicalDefense = 15,
       initialAbilitiesMetadataIds = Seq.empty
     ),
-    NKMCharacterMetadata(
+    CharacterMetadata(
       name = "Derieri",
       attackType = AttackType.Melee,
       initialHealthPoints = 61,
@@ -297,7 +297,7 @@ case class CharacterMetadatasProvider() extends NKMJsonProtocol {
       initialMagicalDefense = 25,
       initialAbilitiesMetadataIds = Seq.empty
     ),
-    NKMCharacterMetadata(
+    CharacterMetadata(
       name = "Ochaco Uraraka",
       attackType = AttackType.Melee,
       initialHealthPoints = 62,
@@ -308,7 +308,7 @@ case class CharacterMetadatasProvider() extends NKMJsonProtocol {
       initialMagicalDefense = 15,
       initialAbilitiesMetadataIds = Seq.empty
     ),
-    NKMCharacterMetadata(
+    CharacterMetadata(
       name = "Levi",
       attackType = AttackType.Melee,
       initialHealthPoints = 57,
@@ -319,7 +319,7 @@ case class CharacterMetadatasProvider() extends NKMJsonProtocol {
       initialMagicalDefense = 10,
       initialAbilitiesMetadataIds = Seq.empty
     ),
-    NKMCharacterMetadata(
+    CharacterMetadata(
       name = "Ononoki Yotsugi",
       attackType = AttackType.Melee,
       initialHealthPoints = 75,
@@ -330,7 +330,7 @@ case class CharacterMetadatasProvider() extends NKMJsonProtocol {
       initialMagicalDefense = 25,
       initialAbilitiesMetadataIds = Seq.empty
     ),
-    NKMCharacterMetadata(
+    CharacterMetadata(
       name = "Sabrac",
       attackType = AttackType.Melee,
       initialHealthPoints = 62,
@@ -341,7 +341,7 @@ case class CharacterMetadatasProvider() extends NKMJsonProtocol {
       initialMagicalDefense = 25,
       initialAbilitiesMetadataIds = Seq.empty
     ),
-    NKMCharacterMetadata(
+    CharacterMetadata(
       name = "Akame",
       attackType = AttackType.Melee,
       initialHealthPoints = 67,
@@ -354,8 +354,8 @@ case class CharacterMetadatasProvider() extends NKMJsonProtocol {
     ),
   )
 
-  def getBotMetadatas: Seq[NKMCharacterMetadata] = 1 to 30 map (i => {
-    NKMCharacterMetadata(
+  def getBotMetadatas: Seq[CharacterMetadata] = 1 to 30 map (i => {
+    CharacterMetadata(
       name = s"Bot$i",
       AttackType.Melee,
       initialHealthPoints = 50,
