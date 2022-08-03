@@ -36,6 +36,9 @@ object HexUtils {
     def characters: Set[NKMCharacter] =
       toCells.characters
 
+    def whereExists(implicit gameState: GameState): Set[HexCoordinates] =
+      toCells.map(_.coordinates)
+
     def whereFriendsOf(characterId: CharacterId): Set[HexCoordinates] =
       toCells.friendsOf(characterId).map(_.parentCell.get.coordinates)
 

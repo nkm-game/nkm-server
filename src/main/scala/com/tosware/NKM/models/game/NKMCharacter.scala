@@ -72,8 +72,8 @@ case class NKMCharacter
     if(parentCell.isEmpty) return Set.empty
     val parentCoordinates = parentCell.get.coordinates
     state.attackType match {
-      case AttackType.Melee => parentCoordinates.getLines(HexDirection.values.toSet, state.basicAttackRange) // TODO: stop at walls and characters
-      case AttackType.Ranged => parentCoordinates.getLines(HexDirection.values.toSet, state.basicAttackRange)
+      case AttackType.Melee => parentCoordinates.getLines(HexDirection.values.toSet, state.basicAttackRange).whereExists // TODO: stop at walls and characters
+      case AttackType.Ranged => parentCoordinates.getLines(HexDirection.values.toSet, state.basicAttackRange).whereExists
     }
   }
 

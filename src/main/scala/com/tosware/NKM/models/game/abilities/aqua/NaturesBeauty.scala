@@ -11,7 +11,7 @@ object NaturesBeauty {
     AbilityMetadata(
       name = "Nature's Beauty",
       abilityType = AbilityType.Passive,
-      description = "* Character * can use basic attacks on allies, healing them instead of dealing damage.",
+      description = "*Character* can use basic attacks on allies, healing them instead of dealing damage.",
     )
 }
 
@@ -24,7 +24,7 @@ case class NaturesBeauty(parentCharacterId: CharacterId) extends Ability with Ba
     rangeCellCoords.whereFriendsOf(parentCharacterId)
   override def basicAttackCells(implicit gameState: GameState) = parentCharacter.defaultBasicAttackCells
   override def basicAttackTargets(implicit gameState: GameState) = parentCharacter.basicAttackTargets
-  override def basicAttack(targetCharacterId: CharacterId)(implicit gameState: GameState) =
+  override def basicAttack(targetCharacterId: CharacterId)(implicit gameState: GameState) = {
     gameState.modify(_.players.each.characters.each).using {
       case character if character.id == targetCharacterId =>
         if(character.isFriendFor(parentCharacterId)) {
@@ -34,4 +34,5 @@ case class NaturesBeauty(parentCharacterId: CharacterId) extends Ability with Ba
         }
       case character => character
     }
+  }
 }

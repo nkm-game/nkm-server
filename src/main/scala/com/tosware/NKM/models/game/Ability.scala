@@ -25,6 +25,7 @@ case class AbilityMetadata
   abilityType: AbilityType,
   description: String,
   cooldown: Int = 0,
+  range: Int = 0,
 ) {
   val id: AbilityMetadataId = name
 }
@@ -33,13 +34,20 @@ case class AbilityState
 (
   parentCharacterId: CharacterId,
   cooldown: Int = 0,
-  parentCanAttackAllies: Boolean = false,
 )
 
 trait BasicAttackOverride {
   def basicAttackCells(implicit gameState: GameState): Set[HexCoordinates]
   def basicAttackTargets(implicit gameState: GameState): Set[HexCoordinates]
   def basicAttack(targetCharacterId: CharacterId)(implicit gameState: GameState): GameState
+}
+
+trait UsableOnCoordinates {
+  def use(target: HexCoordinates)(implicit gameState: GameState): GameState
+}
+
+trait UsableOnCharacter {
+  def use(target: CharacterId)(implicit gameState: GameState): GameState
 }
 
 trait Ability {
@@ -52,4 +60,6 @@ trait Ability {
   def use(targetIds: Seq[String])(implicit gameState: GameState): GameState = gameState
   def parentCharacter(implicit gameState: GameState): NKMCharacter =
     gameState.characters.find(_.state.abilities.map(_.id).contains(id)).get
+  def parentCell(implicit gameState: GameState): Option[HexCell] =
+    parentCharacter.parentCell
 }

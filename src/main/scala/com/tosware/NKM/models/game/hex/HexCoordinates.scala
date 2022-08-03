@@ -1,4 +1,5 @@
 package com.tosware.NKM.models.game.hex
+import math._
 
 case class HexCoordinates(x: Int, z: Int) {
   def y: Int = -x - z
@@ -21,6 +22,18 @@ case class HexCoordinates(x: Int, z: Int) {
 
   def getLines(directions: Set[HexDirection], size: Int): Set[HexCoordinates] =
     directions.flatMap(d => getLine(d, size))
+
+  def getCircle(size: Int): Set[HexCoordinates] =
+    if(size < 0) Set.empty
+    else if(size == 0) Set(this)
+    else {
+      // https: //www.redblobgames.com/grids/hexagons/#range-coordinate
+      val result = for {
+        x <- -size to size
+        z <- max(-size, -x-size) to min(size, -x+size)
+      } yield HexCoordinates(x, z)
+      result.toSet
+    }
 
   def toTuple: (Int, Int) = (x, z)
 
