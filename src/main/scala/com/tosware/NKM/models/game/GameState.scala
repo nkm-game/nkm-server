@@ -255,11 +255,14 @@ case class GameState(id: String,
   def setMap(hexMap: HexMap): GameState =
     copy(hexMap = Some(hexMap))
 
-  def addEffect(characterId: CharacterId, characterEffect: CharacterEffect): GameState =
+  def updateCharacter(characterId: CharacterId, updateFunction: NKMCharacter => NKMCharacter): GameState =
     this.modify(_.players.each.characters.each).using {
-      case character if character.id == characterId => character.addEffect(characterEffect)
+      case character if character.id == characterId => updateFunction(character)
       case character => character
     }
+
+  def addEffect(characterId: CharacterId, characterEffect: CharacterEffect): GameState =
+    updateCharacter(characterId, c => c.addEffect(characterEffect))
 
   def removeCharacterFromMap(characterId: CharacterId): GameState = {
     this.modify(_.hexMap.each.cells.each).using {

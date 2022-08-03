@@ -26,14 +26,11 @@ case class Purification(parentCharacterId: CharacterId) extends Ability with Usa
   override def targetsInRange(implicit gameState: GameState) =
     rangeCellCoords.whereFriendsOf(parentCharacterId)
 
-  override def use(target: CharacterId)(implicit gameState: GameState) =
-    gameState.modify(_.players.each.characters.each).using {
-      case character if character.id == target =>
-        gameState.characterById(target).get
-          .modify(_.state.effects)
-          .using(_.filterNot(_.metadata.effectType == CharacterEffectType.Negative))
-      case character => character
-    }
+  override def use(target: CharacterId, useData: UseData)(implicit gameState: GameState) =
+    gameState.updateCharacter(target, c => {
+      c.modify(_.state.effects)
+        .using(_.filterNot(_.metadata.effectType == CharacterEffectType.Negative))
+    })
 
 
   // TODO: add validator that character is on map, target has negative effects

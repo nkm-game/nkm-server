@@ -24,15 +24,9 @@ case class NaturesBeauty(parentCharacterId: CharacterId) extends Ability with Ba
     rangeCellCoords.whereFriendsOf(parentCharacterId)
   override def basicAttackCells(implicit gameState: GameState) = parentCharacter.defaultBasicAttackCells
   override def basicAttackTargets(implicit gameState: GameState) = parentCharacter.basicAttackTargets
-  override def basicAttack(targetCharacterId: CharacterId)(implicit gameState: GameState) = {
-    gameState.modify(_.players.each.characters.each).using {
-      case character if character.id == targetCharacterId =>
-        if(character.isFriendFor(parentCharacterId)) {
-          character.heal(parentCharacter.state.attackPoints)
-        } else {
-          character.receiveDamage(Damage(id, DamageType.Physical, parentCharacter.state.attackPoints))
-        }
-      case character => character
-    }
-  }
+  override def basicAttack(targetCharacterId: CharacterId)(implicit gameState: GameState) =
+    if(gameState.characterById(targetCharacterId).get.isFriendFor(parentCharacterId)) {
+      gameState.updateCharacter(targetCharacterId, c => c.heal(parentCharacter.state.attackPoints))
+    } else parentCharacter.defaultBasicAttack(targetCharacterId)
+
 }

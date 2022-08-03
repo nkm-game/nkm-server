@@ -1,6 +1,8 @@
 package com.tosware.NKM.models.game.hex
 
+import com.tosware.NKM.models.game.GameState
 import com.tosware.NKM.models.game.NKMCharacter.CharacterId
+import com.tosware.NKM.models.game.Player.PlayerId
 
 object HexMap {
   def empty(): HexMap = HexMap("Empty HexMap", Set.empty)
@@ -12,6 +14,9 @@ case class HexMap(name: String, cells: Set[HexCell]) {
   def getSpawnPoints: Set[HexCell] = cells.filter(c => c.cellType == HexCellType.SpawnPoint)
 
   def getSpawnPointsByNumber(n: Int): Set[HexCell] = getSpawnPoints.filter(_.spawnNumber.forall(_ == n))
+
+  def getSpawnPointsFor(playerId: PlayerId)(implicit gameState: GameState): Set[HexCell] =
+    getSpawnPointsByNumber(gameState.playerNumber(playerId))
 
   def maxNumberOfCharacters: Int = getSpawnPoints.map(_.spawnNumber.get).size
 

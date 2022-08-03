@@ -39,6 +39,9 @@ object HexUtils {
     def whereExists(implicit gameState: GameState): Set[HexCoordinates] =
       toCells.map(_.coordinates)
 
+    def whereEmpty: Set[HexCoordinates] =
+      toCells.whereEmpty.map(_.coordinates)
+
     def whereFriendsOf(characterId: CharacterId): Set[HexCoordinates] =
       toCells.friendsOf(characterId).map(_.parentCell.get.coordinates)
 
@@ -62,6 +65,9 @@ object HexUtils {
 
     def characters: Set[NKMCharacter] =
       characterIds.toCharacters
+
+    def whereEmpty: Set[HexCell] =
+      cells.filter(_.isEmpty)
 
     def friendsOf(characterId: CharacterId): Set[NKMCharacter] =
       characters.filter(_.isFriendFor(characterId))

@@ -81,11 +81,7 @@ case class NKMCharacter
     basicAttackCellCoords.whereEnemiesOf(id)
 
   def defaultBasicAttack(targetCharacterId: CharacterId)(implicit gameState: GameState): GameState =
-    gameState.modify(_.players.each.characters.each).using {
-      case character if character.id == targetCharacterId =>
-        character.receiveDamage(Damage(id, DamageType.Physical, state.attackPoints))
-      case character => character
-    }
+    gameState.updateCharacter(targetCharacterId, c => c.receiveDamage(Damage(id, DamageType.Physical, state.attackPoints)))
 
   def heal(amount: Int): NKMCharacter =
     this.modify(_.state.healthPoints).using(oldHp => math.min(oldHp + amount, state.maxHealthPoints))

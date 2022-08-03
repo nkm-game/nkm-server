@@ -36,6 +36,9 @@ case class AbilityState
   cooldown: Int = 0,
 )
 
+
+case class UseData(data: String = "")
+
 trait BasicAttackOverride {
   def basicAttackCells(implicit gameState: GameState): Set[HexCoordinates]
   def basicAttackTargets(implicit gameState: GameState): Set[HexCoordinates]
@@ -43,11 +46,11 @@ trait BasicAttackOverride {
 }
 
 trait UsableOnCoordinates {
-  def use(target: HexCoordinates)(implicit gameState: GameState): GameState
+  def use(target: HexCoordinates, useData: UseData = UseData())(implicit gameState: GameState): GameState
 }
 
 trait UsableOnCharacter {
-  def use(target: CharacterId)(implicit gameState: GameState): GameState
+  def use(target: CharacterId, useData: UseData = UseData())(implicit gameState: GameState): GameState
 }
 
 trait Ability {
