@@ -1,6 +1,7 @@
 package com.tosware.NKM.models.game
 
 import com.softwaremill.quicklens._
+import com.tosware.NKM.models.game.Ability.AbilityId
 import com.tosware.NKM.models.game.NKMCharacter.CharacterId
 import com.tosware.NKM.models.game.CharacterMetadata.CharacterMetadataId
 import com.tosware.NKM.models.game.Player.PlayerId
@@ -45,7 +46,11 @@ case class GameState(id: String,
 
   def characters: Set[NKMCharacter] = players.flatMap(_.characters).toSet
 
+  def abilities: Set[Ability] = characters.flatMap(_.state.abilities)
+
   def characterById(characterId: CharacterId): Option[NKMCharacter] = characters.find(_.id == characterId)
+
+  def abilityById(abilityId: AbilityId): Option[Ability] = abilities.find(_.id == abilityId)
 
   def characterPickFinished: Boolean =  {
     val draftPickFinished = draftPickState.fold(false)(_.pickPhase == DraftPickPhase.Finished)
@@ -270,6 +275,22 @@ case class GameState(id: String,
   }
 
   def takeActionWithCharacter(characterId: CharacterId): GameState = this.modify(_.characterTakingActionThisTurn).setTo(Some(characterId))
+
+  def useAbilityOnCoordinates(abilityId: AbilityId, target: HexCoordinates, useData: UseData = UseData()): GameState = {
+    val ability = abilityById(abilityId).get.asInstanceOf[Ability with UsableOnCoordinates]
+    val parentCharacter = ability.parentCharacter(this)
+
+    val newGameState = takeActionWithCharacter(parentCharacter.id)
+    ability.use(target, useData)(newGameState)
+  }
+
+  def useAbilityOnCharacter(abilityId: AbilityId, target: CharacterId, useData: UseData = UseData()): GameState = {
+    val ability = abilityById(abilityId).get.asInstanceOf[Ability with UsableOnCharacter]
+    val parentCharacter = ability.parentCharacter(this)
+
+    val newGameState = takeActionWithCharacter(parentCharacter.id)
+    ability.use(target, useData)(newGameState)
+  }
 
   def endTurn(): GameState =
     this.modify(_.characterIdsThatTookActionThisPhase).using(c => c + characterTakingActionThisTurn.get)
