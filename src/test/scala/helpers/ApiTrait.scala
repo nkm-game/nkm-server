@@ -4,12 +4,11 @@ import akka.actor.ActorSystem
 import akka.http.scaladsl.testkit.{RouteTestTimeout, ScalatestRouteTest}
 import com.tosware.NKM.NKMDependencies
 import com.tosware.NKM.services.http.HttpService
-import org.slf4j.{Logger, LoggerFactory}
 
 import scala.concurrent.duration.DurationInt
 
 trait ApiTrait
-    extends NKMTestTrait
+    extends NKMIntegrationTestTrait
       with ScalatestRouteTest
   {
     private var _depsOption: Option[NKMDependencies] = None

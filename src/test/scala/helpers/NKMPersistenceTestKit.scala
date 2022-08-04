@@ -9,7 +9,7 @@ import scala.concurrent.duration._
 import scala.language.postfixOps
 
 class NKMPersistenceTestKit (_system: ActorSystem) extends TestKit(_system)
-  with NKMTestTrait
+  with NKMIntegrationTestTrait
   with ImplicitSender
   with AnyWordSpecLike
 {

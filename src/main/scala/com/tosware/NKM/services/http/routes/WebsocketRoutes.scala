@@ -6,15 +6,14 @@ import akka.http.scaladsl.model.ws.{Message, TextMessage}
 import akka.http.scaladsl.server.Directives._
 import akka.stream.OverflowStrategy
 import akka.stream.scaladsl.{Flow, Sink, Source}
-import com.tosware.NKM.NKMDependencies
+import com.tosware.NKM.{Logging, NKMDependencies}
 import com.tosware.NKM.actors.ws._
 import com.tosware.NKM.services.http.directives.{JwtDirective, JwtSecretKey}
 import com.tosware.NKM.services.{GameService, LobbyService}
 import org.slf4j.{Logger, LoggerFactory}
 
-class WebsocketRoutes(deps: NKMDependencies) extends JwtDirective
+class WebsocketRoutes(deps: NKMDependencies) extends JwtDirective with Logging
 {
-  val logger: Logger = LoggerFactory.getLogger(getClass)
   implicit val jwtSecretKey: JwtSecretKey = deps.jwtSecretKey
   implicit val system: ActorSystem = deps.system
   implicit val lobbyService: LobbyService = deps.lobbyService

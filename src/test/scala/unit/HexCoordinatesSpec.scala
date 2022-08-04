@@ -1,17 +1,18 @@
 package unit
 
+import com.tosware.NKM.Logging
 import com.tosware.NKM.models.game.hex.HexUtils.{CoordinateSeq, CoordinateSet}
 import com.tosware.NKM.models.game.hex.{HexCoordinates, HexDirection}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
-import org.slf4j.{Logger, LoggerFactory}
-import math._
 
+import math._
 
 class HexCoordinatesSpec
   extends AnyWordSpecLike
-    with Matchers {
-  val logger: Logger = LoggerFactory.getLogger(getClass)
+    with Matchers
+    with Logging
+{
   "HexCoordinates" must {
     "calculate correct neighbours" in {
       HexCoordinates(0, 0).getNeighbour(HexDirection.W) should be (HexCoordinates(-1, 0))

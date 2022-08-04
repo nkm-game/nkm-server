@@ -1,4 +1,4 @@
-package actors
+package integration.actors
 
 import akka.actor.{ActorRef, ActorSystem}
 import akka.pattern.ask

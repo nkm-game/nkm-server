@@ -1,16 +1,16 @@
 package unit
 
+import com.tosware.NKM.Logging
 import com.tosware.NKM.models.game.hex.HexCellType._
 import com.tosware.NKM.models.game.hex.{HexMap, HexUtils}
-import com.tosware.NKM.providers.HexMapProvider
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
-import org.slf4j.{Logger, LoggerFactory}
 
 class HexMapSpec
   extends AnyWordSpecLike
-    with Matchers {
-  val logger: Logger = LoggerFactory.getLogger(getClass)
+    with Matchers
+    with Logging
+{
   "HexMap" must {
     "display text Ui in test map" in {
       val hexParams: Set[Any] = Set(

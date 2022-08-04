@@ -3,7 +3,7 @@ package com.tosware.NKM.services.http.routes
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
-import com.tosware.NKM.NKMDependencies
+import com.tosware.NKM.{Logging, NKMDependencies}
 import com.tosware.NKM.actors.User.{RegisterFailure, RegisterSuccess}
 import com.tosware.NKM.models.{Credentials, RegisterRequest}
 import com.tosware.NKM.services.UserService
@@ -11,12 +11,13 @@ import com.tosware.NKM.services.UserService.{InvalidCredentials, LoggedIn}
 import com.tosware.NKM.services.http.directives.{JwtDirective, JwtSecretKey}
 import org.slf4j.{Logger, LoggerFactory}
 
-class AuthRoutes(deps: NKMDependencies) extends JwtDirective
+class AuthRoutes(deps: NKMDependencies)
+  extends JwtDirective
     with SprayJsonSupport
+    with Logging
 {
   val jwtSecretKey: JwtSecretKey = deps.jwtSecretKey
   val userService: UserService = deps.userService
-  val logger: Logger = LoggerFactory.getLogger(getClass)
 
   val authPostRoutes = concat(
     path("register") {

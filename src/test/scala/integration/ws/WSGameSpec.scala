@@ -5,7 +5,7 @@ import com.tosware.NKM.models.game.blindpick.BlindPickPhase
 import com.tosware.NKM.models.game.draftpick.DraftPickPhase
 import com.tosware.NKM.models.game.hex.{HexCellType, HexCoordinates, HexUtils}
 import com.tosware.NKM.models.game.ws._
-import com.tosware.NKM.models.game.{ClockConfig, GameStatus, NKMCharacter, CharacterMetadata, NKMCharacterView, PickType, VictoryStatus}
+import com.tosware.NKM.models.game._
 import helpers.WSTrait
 
 class WSGameSpec extends WSTrait {
@@ -381,7 +381,7 @@ class WSGameSpec extends WSTrait {
       withGameWS {
         auth(0)
 
-        Thread.sleep(maxPickTimeMillis)
+        Thread.sleep(150)
 
         {
           val gameState = fetchAndParseGame(lobbyId)
@@ -410,7 +410,7 @@ class WSGameSpec extends WSTrait {
         auth(2)
         blindPick(lobbyId, availableCharacters.take(numberOfCharacters).toSet)
 
-        Thread.sleep(maxPickTimeMillis)
+        Thread.sleep(500)
 
         {
           val gameState = fetchAndParseGame(lobbyId)

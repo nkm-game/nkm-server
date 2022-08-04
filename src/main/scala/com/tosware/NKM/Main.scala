@@ -1,34 +1,45 @@
 package com.tosware.NKM
 
-import akka.actor.{ActorRef, ActorSystem}
+import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
-import com.tosware.NKM.actors.{GamesManager, LobbiesManager}
-import com.tosware.NKM.services._
 import com.tosware.NKM.services.http.HttpService
-import com.tosware.NKM.services.http.directives.JwtSecretKey
 import com.typesafe.config.{Config, ConfigFactory}
-import org.slf4j.{Logger, LoggerFactory}
 import slick.jdbc.JdbcBackend
 import slick.jdbc.JdbcBackend.Database
 
+import scala.annotation.tailrec
 import scala.language.postfixOps
 
-object Main extends App {
+object Main extends App with Logging {
   val db: JdbcBackend.Database = Database.forConfig("slick.db")
   val port = sys.env.getOrElse("PORT", "8080").toInt
-  val logger: Logger = LoggerFactory.getLogger(getClass)
+
+  @tailrec
+  def initDb(lastDelay: Int = 0): Unit = {
+    try {
+      val config: Config = ConfigFactory.load()
+      val dbName = config.getString("slick.db.dbName")
+      DBManager.createDbIfNotExists(dbName)
+      DBManager.createNeededTables(db)
+    } catch {
+      case e: Throwable =>
+        if(lastDelay > 60) {
+          e.printStackTrace()
+          System.exit(1)
+        }
+        logger.error(s"Initializing database failed, retrying in ${lastDelay + 1} seconds...")
+        Thread.sleep((lastDelay + 1) * 1000)
+        initDb(lastDelay + 1)
+    }
+  }
+
+  initDb()
+
+  implicit val system: ActorSystem = ActorSystem("NKMServer")
+  val deps = new NKMDependencies(system, db)
+  val httpService = new HttpService(deps)
 
   try {
-    val config: Config = ConfigFactory.load()
-    val dbName = config.getString("slick.db.dbName")
-    DBManager.createDbIfNotExists(dbName)
-    DBManager.createNeededTables(db)
-
-    implicit val system: ActorSystem = ActorSystem("NKMServer")
-
-    val deps = new NKMDependencies(system, db)
-    val httpService = new HttpService(deps)
-
     Http().newServerAt("0.0.0.0", port).bind(httpService.routes)
     logger.info("Started http server")
   } catch {

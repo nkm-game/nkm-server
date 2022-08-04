@@ -1,7 +1,6 @@
 package com.tosware.NKM.models.game
 
 import com.softwaremill.quicklens._
-import com.tosware.NKM.models.{Damage, DamageType}
 import com.tosware.NKM.models.game.NKMCharacter.CharacterId
 import com.tosware.NKM.models.game.CharacterMetadata.CharacterMetadataId
 import com.tosware.NKM.models.game.Player.PlayerId

@@ -2,60 +2,20 @@ package unit.validators
 
 import com.tosware.NKM.models.CommandResponse._
 import com.tosware.NKM.models.GameStateValidator
-import com.tosware.NKM.models.game.PickType.BlindPick
-import com.tosware.NKM.models.game.Player.PlayerId
 import com.tosware.NKM.models.game._
 import com.tosware.NKM.models.game.effects._
 import com.tosware.NKM.models.game.hex.HexCoordinates
 import com.tosware.NKM.models.game.hex.HexUtils.CoordinateSeq
-import com.tosware.NKM.providers.HexMapProvider
 import com.tosware.NKM.providers.HexMapProvider.TestHexMapName
+import helpers.TestUtils
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
-import org.slf4j.{Logger, LoggerFactory}
-
-import scala.util.Random
 
 class GameStateValidatorSpec
   extends AnyWordSpecLike
-    with Matchers {
-  implicit val random: Random = new Random()
-  val logger: Logger = LoggerFactory.getLogger(getClass)
-
-  def getTestGameState(testHexMapName: TestHexMapName, characterMetadatass: Seq[Seq[CharacterMetadata]]): GameState = {
-    val playerIds: Seq[PlayerId] = characterMetadatass.indices map(p => s"p$p")
-    val hexMap = HexMapProvider().getTestHexMaps.find(_.name == testHexMapName.toString).get
-
-    logger.info(hexMap.toTextUi)
-
-    val gameStateDeps = GameStartDependencies(
-      players = playerIds.map(n => Player(n)),
-      hexMap = hexMap,
-      pickType = BlindPick,
-      numberOfBansPerPlayer = 0,
-      numberOfCharactersPerPlayer = characterMetadatass.head.size,
-      charactersMetadata = characterMetadatass.flatten.toSet,
-      clockConfig = ClockConfig.empty()
-    )
-    val playersWithMetadatas = (playerIds zip characterMetadatass).toMap
-
-    val startedGameState: GameState = GameState.empty("test").startGame(gameStateDeps)
-    val placingGameState: GameState = playersWithMetadatas.foldLeft(startedGameState){
-      case (acc, (playerId, characterMetadatas)) => acc.blindPick(playerId, characterMetadatas.map(_.id).toSet)
-    }.startPlacingCharacters()
-
-    val playersWithCharacters = placingGameState.players.map(p => p.id -> p.characters.map(_.id)).toMap
-
-    val runningGameState = playersWithCharacters.foldLeft(placingGameState){
-      case (acc, (playerId, characters)) =>
-        val spawnPoints = placingGameState.hexMap.get.getSpawnPointsFor(playerId)(placingGameState)
-        val spawnsWithCharacters = spawnPoints.map(_.coordinates) zip characters
-        acc.placeCharacters(playerId, spawnsWithCharacters.toMap)
-    }
-
-    runningGameState
-  }
-
+    with Matchers
+    with TestUtils
+    {
   val metadata = CharacterMetadata.empty().copy(initialSpeed = 3, initialBasicAttackRange = 1)
   val gameState = getTestGameState(TestHexMapName.Simple2v2, Seq(
     Seq(metadata.copy(name = "Empty1"), metadata.copy(name = "Empty2")),
