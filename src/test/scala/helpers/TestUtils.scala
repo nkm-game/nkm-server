@@ -1,18 +1,33 @@
 package helpers
 
 import com.tosware.NKM.Logging
+import com.tosware.NKM.models.CommandResponse.{CommandResponse, Failure, Success}
 import com.tosware.NKM.models.game.PickType.BlindPick
 import com.tosware.NKM.models.game.Player.PlayerId
 import com.tosware.NKM.models.game._
 import com.tosware.NKM.providers.HexMapProvider
 import com.tosware.NKM.providers.HexMapProvider.TestHexMapName
+import org.scalatest.Assertions.fail
 
 import scala.util.Random
 
 trait TestUtils extends Logging {
   implicit val random: Random = new Random()
 
-  def getTestGameState(testHexMapName: TestHexMapName, characterMetadatass: Seq[Seq[CharacterMetadata]]): GameState = {
+  protected def assertCommandSuccess(c: CommandResponse): Unit = c match {
+    case Success(_) =>
+    case Failure(m) =>
+      logger.error(m)
+      fail()
+  }
+
+  protected def assertCommandFailure(c: CommandResponse): Unit = c match {
+    case Success(_) => fail()
+    case Failure(m) => logger.info(m)
+  }
+
+
+  protected def getTestGameState(testHexMapName: TestHexMapName, characterMetadatass: Seq[Seq[CharacterMetadata]]): GameState = {
     val playerIds: Seq[PlayerId] = characterMetadatass.indices map(p => s"p$p")
     val hexMap = HexMapProvider().getTestHexMaps.find(_.name == testHexMapName.toString).get
 
@@ -42,7 +57,6 @@ trait TestUtils extends Logging {
         val spawnsWithCharacters = spawnPoints.map(_.coordinates) zip characters
         acc.placeCharacters(playerId, spawnsWithCharacters.toMap)
     }
-
     runningGameState
   }
 

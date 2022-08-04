@@ -54,13 +54,12 @@ trait UsableOnCharacter {
 }
 
 trait Ability {
-  def id: AbilityId = java.util.UUID.randomUUID.toString
-  def metadata: AbilityMetadata
-  def state: AbilityState
+  val id: AbilityId = java.util.UUID.randomUUID.toString
+  val metadata: AbilityMetadata
+  val state: AbilityState
   def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates]
   def targetsInRange(implicit gameState: GameState): Set[HexCoordinates]
   def canBeUsed(implicit gameState: GameState): Boolean = false
-  def use(targetIds: Seq[String])(implicit gameState: GameState): GameState = gameState
   def parentCharacter(implicit gameState: GameState): NKMCharacter =
     gameState.characters.find(_.state.abilities.map(_.id).contains(id)).get
   def parentCell(implicit gameState: GameState): Option[HexCell] =

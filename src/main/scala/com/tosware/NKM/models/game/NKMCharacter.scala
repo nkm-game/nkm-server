@@ -1,14 +1,27 @@
 package com.tosware.NKM.models.game
 
 import com.softwaremill.quicklens._
+import com.tosware.NKM.models.game.Ability.AbilityMetadataId
 import com.tosware.NKM.models.game.NKMCharacter._
 import com.tosware.NKM.models.game.CharacterMetadata.CharacterMetadataId
+import com.tosware.NKM.models.game.abilities.aqua.{NaturesBeauty, Purification, Resurrection}
 import com.tosware.NKM.models.game.hex.HexUtils._
 import com.tosware.NKM.models.game.hex._
 import com.tosware.NKM.models.{Damage, DamageType}
 
 object NKMCharacter {
   type CharacterId = String
+  def instantiateAbilities(characterId: CharacterId, metadataIds: Seq[AbilityMetadataId]): Seq[Ability] = {
+    metadataIds.map {
+      case NaturesBeauty.metadata.id =>
+        NaturesBeauty(characterId)
+      case Purification.metadata.id =>
+        Purification(characterId)
+      case Resurrection.metadata.id =>
+        Resurrection(characterId)
+    }
+  }
+
   def fromMetadata(characterId: CharacterId, metadata: CharacterMetadata) = {
     NKMCharacter(
       id = characterId,
@@ -23,6 +36,7 @@ object NKMCharacter {
         speed = metadata.initialSpeed,
         physicalDefense = metadata.initialPsychicalDefense,
         magicalDefense = metadata.initialMagicalDefense,
+        abilities = instantiateAbilities(characterId, metadata.initialAbilitiesMetadataIds)
       )
     )
   }
@@ -35,8 +49,8 @@ case class NKMCharacter
   state: NKMCharacterState,
 )
 {
-  val basicMoveImpairmentCcNames = Seq(CharacterEffectName.Stun, CharacterEffectName.Ground, CharacterEffectName.Snare)
-  val basicAttackImpairmentCcNames = Seq(CharacterEffectName.Stun, CharacterEffectName.Disarm)
+  private val basicMoveImpairmentCcNames = Seq(CharacterEffectName.Stun, CharacterEffectName.Ground, CharacterEffectName.Snare)
+  private val basicAttackImpairmentCcNames = Seq(CharacterEffectName.Stun, CharacterEffectName.Disarm)
 
   def canBasicMove: Boolean = !state.effects.exists(e => basicMoveImpairmentCcNames.contains(e.metadata.name))
 

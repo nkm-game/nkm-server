@@ -18,8 +18,8 @@ object Purification {
 }
 
 case class Purification(parentCharacterId: CharacterId) extends Ability with UsableOnCharacter {
-  override def metadata = Purification.metadata
-  override def state = AbilityState(parentCharacterId, metadata.cooldown)
+  override val metadata = Purification.metadata
+  override val state = AbilityState(parentCharacterId, metadata.cooldown)
   override def rangeCellCoords(implicit gameState: GameState) =
     parentCell.get.coordinates.getCircle(metadata.range).whereExists
 

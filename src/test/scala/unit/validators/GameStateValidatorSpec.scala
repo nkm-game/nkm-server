@@ -32,18 +32,6 @@ class GameStateValidatorSpec
 
   private val validator = GameStateValidator()(gameState)
 
-  private def assertCommandSuccess(c: CommandResponse): Unit = c match {
-    case Success(_) =>
-    case Failure(m) =>
-      logger.error(m)
-      fail()
-  }
-
-  private def assertCommandFailure(c: CommandResponse): Unit = c match {
-    case Success(_) => fail()
-    case Failure(m) => logger.info(m)
-  }
-
   "GameStateValidator" must {
     "validate moving characters and" when {
       "allow move within speed range" in {
