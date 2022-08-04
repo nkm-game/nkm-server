@@ -19,7 +19,7 @@ object HexMapProvider {
   object TestHexMapName extends Enum[TestHexMapName] {
     val values = findValues
 
-    case object Simple1v1 extends TestHexMapName
+    case object Simple2v2 extends TestHexMapName
   }
 
 }
@@ -77,7 +77,7 @@ case class HexMapProvider() extends NKMJsonProtocol {
       (4, -1, Wall),
     )
     Seq(
-      HexMap(TestHexMapName.Simple1v1.toString, HexUtils.hexCellParamsToCells(simple1v1HexParams)),
+      HexMap(TestHexMapName.Simple2v2.toString, HexUtils.hexCellParamsToCells(simple1v1HexParams)),
     )
   }
 }
