@@ -52,6 +52,8 @@ case class NKMCharacter
   private val basicMoveImpairmentCcNames = Seq(CharacterEffectName.Stun, CharacterEffectName.Ground, CharacterEffectName.Snare)
   private val basicAttackImpairmentCcNames = Seq(CharacterEffectName.Stun, CharacterEffectName.Disarm)
 
+  def isDead: Boolean = state.healthPoints <= 0
+
   def canBasicMove: Boolean = !state.effects.exists(e => basicMoveImpairmentCcNames.contains(e.metadata.name))
 
   def canBasicAttack: Boolean = !state.effects.exists(e => basicAttackImpairmentCcNames.contains(e.metadata.name))
@@ -61,6 +63,9 @@ case class NKMCharacter
 
   def owner(implicit gameState: GameState): Player =
     gameState.players.find(_.characterIds.contains(id)).get
+
+  def isOnMap(implicit gameState: GameState): Boolean =
+    !gameState.characterIdsOutsideMap.contains(id)
 
   def isEnemyFor(characterId: CharacterId)(implicit gameState: GameState): Boolean =
     gameState.characterById(characterId).get.owner != owner
@@ -95,7 +100,7 @@ case class NKMCharacter
     basicAttackCellCoords.whereEnemiesOf(id)
 
   def defaultBasicAttack(targetCharacterId: CharacterId)(implicit gameState: GameState): GameState =
-    gameState.updateCharacter(targetCharacterId, c => c.receiveDamage(Damage(id, DamageType.Physical, state.attackPoints)))
+    gameState.updateCharacter(targetCharacterId)(_.receiveDamage(Damage(id, DamageType.Physical, state.attackPoints)))
 
   def heal(amount: Int): NKMCharacter =
     this.modify(_.state.healthPoints).using(oldHp => math.min(oldHp + amount, state.maxHealthPoints))

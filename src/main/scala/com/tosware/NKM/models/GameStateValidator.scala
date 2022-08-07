@@ -1,6 +1,7 @@
 package com.tosware.NKM.models
 
 import com.tosware.NKM.models.CommandResponse._
+import com.tosware.NKM.models.game.Ability.AbilityId
 import com.tosware.NKM.models.game.NKMCharacter.CharacterId
 import com.tosware.NKM.models.game.CharacterMetadata.CharacterMetadataId
 import com.tosware.NKM.models.game.Player.PlayerId
@@ -10,7 +11,13 @@ import com.tosware.NKM.models.game.hex.HexUtils._
 
 case class GameStateValidator()(implicit gameState: GameState) {
   private def playerInGame(playerId: PlayerId) =
-    gameState.players.exists(_.name == playerId)
+    gameState.players.exists(_.id == playerId)
+
+  private def characterInGame(characterId: CharacterId) =
+    gameState.characters.exists(_.id == characterId)
+
+  private def abilityInGame(abilityId: AbilityId) =
+    gameState.abilities.exists(_.id == abilityId)
 
   private def playerIsHost(playerId: PlayerId) =
     gameState.host.name == playerId
@@ -47,7 +54,9 @@ case class GameStateValidator()(implicit gameState: GameState) {
     val playerNotHost = "Player is not a host."
     val gameStarted = "Game is started."
     val gameNotStarted = "Game is not started."
-    val playerNotInGame = "This player is not in the game."
+    val playerNotInGame = "Player is not in the game."
+    val characterNotInGame = "This character is not in the game."
+    val abilityNotInGame = "This ability is not in the game."
     val playerFinishedGame = "This player already finished the game."
     val gameNotInCharacterPick = "Game is not in character pick phase."
     val gameNotInCharacterPlacing = "Game is not in character placing phase."
@@ -117,6 +126,7 @@ case class GameStateValidator()(implicit gameState: GameState) {
 
   def validateBasicMoveCharacter(playerId: PlayerId, path: Seq[HexCoordinates], characterId: CharacterId): CommandResponse = {
     if (!playerInGame(playerId)) Failure(Message.playerNotInGame)
+    else if (!characterInGame(characterId)) Failure(Message.characterNotInGame)
     else if (gameStatusIs(GameStatus.NotStarted)) Failure(Message.gameNotStarted)
     else if (gameState.currentPlayer.id != playerId) Failure(Message.notYourTurn)
     else if (path.size < 2) Failure("Empty moves are disallowed.")
@@ -140,6 +150,7 @@ case class GameStateValidator()(implicit gameState: GameState) {
 
   def validateBasicAttackCharacter(playerId: PlayerId, characterId: CharacterId, targetCharacterId: CharacterId): CommandResponse = {
     if (!playerInGame(playerId)) Failure(Message.playerNotInGame)
+    else if (!characterInGame(characterId)) Failure(Message.characterNotInGame)
     else if (gameStatusIs(GameStatus.NotStarted)) Failure(Message.gameNotStarted)
     else if (gameState.currentPlayer.id != playerId) Failure(Message.notYourTurn)
     else {
@@ -157,4 +168,31 @@ case class GameStateValidator()(implicit gameState: GameState) {
     }
   }
 
+  def validateAbilityUseOnCharacter(playerId: PlayerId, abilityId: AbilityId, target: CharacterId, useData: UseData): CommandResponse = {
+    if (!playerInGame(playerId)) Failure(Message.playerNotInGame)
+    else if (!abilityInGame(abilityId)) Failure(Message.abilityNotInGame)
+    else if (gameStatusIs(GameStatus.NotStarted)) Failure(Message.gameNotStarted)
+    else if (gameState.currentPlayer.id != playerId) Failure(Message.notYourTurn)
+    else {
+      val ability = gameState.abilityById(abilityId).get.asInstanceOf[Ability with UsableOnCharacter]
+      val character = ability.parentCharacter
+      if (!gameState.playerById(playerId).get.characterIds.contains(character.id)) Failure("You do not own this character.")
+      else if (gameState.characterTakingActionThisTurn.fold(false)(_ != character.id)) Failure("Other character already took action this turn.")
+      else ability.canBeUsed(target, useData, gameState)
+    }
+  }
+
+  def validateAbilityUseOnCoordinates(playerId: PlayerId, abilityId: AbilityId, target: HexCoordinates, useData: UseData): CommandResponse = {
+    if (!playerInGame(playerId)) Failure(Message.playerNotInGame)
+    else if (!abilityInGame(abilityId)) Failure(Message.abilityNotInGame)
+    else if (gameStatusIs(GameStatus.NotStarted)) Failure(Message.gameNotStarted)
+    else if (gameState.currentPlayer.id != playerId) Failure(Message.notYourTurn)
+    else {
+      val ability = gameState.abilityById(abilityId).get.asInstanceOf[Ability with UsableOnCoordinates]
+      val character = ability.parentCharacter
+      if (!gameState.playerById(playerId).get.characterIds.contains(character.id)) Failure("You do not own this character.")
+      else if (gameState.characterTakingActionThisTurn.fold(false)(_ != character.id)) Failure("Other character already took action this turn.")
+      else ability.canBeUsed(target, useData, gameState)
+    }
+  }
 }

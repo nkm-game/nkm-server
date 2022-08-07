@@ -1,6 +1,7 @@
 package com.tosware.NKM.models.game
 
 import com.softwaremill.quicklens._
+import com.tosware.NKM.models.{Damage, DamageType}
 import com.tosware.NKM.models.game.Ability.AbilityId
 import com.tosware.NKM.models.game.NKMCharacter.CharacterId
 import com.tosware.NKM.models.game.CharacterMetadata.CharacterMetadataId
@@ -232,40 +233,49 @@ case class GameState(id: String,
 
   def basicMoveCharacter(path: Seq[HexCoordinates], characterId: CharacterId): GameState = {
     val newGameState = takeActionWithCharacter(characterId)
-    path.tail.foldLeft(newGameState){case (acc, coordinate) => acc.moveCharacterSingle(coordinate, characterId)}
+    path.tail.foldLeft(newGameState){case (acc, coordinate) => acc.teleportCharacter(coordinate, characterId)}
   }
 
-  def moveCharacterSingle(parentCellCoordinates: HexCoordinates, characterId: CharacterId): GameState = {
+  def teleportCharacter(targetCellCoordinates: HexCoordinates, characterId: CharacterId): GameState = {
     val parentCell = hexMap.get.cells.find(_.characterId.contains(characterId)).getOrElse {
-      // case if character dies on the way?
+      // case if character dies on the way? make a test of this and create a new functions with while(onMap)
       // TODO      log.error(s"Unable to move character $characterId to $parentCellCoordinates")
       return this
     }
     this.modify(_.hexMap.each.cells.each).using {
       case cell if cell == parentCell => HexCell(cell.coordinates, cell.cellType, None, cell.effects, cell.spawnNumber)
-      case cell if cell.coordinates == parentCellCoordinates => HexCell(cell.coordinates, cell.cellType, Some(characterId), cell.effects, cell.spawnNumber)
+      case cell if cell.coordinates == targetCellCoordinates => HexCell(cell.coordinates, cell.cellType, Some(characterId), cell.effects, cell.spawnNumber)
       case cell => cell
     }
   }
 
-  def basicAttack(attackingCharacterId: CharacterId, targetCharacterId: CharacterId) = {
+
+  def basicAttack(attackingCharacterId: CharacterId, targetCharacterId: CharacterId): GameState = {
     val newGameState = takeActionWithCharacter(attackingCharacterId)
     val attackingCharacter = characterById(attackingCharacterId).get
 
     attackingCharacter.basicAttack(targetCharacterId)(newGameState)
   }
 
+  def systemDamage(targetCharacterId: CharacterId, damageType: DamageType, amount: Int): GameState =
+    updateCharacter(targetCharacterId)(_.receiveDamage(Damage("SYSTEM", damageType, amount)))
+
   def setMap(hexMap: HexMap): GameState =
     copy(hexMap = Some(hexMap))
 
-  def updateCharacter(characterId: CharacterId, updateFunction: NKMCharacter => NKMCharacter): GameState =
+  def removeFromMapIfDead(characterId: CharacterId): GameState =
+    if(characterById(characterId).get.isDead) {
+      removeCharacterFromMap(characterId)
+    } else this
+
+  def updateCharacter(characterId: CharacterId)(updateFunction: NKMCharacter => NKMCharacter): GameState =
     this.modify(_.players.each.characters.each).using {
       case character if character.id == characterId => updateFunction(character)
       case character => character
-    }
+    }.removeFromMapIfDead(characterId)
 
   def addEffect(characterId: CharacterId, characterEffect: CharacterEffect): GameState =
-    updateCharacter(characterId, c => c.addEffect(characterEffect))
+    updateCharacter(characterId)(_.addEffect(characterEffect))
 
   def removeCharacterFromMap(characterId: CharacterId): GameState = {
     this.modify(_.hexMap.each.cells.each).using {
@@ -292,18 +302,26 @@ case class GameState(id: String,
     ability.use(target, useData)(newGameState)
   }
 
+  def incrementTurn(): GameState =
+    this.modify(_.turn).using(oldTurn => Turn(oldTurn.number + 1))
+
   def endTurn(): GameState =
     this.modify(_.characterIdsThatTookActionThisPhase).using(c => c + characterTakingActionThisTurn.get)
       .modify(_.characterTakingActionThisTurn).setTo(None)
-      .modify(_.turn).using(oldTurn => Turn(oldTurn.number + 1))
+      .incrementTurn()
       .finishPhaseIfEveryCharacterTookAction()
 
   def passTurn(characterId: CharacterId): GameState =
     takeActionWithCharacter(characterId).endTurn()
 
-  def finishPhase(): GameState =
+  def refreshCharacterTakenActions(): GameState =
     this.modify(_.characterIdsThatTookActionThisPhase).setTo(Set.empty)
-      .modify(_.phase).using(oldPhase => Phase(oldPhase.number + 1))
+
+  def incrementPhase(by: Int = 1): GameState =
+    this.modify(_.phase).using(oldPhase => Phase(oldPhase.number + by))
+
+  def finishPhase(): GameState =
+    refreshCharacterTakenActions().incrementPhase()
 
   def finishPhaseIfEveryCharacterTookAction(): GameState =
     if(characterIdsThatTookActionThisPhase == characters.map(_.id))

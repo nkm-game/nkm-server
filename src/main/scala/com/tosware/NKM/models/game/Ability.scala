@@ -1,13 +1,16 @@
 package com.tosware.NKM.models.game
 
+import com.tosware.NKM.models.CommandResponse.{CommandResponse, Failure, Success}
 import com.tosware.NKM.models.game.Ability._
 import com.tosware.NKM.models.game.NKMCharacter.CharacterId
+import com.tosware.NKM.models.game.hex.HexUtils._
 import com.tosware.NKM.models.game.hex.{HexCell, HexCoordinates}
 import enumeratum._
 
 object Ability {
   type AbilityId = String
   type AbilityMetadataId = String
+  type UseCheck = (Boolean, String)
 }
 
 sealed trait AbilityType extends EnumEntry
@@ -45,12 +48,37 @@ trait BasicAttackOverride {
   def basicAttack(targetCharacterId: CharacterId)(implicit gameState: GameState): GameState
 }
 
-trait UsableOnCoordinates {
-  def use(target: HexCoordinates, useData: UseData = UseData())(implicit gameState: GameState): GameState
+trait Usable[T] { this: Ability =>
+  def use(target: T, useData: UseData = UseData())(implicit gameState: GameState): GameState
+  def useChecks(implicit target: T, useData: UseData, gameState: GameState): Set[UseCheck] =
+    Set(
+      UseCheck.NotOnCooldown,
+      UseCheck.ParentCharacterOnMap,
+    )
+
+  final def canBeUsed(implicit target: T, useData: UseData, gameState: GameState): CommandResponse = {
+    val failures = useChecks.filter(_._1 == false)
+    if(failures.isEmpty) Success()
+    else Failure(failures.map(_._2).mkString("\n"))
+  }
 }
 
-trait UsableOnCharacter {
-  def use(target: CharacterId, useData: UseData = UseData())(implicit gameState: GameState): GameState
+trait UsableOnCoordinates extends Usable[HexCoordinates] { this: Ability =>
+  override def useChecks(implicit target: HexCoordinates, useData: UseData, gameState: GameState): Set[UseCheck] = {
+    super.useChecks ++
+    Set(
+      UseCheck.TargetCoordsInRange,
+    )
+  }
+}
+
+trait UsableOnCharacter extends Usable[CharacterId] { this: Ability =>
+  override def useChecks(implicit target: CharacterId, useData: UseData, gameState: GameState): Set[UseCheck] = {
+    super.useChecks ++
+    Set(
+      UseCheck.TargetCharacterInRange,
+    )
+  }
 }
 
 trait Ability {
@@ -59,9 +87,28 @@ trait Ability {
   val state: AbilityState
   def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates]
   def targetsInRange(implicit gameState: GameState): Set[HexCoordinates]
-  def canBeUsed(implicit gameState: GameState): Boolean = false
   def parentCharacter(implicit gameState: GameState): NKMCharacter =
     gameState.characters.find(_.state.abilities.map(_.id).contains(id)).get
   def parentCell(implicit gameState: GameState): Option[HexCell] =
     parentCharacter.parentCell
+
+  object UseCheck {
+    def NotOnCooldown: UseCheck =
+      (state.cooldown <= 0) -> "Ability is on cooldown."
+    def ParentCharacterOnMap(implicit gameState: GameState): UseCheck =
+      parentCharacter.isOnMap -> "Parent character is not on map."
+    def TargetCharacterInRange(implicit target: CharacterId, useData: UseData, gameState: GameState): UseCheck =
+      targetsInRange.toCells.exists(_.characterId.contains(target)) -> "Target character is not in range."
+    def TargetIsEnemy(implicit target: CharacterId, useData: UseData, gameState: GameState): UseCheck =
+      gameState.characterById(target).get.isEnemyFor(parentCharacter.id) -> "Target character is not an enemy."
+    def TargetIsFriend(implicit target: CharacterId, useData: UseData, gameState: GameState): UseCheck =
+      gameState.characterById(target).get.isFriendFor(parentCharacter.id) -> "Target character is not a friend."
+    def TargetCoordsInRange(implicit target: HexCoordinates, useData: UseData, gameState: GameState): UseCheck =
+      Seq(target).toCells.nonEmpty -> "Target character is not in range."
+    def TargetIsFriendlySpawn(implicit target: HexCoordinates, useData: UseData, gameState: GameState): UseCheck =
+      gameState.hexMap.get.getSpawnPointsFor(parentCharacter.owner.id).toCoords.contains(target) -> "Target is not a friendly spawn."
+    def TargetIsFreeToStand(implicit target: HexCoordinates, useData: UseData, gameState: GameState): UseCheck = {
+      Seq(target).toCells.headOption.fold(false)(_.isFreeToStand) -> "Target is not free to stand."
+    }
+  }
 }

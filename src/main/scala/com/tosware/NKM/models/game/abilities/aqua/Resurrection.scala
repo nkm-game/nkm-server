@@ -20,7 +20,7 @@ case class ResurrectionUseData(characterId: CharacterId)
 
 case class Resurrection(parentCharacterId: CharacterId) extends Ability with UsableOnCoordinates {
   override val metadata = Resurrection.metadata
-  override val state = AbilityState(parentCharacterId, metadata.cooldown)
+  override val state = AbilityState(parentCharacterId)
   override def rangeCellCoords(implicit gameState: GameState) =
     gameState.hexMap.get.getSpawnPointsFor(parentCharacter.owner.id).map(_.coordinates)
 
@@ -29,9 +29,19 @@ case class Resurrection(parentCharacterId: CharacterId) extends Ability with Usa
 
   override def use(target: HexCoordinates, useData: UseData)(implicit gameState: GameState) = {
     val targetCharacterId = useData.data
-    gameState.updateCharacter(targetCharacterId, c => {
+    gameState.updateCharacter(targetCharacterId) { c =>
       c.modify(_.state.healthPoints).setTo(c.state.maxHealthPoints / 2)
-    }).placeCharacter(target, targetCharacterId)
+    }.placeCharacter(target, targetCharacterId)
   }
-  // TODO: add validator
+
+  override def useChecks(implicit target: HexCoordinates, useData: UseData, gameState: GameState): Set[(Boolean, CharacterId)] = {
+    val targetCharacter: NKMCharacter = gameState.characterById(useData.data).get
+
+    super.useChecks ++ Seq(
+      UseCheck.TargetIsFriendlySpawn,
+      UseCheck.TargetIsFriend(targetCharacter.id, useData, gameState),
+      UseCheck.TargetIsFreeToStand,
+      targetCharacter.isDead -> "Target character is not dead.",
+    )
+  }
 }

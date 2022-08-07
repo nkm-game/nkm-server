@@ -1,7 +1,7 @@
 package com.tosware.NKM.models.game.abilities.aqua
 
 import com.softwaremill.quicklens._
-import com.tosware.NKM.models.{Damage, DamageType}
+import com.tosware.NKM.models.game.Ability.UseCheck
 import com.tosware.NKM.models.game.NKMCharacter.CharacterId
 import com.tosware.NKM.models.game._
 import com.tosware.NKM.models.game.hex.HexUtils._
@@ -19,7 +19,7 @@ object Purification {
 
 case class Purification(parentCharacterId: CharacterId) extends Ability with UsableOnCharacter {
   override val metadata = Purification.metadata
-  override val state = AbilityState(parentCharacterId, metadata.cooldown)
+  override val state = AbilityState(parentCharacterId)
   override def rangeCellCoords(implicit gameState: GameState) =
     parentCell.get.coordinates.getCircle(metadata.range).whereExists
 
@@ -27,11 +27,18 @@ case class Purification(parentCharacterId: CharacterId) extends Ability with Usa
     rangeCellCoords.whereFriendsOf(parentCharacterId)
 
   override def use(target: CharacterId, useData: UseData)(implicit gameState: GameState) =
-    gameState.updateCharacter(target, c => {
-      c.modify(_.state.effects)
+    gameState.updateCharacter(target)(
+      _.modify(_.state.effects)
         .using(_.filterNot(_.metadata.effectType == CharacterEffectType.Negative))
-    })
+    )
 
+  override def useChecks(implicit target: CharacterId, useData: UseData, gameState: GameState): Set[UseCheck] = {
+    val targetCharacter: NKMCharacter = gameState.characterById(target).get
 
-  // TODO: add validator that character is on map, target has negative effects
+    super.useChecks ++ Seq(
+      UseCheck.TargetIsFriend,
+      targetCharacter.state.effects.exists(_.metadata.effectType == CharacterEffectType.Negative) ->
+        "Target character does not have any negative effects.",
+    )
+  }
 }

@@ -2,9 +2,11 @@ package helpers
 
 import com.tosware.NKM.Logging
 import com.tosware.NKM.models.CommandResponse.{CommandResponse, Failure, Success}
+import com.tosware.NKM.models.game.NKMCharacter.CharacterId
 import com.tosware.NKM.models.game.PickType.BlindPick
 import com.tosware.NKM.models.game.Player.PlayerId
 import com.tosware.NKM.models.game._
+import com.tosware.NKM.models.game.hex.HexCoordinates
 import com.tosware.NKM.providers.HexMapProvider
 import com.tosware.NKM.providers.HexMapProvider.TestHexMapName
 import org.scalatest.Assertions.fail
@@ -26,6 +28,11 @@ trait TestUtils extends Logging {
     case Failure(m) => logger.info(m)
   }
 
+  protected def characterIdOnPoint(hexCoordinates: HexCoordinates)(implicit gameState: GameState): CharacterId =
+    gameState.hexMap.get.getCell(hexCoordinates).get.characterId.get
+
+  protected def characterOnPoint(hexCoordinates: HexCoordinates)(implicit gameState: GameState): NKMCharacter =
+    gameState.characterById(characterIdOnPoint(hexCoordinates)).get
 
   protected def getTestGameState(testHexMapName: TestHexMapName, characterMetadatass: Seq[Seq[CharacterMetadata]]): GameState = {
     val playerIds: Seq[PlayerId] = characterMetadatass.indices map(p => s"p$p")
