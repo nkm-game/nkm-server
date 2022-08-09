@@ -1,6 +1,5 @@
 package com.tosware.NKM.models.lobby.ws
 
-import com.tosware.NKM.models.game.ClockConfig
 import enumeratum.values.{StringEnum, StringEnumEntry}
 
 sealed abstract class LobbyResponseType(val value: String) extends StringEnumEntry

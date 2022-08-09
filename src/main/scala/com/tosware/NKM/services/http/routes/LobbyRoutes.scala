@@ -1,7 +1,6 @@
 package com.tosware.NKM.services.http.routes
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
-import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import com.tosware.NKM.NKMDependencies
 import com.tosware.NKM.models.lobby.ws._

@@ -1,6 +1,6 @@
 package unit.abilities.aqua
 
-import com.tosware.NKM.models.{DamageType, GameStateValidator}
+import com.tosware.NKM.models.{Damage, DamageType, GameStateValidator}
 import com.tosware.NKM.models.game._
 import com.tosware.NKM.models.game.abilities.aqua.Resurrection
 import com.tosware.NKM.models.game.hex.HexCoordinates
@@ -35,7 +35,7 @@ class ResurrectionSpec
 
   Resurrection.metadata.name must {
     "be able to resurrect characters that died in the same phase" in {
-      val deadGameState = gameState.systemDamage(p0SecondCharacter.id, DamageType.True, 99999)
+      val deadGameState = gameState.damageCharacter(p0SecondCharacter.id, Damage(DamageType.True, 99999))(gameState.id)
 
       val r = GameStateValidator()(deadGameState)
         .validateAbilityUseOnCoordinates(p0FirstCharacter.owner.id, abilityId, p0SecondCharacterSpawnCoordinates, UseData(p0SecondCharacter.id))
@@ -48,7 +48,7 @@ class ResurrectionSpec
     }
 
     "be able to resurrect characters that died in phase before" in {
-      val deadGameState = gameState.systemDamage(p0SecondCharacter.id, DamageType.True, 99999).incrementPhase()
+      val deadGameState = gameState.damageCharacter(p0SecondCharacter.id, Damage(DamageType.True, 99999))(gameState.id).incrementPhase()
 
       val r = GameStateValidator()(deadGameState)
         .validateAbilityUseOnCoordinates(p0FirstCharacter.owner.id, abilityId, p0SecondCharacterSpawnCoordinates, UseData(p0SecondCharacter.id))
@@ -56,7 +56,7 @@ class ResurrectionSpec
     }
 
     "not be able to resurrect characters that died two phases ago" in {
-      val deadGameState = gameState.systemDamage(p0SecondCharacter.id, DamageType.True, 99999).incrementPhase(2)
+      val deadGameState = gameState.damageCharacter(p0SecondCharacter.id, Damage(DamageType.True, 99999))(gameState.id).incrementPhase(2)
 
       val r = GameStateValidator()(deadGameState)
         .validateAbilityUseOnCoordinates(p0FirstCharacter.owner.id, abilityId, p0SecondCharacterSpawnCoordinates, UseData(p0SecondCharacter.id))
@@ -65,8 +65,8 @@ class ResurrectionSpec
 
     "not be able to resurrect foreign characters" in {
       val deadGameState = gameState
-        .systemDamage(p1SecondCharacter.id, DamageType.True, 99999)
-        .removeCharacterFromMap(p0SecondCharacter.id)
+        .damageCharacter(p1SecondCharacter.id, Damage(DamageType.True, 99999))(gameState.id)
+        .removeCharacterFromMap(p0SecondCharacter.id)(gameState.id)
 
       val r = GameStateValidator()(deadGameState)
         .validateAbilityUseOnCoordinates(p0FirstCharacter.owner.id, abilityId, p1SecondCharacterSpawnCoordinates, UseData(p1SecondCharacter.id))
@@ -78,14 +78,16 @@ class ResurrectionSpec
     }
 
     "not be able to resurrect on foreign spawn" in {
-      val deadGameState = gameState.systemDamage(p0SecondCharacter.id, DamageType.True, 99999).removeCharacterFromMap(p1FirstCharacter.id)
+      val deadGameState = gameState
+        .damageCharacter(p0SecondCharacter.id, Damage(DamageType.True, 99999))(gameState.id)
+        .removeCharacterFromMap(p1FirstCharacter.id)(gameState.id)
 
       val r = GameStateValidator()(deadGameState)
         .validateAbilityUseOnCoordinates(p0FirstCharacter.owner.id, abilityId, p1FirstCharacterSpawnCoordinates, UseData(p0SecondCharacter.id))
       assertCommandFailure(r)
     }
     "not be able to resurrect on tiles that are not free to stand" in {
-      val deadGameState = gameState.systemDamage(p0SecondCharacter.id, DamageType.True, 99999)
+      val deadGameState = gameState.damageCharacter(p0SecondCharacter.id, Damage(DamageType.True, 99999))(gameState.id)
 
       val r = GameStateValidator()(deadGameState)
         .validateAbilityUseOnCoordinates(p0FirstCharacter.owner.id, abilityId, p0FirstCharacterSpawnCoordinates, UseData(p0SecondCharacter.id))
@@ -93,7 +95,7 @@ class ResurrectionSpec
     }
 
     "not be able to resurrect characters that are alive" in {
-      val aliveGameState = gameState.removeCharacterFromMap(p0SecondCharacter.id)
+      val aliveGameState = gameState.removeCharacterFromMap(p0SecondCharacter.id)(gameState.id)
 
       val r = GameStateValidator()(aliveGameState)
         .validateAbilityUseOnCoordinates(p0FirstCharacter.owner.id, abilityId, p0SecondCharacterSpawnCoordinates, UseData(p0SecondCharacter.id))

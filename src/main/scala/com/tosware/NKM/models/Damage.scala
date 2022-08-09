@@ -1,6 +1,5 @@
 package com.tosware.NKM.models
 
-import com.tosware.NKM.models.game.NKMCharacter.CharacterId
 import enumeratum.{Enum, EnumEntry}
 
 sealed trait DamageType extends EnumEntry
@@ -12,4 +11,4 @@ object DamageType extends Enum[DamageType] {
   case object True extends DamageType
 }
 
-case class Damage(sourceId: CharacterId, damageType: DamageType, amount: Int)
+case class Damage(damageType: DamageType, amount: Int)

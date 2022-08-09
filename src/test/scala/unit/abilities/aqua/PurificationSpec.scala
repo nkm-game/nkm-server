@@ -30,10 +30,10 @@ class PurificationSpec
   Purification.metadata.name must {
     "be able to remove negative effects" in {
       val effectGameState = gameState
-        .addEffect(p0SecondCharacter.id, DisarmEffect(5))
-        .addEffect(p0SecondCharacter.id, StunEffect(5))
-        .addEffect(p0SecondCharacter.id, GroundEffect(5))
-        .addEffect(p0SecondCharacter.id, SnareEffect(5))
+        .addEffect(p0SecondCharacter.id, DisarmEffect(5))(gameState.id)
+        .addEffect(p0SecondCharacter.id, StunEffect(5))(gameState.id)
+        .addEffect(p0SecondCharacter.id, GroundEffect(5))(gameState.id)
+        .addEffect(p0SecondCharacter.id, SnareEffect(5))(gameState.id)
 
       val abilityId = p0FirstCharacter.state.abilities.head.id
 

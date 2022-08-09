@@ -7,9 +7,6 @@ import com.tosware.NKM.actors.User._
 import com.tosware.NKM.models.UserState
 import helpers.NKMPersistenceTestKit
 
-import scala.concurrent.Await
-import scala.language.postfixOps
-
 
 class UserSpec extends NKMPersistenceTestKit(ActorSystem("UserSpec"))
 {

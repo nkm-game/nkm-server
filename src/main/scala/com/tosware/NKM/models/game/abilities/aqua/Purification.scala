@@ -1,6 +1,5 @@
 package com.tosware.NKM.models.game.abilities.aqua
 
-import com.softwaremill.quicklens._
 import com.tosware.NKM.models.game.Ability.UseCheck
 import com.tosware.NKM.models.game.NKMCharacter.CharacterId
 import com.tosware.NKM.models.game._
@@ -26,11 +25,12 @@ case class Purification(parentCharacterId: CharacterId) extends Ability with Usa
   override def targetsInRange(implicit gameState: GameState) =
     rangeCellCoords.whereFriendsOf(parentCharacterId)
 
-  override def use(target: CharacterId, useData: UseData)(implicit gameState: GameState) =
-    gameState.updateCharacter(target)(
-      _.modify(_.state.effects)
-        .using(_.filterNot(_.metadata.effectType == CharacterEffectType.Negative))
-    )
+  override def use(target: CharacterId, useData: UseData)(implicit gameState: GameState) = {
+    val effectIdsToRemove = gameState.characterById(target).get.state.effects
+      .filter(_.metadata.effectType == CharacterEffectType.Negative).map(_.id)
+
+    gameState.removeEffects(effectIdsToRemove)(id)
+  }
 
   override def useChecks(implicit target: CharacterId, useData: UseData, gameState: GameState): Set[UseCheck] = {
     val targetCharacter: NKMCharacter = gameState.characterById(target).get

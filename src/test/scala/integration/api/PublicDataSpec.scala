@@ -3,11 +3,10 @@ package integration.api
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.unmarshalling.FromResponseUnmarshaller
-import com.tosware.NKM.models.game.hex.{HexCellEffect, HexMap}
+import com.tosware.NKM.models.game.hex.HexMap
 import com.tosware.NKM.models.game.{AbilityMetadata, CharacterEffectMetadata, CharacterMetadata}
 import helpers.ApiTrait
 
-import scala.language.postfixOps
 import scala.reflect.ClassTag
 
 class PublicDataSpec extends ApiTrait

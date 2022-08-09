@@ -24,7 +24,7 @@ case class NaturesBeauty(parentCharacterId: CharacterId) extends Ability with Ba
   override def basicAttackTargets(implicit gameState: GameState) = parentCharacter.basicAttackTargets
   override def basicAttack(targetCharacterId: CharacterId)(implicit gameState: GameState) =
     if(gameState.characterById(targetCharacterId).get.isFriendFor(parentCharacterId)) {
-      gameState.updateCharacter(targetCharacterId)(_.heal(parentCharacter.state.attackPoints))
+      gameState.heal(targetCharacterId, parentCharacter.state.attackPoints)(parentCharacterId)
     } else parentCharacter.defaultBasicAttack(targetCharacterId)
 
 }

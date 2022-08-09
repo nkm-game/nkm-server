@@ -8,7 +8,6 @@ import slick.jdbc.JdbcBackend
 import slick.jdbc.JdbcBackend.Database
 
 import scala.annotation.tailrec
-import scala.language.postfixOps
 
 object Main extends App with Logging {
   val db: JdbcBackend.Database = Database.forConfig("slick.db")

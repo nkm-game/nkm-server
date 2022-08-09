@@ -1,6 +1,5 @@
 package unit.abilities.aqua
 
-import com.softwaremill.quicklens._
 import com.tosware.NKM.models.game._
 import com.tosware.NKM.models.game.abilities.aqua.NaturesBeauty
 import com.tosware.NKM.models.game.hex.HexCoordinates
@@ -28,7 +27,7 @@ class NaturesBeautySpec
 
   NaturesBeauty.metadata.name must {
     "be able to heal friends via basic attacks" in {
-      val damagedGameState = gameState.updateCharacter(p0SecondCharacterId)(c => c.modify(_.state.healthPoints).setTo(30))
+      val damagedGameState = gameState.setHp(p0SecondCharacterId, 30)(gameState.id)
       val healedGameState = damagedGameState.basicAttack(p0FirstCharacterId, p0SecondCharacterId)
       healedGameState.characterById(p0FirstCharacterId).get.isFriendFor(p0SecondCharacterId)(healedGameState) shouldBe true
       healedGameState.characterById(p0SecondCharacterId).get.state.healthPoints should be(30 + healedGameState.characterById(p0FirstCharacterId).get.state.attackPoints)

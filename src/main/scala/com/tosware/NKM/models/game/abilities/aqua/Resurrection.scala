@@ -1,6 +1,5 @@
 package com.tosware.NKM.models.game.abilities.aqua
 
-import com.softwaremill.quicklens._
 import com.tosware.NKM.models.game.NKMCharacter.CharacterId
 import com.tosware.NKM.models.game._
 import com.tosware.NKM.models.game.hex.HexCoordinates
@@ -28,10 +27,11 @@ case class Resurrection(parentCharacterId: CharacterId) extends Ability with Usa
     rangeCellCoords.whereEmpty
 
   override def use(target: HexCoordinates, useData: UseData)(implicit gameState: GameState) = {
-    val targetCharacterId = useData.data
-    gameState.updateCharacter(targetCharacterId) { c =>
-      c.modify(_.state.healthPoints).setTo(c.state.maxHealthPoints / 2)
-    }.placeCharacter(target, targetCharacterId)
+    val targetCharacter = gameState.characterById(useData.data).get
+
+    gameState
+      .setHp(targetCharacter.id, targetCharacter.state.maxHealthPoints / 2)(id)
+      .placeCharacter(target, targetCharacter.id)(id)
   }
 
   override def useChecks(implicit target: HexCoordinates, useData: UseData, gameState: GameState): Set[(Boolean, CharacterId)] = {
@@ -42,6 +42,9 @@ case class Resurrection(parentCharacterId: CharacterId) extends Ability with Usa
       UseCheck.TargetIsFriend(targetCharacter.id, useData, gameState),
       UseCheck.TargetIsFreeToStand,
       targetCharacter.isDead -> "Target character is not dead.",
+      gameState.gameLog.events.collect {case e: GameEvent.CharacterDied => e}
+        .filter(_.characterId == targetCharacter.id)
+        .exists(e => gameState.phase.number - e.phase.number < 2) -> "Target character has not died in the last 2 phases.",
     )
   }
 }

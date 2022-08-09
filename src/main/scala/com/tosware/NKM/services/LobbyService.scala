@@ -13,7 +13,7 @@ import com.tosware.NKM.models.lobby._
 import com.tosware.NKM.models.lobby.ws.LobbyRequest._
 import slick.jdbc.JdbcBackend
 
-import scala.concurrent.{Await, Future}
+import scala.concurrent.Future
 
 class LobbyService(lobbiesManagerActor: ActorRef)(
   implicit db: JdbcBackend.Database,
@@ -24,8 +24,8 @@ class LobbyService(lobbiesManagerActor: ActorRef)(
   import com.tosware.NKM.models.CommandResponse._
 
   def getLobbyActorOption(lobbyId: String): Option[ActorRef] = {
-    import LobbiesManager.Query.GetLobbyActor
     import LobbiesManager.GetLobbyActorResponse
+    import LobbiesManager.Query.GetLobbyActor
 
     aw(lobbiesManagerActor ? GetLobbyActor(lobbyId))
       .asInstanceOf[GetLobbyActorResponse]

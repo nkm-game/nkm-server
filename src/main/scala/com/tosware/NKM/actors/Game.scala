@@ -321,7 +321,7 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
         case Success(_) =>
           val e = CharacterMoved(id, playerId, path, characterId)
           persistAndPublish(e) { _ =>
-            gameState = gameState.basicMoveCharacter(path, characterId)
+            gameState = gameState.basicMoveCharacter(playerId, path, characterId)
             sender() ! Success()
           }
       }
@@ -363,8 +363,8 @@ class Game(id: String)(implicit NKMDataService: NKMDataService) extends Persiste
     case TurnEnded(_, _) =>
       gameState = gameState.endTurn()
       log.debug(s"Recovered turn end")
-    case CharacterMoved(_, _, hexCoordinates, characterId) =>
-      gameState = gameState.basicMoveCharacter(hexCoordinates, characterId)
+    case CharacterMoved(_, playerId, hexCoordinates, characterId) =>
+      gameState = gameState.basicMoveCharacter(playerId, hexCoordinates, characterId)
       log.debug(s"Recovered $characterId to $hexCoordinates")
     case CharacterBasicAttacked(_, _, attackingCharacterId, targetCharacterId) =>
       gameState = gameState.basicAttack(attackingCharacterId, targetCharacterId)

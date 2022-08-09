@@ -6,8 +6,6 @@ import com.tosware.NKM.models.game.blindpick._
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
-import scala.annotation.tailrec
-
 class BlindPickStateSpec
   extends AnyWordSpecLike
     with Matchers {

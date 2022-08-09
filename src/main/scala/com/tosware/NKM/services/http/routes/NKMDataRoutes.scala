@@ -3,7 +3,7 @@ package com.tosware.NKM.services.http.routes
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.server.Directives._
 import com.tosware.NKM.NKMDependencies
-import com.tosware.NKM.services.{LobbyService, NKMDataService}
+import com.tosware.NKM.services.NKMDataService
 import com.tosware.NKM.services.http.directives.{JwtDirective, JwtSecretKey}
 
 class NKMDataRoutes(deps: NKMDependencies) extends JwtDirective

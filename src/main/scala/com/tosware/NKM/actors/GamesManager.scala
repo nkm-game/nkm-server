@@ -1,6 +1,6 @@
 package com.tosware.NKM.actors
 
-import akka.actor.{ActorLogging, ActorRef, Props, Terminated}
+import akka.actor.{ActorLogging, ActorRef, Props}
 import akka.event.LoggingAdapter
 import akka.persistence.{PersistentActor, RecoveryCompleted}
 import com.tosware.NKM.NKMTimeouts

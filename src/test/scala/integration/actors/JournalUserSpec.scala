@@ -9,9 +9,6 @@ import com.tosware.NKM.actors.User
 import com.tosware.NKM.actors.User._
 import helpers.NKMPersistenceTestKit
 
-import scala.concurrent.Await
-import scala.language.postfixOps
-
 class JournalUserSpec extends NKMPersistenceTestKit(ActorSystem("UserSpec2")) {
   private val readJournal: JdbcReadJournal = PersistenceQuery(system).readJournalFor[JdbcReadJournal](JdbcReadJournal.Identifier)
 

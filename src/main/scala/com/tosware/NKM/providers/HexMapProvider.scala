@@ -1,9 +1,7 @@
 package com.tosware.NKM.providers
 
-import com.tosware.NKM.models.game.AbilityType.Normal
-import com.tosware.NKM.models.game.AttackType.findValues
 import com.tosware.NKM.models.game.hex.HexCellType.{SpawnPoint, Wall}
-import com.tosware.NKM.models.game.hex.{HexCell, HexMap, HexUtils}
+import com.tosware.NKM.models.game.hex.{HexMap, HexUtils}
 import com.tosware.NKM.providers.HexMapProvider.TestHexMapName
 import com.tosware.NKM.serializers.NKMJsonProtocol
 import enumeratum.{Enum, EnumEntry}

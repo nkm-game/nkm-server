@@ -11,8 +11,6 @@ import com.tosware.NKM.actors.User._
 import com.tosware.NKM.models.{Credentials, RegisterRequest}
 import slick.jdbc.JdbcBackend
 
-import scala.concurrent.Await
-
 object UserService {
   sealed trait Event
   case class LoggedIn(login: String) extends Event

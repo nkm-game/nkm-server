@@ -1,15 +1,13 @@
 package com.tosware.NKM.actors.ws
 
 import akka.actor.ActorRef
-import akka.event.Logging.{DebugLevel, LogLevel, WarningLevel}
+import akka.event.Logging.{DebugLevel, WarningLevel}
 import akka.http.scaladsl.model.StatusCodes
 import com.tosware.NKM.models.CommandResponse.{CommandResponse, Failure, Success}
 import com.tosware.NKM.models.game.ws._
 import com.tosware.NKM.services.GameService
 import com.tosware.NKM.services.http.directives.JwtSecretKey
 import spray.json._
-
-import scala.concurrent.Await
 
 trait GameWebsocketUserBehaviour extends WebsocketUserBehaviour {
   val session: ActorRef
@@ -53,10 +51,9 @@ trait GameWebsocketUserBehaviour extends WebsocketUserBehaviour {
   }
 
   def parseWebsocketGameRequest(request: WebsocketGameRequest, outgoing: ActorRef, userActor: ActorRef, authStatus: AuthStatus): WebsocketGameResponse = {
-    import GameRequest.General._
-    import GameRequest.CharacterSelect._
     import GameRequest.Action._
-    import GameRequest.Chat._
+    import GameRequest.CharacterSelect._
+    import GameRequest.General._
     request.requestPath match {
       case GameRoute.Auth =>
         val token = request.requestJson.parseJson.convertTo[Auth].token

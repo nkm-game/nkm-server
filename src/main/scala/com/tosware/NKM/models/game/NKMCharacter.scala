@@ -2,6 +2,7 @@ package com.tosware.NKM.models.game
 
 import com.softwaremill.quicklens._
 import com.tosware.NKM.models.game.Ability.AbilityMetadataId
+import com.tosware.NKM.models.game.CharacterEffect.CharacterEffectId
 import com.tosware.NKM.models.game.NKMCharacter._
 import com.tosware.NKM.models.game.CharacterMetadata.CharacterMetadataId
 import com.tosware.NKM.models.game.abilities.aqua.{NaturesBeauty, Purification, Resurrection}
@@ -100,7 +101,7 @@ case class NKMCharacter
     basicAttackCellCoords.whereEnemiesOf(id)
 
   def defaultBasicAttack(targetCharacterId: CharacterId)(implicit gameState: GameState): GameState =
-    gameState.updateCharacter(targetCharacterId)(_.receiveDamage(Damage(id, DamageType.Physical, state.attackPoints)))
+    gameState.damageCharacter(targetCharacterId, Damage(DamageType.Physical, state.attackPoints))(id)
 
   def heal(amount: Int): NKMCharacter =
     this.modify(_.state.healthPoints).using(oldHp => math.min(oldHp + amount, state.maxHealthPoints))
@@ -131,7 +132,10 @@ case class NKMCharacter
   }
 
   def addEffect(effect: CharacterEffect): NKMCharacter =
-    this.modify(_.state.effects).using(e => e :+ effect)
+    this.modify(_.state.effects).using(_ :+ effect)
+
+  def removeEffect(effectId: CharacterEffectId): NKMCharacter =
+    this.modify(_.state.effects).using(_.filterNot(_.id == effectId))
 
   def toView: NKMCharacterView = NKMCharacterView(
     id = id,

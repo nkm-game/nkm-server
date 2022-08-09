@@ -6,8 +6,6 @@ import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.{Directive0, Route}
 
-import scala.language.postfixOps
-
 trait CORSHandler {
 
   private def corsResponseHeaders(origin: Option[Origin]) = List(
