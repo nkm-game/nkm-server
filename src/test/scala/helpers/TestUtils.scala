@@ -56,13 +56,13 @@ trait TestUtils extends Logging {
       case (acc, (playerId, characterMetadatas)) => acc.blindPick(playerId, characterMetadatas.map(_.id).toSet)
     }.startPlacingCharacters()
 
-    val playersWithCharacters = placingGameState.players.map(p => p.id -> p.characters.map(_.id)).toMap
+    val playersWithCharacters = placingGameState.players
 
     val runningGameState = playersWithCharacters.foldLeft(placingGameState){
-      case (acc, (playerId, characters)) =>
-        val spawnPoints = placingGameState.hexMap.get.getSpawnPointsFor(playerId)(placingGameState)
-        val spawnsWithCharacters = spawnPoints.map(_.coordinates) zip characters
-        acc.placeCharacters(playerId, spawnsWithCharacters.toMap)
+      case (acc, p) =>
+        val spawnPoints = placingGameState.hexMap.get.getSpawnPointsFor(p.id)(placingGameState)
+        val spawnsWithCharacters = spawnPoints.map(_.coordinates) zip p.characterIds
+        acc.placeCharacters(p.id, spawnsWithCharacters.toMap)
     }
     runningGameState
   }

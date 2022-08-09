@@ -35,25 +35,27 @@ object GameEvent {
 }
 case class GameLog(events: Seq[GameEvent])
 
-case class GameState(id: GameId,
-                     charactersMetadata: Set[CharacterMetadata],
-                     hexMap: Option[HexMap],
-                     characterIdsOutsideMap: Set[CharacterId],
-                     characterIdsThatTookActionThisPhase: Set[CharacterId],
-                     characterTakingActionThisTurn: Option[CharacterId],
-                     phase: Phase,
-                     turn: Turn,
-                     players: Seq[Player],
-                     playerIdsThatPlacedCharacters: Set[PlayerId],
-                     gameStatus: GameStatus,
-                     pickType: PickType,
-                     numberOfBans: Int,
-                     numberOfCharactersPerPlayers: Int,
-                     draftPickState: Option[DraftPickState],
-                     blindPickState: Option[BlindPickState],
-                     clockConfig: ClockConfig,
-                     clock: Clock,
-                     gameLog: GameLog,
+case class GameState(
+                      id: GameId,
+                      charactersMetadata: Set[CharacterMetadata],
+                      gameStatus: GameStatus,
+                      pickType: PickType,
+                      numberOfBans: Int,
+                      numberOfCharactersPerPlayers: Int,
+                      draftPickState: Option[DraftPickState],
+                      blindPickState: Option[BlindPickState],
+                      hexMap: Option[HexMap],
+                      players: Seq[Player],
+                      characters: Set[NKMCharacter],
+                      phase: Phase,
+                      turn: Turn,
+                      characterIdsOutsideMap: Set[CharacterId],
+                      characterIdsThatTookActionThisPhase: Set[CharacterId],
+                      characterTakingActionThisTurn: Option[CharacterId],
+                      playerIdsThatPlacedCharacters: Set[PlayerId],
+                      clockConfig: ClockConfig,
+                      clock: Clock,
+                      gameLog: GameLog,
                     ) {
   private implicit val p: Phase = phase
   private implicit val t: Turn = turn
@@ -71,8 +73,6 @@ case class GameState(id: GameId,
   def currentPlayer: Player = players(currentPlayerNumber)
 
   def currentPlayerTime: Long = clock.playerTimes(currentPlayer.id)
-
-  def characters: Set[NKMCharacter] = players.flatMap(_.characters).toSet
 
   def abilities: Set[Ability] = characters.flatMap(_.state.abilities)
 
@@ -185,12 +185,19 @@ case class GameState(id: GameId,
       case PickType.BlindPick =>
         blindPickState.get.characterSelection
     }
-    val playersWithAssignedCharacters =
-      players.map(p => p.copy(characters = characterSelection(p.id).map(c => generateCharacter(c)).toSet))
+
+    val playersWithCharacters =
+      players.map(p => {
+        val generatedCharacters = characterSelection(p.id).map(c => generateCharacter(c)).toSet
+        (p, generatedCharacters)
+      })
+    val playersWithAssignedCharacters = playersWithCharacters.map{case (p, cs) => p.copy(characterIds = cs.map(_.id))}
+    val characters = playersWithCharacters.flatMap(_._2).toSet
 
     copy(
       players = playersWithAssignedCharacters,
-      characterIdsOutsideMap = playersWithAssignedCharacters.flatMap(c => c.characters.map(c => c.id)).toSet
+      characters = characters,
+      characterIdsOutsideMap = characters.map(c => c.id),
     )
   }
 
@@ -285,7 +292,7 @@ case class GameState(id: GameId,
   }
 
   private def updateCharacter(characterId: CharacterId)(updateFunction: NKMCharacter => NKMCharacter): GameState =
-    this.modify(_.players.each.characters.each).using {
+    this.modify(_.characters.each).using {
       case character if character.id == characterId => updateFunction(character)
       case character => character
     }
@@ -400,25 +407,27 @@ case class GameState(id: GameId,
 
   def toView(forPlayer: Option[PlayerId]): GameStateView =
     GameStateView(
-      id,
-      charactersMetadata,
-      hexMap,
-      characterIdsOutsideMap,
-      characterIdsThatTookActionThisPhase,
-      characterTakingActionThisTurn,
-      phase,
-      turn,
-      players.map(_.toView),
-      playerIdsThatPlacedCharacters,
-      gameStatus,
-      pickType,
-      numberOfBans,
-      numberOfCharactersPerPlayers,
-      draftPickState.map(_.toView(forPlayer)),
-      blindPickState.map(_.toView(forPlayer)),
-      clockConfig,
-      clock,
-      currentPlayer.id,
+      id = id,
+      charactersMetadata = charactersMetadata,
+      gameStatus = gameStatus,
+      pickType = pickType,
+      numberOfBans = numberOfBans,
+      numberOfCharactersPerPlayers = numberOfCharactersPerPlayers,
+      draftPickState = draftPickState.map(_.toView(forPlayer)),
+      blindPickState = blindPickState.map(_.toView(forPlayer)),
+      hexMap = hexMap,
+      players = players,
+      characters = characters.map(_.toView),
+      phase = phase,
+      turn = turn,
+      characterIdsOutsideMap = characterIdsOutsideMap,
+      characterIdsThatTookActionThisPhase = characterIdsThatTookActionThisPhase,
+      characterTakingActionThisTurn = characterTakingActionThisTurn,
+      playerIdsThatPlacedCharacters = playerIdsThatPlacedCharacters,
+      clockConfig = clockConfig,
+      clock = clock,
+      currentPlayerId = currentPlayer.id,
+
     )
 
   def shortInfo: String =
@@ -444,45 +453,48 @@ object GameState {
     GameState(
       id = id,
       charactersMetadata = Set(),
-      hexMap = None,
-      characterIdsOutsideMap = Set(),
-      characterIdsThatTookActionThisPhase = Set(),
-      characterTakingActionThisTurn = None,
-      phase = Phase(0),
-      turn = Turn(0),
-      players = Seq(),
-      playerIdsThatPlacedCharacters = Set(),
-      gameStatus = GameStatus.NotStarted,
-      pickType = defaultPickType,
       numberOfBans = 0,
       numberOfCharactersPerPlayers = 1,
       draftPickState = None,
       blindPickState = None,
+      hexMap = None,
+      players = Seq(),
+      characters = Set(),
+      phase = Phase(0),
+      turn = Turn(0),
+      gameStatus = GameStatus.NotStarted,
+      pickType = defaultPickType,
+      characterIdsOutsideMap = Set(),
+      characterIdsThatTookActionThisPhase = Set(),
+      characterTakingActionThisTurn = None,
+      playerIdsThatPlacedCharacters = Set(),
       clockConfig = defaultClockConfig,
       clock = Clock.fromConfig(defaultClockConfig, Seq()),
-      gameLog = GameLog(Seq.empty)
+      gameLog = GameLog(Seq.empty),
     )
   }
 }
 
 case class GameStateView(
-                          id: String,
+                          id: GameId,
                           charactersMetadata: Set[CharacterMetadata],
-                          hexMap: Option[HexMap],
-                          characterIdsOutsideMap: Set[CharacterId],
-                          characterIdsThatTookActionThisPhase: Set[CharacterId],
-                          characterTakingActionThisTurn: Option[CharacterId],
-                          phase: Phase,
-                          turn: Turn,
-                          players: Seq[PlayerView],
-                          playerIdsThatPlacedCharacters: Set[PlayerId],
                           gameStatus: GameStatus,
                           pickType: PickType,
                           numberOfBans: Int,
                           numberOfCharactersPerPlayers: Int,
                           draftPickState: Option[DraftPickStateView],
                           blindPickState: Option[BlindPickStateView],
+                          hexMap: Option[HexMap],
+                          players: Seq[Player],
+                          characters: Set[NKMCharacterView],
+                          phase: Phase,
+                          turn: Turn,
+                          characterIdsOutsideMap: Set[CharacterId],
+                          characterIdsThatTookActionThisPhase: Set[CharacterId],
+                          characterTakingActionThisTurn: Option[CharacterId],
+                          playerIdsThatPlacedCharacters: Set[PlayerId],
                           clockConfig: ClockConfig,
                           clock: Clock,
+
                           currentPlayerId: PlayerId,
                         )

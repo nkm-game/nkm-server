@@ -42,7 +42,7 @@ case class GameStateValidator()(implicit gameState: GameState) {
     if(gameState.hexMap.isEmpty) return (false, "HexMap is empty.")
     if(coordinatesToCharacterIdMap.values.toSet.size != coordinatesToCharacterIdMap.size) return (false, "Duplicated character ids in the map.")
 
-    val playerCharacterIds: Set[CharacterId] = gameState.playerById(playerId).get.characters.map(_.id)
+    val playerCharacterIds: Set[CharacterId] = gameState.playerById(playerId).get.characterIds
     val playerSpawnPoints: Set[HexCoordinates] = gameState.hexMap.get.getSpawnPointsByNumber(gameState.playerNumber(playerId)).map(_.coordinates)
 
     if(!coordinatesToCharacterIdMap.keySet.subsetOf(playerSpawnPoints)) return (false, "All coordinates have to be your spawnpoints.")

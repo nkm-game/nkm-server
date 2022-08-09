@@ -606,7 +606,7 @@ class WSGameSpec extends WSTrait {
         (0 until numberOfPlayers) foreach { i =>
           auth(i)
           val spawnPoints = hexMap.getSpawnPointsByNumber(i)
-          val characterIds = players(i).characters.map(_.id)
+          val characterIds = players(i).characterIds
           val coordinatesToCharacterIdMap = spawnPoints.map(_.coordinates).zip(characterIds).toMap
           placeCharacters(lobbyId, coordinatesToCharacterIdMap).statusCode shouldBe ok
           placeCharacters(lobbyId, coordinatesToCharacterIdMap).statusCode shouldBe nok
@@ -655,7 +655,7 @@ class WSGameSpec extends WSTrait {
           (0 until numberOfPlayers) foreach { i =>
             auth(i)
             val spawnPoints = hexMap.getSpawnPointsByNumber(i)
-            val characterIds = players(i).characters.map(_.id)
+            val characterIds = players(i).characterIds
             val coordinatesToCharacterIdMap = spawnPoints.map(_.coordinates).zip(characterIds).toMap
             placeCharacters(lobbyId, coordinatesToCharacterIdMap).statusCode shouldBe ok
             placeCharacters(lobbyId, coordinatesToCharacterIdMap).statusCode shouldBe nok
@@ -666,12 +666,12 @@ class WSGameSpec extends WSTrait {
 
         val gameState = fetchAndParseGame(lobbyId)
 
-        val characterToMove = gameState.players(0).characters.head
-        val characterCell = gameState.hexMap.get.getCellOfCharacter(characterToMove.id).get
+        val characterToMove = gameState.players(0).characterIds.head
+        val characterCell = gameState.hexMap.get.getCellOfCharacter(characterToMove).get
         val targetCell = HexUtils.getAdjacentCells(gameState.hexMap.get.cells, characterCell.coordinates)
           .filter(c => c.cellType == HexCellType.Normal).head
-        moveCharacter(lobbyId, Seq(characterCell, targetCell).map(_.coordinates), characterToMove.id).statusCode shouldBe ok
-        moveCharacter(lobbyId, Seq(characterCell, targetCell).map(_.coordinates), characterToMove.id).statusCode shouldBe nok
+        moveCharacter(lobbyId, Seq(characterCell, targetCell).map(_.coordinates), characterToMove).statusCode shouldBe ok
+        moveCharacter(lobbyId, Seq(characterCell, targetCell).map(_.coordinates), characterToMove).statusCode shouldBe nok
       }
     }
 
@@ -702,8 +702,8 @@ class WSGameSpec extends WSTrait {
         {
           val players = fetchAndParseGame(lobbyId).players
 
-          val characterId0 = players(0).characters.map(_.id).head
-          val characterId1 = players(1).characters.map(_.id).head
+          val characterId0 = players(0).characterIds.head
+          val characterId1 = players(1).characterIds.head
 
           auth(0)
           placeCharacters(lobbyId, Map(HexCoordinates(3, 10) -> characterId0)).statusCode shouldBe ok
@@ -715,10 +715,10 @@ class WSGameSpec extends WSTrait {
 
         val gameState = fetchAndParseGame(lobbyId)
 
-        val characterToMove = gameState.players(0).characters.head
-        val characterToAttack = gameState.players(1).characters.head
+        val characterToMove = gameState.players(0).characterIds.head
+        val characterToAttack = gameState.players(1).characterIds.head
 
-        basicAttackCharacter(lobbyId, characterToMove.id, characterToAttack.id).statusCode shouldBe ok
+        basicAttackCharacter(lobbyId, characterToMove, characterToAttack).statusCode shouldBe ok
       }
     }
 
@@ -752,17 +752,17 @@ class WSGameSpec extends WSTrait {
         val (character0, character1) = {
           val gameState = fetchAndParseGame(lobbyId)
 
-          val character0 = gameState.players(0).characters.head
-          val character1 = gameState.players(1).characters.head
+          val character0 = gameState.players(0).characterIds.head
+          val character1 = gameState.players(1).characterIds.head
           (character0, character1)
         }
 
         {
           auth(0)
-          placeCharacters(lobbyId, Map(HexCoordinates(3, 10) -> character0.id)).statusCode shouldBe ok
+          placeCharacters(lobbyId, Map(HexCoordinates(3, 10) -> character0)).statusCode shouldBe ok
           endTurn(lobbyId).statusCode shouldBe nok
           auth(1)
-          placeCharacters(lobbyId, Map(HexCoordinates(6, 10) -> character1.id)).statusCode shouldBe ok
+          placeCharacters(lobbyId, Map(HexCoordinates(6, 10) -> character1)).statusCode shouldBe ok
           endTurn(lobbyId).statusCode shouldBe nok
         }
 
@@ -776,7 +776,7 @@ class WSGameSpec extends WSTrait {
         }
 
         endTurn(lobbyId).statusCode shouldBe nok
-        basicAttackCharacter(lobbyId, character0.id, character1.id).statusCode shouldBe ok
+        basicAttackCharacter(lobbyId, character0, character1).statusCode shouldBe ok
         endTurn(lobbyId).statusCode shouldBe ok
         endTurn(lobbyId).statusCode shouldBe nok
 
@@ -788,7 +788,7 @@ class WSGameSpec extends WSTrait {
 
         auth(1)
         endTurn(lobbyId).statusCode shouldBe nok
-        basicAttackCharacter(lobbyId, character1.id, character0.id).statusCode shouldBe ok
+        basicAttackCharacter(lobbyId, character1, character0).statusCode shouldBe ok
         endTurn(lobbyId).statusCode shouldBe ok
         endTurn(lobbyId).statusCode shouldBe nok
 
