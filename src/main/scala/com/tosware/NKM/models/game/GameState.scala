@@ -231,20 +231,20 @@ case class GameState(id: GameId,
   def finishBanningPhase(): GameState =
     copy(
       draftPickState = draftPickState.map(_.finishBanning()),
-      clock = clock.setPickTime(clockConfig.maxPickTimeMillis),
-    )
+    ).updateClock(clock.setPickTime(clockConfig.maxPickTimeMillis))(id)
 
   def pick(playerId: PlayerId, characterId: CharacterMetadataId)(implicit random: Random): GameState =
     copy(
       draftPickState = draftPickState.map(_.pick(playerId, characterId)),
-      clock = clock.setPickTime(clockConfig.maxPickTimeMillis),
-    ).checkIfCharacterPickFinished()
+    ).updateClock(clock.setPickTime(clockConfig.maxPickTimeMillis))(id)
+      .checkIfCharacterPickFinished()
 
   def draftPickTimeout(): GameState =
     surrender(draftPickState.get.currentPlayerPicking.get)
 
   def blindPick(playerId: PlayerId, characterIds: Set[CharacterMetadataId])(implicit random: Random): GameState =
-    copy(blindPickState = blindPickState.map(_.pick(playerId, characterIds))).checkIfCharacterPickFinished()
+    copy(blindPickState = blindPickState.map(_.pick(playerId, characterIds)))
+      .checkIfCharacterPickFinished()
 
   def blindPickTimeout(): GameState =
     surrender(blindPickState.get.pickingPlayers: _*)
@@ -258,10 +258,8 @@ case class GameState(id: GameId,
       .checkIfPlacingCharactersFinished()
 
   def placeCharacter(targetCellCoordinates: HexCoordinates, characterId: CharacterId)(implicit causedBy: String): GameState =
-    this.modify(_.hexMap.each.cells.each).using {
-      case cell if cell.coordinates == targetCellCoordinates => HexCell(cell.coordinates, cell.cellType, Some(characterId), cell.effects, cell.spawnNumber)
-      case cell => cell
-    }.modify(_.characterIdsOutsideMap).using(_.filter(_ != characterId))
+    updateHexCell(targetCellCoordinates)(_.copy(characterId = Some(characterId)))
+    .modify(_.characterIdsOutsideMap).using(_.filter(_ != characterId))
       .logEvent(CharacterPlaced(characterId, targetCellCoordinates))
 
   def basicMoveCharacter(playerId: PlayerId, path: Seq[HexCoordinates], characterId: CharacterId): GameState = {
@@ -271,12 +269,11 @@ case class GameState(id: GameId,
   }
 
   def teleportCharacter(targetCellCoordinates: HexCoordinates, characterId: CharacterId)(implicit causedBy: String): GameState = {
-    val parentCell = hexMap.get.cells.find(_.characterId.contains(characterId)).get
-    this.modify(_.hexMap.each.cells.each).using {
-      case cell if cell == parentCell => HexCell(cell.coordinates, cell.cellType, None, cell.effects, cell.spawnNumber)
-      case cell if cell.coordinates == targetCellCoordinates => HexCell(cell.coordinates, cell.cellType, Some(characterId), cell.effects, cell.spawnNumber)
-      case cell => cell
-    }.logEvent(CharacterTeleported(characterId, targetCellCoordinates))
+    val parentCellOpt = characterById(characterId).get.parentCell(this)
+
+    parentCellOpt.fold(this)(c => updateHexCell(c.coordinates)(_.copy(characterId = None)))
+    .updateHexCell(targetCellCoordinates)(_.copy(characterId = Some(characterId)))
+    .logEvent(CharacterTeleported(characterId, targetCellCoordinates))
   }
 
 
@@ -291,6 +288,12 @@ case class GameState(id: GameId,
     this.modify(_.players.each.characters.each).using {
       case character if character.id == characterId => updateFunction(character)
       case character => character
+    }
+
+  private def updateHexCell(targetCoords: HexCoordinates)(updateFunction: HexCell => HexCell): GameState =
+    this.modify(_.hexMap.each.cells.each).using {
+      case cell if cell.coordinates == targetCoords => updateFunction(cell)
+      case cell => cell
     }
 
   def damageCharacter(characterId: CharacterId, damage: Damage)(implicit causedBy: String): GameState =
@@ -329,10 +332,10 @@ case class GameState(id: GameId,
   }
 
   def removeCharacterFromMap(characterId: CharacterId)(implicit causedById: String): GameState = {
-    this.modify(_.hexMap.each.cells.each).using {
-      case cell if cell.characterId.contains(characterId) => HexCell(cell.coordinates, cell.cellType, None, cell.effects, cell.spawnNumber)
-      case cell => cell
-    }.modify(_.characterIdsOutsideMap).setTo(characterIdsOutsideMap + characterId)
+    val parentCellOpt = characterById(characterId).get.parentCell(this)
+
+    parentCellOpt.fold(this)(c => updateHexCell(c.coordinates)(_.copy(characterId = None)))
+      .modify(_.characterIdsOutsideMap).setTo(characterIdsOutsideMap + characterId)
       .logEvent(CharacterRemovedFromMap(characterId))
   }
 
