@@ -154,7 +154,18 @@ class GameStateValidatorSpec
         assertCommandFailure(result)
       }
 
-      "disallow move if character cannot move (already moved or made other actions)" in {
+      "disallow move if character already moved" in {
+        val newGameState = gameState.basicMoveCharacter(gameState.players(0).id,
+          CoordinateSeq((0, 0), (1, 0)),
+          p0FirstCharacterId)
+        val result = GameStateValidator()(newGameState).validateBasicMoveCharacter(gameState.players(0).id,
+          CoordinateSeq((1, 0), (0, 0)),
+          p0FirstCharacterId
+        )
+        assertCommandFailure(result)
+      }
+
+      "disallow move if character used ultimate ability" in {
         fail()
       }
 
@@ -268,7 +279,16 @@ class GameStateValidatorSpec
         assertCommandFailure(result)
       }
 
-      "disallow move if character cannot attack (already attacked or made other actions)" in {
+      "disallow if character already basic attacked" in {
+        val newState = moveGameState.basicAttack(p0FirstCharacterId, p1FirstCharacterId)
+        val result = GameStateValidator()(newState).validateBasicAttackCharacter(gameState.players(0).id,
+          p0FirstCharacterId,
+          p1FirstCharacterId,
+        )
+        assertCommandFailure(result)
+      }
+
+      "disallow if character used ultimate ability" in {
         fail()
       }
 

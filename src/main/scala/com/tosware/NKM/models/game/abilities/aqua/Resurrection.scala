@@ -42,7 +42,7 @@ case class Resurrection(parentCharacterId: CharacterId) extends Ability with Usa
       UseCheck.TargetIsFriend(targetCharacter.id, useData, gameState),
       UseCheck.TargetIsFreeToStand,
       targetCharacter.isDead -> "Target character is not dead.",
-      gameState.gameLog.events.collect {case e: GameEvent.CharacterDied => e}
+      gameState.gameLog.events.ofType[GameEvent.CharacterDied]
         .filter(_.characterId == targetCharacter.id)
         .exists(e => gameState.phase.number - e.phase.number < 2) -> "Target character has not died in the last 2 phases.",
     )

@@ -1,9 +1,11 @@
 package com.tosware.NKM.models.game.hex
 
+import com.tosware.NKM.models.game.GameEvent.GameEvent
 import com.tosware.NKM.models.game.{GameState, NKMCharacter}
 import com.tosware.NKM.models.game.NKMCharacter.CharacterId
 
 import scala.math.abs
+import scala.reflect.ClassTag
 
 object HexUtils {
 
@@ -77,6 +79,9 @@ object HexUtils {
 
     def enemiesOf(characterId: CharacterId): Set[NKMCharacter] =
       characters.filter(_.isEnemyFor(characterId))
+  }
+  implicit class GameEventSeqUtils(es: Seq[GameEvent]) {
+    def ofType[T <: GameEvent: ClassTag]: Seq[T] = es.collect {case e: T => e}
   }
 }
 

@@ -23,6 +23,8 @@ object GameEvent {
   case class EffectAppliedOnCell(effectId: String, target: HexCoordinates)(implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent
   case class EffectAppliedOnCharacter(effectId: CharacterEffectId, characterId: CharacterId)(implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent
   case class EffectRemovedFromCharacter(effectId: CharacterEffectId)(implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent
+  case class CharacterBasicMoved(characterId: CharacterId, path: Seq[HexCoordinates])(implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent
+  case class CharacterBasicAttacked(characterId: CharacterId, targetCharacterId: CharacterId)(implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent
   case class CharacterTeleported(characterId: CharacterId, target: HexCoordinates)(implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent
   case class CharacterDamaged(characterId: CharacterId, damage: Damage)(implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent
   case class CharacterHealed(characterId: CharacterId, amount: Int)(implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent
@@ -270,9 +272,11 @@ case class GameState(
       .logEvent(CharacterPlaced(characterId, targetCellCoordinates))
 
   def basicMoveCharacter(playerId: PlayerId, path: Seq[HexCoordinates], characterId: CharacterId): GameState = {
+    implicit val causedBy: CharacterId = characterId
     val newGameState = takeActionWithCharacter(characterId)
     // case if character dies on the way? make a test of this and create a new functions with while(onMap)
     path.tail.foldLeft(newGameState){case (acc, coordinate) => acc.teleportCharacter(coordinate, characterId)(playerId)}
+      .logEvent(CharacterBasicMoved(characterId, path))
   }
 
   def teleportCharacter(targetCellCoordinates: HexCoordinates, characterId: CharacterId)(implicit causedBy: String): GameState = {
@@ -285,10 +289,11 @@ case class GameState(
 
 
   def basicAttack(attackingCharacterId: CharacterId, targetCharacterId: CharacterId): GameState = {
+    implicit val causedBy: CharacterId = attackingCharacterId
     val newGameState = takeActionWithCharacter(attackingCharacterId)
     val attackingCharacter = characterById(attackingCharacterId).get
-
     attackingCharacter.basicAttack(targetCharacterId)(newGameState)
+      .logEvent(CharacterBasicAttacked(attackingCharacterId, targetCharacterId))
   }
 
   private def updateCharacter(characterId: CharacterId)(updateFunction: NKMCharacter => NKMCharacter): GameState =
