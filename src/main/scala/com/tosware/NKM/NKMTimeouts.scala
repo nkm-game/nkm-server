@@ -6,7 +6,7 @@ import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
 
 trait NKMTimeouts {
-  private val _atMost = 3000.millis
+  private val _atMost = NKMConf.int("asyncTimeout").millis
   implicit val atMost: Duration = _atMost
   implicit val timeout: Timeout = Timeout(_atMost)
 

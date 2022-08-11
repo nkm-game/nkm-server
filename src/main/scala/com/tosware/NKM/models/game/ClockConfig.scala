@@ -1,14 +1,24 @@
 package com.tosware.NKM.models.game
 
+import com.tosware.NKM.NKMConf
+
 
 object ClockConfig {
   def empty(): ClockConfig =
     ClockConfig(0, 0, 0, 0, 0)
   def defaultForPickType(pickType: PickType): ClockConfig = pickType match {
-    case PickType.AllRandom => ClockConfig(5 * 60 * 1000, 30 * 1000, 0, 0, 30 * 1000)
-    case PickType.DraftPick => ClockConfig(5 * 60 * 1000, 30 * 1000, 45 * 1000, 30 * 1000, 30 * 1000)
-    case PickType.BlindPick => ClockConfig(5 * 60 * 1000, 30 * 1000, 0, 30 * 1000, 10 * 1000)
+    case PickType.AllRandom => fromNKMConf("clock.allRandom")
+    case PickType.DraftPick => fromNKMConf("clock.draftPick")
+    case PickType.BlindPick => fromNKMConf("clock.blindPick")
   }
+  def fromNKMConf(path: String): ClockConfig =
+    ClockConfig(
+      initialTimeMillis = NKMConf.int(s"$path.initialTimeMillis"),
+      incrementMillis = NKMConf.int(s"$path.incrementMillis"),
+      maxBanTimeMillis = NKMConf.int(s"$path.maxBanTimeMillis"),
+      maxPickTimeMillis = NKMConf.int(s"$path.maxPickTimeMillis"),
+      timeAfterPickMillis = NKMConf.int(s"$path.timeAfterPickMillis"),
+    )
 }
 
 case class ClockConfig(

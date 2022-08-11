@@ -55,14 +55,19 @@ case class NKMCharacter
 
   def isDead: Boolean = state.healthPoints <= 0
 
-  def canBasicMove(implicit gameState: GameState): Boolean = {
+  def canBasicMove(implicit gameState: GameState): Boolean =
     !state.effects.exists(e => basicMoveImpairmentCcNames.contains(e.metadata.name)) &&
-      gameState.gameLog.events.filter(e => e.phase.number == gameState.phase.number).ofType[GameEvent.CharacterBasicMoved].isEmpty
-  }
+      !gameState.gameLog.events
+        .filter(e => e.phase.number == gameState.phase.number)
+        .ofType[GameEvent.CharacterBasicMoved]
+        .exists(e => e.characterId == id)
 
   def canBasicAttack(implicit gameState: GameState): Boolean = {
     !state.effects.exists(e => basicAttackImpairmentCcNames.contains(e.metadata.name)) &&
-      gameState.gameLog.events.filter(e => e.phase.number == gameState.phase.number).ofType[GameEvent.CharacterBasicAttacked].isEmpty
+      !gameState.gameLog.events
+        .filter(e => e.phase.number == gameState.phase.number)
+        .ofType[GameEvent.CharacterBasicAttacked]
+        .exists(e => e.characterId == id)
   }
 
   def parentCell(implicit gameState: GameState): Option[HexCell] =

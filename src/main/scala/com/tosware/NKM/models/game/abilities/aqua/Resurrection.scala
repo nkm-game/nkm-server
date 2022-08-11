@@ -1,5 +1,6 @@
 package com.tosware.NKM.models.game.abilities.aqua
 
+import com.tosware.NKM.NKMConf
 import com.tosware.NKM.models.game.NKMCharacter.CharacterId
 import com.tosware.NKM.models.game._
 import com.tosware.NKM.models.game.hex.HexCoordinates
@@ -11,11 +12,9 @@ object Resurrection {
       name = "Resurrection",
       abilityType = AbilityType.Ultimate,
       description = "*Character* resurrects allied character, that died maximally one phase before.\nResurrected character respawns with half base HP on selected spawn point.",
-      cooldown = 8,
+      cooldown = NKMConf.int("abilities.aqua.resurrection.cooldown"),
     )
 }
-
-case class ResurrectionUseData(characterId: CharacterId)
 
 case class Resurrection(parentCharacterId: CharacterId) extends Ability with UsableOnCoordinates {
   override val metadata = Resurrection.metadata

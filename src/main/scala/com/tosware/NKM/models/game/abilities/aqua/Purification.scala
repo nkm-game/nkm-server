@@ -1,5 +1,6 @@
 package com.tosware.NKM.models.game.abilities.aqua
 
+import com.tosware.NKM.NKMConf
 import com.tosware.NKM.models.game.Ability.UseCheck
 import com.tosware.NKM.models.game.NKMCharacter.CharacterId
 import com.tosware.NKM.models.game._
@@ -11,8 +12,8 @@ object Purification {
       name = "Purification",
       abilityType = AbilityType.Normal,
       description = "*Character* removes all negative effects from target.",
-      cooldown = 4,
-      range = 4,
+      cooldown = NKMConf.int("abilities.aqua.purification.cooldown"),
+      range = NKMConf.int("abilities.aqua.purification.range"),
     )
 }
 

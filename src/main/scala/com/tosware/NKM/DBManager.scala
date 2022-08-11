@@ -9,7 +9,7 @@ import scala.concurrent.Await
 import scala.concurrent.duration.{DurationInt, FiniteDuration}
 
 object DBManager {
-  val dbTimeout: FiniteDuration = 3000.millis
+  val dbTimeout: FiniteDuration = NKMConf.int("dbTimeout").millis
 
   def createDbIfNotExists(dbName: String): Unit = {
     val config: Config = ConfigFactory.load("slick_no_db.conf")
