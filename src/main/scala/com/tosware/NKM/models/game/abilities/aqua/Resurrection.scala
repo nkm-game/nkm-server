@@ -11,7 +11,9 @@ object Resurrection {
     AbilityMetadata(
       name = "Resurrection",
       abilityType = AbilityType.Ultimate,
-      description = "*Character* resurrects allied character, that died maximally one phase before.\nResurrected character respawns with half base HP on selected spawn point.",
+      description =
+        """Character resurrects allied character, that died max. one phase before.
+          |Resurrected character respawns with half base HP on selected spawn point.""".stripMargin,
       cooldown = NKMConf.int("abilities.aqua.resurrection.cooldown"),
     )
 }
@@ -42,7 +44,7 @@ case class Resurrection(parentCharacterId: CharacterId) extends Ability with Usa
       UseCheck.TargetIsFreeToStand,
       targetCharacter.isDead -> "Target character is not dead.",
       gameState.gameLog.events.ofType[GameEvent.CharacterDied]
-        .filter(_.characterId == targetCharacter.id)
+        .ofCharacter(targetCharacter.id)
         .exists(e => gameState.phase.number - e.phase.number < 2) -> "Target character has not died in the last 2 phases.",
     )
   }

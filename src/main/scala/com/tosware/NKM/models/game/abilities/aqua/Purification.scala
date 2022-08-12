@@ -11,7 +11,7 @@ object Purification {
     AbilityMetadata(
       name = "Purification",
       abilityType = AbilityType.Normal,
-      description = "*Character* removes all negative effects from target.",
+      description = "Character removes all negative effects from target.",
       cooldown = NKMConf.int("abilities.aqua.purification.cooldown"),
       range = NKMConf.int("abilities.aqua.purification.range"),
     )

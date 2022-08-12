@@ -6,6 +6,7 @@ import com.tosware.NKM.models.game.CharacterEffect.CharacterEffectId
 import com.tosware.NKM.models.game.NKMCharacter._
 import com.tosware.NKM.models.game.CharacterMetadata.CharacterMetadataId
 import com.tosware.NKM.models.game.abilities.aqua.{NaturesBeauty, Purification, Resurrection}
+import com.tosware.NKM.models.game.abilities.hecate.Aster
 import com.tosware.NKM.models.game.hex.HexUtils._
 import com.tosware.NKM.models.game.hex._
 import com.tosware.NKM.models.{Damage, DamageType}
@@ -20,6 +21,8 @@ object NKMCharacter {
         Purification(characterId)
       case Resurrection.metadata.id =>
         Resurrection(characterId)
+      case Aster.metadata.id =>
+        Aster(characterId)
     }
   }
 
@@ -57,18 +60,19 @@ case class NKMCharacter
 
   def canBasicMove(implicit gameState: GameState): Boolean =
     !state.effects.exists(e => basicMoveImpairmentCcNames.contains(e.metadata.name)) &&
-      !gameState.gameLog.events
-        .filter(e => e.phase.number == gameState.phase.number)
+      gameState.gameLog.events
+        .inPhase(gameState.phase.number)
         .ofType[GameEvent.CharacterBasicMoved]
-        .exists(e => e.characterId == id)
+        .ofCharacter(id)
+        .isEmpty
 
-  def canBasicAttack(implicit gameState: GameState): Boolean = {
+  def canBasicAttack(implicit gameState: GameState): Boolean =
     !state.effects.exists(e => basicAttackImpairmentCcNames.contains(e.metadata.name)) &&
-      !gameState.gameLog.events
-        .filter(e => e.phase.number == gameState.phase.number)
+      gameState.gameLog.events
+        .inPhase(gameState.phase.number)
         .ofType[GameEvent.CharacterBasicAttacked]
-        .exists(e => e.characterId == id)
-  }
+        .ofCharacter(id)
+        .isEmpty
 
   def parentCell(implicit gameState: GameState): Option[HexCell] =
     gameState.hexMap.get.getCellOfCharacter(id)

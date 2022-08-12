@@ -1,6 +1,6 @@
 package com.tosware.NKM.models.game.hex
 
-import com.tosware.NKM.models.game.GameEvent.GameEvent
+import com.tosware.NKM.models.game.GameEvent.{ContainsCharacterId, GameEvent}
 import com.tosware.NKM.models.game.{GameState, NKMCharacter}
 import com.tosware.NKM.models.game.NKMCharacter.CharacterId
 
@@ -80,8 +80,17 @@ object HexUtils {
     def enemiesOf(characterId: CharacterId): Set[NKMCharacter] =
       characters.filter(_.isEnemyFor(characterId))
   }
-  implicit class GameEventSeqUtils(es: Seq[GameEvent]) {
-    def ofType[T <: GameEvent: ClassTag]: Seq[T] = es.collect {case e: T => e}
+  implicit class GameEventSeqUtils[T <: GameEvent](es: Seq[T]) {
+    def ofType[A <: T: ClassTag]: Seq[A] =
+      es.collect {case e: A => e}
+    def inPhase(number: Int): Seq[T] =
+      es.filter(_.phase.number == number)
+    def inTurn(number: Int): Seq[T] =
+      es.filter(_.turn.number == number)
+    def causedBy(id: String): Seq[T] =
+      es.filter(_.causedById == id)
+    def ofCharacter(id: CharacterId): Seq[T with ContainsCharacterId] =
+      es.ofType[T with ContainsCharacterId].filter(_.characterId == id)
   }
 }
 

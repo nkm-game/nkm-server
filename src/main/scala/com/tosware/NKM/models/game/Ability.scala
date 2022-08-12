@@ -29,6 +29,7 @@ case class AbilityMetadata
   description: String,
   cooldown: Int = 0,
   range: Int = 0,
+  alternateName: String = "",
 ) {
   val id: AbilityMetadataId = name
 }
@@ -86,7 +87,7 @@ trait Ability {
   val metadata: AbilityMetadata
   val state: AbilityState
   def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates]
-  def targetsInRange(implicit gameState: GameState): Set[HexCoordinates]
+  def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] = Set.empty
   def parentCharacter(implicit gameState: GameState): NKMCharacter =
     gameState.characters.find(_.state.abilities.map(_.id).contains(id)).get
   def parentCell(implicit gameState: GameState): Option[HexCell] =

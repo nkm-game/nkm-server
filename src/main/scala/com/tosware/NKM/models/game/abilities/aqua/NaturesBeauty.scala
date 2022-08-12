@@ -9,7 +9,7 @@ object NaturesBeauty {
     AbilityMetadata(
       name = "Nature's Beauty",
       abilityType = AbilityType.Passive,
-      description = "*Character* can use basic attacks on allies, healing them instead of dealing damage.",
+      description = "Character can use basic attacks on allies, healing them instead of dealing damage.",
     )
 }
 

@@ -182,7 +182,7 @@ case class GameStateValidator()(implicit gameState: GameState) {
     }
   }
 
-  def validateAbilityUseOnCoordinates(playerId: PlayerId, abilityId: AbilityId, target: HexCoordinates, useData: UseData): CommandResponse = {
+  def validateAbilityUseOnCoordinates(playerId: PlayerId, abilityId: AbilityId, target: HexCoordinates, useData: UseData = UseData()): CommandResponse = {
     if (!playerInGame(playerId)) Failure(Message.playerNotInGame)
     else if (!abilityInGame(abilityId)) Failure(Message.abilityNotInGame)
     else if (gameStatusIs(GameStatus.NotStarted)) Failure(Message.gameNotStarted)
