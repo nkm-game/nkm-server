@@ -1,5 +1,6 @@
 package com.tosware.NKM.models.game.effects
 
+import com.tosware.NKM.models.game.CharacterEffect.CharacterEffectId
 import com.tosware.NKM.models.game.{CharacterEffect, CharacterEffectMetadata, CharacterEffectName, CharacterEffectType}
 
 object SnareEffect {
@@ -12,6 +13,6 @@ object SnareEffect {
     )
 }
 
-case class SnareEffect(cooldown: Int) extends CharacterEffect {
+case class SnareEffect(effectId: CharacterEffectId, cooldown: Int) extends CharacterEffect(effectId) {
   val metadata: CharacterEffectMetadata = SnareEffect.metadata
 }

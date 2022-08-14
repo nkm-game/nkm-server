@@ -6,6 +6,7 @@ import com.tosware.NKM.models.game.NKMCharacter.CharacterId
 
 import scala.math.abs
 import scala.reflect.ClassTag
+import scala.util.Random
 
 object HexUtils {
 
@@ -94,3 +95,8 @@ object HexUtils {
   }
 }
 
+
+object NKMUtils {
+  def randomUUID(implicit random: Random): String =
+    java.util.UUID.nameUUIDFromBytes(random.nextBytes(16)).toString
+}

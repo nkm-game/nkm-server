@@ -1,5 +1,6 @@
 package com.tosware.NKM.models.game.abilities.aqua
 
+import com.tosware.NKM.models.game.Ability.AbilityId
 import com.tosware.NKM.models.game.NKMCharacter.CharacterId
 import com.tosware.NKM.models.game._
 import com.tosware.NKM.models.game.hex.HexUtils._
@@ -13,7 +14,7 @@ object NaturesBeauty {
     )
 }
 
-case class NaturesBeauty(parentCharacterId: CharacterId) extends Ability with BasicAttackOverride {
+case class NaturesBeauty(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId) with BasicAttackOverride {
   override val metadata = NaturesBeauty.metadata
   override val state = AbilityState(parentCharacterId)
   override def rangeCellCoords(implicit gameState: GameState) =

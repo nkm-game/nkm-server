@@ -3,7 +3,7 @@ package unit.validators
 import com.tosware.NKM.models.GameStateValidator
 import com.tosware.NKM.models.game._
 import com.tosware.NKM.models.game.effects._
-import com.tosware.NKM.models.game.hex.HexCoordinates
+import com.tosware.NKM.models.game.hex.{HexCoordinates, NKMUtils}
 import com.tosware.NKM.models.game.hex.HexUtils.CoordinateSeq
 import com.tosware.NKM.providers.HexMapProvider.TestHexMapName
 import helpers.TestUtils
@@ -59,7 +59,7 @@ class GameStateValidatorSpec
       }
 
       "disallow if character is grounded" in {
-        val newGameState = gameState.addEffect(p0FirstCharacterId, GroundEffect(1))(gameState.id)
+        val newGameState = gameState.addEffect(p0FirstCharacterId, GroundEffect(NKMUtils.randomUUID, 1))(gameState.id)
 
         val result = GameStateValidator()(newGameState).validateBasicMoveCharacter(
           gameState.players(0).id,
@@ -70,7 +70,7 @@ class GameStateValidatorSpec
       }
 
       "disallow if character is snared" in {
-        val newGameState = gameState.addEffect(p0FirstCharacterId, SnareEffect(1))(gameState.id)
+        val newGameState = gameState.addEffect(p0FirstCharacterId, SnareEffect(NKMUtils.randomUUID, 1))(gameState.id)
 
         val result = GameStateValidator()(newGameState).validateBasicMoveCharacter(
           gameState.players(0).id,
@@ -81,7 +81,7 @@ class GameStateValidatorSpec
       }
 
       "disallow if character is stunned" in {
-        val newGameState = gameState.addEffect(p0FirstCharacterId, StunEffect(1))(gameState.id)
+        val newGameState = gameState.addEffect(p0FirstCharacterId, StunEffect(NKMUtils.randomUUID, 1))(gameState.id)
 
         val result = GameStateValidator()(newGameState).validateBasicMoveCharacter(
           gameState.players(0).id,
@@ -227,7 +227,7 @@ class GameStateValidatorSpec
       }
 
       "allow if character is grounded" in {
-        val newGameState = moveGameState.addEffect(p0FirstCharacterId, GroundEffect(1))(gameState.id)
+        val newGameState = moveGameState.addEffect(p0FirstCharacterId, GroundEffect(NKMUtils.randomUUID, 1))(gameState.id)
 
         val result = GameStateValidator()(newGameState).validateBasicAttackCharacter(
           gameState.players(0).id,
@@ -238,7 +238,7 @@ class GameStateValidatorSpec
       }
 
       "allow if character is snared" in {
-        val newGameState = moveGameState.addEffect(p0FirstCharacterId, SnareEffect(1))(gameState.id)
+        val newGameState = moveGameState.addEffect(p0FirstCharacterId, SnareEffect(NKMUtils.randomUUID, 1))(gameState.id)
 
         val result = GameStateValidator()(newGameState).validateBasicAttackCharacter(
           gameState.players(0).id,
@@ -249,7 +249,7 @@ class GameStateValidatorSpec
       }
 
       "disallow character is stunned" in {
-        val newGameState = moveGameState.addEffect(p0FirstCharacterId, StunEffect(1))(gameState.id)
+        val newGameState = moveGameState.addEffect(p0FirstCharacterId, StunEffect(NKMUtils.randomUUID, 1))(gameState.id)
 
         val result = GameStateValidator()(newGameState).validateBasicAttackCharacter(
           gameState.players(0).id,
@@ -260,7 +260,7 @@ class GameStateValidatorSpec
       }
 
       "disallow character is disarmed" in {
-        val newGameState = moveGameState.addEffect(p0FirstCharacterId, DisarmEffect(1))(gameState.id)
+        val newGameState = moveGameState.addEffect(p0FirstCharacterId, DisarmEffect(NKMUtils.randomUUID, 1))(gameState.id)
 
         val result = GameStateValidator()(newGameState).validateBasicAttackCharacter(
           gameState.players(0).id,

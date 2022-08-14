@@ -1,7 +1,7 @@
 package com.tosware.NKM.models.game.abilities.aqua
 
 import com.tosware.NKM.NKMConf
-import com.tosware.NKM.models.game.Ability.UseCheck
+import com.tosware.NKM.models.game.Ability.{AbilityId, UseCheck}
 import com.tosware.NKM.models.game.NKMCharacter.CharacterId
 import com.tosware.NKM.models.game._
 import com.tosware.NKM.models.game.hex.HexUtils._
@@ -17,7 +17,7 @@ object Purification {
     )
 }
 
-case class Purification(parentCharacterId: CharacterId) extends Ability with UsableOnCharacter {
+case class Purification(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId) with UsableOnCharacter {
   override val metadata = Purification.metadata
   override val state = AbilityState(parentCharacterId)
   override def rangeCellCoords(implicit gameState: GameState) =

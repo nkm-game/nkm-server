@@ -1,6 +1,7 @@
 package com.tosware.NKM.models.game.abilities.aqua
 
 import com.tosware.NKM.NKMConf
+import com.tosware.NKM.models.game.Ability.AbilityId
 import com.tosware.NKM.models.game.NKMCharacter.CharacterId
 import com.tosware.NKM.models.game._
 import com.tosware.NKM.models.game.hex.HexCoordinates
@@ -18,7 +19,7 @@ object Resurrection {
     )
 }
 
-case class Resurrection(parentCharacterId: CharacterId) extends Ability with UsableOnCoordinates {
+case class Resurrection(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId) with UsableOnCoordinates {
   override val metadata = Resurrection.metadata
   override val state = AbilityState(parentCharacterId)
   override def rangeCellCoords(implicit gameState: GameState) =

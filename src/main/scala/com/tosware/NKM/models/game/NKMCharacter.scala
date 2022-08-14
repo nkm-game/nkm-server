@@ -6,27 +6,31 @@ import com.tosware.NKM.models.game.CharacterEffect.CharacterEffectId
 import com.tosware.NKM.models.game.NKMCharacter._
 import com.tosware.NKM.models.game.CharacterMetadata.CharacterMetadataId
 import com.tosware.NKM.models.game.abilities.aqua.{NaturesBeauty, Purification, Resurrection}
-import com.tosware.NKM.models.game.abilities.hecate.Aster
+import com.tosware.NKM.models.game.abilities.hecate.{Aster, MasterThrone}
 import com.tosware.NKM.models.game.hex.HexUtils._
 import com.tosware.NKM.models.game.hex._
 import com.tosware.NKM.models.{Damage, DamageType}
 
+import scala.util.Random
+
 object NKMCharacter {
   type CharacterId = String
-  def instantiateAbilities(characterId: CharacterId, metadataIds: Seq[AbilityMetadataId]): Seq[Ability] = {
+  def instantiateAbilities(characterId: CharacterId, metadataIds: Seq[AbilityMetadataId])(implicit random: Random): Seq[Ability] = {
     metadataIds.map {
       case NaturesBeauty.metadata.id =>
-        NaturesBeauty(characterId)
+        NaturesBeauty(NKMUtils.randomUUID, characterId)
       case Purification.metadata.id =>
-        Purification(characterId)
+        Purification(NKMUtils.randomUUID, characterId)
       case Resurrection.metadata.id =>
-        Resurrection(characterId)
+        Resurrection(NKMUtils.randomUUID, characterId)
       case Aster.metadata.id =>
-        Aster(characterId)
+        Aster(NKMUtils.randomUUID, characterId)
+      case MasterThrone.metadata.id =>
+        MasterThrone(NKMUtils.randomUUID, characterId)
     }
   }
 
-  def fromMetadata(characterId: CharacterId, metadata: CharacterMetadata) = {
+  def fromMetadata(characterId: CharacterId, metadata: CharacterMetadata)(implicit random: Random) = {
     NKMCharacter(
       id = characterId,
       metadataId = metadata.id,

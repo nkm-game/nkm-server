@@ -42,8 +42,7 @@ case class CharacterEffectMetadata
   def id: CharacterEffectMetadataId = name.toString
 }
 
-trait CharacterEffect {
-  val id: CharacterEffectId = java.util.UUID.randomUUID.toString
+abstract class CharacterEffect(val id: CharacterEffectId) {
   val metadata: CharacterEffectMetadata
   val cooldown: Int
   val state: CharacterEffectState = CharacterEffectState(cooldown)

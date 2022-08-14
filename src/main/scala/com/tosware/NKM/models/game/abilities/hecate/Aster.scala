@@ -1,6 +1,7 @@
 package com.tosware.NKM.models.game.abilities.hecate
 
 import com.tosware.NKM.NKMConf
+import com.tosware.NKM.models.game.Ability.AbilityId
 import com.tosware.NKM.models.game.NKMCharacter.CharacterId
 import com.tosware.NKM.models.game._
 import com.tosware.NKM.models.game.abilities.hecate.Aster.radius
@@ -23,7 +24,7 @@ object Aster {
   val damage: Int = NKMConf.int("abilities.hecate.aster.damage")
 }
 
-case class Aster(parentCharacterId: CharacterId) extends Ability with UsableOnCoordinates {
+case class Aster(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId) with UsableOnCoordinates {
   override val metadata = Aster.metadata
   override val state = AbilityState(parentCharacterId)
   override def rangeCellCoords(implicit gameState: GameState) =

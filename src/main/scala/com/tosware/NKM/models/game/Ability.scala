@@ -2,6 +2,7 @@ package com.tosware.NKM.models.game
 
 import com.tosware.NKM.models.CommandResponse.{CommandResponse, Failure, Success}
 import com.tosware.NKM.models.game.Ability._
+import com.tosware.NKM.models.game.GameEvent.GameEvent
 import com.tosware.NKM.models.game.NKMCharacter.CharacterId
 import com.tosware.NKM.models.game.hex.HexUtils._
 import com.tosware.NKM.models.game.hex.{HexCell, HexCoordinates}
@@ -43,6 +44,10 @@ case class AbilityState
 
 case class UseData(data: String = "")
 
+trait GameEventListener {
+  def onEvent(e: GameEvent)(implicit gameState: GameState): GameState
+}
+
 trait BasicAttackOverride {
   def basicAttackCells(implicit gameState: GameState): Set[HexCoordinates]
   def basicAttackTargets(implicit gameState: GameState): Set[HexCoordinates]
@@ -82,11 +87,10 @@ trait UsableOnCharacter extends Usable[CharacterId] { this: Ability =>
   }
 }
 
-trait Ability {
-  val id: AbilityId = java.util.UUID.randomUUID.toString
+abstract class Ability(val id: AbilityId) {
   val metadata: AbilityMetadata
   val state: AbilityState
-  def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates]
+  def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] = Set.empty
   def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] = Set.empty
   def parentCharacter(implicit gameState: GameState): NKMCharacter =
     gameState.characters.find(_.state.abilities.map(_.id).contains(id)).get

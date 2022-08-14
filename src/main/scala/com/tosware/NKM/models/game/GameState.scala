@@ -11,7 +11,7 @@ import com.tosware.NKM.models.game.NKMCharacter.CharacterId
 import com.tosware.NKM.models.game.Player.PlayerId
 import com.tosware.NKM.models.game.blindpick._
 import com.tosware.NKM.models.game.draftpick._
-import com.tosware.NKM.models.game.hex.{HexCell, HexCoordinates, HexMap}
+import com.tosware.NKM.models.game.hex.{HexCell, HexCoordinates, HexMap, NKMUtils}
 
 import scala.util.Random
 
@@ -91,6 +91,8 @@ case class GameState(
 
   def abilities: Set[Ability] = characters.flatMap(_.state.abilities)
 
+  def triggerAbilities: Set[Ability with GameEventListener] = abilities.collect {case a: GameEventListener => a}
+
   def characterById(characterId: CharacterId): Option[NKMCharacter] = characters.find(_.id == characterId)
 
   def abilityById(abilityId: AbilityId): Option[Ability] = abilities.find(_.id == abilityId)
@@ -118,8 +120,12 @@ case class GameState(
       turn.number
   }
 
+  private def executeEventTriggers(e: GameEvent): GameState =
+    triggerAbilities.foldLeft(this)((acc, ability) => ability.onEvent(e)(acc))
+
   private def logEvent(e: GameEvent): GameState =
     copy(gameLog = gameLog.modify(_.events).using(es => es :+ e))
+      .executeEventTriggers(e)
 
   private def updateClock(newClock: Clock)(implicit causedById: String): GameState =
     copy(clock = newClock).logEvent(ClockUpdated(newClock))
@@ -182,7 +188,7 @@ case class GameState(
   }
 
   def generateCharacter(characterMetadataId: CharacterMetadataId)(implicit random: Random): NKMCharacter = {
-    val characterId = java.util.UUID.nameUUIDFromBytes(random.nextBytes(16)).toString
+    val characterId = NKMUtils.randomUUID
     val metadata = charactersMetadata.find(_.id == characterMetadataId).get
     NKMCharacter.fromMetadata(characterId, metadata)
   }
@@ -319,6 +325,12 @@ case class GameState(
     this.modify(_.hexMap.each.cells.each).using {
       case cell if cell.coordinates == targetCoords => updateFunction(cell)
       case cell => cell
+    }
+
+  def updateAbility(abilityId: AbilityId, newAbility: Ability): GameState =
+    this.modify(_.characters.each.state.abilities.each).using {
+      case ability if ability.id == abilityId => newAbility
+      case ability => ability
     }
 
   def damageCharacter(characterId: CharacterId, damage: Damage)(implicit causedBy: String): GameState =
