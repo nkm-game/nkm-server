@@ -1,6 +1,7 @@
 package com.tosware.NKM.providers
 
 import com.tosware.NKM.models.game.abilities.aqua._
+import com.tosware.NKM.models.game.abilities.hecate.{Aster, MasterThrone, PowerOfExistence}
 import com.tosware.NKM.models.game.{AttackType, CharacterMetadata}
 import com.tosware.NKM.serializers.NKMJsonProtocol
 
@@ -75,7 +76,11 @@ case class CharacterMetadatasProvider() extends NKMJsonProtocol {
       initialSpeed = 3,
       initialPsychicalDefense = 5,
       initialMagicalDefense = 20,
-      initialAbilitiesMetadataIds = Seq.empty
+      initialAbilitiesMetadataIds = Seq(
+        MasterThrone.metadata.id,
+        Aster.metadata.id,
+        PowerOfExistence.metadata.id,
+      )
     ),
     CharacterMetadata(
       name = "Rem",
@@ -367,5 +372,4 @@ case class CharacterMetadatasProvider() extends NKMJsonProtocol {
       Seq.empty,
     )
   })
-
 }
