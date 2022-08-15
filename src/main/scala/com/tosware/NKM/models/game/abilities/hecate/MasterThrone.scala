@@ -3,6 +3,7 @@ package com.tosware.NKM.models.game.abilities.hecate
 import com.tosware.NKM.models.game.NKMCharacter.CharacterId
 import com.tosware.NKM.models.game._
 import com.softwaremill.quicklens._
+import com.tosware.NKM.NKMConf
 import com.tosware.NKM.models.game.Ability.AbilityId
 import com.tosware.NKM.models.game.abilities.hecate.MasterThrone.healthPercent
 
@@ -17,7 +18,7 @@ object MasterThrone {
           |Life Energy can be collected only once per character.
           |""".stripMargin,
     )
-  val healthPercent = 40
+  val healthPercent = NKMConf.int("abilities.hecate.masterThrone.healthPercent")
 }
 
 case class MasterThrone
@@ -37,6 +38,11 @@ case class MasterThrone
       .modify(_.collectedCharacterIds).using(cs => cs + characterId)
       .modify(_.collectedEnergy).using(e => e + energy)
   }
+
+  def reset()(implicit gameState: GameState): MasterThrone =
+    this
+      .modify(_.collectedCharacterIds).setTo(Set.empty)
+      .modify(_.collectedEnergy).setTo(0)
 
   override def onEvent(e: GameEvent.GameEvent)(implicit gameState: GameState): GameState = {
     e match {

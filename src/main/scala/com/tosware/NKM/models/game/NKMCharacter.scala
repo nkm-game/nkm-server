@@ -6,7 +6,7 @@ import com.tosware.NKM.models.game.CharacterEffect.CharacterEffectId
 import com.tosware.NKM.models.game.NKMCharacter._
 import com.tosware.NKM.models.game.CharacterMetadata.CharacterMetadataId
 import com.tosware.NKM.models.game.abilities.aqua.{NaturesBeauty, Purification, Resurrection}
-import com.tosware.NKM.models.game.abilities.hecate.{Aster, MasterThrone}
+import com.tosware.NKM.models.game.abilities.hecate.{Aster, MasterThrone, PowerOfExistence}
 import com.tosware.NKM.models.game.hex.HexUtils._
 import com.tosware.NKM.models.game.hex._
 import com.tosware.NKM.models.{Damage, DamageType}
@@ -27,6 +27,8 @@ object NKMCharacter {
         Aster(NKMUtils.randomUUID, characterId)
       case MasterThrone.metadata.id =>
         MasterThrone(NKMUtils.randomUUID, characterId)
+      case PowerOfExistence.metadata.id =>
+        PowerOfExistence(NKMUtils.randomUUID, characterId)
     }
   }
 
