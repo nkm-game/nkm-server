@@ -20,6 +20,9 @@ object GameEvent {
   trait ContainsCharacterId {
     val characterId: CharacterId
   }
+  trait ContainsAbilityId {
+    val abilityId: AbilityId
+  }
 
   case class ClockUpdated(newClock: Clock)(implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent
   case class CharacterPlaced(characterId: CharacterId, target: HexCoordinates)(implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent
@@ -27,6 +30,8 @@ object GameEvent {
   case class EffectAppliedOnCell(effectId: String, target: HexCoordinates)(implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent
   case class EffectAppliedOnCharacter(effectId: CharacterEffectId, characterId: CharacterId)(implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent
   case class EffectRemovedFromCharacter(effectId: CharacterEffectId)(implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent
+  case class AbilityHitCharacter(abilityId: AbilityId, targetCharacterId: CharacterId)(implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent
+    with ContainsAbilityId
   case class CharacterBasicMoved(characterId: CharacterId, path: Seq[HexCoordinates])(implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent
     with ContainsCharacterId
   case class CharacterBasicAttacked(characterId: CharacterId, targetCharacterId: CharacterId)(implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent
@@ -180,11 +185,6 @@ case class GameState(
         .setTo(VictoryStatus.Won)
         .updateGameStatus(GameStatus.Finished)
     } else this
-  }
-
-  def checkIfBanningFinished(): GameState = {
-    val banningFinished = draftPickState.fold(false)(_.pickPhase != DraftPickPhase.Banning)
-    if(banningFinished) finishBanningPhase() else this
   }
 
   def generateCharacter(characterMetadataId: CharacterMetadataId)(implicit random: Random): NKMCharacter = {
@@ -346,9 +346,6 @@ case class GameState(
     updateCharacter(characterId)(_.modify(_.state.healthPoints).setTo(amount))
       .logEvent(CharacterHpSet(characterId, amount))
 
-  def setMap(hexMap: HexMap): GameState =
-    copy(hexMap = Some(hexMap))
-
   def removeFromMapIfDead(characterId: CharacterId)(implicit causedBy: String): GameState =
     if(characterById(characterId).get.isDead) {
       logEvent(CharacterDied(characterId))
@@ -382,6 +379,11 @@ case class GameState(
     this.modify(_.characterTakingActionThisTurn)
       .setTo(Some(characterId))
       .logEvent(CharacterTookAction(characterId))
+  }
+
+  def abilityHitCharacter(abilityId: AbilityId, targetCharacter: CharacterId): GameState = {
+    implicit val causedById: String = abilityId
+    logEvent(AbilityHitCharacter(abilityId: AbilityId, targetCharacter: CharacterId))
   }
 
   def useAbilityOnCoordinates(abilityId: AbilityId, target: HexCoordinates, useData: UseData = UseData()): GameState = {

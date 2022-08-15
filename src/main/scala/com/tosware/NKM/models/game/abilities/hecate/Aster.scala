@@ -37,5 +37,7 @@ case class Aster(abilityId: AbilityId, parentCharacterId: CharacterId) extends A
   }
 
   private def blastCharacter(target: CharacterId, damage: Damage)(implicit gameState: GameState): GameState =
-    gameState.damageCharacter(target, damage)(id)
+    gameState
+      .abilityHitCharacter(id, target)
+      .damageCharacter(target, damage)(id)
 }

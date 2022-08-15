@@ -30,18 +30,26 @@ case class MasterThrone
   override val metadata = MasterThrone.metadata
   override val state = AbilityState(parentCharacterId)
 
-  def collectEnergy(characterId: CharacterId, energy: Int): MasterThrone =
+  def collectEnergy(characterId: CharacterId)(implicit gameState: GameState): MasterThrone = {
+    val energy = (gameState.characterById(characterId).get.state.maxHealthPoints * (healthPercent / 100f)).toInt
+
     this
       .modify(_.collectedCharacterIds).using(cs => cs + characterId)
       .modify(_.collectedEnergy).using(e => e + energy)
+  }
 
   override def onEvent(e: GameEvent.GameEvent)(implicit gameState: GameState): GameState = {
     e match {
       case GameEvent.CharacterBasicAttacked(characterId, targetCharacterId) =>
         if(characterId != parentCharacterId) return gameState
         if(collectedCharacterIds.contains(targetCharacterId)) return gameState
-        val energy = (gameState.characterById(targetCharacterId).get.state.maxHealthPoints * (healthPercent / 100f)).toInt
-        gameState.updateAbility(id, collectEnergy(characterId, energy))
+        gameState.updateAbility(id, collectEnergy(characterId))
+      case GameEvent.AbilityHitCharacter(abilityId, targetCharacterId) =>
+        if(collectedCharacterIds.contains(targetCharacterId)) return gameState
+        val ability = gameState.abilityById(abilityId).get
+        if(ability.parentCharacter.id != parentCharacterId) return gameState
+        if(ability.metadata.abilityType != AbilityType.Normal) return gameState
+        gameState.updateAbility(id, collectEnergy(targetCharacterId))
       case _ => gameState
     }
   }

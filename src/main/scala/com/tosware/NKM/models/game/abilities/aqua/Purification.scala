@@ -30,7 +30,9 @@ case class Purification(abilityId: AbilityId, parentCharacterId: CharacterId) ex
     val effectIdsToRemove = gameState.characterById(target).get.state.effects
       .filter(_.metadata.effectType == CharacterEffectType.Negative).map(_.id)
 
-    gameState.removeEffects(effectIdsToRemove)(id)
+    gameState
+      .abilityHitCharacter(id, target)
+      .removeEffects(effectIdsToRemove)(id)
   }
 
   override def useChecks(implicit target: CharacterId, useData: UseData, gameState: GameState): Set[UseCheck] = {
