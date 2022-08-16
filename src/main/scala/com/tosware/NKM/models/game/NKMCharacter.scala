@@ -64,21 +64,45 @@ case class NKMCharacter
 
   def isDead: Boolean = state.healthPoints <= 0
 
+  def usedBasicMoveThisPhase(implicit gameState: GameState): Boolean =
+    gameState.gameLog.events
+      .inPhase(gameState.phase.number)
+      .ofType[GameEvent.CharacterBasicMoved]
+      .ofCharacter(id)
+      .nonEmpty
+
+  def usedBasicAttackThisPhase(implicit gameState: GameState): Boolean =
+    gameState.gameLog.events
+    .inPhase(gameState.phase.number)
+    .ofType[GameEvent.CharacterBasicAttacked]
+    .ofCharacter(id)
+    .nonEmpty
+
+  def usedUltimatumAbilityThisPhase(implicit gameState: GameState): Boolean =
+    (
+    gameState.gameLog.events
+      .inPhase(gameState.phase.number)
+      .ofType[GameEvent.AbilityUsedOnCoordinates]
+    ++
+    gameState.gameLog.events
+      .inPhase(gameState.phase.number)
+      .ofType[GameEvent.AbilityUsedOnCharacter]
+    )
+    .map(_.abilityId)
+    .map(aid => gameState.abilityById(aid).get)
+    .filter(a => a.parentCharacter.id == id)
+    .map(_.metadata.abilityType)
+    .contains(AbilityType.Ultimate)
+
   def canBasicMove(implicit gameState: GameState): Boolean =
-    !state.effects.exists(e => basicMoveImpairmentCcNames.contains(e.metadata.name)) &&
-      gameState.gameLog.events
-        .inPhase(gameState.phase.number)
-        .ofType[GameEvent.CharacterBasicMoved]
-        .ofCharacter(id)
-        .isEmpty
+    !usedBasicMoveThisPhase &&
+      !usedUltimatumAbilityThisPhase &&
+      !state.effects.exists(e => basicMoveImpairmentCcNames.contains(e.metadata.name))
 
   def canBasicAttack(implicit gameState: GameState): Boolean =
-    !state.effects.exists(e => basicAttackImpairmentCcNames.contains(e.metadata.name)) &&
-      gameState.gameLog.events
-        .inPhase(gameState.phase.number)
-        .ofType[GameEvent.CharacterBasicAttacked]
-        .ofCharacter(id)
-        .isEmpty
+    !usedBasicAttackThisPhase &&
+      !usedUltimatumAbilityThisPhase &&
+      !state.effects.exists(e => basicAttackImpairmentCcNames.contains(e.metadata.name))
 
   def parentCell(implicit gameState: GameState): Option[HexCell] =
     gameState.hexMap.get.getCellOfCharacter(id)

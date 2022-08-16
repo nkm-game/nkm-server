@@ -32,6 +32,10 @@ object GameEvent {
   case class EffectRemovedFromCharacter(effectId: CharacterEffectId)(implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent
   case class AbilityHitCharacter(abilityId: AbilityId, targetCharacterId: CharacterId)(implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent
     with ContainsAbilityId
+  case class AbilityUsedOnCoordinates(abilityId: AbilityId, target: HexCoordinates)(implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent
+    with ContainsAbilityId
+  case class AbilityUsedOnCharacter(abilityId: AbilityId, targetCharacterId: CharacterId)(implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent
+    with ContainsAbilityId
   case class CharacterBasicMoved(characterId: CharacterId, path: Seq[HexCoordinates])(implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent
     with ContainsCharacterId
   case class CharacterBasicAttacked(characterId: CharacterId, targetCharacterId: CharacterId)(implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent
@@ -387,19 +391,23 @@ case class GameState(
   }
 
   def useAbilityOnCoordinates(abilityId: AbilityId, target: HexCoordinates, useData: UseData = UseData()): GameState = {
+    implicit val causedById: String = abilityId
     val ability = abilityById(abilityId).get.asInstanceOf[Ability with UsableOnCoordinates]
     val parentCharacter = ability.parentCharacter(this)
 
     val newGameState = takeActionWithCharacter(parentCharacter.id)
     ability.use(target, useData)(newGameState)
+      .logEvent(AbilityUsedOnCoordinates(abilityId, target))
   }
 
   def useAbilityOnCharacter(abilityId: AbilityId, target: CharacterId, useData: UseData = UseData()): GameState = {
+    implicit val causedById: String = abilityId
     val ability = abilityById(abilityId).get.asInstanceOf[Ability with UsableOnCharacter]
     val parentCharacter = ability.parentCharacter(this)
 
     val newGameState = takeActionWithCharacter(parentCharacter.id)
     ability.use(target, useData)(newGameState)
+      .logEvent(AbilityUsedOnCharacter(abilityId, target))
   }
 
   def incrementTurn(): GameState =

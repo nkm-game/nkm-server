@@ -1,6 +1,7 @@
 package com.tosware.NKM.models.game.hex
 
-import com.tosware.NKM.models.game.GameEvent.{ContainsCharacterId, GameEvent}
+import com.tosware.NKM.models.game.Ability.AbilityId
+import com.tosware.NKM.models.game.GameEvent.{ContainsAbilityId, ContainsCharacterId, GameEvent}
 import com.tosware.NKM.models.game.{GameState, NKMCharacter}
 import com.tosware.NKM.models.game.NKMCharacter.CharacterId
 
@@ -92,6 +93,8 @@ object HexUtils {
       es.filter(_.causedById == id)
     def ofCharacter(id: CharacterId): Seq[T with ContainsCharacterId] =
       es.ofType[T with ContainsCharacterId].filter(_.characterId == id)
+    def ofAbility(id: AbilityId): Seq[T with ContainsAbilityId] =
+      es.ofType[T with ContainsAbilityId].filter(_.abilityId == id)
   }
 }
 
