@@ -7,6 +7,7 @@ import com.tosware.NKM.models.game.NKMCharacter._
 import com.tosware.NKM.models.game.CharacterMetadata.CharacterMetadataId
 import com.tosware.NKM.models.game.abilities.aqua.{NaturesBeauty, Purification, Resurrection}
 import com.tosware.NKM.models.game.abilities.hecate.{Aster, MasterThrone, PowerOfExistence}
+import com.tosware.NKM.models.game.abilities.llenn.PChan
 import com.tosware.NKM.models.game.abilities.sinon.{PreciseShot, SnipersSight, TacticalEscape}
 import com.tosware.NKM.models.game.hex.HexUtils._
 import com.tosware.NKM.models.game.hex._
@@ -38,6 +39,9 @@ object NKMCharacter {
         TacticalEscape(NKMUtils.randomUUID, characterId)
       case PreciseShot.metadata.id =>
         PreciseShot(NKMUtils.randomUUID, characterId)
+
+      case PChan.metadata.id =>
+        PChan(NKMUtils.randomUUID, characterId)
     }
   }
 

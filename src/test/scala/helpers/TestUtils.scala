@@ -38,7 +38,7 @@ trait TestUtils extends Logging {
     val playerIds: Seq[PlayerId] = characterMetadatass.indices map(p => s"p$p")
     val hexMap = HexMapProvider().getTestHexMaps.find(_.name == testHexMapName.toString).get
 
-    logger.info(hexMap.toTextUi)
+//    logger.info(hexMap.toTextUi)
 
     val gameStateDeps = GameStartDependencies(
       players = playerIds.map(n => Player(n)),

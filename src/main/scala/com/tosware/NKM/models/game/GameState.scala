@@ -50,6 +50,8 @@ object GameEvent {
     with ContainsCharacterId
   case class CharacterHpSet(characterId: CharacterId, amount: Int)(implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent
     with ContainsCharacterId
+  case class CharacterStatSet(characterId: CharacterId, statType: StatType, amount: Int)(implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent
+    with ContainsCharacterId
   case class CharacterDied(characterId: CharacterId)(implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent
     with ContainsCharacterId
   case class CharacterRemovedFromMap(characterId: CharacterId)(implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent
@@ -351,6 +353,18 @@ case class GameState(
   def setHp(characterId: CharacterId, amount: Int)(implicit causedBy: String): GameState =
     updateCharacter(characterId)(_.modify(_.state.healthPoints).setTo(amount))
       .logEvent(CharacterHpSet(characterId, amount))
+
+  def setStat(characterId: CharacterId, statType: StatType, amount: Int)(implicit causedBy: String): GameState = {
+    val updateStat = statType match {
+      case StatType.AttackPoints => modify(_: NKMCharacter)(_.state.pureAttackPoints)
+      case StatType.BasicAttackRange => modify(_: NKMCharacter)(_.state.pureBasicAttackRange)
+      case StatType.Speed => modify(_: NKMCharacter)(_.state.pureSpeed)
+      case StatType.PhysicalDefense => modify(_: NKMCharacter)(_.state.purePhysicalDefense)
+      case StatType.MagicalDefense => modify(_: NKMCharacter)(_.state.pureMagicalDefense)
+    }
+    updateCharacter(characterId)(c => updateStat(c).setTo(amount))
+      .logEvent(CharacterStatSet(characterId, statType, amount))
+  }
 
   def removeFromMapIfDead(characterId: CharacterId)(implicit causedBy: String): GameState =
     if(characterById(characterId).get.isDead) {
