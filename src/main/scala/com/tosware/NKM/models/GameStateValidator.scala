@@ -182,7 +182,7 @@ case class GameStateValidator()(implicit gameState: GameState) {
     }
   }
 
-  def validateAbilityUseOnCharacter(playerId: PlayerId, abilityId: AbilityId, target: CharacterId, useData: UseData): CommandResponse = {
+  def validateAbilityUseOnCharacter(playerId: PlayerId, abilityId: AbilityId, target: CharacterId, useData: UseData = UseData()): CommandResponse = {
     if (!playerInGame(playerId)) Failure(Message.playerNotInGame)
     else if (!abilityInGame(abilityId)) Failure(Message.abilityNotInGame)
     else if (gameStatusIs(GameStatus.NotStarted)) Failure(Message.gameNotStarted)

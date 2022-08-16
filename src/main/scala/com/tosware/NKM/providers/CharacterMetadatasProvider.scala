@@ -2,6 +2,7 @@ package com.tosware.NKM.providers
 
 import com.tosware.NKM.models.game.abilities.aqua._
 import com.tosware.NKM.models.game.abilities.hecate.{Aster, MasterThrone, PowerOfExistence}
+import com.tosware.NKM.models.game.abilities.sinon.{PreciseShot, SnipersSight, TacticalEscape}
 import com.tosware.NKM.models.game.{AttackType, CharacterMetadata}
 import com.tosware.NKM.serializers.NKMJsonProtocol
 
@@ -113,7 +114,11 @@ case class CharacterMetadatasProvider() extends NKMJsonProtocol {
       initialSpeed = 4,
       initialPsychicalDefense = 5,
       initialMagicalDefense = 5,
-      initialAbilitiesMetadataIds = Seq.empty
+      initialAbilitiesMetadataIds = Seq(
+        SnipersSight.metadata.id,
+        TacticalEscape.metadata.id,
+        PreciseShot.metadata.id,
+      )
     ),
     CharacterMetadata(
       name = "Yasaka Mahiro",
