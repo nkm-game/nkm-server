@@ -168,6 +168,20 @@ case class GameStateValidator()(implicit gameState: GameState) {
     }
   }
 
+  def validateAbilityUseWithoutTarget(playerId: PlayerId, abilityId: AbilityId): CommandResponse = {
+    if (!playerInGame(playerId)) Failure(Message.playerNotInGame)
+    else if (!abilityInGame(abilityId)) Failure(Message.abilityNotInGame)
+    else if (gameStatusIs(GameStatus.NotStarted)) Failure(Message.gameNotStarted)
+    else if (gameState.currentPlayer.id != playerId) Failure(Message.notYourTurn)
+    else {
+      val ability = gameState.abilityById(abilityId).get.asInstanceOf[Ability with UsableWithoutTarget]
+      val character = ability.parentCharacter
+      if (!gameState.playerById(playerId).get.characterIds.contains(character.id)) Failure("You do not own this character.")
+      else if (gameState.characterTakingActionThisTurn.fold(false)(_ != character.id)) Failure("Other character already took action this turn.")
+      else ability.canBeUsed(gameState)
+    }
+  }
+
   def validateAbilityUseOnCharacter(playerId: PlayerId, abilityId: AbilityId, target: CharacterId, useData: UseData): CommandResponse = {
     if (!playerInGame(playerId)) Failure(Message.playerNotInGame)
     else if (!abilityInGame(abilityId)) Failure(Message.abilityNotInGame)

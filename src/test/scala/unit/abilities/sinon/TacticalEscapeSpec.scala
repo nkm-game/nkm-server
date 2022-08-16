@@ -1,21 +1,20 @@
-package unit.abilities.hecate
+package unit.abilities.sinon
 
 import com.tosware.NKM.models.GameStateValidator
 import com.tosware.NKM.models.game._
-import com.tosware.NKM.models.game.abilities.hecate.{MasterThrone, PowerOfExistence}
+import com.tosware.NKM.models.game.abilities.sinon.TacticalEscape
 import com.tosware.NKM.models.game.hex.HexCoordinates
-import com.tosware.NKM.models.game.hex.HexUtils._
 import com.tosware.NKM.providers.HexMapProvider.TestHexMapName
 import helpers.TestUtils
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
-class PowerOfExistenceSpec
+class TacticalEscapeSpec
   extends AnyWordSpecLike
     with Matchers
     with TestUtils
 {
-  val metadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(PowerOfExistence.metadata.id, MasterThrone.metadata.id))
+  val metadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(TacticalEscape.metadata.id))
   implicit val gameState = getTestGameState(TestHexMapName.Simple2v2, Seq(
     Seq(metadata.copy(name = "Empty1"), metadata.copy(name = "Empty2")),
     Seq(metadata.copy(name = "Empty3"), metadata.copy(name = "Empty4")),
@@ -33,24 +32,15 @@ class PowerOfExistenceSpec
   val p1SecondCharacter = characterOnPoint(p1SecondCharacterSpawnCoordinates)
 
   val abilityId = p0FirstCharacter.state.abilities.head.id
-  val masterThroneAbilityId = p0FirstCharacter.state.abilities.tail.head.id
 
-  PowerOfExistence.metadata.name must {
-    "be able to damage characters" in {
-      val aaGameState: GameState = gameState.basicAttack(p0FirstCharacter.id, p1FirstCharacter.id)
-      aaGameState.abilityById(masterThroneAbilityId).get.asInstanceOf[MasterThrone].collectedEnergy should be > 0
-
-      val validator = GameStateValidator()(aaGameState)
+  TacticalEscape.metadata.name must {
+    "be able to modify character speed" in {
+      val validator = GameStateValidator()
       val r = validator.validateAbilityUseWithoutTarget(p0FirstCharacter.owner.id, abilityId)
       assertCommandSuccess(r)
 
-      val abilityUsedGameState: GameState = aaGameState.useAbilityWithoutTarget(abilityId)
-      abilityUsedGameState.abilityById(masterThroneAbilityId).get.asInstanceOf[MasterThrone].collectedEnergy should be(0)
-
-      abilityUsedGameState.gameLog.events
-        .ofType[GameEvent.CharacterDamaged]
-        .causedBy(abilityId)
-        .size should be (2)
+      val abilityUsedGameState: GameState = gameState.useAbilityWithoutTarget(abilityId)
+      p0FirstCharacter.state.speed should be < abilityUsedGameState.characterById(p0FirstCharacter.id).get.state.speed
     }
   }
 }

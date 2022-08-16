@@ -179,7 +179,7 @@ class GameStateValidatorSpec
       }
 
       "disallow move if character used ultimate ability" in {
-        val newGameState = gameState.useAbilityOnCoordinates(abilityId, p1FirstCharacterSpawnCoordinates)
+        val newGameState = gameState.useAbilityWithoutTarget(abilityId)
         val result = GameStateValidator()(newGameState).validateBasicMoveCharacter(gameState.players(0).id,
           CoordinateSeq((0, 0), (1, 0)),
           p0FirstCharacter.id
@@ -307,7 +307,7 @@ class GameStateValidatorSpec
       }
 
       "disallow if character used ultimate ability" in {
-        val newGameState = moveGameState.useAbilityOnCoordinates(abilityId, p1FirstCharacterSpawnCoordinates)
+        val newGameState = moveGameState.useAbilityWithoutTarget(abilityId)
         val result = GameStateValidator()(newGameState).validateBasicAttackCharacter(
           gameState.players(0).id,
           p0FirstCharacter.id,

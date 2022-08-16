@@ -83,8 +83,6 @@ object HexUtils {
       characters.filter(_.isEnemyFor(characterId))
   }
   implicit class GameEventSeqUtils[T <: GameEvent](es: Seq[T]) {
-    def ofType[A <: T: ClassTag]: Seq[A] =
-      es.collect {case e: A => e}
     def inPhase(number: Int): Seq[T] =
       es.filter(_.phase.number == number)
     def inTurn(number: Int): Seq[T] =
@@ -95,6 +93,11 @@ object HexUtils {
       es.ofType[T with ContainsCharacterId].filter(_.characterId == id)
     def ofAbility(id: AbilityId): Seq[T with ContainsAbilityId] =
       es.ofType[T with ContainsAbilityId].filter(_.abilityId == id)
+  }
+
+  implicit class SeqUtils[T](es: Seq[T]) {
+    def ofType[A <: T: ClassTag]: Seq[A] =
+      es.collect {case e: A => e}
   }
 }
 

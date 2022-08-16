@@ -54,7 +54,22 @@ trait BasicAttackOverride {
   def basicAttack(targetCharacterId: CharacterId)(implicit gameState: GameState): GameState
 }
 
-trait Usable[T] { this: Ability =>
+trait UsableWithoutTarget { this: Ability =>
+  def use()(implicit gameState: GameState): GameState
+  def useChecks(implicit gameState: GameState): Set[UseCheck] =
+    Set(
+      UseCheck.NotOnCooldown,
+      UseCheck.ParentCharacterOnMap,
+    )
+
+  final def canBeUsed(implicit gameState: GameState): CommandResponse = {
+    val failures = useChecks.filter(_._1 == false)
+    if(failures.isEmpty) Success()
+    else Failure(failures.map(_._2).mkString("\n"))
+  }
+}
+
+trait UsableOnTarget[T] { this: Ability =>
   def use(target: T, useData: UseData = UseData())(implicit gameState: GameState): GameState
   def useChecks(implicit target: T, useData: UseData, gameState: GameState): Set[UseCheck] =
     Set(
@@ -69,7 +84,7 @@ trait Usable[T] { this: Ability =>
   }
 }
 
-trait UsableOnCoordinates extends Usable[HexCoordinates] { this: Ability =>
+trait UsableOnCoordinates extends UsableOnTarget[HexCoordinates] { this: Ability =>
   override def useChecks(implicit target: HexCoordinates, useData: UseData, gameState: GameState): Set[UseCheck] = {
     super.useChecks ++
     Set(
@@ -78,7 +93,7 @@ trait UsableOnCoordinates extends Usable[HexCoordinates] { this: Ability =>
   }
 }
 
-trait UsableOnCharacter extends Usable[CharacterId] { this: Ability =>
+trait UsableOnCharacter extends UsableOnTarget[CharacterId] { this: Ability =>
   override def useChecks(implicit target: CharacterId, useData: UseData, gameState: GameState): Set[UseCheck] = {
     super.useChecks ++
     Set(

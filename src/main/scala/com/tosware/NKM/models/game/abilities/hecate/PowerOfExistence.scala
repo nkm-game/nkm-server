@@ -22,7 +22,7 @@ object PowerOfExistence {
     )
 }
 
-case class PowerOfExistence(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId) with UsableOnCoordinates {
+case class PowerOfExistence(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId) with UsableWithoutTarget {
   override val metadata = PowerOfExistence.metadata
   override val state: AbilityState = AbilityState(parentCharacterId)
   override def rangeCellCoords(implicit gameState: GameState) =
@@ -30,7 +30,7 @@ case class PowerOfExistence(abilityId: AbilityId, parentCharacterId: CharacterId
   override def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] =
     rangeCellCoords.whereEnemiesOf(parentCharacterId)
 
-  override def use(target: HexCoordinates, useData: UseData)(implicit gameState: GameState): GameState = {
+  override def use()(implicit gameState: GameState): GameState = {
     val targets = targetsInRange.characters.map(_.id)
     val masterThroneOpt = parentCharacter.state.abilities.collectFirst { case a: MasterThrone => a }
     if(masterThroneOpt.isEmpty) return gameState
