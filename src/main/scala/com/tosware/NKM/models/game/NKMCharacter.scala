@@ -3,16 +3,18 @@ package com.tosware.NKM.models.game
 import com.softwaremill.quicklens._
 import com.tosware.NKM.models.game.Ability.AbilityMetadataId
 import com.tosware.NKM.models.game.CharacterEffect.CharacterEffectId
-import com.tosware.NKM.models.game.NKMCharacter._
 import com.tosware.NKM.models.game.CharacterMetadata.CharacterMetadataId
+import com.tosware.NKM.models.game.GameEvent.GameEvent
+import com.tosware.NKM.models.game.NKMCharacter._
 import com.tosware.NKM.models.game.abilities.aqua.{NaturesBeauty, Purification, Resurrection}
 import com.tosware.NKM.models.game.abilities.hecate.{Aster, MasterThrone, PowerOfExistence}
-import com.tosware.NKM.models.game.abilities.llenn.PChan
+import com.tosware.NKM.models.game.abilities.llenn.{GrenadeThrow, PChan, RunItDown}
 import com.tosware.NKM.models.game.abilities.sinon.{PreciseShot, SnipersSight, TacticalEscape}
 import com.tosware.NKM.models.game.hex.HexUtils._
 import com.tosware.NKM.models.game.hex._
 import com.tosware.NKM.models.{Damage, DamageType}
 
+import scala.reflect.ClassTag
 import scala.util.Random
 
 object NKMCharacter {
@@ -42,6 +44,10 @@ object NKMCharacter {
 
       case PChan.metadata.id =>
         PChan(NKMUtils.randomUUID, characterId)
+      case GrenadeThrow.metadata.id =>
+        GrenadeThrow(NKMUtils.randomUUID, characterId)
+      case RunItDown.metadata.id =>
+        RunItDown(NKMUtils.randomUUID, characterId)
     }
   }
 
@@ -77,19 +83,44 @@ case class NKMCharacter
 
   def isDead: Boolean = state.healthPoints <= 0
 
-  def usedBasicMoveThisPhase(implicit gameState: GameState): Boolean =
+  def usedBasicMoveThisTurn(implicit gameState: GameState): Boolean =
     gameState.gameLog.events
-      .inPhase(gameState.phase.number)
+      .inTurn(gameState.turn.number)
       .ofType[GameEvent.CharacterBasicMoved]
       .ofCharacter(id)
       .nonEmpty
 
-  def usedBasicAttackThisPhase(implicit gameState: GameState): Boolean =
+  def usedBasicAttackThisTurn(implicit gameState: GameState): Boolean =
     gameState.gameLog.events
-    .inPhase(gameState.phase.number)
+    .inTurn(gameState.turn.number)
     .ofType[GameEvent.CharacterBasicAttacked]
     .ofCharacter(id)
     .nonEmpty
+
+  def hasRefreshed[RefreshEvent <: GameEvent: ClassTag, ActionEvent <: GameEvent: ClassTag](implicit gameState: GameState): Boolean = {
+    val lastRefreshIndex = gameState.gameLog.events
+      .ofType[RefreshEvent]
+      .inTurn(gameState.turn.number)
+      .ofCharacter(id)
+      .map(_.index)
+      .lastOption
+
+    val lastActionIndex = gameState.gameLog.events
+      .ofType[ActionEvent]
+      .inTurn(gameState.turn.number)
+      .ofCharacter(id)
+      .map(_.index)
+      .lastOption
+
+    lastRefreshIndex.isDefined && (lastActionIndex.isEmpty || lastRefreshIndex.get > lastActionIndex.get)
+
+  }
+
+  def hasRefreshedBasicMove(implicit gameState: GameState): Boolean =
+    hasRefreshed[GameEvent.BasicMoveRefreshed, GameEvent.CharacterBasicMoved]
+
+  def hasRefreshedBasicAttack(implicit gameState: GameState): Boolean =
+    hasRefreshed[GameEvent.BasicAttackRefreshed, GameEvent.CharacterBasicAttacked]
 
   def usedUltimatumAbilityThisPhase(implicit gameState: GameState): Boolean =
     (
@@ -111,14 +142,13 @@ case class NKMCharacter
     .map(_.metadata.abilityType)
     .contains(AbilityType.Ultimate)
 
-  def canBasicMove(implicit gameState: GameState): Boolean =
-    !usedBasicMoveThisPhase &&
-      !usedUltimatumAbilityThisPhase &&
+  def canBasicMove(implicit gameState: GameState): Boolean = {
+    (hasRefreshedBasicMove || !usedBasicMoveThisTurn && !usedUltimatumAbilityThisPhase) &&
       !state.effects.exists(e => basicMoveImpairmentCcNames.contains(e.metadata.name))
+  }
 
   def canBasicAttack(implicit gameState: GameState): Boolean =
-    !usedBasicAttackThisPhase &&
-      !usedUltimatumAbilityThisPhase &&
+    (hasRefreshedBasicAttack || !usedBasicAttackThisTurn && !usedUltimatumAbilityThisPhase) &&
       !state.effects.exists(e => basicAttackImpairmentCcNames.contains(e.metadata.name))
 
   def parentCell(implicit gameState: GameState): Option[HexCell] =
@@ -147,7 +177,7 @@ case class NKMCharacter
   def basicAttackTargets(implicit gameState: GameState): Set[HexCoordinates] =
     basicAttackOverride.fold(defaultBasicAttackTargets)(_.basicAttackTargets)
 
-  def basicAttack(targetCharacterId: CharacterId)(implicit gameState: GameState): GameState =
+  def basicAttack(targetCharacterId: CharacterId)(implicit random: Random, gameState: GameState): GameState =
     basicAttackOverride.fold(defaultBasicAttack(targetCharacterId))(_.basicAttack(targetCharacterId))
 
   def defaultBasicAttackCells(implicit gameState: GameState): Set[HexCoordinates] = {
@@ -162,8 +192,8 @@ case class NKMCharacter
   def defaultBasicAttackTargets(implicit gameState: GameState): Set[HexCoordinates] =
     basicAttackCellCoords.whereEnemiesOf(id)
 
-  def defaultBasicAttack(targetCharacterId: CharacterId)(implicit gameState: GameState): GameState =
-    gameState.damageCharacter(targetCharacterId, Damage(DamageType.Physical, state.attackPoints))(id)
+  def defaultBasicAttack(targetCharacterId: CharacterId)(implicit random: Random, gameState: GameState): GameState =
+    gameState.damageCharacter(targetCharacterId, Damage(DamageType.Physical, state.attackPoints))(random, id)
 
   def heal(amount: Int): NKMCharacter =
     this.modify(_.state.healthPoints).using(oldHp => math.min(oldHp + amount, state.maxHealthPoints))

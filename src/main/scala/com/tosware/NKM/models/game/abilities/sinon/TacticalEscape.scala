@@ -7,6 +7,8 @@ import com.tosware.NKM.models.game._
 import com.tosware.NKM.models.game.abilities.sinon.TacticalEscape.{duration, speedIncrease}
 import com.tosware.NKM.models.game.effects.StatBuffEffect
 
+import scala.util.Random
+
 object TacticalEscape {
   val metadata: AbilityMetadata =
     AbilityMetadata(
@@ -23,8 +25,7 @@ case class TacticalEscape(abilityId: AbilityId, parentCharacterId: CharacterId) 
   override val metadata = TacticalEscape.metadata
   override val state = AbilityState(parentCharacterId)
 
-  override def use()(implicit gameState: GameState) = {
+  override def use()(implicit random: Random, gameState: GameState): GameState =
     gameState.
-      addEffect(parentCharacterId, StatBuffEffect(parentCharacterId, duration, StatType.Speed, speedIncrease))(id)
-  }
+      addEffect(parentCharacterId, StatBuffEffect(parentCharacterId, duration, StatType.Speed, speedIncrease))(random, id)
 }

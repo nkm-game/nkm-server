@@ -1,20 +1,21 @@
-package unit.abilities.sinon
+package unit.abilities.llenn
 
 import com.tosware.NKM.models.GameStateValidator
 import com.tosware.NKM.models.game._
-import com.tosware.NKM.models.game.abilities.sinon.SnipersSight
+import com.tosware.NKM.models.game.abilities.llenn.GrenadeThrow
 import com.tosware.NKM.models.game.hex.HexCoordinates
+import com.tosware.NKM.models.game.hex.HexUtils._
 import com.tosware.NKM.providers.HexMapProvider.TestHexMapName
 import helpers.TestUtils
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
-class SnipersSightSpec
+class GrenadeThrowSpec
   extends AnyWordSpecLike
     with Matchers
     with TestUtils
 {
-  val metadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(SnipersSight.metadata.id))
+  val metadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(GrenadeThrow.metadata.id))
   implicit val gameState = getTestGameState(TestHexMapName.Simple2v2, Seq(
     Seq(metadata.copy(name = "Empty1"), metadata.copy(name = "Empty2")),
     Seq(metadata.copy(name = "Empty3"), metadata.copy(name = "Empty4")),
@@ -31,11 +32,23 @@ class SnipersSightSpec
   val p1FirstCharacter = characterOnPoint(p1FirstCharacterSpawnCoordinates)
   val p1SecondCharacter = characterOnPoint(p1SecondCharacterSpawnCoordinates)
 
-  SnipersSight.metadata.name must {
-    "be able to attack characters in radial range" in {
-      val newGameState = gameState.teleportCharacter(HexCoordinates(0, 1), p0FirstCharacter.id)(random, gameState.id)
-      val r = GameStateValidator()(newGameState).validateBasicAttackCharacter(p0FirstCharacter.owner.id, p0FirstCharacter.id, p1SecondCharacter.id)
-      assertCommandSuccess(r)
+  val abilityId = p0FirstCharacter.state.abilities.head.id
+
+  GrenadeThrow.metadata.name must {
+    "be able to damage characters" in {
+      val validator = GameStateValidator()
+
+      val allCoords = gameState.hexMap.get.cells.toCoords
+      allCoords.foreach { c =>
+        val r = validator.validateAbilityUseOnCoordinates(p0FirstCharacter.owner.id, abilityId, c)
+        assertCommandSuccess(r)
+      }
+
+      val abilityUsedGameState: GameState = gameState.useAbilityOnCoordinates(abilityId, p0SecondCharacterSpawnCoordinates)
+      abilityUsedGameState.gameLog.events
+        .ofType[GameEvent.CharacterDamaged]
+        .causedBy(abilityId)
+        .size should be (2)
     }
   }
 }

@@ -8,6 +8,8 @@ import com.tosware.NKM.models.game.hex.HexUtils._
 import com.tosware.NKM.models.game.hex.{HexCell, HexCoordinates}
 import enumeratum._
 
+import scala.util.Random
+
 object Ability {
   type AbilityId = String
   type AbilityMetadataId = String
@@ -45,17 +47,17 @@ case class AbilityState
 case class UseData(data: String = "")
 
 trait GameEventListener {
-  def onEvent(e: GameEvent)(implicit gameState: GameState): GameState
+  def onEvent(e: GameEvent)(implicit random: Random, gameState: GameState): GameState
 }
 
 trait BasicAttackOverride {
   def basicAttackCells(implicit gameState: GameState): Set[HexCoordinates]
   def basicAttackTargets(implicit gameState: GameState): Set[HexCoordinates]
-  def basicAttack(targetCharacterId: CharacterId)(implicit gameState: GameState): GameState
+  def basicAttack(targetCharacterId: CharacterId)(implicit random: Random, gameState: GameState): GameState
 }
 
 trait UsableWithoutTarget { this: Ability =>
-  def use()(implicit gameState: GameState): GameState
+  def use()(implicit random: Random, gameState: GameState): GameState
   def useChecks(implicit gameState: GameState): Set[UseCheck] =
     Set(
       UseCheck.NotOnCooldown,
@@ -70,7 +72,7 @@ trait UsableWithoutTarget { this: Ability =>
 }
 
 trait UsableOnTarget[T] { this: Ability =>
-  def use(target: T, useData: UseData = UseData())(implicit gameState: GameState): GameState
+  def use(target: T, useData: UseData = UseData())(implicit random: Random, gameState: GameState): GameState
   def useChecks(implicit target: T, useData: UseData, gameState: GameState): Set[UseCheck] =
     Set(
       UseCheck.NotOnCooldown,

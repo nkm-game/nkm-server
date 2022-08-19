@@ -8,6 +8,8 @@ import com.tosware.NKM.models.game._
 import com.tosware.NKM.models.game.abilities.sinon.PreciseShot.damage
 import com.tosware.NKM.models.game.hex.HexUtils._
 
+import scala.util.Random
+
 object PreciseShot {
   val metadata: AbilityMetadata =
     AbilityMetadata(
@@ -29,10 +31,10 @@ case class PreciseShot(abilityId: AbilityId, parentCharacterId: CharacterId) ext
   override def targetsInRange(implicit gameState: GameState) =
     rangeCellCoords.whereEnemiesOf(parentCharacterId)
 
-  override def use(target: CharacterId, useData: UseData)(implicit gameState: GameState): GameState =
+  override def use(target: CharacterId, useData: UseData)(implicit random: Random, gameState: GameState): GameState =
     gameState
       .abilityHitCharacter(id, target)
-      .damageCharacter(target, Damage(DamageType.Physical, damage))(id)
+      .damageCharacter(target, Damage(DamageType.Physical, damage))(random, id)
 
   override def useChecks(implicit target: CharacterId, useData: UseData, gameState: GameState): Set[UseCheck] =
     super.useChecks + UseCheck.TargetIsEnemy

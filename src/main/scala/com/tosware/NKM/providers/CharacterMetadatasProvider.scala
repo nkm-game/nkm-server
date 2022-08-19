@@ -2,6 +2,7 @@ package com.tosware.NKM.providers
 
 import com.tosware.NKM.models.game.abilities.aqua._
 import com.tosware.NKM.models.game.abilities.hecate.{Aster, MasterThrone, PowerOfExistence}
+import com.tosware.NKM.models.game.abilities.llenn.{GrenadeThrow, PChan, RunItDown}
 import com.tosware.NKM.models.game.abilities.sinon.{PreciseShot, SnipersSight, TacticalEscape}
 import com.tosware.NKM.models.game.{AttackType, CharacterMetadata}
 import com.tosware.NKM.serializers.NKMJsonProtocol
@@ -206,7 +207,11 @@ case class CharacterMetadatasProvider() extends NKMJsonProtocol {
       initialSpeed = 8,
       initialPsychicalDefense = 15,
       initialMagicalDefense = 10,
-      initialAbilitiesMetadataIds = Seq.empty
+      initialAbilitiesMetadataIds = Seq(
+        PChan.metadata.id,
+        GrenadeThrow.metadata.id,
+        RunItDown.metadata.id,
+      )
     ),
     CharacterMetadata(
       name = "Kirito",

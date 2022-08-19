@@ -16,7 +16,11 @@ import com.tosware.NKM.models.game.hex.{HexCell, HexCoordinates, HexMap, NKMUtil
 import scala.util.Random
 
 object GameEvent {
-  abstract class GameEvent()(implicit val phase: Phase, val turn: Turn, val causedById: String)
+  type GameEventId = String
+  abstract class GameEvent(val eid: GameEventId)(implicit val phase: Phase, val turn: Turn, val causedById: String) {
+    def index(implicit gameState: GameState): Int =
+      gameState.gameLog.events.indexWhere(_.eid == eid)
+  }
   trait ContainsCharacterId {
     val characterId: CharacterId
   }
@@ -24,42 +28,69 @@ object GameEvent {
     val abilityId: AbilityId
   }
 
-  case class ClockUpdated(newClock: Clock)(implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent
-  case class CharacterPlaced(characterId: CharacterId, target: HexCoordinates)(implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent
+  case class ClockUpdated(id: GameEventId, newClock: Clock)
+                         (implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent(id)
+  case class CharacterPlaced(id: GameEventId, characterId: CharacterId, target: HexCoordinates)
+                            (implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent(id)
     with ContainsCharacterId
-  case class EffectAppliedOnCell(effectId: String, target: HexCoordinates)(implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent
-  case class EffectAppliedOnCharacter(effectId: CharacterEffectId, characterId: CharacterId)(implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent
-  case class EffectRemovedFromCharacter(effectId: CharacterEffectId)(implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent
-  case class AbilityHitCharacter(abilityId: AbilityId, targetCharacterId: CharacterId)(implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent
+  case class EffectAppliedOnCell(id: GameEventId, effectId: String, target: HexCoordinates)
+                                (implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent(id)
+  case class EffectAppliedOnCharacter(id: GameEventId, effectId: CharacterEffectId, characterId: CharacterId)
+                                     (implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent(id)
+  case class EffectRemovedFromCharacter(id: GameEventId, effectId: CharacterEffectId)
+                                       (implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent(id)
+  case class AbilityHitCharacter(id: GameEventId, abilityId: AbilityId, targetCharacterId: CharacterId)
+                                (implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent(id)
     with ContainsAbilityId
-  case class AbilityUsedWithoutTarget(abilityId: AbilityId)(implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent
+  case class AbilityUsedWithoutTarget(id: GameEventId, abilityId: AbilityId)
+                                     (implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent(id)
     with ContainsAbilityId
-  case class AbilityUsedOnCoordinates(abilityId: AbilityId, target: HexCoordinates)(implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent
+  case class AbilityUsedOnCoordinates(id: GameEventId, abilityId: AbilityId, target: HexCoordinates)
+                                     (implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent(id)
     with ContainsAbilityId
-  case class AbilityUsedOnCharacter(abilityId: AbilityId, targetCharacterId: CharacterId)(implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent
+  case class AbilityUsedOnCharacter(id: GameEventId, abilityId: AbilityId, targetCharacterId: CharacterId)
+                                   (implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent(id)
     with ContainsAbilityId
-  case class CharacterBasicMoved(characterId: CharacterId, path: Seq[HexCoordinates])(implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent
+  case class CharacterBasicMoved(id: GameEventId, characterId: CharacterId, path: Seq[HexCoordinates])
+                                (implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent(id)
     with ContainsCharacterId
-  case class CharacterBasicAttacked(characterId: CharacterId, targetCharacterId: CharacterId)(implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent
+  case class CharacterBasicAttacked(id: GameEventId, characterId: CharacterId, targetCharacterId: CharacterId)
+                                   (implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent(id)
     with ContainsCharacterId
-  case class CharacterTeleported(characterId: CharacterId, target: HexCoordinates)(implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent
+  case class CharacterTeleported(id: GameEventId, characterId: CharacterId, target: HexCoordinates)
+                                (implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent(id)
     with ContainsCharacterId
-  case class CharacterDamaged(characterId: CharacterId, damage: Damage)(implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent
+  case class CharacterDamaged(id: GameEventId, characterId: CharacterId, damage: Damage)
+                             (implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent(id)
     with ContainsCharacterId
-  case class CharacterHealed(characterId: CharacterId, amount: Int)(implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent
+  case class CharacterHealed(id: GameEventId, characterId: CharacterId, amount: Int)
+                            (implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent(id)
     with ContainsCharacterId
-  case class CharacterHpSet(characterId: CharacterId, amount: Int)(implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent
+  case class CharacterHpSet(id: GameEventId, characterId: CharacterId, amount: Int)
+                           (implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent(id)
     with ContainsCharacterId
-  case class CharacterStatSet(characterId: CharacterId, statType: StatType, amount: Int)(implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent
+  case class CharacterStatSet(id: GameEventId, characterId: CharacterId, statType: StatType, amount: Int)
+                             (implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent(id)
     with ContainsCharacterId
-  case class CharacterDied(characterId: CharacterId)(implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent
+  case class CharacterDied(id: GameEventId, characterId: CharacterId)
+                          (implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent(id)
     with ContainsCharacterId
-  case class CharacterRemovedFromMap(characterId: CharacterId)(implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent
+  case class CharacterRemovedFromMap(id: GameEventId, characterId: CharacterId)
+                                    (implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent(id)
     with ContainsCharacterId
-  case class CharacterTookAction(characterId: CharacterId)(implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent
+  case class CharacterTookAction(id: GameEventId, characterId: CharacterId)
+                                (implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent(id)
     with ContainsCharacterId
-  case class TurnFinished()(implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent
-  case class PhaseFinished()(implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent
+  case class BasicAttackRefreshed(id: GameEventId, characterId: CharacterId)
+                                 (implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent(id)
+    with ContainsCharacterId
+  case class BasicMoveRefreshed(id: GameEventId, characterId: CharacterId)
+                               (implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent(id)
+    with ContainsCharacterId
+  case class TurnFinished(id: GameEventId)
+                         (implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent(id)
+  case class PhaseFinished(id: GameEventId)
+                          (implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent(id)
 }
 case class GameLog(events: Seq[GameEvent])
 
@@ -96,8 +127,6 @@ case class GameState(
 
   def playerById(playerId: PlayerId): Option[Player] = players.find(_.id == playerId)
 
-  def isInChampionSelect: Boolean = Seq(GameStatus.CharacterPick, GameStatus.CharacterPicked).contains(gameStatus)
-
   def currentPlayer: Player = players(currentPlayerNumber)
 
   def currentPlayerTime: Long = clock.playerTimes(currentPlayer.id)
@@ -133,15 +162,15 @@ case class GameState(
       turn.number
   }
 
-  private def executeEventTriggers(e: GameEvent): GameState =
-    triggerAbilities.foldLeft(this)((acc, ability) => ability.onEvent(e)(acc))
+  private def executeEventTriggers(e: GameEvent)(implicit random: Random): GameState =
+    triggerAbilities.foldLeft(this)((acc, ability) => ability.onEvent(e)(random, acc))
 
-  private def logEvent(e: GameEvent): GameState =
+  private def logEvent(e: GameEvent)(implicit random: Random): GameState =
     copy(gameLog = gameLog.modify(_.events).using(es => es :+ e))
       .executeEventTriggers(e)
 
-  private def updateClock(newClock: Clock)(implicit causedById: String): GameState =
-    copy(clock = newClock).logEvent(ClockUpdated(newClock))
+  private def updateClock(newClock: Clock)(implicit random: Random, causedById: String): GameState =
+    copy(clock = newClock).logEvent(ClockUpdated(NKMUtils.randomUUID, newClock))
 
   private def updateGameStatus(newGameStatus: GameStatus): GameState =
     copy(gameStatus = newGameStatus)
@@ -152,10 +181,10 @@ case class GameState(
     case PickType.BlindPick => clockConfig.maxPickTimeMillis
   }
 
-  def initializeCharacterPick(): GameState =
-    updateClock(clock.setPickTime(pickTime))(id)
+  def initializeCharacterPick()(implicit random: Random): GameState =
+    updateClock(clock.setPickTime(pickTime))(random, id)
 
-  def startGame(g: GameStartDependencies): GameState = {
+  def startGame(g: GameStartDependencies)(implicit random: Random): GameState = {
     copy(
       charactersMetadata = g.charactersMetadata,
       players = g.players,
@@ -233,27 +262,27 @@ case class GameState(
   def checkIfCharacterPickFinished()(implicit random: Random): GameState =
     if(characterPickFinished) {
       updateGameStatus(GameStatus.CharacterPicked)
-        .updateClock(clock.setPickTime(clockConfig.timeAfterPickMillis))(id)
+        .updateClock(clock.setPickTime(clockConfig.timeAfterPickMillis))(random, id)
         .assignCharactersToPlayers()
     } else this
 
   def startPlacingCharacters()(implicit random: Random): GameState =
     updateGameStatus(GameStatus.CharacterPlacing).placeCharactersRandomlyIfAllRandom()
 
-  def decreasePickTime(timeMillis: Long): GameState =
-    updateClock(clock.decreasePickTime(timeMillis))(id)
+  def decreasePickTime(timeMillis: Long)(implicit random: Random): GameState =
+    updateClock(clock.decreasePickTime(timeMillis))(random, id)
 
-  def decreaseTime(playerId: PlayerId, timeMillis: Long): GameState =
-    updateClock(clock.decreaseTime(playerId, timeMillis))(playerId)
+  def decreaseTime(playerId: PlayerId, timeMillis: Long)(implicit random: Random): GameState =
+    updateClock(clock.decreaseTime(playerId, timeMillis))(random, playerId)
 
-  def increaseTime(playerId: PlayerId, timeMillis: Long): GameState =
-    updateClock(clock.increaseTime(playerId, timeMillis))(playerId)
+  def increaseTime(playerId: PlayerId, timeMillis: Long)(implicit random: Random): GameState =
+    updateClock(clock.increaseTime(playerId, timeMillis))(random, playerId)
 
-  def pause(): GameState =
-    updateClock(clock.pause())(id)
+  def pause()(implicit random: Random): GameState =
+    updateClock(clock.pause())(random, id)
 
-  def unpause(): GameState =
-    updateClock(clock.unpause())(id)
+  def unpause()(implicit random: Random): GameState =
+    updateClock(clock.unpause())(random, id)
 
   def surrender(playerIds: PlayerId*): GameState = {
     def filterPlayers: Player => Boolean = p => playerIds.contains(p.name)
@@ -264,15 +293,15 @@ case class GameState(
   def ban(playerId: PlayerId, characterIds: Set[CharacterMetadataId]): GameState =
     copy(draftPickState = draftPickState.map(_.ban(playerId, characterIds)))
 
-  def finishBanningPhase(): GameState =
+  def finishBanningPhase()(implicit random: Random): GameState =
     copy(
       draftPickState = draftPickState.map(_.finishBanning()),
-    ).updateClock(clock.setPickTime(clockConfig.maxPickTimeMillis))(id)
+    ).updateClock(clock.setPickTime(clockConfig.maxPickTimeMillis))(random, id)
 
   def pick(playerId: PlayerId, characterId: CharacterMetadataId)(implicit random: Random): GameState =
     copy(
       draftPickState = draftPickState.map(_.pick(playerId, characterId)),
-    ).updateClock(clock.setPickTime(clockConfig.maxPickTimeMillis))(id)
+    ).updateClock(clock.setPickTime(clockConfig.maxPickTimeMillis))(random, id)
       .checkIfCharacterPickFinished()
 
   def draftPickTimeout(): GameState =
@@ -288,39 +317,39 @@ case class GameState(
   def checkIfPlacingCharactersFinished(): GameState =
     if(placingCharactersFinished) updateGameStatus(GameStatus.Running) else this
 
-  def placeCharacters(playerId: PlayerId, coordinatesToCharacterIdMap: Map[HexCoordinates, CharacterId]): GameState =
-    coordinatesToCharacterIdMap.foldLeft(this){case (acc, (coordinate, characterId)) => acc.placeCharacter(coordinate, characterId)(playerId)}
+  def placeCharacters(playerId: PlayerId, coordinatesToCharacterIdMap: Map[HexCoordinates, CharacterId])(implicit random: Random): GameState =
+    coordinatesToCharacterIdMap.foldLeft(this){case (acc, (coordinate, characterId)) => acc.placeCharacter(coordinate, characterId)(random, playerId)}
       .copy(playerIdsThatPlacedCharacters = playerIdsThatPlacedCharacters + playerId)
       .checkIfPlacingCharactersFinished()
 
-  def placeCharacter(targetCellCoordinates: HexCoordinates, characterId: CharacterId)(implicit causedBy: String): GameState =
+  def placeCharacter(targetCellCoordinates: HexCoordinates, characterId: CharacterId)(implicit random: Random, causedBy: String): GameState =
     updateHexCell(targetCellCoordinates)(_.copy(characterId = Some(characterId)))
     .modify(_.characterIdsOutsideMap).using(_.filter(_ != characterId))
-      .logEvent(CharacterPlaced(characterId, targetCellCoordinates))
+      .logEvent(CharacterPlaced(NKMUtils.randomUUID, characterId, targetCellCoordinates))
 
-  def basicMoveCharacter(playerId: PlayerId, path: Seq[HexCoordinates], characterId: CharacterId): GameState = {
+  def basicMoveCharacter(playerId: PlayerId, path: Seq[HexCoordinates], characterId: CharacterId)(implicit random: Random): GameState = {
     implicit val causedBy: CharacterId = characterId
     val newGameState = takeActionWithCharacter(characterId)
     // case if character dies on the way? make a test of this and create a new functions with while(onMap)
-    path.tail.foldLeft(newGameState)((acc, coordinate) => acc.teleportCharacter(coordinate, characterId)(playerId))
-      .logEvent(CharacterBasicMoved(characterId, path))
+    path.tail.foldLeft(newGameState)((acc, coordinate) => acc.teleportCharacter(coordinate, characterId)(random, playerId))
+      .logEvent(CharacterBasicMoved(NKMUtils.randomUUID, characterId, path))
   }
 
-  def teleportCharacter(targetCellCoordinates: HexCoordinates, characterId: CharacterId)(implicit causedBy: String): GameState = {
+  def teleportCharacter(targetCellCoordinates: HexCoordinates, characterId: CharacterId)(implicit random: Random, causedBy: String): GameState = {
     val parentCellOpt = characterById(characterId).get.parentCell(this)
 
     parentCellOpt.fold(this)(c => updateHexCell(c.coordinates)(_.copy(characterId = None)))
     .updateHexCell(targetCellCoordinates)(_.copy(characterId = Some(characterId)))
-    .logEvent(CharacterTeleported(characterId, targetCellCoordinates))
+    .logEvent(CharacterTeleported(NKMUtils.randomUUID, characterId, targetCellCoordinates))
   }
 
 
-  def basicAttack(attackingCharacterId: CharacterId, targetCharacterId: CharacterId): GameState = {
+  def basicAttack(attackingCharacterId: CharacterId, targetCharacterId: CharacterId)(implicit random: Random): GameState = {
     implicit val causedBy: CharacterId = attackingCharacterId
     val newGameState = takeActionWithCharacter(attackingCharacterId)
     val attackingCharacter = characterById(attackingCharacterId).get
-    attackingCharacter.basicAttack(targetCharacterId)(newGameState)
-      .logEvent(CharacterBasicAttacked(attackingCharacterId, targetCharacterId))
+    attackingCharacter.basicAttack(targetCharacterId)(random, newGameState)
+      .logEvent(CharacterBasicAttacked(NKMUtils.randomUUID, attackingCharacterId, targetCharacterId))
   }
 
   private def updateCharacter(characterId: CharacterId)(updateFunction: NKMCharacter => NKMCharacter): GameState =
@@ -341,20 +370,20 @@ case class GameState(
       case ability => ability
     }
 
-  def damageCharacter(characterId: CharacterId, damage: Damage)(implicit causedBy: String): GameState =
+  def damageCharacter(characterId: CharacterId, damage: Damage)(implicit random: Random, causedBy: String): GameState =
     updateCharacter(characterId)(_.receiveDamage(damage))
-      .logEvent(CharacterDamaged(characterId, damage))
+      .logEvent(CharacterDamaged(NKMUtils.randomUUID, characterId, damage))
       .removeFromMapIfDead(characterId)
 
-  def heal(characterId: CharacterId, amount: Int)(implicit causedBy: String): GameState =
+  def heal(characterId: CharacterId, amount: Int)(implicit random: Random, causedBy: String): GameState =
     updateCharacter(characterId)(_.heal(amount))
-      .logEvent(CharacterHealed(characterId, amount))
+      .logEvent(CharacterHealed(NKMUtils.randomUUID, characterId, amount))
 
-  def setHp(characterId: CharacterId, amount: Int)(implicit causedBy: String): GameState =
+  def setHp(characterId: CharacterId, amount: Int)(implicit random: Random, causedBy: String): GameState =
     updateCharacter(characterId)(_.modify(_.state.healthPoints).setTo(amount))
-      .logEvent(CharacterHpSet(characterId, amount))
+      .logEvent(CharacterHpSet(NKMUtils.randomUUID, characterId, amount))
 
-  def setStat(characterId: CharacterId, statType: StatType, amount: Int)(implicit causedBy: String): GameState = {
+  def setStat(characterId: CharacterId, statType: StatType, amount: Int)(implicit random: Random, causedBy: String): GameState = {
     val updateStat = statType match {
       case StatType.AttackPoints => modify(_: NKMCharacter)(_.state.pureAttackPoints)
       case StatType.BasicAttackRange => modify(_: NKMCharacter)(_.state.pureBasicAttackRange)
@@ -363,93 +392,98 @@ case class GameState(
       case StatType.MagicalDefense => modify(_: NKMCharacter)(_.state.pureMagicalDefense)
     }
     updateCharacter(characterId)(c => updateStat(c).setTo(amount))
-      .logEvent(CharacterStatSet(characterId, statType, amount))
+      .logEvent(CharacterStatSet(NKMUtils.randomUUID, characterId, statType, amount))
   }
 
-  def removeFromMapIfDead(characterId: CharacterId)(implicit causedBy: String): GameState =
+  def removeFromMapIfDead(characterId: CharacterId)(implicit random: Random, causedById: String): GameState =
     if(characterById(characterId).get.isDead) {
-      logEvent(CharacterDied(characterId))
+      logEvent(CharacterDied(NKMUtils.randomUUID, characterId))
         .removeCharacterFromMap(characterId)
     } else this
 
-  def addEffect(characterId: CharacterId, characterEffect: CharacterEffect)(implicit causedById: String): GameState =
+  def addEffect(characterId: CharacterId, characterEffect: CharacterEffect)(implicit random: Random, causedById: String): GameState =
     updateCharacter(characterId)(_.addEffect(characterEffect))
-      .logEvent(EffectAppliedOnCharacter(characterEffect.id, characterId))
+      .logEvent(EffectAppliedOnCharacter(NKMUtils.randomUUID, characterEffect.id, characterId))
 
-  def removeEffects(characterEffectIds: Seq[CharacterEffectId])(implicit causedById: String): GameState =
+  def removeEffects(characterEffectIds: Seq[CharacterEffectId])(implicit random: Random, causedById: String): GameState =
     characterEffectIds.foldLeft(this){case (acc, eid) => acc.removeEffect(eid)}
 
-  def removeEffect(characterEffectId: CharacterEffectId)(implicit causedById: String): GameState = {
+  def removeEffect(characterEffectId: CharacterEffectId)(implicit random: Random, causedById: String): GameState = {
     val character = characterByEffectId(characterEffectId)
     updateCharacter(character.id)(_.removeEffect(characterEffectId))
-      .logEvent(EffectRemovedFromCharacter(characterEffectId))
+      .logEvent(EffectRemovedFromCharacter(NKMUtils.randomUUID, characterEffectId))
   }
 
-  def removeCharacterFromMap(characterId: CharacterId)(implicit causedById: String): GameState = {
+  def removeCharacterFromMap(characterId: CharacterId)(implicit random: Random, causedById: String): GameState = {
     val parentCellOpt = characterById(characterId).get.parentCell(this)
 
     parentCellOpt.fold(this)(c => updateHexCell(c.coordinates)(_.copy(characterId = None)))
       .modify(_.characterIdsOutsideMap).setTo(characterIdsOutsideMap + characterId)
-      .logEvent(CharacterRemovedFromMap(characterId))
+      .logEvent(CharacterRemovedFromMap(NKMUtils.randomUUID, characterId))
   }
 
-  def takeActionWithCharacter(characterId: CharacterId): GameState = {
+  def takeActionWithCharacter(characterId: CharacterId)(implicit random: Random): GameState = {
     implicit val causedById: String = characterId
 
+    if(characterTakingActionThisTurn.isDefined) // do not log event more than once
+      return this
     this.modify(_.characterTakingActionThisTurn)
       .setTo(Some(characterId))
-      .logEvent(CharacterTookAction(characterId))
+      .logEvent(CharacterTookAction(NKMUtils.randomUUID, characterId))
   }
 
-  def abilityHitCharacter(abilityId: AbilityId, targetCharacter: CharacterId): GameState = {
+  def abilityHitCharacter(abilityId: AbilityId, targetCharacter: CharacterId)(implicit random: Random): GameState = {
     implicit val causedById: String = abilityId
-    logEvent(AbilityHitCharacter(abilityId: AbilityId, targetCharacter: CharacterId))
+    logEvent(AbilityHitCharacter(NKMUtils.randomUUID, abilityId: AbilityId, targetCharacter: CharacterId))
   }
 
-  def useAbilityWithoutTarget(abilityId: AbilityId): GameState = {
+  def refreshBasicMove(targetCharacter: CharacterId)(implicit random: Random, causedById: String): GameState =
+    logEvent(BasicMoveRefreshed(NKMUtils.randomUUID, targetCharacter))
+
+  def refreshBasicAttack(targetCharacter: CharacterId)(implicit random: Random, causedById: String): GameState =
+    logEvent(BasicAttackRefreshed(NKMUtils.randomUUID, targetCharacter))
+
+  def useAbilityWithoutTarget(abilityId: AbilityId)(implicit random: Random): GameState = {
     implicit val causedById: String = abilityId
     val ability = abilityById(abilityId).get.asInstanceOf[Ability with UsableWithoutTarget]
     val parentCharacter = ability.parentCharacter(this)
 
     val newGameState = takeActionWithCharacter(parentCharacter.id)
-    ability.use()(newGameState)
-      .logEvent(AbilityUsedWithoutTarget(abilityId))
+      .logEvent(AbilityUsedWithoutTarget(NKMUtils.randomUUID, abilityId))
+    ability.use()(random, newGameState)
   }
 
-  def useAbilityOnCoordinates(abilityId: AbilityId, target: HexCoordinates, useData: UseData = UseData()): GameState = {
+  def useAbilityOnCoordinates(abilityId: AbilityId, target: HexCoordinates, useData: UseData = UseData())(implicit random: Random): GameState = {
     implicit val causedById: String = abilityId
     val ability = abilityById(abilityId).get.asInstanceOf[Ability with UsableOnCoordinates]
     val parentCharacter = ability.parentCharacter(this)
 
     val newGameState = takeActionWithCharacter(parentCharacter.id)
-    ability.use(target, useData)(newGameState)
-      .logEvent(AbilityUsedOnCoordinates(abilityId, target))
+    ability.use(target, useData)(random, newGameState)
+      .logEvent(AbilityUsedOnCoordinates(NKMUtils.randomUUID, abilityId, target))
   }
 
-  def useAbilityOnCharacter(abilityId: AbilityId, target: CharacterId, useData: UseData = UseData()): GameState = {
+  def useAbilityOnCharacter(abilityId: AbilityId, target: CharacterId, useData: UseData = UseData())(implicit random: Random): GameState = {
     implicit val causedById: String = abilityId
     val ability = abilityById(abilityId).get.asInstanceOf[Ability with UsableOnCharacter]
     val parentCharacter = ability.parentCharacter(this)
 
     val newGameState = takeActionWithCharacter(parentCharacter.id)
-    ability.use(target, useData)(newGameState)
-      .logEvent(AbilityUsedOnCharacter(abilityId, target))
+    ability.use(target, useData)(random, newGameState)
+      .logEvent(AbilityUsedOnCharacter(NKMUtils.randomUUID, abilityId, target))
   }
 
   def incrementTurn(): GameState =
     this.modify(_.turn).using(oldTurn => Turn(oldTurn.number + 1))
 
-  def endTurn(): GameState = {
-    implicit val causedById: String = id
-
+  def endTurn()(implicit random: Random, causedById: String = id): GameState =
     this.modify(_.characterIdsThatTookActionThisPhase).using(c => c + characterTakingActionThisTurn.get)
       .modify(_.characterTakingActionThisTurn).setTo(None)
       .incrementTurn()
       .finishPhaseIfEveryCharacterTookAction()
-      .logEvent(TurnFinished())
-  }
+      .logEvent(TurnFinished(NKMUtils.randomUUID))
 
-  def passTurn(characterId: CharacterId): GameState =
+  def passTurn(characterId: CharacterId)(implicit random: Random): GameState =
     takeActionWithCharacter(characterId).endTurn()
 
   def refreshCharacterTakenActions(): GameState =
@@ -458,15 +492,12 @@ case class GameState(
   def incrementPhase(by: Int = 1): GameState =
     this.modify(_.phase).using(oldPhase => Phase(oldPhase.number + by))
 
-  def finishPhase(): GameState = {
-    implicit val causedById: String = id
-
+  def finishPhase()(implicit random: Random, causedById: String = id): GameState =
     refreshCharacterTakenActions()
       .incrementPhase()
-      .logEvent(PhaseFinished())
-  }
+      .logEvent(PhaseFinished(NKMUtils.randomUUID))
 
-  def finishPhaseIfEveryCharacterTookAction(): GameState =
+  def finishPhaseIfEveryCharacterTookAction()(implicit random: Random): GameState =
     if(characterIdsThatTookActionThisPhase == characters.map(_.id))
       this.finishPhase()
     else this

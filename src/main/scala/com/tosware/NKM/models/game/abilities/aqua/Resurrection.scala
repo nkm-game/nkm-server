@@ -7,6 +7,8 @@ import com.tosware.NKM.models.game._
 import com.tosware.NKM.models.game.hex.HexCoordinates
 import com.tosware.NKM.models.game.hex.HexUtils._
 
+import scala.util.Random
+
 object Resurrection {
   val metadata: AbilityMetadata =
     AbilityMetadata(
@@ -28,12 +30,12 @@ case class Resurrection(abilityId: AbilityId, parentCharacterId: CharacterId) ex
   override def targetsInRange(implicit gameState: GameState) =
     rangeCellCoords.whereEmpty
 
-  override def use(target: HexCoordinates, useData: UseData)(implicit gameState: GameState) = {
+  override def use(target: HexCoordinates, useData: UseData)(implicit random: Random, gameState: GameState) = {
     val targetCharacter = gameState.characterById(useData.data).get
 
     gameState
-      .setHp(targetCharacter.id, targetCharacter.state.maxHealthPoints / 2)(id)
-      .placeCharacter(target, targetCharacter.id)(id)
+      .setHp(targetCharacter.id, targetCharacter.state.maxHealthPoints / 2)(random, id)
+      .placeCharacter(target, targetCharacter.id)(random, id)
   }
 
   override def useChecks(implicit target: HexCoordinates, useData: UseData, gameState: GameState): Set[(Boolean, CharacterId)] = {

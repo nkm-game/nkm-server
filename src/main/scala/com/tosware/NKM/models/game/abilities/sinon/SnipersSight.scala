@@ -6,6 +6,8 @@ import com.tosware.NKM.models.game._
 import com.tosware.NKM.models.game.hex.HexCoordinates
 import com.tosware.NKM.models.game.hex.HexUtils._
 
+import scala.util.Random
+
 object SnipersSight {
   val metadata: AbilityMetadata =
     AbilityMetadata(
@@ -35,6 +37,6 @@ case class SnipersSight
   override def basicAttackTargets(implicit gameState: GameState): Set[HexCoordinates] =
     parentCharacter.defaultBasicAttackTargets
 
-  override def basicAttack(targetCharacterId: CharacterId)(implicit gameState: GameState): GameState =
+  override def basicAttack(targetCharacterId: CharacterId)(implicit random: Random, gameState: GameState): GameState =
     parentCharacter.defaultBasicAttack(targetCharacterId)
 }

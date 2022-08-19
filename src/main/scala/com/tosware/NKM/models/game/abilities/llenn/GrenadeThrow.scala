@@ -1,4 +1,4 @@
-package com.tosware.NKM.models.game.abilities.hecate
+package com.tosware.NKM.models.game.abilities.llenn
 
 import com.tosware.NKM.NKMConf
 import com.tosware.NKM.models.game.Ability.AbilityId
@@ -11,30 +11,29 @@ import com.tosware.NKM.models.{Damage, DamageType}
 
 import scala.util.Random
 
-object Aster {
+object GrenadeThrow {
   val metadata: AbilityMetadata =
     AbilityMetadata(
-      name = "Aster",
-      alternateName = "星",
+      name = "Grenade Throw",
       abilityType = AbilityType.Normal,
       description =
-        "Character shoots rays of energy from Aster, dealing magical damage in a sphere.".stripMargin,
-      cooldown = NKMConf.int("abilities.hecate.aster.cooldown"),
-      range = NKMConf.int("abilities.hecate.aster.range"),
+        "Character throws a granade, dealing physical damage in a sphere.".stripMargin,
+      cooldown = NKMConf.int("abilities.llenn.grenadeThrow.cooldown"),
+      range = NKMConf.int("abilities.llenn.grenadeThrow.range"),
     )
-  val radius: Int = NKMConf.int("abilities.hecate.aster.radius")
-  val damage: Int = NKMConf.int("abilities.hecate.aster.damage")
+  val radius: Int = NKMConf.int("abilities.llenn.grenadeThrow.radius")
+  val damage: Int = NKMConf.int("abilities.llenn.grenadeThrow.damage")
 }
 
-case class Aster(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId) with UsableOnCoordinates {
-  override val metadata = Aster.metadata
+case class GrenadeThrow(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId) with UsableOnCoordinates {
+  override val metadata = GrenadeThrow.metadata
   override val state = AbilityState(parentCharacterId)
   override def rangeCellCoords(implicit gameState: GameState) =
     parentCell.get.coordinates.getCircle(metadata.range).whereExists
 
   override def use(target: HexCoordinates, useData: UseData)(implicit random: Random, gameState: GameState): GameState = {
     val targets = target.getCircle(radius).whereEnemiesOf(parentCharacterId).characters.map(_.id)
-    val damage = Damage(DamageType.Magical, Aster.damage)
+    val damage = Damage(DamageType.Physical, GrenadeThrow.damage)
     targets.foldLeft(gameState)((acc, cid) => blastCharacter(cid, damage)(random, acc))
   }
 

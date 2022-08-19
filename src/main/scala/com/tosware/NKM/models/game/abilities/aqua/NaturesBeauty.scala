@@ -5,6 +5,8 @@ import com.tosware.NKM.models.game.NKMCharacter.CharacterId
 import com.tosware.NKM.models.game._
 import com.tosware.NKM.models.game.hex.HexUtils._
 
+import scala.util.Random
+
 object NaturesBeauty {
   val metadata: AbilityMetadata =
     AbilityMetadata(
@@ -23,9 +25,9 @@ case class NaturesBeauty(abilityId: AbilityId, parentCharacterId: CharacterId) e
     rangeCellCoords.whereFriendsOf(parentCharacterId)
   override def basicAttackCells(implicit gameState: GameState) = parentCharacter.defaultBasicAttackCells
   override def basicAttackTargets(implicit gameState: GameState) = parentCharacter.basicAttackTargets
-  override def basicAttack(targetCharacterId: CharacterId)(implicit gameState: GameState) =
+  override def basicAttack(targetCharacterId: CharacterId)(implicit random: Random, gameState: GameState) =
     if(gameState.characterById(targetCharacterId).get.isFriendFor(parentCharacterId)) {
-      gameState.heal(targetCharacterId, parentCharacter.state.attackPoints)(parentCharacterId)
+      gameState.heal(targetCharacterId, parentCharacter.state.attackPoints)(random, parentCharacterId)
     } else parentCharacter.defaultBasicAttack(targetCharacterId)
 
 }

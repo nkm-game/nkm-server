@@ -6,6 +6,8 @@ import com.tosware.NKM.models.game.NKMCharacter.CharacterId
 import com.tosware.NKM.models.game._
 import com.tosware.NKM.models.game.hex.HexUtils._
 
+import scala.util.Random
+
 object Purification {
   val metadata: AbilityMetadata =
     AbilityMetadata(
@@ -26,13 +28,13 @@ case class Purification(abilityId: AbilityId, parentCharacterId: CharacterId) ex
   override def targetsInRange(implicit gameState: GameState) =
     rangeCellCoords.whereFriendsOf(parentCharacterId)
 
-  override def use(target: CharacterId, useData: UseData)(implicit gameState: GameState) = {
+  override def use(target: CharacterId, useData: UseData)(implicit random: Random, gameState: GameState) = {
     val effectIdsToRemove = gameState.characterById(target).get.state.effects
       .filter(_.metadata.effectType == CharacterEffectType.Negative).map(_.id)
 
     gameState
       .abilityHitCharacter(id, target)
-      .removeEffects(effectIdsToRemove)(id)
+      .removeEffects(effectIdsToRemove)(random, id)
   }
 
   override def useChecks(implicit target: CharacterId, useData: UseData, gameState: GameState): Set[UseCheck] = {

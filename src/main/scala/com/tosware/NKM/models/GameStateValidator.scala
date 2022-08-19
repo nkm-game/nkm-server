@@ -134,7 +134,6 @@ case class GameStateValidator()(implicit gameState: GameState) {
       val character = gameState.characterById(characterId).get
       val parentCell = character.parentCell
       val pathCells = path.toCells
-      println(pathCells.map(_.isFreeToMove(characterId)))
       if (pathCells.size != path.size) Failure("Not all cells exist on the map.")
       else if (pathCells.exists(c => !c.isFreeToMove(characterId))) Failure("Some of the cells in the path are not free to move.")
       else if (!gameState.playerById(playerId).get.characterIds.contains(characterId)) Failure("You do not own this character.")

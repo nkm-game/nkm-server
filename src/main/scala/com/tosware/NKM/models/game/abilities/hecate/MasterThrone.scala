@@ -7,6 +7,8 @@ import com.tosware.NKM.NKMConf
 import com.tosware.NKM.models.game.Ability.AbilityId
 import com.tosware.NKM.models.game.abilities.hecate.MasterThrone.healthPercent
 
+import scala.util.Random
+
 object MasterThrone {
   val metadata: AbilityMetadata =
     AbilityMetadata(
@@ -44,13 +46,13 @@ case class MasterThrone
       .modify(_.collectedCharacterIds).setTo(Set.empty)
       .modify(_.collectedEnergy).setTo(0)
 
-  override def onEvent(e: GameEvent.GameEvent)(implicit gameState: GameState): GameState = {
+  override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState = {
     e match {
-      case GameEvent.CharacterBasicAttacked(characterId, targetCharacterId) =>
+      case GameEvent.CharacterBasicAttacked(_, characterId, targetCharacterId) =>
         if(characterId != parentCharacterId) return gameState
         if(collectedCharacterIds.contains(targetCharacterId)) return gameState
         gameState.updateAbility(id, collectEnergy(characterId))
-      case GameEvent.AbilityHitCharacter(abilityId, targetCharacterId) =>
+      case GameEvent.AbilityHitCharacter(_, abilityId, targetCharacterId) =>
         if(collectedCharacterIds.contains(targetCharacterId)) return gameState
         val ability = gameState.abilityById(abilityId).get
         if(ability.parentCharacter.id != parentCharacterId) return gameState
