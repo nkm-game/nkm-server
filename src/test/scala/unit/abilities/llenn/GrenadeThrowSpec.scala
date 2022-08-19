@@ -48,7 +48,7 @@ class GrenadeThrowSpec
       abilityUsedGameState.gameLog.events
         .ofType[GameEvent.CharacterDamaged]
         .causedBy(abilityId)
-        .size should be (2)
+        .size should be (4)
     }
   }
 }

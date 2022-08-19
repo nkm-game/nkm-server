@@ -18,7 +18,7 @@ object Aster {
       alternateName = "星",
       abilityType = AbilityType.Normal,
       description =
-        "Character shoots rays of energy from Aster, dealing magical damage in a sphere.".stripMargin,
+        "Character shoots rays of energy from Aster, dealing magical damage in a sphere to enemies.".stripMargin,
       cooldown = NKMConf.int("abilities.hecate.aster.cooldown"),
       range = NKMConf.int("abilities.hecate.aster.range"),
     )

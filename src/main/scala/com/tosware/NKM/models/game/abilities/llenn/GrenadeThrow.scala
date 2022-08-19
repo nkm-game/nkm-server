@@ -17,7 +17,7 @@ object GrenadeThrow {
       name = "Grenade Throw",
       abilityType = AbilityType.Normal,
       description =
-        "Character throws a granade, dealing physical damage in a sphere.".stripMargin,
+        "Character throws a granade, dealing physical damage in a sphere to all characters.".stripMargin,
       cooldown = NKMConf.int("abilities.llenn.grenadeThrow.cooldown"),
       range = NKMConf.int("abilities.llenn.grenadeThrow.range"),
     )
@@ -32,7 +32,7 @@ case class GrenadeThrow(abilityId: AbilityId, parentCharacterId: CharacterId) ex
     parentCell.get.coordinates.getCircle(metadata.range).whereExists
 
   override def use(target: HexCoordinates, useData: UseData)(implicit random: Random, gameState: GameState): GameState = {
-    val targets = target.getCircle(radius).whereEnemiesOf(parentCharacterId).characters.map(_.id)
+    val targets = target.getCircle(radius).characters.map(_.id)
     val damage = Damage(DamageType.Physical, GrenadeThrow.damage)
     targets.foldLeft(gameState)((acc, cid) => blastCharacter(cid, damage)(random, acc))
   }
