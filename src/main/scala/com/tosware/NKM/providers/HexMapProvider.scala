@@ -18,6 +18,7 @@ object HexMapProvider {
     val values = findValues
 
     case object Simple2v2 extends TestHexMapName
+    case object Simple2v2Wall extends TestHexMapName
   }
 
 }
@@ -48,18 +49,20 @@ case class HexMapProvider() extends NKMJsonProtocol {
   }
 
   def getTestHexMaps: Seq[HexMap] = {
-    val simple1v1HexParams: Set[Any] = Set(
+    val simple2v2HexParams: Set[Any] = Set(
       (-2, 2, Wall),
       (-1, 2, Wall),
       (0, 2, Wall),
       (1, 2, Wall),
       (2, 2, Wall),
       (3, 2, Wall),
+      (-2, 1),
       (-1, 1),
       (0, 1),
       (1, 1),
       (2, 1),
       (3, 1),
+      (4, 1),
       (-2, 0),
       (-1, 0, SpawnPoint, 0),
       (0, 0, SpawnPoint, 0),
@@ -74,8 +77,20 @@ case class HexMapProvider() extends NKMJsonProtocol {
       (3, -1, Wall),
       (4, -1, Wall),
     )
+    val simple2v2WallHexParams: Set[Any] = Set(
+      (-1, 0, SpawnPoint, 0),
+      (0, 0, SpawnPoint, 0),
+      (1, 0, Wall),
+      (2, 0, Wall),
+      (3, 0, SpawnPoint, 1),
+      (4, 0, SpawnPoint, 1),
+    )
     Seq(
-      HexMap(TestHexMapName.Simple2v2.toString, HexUtils.hexCellParamsToCells(simple1v1HexParams)),
+      HexMap(TestHexMapName.Simple2v2.toString, HexUtils.hexCellParamsToCells(simple2v2HexParams)),
+      HexMap(TestHexMapName.Simple2v2Wall.toString, HexUtils.hexCellParamsToCells(simple2v2WallHexParams)),
     )
   }
+
+  def getTestHexMap(name: TestHexMapName): HexMap =
+    getTestHexMaps.find(_.name == name.toString).get
 }

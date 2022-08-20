@@ -22,11 +22,11 @@ case class NaturesBeauty(abilityId: AbilityId, parentCharacterId: CharacterId) e
   override def rangeCellCoords(implicit gameState: GameState) =
     gameState.characterById(state.parentCharacterId).get.basicAttackCellCoords(gameState)
   override def targetsInRange(implicit gameState: GameState) =
-    rangeCellCoords.whereFriendsOf(parentCharacterId)
+    rangeCellCoords.whereFriendsOfC(parentCharacterId)
   override def basicAttackCells(implicit gameState: GameState) = parentCharacter.defaultBasicAttackCells
   override def basicAttackTargets(implicit gameState: GameState) = parentCharacter.basicAttackTargets
   override def basicAttack(targetCharacterId: CharacterId)(implicit random: Random, gameState: GameState) =
-    if(gameState.characterById(targetCharacterId).get.isFriendFor(parentCharacterId)) {
+    if(gameState.characterById(targetCharacterId).get.isFriendForC(parentCharacterId)) {
       gameState.heal(targetCharacterId, parentCharacter.state.attackPoints)(random, parentCharacterId)
     } else parentCharacter.defaultBasicAttack(targetCharacterId)
 

@@ -29,7 +29,7 @@ case class PChan
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState = {
     e match {
       case GameEvent.CharacterDied(_, characterId) =>
-        if(parentCharacter.isFriendFor(characterId)) {
+        if(parentCharacter.isFriendForC(characterId)) {
           gameState.setStat(parentCharacterId, StatType.Speed, parentCharacter.state.pureSpeed + speedIncrease)(random, id)
         }
         else gameState

@@ -29,7 +29,7 @@ case class PreciseShot(abilityId: AbilityId, parentCharacterId: CharacterId) ext
     parentCell.get.coordinates.getCircle(metadata.range).whereExists
 
   override def targetsInRange(implicit gameState: GameState) =
-    rangeCellCoords.whereEnemiesOf(parentCharacterId)
+    rangeCellCoords.whereEnemiesOfC(parentCharacterId)
 
   override def use(target: CharacterId, useData: UseData)(implicit random: Random, gameState: GameState): GameState =
     gameState

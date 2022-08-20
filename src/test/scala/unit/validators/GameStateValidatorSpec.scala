@@ -15,7 +15,7 @@ class GameStateValidatorSpec
   extends AnyWordSpecLike
     with Matchers
     with TestUtils
-    {
+{
   val metadata = CharacterMetadata.empty()
     .copy(
       initialSpeed = 3,
@@ -25,6 +25,28 @@ class GameStateValidatorSpec
   implicit val gameState = getTestGameState(TestHexMapName.Simple2v2, Seq(
     Seq(metadata.copy(name = "Empty1"), metadata.copy(name = "Empty2")),
     Seq(metadata.copy(name = "Empty3"), metadata.copy(name = "Empty4")),
+  ))
+
+  val wallMeleeGameState = getTestGameState(TestHexMapName.Simple2v2Wall, Seq(
+    Seq(
+      metadata.copy(name = "Empty1", attackType = AttackType.Melee, initialBasicAttackRange = 4),
+      metadata.copy(name = "Empty2", attackType = AttackType.Melee, initialBasicAttackRange = 4),
+    ),
+    Seq(
+      metadata.copy(name = "Empty2", attackType = AttackType.Melee, initialBasicAttackRange = 4),
+      metadata.copy(name = "Empty3", attackType = AttackType.Melee, initialBasicAttackRange = 4),
+    ),
+  ))
+
+  val wallRangedGameState = getTestGameState(TestHexMapName.Simple2v2Wall, Seq(
+    Seq(
+      metadata.copy(name = "Empty1", attackType = AttackType.Ranged, initialBasicAttackRange = 4),
+      metadata.copy(name = "Empty2", attackType = AttackType.Ranged, initialBasicAttackRange = 4),
+    ),
+    Seq(
+      metadata.copy(name = "Empty3", attackType = AttackType.Ranged, initialBasicAttackRange = 4),
+      metadata.copy(name = "Empty4", attackType = AttackType.Ranged, initialBasicAttackRange = 4),
+    ),
   ))
 
   def characterIdOnPoint(hexCoordinates: HexCoordinates) = gameState.hexMap.get.getCell(hexCoordinates).get.characterId.get
@@ -39,6 +61,14 @@ class GameStateValidatorSpec
 
   val p1FirstCharacter = characterOnPoint(p1FirstCharacterSpawnCoordinates)
   val p1SecondCharacter = characterOnPoint(p1SecondCharacterSpawnCoordinates)
+
+  val p0FirstCharacterMelee = characterOnPoint(p0FirstCharacterSpawnCoordinates)(wallMeleeGameState)
+  val p1FirstCharacterMelee = characterOnPoint(p1FirstCharacterSpawnCoordinates)(wallMeleeGameState)
+  val p1SecondCharacterMelee = characterOnPoint(p1SecondCharacterSpawnCoordinates)(wallMeleeGameState)
+
+  val p0FirstCharacterRanged = characterOnPoint(p0FirstCharacterSpawnCoordinates)(wallRangedGameState)
+  val p1FirstCharacterRanged = characterOnPoint(p1FirstCharacterSpawnCoordinates)(wallRangedGameState)
+  val p1SecondCharacterRanged = characterOnPoint(p1SecondCharacterSpawnCoordinates)(wallRangedGameState)
 
   val abilityId = p0FirstCharacter.state.abilities.head.id
 
@@ -188,13 +218,13 @@ class GameStateValidatorSpec
       }
 
       "disallow move if other character took action in turn" in {
-          val newGameState = gameState.takeActionWithCharacter("test_nonexistent_id")
+        val newGameState = gameState.takeActionWithCharacter("test_nonexistent_id")
 
-          val result = GameStateValidator()(newGameState).validateBasicMoveCharacter(gameState.players(0).id,
-            CoordinateSeq((0, 0), (1, 0)),
-            p0FirstCharacter.id
-          )
-          assertCommandFailure(result)
+        val result = GameStateValidator()(newGameState).validateBasicMoveCharacter(gameState.players(0).id,
+          CoordinateSeq((0, 0), (1, 0)),
+          p0FirstCharacter.id
+        )
+        assertCommandFailure(result)
       }
 
       "disallow move if there is an obstacle on path" in {
@@ -225,13 +255,54 @@ class GameStateValidatorSpec
     "validate attacking characters and" when {
       val moveGameState = gameState.teleportCharacter(HexCoordinates(2, 0), p0FirstCharacter.id)(random, gameState.id)
 
-      "allow if character is in attack range" in {
-        val result = GameStateValidator()(moveGameState).validateBasicAttackCharacter(gameState.players(0).id,
+
+      "allow if character is in attack range without obstacles" in {
+        val result = GameStateValidator()(moveGameState).validateBasicAttackCharacter(p0FirstCharacter.owner.id,
           p0FirstCharacter.id,
           p1FirstCharacter.id,
         )
 
         assertCommandSuccess(result)
+      }
+
+      "allow over wall if character is ranged" in {
+        implicit val gameState: GameState = wallRangedGameState
+        val result = GameStateValidator().validateBasicAttackCharacter(p0FirstCharacterRanged.owner.id,
+          p0FirstCharacterRanged.id,
+          p1FirstCharacterRanged.id,
+        )
+
+        assertCommandSuccess(result)
+      }
+
+      "disallow over wall if character is melee" in {
+        implicit val gameState: GameState = wallMeleeGameState
+        val result = GameStateValidator().validateBasicAttackCharacter(p0FirstCharacterMelee.owner.id,
+          p0FirstCharacterMelee.id,
+          p1FirstCharacterMelee.id,
+        )
+
+        assertCommandFailure(result)
+      }
+
+      "allow over character if character is ranged" in {
+        implicit val gameState: GameState = wallRangedGameState
+        val result = GameStateValidator().validateBasicAttackCharacter(p0FirstCharacterRanged.owner.id,
+          p0FirstCharacterRanged.id,
+          p1SecondCharacterRanged.id,
+        )
+
+        assertCommandSuccess(result)
+      }
+
+      "disallow over character if character is melee" in {
+        implicit val gameState: GameState = wallMeleeGameState
+        val result = GameStateValidator().validateBasicAttackCharacter(p0FirstCharacterMelee.owner.id,
+          p0FirstCharacterMelee.id,
+          p1SecondCharacterMelee.id,
+        )
+
+        assertCommandFailure(result)
       }
 
       "disallow if character is not on the map" in {

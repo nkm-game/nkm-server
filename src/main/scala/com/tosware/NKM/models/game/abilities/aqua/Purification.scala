@@ -26,7 +26,7 @@ case class Purification(abilityId: AbilityId, parentCharacterId: CharacterId) ex
     parentCell.get.coordinates.getCircle(metadata.range).whereExists
 
   override def targetsInRange(implicit gameState: GameState) =
-    rangeCellCoords.whereFriendsOf(parentCharacterId)
+    rangeCellCoords.whereFriendsOfC(parentCharacterId)
 
   override def use(target: CharacterId, useData: UseData)(implicit random: Random, gameState: GameState) = {
     val effectIdsToRemove = gameState.characterById(target).get.state.effects

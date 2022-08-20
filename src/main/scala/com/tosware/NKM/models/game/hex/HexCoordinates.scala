@@ -1,5 +1,5 @@
 package com.tosware.NKM.models.game.hex
-import math._
+import scala.math._
 
 case class HexCoordinates(x: Int, z: Int) {
   def y: Int = -x - z
@@ -13,6 +13,12 @@ case class HexCoordinates(x: Int, z: Int) {
       case HexDirection.NE => HexCoordinates(x, z+1)
     }
   }
+
+  def getInDirection(hexDirection: HexDirection, distance: Int): HexCoordinates = {
+    if(distance <= 0) return this
+    getNeighbour(hexDirection).getInDirection(hexDirection, distance - 1)
+  }
+
   def getLine(direction: HexDirection, size: Int): Set[HexCoordinates] = {
     if(size <= 0) return Set.empty
     val neighbour = getNeighbour(direction)
@@ -36,6 +42,13 @@ case class HexCoordinates(x: Int, z: Int) {
     }
 
   def toTuple: (Int, Int) = (x, z)
+
+  def toCellOpt(implicit hexMap: HexMap): Option[HexCell] =
+    hexMap.getCell(this)
+
+  def toCell(implicit hexMap: HexMap): HexCell =
+    toCellOpt.get
+
 
 }
 

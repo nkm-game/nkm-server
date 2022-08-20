@@ -36,9 +36,9 @@ trait TestUtils extends Logging {
 
   protected def getTestGameState(testHexMapName: TestHexMapName, characterMetadatass: Seq[Seq[CharacterMetadata]]): GameState = {
     val playerIds: Seq[PlayerId] = characterMetadatass.indices map(p => s"p$p")
-    val hexMap = HexMapProvider().getTestHexMaps.find(_.name == testHexMapName.toString).get
+    val hexMap = HexMapProvider().getTestHexMap(testHexMapName)
 
-//    logger.info(hexMap.toTextUi)
+    logger.info(hexMap.toTextUi)
 
     val gameStateDeps = GameStartDependencies(
       players = playerIds.map(n => Player(n)),

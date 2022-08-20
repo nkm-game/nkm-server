@@ -60,5 +60,14 @@ class HexCoordinatesSpec
         }
       }
     }
+
+    "calculate correct directions" in {
+      HexCoordinates(0, 0).getInDirection(HexDirection.W, 0) should be (HexCoordinates(0, 0))
+      HexCoordinates(-2, 2).getInDirection(HexDirection.NE, 1) should be (HexCoordinates(-2, 3))
+      HexCoordinates(0, -2).getInDirection(HexDirection.NW, 1) should be (HexCoordinates(-1, -1))
+      HexCoordinates(0, 0).getInDirection(HexDirection.SW, 2) should be (HexCoordinates(0, -2))
+      HexCoordinates(0, 0).getInDirection(HexDirection.SE, 2) should be (HexCoordinates(2, -2))
+      HexCoordinates(0, -3).getInDirection(HexDirection.E, 10) should be (HexCoordinates(10, -3))
+    }
   }
 }

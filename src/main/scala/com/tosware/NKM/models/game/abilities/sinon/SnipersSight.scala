@@ -3,7 +3,7 @@ package com.tosware.NKM.models.game.abilities.sinon
 import com.tosware.NKM.models.game.Ability.AbilityId
 import com.tosware.NKM.models.game.NKMCharacter.CharacterId
 import com.tosware.NKM.models.game._
-import com.tosware.NKM.models.game.hex.HexCoordinates
+import com.tosware.NKM.models.game.hex.{HexCoordinates, SearchFlag}
 import com.tosware.NKM.models.game.hex.HexUtils._
 
 import scala.util.Random
@@ -29,8 +29,14 @@ case class SnipersSight
     if(parentCell.isEmpty) return Set.empty
     val parentCoordinates = parentCell.get.coordinates
     parentCharacter.state.attackType match {
-      case AttackType.Melee => parentCoordinates.getCircle(parentCharacter.state.basicAttackRange).whereExists // TODO: stop at walls and characters
-      case AttackType.Ranged => parentCoordinates.getCircle(parentCharacter.state.basicAttackRange).whereExists
+      case AttackType.Melee =>
+        parentCell.get.getArea(
+          parentCharacter.state.basicAttackRange,
+          Set(SearchFlag.StopAtWalls, SearchFlag.StopAfterEnemies, SearchFlag.StopAfterFriends),
+          friendlyPlayerIdOpt = Some(parentCharacter.owner.id),
+        ).toCoords
+      case AttackType.Ranged =>
+        parentCell.get.getArea(parentCharacter.state.basicAttackRange).toCoords
     }
   }
 

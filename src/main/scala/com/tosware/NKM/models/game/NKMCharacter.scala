@@ -6,6 +6,7 @@ import com.tosware.NKM.models.game.CharacterEffect.CharacterEffectId
 import com.tosware.NKM.models.game.CharacterMetadata.CharacterMetadataId
 import com.tosware.NKM.models.game.GameEvent.GameEvent
 import com.tosware.NKM.models.game.NKMCharacter._
+import com.tosware.NKM.models.game.Player.PlayerId
 import com.tosware.NKM.models.game.abilities.aqua.{NaturesBeauty, Purification, Resurrection}
 import com.tosware.NKM.models.game.abilities.hecate.{Aster, MasterThrone, PowerOfExistence}
 import com.tosware.NKM.models.game.abilities.llenn.{GrenadeThrow, PChan, RunItDown}
@@ -160,11 +161,17 @@ case class NKMCharacter
   def isOnMap(implicit gameState: GameState): Boolean =
     !gameState.characterIdsOutsideMap.contains(id)
 
-  def isEnemyFor(characterId: CharacterId)(implicit gameState: GameState): Boolean =
-    gameState.characterById(characterId).get.owner != owner
+  def isEnemyForC(characterId: CharacterId)(implicit gameState: GameState): Boolean =
+    isEnemyFor(gameState.characterById(characterId).get.owner.id)
 
-  def isFriendFor(characterId: CharacterId)(implicit gameState: GameState): Boolean =
-    gameState.characterById(characterId).get.owner == owner
+  def isFriendForC(characterId: CharacterId)(implicit gameState: GameState): Boolean =
+    isFriendFor(gameState.characterById(characterId).get.owner.id)
+
+  def isEnemyFor(playerId: PlayerId)(implicit gameState: GameState): Boolean =
+    playerId != owner.id
+
+  def isFriendFor(playerId: PlayerId)(implicit gameState: GameState): Boolean =
+    playerId == owner.id
 
   def basicAttackOverride: Option[BasicAttackOverride] =
     state.abilities.collectFirst {
@@ -180,17 +187,32 @@ case class NKMCharacter
   def basicAttack(targetCharacterId: CharacterId)(implicit random: Random, gameState: GameState): GameState =
     basicAttackOverride.fold(defaultBasicAttack(targetCharacterId))(_.basicAttack(targetCharacterId))
 
-  def defaultBasicAttackCells(implicit gameState: GameState): Set[HexCoordinates] = {
+  def defaultMeleeBasicAttackCells(implicit gameState: GameState): Set[HexCoordinates] = {
     if(parentCell.isEmpty) return Set.empty
-    val parentCoordinates = parentCell.get.coordinates
+    val range = state.basicAttackRange
+    parentCell.get.getArea(
+      range,
+      Set(SearchFlag.StopAtWalls, SearchFlag.StopAfterEnemies, SearchFlag.StopAfterFriends, SearchFlag.StraightLine),
+      friendlyPlayerIdOpt = Some(owner.id),
+    ).toCoords
+  }
+  def defaultRangedBasicAttackCells(implicit gameState: GameState): Set[HexCoordinates] = {
+    if(parentCell.isEmpty) return Set.empty
+    val range = state.basicAttackRange
+    parentCell.get.getArea(range, Set(SearchFlag.StraightLine)).toCoords
+  }
+
+  def defaultBasicAttackCells(implicit gameState: GameState): Set[HexCoordinates] = {
     state.attackType match {
-      case AttackType.Melee => parentCoordinates.getLines(HexDirection.values.toSet, state.basicAttackRange).whereExists // TODO: stop at walls and characters
-      case AttackType.Ranged => parentCoordinates.getLines(HexDirection.values.toSet, state.basicAttackRange).whereExists
+      case AttackType.Melee =>
+        defaultMeleeBasicAttackCells
+      case AttackType.Ranged =>
+        defaultRangedBasicAttackCells
     }
   }
 
   def defaultBasicAttackTargets(implicit gameState: GameState): Set[HexCoordinates] =
-    basicAttackCellCoords.whereEnemiesOf(id)
+    basicAttackCellCoords.whereEnemiesOfC(id)
 
   def defaultBasicAttack(targetCharacterId: CharacterId)(implicit random: Random, gameState: GameState): GameState =
     gameState.damageCharacter(targetCharacterId, Damage(DamageType.Physical, state.attackPoints))(random, id)

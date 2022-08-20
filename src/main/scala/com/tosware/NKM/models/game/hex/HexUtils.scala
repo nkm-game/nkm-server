@@ -4,6 +4,7 @@ import com.tosware.NKM.models.game.Ability.AbilityId
 import com.tosware.NKM.models.game.GameEvent.{ContainsAbilityId, ContainsCharacterId, GameEvent}
 import com.tosware.NKM.models.game.{GameState, NKMCharacter}
 import com.tosware.NKM.models.game.NKMCharacter.CharacterId
+import com.tosware.NKM.models.game.Player.PlayerId
 
 import scala.math.abs
 import scala.reflect.ClassTag
@@ -46,11 +47,11 @@ object HexUtils {
     def whereEmpty: Set[HexCoordinates] =
       toCells.whereEmpty.map(_.coordinates)
 
-    def whereFriendsOf(characterId: CharacterId): Set[HexCoordinates] =
-      toCells.friendsOf(characterId).map(_.parentCell.get.coordinates)
+    def whereFriendsOfC(characterId: CharacterId): Set[HexCoordinates] =
+      toCells.whereFriendsOfC(characterId).toCoords
 
-    def whereEnemiesOf(characterId: CharacterId): Set[HexCoordinates] =
-      toCells.enemiesOf(characterId).map(_.parentCell.get.coordinates)
+    def whereEnemiesOfC(characterId: CharacterId): Set[HexCoordinates] =
+      toCells.whereEnemiesOfC(characterId).toCoords
   }
 
   implicit class HexCoordinatesSeqUtils(coords: Seq[HexCoordinates])(implicit gameState: GameState) {
@@ -76,11 +77,29 @@ object HexUtils {
     def whereEmpty: Set[HexCell] =
       cells.filter(_.isEmpty)
 
-    def friendsOf(characterId: CharacterId): Set[NKMCharacter] =
-      characters.filter(_.isFriendFor(characterId))
+    def whereFriendsOfC(characterId: CharacterId): Set[HexCell] =
+      friendsOfC(characterId).map(_.parentCell.get)
 
-    def enemiesOf(characterId: CharacterId): Set[NKMCharacter] =
-      characters.filter(_.isEnemyFor(characterId))
+    def whereEnemiesOfC(characterId: CharacterId): Set[HexCell] =
+      enemiesOfC(characterId).map(_.parentCell.get)
+
+    def friendsOfC(characterId: CharacterId): Set[NKMCharacter] =
+      characters.filter(_.isFriendForC(characterId))
+
+    def enemiesOfC(characterId: CharacterId): Set[NKMCharacter] =
+      characters.filter(_.isEnemyForC(characterId))
+
+    def whereFriendsOf(playerId: PlayerId): Set[HexCell] =
+      friendsOf(playerId).map(_.parentCell.get)
+
+    def whereEnemiesOf(playerId: PlayerId): Set[HexCell] =
+      enemiesOf(playerId).map(_.parentCell.get)
+
+    def friendsOf(playerId: PlayerId): Set[NKMCharacter] =
+      characters.filter(_.isFriendFor(playerId))
+
+    def enemiesOf(playerId: PlayerId): Set[NKMCharacter] =
+      characters.filter(_.isEnemyFor(playerId))
   }
   implicit class GameEventSeqUtils[T <: GameEvent](es: Seq[T]) {
     def inPhase(number: Int): Seq[T] =

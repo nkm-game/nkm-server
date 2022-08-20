@@ -30,7 +30,7 @@ case class PowerOfExistence(abilityId: AbilityId, parentCharacterId: CharacterId
   override def rangeCellCoords(implicit gameState: GameState) =
     gameState.hexMap.get.cells.toCoords
   override def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] =
-    rangeCellCoords.whereEnemiesOf(parentCharacterId)
+    rangeCellCoords.whereEnemiesOfC(parentCharacterId)
 
   override def use()(implicit random: Random, gameState: GameState): GameState = {
     val targets = targetsInRange.characters.map(_.id)

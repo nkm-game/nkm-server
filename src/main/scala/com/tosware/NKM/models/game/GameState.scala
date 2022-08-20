@@ -184,11 +184,13 @@ case class GameState(
   def initializeCharacterPick()(implicit random: Random): GameState =
     updateClock(clock.setPickTime(pickTime))(random, id)
 
+  def setHexMap(hexMap: HexMap): GameState =
+    this.modify(_.hexMap).setTo(Some(hexMap))
+
   def startGame(g: GameStartDependencies)(implicit random: Random): GameState = {
-    copy(
+    setHexMap(g.hexMap).copy(
       charactersMetadata = g.charactersMetadata,
       players = g.players,
-      hexMap = Some(g.hexMap),
       pickType = g.pickType,
       numberOfBans = g.numberOfBansPerPlayer,
       numberOfCharactersPerPlayers = g.numberOfCharactersPerPlayer,
