@@ -59,7 +59,7 @@ class RunItDownSpec
         gameState.basicAttack(p0FirstCharacter.id, p1FirstCharacter.id)
 
       def basicMove(gameState: GameState, cs: Seq[(Int, Int)]) =
-        gameState.basicMoveCharacter(CoordinateSeq(cs: _*), p0FirstCharacter.id)
+        gameState.basicMoveCharacter(p0FirstCharacter.id, CoordinateSeq(cs: _*))
 
       assertCommandSuccess (validateBasicMove(abilityUsedGameState, Seq((0, 0), (1, 0))))
       assertCommandSuccess (validateBasicAttack(abilityUsedGameState))

@@ -1,56 +1,21 @@
 package com.tosware.NKM.models.game
 
 import com.softwaremill.quicklens._
-import com.tosware.NKM.models.game.Ability.AbilityMetadataId
 import com.tosware.NKM.models.game.CharacterEffect.CharacterEffectId
 import com.tosware.NKM.models.game.CharacterMetadata.CharacterMetadataId
 import com.tosware.NKM.models.game.GameEvent.GameEvent
 import com.tosware.NKM.models.game.NKMCharacter._
 import com.tosware.NKM.models.game.Player.PlayerId
-import com.tosware.NKM.models.game.abilities.aqua.{NaturesBeauty, Purification, Resurrection}
-import com.tosware.NKM.models.game.abilities.hecate.{Aster, MasterThrone, PowerOfExistence}
-import com.tosware.NKM.models.game.abilities.llenn.{GrenadeThrow, PChan, RunItDown}
-import com.tosware.NKM.models.game.abilities.sinon.{PreciseShot, SnipersSight, TacticalEscape}
 import com.tosware.NKM.models.game.hex.HexUtils._
 import com.tosware.NKM.models.game.hex._
 import com.tosware.NKM.models.{Damage, DamageType}
+import com.tosware.NKM.providers.AbilityProvider
 
 import scala.reflect.ClassTag
 import scala.util.Random
 
 object NKMCharacter {
   type CharacterId = String
-  def instantiateAbilities(characterId: CharacterId, metadataIds: Seq[AbilityMetadataId])(implicit random: Random): Seq[Ability] = {
-    metadataIds.map {
-      case NaturesBeauty.metadata.id =>
-        NaturesBeauty(NKMUtils.randomUUID, characterId)
-      case Purification.metadata.id =>
-        Purification(NKMUtils.randomUUID, characterId)
-      case Resurrection.metadata.id =>
-        Resurrection(NKMUtils.randomUUID, characterId)
-
-      case MasterThrone.metadata.id =>
-        MasterThrone(NKMUtils.randomUUID, characterId)
-      case Aster.metadata.id =>
-        Aster(NKMUtils.randomUUID, characterId)
-      case PowerOfExistence.metadata.id =>
-        PowerOfExistence(NKMUtils.randomUUID, characterId)
-
-      case SnipersSight.metadata.id =>
-        SnipersSight(NKMUtils.randomUUID, characterId)
-      case TacticalEscape.metadata.id =>
-        TacticalEscape(NKMUtils.randomUUID, characterId)
-      case PreciseShot.metadata.id =>
-        PreciseShot(NKMUtils.randomUUID, characterId)
-
-      case PChan.metadata.id =>
-        PChan(NKMUtils.randomUUID, characterId)
-      case GrenadeThrow.metadata.id =>
-        GrenadeThrow(NKMUtils.randomUUID, characterId)
-      case RunItDown.metadata.id =>
-        RunItDown(NKMUtils.randomUUID, characterId)
-    }
-  }
 
   def fromMetadata(characterId: CharacterId, metadata: CharacterMetadata)(implicit random: Random) = {
     NKMCharacter(
@@ -66,7 +31,7 @@ object NKMCharacter {
         pureSpeed = metadata.initialSpeed,
         purePhysicalDefense = metadata.initialPsychicalDefense,
         pureMagicalDefense = metadata.initialMagicalDefense,
-        abilities = instantiateAbilities(characterId, metadata.initialAbilitiesMetadataIds)
+        abilities = AbilityProvider.instantiateAbilities(characterId, metadata.initialAbilitiesMetadataIds),
       )
     )
   }

@@ -199,8 +199,8 @@ class GameStateValidatorSpec
 
       "disallow move if character already moved" in {
         val newGameState = gameState.basicMoveCharacter(
-          CoordinateSeq((0, 0), (1, 0)),
-          p0FirstCharacter.id)
+          p0FirstCharacter.id,
+          CoordinateSeq((0, 0), (1, 0)))
         val result = GameStateValidator()(newGameState).validateBasicMoveCharacter(gameState.players(0).id,
           CoordinateSeq((1, 0), (0, 0)),
           p0FirstCharacter.id

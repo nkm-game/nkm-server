@@ -329,7 +329,7 @@ case class GameState(
     .modify(_.characterIdsOutsideMap).using(_.filter(_ != characterId))
       .logEvent(CharacterPlaced(NKMUtils.randomUUID, characterId, targetCellCoordinates))
 
-  def basicMoveCharacter(path: Seq[HexCoordinates], characterId: CharacterId)(implicit random: Random): GameState = {
+  def basicMoveCharacter(characterId: CharacterId, path: Seq[HexCoordinates])(implicit random: Random): GameState = {
     implicit val causedBy: CharacterId = characterId
     val newGameState = takeActionWithCharacter(characterId)
     characterById(characterId).get.basicMove(path)(random, newGameState)
