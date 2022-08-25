@@ -27,7 +27,6 @@ case class SnipersSight
 
   override def basicAttackCells(implicit gameState: GameState): Set[HexCoordinates] = {
     if(parentCell.isEmpty) return Set.empty
-    val parentCoordinates = parentCell.get.coordinates
     parentCharacter.state.attackType match {
       case AttackType.Melee =>
         parentCell.get.getArea(

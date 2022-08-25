@@ -56,6 +56,10 @@ trait BasicAttackOverride {
   def basicAttack(targetCharacterId: CharacterId)(implicit random: Random, gameState: GameState): GameState
 }
 
+trait BasicMoveOverride {
+  def basicMove(path: Seq[HexCoordinates])(implicit random: Random, gameState: GameState): GameState
+}
+
 trait UsableWithoutTarget { this: Ability =>
   def use()(implicit random: Random, gameState: GameState): GameState
   def useChecks(implicit gameState: GameState): Set[UseCheck] =

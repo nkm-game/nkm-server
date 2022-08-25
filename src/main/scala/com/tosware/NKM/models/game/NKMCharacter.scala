@@ -174,9 +174,7 @@ case class NKMCharacter
     playerId == owner.id
 
   def basicAttackOverride: Option[BasicAttackOverride] =
-    state.abilities.collectFirst {
-      case o: BasicAttackOverride => o
-    }
+    state.abilities.ofType[BasicAttackOverride].headOption
 
   def basicAttackCellCoords(implicit gameState: GameState): Set[HexCoordinates] =
     basicAttackOverride.fold(defaultBasicAttackCells)(_.basicAttackCells)
@@ -186,6 +184,18 @@ case class NKMCharacter
 
   def basicAttack(targetCharacterId: CharacterId)(implicit random: Random, gameState: GameState): GameState =
     basicAttackOverride.fold(defaultBasicAttack(targetCharacterId))(_.basicAttack(targetCharacterId))
+
+  def basicMoveOverride: Option[BasicMoveOverride] =
+    state.abilities.ofType[BasicMoveOverride].headOption
+
+  def defaultBasicMove(path: Seq[HexCoordinates])(implicit random: Random, gameState: GameState): GameState =
+    path.tail.foldLeft(gameState)((acc, coordinate) => acc.teleportCharacter(id, coordinate)(random, id))
+
+  // case if character dies on the way? make a test of this and create a new functions with while(onMap)
+  def basicMove(path: Seq[HexCoordinates])(implicit random: Random, gameState: GameState): GameState =
+    basicMoveOverride.fold(defaultBasicMove(path))(_.basicMove(path))
+
+
 
   def defaultMeleeBasicAttackCells(implicit gameState: GameState): Set[HexCoordinates] = {
     if(parentCell.isEmpty) return Set.empty

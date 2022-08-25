@@ -115,7 +115,7 @@ object HexUtils {
   }
 
   implicit class SeqUtils[T](es: Seq[T]) {
-    def ofType[A <: T: ClassTag]: Seq[A] =
+    def ofType[A: ClassTag]: Seq[A] =
       es.collect {case e: A => e}
   }
 }

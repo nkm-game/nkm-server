@@ -329,15 +329,14 @@ case class GameState(
     .modify(_.characterIdsOutsideMap).using(_.filter(_ != characterId))
       .logEvent(CharacterPlaced(NKMUtils.randomUUID, characterId, targetCellCoordinates))
 
-  def basicMoveCharacter(playerId: PlayerId, path: Seq[HexCoordinates], characterId: CharacterId)(implicit random: Random): GameState = {
+  def basicMoveCharacter(path: Seq[HexCoordinates], characterId: CharacterId)(implicit random: Random): GameState = {
     implicit val causedBy: CharacterId = characterId
     val newGameState = takeActionWithCharacter(characterId)
-    // case if character dies on the way? make a test of this and create a new functions with while(onMap)
-    path.tail.foldLeft(newGameState)((acc, coordinate) => acc.teleportCharacter(coordinate, characterId)(random, playerId))
+    characterById(characterId).get.basicMove(path)(random, newGameState)
       .logEvent(CharacterBasicMoved(NKMUtils.randomUUID, characterId, path))
   }
 
-  def teleportCharacter(targetCellCoordinates: HexCoordinates, characterId: CharacterId)(implicit random: Random, causedBy: String): GameState = {
+  def teleportCharacter(characterId: CharacterId, targetCellCoordinates: HexCoordinates)(implicit random: Random, causedBy: String): GameState = {
     val parentCellOpt = characterById(characterId).get.parentCell(this)
 
     parentCellOpt.fold(this)(c => updateHexCell(c.coordinates)(_.copy(characterId = None)))

@@ -198,7 +198,7 @@ class GameStateValidatorSpec
       }
 
       "disallow move if character already moved" in {
-        val newGameState = gameState.basicMoveCharacter(gameState.players(0).id,
+        val newGameState = gameState.basicMoveCharacter(
           CoordinateSeq((0, 0), (1, 0)),
           p0FirstCharacter.id)
         val result = GameStateValidator()(newGameState).validateBasicMoveCharacter(gameState.players(0).id,
@@ -253,7 +253,7 @@ class GameStateValidatorSpec
     }
 
     "validate attacking characters and" when {
-      val moveGameState = gameState.teleportCharacter(HexCoordinates(2, 0), p0FirstCharacter.id)(random, gameState.id)
+      val moveGameState = gameState.teleportCharacter(p0FirstCharacter.id, HexCoordinates(2, 0))(random, gameState.id)
 
 
       "allow if character is in attack range without obstacles" in {

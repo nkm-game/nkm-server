@@ -12,7 +12,7 @@ import scala.util.Random
 object Resurrection {
   val metadata: AbilityMetadata =
     AbilityMetadata(
-      name = "Resurrection",
+      name = "OneHundredEightPoundPhoenix",
       abilityType = AbilityType.Ultimate,
       description =
         """Character resurrects allied character, that died max. one phase before.
