@@ -1,14 +1,14 @@
 package helpers
 
-import com.tosware.NKM.Logging
-import com.tosware.NKM.models.CommandResponse.{CommandResponse, Failure, Success}
-import com.tosware.NKM.models.game.NKMCharacter.CharacterId
-import com.tosware.NKM.models.game.PickType.BlindPick
-import com.tosware.NKM.models.game.Player.PlayerId
-import com.tosware.NKM.models.game._
-import com.tosware.NKM.models.game.hex.HexCoordinates
-import com.tosware.NKM.providers.HexMapProvider
-import com.tosware.NKM.providers.HexMapProvider.TestHexMapName
+import com.tosware.nkm.Logging
+import com.tosware.nkm.models.CommandResponse.{CommandResponse, Failure, Success}
+import com.tosware.nkm.models.game.NkmCharacter.CharacterId
+import com.tosware.nkm.models.game.PickType.BlindPick
+import com.tosware.nkm.models.game.Player.PlayerId
+import com.tosware.nkm.models.game._
+import com.tosware.nkm.models.game.hex.HexCoordinates
+import com.tosware.nkm.providers.HexMapProvider
+import com.tosware.nkm.providers.HexMapProvider.TestHexMapName
 import org.scalatest.Assertions.fail
 
 import scala.util.Random
@@ -31,7 +31,7 @@ trait TestUtils extends Logging {
   protected def characterIdOnPoint(hexCoordinates: HexCoordinates)(implicit gameState: GameState): CharacterId =
     gameState.hexMap.get.getCell(hexCoordinates).get.characterId.get
 
-  protected def characterOnPoint(hexCoordinates: HexCoordinates)(implicit gameState: GameState): NKMCharacter =
+  protected def characterOnPoint(hexCoordinates: HexCoordinates)(implicit gameState: GameState): NkmCharacter =
     gameState.characterById(characterIdOnPoint(hexCoordinates)).get
 
   protected def getTestGameState(testHexMapName: TestHexMapName, characterMetadatass: Seq[Seq[CharacterMetadata]]): GameState = {

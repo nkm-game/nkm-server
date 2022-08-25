@@ -1,10 +1,10 @@
 package unit
 
-import com.tosware.NKM.Logging
-import com.tosware.NKM.models.game.hex.HexUtils._
-import com.tosware.NKM.models.game.hex._
-import com.tosware.NKM.models.game.{CharacterMetadata, GameState}
-import com.tosware.NKM.providers.HexMapProvider.TestHexMapName
+import com.tosware.nkm.Logging
+import com.tosware.nkm.models.game.hex.HexUtils._
+import com.tosware.nkm.models.game.hex._
+import com.tosware.nkm.models.game.{CharacterMetadata, GameState}
+import com.tosware.nkm.providers.HexMapProvider.TestHexMapName
 import helpers.TestUtils
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike

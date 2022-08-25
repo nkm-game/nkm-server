@@ -1,8 +1,8 @@
 package unit
 
-import com.tosware.NKM.models.game.CharacterMetadata.CharacterMetadataId
-import com.tosware.NKM.models.game.Player.PlayerId
-import com.tosware.NKM.models.game.blindpick._
+import com.tosware.nkm.models.game.CharacterMetadata.CharacterMetadataId
+import com.tosware.nkm.models.game.Player.PlayerId
+import com.tosware.nkm.models.game.blindpick._
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 

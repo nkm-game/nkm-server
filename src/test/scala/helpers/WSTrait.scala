@@ -2,18 +2,18 @@ package helpers
 
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.testkit.WSProbe
-import com.tosware.NKM.models.game.{ClockConfig, GameStateView, PickType}
-import com.tosware.NKM.models.game.NKMCharacter.CharacterId
-import com.tosware.NKM.models.game.CharacterMetadata.CharacterMetadataId
-import com.tosware.NKM.models.game.hex.HexCoordinates
-import com.tosware.NKM.models.game.ws.GameRequest.Action.{BasicAttack, EndTurn}
-//import com.tosware.NKM.models.game._
-import com.tosware.NKM.models.game.ws.GameRequest.Action.{Move, PlaceCharacters}
-import com.tosware.NKM.models.game.ws.GameRequest.CharacterSelect._
-import com.tosware.NKM.models.game.ws.GameRequest.General._
-import com.tosware.NKM.models.game.ws._
-import com.tosware.NKM.models.lobby.LobbyState
-import com.tosware.NKM.models.lobby.ws._
+import com.tosware.nkm.models.game.{ClockConfig, GameStateView, PickType}
+import com.tosware.nkm.models.game.NkmCharacter.CharacterId
+import com.tosware.nkm.models.game.CharacterMetadata.CharacterMetadataId
+import com.tosware.nkm.models.game.hex.HexCoordinates
+import com.tosware.nkm.models.game.ws.GameRequest.Action.{BasicAttack, EndTurn}
+//import com.tosware.nkm.models.game._
+import com.tosware.nkm.models.game.ws.GameRequest.Action.{Move, PlaceCharacters}
+import com.tosware.nkm.models.game.ws.GameRequest.CharacterSelect._
+import com.tosware.nkm.models.game.ws.GameRequest.General._
+import com.tosware.nkm.models.game.ws._
+import com.tosware.nkm.models.lobby.LobbyState
+import com.tosware.nkm.models.lobby.ws._
 import spray.json._
 
 trait WSTrait extends UserApiTrait {

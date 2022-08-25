@@ -1,7 +1,7 @@
 package integration.ws
 
-import com.tosware.NKM.models.game._
-import com.tosware.NKM.models.lobby.ws._
+import com.tosware.nkm.models.game._
+import com.tosware.nkm.models.lobby.ws._
 import helpers.WSTrait
 
 class WSLobbySpec extends WSTrait

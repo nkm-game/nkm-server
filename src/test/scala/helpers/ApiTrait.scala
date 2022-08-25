@@ -2,16 +2,16 @@ package helpers
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.testkit.{RouteTestTimeout, ScalatestRouteTest}
-import com.tosware.NKM.NKMDependencies
-import com.tosware.NKM.services.http.HttpService
+import com.tosware.nkm.NkmDependencies
+import com.tosware.nkm.services.http.HttpService
 
 import scala.concurrent.duration.DurationInt
 
 trait ApiTrait
-    extends NKMIntegrationTestTrait
+    extends NkmIntegrationTestTrait
       with ScalatestRouteTest
   {
-    private var _depsOption: Option[NKMDependencies] = None
+    private var _depsOption: Option[NkmDependencies] = None
     def deps = _depsOption.get
     private var _httpServiceOption: Option[HttpService] = None
     def httpService = _httpServiceOption.get
@@ -25,7 +25,7 @@ trait ApiTrait
 
     override def beforeEach(): Unit = {
       super.beforeEach()
-      _depsOption = Some(new NKMDependencies(system, db))
+      _depsOption = Some(new NkmDependencies(system, db))
       _httpServiceOption = Some(new HttpService(deps))
     }
 

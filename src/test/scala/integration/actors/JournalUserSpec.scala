@@ -5,11 +5,11 @@ import akka.pattern.ask
 import akka.persistence.jdbc.query.scaladsl.JdbcReadJournal
 import akka.persistence.query.PersistenceQuery
 import akka.stream.scaladsl.Sink
-import com.tosware.NKM.actors.User
-import com.tosware.NKM.actors.User._
-import helpers.NKMPersistenceTestKit
+import com.tosware.nkm.actors.User
+import com.tosware.nkm.actors.User._
+import helpers.NkmPersistenceTestKit
 
-class JournalUserSpec extends NKMPersistenceTestKit(ActorSystem("UserSpec2")) {
+class JournalUserSpec extends NkmPersistenceTestKit(ActorSystem("UserSpec2")) {
   private val readJournal: JdbcReadJournal = PersistenceQuery(system).readJournalFor[JdbcReadJournal](JdbcReadJournal.Identifier)
 
   def createUser(username: String): Unit = {

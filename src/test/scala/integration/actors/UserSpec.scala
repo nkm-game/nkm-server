@@ -2,13 +2,13 @@ package integration.actors
 
 import akka.actor.{ActorRef, ActorSystem}
 import akka.pattern.ask
-import com.tosware.NKM.actors.User
-import com.tosware.NKM.actors.User._
-import com.tosware.NKM.models.UserState
-import helpers.NKMPersistenceTestKit
+import com.tosware.nkm.actors.User
+import com.tosware.nkm.actors.User._
+import com.tosware.nkm.models.UserState
+import helpers.NkmPersistenceTestKit
 
 
-class UserSpec extends NKMPersistenceTestKit(ActorSystem("UserSpec"))
+class UserSpec extends NkmPersistenceTestKit(ActorSystem("UserSpec"))
 {
   "An User actor" must {
     "not be registered initially" in {

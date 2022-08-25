@@ -1,8 +1,8 @@
 package unit
 
-import com.tosware.NKM.Logging
-import com.tosware.NKM.models.game.hex.HexCellType._
-import com.tosware.NKM.models.game.hex.{HexMap, HexUtils}
+import com.tosware.nkm.Logging
+import com.tosware.nkm.models.game.hex.HexCellType._
+import com.tosware.nkm.models.game.hex.{HexMap, HexUtils}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 

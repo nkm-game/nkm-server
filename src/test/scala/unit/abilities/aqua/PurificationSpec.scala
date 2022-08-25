@@ -1,11 +1,11 @@
 package unit.abilities.aqua
 
-import com.tosware.NKM.models.GameStateValidator
-import com.tosware.NKM.models.game._
-import com.tosware.NKM.models.game.abilities.aqua.Purification
-import com.tosware.NKM.models.game.effects._
-import com.tosware.NKM.models.game.hex.{HexCoordinates, NKMUtils}
-import com.tosware.NKM.providers.HexMapProvider.TestHexMapName
+import com.tosware.nkm.models.GameStateValidator
+import com.tosware.nkm.models.game._
+import com.tosware.nkm.models.game.abilities.aqua.Purification
+import com.tosware.nkm.models.game.effects._
+import com.tosware.nkm.models.game.hex.{HexCoordinates, NkmUtils}
+import com.tosware.nkm.providers.HexMapProvider.TestHexMapName
 import helpers.TestUtils
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
@@ -30,10 +30,10 @@ class PurificationSpec
   Purification.metadata.name must {
     "be able to remove negative effects" in {
       val effectGameState = gameState
-        .addEffect(p0SecondCharacter.id, DisarmEffect(NKMUtils.randomUUID, 5))(random, gameState.id)
-        .addEffect(p0SecondCharacter.id, StunEffect(NKMUtils.randomUUID, 5))(random, gameState.id)
-        .addEffect(p0SecondCharacter.id, GroundEffect(NKMUtils.randomUUID, 5))(random, gameState.id)
-        .addEffect(p0SecondCharacter.id, SnareEffect(NKMUtils.randomUUID, 5))(random, gameState.id)
+        .addEffect(p0SecondCharacter.id, DisarmEffect(NkmUtils.randomUUID(), 5))(random, gameState.id)
+        .addEffect(p0SecondCharacter.id, StunEffect(NkmUtils.randomUUID(), 5))(random, gameState.id)
+        .addEffect(p0SecondCharacter.id, GroundEffect(NkmUtils.randomUUID(), 5))(random, gameState.id)
+        .addEffect(p0SecondCharacter.id, SnareEffect(NkmUtils.randomUUID(), 5))(random, gameState.id)
 
       val abilityId = p0FirstCharacter.state.abilities.head.id
 

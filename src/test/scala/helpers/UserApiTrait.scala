@@ -3,7 +3,7 @@ package helpers
 import akka.http.scaladsl.marshalling.ToEntityMarshaller
 import akka.http.scaladsl.model.StatusCode
 import akka.http.scaladsl.model.headers.RawHeader
-import com.tosware.NKM.models.{Credentials, RegisterRequest}
+import com.tosware.nkm.models.{Credentials, RegisterRequest}
 
 trait UserApiTrait extends ApiTrait
   {

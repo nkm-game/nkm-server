@@ -1,9 +1,9 @@
 package unit.abilities.aqua
 
-import com.tosware.NKM.models.game._
-import com.tosware.NKM.models.game.abilities.aqua.NaturesBeauty
-import com.tosware.NKM.models.game.hex.HexCoordinates
-import com.tosware.NKM.providers.HexMapProvider.TestHexMapName
+import com.tosware.nkm.models.game._
+import com.tosware.nkm.models.game.abilities.aqua.NaturesBeauty
+import com.tosware.nkm.models.game.hex.HexCoordinates
+import com.tosware.nkm.providers.HexMapProvider.TestHexMapName
 import helpers.TestUtils
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike

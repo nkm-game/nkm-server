@@ -1,6 +1,6 @@
 package helpers
 
-import com.tosware.NKM.models.lobby.ws.LobbyRequest.LobbyCreation
+import com.tosware.nkm.models.lobby.ws.LobbyRequest.LobbyCreation
 
 trait LobbyApiTrait extends UserApiTrait
   {
