@@ -175,7 +175,7 @@ class GameStateValidatorSpec
 
       "disallow move above speed range" in {
         val result = validator.validateBasicMoveCharacter(gameState.players(0).id,
-          CoordinateSeq((0, 0), (1, 0), (2, 0), (2, 1), (2, 2)),
+          CoordinateSeq((0, 0), (1, 0), (2, 0), (2, 1), (1, 1)),
           p0FirstCharacter.id
         )
         assertCommandFailure(result)

@@ -47,6 +47,12 @@ object HexUtils {
     def whereEmpty: Set[HexCoordinates] =
       toCells.whereEmpty.map(_.coordinates)
 
+    def whereFreeToStand: Set[HexCoordinates] =
+      toCells.whereFreeToStand.toCoords
+
+    def whereFreeToPass(forCharacterId: CharacterId): Set[HexCoordinates] =
+      toCells.whereFreeToPass(forCharacterId).toCoords
+
     def whereFriendsOfC(characterId: CharacterId): Set[HexCoordinates] =
       toCells.whereFriendsOfC(characterId).toCoords
 
@@ -76,6 +82,12 @@ object HexUtils {
 
     def whereEmpty: Set[HexCell] =
       cells.filter(_.isEmpty)
+
+    def whereFreeToStand: Set[HexCell] =
+      cells.filter(_.isFreeToStand)
+
+    def whereFreeToPass(forCharacterId: CharacterId): Set[HexCell] =
+      cells.filter(_.isFreeToPass(forCharacterId))
 
     def whereFriendsOfC(characterId: CharacterId): Set[HexCell] =
       friendsOfC(characterId).map(_.parentCell.get)

@@ -29,7 +29,7 @@ case class HexCell
 ) {
   def isEmpty: Boolean = characterId.isEmpty
   def isFreeToStand: Boolean = isEmpty && cellType != HexCellType.Wall
-  def isFreeToMove(forCharacterId: CharacterId)(implicit gameState: GameState): Boolean =
+  def isFreeToPass(forCharacterId: CharacterId)(implicit gameState: GameState): Boolean =
     cellType != HexCellType.Wall && characterId.flatMap(cid => gameState.characterById(cid)).fold(true)(_.isFriendForC(forCharacterId))
   def character(implicit gameState: GameState): Option[NkmCharacter] =
     characterId.flatMap(cid => gameState.characterById(cid))
