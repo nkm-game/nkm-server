@@ -7,7 +7,7 @@ import com.tosware.nkm.models.game.effects._
 import com.tosware.nkm.models.game.hex.{HexCoordinates, NkmUtils}
 import com.tosware.nkm.models.game.hex.HexUtils.CoordinateSeq
 import com.tosware.nkm.providers.HexMapProvider.TestHexMapName
-import helpers.TestUtils
+import helpers.{Simple2v2TestScenario, TestUtils}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
@@ -16,62 +16,27 @@ class GameStateValidatorSpec
     with Matchers
     with TestUtils
 {
-  val metadata = CharacterMetadata.empty()
+  private val metadata = CharacterMetadata.empty()
     .copy(
       initialSpeed = 3,
       initialBasicAttackRange = 1,
       initialAbilitiesMetadataIds = Seq(PowerOfExistence.metadata.id)
     )
-  implicit val gameState = getTestGameState(TestHexMapName.Simple2v2, Seq(
-    Seq(metadata.copy(name = "Empty1"), metadata.copy(name = "Empty2")),
-    Seq(metadata.copy(name = "Empty3"), metadata.copy(name = "Empty4")),
-  ))
 
-  val wallMeleeGameState = getTestGameState(TestHexMapName.Simple2v2Wall, Seq(
-    Seq(
-      metadata.copy(name = "Empty1", attackType = AttackType.Melee, initialBasicAttackRange = 4),
-      metadata.copy(name = "Empty2", attackType = AttackType.Melee, initialBasicAttackRange = 4),
-    ),
-    Seq(
-      metadata.copy(name = "Empty2", attackType = AttackType.Melee, initialBasicAttackRange = 4),
-      metadata.copy(name = "Empty3", attackType = AttackType.Melee, initialBasicAttackRange = 4),
-    ),
-  ))
+  private val s = Simple2v2TestScenario(metadata)
+  private implicit val gameState: GameState = s.gameState
 
-  val wallRangedGameState = getTestGameState(TestHexMapName.Simple2v2Wall, Seq(
-    Seq(
-      metadata.copy(name = "Empty1", attackType = AttackType.Ranged, initialBasicAttackRange = 4),
-      metadata.copy(name = "Empty2", attackType = AttackType.Ranged, initialBasicAttackRange = 4),
-    ),
-    Seq(
-      metadata.copy(name = "Empty3", attackType = AttackType.Ranged, initialBasicAttackRange = 4),
-      metadata.copy(name = "Empty4", attackType = AttackType.Ranged, initialBasicAttackRange = 4),
-    ),
-  ))
+  private val wallMeleeScenario = Simple2v2TestScenario(
+    metadata.copy(attackType = AttackType.Melee, initialBasicAttackRange = 4),
+    TestHexMapName.Simple2v2Wall
+  )
 
-  def characterIdOnPoint(hexCoordinates: HexCoordinates) = gameState.hexMap.get.getCell(hexCoordinates).get.characterId.get
+  private val wallRangedScenario = Simple2v2TestScenario(
+    metadata.copy(attackType = AttackType.Ranged, initialBasicAttackRange = 4),
+    TestHexMapName.Simple2v2Wall
+  )
 
-  val p0FirstCharacterSpawnCoordinates = HexCoordinates(0, 0)
-  val p0SecondCharacterSpawnCoordinates = HexCoordinates(-1, 0)
-  val p1FirstCharacterSpawnCoordinates = HexCoordinates(3, 0)
-  val p1SecondCharacterSpawnCoordinates = HexCoordinates(4, 0)
-
-  val p0FirstCharacter = characterOnPoint(p0FirstCharacterSpawnCoordinates)
-  val p0SecondCharacter = characterOnPoint(p0SecondCharacterSpawnCoordinates)
-
-  val p1FirstCharacter = characterOnPoint(p1FirstCharacterSpawnCoordinates)
-  val p1SecondCharacter = characterOnPoint(p1SecondCharacterSpawnCoordinates)
-
-  val p0FirstCharacterMelee = characterOnPoint(p0FirstCharacterSpawnCoordinates)(wallMeleeGameState)
-  val p1FirstCharacterMelee = characterOnPoint(p1FirstCharacterSpawnCoordinates)(wallMeleeGameState)
-  val p1SecondCharacterMelee = characterOnPoint(p1SecondCharacterSpawnCoordinates)(wallMeleeGameState)
-
-  val p0FirstCharacterRanged = characterOnPoint(p0FirstCharacterSpawnCoordinates)(wallRangedGameState)
-  val p1FirstCharacterRanged = characterOnPoint(p1FirstCharacterSpawnCoordinates)(wallRangedGameState)
-  val p1SecondCharacterRanged = characterOnPoint(p1SecondCharacterSpawnCoordinates)(wallRangedGameState)
-
-  val abilityId = p0FirstCharacter.state.abilities.head.id
-
+  private val abilityId = s.characters.p0First.state.abilities.head.id
   private val validator = GameStateValidator()(gameState)
 
   "GameStateValidator" must {
@@ -79,7 +44,7 @@ class GameStateValidatorSpec
       "allow move within speed range" in {
         val result = validator.validateBasicMoveCharacter(gameState.players(0).id,
           CoordinateSeq((0, 0), (1, 0)),
-          p0FirstCharacter.id
+          s.characters.p0First.id
         )
         assertCommandSuccess(result)
       }
@@ -87,49 +52,49 @@ class GameStateValidatorSpec
       "allow move over friendly characters" in {
         val result = validator.validateBasicMoveCharacter(gameState.players(0).id,
           CoordinateSeq((0, 0), (-1, 0), (-2, 0)),
-          p0FirstCharacter.id
+          s.characters.p0First.id
         )
         assertCommandSuccess(result)
       }
 
       "disallow if character is not on the map" in {
-        val newGameState = gameState.removeCharacterFromMap(p0FirstCharacter.id)(random, gameState.id)
+        val newGameState = gameState.removeCharacterFromMap(s.characters.p0First.id)(random, gameState.id)
         val result =  GameStateValidator()(newGameState).validateBasicMoveCharacter(gameState.players(0).id,
           CoordinateSeq((0, 0), (1, 0)),
-          p0FirstCharacter.id
+          s.characters.p0First.id
         )
         assertCommandFailure(result)
       }
 
       "disallow if character is grounded" in {
-        val newGameState = gameState.addEffect(p0FirstCharacter.id, GroundEffect(NkmUtils.randomUUID(), 1))(random, gameState.id)
+        val newGameState = gameState.addEffect(s.characters.p0First.id, GroundEffect(NkmUtils.randomUUID(), 1))(random, gameState.id)
 
         val result = GameStateValidator()(newGameState).validateBasicMoveCharacter(
           gameState.players(0).id,
           CoordinateSeq((0, 0), (1, 0)),
-          p0FirstCharacter.id
+          s.characters.p0First.id
         )
         assertCommandFailure(result)
       }
 
       "disallow if character is snared" in {
-        val newGameState = gameState.addEffect(p0FirstCharacter.id, SnareEffect(NkmUtils.randomUUID(), 1))(random, gameState.id)
+        val newGameState = gameState.addEffect(s.characters.p0First.id, SnareEffect(NkmUtils.randomUUID(), 1))(random, gameState.id)
 
         val result = GameStateValidator()(newGameState).validateBasicMoveCharacter(
           gameState.players(0).id,
           CoordinateSeq((0, 0), (1, 0)),
-          p0FirstCharacter.id
+          s.characters.p0First.id
         )
         assertCommandFailure(result)
       }
 
       "disallow if character is stunned" in {
-        val newGameState = gameState.addEffect(p0FirstCharacter.id, StunEffect(NkmUtils.randomUUID(), 1))(random, gameState.id)
+        val newGameState = gameState.addEffect(s.characters.p0First.id, StunEffect(NkmUtils.randomUUID(), 1))(random, gameState.id)
 
         val result = GameStateValidator()(newGameState).validateBasicMoveCharacter(
           gameState.players(0).id,
           CoordinateSeq((0, 0), (1, 0)),
-          p0FirstCharacter.id
+          s.characters.p0First.id
         )
         assertCommandFailure(result)
       }
@@ -137,13 +102,13 @@ class GameStateValidatorSpec
       "disallow empty moves" in {
         val result = validator.validateBasicMoveCharacter(gameState.players(0).id,
           CoordinateSeq(),
-          p0FirstCharacter.id
+          s.characters.p0First.id
         )
         assertCommandFailure(result)
 
         val result2 = validator.validateBasicMoveCharacter(gameState.players(0).id,
           CoordinateSeq((0, 0)),
-          p0FirstCharacter.id
+          s.characters.p0First.id
         )
         assertCommandFailure(result2)
       }
@@ -151,7 +116,7 @@ class GameStateValidatorSpec
       "disallow move from other cell than characters" in {
         val result = validator.validateBasicMoveCharacter(gameState.players(0).id,
           CoordinateSeq((1, 0), (2, 0)),
-          p0FirstCharacter.id
+          s.characters.p0First.id
         )
         assertCommandFailure(result)
       }
@@ -159,7 +124,7 @@ class GameStateValidatorSpec
       "disallow move outside of turn" in {
         val result = validator.validateBasicMoveCharacter(gameState.players(1).id,
           CoordinateSeq((3, 0), (2, 0)),
-          p1FirstCharacter.id
+          s.characters.p1First.id
         )
         assertCommandFailure(result)
       }
@@ -167,7 +132,7 @@ class GameStateValidatorSpec
       "disallow move foreign characters" in {
         val result = validator.validateBasicMoveCharacter(gameState.players(0).id,
           CoordinateSeq((3, 0), (2, 0)),
-          p1FirstCharacter.id
+          s.characters.p1First.id
         )
         assertCommandFailure(result)
       }
@@ -176,7 +141,7 @@ class GameStateValidatorSpec
       "disallow move above speed range" in {
         val result = validator.validateBasicMoveCharacter(gameState.players(0).id,
           CoordinateSeq((0, 0), (1, 0), (2, 0), (2, 1), (1, 1)),
-          p0FirstCharacter.id
+          s.characters.p0First.id
         )
         assertCommandFailure(result)
       }
@@ -184,7 +149,7 @@ class GameStateValidatorSpec
       "disallow move into the same position" in {
         val result = validator.validateBasicMoveCharacter(gameState.players(0).id,
           CoordinateSeq((0, 0), (1, 0), (0, 0)),
-          p0FirstCharacter.id
+          s.characters.p0First.id
         )
         assertCommandFailure(result)
       }
@@ -192,18 +157,18 @@ class GameStateValidatorSpec
       "disallow move that visits another cell more than once" in {
         val result = validator.validateBasicMoveCharacter(gameState.players(0).id,
           CoordinateSeq((0, 0), (1, 0), (2, 0), (1, 0)),
-          p0FirstCharacter.id
+          s.characters.p0First.id
         )
         assertCommandFailure(result)
       }
 
       "disallow move if character already moved" in {
         val newGameState = gameState.basicMoveCharacter(
-          p0FirstCharacter.id,
+          s.characters.p0First.id,
           CoordinateSeq((0, 0), (1, 0)))
         val result = GameStateValidator()(newGameState).validateBasicMoveCharacter(gameState.players(0).id,
           CoordinateSeq((1, 0), (0, 0)),
-          p0FirstCharacter.id
+          s.characters.p0First.id
         )
         assertCommandFailure(result)
       }
@@ -212,7 +177,7 @@ class GameStateValidatorSpec
         val newGameState = gameState.useAbilityWithoutTarget(abilityId)
         val result = GameStateValidator()(newGameState).validateBasicMoveCharacter(gameState.players(0).id,
           CoordinateSeq((0, 0), (1, 0)),
-          p0FirstCharacter.id
+          s.characters.p0First.id
         )
         assertCommandFailure(result)
       }
@@ -222,7 +187,7 @@ class GameStateValidatorSpec
 
         val result = GameStateValidator()(newGameState).validateBasicMoveCharacter(gameState.players(0).id,
           CoordinateSeq((0, 0), (1, 0)),
-          p0FirstCharacter.id
+          s.characters.p0First.id
         )
         assertCommandFailure(result)
       }
@@ -230,7 +195,7 @@ class GameStateValidatorSpec
       "disallow move if there is an obstacle on path" in {
         val result = validator.validateBasicMoveCharacter(gameState.players(0).id,
           CoordinateSeq((0, 0), (1, -1), (1, 0)),
-          p0FirstCharacter.id
+          s.characters.p0First.id
         )
         assertCommandFailure(result)
       }
@@ -238,7 +203,7 @@ class GameStateValidatorSpec
       "disallow move if cell at the end is not free to move" in {
         val result = validator.validateBasicMoveCharacter(gameState.players(0).id,
           CoordinateSeq((0, 0), (1, -1)),
-          p0FirstCharacter.id
+          s.characters.p0First.id
         )
         assertCommandFailure(result)
       }
@@ -246,133 +211,137 @@ class GameStateValidatorSpec
       "disallow move if moving to not adjacent cell" in {
         val result = validator.validateBasicMoveCharacter(gameState.players(0).id,
           CoordinateSeq((0, 0), (0, 2)),
-          p0FirstCharacter.id
+          s.characters.p0First.id
         )
         assertCommandFailure(result)
       }
     }
 
     "validate attacking characters and" when {
-      val moveGameState = gameState.teleportCharacter(p0FirstCharacter.id, HexCoordinates(2, 0))(random, gameState.id)
+      val moveGameState = gameState.teleportCharacter(s.characters.p0First.id, HexCoordinates(2, 0))(random, gameState.id)
 
 
       "allow if character is in attack range without obstacles" in {
-        val result = GameStateValidator()(moveGameState).validateBasicAttackCharacter(p0FirstCharacter.owner.id,
-          p0FirstCharacter.id,
-          p1FirstCharacter.id,
+        val result = GameStateValidator()(moveGameState).validateBasicAttackCharacter(s.characters.p0First.owner.id,
+          s.characters.p0First.id,
+          s.characters.p1First.id,
         )
 
         assertCommandSuccess(result)
       }
 
       "allow over wall if character is ranged" in {
-        implicit val gameState: GameState = wallRangedGameState
-        val result = GameStateValidator().validateBasicAttackCharacter(p0FirstCharacterRanged.owner.id,
-          p0FirstCharacterRanged.id,
-          p1FirstCharacterRanged.id,
+        val s = wallRangedScenario
+        implicit val gameState: GameState = s.gameState
+        val result = GameStateValidator().validateBasicAttackCharacter(s.characters.p0First.owner.id,
+          s.characters.p0First.id,
+          s.characters.p1First.id,
         )
 
         assertCommandSuccess(result)
       }
 
       "disallow over wall if character is melee" in {
-        implicit val gameState: GameState = wallMeleeGameState
-        val result = GameStateValidator().validateBasicAttackCharacter(p0FirstCharacterMelee.owner.id,
-          p0FirstCharacterMelee.id,
-          p1FirstCharacterMelee.id,
+        val s = wallMeleeScenario
+        implicit val gameState: GameState = s.gameState
+        val result = GameStateValidator().validateBasicAttackCharacter(s.characters.p0First.owner.id,
+          s.characters.p0First.id,
+          s.characters.p1First.id,
         )
 
         assertCommandFailure(result)
       }
 
       "allow over character if character is ranged" in {
-        implicit val gameState: GameState = wallRangedGameState
-        val result = GameStateValidator().validateBasicAttackCharacter(p0FirstCharacterRanged.owner.id,
-          p0FirstCharacterRanged.id,
-          p1SecondCharacterRanged.id,
+        val s = wallRangedScenario
+        implicit val gameState: GameState = s.gameState
+        val result = GameStateValidator().validateBasicAttackCharacter(s.characters.p0First.owner.id,
+          s.characters.p0First.id,
+          s.characters.p1Second.id,
         )
 
         assertCommandSuccess(result)
       }
 
       "disallow over character if character is melee" in {
-        implicit val gameState: GameState = wallMeleeGameState
-        val result = GameStateValidator().validateBasicAttackCharacter(p0FirstCharacterMelee.owner.id,
-          p0FirstCharacterMelee.id,
-          p1SecondCharacterMelee.id,
+        val s = wallMeleeScenario
+        implicit val gameState: GameState = s.gameState
+        val result = GameStateValidator().validateBasicAttackCharacter(s.characters.p0First.owner.id,
+          s.characters.p0First.id,
+          s.characters.p1Second.id,
         )
 
         assertCommandFailure(result)
       }
 
       "disallow if character is not on the map" in {
-        val newGameState = moveGameState.removeCharacterFromMap(p0FirstCharacter.id)(random, gameState.id)
+        val newGameState = moveGameState.removeCharacterFromMap(s.characters.p0First.id)(random, gameState.id)
 
         val result = GameStateValidator()(newGameState).validateBasicAttackCharacter(gameState.players(0).id,
-          p0FirstCharacter.id,
-          p1FirstCharacter.id,
+          s.characters.p0First.id,
+          s.characters.p1First.id,
         )
         assertCommandFailure(result)
       }
 
       "allow if character is grounded" in {
-        val newGameState = moveGameState.addEffect(p0FirstCharacter.id, GroundEffect(NkmUtils.randomUUID(), 1))(random, gameState.id)
+        val newGameState = moveGameState.addEffect(s.characters.p0First.id, GroundEffect(NkmUtils.randomUUID(), 1))(random, gameState.id)
 
         val result = GameStateValidator()(newGameState).validateBasicAttackCharacter(
           gameState.players(0).id,
-          p0FirstCharacter.id,
-          p1FirstCharacter.id,
+          s.characters.p0First.id,
+          s.characters.p1First.id,
         )
         assertCommandSuccess(result)
       }
 
       "allow if character is snared" in {
-        val newGameState = moveGameState.addEffect(p0FirstCharacter.id, SnareEffect(NkmUtils.randomUUID(), 1))(random, gameState.id)
+        val newGameState = moveGameState.addEffect(s.characters.p0First.id, SnareEffect(NkmUtils.randomUUID(), 1))(random, gameState.id)
 
         val result = GameStateValidator()(newGameState).validateBasicAttackCharacter(
           gameState.players(0).id,
-          p0FirstCharacter.id,
-          p1FirstCharacter.id,
+          s.characters.p0First.id,
+          s.characters.p1First.id,
         )
         assertCommandSuccess(result)
       }
 
       "disallow character is stunned" in {
-        val newGameState = moveGameState.addEffect(p0FirstCharacter.id, StunEffect(NkmUtils.randomUUID(), 1))(random, gameState.id)
+        val newGameState = moveGameState.addEffect(s.characters.p0First.id, StunEffect(NkmUtils.randomUUID(), 1))(random, gameState.id)
 
         val result = GameStateValidator()(newGameState).validateBasicAttackCharacter(
           gameState.players(0).id,
-          p0FirstCharacter.id,
-          p1FirstCharacter.id,
+          s.characters.p0First.id,
+          s.characters.p1First.id,
         )
         assertCommandFailure(result)
       }
 
       "disallow character is disarmed" in {
-        val newGameState = moveGameState.addEffect(p0FirstCharacter.id, DisarmEffect(NkmUtils.randomUUID(), 1))(random, gameState.id)
+        val newGameState = moveGameState.addEffect(s.characters.p0First.id, DisarmEffect(NkmUtils.randomUUID(), 1))(random, gameState.id)
 
         val result = GameStateValidator()(newGameState).validateBasicAttackCharacter(
           gameState.players(0).id,
-          p0FirstCharacter.id,
-          p1FirstCharacter.id,
+          s.characters.p0First.id,
+          s.characters.p1First.id,
         )
         assertCommandFailure(result)
       }
 
       "disallow if character is not in attack range" in {
         val result = validator.validateBasicAttackCharacter(gameState.players(0).id,
-          p0FirstCharacter.id,
-          p1FirstCharacter.id,
+          s.characters.p0First.id,
+          s.characters.p1First.id,
         )
 
         assertCommandFailure(result)
       }
 
       "disallow if character already basic attacked" in {
-        val newState = moveGameState.basicAttack(p0FirstCharacter.id, p1FirstCharacter.id)
+        val newState = moveGameState.basicAttack(s.characters.p0First.id, s.characters.p1First.id)
         val result = GameStateValidator()(newState).validateBasicAttackCharacter(gameState.players(0).id,
-          p0FirstCharacter.id,
-          p1FirstCharacter.id,
+          s.characters.p0First.id,
+          s.characters.p1First.id,
         )
         assertCommandFailure(result)
       }
@@ -381,8 +350,8 @@ class GameStateValidatorSpec
         val newGameState = moveGameState.useAbilityWithoutTarget(abilityId)
         val result = GameStateValidator()(newGameState).validateBasicAttackCharacter(
           gameState.players(0).id,
-          p0FirstCharacter.id,
-          p1FirstCharacter.id,
+          s.characters.p0First.id,
+          s.characters.p1First.id,
         )
         assertCommandFailure(result)
       }
@@ -392,8 +361,8 @@ class GameStateValidatorSpec
 
         val result = GameStateValidator()(newGameState).validateBasicAttackCharacter(
           gameState.players(0).id,
-          p0FirstCharacter.id,
-          p1FirstCharacter.id,
+          s.characters.p0First.id,
+          s.characters.p1First.id,
         )
         assertCommandFailure(result)
       }

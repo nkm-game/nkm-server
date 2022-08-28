@@ -4,8 +4,7 @@ import com.tosware.nkm.Logging
 import com.tosware.nkm.models.game.hex.HexUtils._
 import com.tosware.nkm.models.game.hex._
 import com.tosware.nkm.models.game.{CharacterMetadata, GameState}
-import com.tosware.nkm.providers.HexMapProvider.TestHexMapName
-import helpers.TestUtils
+import helpers.{Simple2v2TestScenario, TestUtils}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
@@ -16,22 +15,9 @@ class HexCellSpec
     with TestUtils
 {
   private val metadata = CharacterMetadata.empty()
-  implicit val gameState: GameState = getTestGameState(TestHexMapName.Simple2v2, Seq(
-    Seq(metadata.copy(name = "Empty1"), metadata.copy(name = "Empty2")),
-    Seq(metadata.copy(name = "Empty3"), metadata.copy(name = "Empty4")),
-  ))
-  implicit val hexMap: HexMap = gameState.hexMap.get
-
-  val p0FirstCharacterSpawnCoordinates = HexCoordinates(0, 0)
-  val p0SecondCharacterSpawnCoordinates = HexCoordinates(-1, 0)
-  val p1FirstCharacterSpawnCoordinates = HexCoordinates(3, 0)
-  val p1SecondCharacterSpawnCoordinates = HexCoordinates(4, 0)
-
-  val p0FirstCharacter = characterOnPoint(p0FirstCharacterSpawnCoordinates)
-  val p0SecondCharacter = characterOnPoint(p0SecondCharacterSpawnCoordinates)
-
-  val p1FirstCharacter = characterOnPoint(p1FirstCharacterSpawnCoordinates)
-  val p1SecondCharacter = characterOnPoint(p1SecondCharacterSpawnCoordinates)
+  private val s = Simple2v2TestScenario(metadata)
+  implicit val gameState: GameState = s.gameState
+  implicit val hexMap: HexMap = s.gameState.hexMap.get
   "HexCell" must {
     "calculate correct neighbours" in {
       HexCoordinates(0, 0).toCell.getNeighbour(HexDirection.W).get.coordinates should be (HexCoordinates(-1, 0))
@@ -60,9 +46,9 @@ class HexCellSpec
       HexCoordinates(0, 0).toCell.getArea(
         10,
         Set(SearchFlag.StopAtEnemies),
-        Some(p0FirstCharacter.owner.id),
+        Some(s.characters.p0First.owner.id),
       ).toCoords should be (
-        hexMap.cells.toCoords -- hexMap.cells.whereEnemiesOfC(p0FirstCharacter.id).toCoords
+        hexMap.cells.toCoords -- hexMap.cells.whereEnemiesOfC(s.characters.p0First.id).toCoords
       )
     }
   }

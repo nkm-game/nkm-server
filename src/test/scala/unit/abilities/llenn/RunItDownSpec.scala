@@ -3,10 +3,8 @@ package unit.abilities.llenn
 import com.tosware.nkm.models.GameStateValidator
 import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.game.abilities.llenn.RunItDown
-import com.tosware.nkm.models.game.hex.HexCoordinates
 import com.tosware.nkm.models.game.hex.HexUtils.CoordinateSeq
-import com.tosware.nkm.providers.HexMapProvider.TestHexMapName
-import helpers.TestUtils
+import helpers.{Simple2v2TestScenario, TestUtils}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
@@ -15,51 +13,37 @@ class RunItDownSpec
     with Matchers
     with TestUtils
 {
-  val metadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(RunItDown.metadata.id))
-  implicit val gameState = getTestGameState(TestHexMapName.Simple2v2, Seq(
-    Seq(metadata.copy(name = "Empty1"), metadata.copy(name = "Empty2")),
-    Seq(metadata.copy(name = "Empty3"), metadata.copy(name = "Empty4")),
-  ))
-
-  val p0FirstCharacterSpawnCoordinates = HexCoordinates(0, 0)
-  val p0SecondCharacterSpawnCoordinates = HexCoordinates(-1, 0)
-  val p1FirstCharacterSpawnCoordinates = HexCoordinates(3, 0)
-  val p1SecondCharacterSpawnCoordinates = HexCoordinates(4, 0)
-
-  val p0FirstCharacter = characterOnPoint(p0FirstCharacterSpawnCoordinates)
-  val p0SecondCharacter = characterOnPoint(p0SecondCharacterSpawnCoordinates)
-
-  val p1FirstCharacter = characterOnPoint(p1FirstCharacterSpawnCoordinates)
-  val p1SecondCharacter = characterOnPoint(p1SecondCharacterSpawnCoordinates)
-
-  val abilityId = p0FirstCharacter.state.abilities.head.id
-  val pid = gameState.players(0).id
+  private val metadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(RunItDown.metadata.id))
+  private val s = Simple2v2TestScenario(metadata)
+  private implicit val gameState: GameState = s.gameState
+  private val abilityId = s.characters.p0First.state.abilities.head.id
+  private val pid = gameState.players.head.id
 
   RunItDown.metadata.name must {
     "be able to move and attack three times after using" in {
       {
-        val r = GameStateValidator().validateAbilityUseWithoutTarget(p0FirstCharacter.owner.id, abilityId)
+        val r = GameStateValidator().validateAbilityUseWithoutTarget(s.characters.p0First.owner.id, abilityId)
         assertCommandSuccess(r)
       }
       val abilityUsedGameState: GameState = gameState.useAbilityWithoutTarget(abilityId)
 
       def validateBasicAttack(gameState: GameState) =
         GameStateValidator()(gameState).validateBasicAttackCharacter(pid,
-          p0FirstCharacter.id,
-          p1FirstCharacter.id,
+          s.characters.p0First.id,
+          s.characters.p1First.id,
         )
 
       def validateBasicMove(gameState: GameState, cs: Seq[(Int, Int)]) =
         GameStateValidator()(gameState).validateBasicMoveCharacter(pid,
           CoordinateSeq(cs: _*),
-          p0FirstCharacter.id
+          s.characters.p0First.id
         )
 
       def basicAttack(gameState: GameState) =
-        gameState.basicAttack(p0FirstCharacter.id, p1FirstCharacter.id)
+        gameState.basicAttack(s.characters.p0First.id, s.characters.p1First.id)
 
       def basicMove(gameState: GameState, cs: Seq[(Int, Int)]) =
-        gameState.basicMoveCharacter(p0FirstCharacter.id, CoordinateSeq(cs: _*))
+        gameState.basicMoveCharacter(s.characters.p0First.id, CoordinateSeq(cs: _*))
 
       assertCommandSuccess (validateBasicMove(abilityUsedGameState, Seq((0, 0), (1, 0))))
       assertCommandSuccess (validateBasicAttack(abilityUsedGameState))
