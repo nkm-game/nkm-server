@@ -129,6 +129,8 @@ abstract class Ability(val id: AbilityId) {
       gameState.characterById(target).get.isEnemyForC(parentCharacter.id) -> "Target character is not an enemy."
     def TargetIsFriend(implicit target: CharacterId, useData: UseData, gameState: GameState): UseCheck =
       gameState.characterById(target).get.isFriendForC(parentCharacter.id) -> "Target character is not a friend."
+    def TargetIsOnMap(implicit target: CharacterId, useData: UseData, gameState: GameState): UseCheck =
+      gameState.characterById(target).get.isOnMap -> "Target character is not on map."
     def TargetCoordsInRange(implicit target: HexCoordinates, useData: UseData, gameState: GameState): UseCheck =
       Seq(target).toCells.nonEmpty -> "Target character is not in range."
     def TargetIsFriendlySpawn(implicit target: HexCoordinates, useData: UseData, gameState: GameState): UseCheck =

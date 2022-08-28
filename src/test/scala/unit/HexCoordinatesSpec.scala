@@ -61,13 +61,23 @@ class HexCoordinatesSpec
       }
     }
 
-    "calculate correct directions" in {
+    "calculate correct coords in directions" in {
       HexCoordinates(0, 0).getInDirection(HexDirection.W, 0) should be (HexCoordinates(0, 0))
       HexCoordinates(-2, 2).getInDirection(HexDirection.NE, 1) should be (HexCoordinates(-2, 3))
       HexCoordinates(0, -2).getInDirection(HexDirection.NW, 1) should be (HexCoordinates(-1, -1))
       HexCoordinates(0, 0).getInDirection(HexDirection.SW, 2) should be (HexCoordinates(0, -2))
       HexCoordinates(0, 0).getInDirection(HexDirection.SE, 2) should be (HexCoordinates(2, -2))
       HexCoordinates(0, -3).getInDirection(HexDirection.E, 10) should be (HexCoordinates(10, -3))
+    }
+
+    "calculate correct directions from coords" in {
+      HexCoordinates(0, 0).getDirection(HexCoordinates(0, 0)) should be (None)
+      HexCoordinates(-2, 2).getDirection(HexCoordinates(-2, 3)) should be (Some(HexDirection.NE))
+      HexCoordinates(0, -2).getDirection(HexCoordinates(-1, -1)) should be (Some(HexDirection.NW))
+      HexCoordinates(0, 0).getDirection(HexCoordinates(0, -2)) should be (Some(HexDirection.SW))
+      HexCoordinates(0, 0).getDirection(HexCoordinates(2, -2)) should be (Some(HexDirection.SE))
+      HexCoordinates(0, -3).getDirection(HexCoordinates(10, -3)) should be (Some(HexDirection.E))
+      HexCoordinates(0, -3).getDirection(HexCoordinates(1, 1)) should be (None)
     }
   }
 }

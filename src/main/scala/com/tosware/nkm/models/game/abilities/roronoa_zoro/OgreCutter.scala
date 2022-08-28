@@ -35,19 +35,30 @@ case class OgreCutter(abilityId: AbilityId, parentCharacterId: CharacterId) exte
     rangeCellCoords.whereEnemiesOfC(parentCharacterId)
 
   override def use(target: CharacterId, useData: UseData)(implicit random: Random, gameState: GameState) = {
+    val targetCoordinates = gameState.characterById(target).get.parentCell.get.coordinates
+    val targetDirection = parentCell.get.coordinates.getDirection(targetCoordinates).get
+    val teleportCoordinates = targetCoordinates.getInDirection(targetDirection, 2)
     gameState
       .abilityHitCharacter(id, target)
       .basicAttack(parentCharacterId, target)
-      .teleportCharacter(parentCharacterId, ???)(random, id)
+      .teleportCharacter(parentCharacterId, teleportCoordinates)(random, id)
   }
 
   override def useChecks(implicit target: CharacterId, useData: UseData, gameState: GameState): Set[UseCheck] = {
-    val targetCharacter: NkmCharacter = gameState.characterById(target).get
+    def cellToTeleportIsFreeToStand(): Boolean = {
+      val targetCharacter: NkmCharacter = gameState.characterById(target).get
+      val targetCoordinatesOpt = targetCharacter.parentCell.map(_.coordinates)
+      if (targetCoordinatesOpt.isEmpty) return false
+      val targetDirectionOpt = parentCell.get.coordinates.getDirection(targetCoordinatesOpt.get)
+      if (targetDirectionOpt.isEmpty) return false
+      val teleportCoordinates = targetCoordinatesOpt.get.getInDirection(targetDirectionOpt.get, 2)
+      if (!teleportCoordinates.toCell(gameState.hexMap.get).isFreeToStand) return false
+      true
+    }
 
     super.useChecks ++ Seq(
       UseCheck.TargetIsEnemy,
-//      targetCharacter.state.effects.exists(_.metadata.effectType == CharacterEffectType.Negative) ->
-//        "Target character does not have any negative effects.",
+      cellToTeleportIsFreeToStand() -> "Cell to teleport is not free to stand."
     )
   }
 }

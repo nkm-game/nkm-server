@@ -14,6 +14,14 @@ case class HexCoordinates(x: Int, z: Int) {
     }
   }
 
+  def getDirection(coordinates: HexCoordinates): Option[HexDirection] = {
+    if(coordinates == this) return None
+    if(coordinates.x == x) return Some(if(coordinates.y > y) HexDirection.SW else HexDirection.NE)
+    if(coordinates.y == y) return Some(if(coordinates.x > x) HexDirection.SE else HexDirection.NW)
+    if(coordinates.z == z) return Some(if(coordinates.x > x) HexDirection.E else HexDirection.W)
+    None
+  }
+
   def getInDirection(hexDirection: HexDirection, distance: Int): HexCoordinates = {
     if(distance <= 0) return this
     getNeighbour(hexDirection).getInDirection(hexDirection, distance - 1)
