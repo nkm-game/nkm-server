@@ -3,6 +3,7 @@ package com.tosware.nkm.providers
 import com.tosware.nkm.models.game.abilities.aqua._
 import com.tosware.nkm.models.game.abilities.hecate.{Aster, MasterThrone, PowerOfExistence}
 import com.tosware.nkm.models.game.abilities.llenn.{GrenadeThrow, PChan, RunItDown}
+import com.tosware.nkm.models.game.abilities.roronoa_zoro.{LackOfOrientation, OgreCutter, OneHundredEightPoundPhoenix}
 import com.tosware.nkm.models.game.abilities.sinon.{PreciseShot, SnipersSight, TacticalEscape}
 import com.tosware.nkm.models.game.{AttackType, CharacterMetadata}
 import com.tosware.nkm.serializers.NkmJsonProtocol
@@ -104,7 +105,11 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       initialSpeed = 8,
       initialPsychicalDefense = 40,
       initialMagicalDefense = 25,
-      initialAbilitiesMetadataIds = Seq.empty
+      initialAbilitiesMetadataIds = Seq(
+        LackOfOrientation.metadata.id,
+        OgreCutter.metadata.id,
+        OneHundredEightPoundPhoenix.metadata.id,
+      )
     ),
     CharacterMetadata(
       name = "Sinon",

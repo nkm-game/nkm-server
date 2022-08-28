@@ -52,6 +52,7 @@ case class HexCell
   (
     direction: HexDirection,
     size: Int,
+    characterPredicate: NkmCharacter => Boolean = _ => true,
   )(implicit gameState: GameState): Option[NkmCharacter] = {
     implicit val hexMap: HexMap = gameState.hexMap.get
 
@@ -61,7 +62,9 @@ case class HexCell
       val neighbour = lastCell.getNeighbour(direction)
       if(neighbour.isEmpty) return None
       if(neighbour.get.characterId.isDefined) {
-        return Some(neighbour.get.character.get)
+        val target = neighbour.get.character.get
+        if(characterPredicate(target))
+          return Some(neighbour.get.character.get)
       }
       scan(depth - 1, neighbour.get)
     }
