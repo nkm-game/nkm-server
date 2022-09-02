@@ -3,8 +3,10 @@ package com.tosware.nkm.providers
 import com.tosware.nkm.models.game.AbilityMetadata
 import com.tosware.nkm.models.game.abilities._
 import akame._
-import blank._
 import aqua._
+import blank._
+import carmel_wilhelmina._
+import crona._
 import hecate._
 import llenn._
 import roronoa_zoro._
@@ -24,6 +26,14 @@ case class AbilityMetadatasProvider() extends NkmJsonProtocol {
     AceInTheHole.metadata,
     Check.metadata,
     Castling.metadata,
+
+    ManipulatorOfObjects.metadata,
+    BindingRibbons.metadata,
+    TiamatsIntervention.metadata,
+
+    BlackBlood.metadata,
+    ScreechAlpha.metadata,
+    Infection.metadata,
 
     MasterThrone.metadata,
     Aster.metadata,

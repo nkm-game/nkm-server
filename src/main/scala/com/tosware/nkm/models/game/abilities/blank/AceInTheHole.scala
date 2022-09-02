@@ -11,7 +11,7 @@ object AceInTheHole {
       name = "Ace In The Hole",
       abilityType = AbilityType.Passive,
       description = """If Character takes damage equal to more than X% of their maximum HP during the turn of one character, they will be able to use one of their abilities on their next move, regardless of its CD.
-      It does not affect the actual ability CD count.""",
+                      |It does not affect the actual ability CD count.""".stripMargin,
       variables = NkmConf.extract("abilities.blank.aceInTheHole"),
     )
 }

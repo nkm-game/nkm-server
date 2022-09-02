@@ -2,8 +2,10 @@ package com.tosware.nkm.providers
 
 import com.tosware.nkm.models.game.abilities._
 import akame._
-import blank._
 import aqua._
+import blank._
+import carmel_wilhelmina._
+import crona._
 import hecate._
 import llenn._
 import roronoa_zoro._
@@ -149,7 +151,11 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       initialSpeed = 6,
       initialPsychicalDefense = 25,
       initialMagicalDefense = 35,
-      initialAbilitiesMetadataIds = Seq.empty
+      initialAbilitiesMetadataIds = Seq(
+        BlackBlood.metadata.id,
+        ScreechAlpha.metadata.id,
+        Infection.metadata.id,
+      )
     ),
     CharacterMetadata(
       name = "Itsuka Kotori",
@@ -278,7 +284,11 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       initialSpeed = 5,
       initialPsychicalDefense = 35,
       initialMagicalDefense = 40,
-      initialAbilitiesMetadataIds = Seq.empty
+      initialAbilitiesMetadataIds = Seq(
+        ManipulatorOfObjects.metadata.id,
+        BindingRibbons.metadata.id,
+        TiamatsIntervention.metadata.id,
+      )
     ),
     CharacterMetadata(
       name = "Ryuko Matoi",
