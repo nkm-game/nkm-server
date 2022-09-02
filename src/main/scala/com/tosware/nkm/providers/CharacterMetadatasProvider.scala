@@ -1,11 +1,13 @@
 package com.tosware.nkm.providers
 
-import com.tosware.nkm.models.game.abilities.aqua._
-import com.tosware.nkm.models.game.abilities.blank._
-import com.tosware.nkm.models.game.abilities.hecate._
-import com.tosware.nkm.models.game.abilities.llenn._
-import com.tosware.nkm.models.game.abilities.roronoa_zoro._
-import com.tosware.nkm.models.game.abilities.sinon._
+import com.tosware.nkm.models.game.abilities._
+import akame._
+import blank._
+import aqua._
+import hecate._
+import llenn._
+import roronoa_zoro._
+import sinon._
 import com.tosware.nkm.models.game.{AttackType, CharacterMetadata}
 import com.tosware.nkm.serializers.NkmJsonProtocol
 
@@ -375,7 +377,11 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       initialSpeed = 7,
       initialPsychicalDefense = 20,
       initialMagicalDefense = 15,
-      initialAbilitiesMetadataIds = Seq.empty
+      initialAbilitiesMetadataIds = Seq(
+        Murasame.metadata.id,
+        Eliminate.metadata.id,
+        LittleWarHorn.metadata.id,
+      )
     ),
   )
 
