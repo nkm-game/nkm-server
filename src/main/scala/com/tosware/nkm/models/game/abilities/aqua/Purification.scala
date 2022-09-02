@@ -14,8 +14,7 @@ object Purification {
       name = "Purification",
       abilityType = AbilityType.Normal,
       description = "Character removes all negative effects from target.",
-      cooldown = NkmConf.int("abilities.aqua.purification.cooldown"),
-      range = NkmConf.int("abilities.aqua.purification.range"),
+      variables = NkmConf.extract("abilities.aqua.purification"),
     )
 }
 
@@ -23,7 +22,7 @@ case class Purification(abilityId: AbilityId, parentCharacterId: CharacterId) ex
   override val metadata = Purification.metadata
   override val state = AbilityState(parentCharacterId)
   override def rangeCellCoords(implicit gameState: GameState) =
-    parentCell.get.coordinates.getCircle(metadata.range).whereExists
+    parentCell.get.coordinates.getCircle(metadata.variables("range")).whereExists
 
   override def targetsInRange(implicit gameState: GameState) =
     rangeCellCoords.whereFriendsOfC(parentCharacterId)

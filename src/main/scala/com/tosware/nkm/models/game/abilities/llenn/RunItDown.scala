@@ -17,7 +17,7 @@ object RunItDown {
       description =
         """Character can move three times this turn.
           |After each move they can use basic attack.""".stripMargin,
-      cooldown = NkmConf.int("abilities.llenn.runItDown.cooldown"),
+      variables = NkmConf.extract("abilities.llenn.runItDown"),
     )
 }
 

@@ -47,16 +47,18 @@ class HexCoordinatesSpec
         c2.size should be (1 + 6 + 12)
         c3.size should be (1 + 6 + 12 + 18)
 
+        assert(c2.contains(HexCoordinates(c.x + 2, c.z)))
+
         c1 foreach { co =>
-          abs(co.x) + abs(co.y) + abs(co.z) should be <= 2
+          abs(co.x - c.x) + abs(co.y - c.y) + abs(co.z - c.z) should be <= 2
         }
 
         c2 foreach { co =>
-          abs(co.x) + abs(co.y) + abs(co.z) should be <= 4
+          abs(co.x - c.x) + abs(co.y - c.y) + abs(co.z - c.z) should be <= 4
         }
 
         c3 foreach { co =>
-          abs(co.x) + abs(co.y) + abs(co.z) should be <= 6
+          abs(co.x - c.x) + abs(co.y - c.y) + abs(co.z - c.z) should be <= 6
         }
       }
     }

@@ -41,11 +41,11 @@ case class HexCoordinates(x: Int, z: Int) {
     if(size < 0) Set.empty
     else if(size == 0) Set(this)
     else {
-      // https: //www.redblobgames.com/grids/hexagons/#range-coordinate
+      // https://www.redblobgames.com/grids/hexagons/#range-coordinate
       val result = for {
-        x <- -size to size
-        z <- max(-size, -x-size) to min(size, -x+size)
-      } yield HexCoordinates(x, z)
+        nx <- -size to size
+        nz <- max(-size, -nx-size) to min(size, -nx+size)
+      } yield HexCoordinates(x + nx, z + nz)
       result.toSet
     }
 

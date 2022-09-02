@@ -30,8 +30,7 @@ case class AbilityMetadata
   name: String,
   abilityType: AbilityType,
   description: String,
-  cooldown: Int = 0,
-  range: Int = 0,
+  variables: Map[String, Int] = Map.empty,
   alternateName: String = "",
 ) {
   val id: AbilityMetadataId = name

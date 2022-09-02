@@ -16,8 +16,7 @@ object OgreCutter {
       alternateName = "鬼斬り",
       abilityType = AbilityType.Normal,
       description = "Character deals basic damage to selected target in range and teleports 2 tiles behind it.",
-      cooldown = NkmConf.int("abilities.roronoaZoro.ogreCutter.cooldown"),
-      range = NkmConf.int("abilities.roronoaZoro.ogreCutter.range"),
+      variables = NkmConf.extract("abilities.roronoaZoro.ogreCutter"),
     )
 }
 
@@ -26,7 +25,7 @@ case class OgreCutter(abilityId: AbilityId, parentCharacterId: CharacterId) exte
   override val state = AbilityState(parentCharacterId)
   override def rangeCellCoords(implicit gameState: GameState) =
     parentCell.fold(Set.empty[HexCell])(c => c.getArea(
-      metadata.range,
+      metadata.variables("range"),
       Set(SearchFlag.StopAtWalls, SearchFlag.StopAfterEnemies, SearchFlag.StraightLine),
       friendlyPlayerIdOpt = Some(parentCharacter.owner.id),
     )).toCoords

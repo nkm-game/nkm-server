@@ -4,7 +4,6 @@ import com.tosware.nkm.NkmConf
 import com.tosware.nkm.models.game.Ability.AbilityId
 import com.tosware.nkm.models.game.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game._
-import com.tosware.nkm.models.game.abilities.sinon.TacticalEscape.{duration, speedIncrease}
 import com.tosware.nkm.models.game.effects.StatBuffEffect
 
 import scala.util.Random
@@ -15,10 +14,8 @@ object TacticalEscape {
       name = "Tactical Escape",
       abilityType = AbilityType.Normal,
       description = "Character increases its speed for a phase.",
-      cooldown = NkmConf.int("abilities.sinon.tacticalEscape.cooldown"),
+      variables = NkmConf.extract("abilities.sinon.tacticalEscape"),
     )
-  val duration: Int = NkmConf.int("abilities.sinon.tacticalEscape.duration")
-  val speedIncrease: Int = NkmConf.int("abilities.sinon.tacticalEscape.speedIncrease")
 }
 
 case class TacticalEscape(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId) with UsableWithoutTarget {
@@ -27,5 +24,5 @@ case class TacticalEscape(abilityId: AbilityId, parentCharacterId: CharacterId) 
 
   override def use()(implicit random: Random, gameState: GameState): GameState =
     gameState.
-      addEffect(parentCharacterId, StatBuffEffect(parentCharacterId, duration, StatType.Speed, speedIncrease))(random, id)
+      addEffect(parentCharacterId, StatBuffEffect(parentCharacterId, metadata.variables("duration"), StatType.Speed, metadata.variables("speedIncrease")))(random, id)
 }

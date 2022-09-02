@@ -17,7 +17,7 @@ object Resurrection {
       description =
         """Character resurrects allied character, that died max. one phase before.
           |Resurrected character respawns with half base HP on selected spawn point.""".stripMargin,
-      cooldown = NkmConf.int("abilities.aqua.resurrection.cooldown"),
+      variables = NkmConf.extract("abilities.aqua.resurrection"),
     )
 }
 

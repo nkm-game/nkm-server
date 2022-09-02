@@ -20,7 +20,7 @@ object PowerOfExistence {
         """Character releases collected Life Energy, dealing magic damage to every enemy character on the map.
           |Damage equals to collected Life Energy divided by number of enemies.
           |""".stripMargin,
-      cooldown = NkmConf.int("abilities.hecate.powerOfExistence.cooldown"),
+      variables = NkmConf.extract("abilities.hecate.powerOfExistence"),
     )
 }
 

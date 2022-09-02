@@ -3,6 +3,7 @@ package unit.abilities.llenn
 import com.tosware.nkm.models.GameStateValidator
 import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.game.abilities.llenn.GrenadeThrow
+import com.tosware.nkm.models.game.hex.HexCoordinates
 import com.tosware.nkm.models.game.hex.HexUtils._
 import helpers.{Simple2v2TestScenario, TestUtils}
 import org.scalatest.matchers.should.Matchers
@@ -28,11 +29,11 @@ class GrenadeThrowSpec
         assertCommandSuccess(r)
       }
 
-      val abilityUsedGameState: GameState = gameState.useAbilityOnCoordinates(abilityId, s.spawnCoordinates.p0Second)
+      val abilityUsedGameState: GameState = gameState.useAbilityOnCoordinates(abilityId, HexCoordinates(2, 0))
       abilityUsedGameState.gameLog.events
         .ofType[GameEvent.CharacterDamaged]
         .causedBy(abilityId)
-        .size should be (4)
+        .size should be (3)
     }
   }
 }
