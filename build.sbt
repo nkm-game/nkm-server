@@ -71,4 +71,5 @@ scalacOptions in Compile ++= Seq(
   "-unchecked",
   "-Ywarn-unused:imports",
   "-Xfatal-warnings",
+  "-Xsource:3",
 )

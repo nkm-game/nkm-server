@@ -26,10 +26,10 @@ object AbilityProvider {
 
       case AceInTheHole.metadata.id =>
         AceInTheHole(NkmUtils.randomUUID(), characterId)
-      case Castling.metadata.id =>
-        Castling(NkmUtils.randomUUID(), characterId)
       case Check.metadata.id =>
         Check(NkmUtils.randomUUID(), characterId)
+      case Castling.metadata.id =>
+        Castling(NkmUtils.randomUUID(), characterId)
 
       case MasterThrone.metadata.id =>
         MasterThrone(NkmUtils.randomUUID(), characterId)
