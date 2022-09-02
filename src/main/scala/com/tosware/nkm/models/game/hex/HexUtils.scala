@@ -41,6 +41,9 @@ object HexUtils {
     def characters: Set[NkmCharacter] =
       toCells.characters
 
+    def whereCharacters: Set[HexCoordinates] =
+      toCells.whereCharacters.toCoords
+
     def whereExists(implicit gameState: GameState): Set[HexCoordinates] =
       toCells.map(_.coordinates)
 
@@ -79,6 +82,9 @@ object HexUtils {
 
     def characters: Set[NkmCharacter] =
       characterIds.toCharacters
+
+    def whereCharacters: Set[HexCell] =
+      cells.filter(_.characterId.isDefined)
 
     def whereEmpty: Set[HexCell] =
       cells.filter(_.isEmpty)

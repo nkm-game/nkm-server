@@ -1,6 +1,7 @@
 package com.tosware.nkm.providers
 
 import com.tosware.nkm.models.game.AbilityMetadata
+import com.tosware.nkm.models.game.abilities.blank.{AceInTheHole, Castling, Check}
 import com.tosware.nkm.models.game.abilities.aqua.{NaturesBeauty, Purification, Resurrection}
 import com.tosware.nkm.models.game.abilities.hecate.{Aster, MasterThrone, PowerOfExistence}
 import com.tosware.nkm.models.game.abilities.llenn.{GrenadeThrow, PChan, RunItDown}
@@ -13,6 +14,10 @@ case class AbilityMetadatasProvider() extends NkmJsonProtocol {
     NaturesBeauty.metadata,
     Purification.metadata,
     Resurrection.metadata,
+
+    AceInTheHole.metadata,
+    Check.metadata,
+    Castling.metadata,
 
     MasterThrone.metadata,
     Aster.metadata,

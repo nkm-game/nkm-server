@@ -6,6 +6,7 @@ import com.tosware.nkm.models.game.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game.abilities._
 import com.tosware.nkm.models.game.hex.NkmUtils
 import aqua._
+import blank._
 import hecate._
 import llenn._
 import roronoa_zoro._
@@ -22,6 +23,13 @@ object AbilityProvider {
         Purification(NkmUtils.randomUUID(), characterId)
       case Resurrection.metadata.id =>
         Resurrection(NkmUtils.randomUUID(), characterId)
+
+      case AceInTheHole.metadata.id =>
+        AceInTheHole(NkmUtils.randomUUID(), characterId)
+      case Castling.metadata.id =>
+        Castling(NkmUtils.randomUUID(), characterId)
+      case Check.metadata.id =>
+        Check(NkmUtils.randomUUID(), characterId)
 
       case MasterThrone.metadata.id =>
         MasterThrone(NkmUtils.randomUUID(), characterId)
