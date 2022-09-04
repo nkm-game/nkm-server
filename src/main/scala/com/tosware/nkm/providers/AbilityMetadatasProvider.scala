@@ -11,6 +11,7 @@ import hecate._
 import kirito._
 import llenn._
 import roronoa_zoro._
+import ryuko_matoi._
 import sinon._
 import com.tosware.nkm.serializers.NkmJsonProtocol
 
@@ -51,6 +52,10 @@ case class AbilityMetadatasProvider() extends NkmJsonProtocol {
     LackOfOrientation.metadata,
     OgreCutter.metadata,
     OneHundredEightPoundPhoenix.metadata,
+
+    ScissorBlade.metadata,
+    FiberDecapitation.metadata,
+    GodrobeSenketsu.metadata,
 
     SnipersSight.metadata,
     TacticalEscape.metadata,

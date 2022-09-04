@@ -10,6 +10,7 @@ import hecate._
 import kirito._
 import llenn._
 import roronoa_zoro._
+import ryuko_matoi._
 import sinon._
 import com.tosware.nkm.models.game.{AttackType, CharacterMetadata}
 import com.tosware.nkm.serializers.NkmJsonProtocol
@@ -304,7 +305,11 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       initialSpeed = 6,
       initialPsychicalDefense = 15,
       initialMagicalDefense = 10,
-      initialAbilitiesMetadataIds = Seq.empty
+      initialAbilitiesMetadataIds = Seq(
+        ScissorBlade.metadata.id,
+        FiberDecapitation.metadata.id,
+        GodrobeSenketsu.metadata.id,
+      )
     ),
     CharacterMetadata(
       name = "Liones Elizabeth",
