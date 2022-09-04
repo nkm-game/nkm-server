@@ -7,6 +7,7 @@ import blank._
 import carmel_wilhelmina._
 import crona._
 import hecate._
+import kirito._
 import llenn._
 import roronoa_zoro._
 import sinon._
@@ -240,7 +241,11 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       initialSpeed = 6,
       initialPsychicalDefense = 20,
       initialMagicalDefense = 15,
-      initialAbilitiesMetadataIds = Seq.empty
+      initialAbilitiesMetadataIds = Seq(
+        Parry.metadata.id,
+        Switch.metadata.id,
+        StarburstStream.metadata.id,
+      )
     ),
     CharacterMetadata(
       name = "Monkey D. Luffy",

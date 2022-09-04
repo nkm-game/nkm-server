@@ -8,6 +8,7 @@ import blank._
 import carmel_wilhelmina._
 import crona._
 import hecate._
+import kirito._
 import llenn._
 import roronoa_zoro._
 import sinon._
@@ -38,6 +39,10 @@ case class AbilityMetadatasProvider() extends NkmJsonProtocol {
     MasterThrone.metadata,
     Aster.metadata,
     PowerOfExistence.metadata,
+
+    Parry.metadata,
+    Switch.metadata,
+    StarburstStream.metadata,
 
     PChan.metadata,
     GrenadeThrow.metadata,
