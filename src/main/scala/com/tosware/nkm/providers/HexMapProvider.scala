@@ -107,7 +107,6 @@ case class HexMapProvider() extends NkmJsonProtocol {
       (7, 0, SpawnPoint, 1),
       (8, 0, SpawnPoint, 1),
       (9, 0, SpawnPoint, 1),
-      (10, 0, SpawnPoint, 1),
     )
     val nameToParams: Map[TestHexMapName, Set[Any]] = Map(
       TestHexMapName.Simple2v2 -> simple2v2HexParams,

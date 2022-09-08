@@ -4,6 +4,7 @@
 - Add ability variables in `nkm.conf`
 - Add ability metadata in `AbilityMetadatasProvider`
 - Add character metadata in `CharacterMetadatasProvider`
+- Add ability instantiation mapping in `AbilityProvider`
 ### Implement Abilities
 - Add ability tests on the `unit/abilites` path
 - Implement abilities and make unit tests green

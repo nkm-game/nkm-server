@@ -7,6 +7,7 @@ import com.tosware.nkm.models.game.abilities._
 import com.tosware.nkm.models.game.hex.NkmUtils
 import aqua._
 import blank._
+import crona._
 import hecate._
 import llenn._
 import roronoa_zoro._
@@ -23,6 +24,13 @@ object AbilityProvider {
         Purification(NkmUtils.randomUUID(), characterId)
       case Resurrection.metadata.id =>
         Resurrection(NkmUtils.randomUUID(), characterId)
+
+      case BlackBlood.metadata.id =>
+        ScreechAlpha(NkmUtils.randomUUID(), characterId)
+      case ScreechAlpha.metadata.id =>
+        ScreechAlpha(NkmUtils.randomUUID(), characterId)
+      case Infection.metadata.id =>
+        ScreechAlpha(NkmUtils.randomUUID(), characterId)
 
       case AceInTheHole.metadata.id =>
         AceInTheHole(NkmUtils.randomUUID(), characterId)

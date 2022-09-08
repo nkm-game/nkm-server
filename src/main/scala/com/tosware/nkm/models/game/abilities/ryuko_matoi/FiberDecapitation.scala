@@ -13,11 +13,11 @@ object FiberDecapitation {
       name = "Fiber Decapitation",
       abilityType = AbilityType.Normal,
       description =
-        """Cut throught selected enemy, decreasing his physical defense by {physicalDefenseDecrease},
+        """Cut through selected enemy, decreasing his physical defense by {physicalDefenseDecrease},
           |dealing {damage} physical damage and landing {targetCellOffset} tiles behind him.
           |
           |Range: {Range}""".stripMargin,
-      variables = NkmConf.extract("abilities.ryukoMatoi.fiberDecapication"),
+      variables = NkmConf.extract("abilities.ryukoMatoi.fiberDecapitation"),
     )
 }
 

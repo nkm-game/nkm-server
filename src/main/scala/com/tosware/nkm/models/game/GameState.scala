@@ -33,10 +33,10 @@ object GameEvent {
   case class CharacterPlaced(id: GameEventId, characterId: CharacterId, target: HexCoordinates)
                             (implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent(id)
     with ContainsCharacterId
-  case class EffectAppliedOnCell(id: GameEventId, effectId: String, target: HexCoordinates)
-                                (implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent(id)
-  case class EffectAppliedOnCharacter(id: GameEventId, effectId: CharacterEffectId, characterId: CharacterId)
-                                     (implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent(id)
+  case class EffectAddedToCell(id: GameEventId, effectId: String, target: HexCoordinates)
+                              (implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent(id)
+  case class EffectAddedToCharacter(id: GameEventId, effectId: CharacterEffectId, characterId: CharacterId)
+                                   (implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent(id)
   case class EffectRemovedFromCharacter(id: GameEventId, effectId: CharacterEffectId)
                                        (implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent(id)
   case class AbilityHitCharacter(id: GameEventId, abilityId: AbilityId, targetCharacterId: CharacterId)
@@ -404,7 +404,7 @@ case class GameState(
 
   def addEffect(characterId: CharacterId, characterEffect: CharacterEffect)(implicit random: Random, causedById: String): GameState =
     updateCharacter(characterId)(_.addEffect(characterEffect))
-      .logEvent(EffectAppliedOnCharacter(NkmUtils.randomUUID(), characterEffect.id, characterId))
+      .logEvent(EffectAddedToCharacter(NkmUtils.randomUUID(), characterEffect.id, characterId))
 
   def removeEffects(characterEffectIds: Seq[CharacterEffectId])(implicit random: Random, causedById: String): GameState =
     characterEffectIds.foldLeft(this){case (acc, eid) => acc.removeEffect(eid)}
