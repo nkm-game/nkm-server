@@ -26,11 +26,11 @@ object AbilityProvider {
         Resurrection(NkmUtils.randomUUID(), characterId)
 
       case BlackBlood.metadata.id =>
-        ScreechAlpha(NkmUtils.randomUUID(), characterId)
+        BlackBlood(NkmUtils.randomUUID(), characterId)
       case ScreechAlpha.metadata.id =>
         ScreechAlpha(NkmUtils.randomUUID(), characterId)
       case Infection.metadata.id =>
-        ScreechAlpha(NkmUtils.randomUUID(), characterId)
+        Infection(NkmUtils.randomUUID(), characterId)
 
       case AceInTheHole.metadata.id =>
         AceInTheHole(NkmUtils.randomUUID(), characterId)
