@@ -4,7 +4,7 @@ import com.tosware.nkm.Logging
 import com.tosware.nkm.models.game.hex.HexUtils._
 import com.tosware.nkm.models.game.hex._
 import com.tosware.nkm.models.game.{CharacterMetadata, GameState}
-import helpers.{Simple2v2TestScenario, TestUtils}
+import helpers.{TestUtils, scenarios}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
@@ -15,7 +15,7 @@ class HexCellSpec
     with TestUtils
 {
   private val metadata = CharacterMetadata.empty()
-  private val s = Simple2v2TestScenario(metadata)
+  private val s = scenarios.Simple2v2TestScenario(metadata)
   implicit val gameState: GameState = s.gameState
   implicit val hexMap: HexMap = s.gameState.hexMap.get
   "HexCell" must {

@@ -2,7 +2,7 @@ package unit.abilities.hecate
 
 import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.game.abilities.hecate.{Aster, MasterThrone}
-import helpers.{Simple2v2TestScenario, TestUtils}
+import helpers.{TestUtils, scenarios}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
@@ -12,7 +12,7 @@ class MasterThroneSpec
     with TestUtils
 {
   private val metadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(MasterThrone.metadata.id, Aster.metadata.id))
-  private val s = Simple2v2TestScenario(metadata)
+  private val s = scenarios.Simple2v2TestScenario(metadata)
   private implicit val gameState: GameState = s.gameState
   private val abilityId = s.characters.p0First.state.abilities.head.id
   private val asterAbilityId = s.characters.p0First.state.abilities.tail.head.id

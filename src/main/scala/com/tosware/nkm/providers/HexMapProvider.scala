@@ -19,9 +19,9 @@ object HexMapProvider {
 
     case object Simple2v2 extends TestHexMapName
     case object Simple2v2Wall extends TestHexMapName
+    case object Simple1v9Line extends TestHexMapName
     case object OgreCutter extends TestHexMapName
   }
-
 }
 
 case class HexMapProvider() extends NkmJsonProtocol {
@@ -95,10 +95,25 @@ case class HexMapProvider() extends NkmJsonProtocol {
       (5, 0),
       (6, 0, Wall),
     )
+
+    val simple1v9LineHexParams: Set[Any] = Set(
+      (0, 0, SpawnPoint, 0),
+      (1, 0, SpawnPoint, 1),
+      (2, 0, SpawnPoint, 1),
+      (3, 0, SpawnPoint, 1),
+      (4, 0, SpawnPoint, 1),
+      (5, 0, SpawnPoint, 1),
+      (6, 0, SpawnPoint, 1),
+      (7, 0, SpawnPoint, 1),
+      (8, 0, SpawnPoint, 1),
+      (9, 0, SpawnPoint, 1),
+      (10, 0, SpawnPoint, 1),
+    )
     val nameToParams: Map[TestHexMapName, Set[Any]] = Map(
       TestHexMapName.Simple2v2 -> simple2v2HexParams,
       TestHexMapName.Simple2v2Wall -> simple2v2WallHexParams,
       TestHexMapName.OgreCutter -> ogreCutterHexParams,
+      TestHexMapName.Simple1v9Line -> simple1v9LineHexParams,
     )
     nameToParams.map {
       case (name: TestHexMapName, params: Set[Any]) =>

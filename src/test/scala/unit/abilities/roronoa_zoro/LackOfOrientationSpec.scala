@@ -3,7 +3,7 @@ package unit.abilities.roronoa_zoro
 import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.game.abilities.roronoa_zoro.LackOfOrientation
 import com.tosware.nkm.models.game.hex.HexUtils.CoordinateSeq
-import helpers.{Simple2v2TestScenario, TestUtils}
+import helpers.{TestUtils, scenarios}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
@@ -17,7 +17,7 @@ class LackOfOrientationSpec
   //  override implicit val random = new Random(lostSeed)
 
   private val metadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(LackOfOrientation.metadata.id))
-  private val s = Simple2v2TestScenario(metadata)
+  private val s = scenarios.Simple2v2TestScenario(metadata)
 
   LackOfOrientation.metadata.name must {
     "make parent character get lost sometimes" in {

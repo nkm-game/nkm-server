@@ -3,7 +3,7 @@ package unit.abilities.llenn
 import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.game.abilities.llenn.PChan
 import com.tosware.nkm.models.{Damage, DamageType}
-import helpers.{Simple2v2TestScenario, TestUtils}
+import helpers.{TestUtils, scenarios}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
@@ -13,7 +13,7 @@ class PChanSpec
     with TestUtils
 {
   private val metadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(PChan.metadata.id))
-  private val s = Simple2v2TestScenario(metadata)
+  private val s = scenarios.Simple2v2TestScenario(metadata)
   private implicit val gameState: GameState = s.gameState
 
   PChan.metadata.name must {

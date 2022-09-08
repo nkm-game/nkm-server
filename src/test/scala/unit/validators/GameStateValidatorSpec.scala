@@ -7,7 +7,7 @@ import com.tosware.nkm.models.game.effects._
 import com.tosware.nkm.models.game.hex.{HexCoordinates, NkmUtils}
 import com.tosware.nkm.models.game.hex.HexUtils.CoordinateSeq
 import com.tosware.nkm.providers.HexMapProvider.TestHexMapName
-import helpers.{Simple2v2TestScenario, TestUtils}
+import helpers.{TestUtils, scenarios}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
@@ -23,15 +23,15 @@ class GameStateValidatorSpec
       initialAbilitiesMetadataIds = Seq(PowerOfExistence.metadata.id)
     )
 
-  private val s = Simple2v2TestScenario(metadata)
+  private val s = scenarios.Simple2v2TestScenario(metadata)
   private implicit val gameState: GameState = s.gameState
 
-  private val wallMeleeScenario = Simple2v2TestScenario(
+  private val wallMeleeScenario = scenarios.Simple2v2TestScenario(
     metadata.copy(attackType = AttackType.Melee, initialBasicAttackRange = 4),
     TestHexMapName.Simple2v2Wall
   )
 
-  private val wallRangedScenario = Simple2v2TestScenario(
+  private val wallRangedScenario = scenarios.Simple2v2TestScenario(
     metadata.copy(attackType = AttackType.Ranged, initialBasicAttackRange = 4),
     TestHexMapName.Simple2v2Wall
   )

@@ -5,7 +5,7 @@ import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.game.abilities.aqua.Purification
 import com.tosware.nkm.models.game.effects._
 import com.tosware.nkm.models.game.hex.NkmUtils
-import helpers.{Simple2v2TestScenario, TestUtils}
+import helpers.{TestUtils, scenarios}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
@@ -15,7 +15,7 @@ class PurificationSpec
     with TestUtils
 {
   private val metadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(Purification.metadata.id))
-  private val s = Simple2v2TestScenario(metadata)
+  private val s = scenarios.Simple2v2TestScenario(metadata)
 
   Purification.metadata.name must {
     "be able to remove negative effects" in {
