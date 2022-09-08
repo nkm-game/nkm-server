@@ -16,9 +16,9 @@ object NaturesBeauty {
     )
 }
 
-case class NaturesBeauty(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId) with BasicAttackOverride {
+case class NaturesBeauty(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId) with BasicAttackOverride {
   override val metadata = NaturesBeauty.metadata
-  override val state = AbilityState(parentCharacterId)
+
   override def rangeCellCoords(implicit gameState: GameState) =
     gameState.characterById(state.parentCharacterId).get.basicAttackCellCoords(gameState)
   override def targetsInRange(implicit gameState: GameState) =

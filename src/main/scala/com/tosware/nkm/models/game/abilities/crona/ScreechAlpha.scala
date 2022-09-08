@@ -20,9 +20,9 @@ object ScreechAlpha {
     )
 }
 
-case class ScreechAlpha(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId) with UsableWithoutTarget {
+case class ScreechAlpha(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId) with UsableWithoutTarget {
   override val metadata = ScreechAlpha.metadata
-  override val state = AbilityState(parentCharacterId)
+
   override def rangeCellCoords(implicit gameState: GameState) = ???
 
   override def targetsInRange(implicit gameState: GameState) = ???

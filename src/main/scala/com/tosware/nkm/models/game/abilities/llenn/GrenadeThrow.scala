@@ -21,9 +21,9 @@ object GrenadeThrow {
     )
 }
 
-case class GrenadeThrow(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId) with UsableOnCoordinates {
+case class GrenadeThrow(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId) with UsableOnCoordinates {
   override val metadata = GrenadeThrow.metadata
-  override val state = AbilityState(parentCharacterId)
+
   override def rangeCellCoords(implicit gameState: GameState) =
     parentCell.get.coordinates.getCircle(metadata.variables("range")).whereExists
 

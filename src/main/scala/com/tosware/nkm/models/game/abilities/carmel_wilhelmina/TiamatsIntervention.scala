@@ -24,9 +24,9 @@ object TiamatsIntervention {
     )
 }
 
-case class TiamatsIntervention(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId) with UsableOnCharacter {
+case class TiamatsIntervention(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId) with UsableOnCharacter {
   override val metadata = TiamatsIntervention.metadata
-  override val state = AbilityState(parentCharacterId)
+
   override def rangeCellCoords(implicit gameState: GameState) = ???
 
   override def targetsInRange(implicit gameState: GameState) = ???

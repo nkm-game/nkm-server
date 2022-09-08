@@ -17,9 +17,8 @@ object LittleWarHorn {
     )
 }
 
-case class LittleWarHorn(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId) with UsableWithoutTarget {
+case class LittleWarHorn(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId) with UsableWithoutTarget {
   override val metadata = LittleWarHorn.metadata
-  override val state = AbilityState(parentCharacterId)
 
   override def use()(implicit random: Random, gameState: GameState) = ???
 }

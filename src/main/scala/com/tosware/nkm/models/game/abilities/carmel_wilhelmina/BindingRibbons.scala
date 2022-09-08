@@ -23,9 +23,9 @@ object BindingRibbons {
     )
 }
 
-case class BindingRibbons(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId) with UsableOnCoordinates {
+case class BindingRibbons(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId) with UsableOnCoordinates {
   override val metadata = BindingRibbons.metadata
-  override val state = AbilityState(parentCharacterId)
+
   override def rangeCellCoords(implicit gameState: GameState) = ???
 
   override def use(target: HexCoordinates, useData: UseData)(implicit random: Random, gameState: GameState): GameState = ???

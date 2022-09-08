@@ -22,12 +22,12 @@ object RunItDown {
 }
 
 case class RunItDown(abilityId: AbilityId, parentCharacterId: CharacterId, movesLeft: Int = 0)
-  extends Ability(abilityId)
+  extends Ability(abilityId, parentCharacterId)
     with UsableWithoutTarget
     with GameEventListener
 {
   override val metadata = RunItDown.metadata
-  override val state = AbilityState(parentCharacterId)
+
 
   private def setMovesLeft(value: Int): RunItDown =
     copy(movesLeft = value)

@@ -29,9 +29,9 @@ case class MasterThrone
   parentCharacterId: CharacterId,
   collectedCharacterIds: Set[CharacterId] = Set.empty,
   collectedEnergy: Int = 0
-) extends Ability(abilityId) with GameEventListener {
+) extends Ability(abilityId, parentCharacterId) with GameEventListener {
   override val metadata = MasterThrone.metadata
-  override val state = AbilityState(parentCharacterId)
+
 
   def collectEnergy(characterId: CharacterId)(implicit gameState: GameState): MasterThrone = {
     val energy = (gameState.characterById(characterId).get.state.maxHealthPoints * (healthPercent / 100f)).toInt

@@ -18,9 +18,9 @@ object Purification {
     )
 }
 
-case class Purification(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId) with UsableOnCharacter {
+case class Purification(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId) with UsableOnCharacter {
   override val metadata = Purification.metadata
-  override val state = AbilityState(parentCharacterId)
+
   override def rangeCellCoords(implicit gameState: GameState) =
     parentCell.get.coordinates.getCircle(metadata.variables("range")).whereExists
 

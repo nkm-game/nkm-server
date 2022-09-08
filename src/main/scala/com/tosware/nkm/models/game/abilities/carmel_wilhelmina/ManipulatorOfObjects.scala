@@ -18,9 +18,9 @@ object ManipulatorOfObjects {
     )
 }
 
-case class ManipulatorOfObjects(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId) with GameEventListener {
+case class ManipulatorOfObjects(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId) with GameEventListener {
   override val metadata = ManipulatorOfObjects.metadata
-  override val state = AbilityState(parentCharacterId)
+
 
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState = ???
 }

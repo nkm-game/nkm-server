@@ -18,9 +18,9 @@ object LackOfOrientation {
     )
 }
 
-case class LackOfOrientation(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId) with BasicMoveOverride {
+case class LackOfOrientation(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId) with BasicMoveOverride {
   override val metadata = LackOfOrientation.metadata
-  override val state = AbilityState(parentCharacterId)
+
 
   override def basicMove(path: Seq[HexCoordinates])(implicit random: Random, gameState: GameState): GameState = {
     implicit val hexMap: HexMap = gameState.hexMap.get

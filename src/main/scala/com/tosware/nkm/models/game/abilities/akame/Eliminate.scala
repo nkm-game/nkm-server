@@ -18,9 +18,9 @@ object Eliminate {
     )
 }
 
-case class Eliminate(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId) with UsableOnCharacter {
+case class Eliminate(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId) with UsableOnCharacter {
   override val metadata = Eliminate.metadata
-  override val state = AbilityState(parentCharacterId)
+
   override def rangeCellCoords(implicit gameState: GameState) =
     parentCell.get.coordinates.getCircle(metadata.variables("range"))
 

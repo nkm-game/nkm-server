@@ -20,9 +20,9 @@ object Check {
     )
 }
 
-case class Check(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId) with UsableOnCharacter {
+case class Check(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId) with UsableOnCharacter {
   override val metadata = Check.metadata
-  override val state = AbilityState(parentCharacterId)
+
   override def rangeCellCoords(implicit gameState: GameState) =
     gameState.hexMap.get.cells.toCoords
 

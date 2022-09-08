@@ -21,9 +21,9 @@ object OneHundredEightPoundPhoenix {
     )
 }
 
-case class OneHundredEightPoundPhoenix(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId) with UsableOnCharacter {
+case class OneHundredEightPoundPhoenix(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId) with UsableOnCharacter {
   override val metadata = OneHundredEightPoundPhoenix.metadata
-  override val state = AbilityState(parentCharacterId)
+
   override def rangeCellCoords(implicit gameState: GameState) =
     parentCell.fold(Set.empty[HexCell])(_.getArea(
       metadata.variables("range"),

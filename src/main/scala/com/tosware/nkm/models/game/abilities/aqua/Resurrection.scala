@@ -21,9 +21,9 @@ object Resurrection {
     )
 }
 
-case class Resurrection(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId) with UsableOnCoordinates {
+case class Resurrection(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId) with UsableOnCoordinates {
   override val metadata = Resurrection.metadata
-  override val state = AbilityState(parentCharacterId)
+
   override def rangeCellCoords(implicit gameState: GameState) =
     gameState.hexMap.get.getSpawnPointsFor(parentCharacter.owner.id).map(_.coordinates)
 

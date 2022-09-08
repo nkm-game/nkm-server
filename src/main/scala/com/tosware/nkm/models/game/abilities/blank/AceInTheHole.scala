@@ -16,7 +16,7 @@ object AceInTheHole {
     )
 }
 
-case class AceInTheHole(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId) {
+case class AceInTheHole(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId) {
   override val metadata = AceInTheHole.metadata
-  override val state = AbilityState(parentCharacterId)
+
 }

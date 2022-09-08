@@ -18,9 +18,9 @@ object TacticalEscape {
     )
 }
 
-case class TacticalEscape(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId) with UsableWithoutTarget {
+case class TacticalEscape(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId) with UsableWithoutTarget {
   override val metadata = TacticalEscape.metadata
-  override val state = AbilityState(parentCharacterId)
+
 
   override def use()(implicit random: Random, gameState: GameState): GameState =
     gameState.

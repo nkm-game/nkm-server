@@ -24,9 +24,9 @@ object GodrobeSenketsu {
     )
 }
 
-case class GodrobeSenketsu(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId) with UsableOnCharacter {
+case class GodrobeSenketsu(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId) with UsableOnCharacter {
   override val metadata = GodrobeSenketsu.metadata
-  override val state = AbilityState(parentCharacterId)
+
   override def rangeCellCoords(implicit gameState: GameState) = ???
 
   override def targetsInRange(implicit gameState: GameState) = ???

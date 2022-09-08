@@ -20,9 +20,9 @@ object OgreCutter {
     )
 }
 
-case class OgreCutter(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId) with UsableOnCharacter {
+case class OgreCutter(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId) with UsableOnCharacter {
   override val metadata = OgreCutter.metadata
-  override val state = AbilityState(parentCharacterId)
+
   override def rangeCellCoords(implicit gameState: GameState) =
     parentCell.fold(Set.empty[HexCell])(c => c.getArea(
       metadata.variables("range"),

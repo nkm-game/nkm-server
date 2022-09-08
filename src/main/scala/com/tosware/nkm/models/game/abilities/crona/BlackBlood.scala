@@ -20,9 +20,8 @@ object BlackBlood {
     )
 }
 
-case class BlackBlood(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId) with GameEventListener {
+case class BlackBlood(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId) with GameEventListener {
   override val metadata = BlackBlood.metadata
-  override val state = AbilityState(parentCharacterId)
 
   // NOTE: maybe instead onEvent we should add effect with onEvent, as ultimate reuses this
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState = ???
