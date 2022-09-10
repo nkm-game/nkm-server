@@ -21,7 +21,9 @@ object Infection {
     )
 }
 
-case class Infection(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId) with UsableOnCharacter {
+case class Infection(abilityId: AbilityId, parentCharacterId: CharacterId)
+  extends Ability(abilityId, parentCharacterId)
+    with UsableOnCharacter {
   override val metadata = Infection.metadata
 
   override def rangeCellCoords(implicit gameState: GameState) = ???
