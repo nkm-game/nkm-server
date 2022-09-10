@@ -18,6 +18,7 @@ class InfectionSpec
   private val s = scenarios.Simple2v2TestScenario(characterMetadata)
   private implicit val gameState: GameState = s.gameState
   private val abilityId = s.characters.p0First.state.abilities.head.id
+  private val abilityId2 = s.characters.p0Second.state.abilities.head.id
 
   abilityMetadata.name must {
     "be able to infect and deal damage" in {
@@ -40,6 +41,24 @@ class InfectionSpec
         .ofType[GameEvent.CharacterDamaged]
         .causedBy(abilityId)
         .size shouldBe 2
+    }
+    "be able to trigger loop correctly" in {
+      val newGameState: GameState = gameState
+        .useAbilityOnCharacter(abilityId, s.characters.p1First.id)
+        .endTurn()
+        .passTurn(s.characters.p0Second.id)
+        .useAbilityOnCharacter(abilityId2, s.characters.p1Second.id)
+        .endTurn()
+        .passTurn(s.characters.p0First.id)
+        .basicAttack(s.characters.p0Second.id, s.characters.p1First.id)
+
+      // TODO
+      fail()
+
+//      newGameState.gameLog.events
+//        .ofType[GameEvent.CharacterDamaged]
+//        .causedBy(abilityId)
+//        .size shouldBe 2
     }
   }
 }

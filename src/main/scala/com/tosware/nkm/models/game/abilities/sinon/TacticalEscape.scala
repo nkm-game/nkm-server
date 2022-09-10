@@ -5,6 +5,7 @@ import com.tosware.nkm.models.game.Ability.AbilityId
 import com.tosware.nkm.models.game.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.game.effects.StatBuff
+import com.tosware.nkm.models.game.hex.NkmUtils
 
 import scala.util.Random
 
@@ -24,5 +25,5 @@ case class TacticalEscape(abilityId: AbilityId, parentCharacterId: CharacterId) 
 
   override def use()(implicit random: Random, gameState: GameState): GameState =
     gameState.
-      addEffect(parentCharacterId, StatBuff(parentCharacterId, metadata.variables("duration"), StatType.Speed, metadata.variables("speedIncrease")))(random, id)
+      addEffect(parentCharacterId, StatBuff(NkmUtils.randomUUID(), metadata.variables("duration"), StatType.Speed, metadata.variables("speedIncrease")))(random, id)
 }

@@ -4,6 +4,8 @@ import com.tosware.nkm.NkmConf
 import com.tosware.nkm.models.game.Ability.AbilityId
 import com.tosware.nkm.models.game.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game._
+import com.tosware.nkm.models.game.hex.HexUtils._
+import com.tosware.nkm.models.game.hex.NkmUtils
 
 import scala.util.Random
 
@@ -26,9 +28,14 @@ case class Infection(abilityId: AbilityId, parentCharacterId: CharacterId)
     with UsableOnCharacter {
   override val metadata = Infection.metadata
 
-  override def rangeCellCoords(implicit gameState: GameState) = ???
+  override def rangeCellCoords(implicit gameState: GameState) =
+    parentCell.get.coordinates.getCircle(metadata.variables("range")).whereExists
 
-  override def targetsInRange(implicit gameState: GameState) = ???
+  override def targetsInRange(implicit gameState: GameState) =
+    rangeCellCoords.whereEnemiesOfC(parentCharacterId)
 
-  override def use(target: CharacterId, useData: UseData)(implicit random: Random, gameState: GameState) = ???
+  override def use(target: CharacterId, useData: UseData)(implicit random: Random, gameState: GameState) = {
+    val effect = effects.BlackBlood(NkmUtils.randomUUID(), metadata.variables("duration"), parentCharacterId, abilityId)
+    gameState.addEffect(target, effect)(random, abilityId)
+  }
 }
