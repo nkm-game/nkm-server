@@ -163,7 +163,14 @@ case class GameState(
   }
 
   private def executeEventTriggers(e: GameEvent)(implicit random: Random): GameState =
-    triggerAbilities.foldLeft(this)((acc, ability) => ability.onEvent(e)(random, acc))
+    triggerAbilities.foldLeft(this)((acc, ability) => {
+      try {
+        ability.onEvent(e)(random, acc)
+      } catch {
+        case _: Throwable =>
+          acc
+      }
+    })
 
   private def logEvent(e: GameEvent)(implicit random: Random): GameState =
     copy(gameLog = gameLog.modify(_.events).using(es => es :+ e))
