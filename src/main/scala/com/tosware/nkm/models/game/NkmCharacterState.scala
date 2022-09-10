@@ -1,5 +1,5 @@
 package com.tosware.nkm.models.game
-import com.tosware.nkm.models.game.effects.{StatBuffEffect, StatNerfEffect}
+import com.tosware.nkm.models.game.effects.{StatBuff, StatNerf}
 import com.tosware.nkm.models.game.hex.HexUtils._
 
 case class NkmCharacterState
@@ -17,8 +17,8 @@ case class NkmCharacterState
   abilities: Seq[Ability] = Seq.empty,
   effects: Seq[CharacterEffect] = Seq.empty,
 ) {
-  private val statBuffs = effects.ofType[StatBuffEffect]
-  private val statNerfs = effects.ofType[StatNerfEffect]
+  private val statBuffs = effects.ofType[StatBuff]
+  private val statNerfs = effects.ofType[StatNerf]
   private def calculateEffectModifier(statType: StatType) =
     statBuffs.filter(_.statType == statType).map(_.value).sum - statNerfs.filter(_.statType == statType).map(_.value).sum
 

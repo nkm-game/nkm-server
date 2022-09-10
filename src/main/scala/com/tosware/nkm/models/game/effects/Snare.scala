@@ -3,7 +3,7 @@ package com.tosware.nkm.models.game.effects
 import com.tosware.nkm.models.game.CharacterEffect.CharacterEffectId
 import com.tosware.nkm.models.game.{CharacterEffect, CharacterEffectMetadata, CharacterEffectName, CharacterEffectType}
 
-object SnareEffect {
+object Snare {
   val metadata: CharacterEffectMetadata =
     CharacterEffectMetadata(
       name = CharacterEffectName.Snare,
@@ -13,6 +13,6 @@ object SnareEffect {
     )
 }
 
-case class SnareEffect(effectId: CharacterEffectId, cooldown: Int) extends CharacterEffect(effectId) {
-  val metadata: CharacterEffectMetadata = SnareEffect.metadata
+case class Snare(effectId: CharacterEffectId, cooldown: Int) extends CharacterEffect(effectId) {
+  val metadata: CharacterEffectMetadata = Snare.metadata
 }

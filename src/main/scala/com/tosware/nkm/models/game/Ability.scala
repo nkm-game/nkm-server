@@ -2,7 +2,6 @@ package com.tosware.nkm.models.game
 
 import com.tosware.nkm.models.CommandResponse.{CommandResponse, Failure, Success}
 import com.tosware.nkm.models.game.Ability._
-import com.tosware.nkm.models.game.GameEvent.GameEvent
 import com.tosware.nkm.models.game.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game.hex.HexUtils._
 import com.tosware.nkm.models.game.hex.{HexCell, HexCoordinates}
@@ -44,10 +43,6 @@ case class AbilityState
 
 
 case class UseData(data: String = "")
-
-trait GameEventListener {
-  def onEvent(e: GameEvent)(implicit random: Random, gameState: GameState): GameState
-}
 
 trait BasicAttackOverride {
   def basicAttackCells(implicit gameState: GameState): Set[HexCoordinates]

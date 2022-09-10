@@ -1,15 +1,15 @@
 package com.tosware.nkm.providers
 
 import com.tosware.nkm.models.game._
-import com.tosware.nkm.models.game.effects.{DisarmEffect, GroundEffect, SnareEffect, StunEffect}
+import com.tosware.nkm.models.game.effects.{Disarm, Ground, Snare, Stun}
 import com.tosware.nkm.serializers.NkmJsonProtocol
 
 case class CharacterEffectMetadatasProvider() extends NkmJsonProtocol {
   def getCharacterEffectMetadatas: Seq[CharacterEffectMetadata] = Seq(
-    GroundEffect.metadata,
-    SnareEffect.metadata,
-    StunEffect.metadata,
-    DisarmEffect.metadata,
+    Ground.metadata,
+    Snare.metadata,
+    Stun.metadata,
+    Disarm.metadata,
     CharacterEffectMetadata(
       name = CharacterEffectName.Poison,
       effectType = CharacterEffectType.Negative,

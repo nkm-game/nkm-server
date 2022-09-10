@@ -3,16 +3,16 @@ package com.tosware.nkm.models.game.effects
 import com.tosware.nkm.models.game.CharacterEffect.CharacterEffectId
 import com.tosware.nkm.models.game.{CharacterEffect, CharacterEffectMetadata, CharacterEffectName, CharacterEffectType}
 
-object StunEffect {
+object Ground {
   val metadata: CharacterEffectMetadata =
     CharacterEffectMetadata(
-      name = CharacterEffectName.Stun,
+      name = CharacterEffectName.Ground,
       effectType = CharacterEffectType.Negative,
-      description = "This character cannot take action.",
+      description = "This character is grounded and cannot move.",
       isCc = true,
     )
 }
 
-case class StunEffect(effectId: CharacterEffectId, cooldown: Int) extends CharacterEffect(effectId) {
-  val metadata: CharacterEffectMetadata = StunEffect.metadata
+case class Ground(effectId: CharacterEffectId, cooldown: Int) extends CharacterEffect(effectId) {
+  val metadata: CharacterEffectMetadata = Ground.metadata
 }

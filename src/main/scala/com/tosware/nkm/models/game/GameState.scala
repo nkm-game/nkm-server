@@ -87,6 +87,8 @@ object GameEvent {
   case class BasicMoveRefreshed(id: GameEventId, characterId: CharacterId)
                                (implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent(id)
     with ContainsCharacterId
+  case class CharactersPicked(id: GameEventId)
+                             (implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent(id)
   case class TurnFinished(id: GameEventId)
                          (implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent(id)
   case class PhaseFinished(id: GameEventId)
@@ -133,7 +135,11 @@ case class GameState(
 
   def abilities: Set[Ability] = characters.flatMap(_.state.abilities)
 
+  def effects: Set[CharacterEffect] = characters.flatMap(_.state.effects)
+
   def triggerAbilities: Set[Ability with GameEventListener] = abilities.collect {case a: GameEventListener => a}
+
+  def triggerEffects: Set[CharacterEffect with GameEventListener] = effects.collect {case e: GameEventListener => e}
 
   def characterById(characterId: CharacterId): Option[NkmCharacter] = characters.find(_.id == characterId)
 
@@ -161,16 +167,24 @@ case class GameState(
     case GameStatus.CharacterPlacing | GameStatus.Running | GameStatus.Finished =>
       turn.number
   }
+  private def handleTrigger(e: GameEvent, trigger: GameEventListener)(implicit random: Random, gameState: GameState) = {
+    try {
+      trigger.onEvent(e)(random, gameState)
+    } catch {
+      case _: Throwable =>
+        gameState
+    }
 
-  private def executeEventTriggers(e: GameEvent)(implicit random: Random): GameState =
-    triggerAbilities.foldLeft(this)((acc, ability) => {
-      try {
-        ability.onEvent(e)(random, acc)
-      } catch {
-        case _: Throwable =>
-          acc
-      }
+  }
+
+  private def executeEventTriggers(e: GameEvent)(implicit random: Random): GameState = {
+    val stateAfterAbilityTriggers = triggerAbilities.foldLeft(this)((acc, ability) => {
+      handleTrigger(e, ability)(random, acc)
     })
+    triggerEffects.foldLeft(stateAfterAbilityTriggers)((acc, effect) => {
+      handleTrigger(e, effect)(random, acc)
+    })
+  }
 
   private def logEvent(e: GameEvent)(implicit random: Random): GameState =
     copy(gameLog = gameLog.modify(_.events).using(es => es :+ e))
@@ -268,12 +282,15 @@ case class GameState(
     )
   }
 
-  def checkIfCharacterPickFinished()(implicit random: Random): GameState =
+  def checkIfCharacterPickFinished()(implicit random: Random): GameState = {
+    implicit val causedById: String = id
     if(characterPickFinished) {
       updateGameStatus(GameStatus.CharacterPicked)
         .updateClock(clock.setPickTime(clockConfig.timeAfterPickMillis))(random, id)
         .assignCharactersToPlayers()
+        .logEvent(CharactersPicked(NkmUtils.randomUUID()))
     } else this
+  }
 
   def startPlacingCharacters()(implicit random: Random): GameState =
     updateGameStatus(GameStatus.CharacterPlacing).placeCharactersRandomlyIfAllRandom()

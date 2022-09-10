@@ -3,7 +3,7 @@ package com.tosware.nkm.models.game.effects
 import com.tosware.nkm.models.game.CharacterEffect.CharacterEffectId
 import com.tosware.nkm.models.game.{CharacterEffect, CharacterEffectMetadata, CharacterEffectName, CharacterEffectType, StatType}
 
-object StatBuffEffect {
+object StatBuff {
   val metadata: CharacterEffectMetadata =
     CharacterEffectMetadata(
       name = CharacterEffectName.StatBuff,
@@ -12,6 +12,6 @@ object StatBuffEffect {
     )
 }
 
-case class StatBuffEffect(effectId: CharacterEffectId, cooldown: Int, statType: StatType, value: Int) extends CharacterEffect(effectId) {
-  val metadata: CharacterEffectMetadata = StatBuffEffect.metadata
+case class StatBuff(effectId: CharacterEffectId, cooldown: Int, statType: StatType, value: Int) extends CharacterEffect(effectId) {
+  val metadata: CharacterEffectMetadata = StatBuff.metadata
 }

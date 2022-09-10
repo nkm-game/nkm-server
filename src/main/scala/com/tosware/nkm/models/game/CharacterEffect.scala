@@ -1,6 +1,7 @@
 package com.tosware.nkm.models.game
 
 import com.tosware.nkm.models.game.CharacterEffect._
+import com.tosware.nkm.models.game.hex.HexCell
 import enumeratum._
 
 object CharacterEffect {
@@ -21,6 +22,8 @@ object CharacterEffectName extends Enum[CharacterEffectName] {
   case object Silence extends CharacterEffectName
   case object StatBuff extends CharacterEffectName
   case object StatNerf extends CharacterEffectName
+
+  case object BlackBlood extends CharacterEffectName
 }
 
 sealed trait CharacterEffectType extends EnumEntry
@@ -30,6 +33,7 @@ object CharacterEffectType extends Enum[CharacterEffectType] {
   case object Positive extends CharacterEffectType
   case object Neutral extends CharacterEffectType
   case object Negative extends CharacterEffectType
+  case object Mixed extends CharacterEffectType
 }
 
 case class CharacterEffectMetadata
@@ -46,6 +50,11 @@ abstract class CharacterEffect(val id: CharacterEffectId) {
   val metadata: CharacterEffectMetadata
   val cooldown: Int
   val state: CharacterEffectState = CharacterEffectState(cooldown)
+
+  def parentCharacter(implicit gameState: GameState): NkmCharacter =
+    gameState.characters.find(_.state.effects.map(_.id).contains(id)).get
+  def parentCell(implicit gameState: GameState): Option[HexCell] =
+    parentCharacter.parentCell
 }
 
 case class CharacterEffectState(cooldown: Int)

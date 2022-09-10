@@ -3,7 +3,7 @@ package com.tosware.nkm.models.game.effects
 import com.tosware.nkm.models.game.CharacterEffect.CharacterEffectId
 import com.tosware.nkm.models.game.{CharacterEffect, CharacterEffectMetadata, CharacterEffectName, CharacterEffectType}
 
-object DisarmEffect {
+object Disarm {
   val metadata: CharacterEffectMetadata =
     CharacterEffectMetadata(
       name = CharacterEffectName.Disarm,
@@ -13,6 +13,6 @@ object DisarmEffect {
     )
 }
 
-case class DisarmEffect(effectId: CharacterEffectId, cooldown: Int) extends CharacterEffect(effectId) {
-  val metadata: CharacterEffectMetadata = DisarmEffect.metadata
+case class Disarm(effectId: CharacterEffectId, cooldown: Int) extends CharacterEffect(effectId) {
+  val metadata: CharacterEffectMetadata = Disarm.metadata
 }
