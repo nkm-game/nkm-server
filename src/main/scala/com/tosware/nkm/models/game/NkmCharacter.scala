@@ -195,15 +195,18 @@ case class NkmCharacter
   def heal(amount: Int): NkmCharacter =
     this.modify(_.state.healthPoints).using(oldHp => math.min(oldHp + amount, state.maxHealthPoints))
 
-  def receiveDamage(damage: Damage): NkmCharacter = {
+  def calculateReduction(damage: Damage): Int = {
     val defense = damage.damageType match {
       case DamageType.Physical => state.physicalDefense
       case DamageType.Magical => state.magicalDefense
       case DamageType.True => 0
     }
+    (damage.amount * defense / 100f).toInt
+  }
 
-    val reduction = damage.amount * defense / 100f
-    val damageAfterReduction: Int = damage.amount - reduction.toInt
+  def receiveDamage(damage: Damage): NkmCharacter = {
+    val reduction = calculateReduction(damage)
+    val damageAfterReduction: Int = damage.amount - reduction
     if (damageAfterReduction <= 0) return this
 
     if(state.shield >= damageAfterReduction) {

@@ -46,8 +46,12 @@ case class BlackBlood(effectId: CharacterEffectId, cooldown: Int, sourceCharacte
 
       case _ => gameState
     }
-  def hitCharacter(target: CharacterId, damage: Damage)(implicit random: Random, gameState: GameState): GameState =
-    gameState
-      .abilityHitCharacter(sourceAbilityId, target)
-      .damageCharacter(target, damage)(random, sourceAbilityId)
+  def hitCharacter(target: CharacterId, damage: Damage)(implicit random: Random, gameState: GameState): GameState = {
+    if(gameState.characterById(target).get.isDead)
+      gameState
+    else
+      gameState
+        .abilityHitCharacter(sourceAbilityId, target)
+        .damageCharacter(target, damage)(random, sourceAbilityId)
+  }
 }

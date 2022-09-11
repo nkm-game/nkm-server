@@ -1,6 +1,7 @@
 package com.tosware.nkm.models.game
 
 import com.softwaremill.quicklens._
+import com.tosware.nkm.Logging
 import com.tosware.nkm.actors.Game.GameId
 import com.tosware.nkm.models.Damage
 import com.tosware.nkm.models.game.Ability.AbilityId
@@ -118,6 +119,7 @@ case class GameState(
                       clock: Clock,
                       gameLog: GameLog,
                     ) {
+  import GameState._
   private implicit val p: Phase = phase
   private implicit val t: Turn = turn
 
@@ -167,11 +169,12 @@ case class GameState(
     case GameStatus.CharacterPlacing | GameStatus.Running | GameStatus.Finished =>
       turn.number
   }
-  private def handleTrigger(e: GameEvent, trigger: GameEventListener)(implicit random: Random, gameState: GameState) = {
+  private def handleTrigger(event: GameEvent, trigger: GameEventListener)(implicit random: Random, gameState: GameState) = {
     try {
-      trigger.onEvent(e)(random, gameState)
+      trigger.onEvent(event)(random, gameState)
     } catch {
-      case _: Throwable =>
+      case e: Throwable =>
+        logger.error(e.getMessage)
         gameState
     }
 
@@ -395,14 +398,25 @@ case class GameState(
       case ability => ability
     }
 
-  def damageCharacter(characterId: CharacterId, damage: Damage)(implicit random: Random, causedBy: String): GameState =
-    updateCharacter(characterId)(_.receiveDamage(damage))
-      .logEvent(CharacterDamaged(NkmUtils.randomUUID(), characterId, damage))
-      .removeFromMapIfDead(characterId)
+  def damageCharacter(characterId: CharacterId, damage: Damage)(implicit random: Random, causedBy: String): GameState = {
+    if(characterById(characterId).get.isDead) {
+      logger.error(s"Unable to damage character $characterId. Character dead.")
+      this
+    } else {
+      updateCharacter(characterId)(_.receiveDamage(damage))
+        .removeFromMapIfDead(characterId) // needs to be removed first in order to avoid infinite triggers
+        .logEvent(CharacterDamaged(NkmUtils.randomUUID(), characterId, damage))
+    }
+  }
 
   def heal(characterId: CharacterId, amount: Int)(implicit random: Random, causedBy: String): GameState =
-    updateCharacter(characterId)(_.heal(amount))
-      .logEvent(CharacterHealed(NkmUtils.randomUUID(), characterId, amount))
+    if(characterById(characterId).get.isDead) {
+      logger.error(s"Unable to heal character $characterId. Character dead.")
+      this
+    } else {
+      updateCharacter(characterId)(_.heal(amount))
+        .logEvent(CharacterHealed(NkmUtils.randomUUID(), characterId, amount))
+    }
 
   def setHp(characterId: CharacterId, amount: Int)(implicit random: Random, causedBy: String): GameState =
     updateCharacter(characterId)(_.modify(_.state.healthPoints).setTo(amount))
@@ -422,6 +436,7 @@ case class GameState(
 
   def removeFromMapIfDead(characterId: CharacterId)(implicit random: Random, causedById: String): GameState =
     if(characterById(characterId).get.isDead) {
+      logger.info(characterId + " is dead")
       logEvent(CharacterDied(NkmUtils.randomUUID(), characterId))
         .removeCharacterFromMap(characterId)
     } else this
@@ -567,7 +582,7 @@ case class GameState(
       |""".stripMargin
 }
 
-object GameState {
+object GameState extends Logging {
   def empty(id: String): GameState = {
     val defaultPickType = PickType.AllRandom
     val defaultClockConfig = ClockConfig.defaultForPickType(defaultPickType)

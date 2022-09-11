@@ -52,13 +52,9 @@ class InfectionSpec
         .passTurn(s.characters.p0First.id)
         .basicAttack(s.characters.p0Second.id, s.characters.p1First.id)
 
-      // TODO
-      fail()
-
-//      newGameState.gameLog.events
-//        .ofType[GameEvent.CharacterDamaged]
-//        .causedBy(abilityId)
-//        .size shouldBe 2
+      newGameState.gameLog.events
+        .ofType[GameEvent.CharacterDied]
+        .size should (be > 0 and be < 3)
     }
   }
 }
