@@ -23,7 +23,7 @@ class PurificationSpec
         .addEffect(s.characters.p0Second.id, Disarm(NkmUtils.randomUUID(), 5))(random, s.gameState.id)
         .addEffect(s.characters.p0Second.id, Stun(NkmUtils.randomUUID(), 5))(random, s.gameState.id)
         .addEffect(s.characters.p0Second.id, Ground(NkmUtils.randomUUID(), 5))(random, s.gameState.id)
-        .addEffect(s.characters.p0Second.id, Snare(NkmUtils.randomUUID(), 5))(random, s.gameState.id)
+        .addEffect(s.characters.p0Second.id, Silence(NkmUtils.randomUUID(), 5))(random, s.gameState.id)
 
       val abilityId = s.characters.p0First.state.abilities.head.id
 

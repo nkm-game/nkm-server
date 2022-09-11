@@ -16,7 +16,7 @@ object BlackBlood {
       description =
         """After receiving damage, character deals {damage} magical damage to surrounding enemies.
           |
-          |Range: circular, {range}""".stripMargin,
+          |Radius: circular, {radius}""".stripMargin,
       variables = NkmConf.extract("abilities.crona.blackBlood"),
     )
 }

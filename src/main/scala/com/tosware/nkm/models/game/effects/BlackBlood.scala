@@ -24,7 +24,7 @@ case class BlackBlood(effectId: CharacterEffectId, cooldown: Int, sourceCharacte
   extends CharacterEffect(effectId)
     with GameEventListener {
   val metadata: CharacterEffectMetadata = BlackBlood.metadata
-  val range = NkmConf.int("abilities.crona.blackBlood.range")
+  val radius = NkmConf.int("abilities.crona.blackBlood.radius")
   val damage = NkmConf.int("abilities.crona.blackBlood.damage")
 
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
@@ -36,7 +36,7 @@ case class BlackBlood(effectId: CharacterEffectId, cooldown: Int, sourceCharacte
 
         val enemiesInRange =
           parentCell.get.coordinates
-            .getCircle(range)
+            .getCircle(radius)
             .whereEnemiesOfC(sourceCharacterId)
             .characters
             .map(_.id)

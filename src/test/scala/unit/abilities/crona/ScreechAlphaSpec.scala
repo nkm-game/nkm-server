@@ -22,7 +22,7 @@ class ScreechAlphaSpec
   private val abilityRadius = abilityMetadata.variables("radius")
 
   abilityMetadata.name must {
-    "be able to silence and slow nearby enemies" in {
+    "be able to stun and slow nearby enemies" in {
       val r = GameStateValidator()
         .validateAbilityUseWithoutTarget(s.characters.p0.owner.id, abilityId)
       assertCommandSuccess(r)
@@ -40,7 +40,7 @@ class ScreechAlphaSpec
           .effects
           .map(_.metadata.name)
         if(coordsInRange.contains(p.parentCell.get.coordinates)) {
-          effectsNames should (contain (Silence) and contain (StatNerf))
+          effectsNames should (contain (Stun) and contain (StatNerf))
         } else {
           effectsNames should be (empty)
         }

@@ -18,7 +18,7 @@ class BlackBloodSpec
   private val s = scenarios.Simple1v9LineTestScenario(characterMetadata)
   private implicit val gameState: GameState = s.gameState.passTurn(s.characters.p0.id)
   private val abilityId = s.characters.p0.state.abilities.head.id
-  private val abilityRange = abilityMetadata.variables("range")
+  private val abilityRange = abilityMetadata.variables("radius")
 
   abilityMetadata.name must {
     "deal damage to surrounding enemies" in {
