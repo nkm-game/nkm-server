@@ -20,15 +20,18 @@ class OgreCutterSpec
   private val abilityId = s.characters.p0.state.abilities.head.id
 
   OgreCutter.metadata.name must {
-    "be able to damage and teleport" in {
+    "be able to use" in {
       val r = GameStateValidator()
         .validateAbilityUseOnCharacter(s.characters.p0.owner.id, abilityId, s.characters.p1.id)
       assertCommandSuccess(r)
+    }
 
+    "be able to damage and teleport" in {
       val newGameState: GameState = gameState.useAbilityOnCharacter(abilityId, s.characters.p1.id)
       newGameState.gameLog.events.ofType[GameEvent.CharacterDamaged].exists(_.causedById == abilityId)
       newGameState.hexMap.get.getCellOfCharacter(s.characters.p0.id).get.coordinates.toTuple shouldBe (5, 0)
     }
+
     "not be able to use if teleport cell is not free to stand" in {
       val newGameState = gameState.teleportCharacter(s.characters.p1.id, HexCoordinates(4, 0))(random, gameState.id)
       val r = GameStateValidator()(newGameState)

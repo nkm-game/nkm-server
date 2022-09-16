@@ -16,7 +16,6 @@ class SnipersSightSpec
   private val metadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(SnipersSight.metadata.id))
   private val s = scenarios.Simple2v2TestScenario(metadata)
   private implicit val gameState: GameState = s.gameState
-  private val abilityId = s.characters.p0First.state.abilities.head.id
 
   SnipersSight.metadata.name must {
     "be able to attack characters in radial range" in {

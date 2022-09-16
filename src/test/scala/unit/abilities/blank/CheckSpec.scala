@@ -19,19 +19,21 @@ class CheckSpec
   private val abilityId = s.characters.p0First.state.abilities.head.id
 
   abilityMetadata.name must {
-    "be able to use check" in {
+    "be able to use" in {
       val r = GameStateValidator()
         .validateAbilityUseOnCharacter(s.characters.p0First.owner.id, abilityId, s.characters.p1First.id)
       assertCommandSuccess(r)
     }
-    "force to take a turn with check" in {
+
+    "force to take a turn" in {
       val abilityGameState: GameState = gameState
         .useAbilityOnCharacter(abilityId, s.characters.p1First.id)
         .endTurn()
 
       abilityGameState.characterTakingActionThisTurn should be (Some(s.characters.p1First.id))
     }
-    "apply silence with check" in {
+
+    "apply silence" in {
       val abilityGameState: GameState = gameState
         .useAbilityOnCharacter(abilityId, s.characters.p1First.id)
         .endTurn()
@@ -40,7 +42,8 @@ class CheckSpec
         .characterById(s.characters.p1First.id).get
         .state.effects.exists(_.metadata.name == CharacterEffectName.Silence)
     }
-    "be unable to check enemies that already took action" in {
+
+    "be unable to use on enemies that already took action" in {
       val passGameState: GameState = gameState
         .passTurn(s.characters.p0Second.id)
         .passTurn(s.characters.p1First.id)

@@ -21,11 +21,13 @@ class InfectionSpec
   private val abilityId2 = s.characters.p0Second.state.abilities.head.id
 
   abilityMetadata.name must {
-    "be able to infect and deal damage" in {
+    "be able to use" in {
       val r = GameStateValidator()
         .validateAbilityUseOnCharacter(s.characters.p0First.owner.id, abilityId, s.characters.p1First.id)
       assertCommandSuccess(r)
+    }
 
+    "be able to infect and deal damage" in {
       val abilityGameState: GameState = gameState.useAbilityOnCharacter(abilityId, s.characters.p1First.id)
       abilityGameState.gameLog.events
         .ofType[GameEvent.EffectAddedToCharacter]
@@ -42,6 +44,7 @@ class InfectionSpec
         .causedBy(abilityId)
         .size shouldBe 2
     }
+
     "be able to trigger loop correctly" in {
       val newGameState: GameState = gameState
         .useAbilityOnCharacter(abilityId, s.characters.p1First.id)

@@ -19,7 +19,7 @@ class AsterSpec
   private val abilityId = s.characters.p0First.state.abilities.head.id
 
   Aster.metadata.name must {
-    "be able to damage characters" in {
+    "be able to use on all coords" in {
       val validator = GameStateValidator()
 
       val allCoords = s.gameState.hexMap.get.cells.toCoords
@@ -27,7 +27,9 @@ class AsterSpec
         val r = validator.validateAbilityUseOnCoordinates(s.characters.p0First.owner.id, abilityId, c)
         assertCommandSuccess(r)
       }
+    }
 
+    "be able to damage characters" in {
       val abilityUsedGameState: GameState = s.gameState.useAbilityOnCoordinates(abilityId, s.spawnCoordinates.p0Second)
       abilityUsedGameState.gameLog.events
         .ofType[GameEvent.CharacterDamaged]

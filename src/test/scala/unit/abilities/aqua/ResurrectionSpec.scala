@@ -16,9 +16,8 @@ class ResurrectionSpec
   private val metadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(Resurrection.metadata.id))
   private val s = scenarios.Simple2v2TestScenario(metadata)
   private val abilityId = s.characters.p0First.state.abilities.head.id
-
   Resurrection.metadata.name must {
-    "be able to resurrect characters that died in the same phase" in {
+    "be able to use on characters that died in the same phase" in {
       val deadGameState = s.gameState.damageCharacter(s.characters.p0Second.id, Damage(DamageType.True, 99999))(random, s.gameState.id)
 
       val r = GameStateValidator()(deadGameState)
@@ -29,6 +28,9 @@ class ResurrectionSpec
           UseData(s.characters.p0Second.id),
         )
       assertCommandSuccess(r)
+    }
+    "be able to resurrect characters that died in the same phase" in {
+      val deadGameState = s.gameState.damageCharacter(s.characters.p0Second.id, Damage(DamageType.True, 99999))(random, s.gameState.id)
 
       val resurrectedGameState: GameState = deadGameState.useAbilityOnCoordinates(
         abilityId,
@@ -41,10 +43,17 @@ class ResurrectionSpec
     }
 
     "be able to resurrect characters that died in phase before" in {
-      val deadGameState = s.gameState.damageCharacter(s.characters.p0Second.id, Damage(DamageType.True, 99999))(random, s.gameState.id).incrementPhase()
+      val deadGameState = s.gameState
+        .damageCharacter(s.characters.p0Second.id, Damage(DamageType.True, 99999))(random, s.gameState.id)
+        .incrementPhase()
 
       val r = GameStateValidator()(deadGameState)
-        .validateAbilityUseOnCoordinates(s.characters.p0First.owner(s.gameState).id, abilityId, s.spawnCoordinates.p0Second, UseData(s.characters.p0Second.id))
+        .validateAbilityUseOnCoordinates(
+          s.characters.p0First.owner(s.gameState).id,
+          abilityId,
+          s.spawnCoordinates.p0Second,
+          UseData(s.characters.p0Second.id),
+        )
       assertCommandSuccess(r)
     }
 
@@ -102,7 +111,8 @@ class ResurrectionSpec
       assertCommandFailure(r)
     }
     "not be able to resurrect on tiles that are not free to stand" in {
-      val deadGameState = s.gameState.damageCharacter(s.characters.p0Second.id, Damage(DamageType.True, 99999))(random, s.gameState.id)
+      val deadGameState = s.gameState
+        .damageCharacter(s.characters.p0Second.id, Damage(DamageType.True, 99999))(random, s.gameState.id)
 
       val r = GameStateValidator()(deadGameState)
         .validateAbilityUseOnCoordinates(
@@ -115,7 +125,8 @@ class ResurrectionSpec
     }
 
     "not be able to resurrect characters that are alive" in {
-      val aliveGameState = s.gameState.removeCharacterFromMap(s.characters.p0Second.id)(random, s.gameState.id)
+      val aliveGameState = s.gameState
+        .removeCharacterFromMap(s.characters.p0Second.id)(random, s.gameState.id)
 
       val r = GameStateValidator()(aliveGameState)
         .validateAbilityUseOnCoordinates(

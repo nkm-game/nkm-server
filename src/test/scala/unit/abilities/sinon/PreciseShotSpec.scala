@@ -19,11 +19,13 @@ class PreciseShotSpec
   private val abilityId = s.characters.p0First.state.abilities.head.id
 
   PreciseShot.metadata.name must {
-    "be able to deal damage" in {
+    "be able to use" in {
       val r = GameStateValidator()
         .validateAbilityUseOnCharacter(s.characters.p0First.owner.id, abilityId, s.characters.p1First.id)
       assertCommandSuccess(r)
+    }
 
+    "be able to deal damage" in {
       val newGameState: GameState = gameState.useAbilityOnCharacter(abilityId, s.characters.p1First.id)
       newGameState.gameLog.events.ofType[GameEvent.CharacterDamaged].exists(_.causedById == abilityId)
     }

@@ -18,11 +18,13 @@ class TacticalEscapeSpec
   private val abilityId = s.characters.p0First.state.abilities.head.id
 
   TacticalEscape.metadata.name must {
-    "be able to modify character speed" in {
+    "be able to use" in {
       val validator = GameStateValidator()
       val r = validator.validateAbilityUseWithoutTarget(s.characters.p0First.owner.id, abilityId)
       assertCommandSuccess(r)
+    }
 
+    "be able to modify character speed" in {
       val abilityUsedGameState: GameState = gameState.useAbilityWithoutTarget(abilityId)
       s.characters.p0First.state.speed should be < abilityUsedGameState.characterById(s.characters.p0First.id).get.state.speed
     }

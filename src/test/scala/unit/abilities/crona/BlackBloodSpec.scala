@@ -19,10 +19,10 @@ class BlackBloodSpec
   private implicit val gameState: GameState = s.gameState.passTurn(s.characters.p0.id)
   private val abilityId = s.characters.p0.state.abilities.head.id
   private val abilityRange = abilityMetadata.variables("radius")
+  private val attackingCharacter = s.characters.p1.head
 
   abilityMetadata.name must {
-    "deal damage to surrounding enemies" in {
-      val attackingCharacter = s.characters.p1.head
+    "be able to use" in {
       val r = GameStateValidator()
         .validateBasicAttackCharacter(
           attackingCharacter.owner.id,
@@ -30,7 +30,9 @@ class BlackBloodSpec
           s.characters.p0.id,
         )
       assertCommandSuccess(r)
+    }
 
+    "deal damage to surrounding enemies" in {
       val newGameState: GameState = gameState.basicAttack(attackingCharacter.id, s.characters.p0.id)
       newGameState.gameLog.events
         .ofType[GameEvent.CharacterDamaged]

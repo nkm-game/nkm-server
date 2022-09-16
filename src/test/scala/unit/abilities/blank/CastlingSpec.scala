@@ -54,7 +54,7 @@ class CastlingSpec
         )
       assertCommandFailure(r1)
 
-      val r2 = GameStateValidator()(s1)
+      val r2 = GameStateValidator()(s2)
         .validateAbilityUseOnCharacter(
           s.characters.p0First.owner.id,
           abilityId,
@@ -63,6 +63,7 @@ class CastlingSpec
         )
       assertCommandFailure(r2)
     }
+
     "swap positions with castling" in {
       val newGameState = gameState.useAbilityOnCharacter(
         abilityId,

@@ -19,15 +19,18 @@ class OneHundredEightPoundPhoenixSpec
   private val abilityId = s.characters.p0First.state.abilities.head.id
 
   OneHundredEightPoundPhoenix.metadata.name must {
-    "be able to damage single character" in {
+    "be able to use" in {
       val r = GameStateValidator()
         .validateAbilityUseOnCharacter(s.characters.p0First.owner.id, abilityId, s.characters.p1First.id)
       assertCommandSuccess(r)
+    }
 
+    "be able to damage single character" in {
       val newGameState: GameState = gameState.useAbilityOnCharacter(abilityId, s.characters.p1First.id)
       newGameState.gameLog.events.ofType[GameEvent.CharacterDamaged].count(_.causedById == abilityId) shouldBe 3
       newGameState.gameLog.events.ofType[GameEvent.CharacterDamaged].count(_.characterId == s.characters.p1First.id) shouldBe 3
     }
+
     "be able to damage several characters" in {
       val damagedGameState = gameState.damageCharacter(s.characters.p1First.id, Damage(DamageType.True, 99))(random, gameState.id)
       val r = GameStateValidator()(damagedGameState)
@@ -39,6 +42,7 @@ class OneHundredEightPoundPhoenixSpec
       newGameState.gameLog.events.ofType[GameEvent.CharacterDamaged].ofCharacter(s.characters.p1First.id).count(_.causedById == abilityId) shouldBe 1
       newGameState.gameLog.events.ofType[GameEvent.CharacterDamaged].ofCharacter(s.characters.p1Second.id).count(_.causedById == abilityId) shouldBe 2
     }
+
     "send shockwaves over friends" in {
       val r = GameStateValidator()
         .validateAbilityUseOnCharacter(s.characters.p0Second.owner.id, abilityId, s.characters.p1First.id)

@@ -18,16 +18,17 @@ class PowerOfExistenceSpec
   private implicit val gameState: GameState = s.gameState
   private val abilityId = s.characters.p0First.state.abilities.head.id
   private val masterThroneAbilityId = s.characters.p0First.state.abilities.tail.head.id
+  private val aaGameState: GameState = gameState.basicAttack(s.characters.p0First.id, s.characters.p1First.id)
 
   PowerOfExistence.metadata.name must {
-    "be able to damage characters" in {
-      val aaGameState: GameState = gameState.basicAttack(s.characters.p0First.id, s.characters.p1First.id)
-      aaGameState.abilityById(masterThroneAbilityId).get.asInstanceOf[MasterThrone].collectedEnergy should be > 0
-
+    "be able to use" in {
       val validator = GameStateValidator()(aaGameState)
       val r = validator.validateAbilityUseWithoutTarget(s.characters.p0First.owner.id, abilityId)
       assertCommandSuccess(r)
+    }
 
+    "be able to damage characters" in {
+      aaGameState.abilityById(masterThroneAbilityId).get.asInstanceOf[MasterThrone].collectedEnergy should be > 0
       val abilityUsedGameState: GameState = aaGameState.useAbilityWithoutTarget(abilityId)
       abilityUsedGameState.abilityById(masterThroneAbilityId).get.asInstanceOf[MasterThrone].collectedEnergy should be(0)
 
