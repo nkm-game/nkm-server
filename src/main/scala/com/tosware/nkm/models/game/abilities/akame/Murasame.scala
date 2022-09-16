@@ -14,10 +14,9 @@ object Murasame {
       abilityType = AbilityType.Passive,
       description =
         """Character applies Poison effect on basic attack or ability hit.
-          |This effect can stack.
-          |Each stack deals 1 true damage.
-          |After applying 7 stacks target dies immediately.
-          |Effect remains till the end of the game.""".stripMargin,
+          |This effect can stack and is permanent.
+          |Each stack deals {poisonDamage} true damage at the end of turn.
+          |After applying {poisonStacksToDie} stacks target dies immediately.""".stripMargin,
       variables = NkmConf.extract("abilities.akame.murasame"),
     )
 }

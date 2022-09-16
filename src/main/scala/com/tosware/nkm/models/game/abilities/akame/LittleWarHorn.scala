@@ -12,7 +12,9 @@ object LittleWarHorn {
     AbilityMetadata(
       name = "Little War Horn",
       abilityType = AbilityType.Ultimate,
-      description = "Character gains 10 AttackPoints and 4 Speed for 5 turns. After effect finish set *character's* Speed to 5.",
+      description =
+        """Character gains {attackPoints} AD and {speedIncrease} Speed for {duration}t.
+          |When this effect is finished, set this characters base Speed to {finalSpeed}.""".stripMargin,
       variables = NkmConf.extract("abilities.akame.littleWarHorn"),
     )
 }

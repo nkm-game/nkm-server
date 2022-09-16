@@ -13,7 +13,10 @@ object Eliminate {
     AbilityMetadata(
       name = "Eliminate",
       abilityType = AbilityType.Normal,
-      description = "Character deals critical damage dealing double damage to selected target in range.",
+      description =
+        """Character hits critically, dealing double damage to target.
+          |
+          |Range: circular, {range}""".stripMargin,
       variables = NkmConf.extract("abilities.akame.eliminate"),
     )
 }
