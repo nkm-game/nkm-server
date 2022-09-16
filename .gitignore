@@ -6,4 +6,5 @@ target
 *.iws
 /.idea/*
 !/.idea/codeStyles
+!/.idea/vcs.xml
 out
