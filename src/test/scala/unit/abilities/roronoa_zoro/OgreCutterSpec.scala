@@ -4,7 +4,7 @@ import com.tosware.nkm.models.GameStateValidator
 import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.game.abilities.roronoa_zoro.OgreCutter
 import com.tosware.nkm.models.game.hex.HexCoordinates
-import com.tosware.nkm.models.game.hex.HexUtils.SeqUtils
+import com.tosware.nkm.models.game.hex.HexUtils._
 import helpers.{TestUtils, scenarios}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
@@ -26,17 +26,22 @@ class OgreCutterSpec
       assertCommandSuccess(r)
     }
 
-    "be able to damage and teleport" in {
-      val newGameState: GameState = gameState.useAbilityOnCharacter(abilityId, s.characters.p1.id)
-      newGameState.gameLog.events.ofType[GameEvent.CharacterDamaged].exists(_.causedById == abilityId)
-      newGameState.hexMap.get.getCellOfCharacter(s.characters.p0.id).get.coordinates.toTuple shouldBe (5, 0)
-    }
-
     "not be able to use if teleport cell is not free to stand" in {
       val newGameState = gameState.teleportCharacter(s.characters.p1.id, HexCoordinates(4, 0))(random, gameState.id)
       val r = GameStateValidator()(newGameState)
         .validateAbilityUseOnCharacter(s.characters.p0.owner.id, abilityId, s.characters.p1.id)
       assertCommandFailure(r)
+    }
+
+    "be able to damage and teleport" in {
+      val newGameState: GameState = gameState.useAbilityOnCharacter(abilityId, s.characters.p1.id)
+      newGameState
+        .gameLog.events
+        .causedBy(s.characters.p0.id)
+        .ofType[GameEvent.CharacterDamaged] should not be empty
+      newGameState.hexMap.get
+        .getCellOfCharacter(s.characters.p0.id).get
+        .coordinates.toTuple shouldBe (5, 0)
     }
   }
 }

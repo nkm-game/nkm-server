@@ -15,7 +15,7 @@ object OgreCutter {
       name = "Ogre Cutter",
       alternateName = "鬼斬り",
       abilityType = AbilityType.Normal,
-      description = "Character deals basic damage to selected target in range and teleports 2 tiles behind it.",
+      description = "Character basic attacks selected target in range and teleports 2 tiles behind it.",
       variables = NkmConf.extract("abilities.roronoaZoro.ogreCutter"),
     )
 }
