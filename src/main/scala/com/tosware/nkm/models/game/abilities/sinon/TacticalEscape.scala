@@ -22,7 +22,6 @@ object TacticalEscape {
 case class TacticalEscape(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId) with UsableWithoutTarget {
   override val metadata = TacticalEscape.metadata
 
-
   override def use()(implicit random: Random, gameState: GameState): GameState =
     gameState.
       addEffect(parentCharacterId, StatBuff(NkmUtils.randomUUID(), metadata.variables("duration"), StatType.Speed, metadata.variables("speedIncrease")))(random, id)
