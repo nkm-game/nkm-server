@@ -105,6 +105,7 @@ trait UsableOnCharacter extends UsableOnTarget[CharacterId] { this: Ability =>
 abstract class Ability(val id: AbilityId, pid: CharacterId) {
   val metadata: AbilityMetadata
   val state = AbilityState(pid)
+
   def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] = Set.empty
   def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] = Set.empty
   def parentCharacter(implicit gameState: GameState): NkmCharacter =
