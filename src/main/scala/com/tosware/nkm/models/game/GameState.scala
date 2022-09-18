@@ -3,7 +3,7 @@ package com.tosware.nkm.models.game
 import com.softwaremill.quicklens._
 import com.tosware.nkm.Logging
 import com.tosware.nkm.actors.Game.GameId
-import com.tosware.nkm.models.Damage
+import com.tosware.nkm.models.{Damage, DamageType}
 import com.tosware.nkm.models.game.Ability.AbilityId
 import com.tosware.nkm.models.game.CharacterEffect.CharacterEffectId
 import com.tosware.nkm.models.game.CharacterMetadata.CharacterMetadataId
@@ -147,8 +147,7 @@ case class GameState(
 
   def abilityById(abilityId: AbilityId): Option[Ability] = abilities.find(_.id == abilityId)
 
-  def characterByEffectId(characterEffectId: CharacterEffectId): NkmCharacter =
-    characters.find(_.state.effects.exists(_.id == characterEffectId)).get
+  def effectById(effectId: CharacterEffectId): Option[CharacterEffect] = effects.find(_.id == effectId)
 
   def characterPickFinished: Boolean = {
     val draftPickFinished = draftPickState.fold(false)(_.pickPhase == DraftPickPhase.Finished)
@@ -398,6 +397,9 @@ case class GameState(
       case ability => ability
     }
 
+  def executeCharacter(characterId: CharacterId)(implicit random: Random, causedBy: String): GameState =
+    damageCharacter(characterId, Damage(DamageType.True, Int.MaxValue))
+
   def damageCharacter(characterId: CharacterId, damage: Damage)(implicit random: Random, causedBy: String): GameState = {
     if(characterById(characterId).get.isDead) {
       logger.error(s"Unable to damage character $characterId. Character dead.")
@@ -449,7 +451,7 @@ case class GameState(
     characterEffectIds.foldLeft(this){case (acc, eid) => acc.removeEffect(eid)}
 
   def removeEffect(characterEffectId: CharacterEffectId)(implicit random: Random, causedById: String): GameState = {
-    val character = characterByEffectId(characterEffectId)
+    val character = effectById(characterEffectId).get.parentCharacter(this)
     updateCharacter(character.id)(_.removeEffect(characterEffectId))
       .logEvent(EffectRemovedFromCharacter(NkmUtils.randomUUID(), characterEffectId))
   }

@@ -5,6 +5,7 @@ import com.tosware.nkm.models.game.Ability.{AbilityId, UseCheck}
 import com.tosware.nkm.models.game.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.game.hex.HexUtils._
+import com.tosware.nkm.models.{Damage, DamageType}
 
 import scala.util.Random
 
@@ -14,7 +15,7 @@ object Eliminate {
       name = "Eliminate",
       abilityType = AbilityType.Normal,
       description =
-        """Character hits critically, dealing double damage to target.
+        """Character hits critically, dealing double AD damage to target.
           |
           |Range: circular, {range}""".stripMargin,
       variables = NkmConf.extract("abilities.akame.eliminate"),
@@ -30,11 +31,10 @@ case class Eliminate(abilityId: AbilityId, parentCharacterId: CharacterId) exten
   override def targetsInRange(implicit gameState: GameState) =
     rangeCellCoords.whereEnemiesOfC(parentCharacterId)
 
-  override def use(target: CharacterId, useData: UseData)(implicit random: Random, gameState: GameState) = {
+  override def use(target: CharacterId, useData: UseData)(implicit random: Random, gameState: GameState) =
     gameState
       .abilityHitCharacter(id, target)
-    ???
-  }
+      .damageCharacter(target, Damage(DamageType.Physical, parentCharacter.state.attackPoints * 2))(random, id)
 
   override def useChecks(implicit target: CharacterId, useData: UseData, gameState: GameState): Set[UseCheck] = {
     super.useChecks ++ Seq(

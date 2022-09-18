@@ -33,10 +33,10 @@ class MurasameSpec
         s.characters.p1.id
       )
       newGameState
-        .characterById(s.characters.p0.id).get
+        .characterById(s.characters.p1.id).get
         .state
         .effects
-        .map(_.metadata.name) should contain (Poison)
+        .map(_.metadata.name) should contain (MurasamePoison)
     }
     "apply poison on ability hit" in {
       val newGameState: GameState = gameState.useAbilityOnCharacter(
@@ -44,10 +44,10 @@ class MurasameSpec
         s.characters.p1.id
       )
       newGameState
-        .characterById(s.characters.p0.id).get
+        .characterById(s.characters.p1.id).get
         .state
         .effects
-        .map(_.metadata.name) should contain (Poison)
+        .map(_.metadata.name) should contain (MurasamePoison)
     }
 
     def attackAndSkip(gameState: GameState): GameState = {
@@ -68,10 +68,10 @@ class MurasameSpec
       val newGameState = attackAndSkipN(2)(gameState)
 
       newGameState
-        .characterById(s.characters.p0.id).get
+        .characterById(s.characters.p1.id).get
         .state
         .effects
-        .map(_.metadata.name).count(_ == Poison) should be (2)
+        .map(_.metadata.name).count(_ == MurasamePoison) should be (2)
     }
 
     "execute target when fully stacked" in {

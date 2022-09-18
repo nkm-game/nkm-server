@@ -23,6 +23,7 @@ object CharacterEffectName extends Enum[CharacterEffectName] {
   case object StatBuff extends CharacterEffectName
   case object StatNerf extends CharacterEffectName
 
+  case object MurasamePoison extends CharacterEffectName
   case object BlackBlood extends CharacterEffectName
 }
 
