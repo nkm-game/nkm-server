@@ -20,26 +20,26 @@ class GameStateSpec
     )
 
   private val s = scenarios.Simple1v1TestScenario(metadata)
-  private implicit val gameState: GameState = s.gameState
+  private val gameState: GameState = s.gameState
   private val littleWarHornAbilityId = s.characters.p0.state.abilities(0).id
   private val tacticalEscapeAbilityId = s.characters.p0.state.abilities(1).id
 
   "GameState" must {
     "start abilities with cooldown 0" in {
-      gameState.abilities.map(_.state.cooldown) should be (Set(0))
+      gameState.abilityStates.values.map(_.cooldown).toSet should be (Set(0))
     }
     "put used ability on cooldown" in {
       val abilityId = littleWarHornAbilityId
       val abilityUsedGameState = gameState.useAbilityWithoutTarget(abilityId)
-      abilityUsedGameState.abilityById(abilityId).get.state.cooldown should be > 0
+      abilityUsedGameState.abilityById(abilityId).get.state(abilityUsedGameState).cooldown should be > 0
     }
     "decrement ability cooldowns at end of characters turn" in {
       val abilityId = littleWarHornAbilityId
       val abilityUsedGameState = gameState.useAbilityWithoutTarget(abilityId)
       val endTurnGameState = abilityUsedGameState.endTurn()
 
-      val oldCooldown = abilityUsedGameState.abilityById(abilityId).get.state.cooldown
-      val newCooldown = endTurnGameState.abilityById(abilityId).get.state.cooldown
+      val oldCooldown = abilityUsedGameState.abilityStates(abilityId).cooldown
+      val newCooldown = endTurnGameState.abilityStates(abilityId).cooldown
       oldCooldown should be (newCooldown + 1)
     }
     "decrement effect cooldowns at end of characters turn" in {

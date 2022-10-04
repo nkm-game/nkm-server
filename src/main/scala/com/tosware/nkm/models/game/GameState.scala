@@ -115,6 +115,7 @@ case class GameState(
                       characterIdsThatTookActionThisPhase: Set[CharacterId],
                       characterTakingActionThisTurn: Option[CharacterId],
                       playerIdsThatPlacedCharacters: Set[PlayerId],
+                      abilityStates: Map[AbilityId, AbilityState],
                       clockConfig: ClockConfig,
                       clock: Clock,
                       gameLog: GameLog,
@@ -276,11 +277,17 @@ case class GameState(
       })
     val playersWithAssignedCharacters = playersWithCharacters.map{case (p, cs) => p.copy(characterIds = cs.map(_.id))}
     val characters = playersWithCharacters.flatMap(_._2).toSet
+    val abilitiesByCharacter = characters.map(c => (c.id, c.state.abilities))
+    val abilityStatesMap: Map[AbilityId, AbilityState] = abilitiesByCharacter.collect
+    {
+      case (cid: CharacterId, as: Seq[Ability]) => as.map(a => a.id -> AbilityState(cid))
+    }.flatten.toMap
 
     copy(
       players = playersWithAssignedCharacters,
       characters = characters,
       characterIdsOutsideMap = characters.map(c => c.id),
+      abilityStates = abilityStates.concat(abilityStatesMap)
     )
   }
 
@@ -485,6 +492,11 @@ case class GameState(
   def refreshBasicAttack(targetCharacter: CharacterId)(implicit random: Random, causedById: String): GameState =
     logEvent(BasicAttackRefreshed(NkmUtils.randomUUID(), targetCharacter))
 
+  def putAbilityOnCooldown(abilityId: AbilityId): GameState = {
+    val newState = abilityById(abilityId).get.getCooldownState(this)
+    this.copy(abilityStates = abilityStates.updated(abilityId, newState))
+  }
+
   def useAbilityWithoutTarget(abilityId: AbilityId)(implicit random: Random): GameState = {
     implicit val causedById: String = abilityId
     val ability = abilityById(abilityId).get.asInstanceOf[Ability with UsableWithoutTarget]
@@ -493,6 +505,7 @@ case class GameState(
     val newGameState = takeActionWithCharacter(parentCharacter.id)
       .logEvent(AbilityUsedWithoutTarget(NkmUtils.randomUUID(), abilityId))
     ability.use()(random, newGameState)
+      .putAbilityOnCooldown(abilityId)
   }
 
   def useAbilityOnCoordinates(abilityId: AbilityId, target: HexCoordinates, useData: UseData = UseData())(implicit random: Random): GameState = {
@@ -503,6 +516,7 @@ case class GameState(
     val newGameState = takeActionWithCharacter(parentCharacter.id)
     ability.use(target, useData)(random, newGameState)
       .logEvent(AbilityUsedOnCoordinates(NkmUtils.randomUUID(), abilityId, target))
+      .putAbilityOnCooldown(abilityId)
   }
 
   def useAbilityOnCharacter(abilityId: AbilityId, target: CharacterId, useData: UseData = UseData())(implicit random: Random): GameState = {
@@ -513,6 +527,7 @@ case class GameState(
     val newGameState = takeActionWithCharacter(parentCharacter.id)
     ability.use(target, useData)(random, newGameState)
       .logEvent(AbilityUsedOnCharacter(NkmUtils.randomUUID(), abilityId, target))
+      .putAbilityOnCooldown(abilityId)
   }
 
   def incrementTurn(): GameState =
@@ -563,6 +578,7 @@ case class GameState(
       characterIdsThatTookActionThisPhase = characterIdsThatTookActionThisPhase,
       characterTakingActionThisTurn = characterTakingActionThisTurn,
       playerIdsThatPlacedCharacters = playerIdsThatPlacedCharacters,
+      abilityStates = abilityStates,
       clockConfig = clockConfig,
       clock = clock,
       currentPlayerId = currentPlayer.id,
@@ -607,6 +623,7 @@ object GameState extends Logging {
       characterIdsThatTookActionThisPhase = Set(),
       characterTakingActionThisTurn = None,
       playerIdsThatPlacedCharacters = Set(),
+      abilityStates = Map(),
       clockConfig = defaultClockConfig,
       clock = Clock.fromConfig(defaultClockConfig, Seq()),
       gameLog = GameLog(Seq.empty),
@@ -632,6 +649,7 @@ case class GameStateView(
                           characterIdsThatTookActionThisPhase: Set[CharacterId],
                           characterTakingActionThisTurn: Option[CharacterId],
                           playerIdsThatPlacedCharacters: Set[PlayerId],
+                          abilityStates: Map[AbilityId, AbilityState],
                           clockConfig: ClockConfig,
                           clock: Clock,
 

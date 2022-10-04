@@ -26,7 +26,6 @@ object PowerOfExistence {
 
 case class PowerOfExistence(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId) with UsableWithoutTarget {
   override val metadata = PowerOfExistence.metadata
-  override val state: AbilityState = AbilityState(parentCharacterId)
   override def rangeCellCoords(implicit gameState: GameState) =
     gameState.hexMap.get.cells.toCoords
   override def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] =

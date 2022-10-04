@@ -104,7 +104,9 @@ trait UsableOnCharacter extends UsableOnTarget[CharacterId] { this: Ability =>
 
 abstract class Ability(val id: AbilityId, pid: CharacterId) {
   val metadata: AbilityMetadata
-  val state = AbilityState(pid)
+
+  def state(implicit gameState: GameState) =
+    gameState.abilityStates(id)
 
   def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] = Set.empty
   def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] = Set.empty
@@ -113,8 +115,11 @@ abstract class Ability(val id: AbilityId, pid: CharacterId) {
   def parentCell(implicit gameState: GameState): Option[HexCell] =
     parentCharacter.parentCell
 
+  def getCooldownState(implicit gameState: GameState): AbilityState =
+    state.copy(cooldown = metadata.variables("cooldown"))
+
   object UseCheck {
-    def NotOnCooldown: UseCheck =
+    def NotOnCooldown(implicit gameState: GameState): UseCheck =
       (state.cooldown <= 0) -> "Ability is on cooldown."
     def ParentCharacterOnMap(implicit gameState: GameState): UseCheck =
       parentCharacter.isOnMap -> "Parent character is not on map."
