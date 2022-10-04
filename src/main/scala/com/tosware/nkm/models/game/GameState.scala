@@ -497,6 +497,11 @@ case class GameState(
     this.copy(abilityStates = abilityStates.updated(abilityId, newState))
   }
 
+  def decrementAbilityCooldown(abilityId: AbilityId): GameState = {
+    val newState = abilityById(abilityId).get.getDecrementCooldownState(this)
+    this.copy(abilityStates = abilityStates.updated(abilityId, newState))
+  }
+
   def useAbilityWithoutTarget(abilityId: AbilityId)(implicit random: Random): GameState = {
     implicit val causedById: String = abilityId
     val ability = abilityById(abilityId).get.asInstanceOf[Ability with UsableWithoutTarget]
@@ -533,12 +538,20 @@ case class GameState(
   def incrementTurn(): GameState =
     this.modify(_.turn).using(oldTurn => Turn(oldTurn.number + 1))
 
-  def endTurn()(implicit random: Random, causedById: String = id): GameState =
-    this.modify(_.characterIdsThatTookActionThisPhase).using(c => c + characterTakingActionThisTurn.get)
+  def endTurn()(implicit random: Random, causedById: String = id): GameState = {
+    val currentCharacterAbilityIds = characterById(characterTakingActionThisTurn.get).get.state.abilities.map(_.id)
+
+    val decrementAbilityCooldownsState = currentCharacterAbilityIds.foldLeft(this)((acc, abilityId) => {
+      acc.decrementAbilityCooldown(abilityId)
+    })
+
+    decrementAbilityCooldownsState
+      .modify(_.characterIdsThatTookActionThisPhase).using(c => c + characterTakingActionThisTurn.get)
       .modify(_.characterTakingActionThisTurn).setTo(None)
       .incrementTurn()
       .finishPhaseIfEveryCharacterTookAction()
       .logEvent(TurnFinished(NkmUtils.randomUUID()))
+  }
 
   def passTurn(characterId: CharacterId)(implicit random: Random): GameState =
     takeActionWithCharacter(characterId).endTurn()

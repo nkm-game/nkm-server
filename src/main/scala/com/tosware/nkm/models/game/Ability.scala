@@ -118,6 +118,9 @@ abstract class Ability(val id: AbilityId, pid: CharacterId) {
   def getCooldownState(implicit gameState: GameState): AbilityState =
     state.copy(cooldown = metadata.variables("cooldown"))
 
+  def getDecrementCooldownState(implicit gameState: GameState): AbilityState =
+    state.copy(cooldown = math.max(state.cooldown - 1, 0))
+
   object UseCheck {
     def NotOnCooldown(implicit gameState: GameState): UseCheck =
       (state.cooldown <= 0) -> "Ability is on cooldown."
