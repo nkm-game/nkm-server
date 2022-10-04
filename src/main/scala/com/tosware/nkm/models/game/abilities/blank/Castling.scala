@@ -1,7 +1,7 @@
 package com.tosware.nkm.models.game.abilities.blank
 
 import com.tosware.nkm.NkmConf
-import com.tosware.nkm.models.game.Ability.AbilityId
+import com.tosware.nkm.models.game.Ability.{AbilityId, UseCheck}
 import com.tosware.nkm.models.game.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.game.hex.HexUtils._
@@ -27,5 +27,26 @@ case class Castling(abilityId: AbilityId, parentCharacterId: CharacterId) extend
   override def targetsInRange(implicit gameState: GameState) =
     rangeCellCoords.whereCharacters
 
-  override def use(target: CharacterId, useData: UseData)(implicit random: Random, gameState: GameState) = ???
+  override def use(target: CharacterId, useData: UseData)(implicit random: Random, gameState: GameState) = {
+    val target1 = gameState.characterById(target).get
+    val target2 = gameState.characterById(useData.data).get
+    implicit val causedById: String = id
+
+    gameState
+      .removeCharacterFromMap(target1.id)
+      .removeCharacterFromMap(target2.id)
+      .placeCharacter(target2.parentCell.get.coordinates, target1.id)
+      .placeCharacter(target1.parentCell.get.coordinates, target2.id)
+  }
+
+  override def useChecks(implicit target: CharacterId, useData: UseData, gameState: GameState): Set[UseCheck] = {
+    val target1 = gameState.characterById(target).get
+    val target2 = gameState.characterById(useData.data).get
+
+    super.useChecks ++ Seq(
+      (target1.id != target2.id) -> "Targets have to be different.",
+      UseCheck.TargetIsOnMap,
+      UseCheck.TargetIsOnMap(target2.id, useData, gameState),
+    )
+  }
 }
