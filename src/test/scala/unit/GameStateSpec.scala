@@ -47,8 +47,8 @@ class GameStateSpec
       val abilityUsedGameState = gameState.useAbilityWithoutTarget(abilityId)
       val endTurnGameState = abilityUsedGameState.endTurn()
 
-      val oldCooldown = abilityUsedGameState.effects.head.cooldown
-      val newCooldown = endTurnGameState.effects.head.cooldown
+      val oldCooldown = abilityUsedGameState.characterEffectStates.values.head.cooldown
+      val newCooldown = endTurnGameState.characterEffectStates.values.head.cooldown
       oldCooldown should be (newCooldown + 1)
     }
     "remove effects from characters with expired cooldowns" in {

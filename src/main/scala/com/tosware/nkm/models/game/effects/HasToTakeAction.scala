@@ -16,7 +16,7 @@ object HasToTakeAction {
     )
 }
 
-case class HasToTakeAction(effectId: CharacterEffectId, cooldown: Int)
+case class HasToTakeAction(effectId: CharacterEffectId, initialCooldown: Int)
   extends CharacterEffect(effectId)
   with GameEventListener
   {

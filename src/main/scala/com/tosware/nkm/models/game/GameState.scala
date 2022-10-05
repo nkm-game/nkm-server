@@ -118,6 +118,7 @@ case class GameState(
                       characterTakingActionThisTurn: Option[CharacterId],
                       playerIdsThatPlacedCharacters: Set[PlayerId],
                       abilityStates: Map[AbilityId, AbilityState],
+                      characterEffectStates: Map[CharacterEffectId, CharacterEffectState],
                       clockConfig: ClockConfig,
                       clock: Clock,
                       gameLog: GameLog,
@@ -135,6 +136,8 @@ case class GameState(
   def playerById(playerId: PlayerId): Option[Player] = players.find(_.id == playerId)
 
   def currentPlayer: Player = players(currentPlayerNumber)
+
+  def currentCharacter: Option[NkmCharacter] = characterTakingActionThisTurn.flatMap(characterById)
 
   def currentPlayerTime: Long = clock.playerTimes(currentPlayer.id)
 
@@ -454,6 +457,7 @@ case class GameState(
 
   def addEffect(characterId: CharacterId, characterEffect: CharacterEffect)(implicit random: Random, causedById: String): GameState =
     updateCharacter(characterId)(_.addEffect(characterEffect))
+      .modify(_.characterEffectStates).using(ces => ces.updated(characterEffect.id, CharacterEffectState(characterEffect.initialCooldown)))
       .logEvent(EffectAddedToCharacter(NkmUtils.randomUUID(), characterEffect.id, characterId))
 
   def removeEffects(characterEffectIds: Seq[CharacterEffectId])(implicit random: Random, causedById: String): GameState =
@@ -462,6 +466,7 @@ case class GameState(
   def removeEffect(characterEffectId: CharacterEffectId)(implicit random: Random, causedById: String): GameState = {
     val character = effectById(characterEffectId).get.parentCharacter(this)
     updateCharacter(character.id)(_.removeEffect(characterEffectId))
+      .modify(_.characterEffectStates).using(ces => ces.removed(characterEffectId))
       .logEvent(EffectRemovedFromCharacter(NkmUtils.randomUUID(), characterEffectId))
   }
 
@@ -504,6 +509,15 @@ case class GameState(
     this.copy(abilityStates = abilityStates.updated(abilityId, newState))
   }
 
+  def decrementEffectCooldown(effectId: CharacterEffectId)(implicit random: Random): GameState = {
+    val newState = effectById(effectId).get.getDecrementCooldownState(this)
+    if(newState.cooldown > 0) {
+      this.copy(characterEffectStates = characterEffectStates.updated(effectId, newState))
+    } else {
+      this.removeEffect(effectId)(random, id)
+    }
+  }
+
   def useAbilityWithoutTarget(abilityId: AbilityId)(implicit random: Random): GameState = {
     implicit val causedById: String = abilityId
     val ability = abilityById(abilityId).get.asInstanceOf[Ability with UsableWithoutTarget]
@@ -541,17 +555,24 @@ case class GameState(
     this.modify(_.turn).using(oldTurn => Turn(oldTurn.number + 1))
 
   def endTurn()(implicit random: Random, causedById: String = id): GameState = {
-    val currentCharacterAbilityIds = characterById(characterTakingActionThisTurn.get).get.state.abilities.map(_.id)
+    val currentCharacterAbilityIds = currentCharacter.get.state.abilities.map(_.id)
+    val currentCharacterEffectIds = currentCharacter.get.state.effects.map(_.id)
 
     val decrementAbilityCooldownsState = currentCharacterAbilityIds.foldLeft(this)((acc, abilityId) => {
       acc.decrementAbilityCooldown(abilityId)
     })
 
-    decrementAbilityCooldownsState
+    val turnFinishedState = decrementAbilityCooldownsState
       .modify(_.characterIdsThatTookActionThisPhase).using(c => c + characterTakingActionThisTurn.get)
       .modify(_.characterTakingActionThisTurn).setTo(None)
       .incrementTurn()
       .logEvent(TurnFinished(NkmUtils.randomUUID()))
+
+    val decrementEffectCooldownsState = currentCharacterEffectIds.foldLeft(turnFinishedState)((acc, effectId) => {
+      acc.decrementEffectCooldown(effectId)
+    })
+
+    decrementEffectCooldownsState
       .finishPhaseIfEveryCharacterTookAction()
       .logEvent(TurnStarted(NkmUtils.randomUUID()))
   }
@@ -595,6 +616,7 @@ case class GameState(
       characterTakingActionThisTurn = characterTakingActionThisTurn,
       playerIdsThatPlacedCharacters = playerIdsThatPlacedCharacters,
       abilityStates = abilityStates,
+      characterEffectStates = characterEffectStates,
       clockConfig = clockConfig,
       clock = clock,
       currentPlayerId = currentPlayer.id,
@@ -640,6 +662,7 @@ object GameState extends Logging {
       characterTakingActionThisTurn = None,
       playerIdsThatPlacedCharacters = Set(),
       abilityStates = Map(),
+      characterEffectStates = Map(),
       clockConfig = defaultClockConfig,
       clock = Clock.fromConfig(defaultClockConfig, Seq()),
       gameLog = GameLog(Seq.empty),
@@ -666,6 +689,7 @@ case class GameStateView(
                           characterTakingActionThisTurn: Option[CharacterId],
                           playerIdsThatPlacedCharacters: Set[PlayerId],
                           abilityStates: Map[AbilityId, AbilityState],
+                          characterEffectStates: Map[CharacterEffectId, CharacterEffectState],
                           clockConfig: ClockConfig,
                           clock: Clock,
 

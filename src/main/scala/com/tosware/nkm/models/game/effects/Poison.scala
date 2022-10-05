@@ -31,7 +31,7 @@ object MurasamePoison {
     )
 }
 
-case class Poison(effectId: CharacterEffectId, cooldown: Int, damage: Damage, metadata: CharacterEffectMetadata = Poison.metadata)
+case class Poison(effectId: CharacterEffectId, initialCooldown: Int, damage: Damage, metadata: CharacterEffectMetadata = Poison.metadata)
   extends CharacterEffect(effectId)
     with GameEventListener {
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =

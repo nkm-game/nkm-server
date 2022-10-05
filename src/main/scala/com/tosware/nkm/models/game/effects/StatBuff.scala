@@ -12,6 +12,6 @@ object StatBuff {
     )
 }
 
-case class StatBuff(effectId: CharacterEffectId, cooldown: Int, statType: StatType, value: Int) extends CharacterEffect(effectId) {
+case class StatBuff(effectId: CharacterEffectId, initialCooldown: Int, statType: StatType, value: Int) extends CharacterEffect(effectId) {
   val metadata: CharacterEffectMetadata = StatBuff.metadata
 }

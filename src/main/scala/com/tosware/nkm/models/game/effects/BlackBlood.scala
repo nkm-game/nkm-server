@@ -20,7 +20,7 @@ object BlackBlood {
     )
 }
 
-case class BlackBlood(effectId: CharacterEffectId, cooldown: Int, sourceCharacterId: CharacterId, sourceAbilityId: AbilityId)
+case class BlackBlood(effectId: CharacterEffectId, initialCooldown: Int, sourceCharacterId: CharacterId, sourceAbilityId: AbilityId)
   extends CharacterEffect(effectId)
     with GameEventListener {
   val metadata: CharacterEffectMetadata = BlackBlood.metadata

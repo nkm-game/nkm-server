@@ -13,6 +13,6 @@ object Ground {
     )
 }
 
-case class Ground(effectId: CharacterEffectId, cooldown: Int) extends CharacterEffect(effectId) {
+case class Ground(effectId: CharacterEffectId, initialCooldown: Int) extends CharacterEffect(effectId) {
   val metadata: CharacterEffectMetadata = Ground.metadata
 }

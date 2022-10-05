@@ -13,6 +13,6 @@ object Snare {
     )
 }
 
-case class Snare(effectId: CharacterEffectId, cooldown: Int) extends CharacterEffect(effectId) {
+case class Snare(effectId: CharacterEffectId, initialCooldown: Int) extends CharacterEffect(effectId) {
   val metadata: CharacterEffectMetadata = Snare.metadata
 }

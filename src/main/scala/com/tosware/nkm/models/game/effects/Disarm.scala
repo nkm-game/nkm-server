@@ -13,6 +13,6 @@ object Disarm {
     )
 }
 
-case class Disarm(effectId: CharacterEffectId, cooldown: Int) extends CharacterEffect(effectId) {
+case class Disarm(effectId: CharacterEffectId, initialCooldown: Int) extends CharacterEffect(effectId) {
   val metadata: CharacterEffectMetadata = Disarm.metadata
 }

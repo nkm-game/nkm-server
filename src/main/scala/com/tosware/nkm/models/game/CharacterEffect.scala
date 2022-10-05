@@ -50,13 +50,17 @@ case class CharacterEffectMetadata
 
 abstract class CharacterEffect(val id: CharacterEffectId) {
   val metadata: CharacterEffectMetadata
-  val cooldown: Int
-  val state: CharacterEffectState = CharacterEffectState(cooldown)
+  val initialCooldown: Int
 
+  def state(implicit gameState: GameState): CharacterEffectState =
+    gameState.characterEffectStates(id)
   def parentCharacter(implicit gameState: GameState): NkmCharacter =
     gameState.characters.find(_.state.effects.map(_.id).contains(id)).get
   def parentCell(implicit gameState: GameState): Option[HexCell] =
     parentCharacter.parentCell
+
+  def getDecrementCooldownState(implicit gameState: GameState): CharacterEffectState =
+    state.copy(cooldown = math.max(state.cooldown - 1, 0))
 }
 
 case class CharacterEffectState(cooldown: Int)

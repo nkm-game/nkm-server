@@ -12,6 +12,6 @@ object StatNerf {
     )
 }
 
-case class StatNerf(effectId: CharacterEffectId, cooldown: Int, statType: StatType, value: Int) extends CharacterEffect(effectId) {
+case class StatNerf(effectId: CharacterEffectId, initialCooldown: Int, statType: StatType, value: Int) extends CharacterEffect(effectId) {
   val metadata: CharacterEffectMetadata = StatNerf.metadata
 }

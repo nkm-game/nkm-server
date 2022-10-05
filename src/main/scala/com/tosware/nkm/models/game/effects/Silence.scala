@@ -14,6 +14,6 @@ object Silence {
   }
 }
 
-case class Silence(effectId: CharacterEffectId, cooldown: Int) extends CharacterEffect(effectId) {
+case class Silence(effectId: CharacterEffectId, initialCooldown: Int) extends CharacterEffect(effectId) {
   val metadata: CharacterEffectMetadata = Silence.metadata
 }

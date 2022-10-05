@@ -13,6 +13,6 @@ object Stun {
     )
 }
 
-case class Stun(effectId: CharacterEffectId, cooldown: Int) extends CharacterEffect(effectId) {
+case class Stun(effectId: CharacterEffectId, initialCooldown: Int) extends CharacterEffect(effectId) {
   val metadata: CharacterEffectMetadata = Stun.metadata
 }

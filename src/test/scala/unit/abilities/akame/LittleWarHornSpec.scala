@@ -18,7 +18,10 @@ class LittleWarHornSpec
 {
   private val abilityMetadata = LittleWarHorn.metadata
   private val characterMetadata = CharacterMetadata.empty()
-    .copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
+    .copy(
+      initialAbilitiesMetadataIds = Seq(abilityMetadata.id),
+      initialSpeed = 7
+    )
   private val s = scenarios.Simple1v1TestScenario(characterMetadata)
   private implicit val gameState: GameState = s.gameState
   private val abilityId = s.characters.p0.state.abilities.head.id
@@ -65,7 +68,7 @@ class LittleWarHornSpec
       val afterDurationGameState = skipPhaseN(duration)(abilityUseGameState)
       afterDurationGameState
         .characterById(s.characters.p0.id).get
-        .state.pureSpeed should not be (initialSpeed)
+        .state.pureSpeed should not be initialSpeed
     }
   }
 }

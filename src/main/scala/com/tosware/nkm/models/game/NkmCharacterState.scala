@@ -1,5 +1,6 @@
 package com.tosware.nkm.models.game
 import com.tosware.nkm.models.game.Ability.AbilityId
+import com.tosware.nkm.models.game.CharacterEffect.CharacterEffectId
 import com.tosware.nkm.models.game.effects.{StatBuff, StatNerf}
 import com.tosware.nkm.models.game.hex.HexUtils._
 
@@ -40,7 +41,7 @@ case class NkmCharacterState
     physicalDefense = physicalDefense,
     magicalDefense = magicalDefense,
     abilities = abilities.map(_.id),
-    effects = effects.map(_.state),
+    effects = effects.map(_.id),
   )
 }
 
@@ -56,5 +57,5 @@ case class NkmCharacterStateView
   physicalDefense: Int,
   magicalDefense: Int,
   abilities: Seq[AbilityId] = Seq.empty,
-  effects: Seq[CharacterEffectState] = Seq.empty,
+  effects: Seq[CharacterEffectId] = Seq.empty,
 )
