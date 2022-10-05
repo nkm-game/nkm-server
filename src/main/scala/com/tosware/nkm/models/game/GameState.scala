@@ -92,6 +92,8 @@ object GameEvent {
                              (implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent(id)
   case class TurnFinished(id: GameEventId)
                          (implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent(id)
+  case class TurnStarted(id: GameEventId)
+                         (implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent(id)
   case class PhaseFinished(id: GameEventId)
                           (implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent(id)
 }
@@ -549,8 +551,9 @@ case class GameState(
       .modify(_.characterIdsThatTookActionThisPhase).using(c => c + characterTakingActionThisTurn.get)
       .modify(_.characterTakingActionThisTurn).setTo(None)
       .incrementTurn()
-      .finishPhaseIfEveryCharacterTookAction()
       .logEvent(TurnFinished(NkmUtils.randomUUID()))
+      .finishPhaseIfEveryCharacterTookAction()
+      .logEvent(TurnStarted(NkmUtils.randomUUID()))
   }
 
   def passTurn(characterId: CharacterId)(implicit random: Random): GameState =

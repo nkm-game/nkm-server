@@ -33,14 +33,14 @@ class CheckSpec
       abilityGameState.characterTakingActionThisTurn should be (Some(s.characters.p1First.id))
     }
 
-    "apply silence" in {
+    "apply disarm" in {
       val abilityGameState: GameState = gameState
         .useAbilityOnCharacter(abilityId, s.characters.p1First.id)
         .endTurn()
 
       abilityGameState
         .characterById(s.characters.p1First.id).get
-        .state.effects.exists(_.metadata.name == CharacterEffectName.Silence)
+        .state.effects.exists(_.metadata.name == CharacterEffectName.Disarm)
     }
 
     "be unable to use on enemies that already took action" in {

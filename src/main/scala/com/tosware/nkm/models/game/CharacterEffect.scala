@@ -16,6 +16,7 @@ object CharacterEffectName extends Enum[CharacterEffectName] {
   case object Snare extends CharacterEffectName
   case object Stun extends CharacterEffectName
   case object Ground extends CharacterEffectName
+  case object HasToTakeAction extends CharacterEffectName
   case object Poison extends CharacterEffectName
   case object Fly extends CharacterEffectName
   case object Disarm extends CharacterEffectName
