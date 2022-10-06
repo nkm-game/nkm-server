@@ -23,7 +23,7 @@ class LittleWarHornSpec
       initialSpeed = 7
     )
   private val s = scenarios.Simple1v1TestScenario(characterMetadata)
-  private implicit val gameState: GameState = s.gameState
+  private implicit val gameState: GameState = s.gameState.incrementPhase(4)
   private val abilityId = s.characters.p0.state.abilities.head.id
 
   abilityMetadata.name must {

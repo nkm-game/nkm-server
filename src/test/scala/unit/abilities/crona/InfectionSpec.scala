@@ -16,7 +16,7 @@ class InfectionSpec
   private val abilityMetadata = Infection.metadata
   private val characterMetadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
   private val s = scenarios.Simple2v2TestScenario(characterMetadata)
-  private implicit val gameState: GameState = s.gameState
+  private implicit val gameState: GameState = s.gameState.incrementPhase(4)
   private val abilityId = s.characters.p0First.state.abilities.head.id
   private val abilityId2 = s.characters.p0Second.state.abilities.head.id
 

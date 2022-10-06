@@ -54,56 +54,53 @@ trait BasicMoveOverride {
   def basicMove(path: Seq[HexCoordinates])(implicit random: Random, gameState: GameState): GameState
 }
 
-trait UsableWithoutTarget { this: Ability =>
-  def use()(implicit random: Random, gameState: GameState): GameState
-  def useChecks(implicit gameState: GameState): Set[UseCheck] =
-    Set(
-      UseCheck.NotOnCooldown,
-      UseCheck.ParentCharacterOnMap,
-    )
-
-  final def canBeUsed(implicit gameState: GameState): CommandResponse = {
+trait Usable {
+  def _canBeUsed(useChecks: Set[UseCheck])(implicit gameState: GameState): CommandResponse = {
     val failures = useChecks.filter(_._1 == false)
     if(failures.isEmpty) Success()
     else Failure(failures.map(_._2).mkString("\n"))
   }
 }
 
-trait UsableOnTarget[T] { this: Ability =>
+trait UsableWithoutTarget extends Usable { this: Ability =>
+  def use()(implicit random: Random, gameState: GameState): GameState
+  def useChecks(implicit gameState: GameState): Set[UseCheck] =
+    baseUseChecks ++
+      Set(
+        UseCheck.NotOnCooldown,
+        UseCheck.ParentCharacterOnMap,
+      )
+  final def canBeUsed(implicit gameState: GameState): CommandResponse =
+    _canBeUsed(useChecks)
+}
+
+trait UsableOnTarget[T] extends Usable { this: Ability =>
   def use(target: T, useData: UseData = UseData())(implicit random: Random, gameState: GameState): GameState
   def useChecks(implicit target: T, useData: UseData, gameState: GameState): Set[UseCheck] =
-    Set(
-      UseCheck.NotOnCooldown,
-      UseCheck.ParentCharacterOnMap,
-    )
-
-  final def canBeUsed(implicit target: T, useData: UseData, gameState: GameState): CommandResponse = {
-    val failures = useChecks.filter(_._1 == false)
-    if(failures.isEmpty) Success()
-    else Failure(failures.map(_._2).mkString("\n"))
-  }
+    baseUseChecks ++
+      Set(
+        UseCheck.NotOnCooldown,
+        UseCheck.ParentCharacterOnMap,
+      )
+  final def canBeUsed(implicit target: T, useData: UseData, gameState: GameState): CommandResponse =
+    _canBeUsed(useChecks)
 }
 
 trait UsableOnCoordinates extends UsableOnTarget[HexCoordinates] { this: Ability =>
-  override def useChecks(implicit target: HexCoordinates, useData: UseData, gameState: GameState): Set[UseCheck] = {
-    super.useChecks ++
-    Set(
-      UseCheck.TargetCoordsInRange,
-    )
-  }
+  override def useChecks(implicit target: HexCoordinates, useData: UseData, gameState: GameState): Set[UseCheck] =
+    super.useChecks + UseCheck.TargetCoordsInRange
 }
 
 trait UsableOnCharacter extends UsableOnTarget[CharacterId] { this: Ability =>
-  override def useChecks(implicit target: CharacterId, useData: UseData, gameState: GameState): Set[UseCheck] = {
-    super.useChecks ++
-    Set(
-      UseCheck.TargetCharacterInRange,
-    )
-  }
+  override def useChecks(implicit target: CharacterId, useData: UseData, gameState: GameState): Set[UseCheck] =
+    super.useChecks + UseCheck.TargetCharacterInRange
 }
 
 abstract class Ability(val id: AbilityId, pid: CharacterId) {
   val metadata: AbilityMetadata
+
+  def baseUseChecks(implicit gameState: GameState): Set[UseCheck] =
+    Option.when(metadata.abilityType == AbilityType.Ultimate)(UseCheck.PhaseIsGreaterThan(3)).toSet
 
   def state(implicit gameState: GameState): AbilityState =
     gameState.abilityStates(id)
@@ -122,6 +119,8 @@ abstract class Ability(val id: AbilityId, pid: CharacterId) {
     state.copy(cooldown = math.max(state.cooldown - 1, 0))
 
   object UseCheck {
+    def PhaseIsGreaterThan(i: Int)(implicit gameState: GameState): UseCheck =
+      (gameState.phase.number > i) -> s"Phase is not greater than $i."
     def NotOnCooldown(implicit gameState: GameState): UseCheck =
       (state.cooldown <= 0) -> "Ability is on cooldown."
     def ParentCharacterOnMap(implicit gameState: GameState): UseCheck =

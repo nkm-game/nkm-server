@@ -15,7 +15,7 @@ class PowerOfExistenceSpec
 {
   private val metadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(PowerOfExistence.metadata.id, MasterThrone.metadata.id))
   private val s = scenarios.Simple2v2TestScenario(metadata)
-  private implicit val gameState: GameState = s.gameState
+  private implicit val gameState: GameState = s.gameState.incrementPhase(4)
   private val abilityId = s.characters.p0First.state.abilities.head.id
   private val masterThroneAbilityId = s.characters.p0First.state.abilities.tail.head.id
   private val aaGameState: GameState = gameState.basicAttack(s.characters.p0First.id, s.characters.p1First.id)

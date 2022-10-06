@@ -15,7 +15,7 @@ class PreciseShotSpec
 {
   private val metadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(PreciseShot.metadata.id))
   private val s = scenarios.Simple2v2TestScenario(metadata)
-  private implicit val gameState: GameState = s.gameState
+  private implicit val gameState: GameState = s.gameState.incrementPhase(4)
   private val abilityId = s.characters.p0First.state.abilities.head.id
 
   PreciseShot.metadata.name must {
