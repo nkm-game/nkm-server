@@ -12,6 +12,7 @@ import scala.annotation.tailrec
 object Main extends App with Logging {
   val db: JdbcBackend.Database = Database.forConfig("slick.db")
   val port = sys.env.getOrElse("PORT", "8080").toInt
+  val host = "0.0.0.0"
 
   @tailrec
   def initDb(lastDelay: Int = 0): Unit = {
@@ -34,12 +35,12 @@ object Main extends App with Logging {
 
   initDb()
 
-  implicit val system: ActorSystem = ActorSystem("NKM Actor System")
+  implicit val system: ActorSystem = ActorSystem("NkmActorSystem")
   val deps = new NkmDependencies(system, db)
-  val httpService = new HttpService(deps)
+  val httpService = new HttpService(deps, host, port)
 
   try {
-    Http().newServerAt("0.0.0.0", port).bind(httpService.routes)
+    Http().newServerAt(host, port).bind(httpService.routes)
     logger.info("Started http server")
   } catch {
     case e: Throwable =>
