@@ -100,13 +100,6 @@
     },
     "effects": []
   }, {
-    "cellType": "Wall",
-    "coordinates": {
-      "x": 0,
-      "z": 0
-    },
-    "effects": []
-  }, {
     "cellType": "SpawnPoint",
     "coordinates": {
       "x": 1,
@@ -190,13 +183,6 @@
     "coordinates": {
       "x": 6,
       "z": 1
-    },
-    "effects": []
-  }, {
-    "cellType": "Wall",
-    "coordinates": {
-      "x": -2,
-      "z": 4
     },
     "effects": []
   }, {
@@ -287,13 +273,6 @@
   }, {
     "cellType": "Wall",
     "coordinates": {
-      "x": 19,
-      "z": 3
-    },
-    "effects": []
-  }, {
-    "cellType": "Wall",
-    "coordinates": {
       "x": 8,
       "z": 0
     },
@@ -306,13 +285,6 @@
     },
     "effects": [],
     "spawnNumber": 1
-  }, {
-    "cellType": "Wall",
-    "coordinates": {
-      "x": 20,
-      "z": 0
-    },
-    "effects": []
   }, {
     "cellType": "Normal",
     "coordinates": {
@@ -665,13 +637,6 @@
   }, {
     "cellType": "Wall",
     "coordinates": {
-      "x": 20,
-      "z": 1
-    },
-    "effects": []
-  }, {
-    "cellType": "Wall",
-    "coordinates": {
       "x": 7,
       "z": 4
     },
@@ -681,13 +646,6 @@
     "coordinates": {
       "x": 0,
       "z": 1
-    },
-    "effects": []
-  }, {
-    "cellType": "Wall",
-    "coordinates": {
-      "x": 18,
-      "z": 4
     },
     "effects": []
   }, {
