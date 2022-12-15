@@ -265,7 +265,7 @@ case class GameState(
     val characterSelection: Map[PlayerId, Iterable[CharacterMetadataId]] = pickType match {
       case PickType.AllRandom =>
         val pickedCharacters = random
-          .shuffle(charactersMetadata.map(_.id))
+          .shuffle(charactersMetadata.map(_.id).toSeq)
           .grouped(numberOfCharactersPerPlayers)
           .take(players.length)
         players.map(_.id).zip(pickedCharacters).toMap

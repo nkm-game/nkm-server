@@ -42,7 +42,10 @@ class WSGameSpec extends WSTrait {
         joinLobby(lobbyId)
       }
       authL(0)
-      startGame(lobbyId).statusCode shouldBe ok
+      val startGameResponse = startGame(lobbyId)
+      if(startGameResponse.statusCode != ok) {
+        fail(startGameResponse.body)
+      }
     }
     lobbyId
   }
@@ -106,6 +109,39 @@ class WSGameSpec extends WSTrait {
         surrender(lobbyId).statusCode shouldBe nok
         auth(1)
         surrender(lobbyId).statusCode shouldBe nok
+      }
+    }
+
+    "use different randomness in different games" in {
+      val lobbyId1 = createLobbyForGame(
+        pickType = PickType.AllRandom,
+        hexMapName = "Shuriken",
+        clockConfigOpt = Some(ClockConfig.defaultForPickType(PickType.AllRandom).copy(timeAfterPickMillis = 1)),
+        numberOfCharacters = 2,
+        numberOfPlayers = 4,
+      )
+
+      val lobbyId2 = createLobbyForGame(
+        lobbyName = "other lobby",
+        pickType = PickType.AllRandom,
+        hexMapName = "Shuriken",
+        clockConfigOpt = Some(ClockConfig.defaultForPickType(PickType.AllRandom).copy(timeAfterPickMillis = 1)),
+        numberOfCharacters = 2,
+        numberOfPlayers = 4,
+      )
+
+      withGameWS {
+        auth(0)
+
+        Thread.sleep(150)
+        def getPlayersWithCharacters(gameView: GameStateView) = {
+          gameView.players.map(p => p.name -> p.characterIds.map(c => gameView.characters.find(_.id == c).get.metadataId))
+        }
+
+        val x1 = getPlayersWithCharacters(fetchAndParseGame(lobbyId1))
+        val x2 = getPlayersWithCharacters(fetchAndParseGame(lobbyId2))
+
+        x1 should not be x2
       }
     }
 
