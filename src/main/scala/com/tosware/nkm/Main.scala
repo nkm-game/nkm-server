@@ -34,7 +34,7 @@ object Main extends App with Logging {
 
   initDb()
 
-  implicit val system: ActorSystem = ActorSystem("NKM Actor System")
+  implicit val system: ActorSystem = ActorSystem("nkm-actor-system")
   val deps = new NkmDependencies(system, db)
   val httpService = new HttpService(deps)
 
