@@ -3,9 +3,12 @@ package com.tosware.nkm
 import akka.actor.{ActorRef, ActorSystem}
 import com.tosware.nkm.actors.ws.{GameSessionActor, LobbySessionActor}
 import com.tosware.nkm.actors.{GamesManager, LobbiesManager}
+import com.tosware.nkm.models.game.hex.NkmUtils
 import com.tosware.nkm.services.{GameService, LobbyService, NkmDataService, UserService}
 import com.tosware.nkm.services.http.directives.JwtSecretKey
 import slick.jdbc.JdbcBackend
+
+import scala.util.Random
 
 class NkmDependencies(_system: ActorSystem, _db: JdbcBackend.Database) {
   implicit val system: ActorSystem = _system
@@ -18,8 +21,8 @@ class NkmDependencies(_system: ActorSystem, _db: JdbcBackend.Database) {
   implicit val lobbyService: LobbyService = new LobbyService(lobbiesManagerActor)
   implicit val jwtSecretKey: JwtSecretKey = JwtSecretKey(sys.env.getOrElse("JWT_SECRET_KEY", "tmp_jwt_secret_key^*(^(*$#&(*"))
 
-  implicit val lobbySessionActor: ActorRef = system.actorOf(LobbySessionActor.props(), "lobby_session")
-  implicit val gameSessionActor: ActorRef = system.actorOf(GameSessionActor.props(), "game_session")
+  implicit val lobbySessionActor: ActorRef = system.actorOf(LobbySessionActor.props(), s"lobby_session_${NkmUtils.randomUUID()(new Random())}")
+  implicit val gameSessionActor: ActorRef = system.actorOf(GameSessionActor.props(), s"game_session_${NkmUtils.randomUUID()(new Random())}")
 
   def cleanup(): Unit = {
     system.stop(gamesManagerActor)
