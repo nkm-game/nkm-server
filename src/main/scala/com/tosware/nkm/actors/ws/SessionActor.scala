@@ -23,6 +23,7 @@ trait SessionActor
   // user can observe only one lobby at once
   private val lobbyIdByObserver = mutable.Map.empty[ActorRef, String]
   private val authStatusByObserver = mutable.Map.empty[ActorRef, Option[String]]
+  private val lastReceivedGameLogIndexByObserver = mutable.Map.empty[ActorRef, Option[Int]]
   private def observersBylobbyId() = lobbyIdByObserver.groupMap(_._2)(_._1)
 
   private def observe(lobbyId: String, websocketUserOutputActor: ActorRef): Unit =
@@ -34,11 +35,17 @@ trait SessionActor
   private def authenticate(username: String, websocketUserOutputActor: ActorRef): Unit =
     authStatusByObserver(websocketUserOutputActor) = Some(username)
 
+  private def updateGameLogIndex(newIndex: Int, websocketUserOutputActor: ActorRef): Unit =
+    lastReceivedGameLogIndexByObserver(websocketUserOutputActor) = Some(newIndex)
+
   def getObservers(lobbyId: String): Set[ActorRef] =
     observersBylobbyId().getOrElse(lobbyId, Set.empty).toSet
 
   def getAuthStatus(websocketUserOutputActor: ActorRef): Option[String] =
     authStatusByObserver.get(websocketUserOutputActor).flatten
+
+  def getLastGameLogIndex(websocketUserOutputActor: ActorRef): Option[Int] =
+    lastReceivedGameLogIndexByObserver.get(websocketUserOutputActor).flatten
 
   def receive: Receive = {
     case Observe(lobbyId, userActor) =>

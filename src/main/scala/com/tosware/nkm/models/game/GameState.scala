@@ -692,6 +692,7 @@ case class GameStateView(
                           characterEffectStates: Map[CharacterEffectId, CharacterEffectState],
                           clockConfig: ClockConfig,
                           clock: Clock,
+                          gameLog: GameLog,
 
                           currentPlayerId: PlayerId,
                         )

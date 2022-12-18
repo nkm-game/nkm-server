@@ -27,8 +27,12 @@ class GameSessionActor(implicit gameService: GameService)
       // TODO: use async proprely
       getObservers(lobbyId).foreach { ob =>
         val authStatus = getAuthStatus(ob)
-        val gameState = aw(gameService.getGameStateView(lobbyId, authStatus))
-        val response = WebsocketGameResponse(GameResponseType.State, StatusCodes.OK.intValue, gameState.toJson.toString)
+//        val lastGameLogIndex = getLastGameLogIndex(ob)
+        val gameStateView = aw(gameService.getGameStateView(lobbyId, authStatus))
+//        val gameLog = gameStateView.
+        val response = WebsocketGameResponse(GameResponseType.State, StatusCodes.OK.intValue, gameStateView.toJson.toString)
+//        val response = WebsocketGameResponse(GameResponseType.RecentGameEvents, StatusCodes.OK.intValue, gameState.toJson.toString)
+
         ob ! WebsocketUser.OutgoingMessage(response.toJson.toString)
       }
   }

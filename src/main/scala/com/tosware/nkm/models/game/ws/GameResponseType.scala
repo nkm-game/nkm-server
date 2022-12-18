@@ -31,6 +31,7 @@ object GameResponseType extends StringEnum[GameResponseType] {
   case object ExecuteCommand extends GameResponseType("exec")
 
   case object Error extends GameResponseType("error")
+  case object RecentGameEvents extends GameResponseType("recent_game_events")
 }
 
 
