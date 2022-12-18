@@ -1,7 +1,10 @@
 package com.tosware.nkm.models.game.ws
 
+import com.tosware.nkm.actors.Game.GameId
+import com.tosware.nkm.models.game.Ability.AbilityId
 import com.tosware.nkm.models.game.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game.CharacterMetadata.CharacterMetadataId
+import com.tosware.nkm.models.game.UseData
 import com.tosware.nkm.models.game.hex.HexCoordinates
 
 object GameRequest {
@@ -14,19 +17,21 @@ object GameRequest {
     final case class Surrender(lobbyId: String) extends GameRequest
   }
   object CharacterSelect {
-    final case class BanCharacters(lobbyId: String, characterIds: Set[CharacterMetadataId]) extends GameRequest
-    final case class PickCharacter(lobbyId: String, characterId: CharacterMetadataId) extends GameRequest
-    final case class BlindPickCharacters(lobbyId: String, characterIds: Set[CharacterMetadataId]) extends GameRequest
+    final case class BanCharacters(lobbyId: GameId, characterIds: Set[CharacterMetadataId]) extends GameRequest
+    final case class PickCharacter(lobbyId: GameId, characterId: CharacterMetadataId) extends GameRequest
+    final case class BlindPickCharacters(lobbyId: GameId, characterIds: Set[CharacterMetadataId]) extends GameRequest
   }
   object Action {
-    final case class PlaceCharacters(lobbyId: String, coordinatesToCharacterIdMap: Map[HexCoordinates, CharacterId]) extends GameRequest
-    final case class EndTurn(lobbyId: String) extends GameRequest
-    final case class Move(lobbyId: String, path: Seq[HexCoordinates], characterId: CharacterId) extends GameRequest
-    final case class BasicAttack(lobbyId: String, attackingCharacterId: CharacterId, targetCharacterId: CharacterId) extends GameRequest
-    final case class UseAbility(lobbyId: String, useAbilityData: String) extends GameRequest
+    final case class PlaceCharacters(lobbyId: GameId, coordinatesToCharacterIdMap: Map[HexCoordinates, CharacterId]) extends GameRequest
+    final case class EndTurn(lobbyId: GameId) extends GameRequest
+    final case class Move(lobbyId: GameId, path: Seq[HexCoordinates], characterId: CharacterId) extends GameRequest
+    final case class BasicAttack(lobbyId: GameId, attackingCharacterId: CharacterId, targetCharacterId: CharacterId) extends GameRequest
+    final case class UseAbilityWithoutTarget(lobbyId: GameId, abilityId: AbilityId) extends GameRequest
+    final case class UseAbilityOnCoordinates(lobbyId: GameId, abilityId: AbilityId, target: HexCoordinates, useData: UseData) extends GameRequest
+    final case class UseAbilityOnCharacter(lobbyId: GameId, abilityId: AbilityId, target: CharacterId, useData: UseData) extends GameRequest
   }
   object Chat {
-    final case class SendChatMessage(lobbyId: String, message: String) extends GameRequest
-    final case class ExecuteCommand(lobbyId: String, command: String) extends GameRequest
+    final case class SendChatMessage(lobbyId: GameId, message: String) extends GameRequest
+    final case class ExecuteCommand(lobbyId: GameId, command: String) extends GameRequest
   }
 }

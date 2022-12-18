@@ -24,6 +24,9 @@ object GameResponseType extends StringEnum[GameResponseType] {
   case object EndTurn extends GameResponseType("end_turn")
   case object Move extends GameResponseType("move")
   case object BasicAttack extends GameResponseType("basic_attack")
+  case object UseAbilityWithoutTarget extends GameResponseType("use_ability_without_target")
+  case object UseAbilityOnCoordinates extends GameResponseType("use_ability_on_coordinates")
+  case object UseAbilityOnCharacter extends GameResponseType("use_ability_on_character")
   case object UseAbility extends GameResponseType("use_ability")
 
   // Chat

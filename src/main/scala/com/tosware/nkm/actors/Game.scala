@@ -4,6 +4,7 @@ import akka.actor.{ActorLogging, Cancellable, Props}
 import akka.persistence.{PersistentActor, RecoveryCompleted}
 import com.tosware.nkm.models.CommandResponse._
 import com.tosware.nkm.models.GameStateValidator
+import com.tosware.nkm.models.game.Ability.AbilityId
 import com.tosware.nkm.models.game.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game.CharacterMetadata.CharacterMetadataId
 import com.tosware.nkm.models.game.Player.PlayerId
@@ -48,6 +49,12 @@ object Game {
 
   case class BasicAttackCharacter(playerId: PlayerId, attackingCharacterId: CharacterId, targetCharacterId: CharacterId) extends Command
 
+  case class UseAbilityWithoutTarget(playerId: PlayerId, abilityId: AbilityId) extends Command
+
+  case class UseAbilityOnCoordinates(playerId: PlayerId, abilityId: AbilityId, target: HexCoordinates, useData: UseData) extends Command
+
+  case class UseAbilityOnCharacter(playerId: PlayerId, abilityId: AbilityId, target: CharacterId, useData: UseData) extends Command
+
   // sent only by self /////////
   //
   case class CharacterSelectTimeout(pickNumber: Int) extends Command
@@ -85,6 +92,12 @@ object Game {
   case class CharacterMoved(id: GameId, playerId: PlayerId, path: Seq[HexCoordinates], characterId: CharacterId) extends Event
 
   case class CharacterBasicAttacked(id: GameId, playerId: PlayerId, attackingCharacterId: CharacterId, targetCharacterId: CharacterId) extends Event
+
+  case class AbilityUsedWithoutTarget(id: GameId, playerId: PlayerId, abilityId: AbilityId) extends Command
+
+  case class AbilityUsedOnCoordinates(id: GameId, playerId: PlayerId, abilityId: AbilityId, target: HexCoordinates, useData: UseData) extends Command
+
+  case class AbilityUsedOnCharacter(id: GameId, playerId: PlayerId, abilityId: AbilityId, target: CharacterId, useData: UseData) extends Command
 
   // CLOCK TIMEOUTS /////////////////////
   //
@@ -335,6 +348,37 @@ class Game(id: String)(implicit nkmDataService: NkmDataService) extends Persiste
             sender() ! Success()
           }
       }
+    case UseAbilityWithoutTarget(playerId, abilityId) =>
+      GameStateValidator().validateAbilityUseWithoutTarget(playerId, abilityId) match {
+        case failure @ Failure(_) => sender() ! failure
+        case Success(_) =>
+          val e = AbilityUsedWithoutTarget(id, playerId, abilityId)
+          persistAndPublish(e) { _ =>
+            gameState = gameState.useAbilityWithoutTarget(abilityId)
+            sender() ! Success()
+          }
+      }
+    case UseAbilityOnCoordinates(playerId, abilityId, target, useData) =>
+      GameStateValidator().validateAbilityUseOnCoordinates(playerId, abilityId, target, useData) match {
+        case failure @ Failure(_) => sender() ! failure
+        case Success(_) =>
+          val e = AbilityUsedOnCoordinates(id, playerId, abilityId, target, useData)
+          persistAndPublish(e) { _ =>
+            gameState = gameState.useAbilityOnCoordinates(abilityId, target, useData)
+            sender() ! Success()
+          }
+      }
+    case UseAbilityOnCharacter(playerId, abilityId, target, useData) =>
+      GameStateValidator().validateAbilityUseOnCharacter(playerId, abilityId, target, useData) match {
+        case failure @ Failure(_) => sender() ! failure
+        case Success(_) =>
+          val e = AbilityUsedOnCharacter(id, playerId, abilityId, target, useData)
+          persistAndPublish(e) { _ =>
+            gameState = gameState.useAbilityOnCharacter(abilityId, target, useData)
+            sender() ! Success()
+          }
+      }
+
     case e => log.warning(s"Unknown message: $e")
   }
 

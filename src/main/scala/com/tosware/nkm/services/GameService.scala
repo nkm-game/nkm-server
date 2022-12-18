@@ -93,6 +93,27 @@ class GameService(gamesManagerActor: ActorRef)
     Future.successful(aw(f).asInstanceOf[CommandResponse])
   }
 
+  def useAbilityWithoutTarget(username: String, request: Action.UseAbilityWithoutTarget): Future[CommandResponse] = {
+    val gameActor: ActorRef = getGameActor(request.lobbyId)
+
+    val f = gameActor ? Game.UseAbilityWithoutTarget(username, request.abilityId)
+    Future.successful(aw(f).asInstanceOf[CommandResponse])
+  }
+
+  def useAbilityOnCoordinates(username: String, request: Action.UseAbilityOnCoordinates): Future[CommandResponse] = {
+    val gameActor: ActorRef = getGameActor(request.lobbyId)
+
+    val f = gameActor ? Game.UseAbilityOnCoordinates(username, request.abilityId, request.target, request.useData)
+    Future.successful(aw(f).asInstanceOf[CommandResponse])
+  }
+
+  def useAbilityOnCharacter(username: String, request: Action.UseAbilityOnCharacter): Future[CommandResponse] = {
+    val gameActor: ActorRef = getGameActor(request.lobbyId)
+
+    val f = gameActor ? Game.UseAbilityOnCharacter(username, request.abilityId, request.target, request.useData)
+    Future.successful(aw(f).asInstanceOf[CommandResponse])
+  }
+
   def getGameState(gameActor: ActorRef): Future[GameState] =
     (gameActor ? GetState).mapTo[GameState]
 

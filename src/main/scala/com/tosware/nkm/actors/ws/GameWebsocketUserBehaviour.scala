@@ -136,7 +136,27 @@ trait GameWebsocketUserBehaviour extends WebsocketUserBehaviour {
         val username = authStatus.username.get
         val response = aw(gameService.basicAttackCharacter(username, basicAttackCharacterRequest))
         resolveResponse(response)
-      case GameRoute.UseAbility => ???
+      case GameRoute.UseAbilityWithoutTarget =>
+        val useAbilityRequest = request.requestJson.parseJson.convertTo[UseAbilityWithoutTarget]
+        implicit val responseType: GameResponseType = GameResponseType.UseAbility
+        if (authStatus.username.isEmpty) return unauthorized()
+        val username = authStatus.username.get
+        val response = aw(gameService.useAbilityWithoutTarget(username, useAbilityRequest))
+        resolveResponse(response)
+      case GameRoute.UseAbilityOnCoordinates =>
+        val useAbilityRequest = request.requestJson.parseJson.convertTo[UseAbilityOnCoordinates]
+        implicit val responseType: GameResponseType = GameResponseType.UseAbility
+        if (authStatus.username.isEmpty) return unauthorized()
+        val username = authStatus.username.get
+        val response = aw(gameService.useAbilityOnCoordinates(username, useAbilityRequest))
+        resolveResponse(response)
+      case GameRoute.UseAbilityOnCharacter =>
+        val useAbilityRequest = request.requestJson.parseJson.convertTo[UseAbilityOnCharacter]
+        implicit val responseType: GameResponseType = GameResponseType.UseAbility
+        if (authStatus.username.isEmpty) return unauthorized()
+        val username = authStatus.username.get
+        val response = aw(gameService.useAbilityOnCharacter(username, useAbilityRequest))
+        resolveResponse(response)
       case GameRoute.SendChatMessage => ???
       case GameRoute.ExecuteCommand => ???
     }
