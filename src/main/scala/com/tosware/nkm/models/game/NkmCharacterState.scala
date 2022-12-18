@@ -40,6 +40,7 @@ case class NkmCharacterState
     speed = speed,
     physicalDefense = physicalDefense,
     magicalDefense = magicalDefense,
+    shield = shield,
     abilities = abilities.map(_.id),
     effects = effects.map(_.id),
   )
@@ -56,6 +57,7 @@ case class NkmCharacterStateView
   speed: Int,
   physicalDefense: Int,
   magicalDefense: Int,
+  shield: Int,
   abilities: Seq[AbilityId] = Seq.empty,
   effects: Seq[CharacterEffectId] = Seq.empty,
 )
