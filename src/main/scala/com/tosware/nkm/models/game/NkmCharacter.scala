@@ -229,10 +229,17 @@ case class NkmCharacter
   def removeEffect(effectId: CharacterEffectId): NkmCharacter =
     this.modify(_.state.effects).using(_.filterNot(_.id == effectId))
 
-  def toView: NkmCharacterView = NkmCharacterView(
+  def toView(implicit gameState: GameState): NkmCharacterView = NkmCharacterView(
     id = id,
     metadataId = metadataId,
     state = state.toView,
+    ownerId = owner.id,
+    isDead = isDead,
+    canBasicMove = canBasicMove,
+    canBasicAttack = canBasicAttack,
+    isOnMap = isOnMap,
+    basicAttackCellCoords = basicAttackCellCoords,
+    basicAttackTargets = basicAttackTargets,
   )
 }
 
@@ -241,4 +248,11 @@ case class NkmCharacterView
   id: CharacterId,
   metadataId: CharacterMetadataId,
   state: NkmCharacterStateView,
+  ownerId: PlayerId,
+  isDead: Boolean,
+  canBasicMove: Boolean,
+  canBasicAttack: Boolean,
+  isOnMap: Boolean,
+  basicAttackCellCoords: Set[HexCoordinates],
+  basicAttackTargets: Set[HexCoordinates],
 )

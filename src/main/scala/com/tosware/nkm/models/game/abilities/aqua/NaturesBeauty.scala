@@ -24,7 +24,7 @@ case class NaturesBeauty(abilityId: AbilityId, parentCharacterId: CharacterId) e
   override def targetsInRange(implicit gameState: GameState) =
     rangeCellCoords.whereFriendsOfC(parentCharacterId)
   override def basicAttackCells(implicit gameState: GameState) = parentCharacter.defaultBasicAttackCells
-  override def basicAttackTargets(implicit gameState: GameState) = parentCharacter.basicAttackTargets
+  override def basicAttackTargets(implicit gameState: GameState) = basicAttackCells.whereCharacters
   override def basicAttack(targetCharacterId: CharacterId)(implicit random: Random, gameState: GameState) =
     if(gameState.characterById(targetCharacterId).get.isFriendForC(parentCharacterId)) {
       gameState.heal(targetCharacterId, parentCharacter.state.attackPoints)(random, parentCharacterId)

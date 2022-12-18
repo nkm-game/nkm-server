@@ -10,6 +10,7 @@ class NkmDataService extends NkmTimeouts
   def getHexMaps: Seq[HexMap] = HexMapProvider().getHexMaps
 
   def getCharacterMetadatas: Seq[CharacterMetadata] = CharacterMetadatasProvider().getCharacterMetadatas
+    .filter(_.initialAbilitiesMetadataIds.size >= 3)
 
   def getAbilityMetadatas: Seq[AbilityMetadata] = AbilityMetadatasProvider().getAbilityMetadatas
 

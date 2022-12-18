@@ -7,7 +7,7 @@ import com.tosware.nkm.models.game.hex.HexUtils._
 import com.tosware.nkm.models.game.hex.{HexCell, HexCoordinates}
 import enumeratum._
 
-import scala.util.Random
+import scala.util.{Random, Try}
 
 object Ability {
   type AbilityId = String
@@ -109,6 +109,7 @@ abstract class Ability(val id: AbilityId, pid: CharacterId) {
   def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] = Set.empty
   def parentCharacter(implicit gameState: GameState): NkmCharacter =
     gameState.characters.find(_.state.abilities.map(_.id).contains(id)).get
+
   def parentCell(implicit gameState: GameState): Option[HexCell] =
     parentCharacter.parentCell
 
@@ -117,6 +118,16 @@ abstract class Ability(val id: AbilityId, pid: CharacterId) {
 
   def getDecrementCooldownState(implicit gameState: GameState): AbilityState =
     state.copy(cooldown = math.max(state.cooldown - 1, 0))
+
+  def toView(implicit gameState: GameState): AbilityView =
+    AbilityView(
+      id = id,
+      metadataId = metadata.id,
+      parentCharacterId = parentCharacter.id,
+      state = state,
+      rangeCellCoords = Try(rangeCellCoords).getOrElse(Set.empty),
+      targetsInRange = Try(targetsInRange).getOrElse(Set.empty),
+    )
 
   object UseCheck {
     def PhaseIsGreaterThan(i: Int)(implicit gameState: GameState): UseCheck =
@@ -142,3 +153,13 @@ abstract class Ability(val id: AbilityId, pid: CharacterId) {
     }
   }
 }
+
+case class AbilityView
+(
+  id: AbilityId,
+  metadataId: AbilityMetadataId,
+  parentCharacterId: CharacterId,
+  state: AbilityState,
+  rangeCellCoords: Set[HexCoordinates],
+  targetsInRange: Set[HexCoordinates],
+)

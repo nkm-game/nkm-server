@@ -726,7 +726,8 @@ class WSGameSpec extends WSTrait {
       withGameWS {
         auth(0)
         val availableCharacters = fetchAndParseGame(lobbyId).blindPickState.get.config.availableCharacters.toSeq
-        val charactersToPick = availableCharacters.take(numberOfCharacters).toSet
+        // reverse hack to get someone with sufficient attack range
+        val charactersToPick = availableCharacters.reverse.take(numberOfCharacters).toSet
 
         for (i <- 0 until numberOfPlayers) {
           auth(i)
@@ -775,7 +776,8 @@ class WSGameSpec extends WSTrait {
         auth(0)
         endTurn(lobbyId).statusCode shouldBe nok
         val availableCharacters = fetchAndParseGame(lobbyId).blindPickState.get.config.availableCharacters.toSeq
-        val charactersToPick = availableCharacters.take(numberOfCharacters).toSet
+        // reverse hack to get someone with sufficient attack range
+        val charactersToPick = availableCharacters.reverse.take(numberOfCharacters).toSet
 
         for (i <- 0 until numberOfPlayers) {
           auth(i)
