@@ -1,0 +1,203 @@
+{
+	"cells": [
+		{
+			"cellType": "Wall",
+			"coordinates": {
+				"x": 1,
+				"z": 0
+			},
+			"effects": []
+		},
+		{
+			"cellType": "Wall",
+			"coordinates": {
+				"x": 0,
+				"z": 1
+			},
+			"effects": []
+		},
+		{
+			"cellType": "Wall",
+			"coordinates": {
+				"x": -1,
+				"z": 2
+			},
+			"effects": []
+		},
+		{
+			"cellType": "Wall",
+			"coordinates": {
+				"x": -1,
+				"z": 3
+			},
+			"effects": []
+		},
+		{
+			"cellType": "Wall",
+			"coordinates": {
+				"x": -1,
+				"z": 4
+			},
+			"effects": []
+		},
+		{
+			"cellType": "Wall",
+			"coordinates": {
+				"x": 0,
+				"z": 4
+			},
+			"effects": []
+		},
+		{
+			"cellType": "Wall",
+			"coordinates": {
+				"x": 1,
+				"z": 4
+			},
+			"effects": []
+		},
+		{
+			"cellType": "Wall",
+			"coordinates": {
+				"x": 2,
+				"z": 4
+			},
+			"effects": []
+		},
+		{
+			"cellType": "Wall",
+			"coordinates": {
+				"x": 3,
+				"z": 3
+			},
+			"effects": []
+		},
+		{
+			"cellType": "Wall",
+			"coordinates": {
+				"x": 4,
+				"z": 2
+			},
+			"effects": []
+		},
+		{
+			"cellType": "Wall",
+			"coordinates": {
+				"x": 4,
+				"z": 1
+			},
+			"effects": []
+		},
+		{
+			"cellType": "Wall",
+			"coordinates": {
+				"x": 4,
+				"z": 0
+			},
+			"effects": []
+		},
+		{
+			"cellType": "Wall",
+			"coordinates": {
+				"x": 3,
+				"z": 0
+			},
+			"effects": []
+		},
+		{
+			"cellType": "Wall",
+			"coordinates": {
+				"x": 2,
+				"z": 0
+			},
+			"effects": []
+		},
+		{
+			"cellType": "SpawnPoint",
+			"coordinates": {
+				"x": 1,
+				"z": 1
+			},
+			"effects": [],
+			"spawnNumber": 0
+		},
+		{
+			"cellType": "SpawnPoint",
+			"coordinates": {
+				"x": 0,
+				"z": 2
+			},
+			"effects": [],
+			"spawnNumber": 0
+		},
+		{
+			"cellType": "SpawnPoint",
+			"coordinates": {
+				"x": 0,
+				"z": 3
+			},
+			"effects": [],
+			"spawnNumber": 0
+		},
+		{
+			"cellType": "SpawnPoint",
+			"coordinates": {
+				"x": 2,
+				"z": 3
+			},
+			"effects": [],
+			"spawnNumber": 1
+		},
+		{
+			"cellType": "SpawnPoint",
+			"coordinates": {
+				"x": 3,
+				"z": 2
+			},
+			"effects": [],
+			"spawnNumber": 1
+		},
+		{
+			"cellType": "SpawnPoint",
+			"coordinates": {
+				"x": 3,
+				"z": 1
+			},
+			"effects": [],
+			"spawnNumber": 1
+		},
+		{
+			"cellType": "Normal",
+			"coordinates": {
+				"x": 2,
+				"z": 2
+			},
+			"effects": []
+		},
+		{
+			"cellType": "Normal",
+			"coordinates": {
+				"x": 2,
+				"z": 1
+			},
+			"effects": []
+		},
+		{
+			"cellType": "Normal",
+			"coordinates": {
+				"x": 1,
+				"z": 2
+			},
+			"effects": []
+		},
+		{
+			"cellType": "Normal",
+			"coordinates": {
+				"x": 1,
+				"z": 3
+			},
+			"effects": []
+		}
+	],
+	"name": "SmallTestMap"
+}
