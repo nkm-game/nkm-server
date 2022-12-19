@@ -837,5 +837,52 @@ class WSGameSpec extends WSTrait {
         }
       }
     }
+
+    "allow using abilities on characters" in {
+      val numberOfPlayers = 2
+      val numberOfCharacters = 1
+
+      val lobbyId = createLobbyForGame(
+        hexMapName = "TestMap",
+        pickType = PickType.BlindPick,
+        numberOfPlayers = numberOfPlayers,
+        numberOfCharacters = numberOfCharacters,
+        clockConfigOpt = Some(ClockConfig.defaultForPickType(PickType.BlindPick).copy(timeAfterPickMillis = 1)),
+      )
+
+      withGameWS {
+        auth(0)
+        val charactersToPick = Set("Roronoa Zoro")
+
+        for (i <- 0 until numberOfPlayers) {
+          auth(i)
+          blindPick(lobbyId, charactersToPick).statusCode shouldBe ok
+        }
+
+        Thread.sleep(150)
+
+        val (ability0, character0, character1) = {
+          val gameState = fetchAndParseGame(lobbyId)
+
+          val character0 = gameState.players(0).characterIds.head
+          val character1 = gameState.players(1).characterIds.head
+          val ability0 = gameState.abilities.find(a => a.parentCharacterId == character0 && a.metadataId == "Ogre Cutter").get.id
+          (ability0, character0, character1)
+        }
+
+        {
+          auth(0)
+          placeCharacters(lobbyId, Map(HexCoordinates(3, 10) -> character0)).statusCode shouldBe ok
+          endTurn(lobbyId).statusCode shouldBe nok
+          auth(1)
+          placeCharacters(lobbyId, Map(HexCoordinates(6, 10) -> character1)).statusCode shouldBe ok
+          endTurn(lobbyId).statusCode shouldBe nok
+        }
+
+        auth(0)
+
+        useAbilityOnCharacter(lobbyId, ability0, character1).statusCode shouldBe ok
+      }
+    }
   }
 }

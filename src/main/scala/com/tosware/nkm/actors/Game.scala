@@ -93,11 +93,11 @@ object Game {
 
   case class CharacterBasicAttacked(id: GameId, playerId: PlayerId, attackingCharacterId: CharacterId, targetCharacterId: CharacterId) extends Event
 
-  case class AbilityUsedWithoutTarget(id: GameId, playerId: PlayerId, abilityId: AbilityId) extends Command
+  case class AbilityUsedWithoutTarget(id: GameId, playerId: PlayerId, abilityId: AbilityId) extends Event
 
-  case class AbilityUsedOnCoordinates(id: GameId, playerId: PlayerId, abilityId: AbilityId, target: HexCoordinates, useData: UseData) extends Command
+  case class AbilityUsedOnCoordinates(id: GameId, playerId: PlayerId, abilityId: AbilityId, target: HexCoordinates, useData: UseData) extends Event
 
-  case class AbilityUsedOnCharacter(id: GameId, playerId: PlayerId, abilityId: AbilityId, target: CharacterId, useData: UseData) extends Command
+  case class AbilityUsedOnCharacter(id: GameId, playerId: PlayerId, abilityId: AbilityId, target: CharacterId, useData: UseData) extends Event
 
   // CLOCK TIMEOUTS /////////////////////
   //

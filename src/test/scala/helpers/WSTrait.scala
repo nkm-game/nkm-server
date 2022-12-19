@@ -2,12 +2,12 @@ package helpers
 
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.testkit.WSProbe
-import com.tosware.nkm.models.game.{ClockConfig, GameStateView, PickType}
+import com.tosware.nkm.models.game.Ability.AbilityId
+import com.tosware.nkm.models.game.{ClockConfig, GameStateView, PickType, UseData}
 import com.tosware.nkm.models.game.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game.CharacterMetadata.CharacterMetadataId
 import com.tosware.nkm.models.game.hex.HexCoordinates
-import com.tosware.nkm.models.game.ws.GameRequest.Action.{BasicAttack, EndTurn}
-//import com.tosware.nkm.models.game._
+import com.tosware.nkm.models.game.ws.GameRequest.Action.{BasicAttack, EndTurn, UseAbilityOnCharacter}
 import com.tosware.nkm.models.game.ws.GameRequest.Action.{Move, PlaceCharacters}
 import com.tosware.nkm.models.game.ws.GameRequest.CharacterSelect._
 import com.tosware.nkm.models.game.ws.GameRequest.General._
@@ -147,6 +147,9 @@ trait WSTrait extends UserApiTrait {
 
   def basicAttackCharacter(lobbyId: String, attackingCharacterId: CharacterId, targetCharacterId: CharacterId): WebsocketGameResponse =
     sendWSRequestG(GameRoute.BasicAttack, BasicAttack(lobbyId, attackingCharacterId, targetCharacterId).toJson.toString)
+
+  def useAbilityOnCharacter(lobbyId: String, abilityId: AbilityId, target: CharacterId, useData: UseData = UseData()): WebsocketGameResponse =
+    sendWSRequestG(GameRoute.UseAbilityOnCharacter, UseAbilityOnCharacter(lobbyId, abilityId, target, useData).toJson.toString)
 
   def endTurn(lobbyId: String): WebsocketGameResponse =
     sendWSRequestG(GameRoute.EndTurn, EndTurn(lobbyId).toJson.toString)
