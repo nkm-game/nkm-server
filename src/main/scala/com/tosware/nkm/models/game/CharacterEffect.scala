@@ -1,6 +1,7 @@
 package com.tosware.nkm.models.game
 
 import com.tosware.nkm.models.game.CharacterEffect._
+import com.tosware.nkm.models.game.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game.hex.HexCell
 import enumeratum._
 
@@ -61,6 +62,22 @@ abstract class CharacterEffect(val id: CharacterEffectId) {
 
   def getDecrementCooldownState(implicit gameState: GameState): CharacterEffectState =
     state.copy(cooldown = math.max(state.cooldown - 1, 0))
+
+  def toView(implicit gameState: GameState): CharacterEffectView =
+    CharacterEffectView(
+      id = id,
+      metadataId = metadata.id,
+      parentCharacterId = parentCharacter.id,
+      state = state,
+    )
 }
 
 case class CharacterEffectState(cooldown: Int)
+
+case class CharacterEffectView
+(
+  id: CharacterEffectId,
+  metadataId: CharacterEffectMetadataId,
+  parentCharacterId: CharacterId,
+  state: CharacterEffectState,
+)
