@@ -43,7 +43,7 @@ case class Check(abilityId: AbilityId, parentCharacterId: CharacterId) extends A
 
   override def useChecks(implicit target: CharacterId, useData: UseData, gameState: GameState): Set[UseCheck] = {
     super.useChecks ++ Seq(
-      UseCheck.TargetIsEnemy,
+      UseCheck.TargetCharacter.IsEnemy,
       !gameState.characterIdsThatTookActionThisPhase.contains(target) -> "This character already took action in this phase."
     )
   }

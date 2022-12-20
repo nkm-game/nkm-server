@@ -64,11 +64,7 @@ trait Usable {
 trait UsableWithoutTarget extends Usable { this: Ability =>
   def use()(implicit random: Random, gameState: GameState): GameState
   def useChecks(implicit gameState: GameState): Set[UseCheck] =
-    baseUseChecks ++
-      Set(
-        UseCheck.NotOnCooldown,
-        UseCheck.ParentCharacterOnMap,
-      )
+    baseUseChecks
   final def canBeUsed(implicit gameState: GameState): CommandResponse =
     _canBeUsed(useChecks)
 }
@@ -76,30 +72,32 @@ trait UsableWithoutTarget extends Usable { this: Ability =>
 trait UsableOnTarget[T] extends Usable { this: Ability =>
   def use(target: T, useData: UseData = UseData())(implicit random: Random, gameState: GameState): GameState
   def useChecks(implicit target: T, useData: UseData, gameState: GameState): Set[UseCheck] =
-    baseUseChecks ++
-      Set(
-        UseCheck.NotOnCooldown,
-        UseCheck.ParentCharacterOnMap,
-      )
+    baseUseChecks
   final def canBeUsed(implicit target: T, useData: UseData, gameState: GameState): CommandResponse =
     _canBeUsed(useChecks)
 }
 
 trait UsableOnCoordinates extends UsableOnTarget[HexCoordinates] { this: Ability =>
   override def useChecks(implicit target: HexCoordinates, useData: UseData, gameState: GameState): Set[UseCheck] =
-    super.useChecks + UseCheck.TargetCoordsInRange
+    super.useChecks + UseCheck.TargetCoordinates.InRange
 }
 
 trait UsableOnCharacter extends UsableOnTarget[CharacterId] { this: Ability =>
   override def useChecks(implicit target: CharacterId, useData: UseData, gameState: GameState): Set[UseCheck] =
-    super.useChecks + UseCheck.TargetCharacterInRange
+    super.useChecks + UseCheck.TargetCharacter.InRange
 }
 
-abstract class Ability(val id: AbilityId, pid: CharacterId) {
+abstract class Ability(val id: AbilityId, pid: CharacterId) extends Usable {
   val metadata: AbilityMetadata
 
-  def baseUseChecks(implicit gameState: GameState): Set[UseCheck] =
-    Option.when(metadata.abilityType == AbilityType.Ultimate)(UseCheck.PhaseIsGreaterThan(3)).toSet
+  def baseUseChecks(implicit gameState: GameState): Set[UseCheck] = {
+    Set(
+      UseCheck.Base.IsNotPassive,
+      UseCheck.Base.IsNotOnCooldown,
+      UseCheck.Base.ParentCharacterOnMap,
+    ) ++
+    Option.when(metadata.abilityType == AbilityType.Ultimate)(UseCheck.Base.PhaseIsGreaterThan(3)).toSet
+  }
 
   def state(implicit gameState: GameState): AbilityState =
     gameState.abilityStates(id)
@@ -118,7 +116,17 @@ abstract class Ability(val id: AbilityId, pid: CharacterId) {
   def getDecrementCooldownState(implicit gameState: GameState): AbilityState =
     state.copy(cooldown = math.max(state.cooldown - 1, 0))
 
-  def toView(implicit gameState: GameState): AbilityView =
+  def toView(implicit gameState: GameState): AbilityView = {
+    val canBeUsedResponse = _canBeUsed(baseUseChecks)
+    val canBeUsed = canBeUsedResponse match {
+      case Success(_) => true
+      case Failure(_) => false
+    }
+    val canBeUsedFailureMessage = canBeUsedResponse match {
+      case Success(_) => None
+      case Failure(msg) => Some(msg)
+    }
+
     AbilityView(
       id = id,
       metadataId = metadata.id,
@@ -126,29 +134,40 @@ abstract class Ability(val id: AbilityId, pid: CharacterId) {
       state = state,
       rangeCellCoords = Try(rangeCellCoords).getOrElse(Set.empty),
       targetsInRange = Try(targetsInRange).getOrElse(Set.empty),
+      canBeUsed = canBeUsed,
+      canBeUsedFailureMessage = canBeUsedFailureMessage,
     )
+  }
 
   object UseCheck {
-    def PhaseIsGreaterThan(i: Int)(implicit gameState: GameState): UseCheck =
-      (gameState.phase.number > i) -> s"Phase is not greater than $i."
-    def NotOnCooldown(implicit gameState: GameState): UseCheck =
-      (state.cooldown <= 0) -> "Ability is on cooldown."
-    def ParentCharacterOnMap(implicit gameState: GameState): UseCheck =
-      parentCharacter.isOnMap -> "Parent character is not on map."
-    def TargetCharacterInRange(implicit target: CharacterId, useData: UseData, gameState: GameState): UseCheck =
-      targetsInRange.toCells.exists(_.characterId.contains(target)) -> "Target character is not in range."
-    def TargetIsEnemy(implicit target: CharacterId, useData: UseData, gameState: GameState): UseCheck =
-      gameState.characterById(target).get.isEnemyForC(parentCharacter.id) -> "Target character is not an enemy."
-    def TargetIsFriend(implicit target: CharacterId, useData: UseData, gameState: GameState): UseCheck =
-      gameState.characterById(target).get.isFriendForC(parentCharacter.id) -> "Target character is not a friend."
-    def TargetIsOnMap(implicit target: CharacterId, useData: UseData, gameState: GameState): UseCheck =
-      gameState.characterById(target).get.isOnMap -> "Target character is not on map."
-    def TargetCoordsInRange(implicit target: HexCoordinates, useData: UseData, gameState: GameState): UseCheck =
-      Seq(target).toCells.nonEmpty -> "Target character is not in range."
-    def TargetIsFriendlySpawn(implicit target: HexCoordinates, useData: UseData, gameState: GameState): UseCheck =
-      gameState.hexMap.get.getSpawnPointsFor(parentCharacter.owner.id).toCoords.contains(target) -> "Target is not a friendly spawn."
-    def TargetIsFreeToStand(implicit target: HexCoordinates, useData: UseData, gameState: GameState): UseCheck = {
-      Seq(target).toCells.headOption.fold(false)(_.isFreeToStand) -> "Target is not free to stand."
+    object Base {
+      def IsNotPassive(implicit gameState: GameState): UseCheck =
+        (metadata.abilityType != AbilityType.Passive) -> s"Cannot use passive abilities."
+      def IsNotOnCooldown(implicit gameState: GameState): UseCheck =
+        (state.cooldown <= 0) -> "Ability is on cooldown."
+      def ParentCharacterOnMap(implicit gameState: GameState): UseCheck =
+        parentCharacter.isOnMap -> "Parent character is not on map."
+      def PhaseIsGreaterThan(i: Int)(implicit gameState: GameState): UseCheck =
+        (gameState.phase.number > i) -> s"Phase is not greater than $i."
+    }
+    object TargetCharacter {
+      def InRange(implicit target: CharacterId, useData: UseData, gameState: GameState): UseCheck =
+        targetsInRange.toCells.exists(_.characterId.contains(target)) -> "Target character is not in range."
+      def IsEnemy(implicit target: CharacterId, useData: UseData, gameState: GameState): UseCheck =
+        gameState.characterById(target).get.isEnemyForC(parentCharacter.id) -> "Target character is not an enemy."
+      def IsFriend(implicit target: CharacterId, useData: UseData, gameState: GameState): UseCheck =
+        gameState.characterById(target).get.isFriendForC(parentCharacter.id) -> "Target character is not a friend."
+      def IsOnMap(implicit target: CharacterId, useData: UseData, gameState: GameState): UseCheck =
+        gameState.characterById(target).get.isOnMap -> "Target character is not on map."
+    }
+
+    object TargetCoordinates {
+      def InRange(implicit target: HexCoordinates, useData: UseData, gameState: GameState): UseCheck =
+        Seq(target).toCells.nonEmpty -> "Target character is not in range."
+      def IsFreeToStand(implicit target: HexCoordinates, useData: UseData, gameState: GameState): UseCheck =
+        Seq(target).toCells.headOption.fold(false)(_.isFreeToStand) -> "Target is not free to stand."
+      def IsFriendlySpawn(implicit target: HexCoordinates, useData: UseData, gameState: GameState): UseCheck =
+        gameState.hexMap.get.getSpawnPointsFor(parentCharacter.owner.id).toCoords.contains(target) -> "Target is not a friendly spawn."
     }
   }
 }
@@ -161,4 +180,6 @@ case class AbilityView
   state: AbilityState,
   rangeCellCoords: Set[HexCoordinates],
   targetsInRange: Set[HexCoordinates],
+  canBeUsed: Boolean,
+  canBeUsedFailureMessage: Option[String],
 )

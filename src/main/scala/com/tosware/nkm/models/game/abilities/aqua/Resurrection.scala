@@ -42,9 +42,9 @@ case class Resurrection(abilityId: AbilityId, parentCharacterId: CharacterId) ex
     val targetCharacter: NkmCharacter = gameState.characterById(useData.data).get
 
     super.useChecks ++ Seq(
-      UseCheck.TargetIsFriendlySpawn,
-      UseCheck.TargetIsFriend(targetCharacter.id, useData, gameState),
-      UseCheck.TargetIsFreeToStand,
+      UseCheck.TargetCharacter.IsFriend(targetCharacter.id, useData, gameState),
+      UseCheck.TargetCoordinates.IsFriendlySpawn,
+      UseCheck.TargetCoordinates.IsFreeToStand,
       targetCharacter.isDead -> "Target character is not dead.",
       gameState.gameLog.events.ofType[GameEvent.CharacterDied]
         .ofCharacter(targetCharacter.id)

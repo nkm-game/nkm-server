@@ -38,7 +38,7 @@ case class Eliminate(abilityId: AbilityId, parentCharacterId: CharacterId) exten
 
   override def useChecks(implicit target: CharacterId, useData: UseData, gameState: GameState): Set[UseCheck] = {
     super.useChecks ++ Seq(
-      UseCheck.TargetIsEnemy,
+      UseCheck.TargetCharacter.IsEnemy,
     )
   }
 }

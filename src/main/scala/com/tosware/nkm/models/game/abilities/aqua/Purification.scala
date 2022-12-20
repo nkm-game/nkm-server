@@ -40,7 +40,7 @@ case class Purification(abilityId: AbilityId, parentCharacterId: CharacterId) ex
     val targetCharacter: NkmCharacter = gameState.characterById(target).get
 
     super.useChecks ++ Seq(
-      UseCheck.TargetIsFriend,
+      UseCheck.TargetCharacter.IsFriend,
       targetCharacter.state.effects.exists(_.metadata.effectType == CharacterEffectType.Negative) ->
         "Target character does not have any negative effects.",
     )

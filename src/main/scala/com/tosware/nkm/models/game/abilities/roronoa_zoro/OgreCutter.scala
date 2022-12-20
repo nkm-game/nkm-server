@@ -56,7 +56,7 @@ case class OgreCutter(abilityId: AbilityId, parentCharacterId: CharacterId) exte
     }
 
     super.useChecks ++ Seq(
-      UseCheck.TargetIsEnemy,
+      UseCheck.TargetCharacter.IsEnemy,
       cellToTeleportIsFreeToStand() -> "Cell to teleport is not free to stand or does not exist."
     )
   }

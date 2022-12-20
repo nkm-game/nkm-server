@@ -45,8 +45,8 @@ case class Castling(abilityId: AbilityId, parentCharacterId: CharacterId) extend
 
     super.useChecks ++ Seq(
       (target1.id != target2.id) -> "Targets have to be different.",
-      UseCheck.TargetIsOnMap,
-      UseCheck.TargetIsOnMap(target2.id, useData, gameState),
+      UseCheck.TargetCharacter.IsOnMap,
+      UseCheck.TargetCharacter.IsOnMap(target2.id, useData, gameState),
     )
   }
 }
