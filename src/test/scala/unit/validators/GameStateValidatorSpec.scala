@@ -10,6 +10,7 @@ import com.tosware.nkm.providers.HexMapProvider.TestHexMapName
 import helpers.{TestUtils, scenarios}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
+import com.tosware.nkm.models.game.hex.HexUtils._
 
 class GameStateValidatorSpec
   extends AnyWordSpecLike
@@ -40,6 +41,10 @@ class GameStateValidatorSpec
   private val validator = GameStateValidator()(gameState)
 
   "GameStateValidator" must {
+    "pass sanity check" in {
+      gameState.characters.count(_.isOnMap(gameState)) should be (s.gameState.characters.size)
+      gameState.hexMap.get.cells.whereCharacters.size should be (s.gameState.characters.size)
+    }
     "validate moving characters and" when {
       "allow move within speed range" in {
         val result = validator.validateBasicMoveCharacter(gameState.players(0).id,
@@ -55,6 +60,10 @@ class GameStateValidatorSpec
           s.characters.p0First.id
         )
         assertCommandSuccess(result)
+
+        val newGameState = gameState.basicMoveCharacter( s.characters.p0First.id, CoordinateSeq((0, 0), (-1, 0), (-2, 0)))
+        newGameState.characters.count(_.isOnMap(newGameState)) should be (s.gameState.characters.size)
+        newGameState.hexMap.get.cells.whereCharacters.size should be (s.gameState.characters.size)
       }
 
       "disallow if character is not on the map" in {

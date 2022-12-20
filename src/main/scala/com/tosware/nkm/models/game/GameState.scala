@@ -294,9 +294,18 @@ case class GameState(
   def teleportCharacter(characterId: CharacterId, targetCellCoordinates: HexCoordinates)(implicit random: Random, causedBy: String): GameState = {
     val parentCellOpt = characterById(characterId).get.parentCell(this)
 
-    parentCellOpt.fold(this)(c => updateHexCell(c.coordinates)(_.copy(characterId = None)))
-    .updateHexCell(targetCellCoordinates)(_.copy(characterId = Some(characterId)))
-    .logEvent(CharacterTeleported(NkmUtils.randomUUID(), characterId, targetCellCoordinates))
+    val removedFromParentCellState = parentCellOpt.fold(this)(c => updateHexCell(c.coordinates)(_.copy(characterId = None)))
+    val targetIsFreeToStand = hexMap.get.getCell(targetCellCoordinates).get.isFreeToStand
+    val characterIsOnMap = characterById(characterId).get.isOnMap(this)
+
+    if (targetIsFreeToStand) {
+      if (characterIsOnMap)
+        removedFromParentCellState.updateHexCell(targetCellCoordinates)(_.copy(characterId = Some(characterId)))
+      else removedFromParentCellState.placeCharacter(targetCellCoordinates, characterId)
+    } else {
+      // probably just passing by a friendly character
+      removedFromParentCellState.removeCharacterFromMap(characterId)
+    }.logEvent(CharacterTeleported(NkmUtils.randomUUID(), characterId, targetCellCoordinates))
   }
 
 

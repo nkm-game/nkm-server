@@ -57,12 +57,12 @@ class RunItDownSpec
       assertCommandSuccess (validateBasicMove(g2, Seq((1, 0), (0, 0))))
       assertCommandFailure (validateBasicAttack(g2))
 
-      val g3 = basicMove(g2, Seq((0, 0), (1, 0)))
-      assertCommandSuccess (validateBasicMove(g3, Seq((1, 0), (0, 0))))
+      val g3 = basicMove(g2, Seq((1, 0), (0, 0)))
+      assertCommandSuccess (validateBasicMove(g3, Seq((0, 0), (1, 0))))
       assertCommandSuccess (validateBasicAttack(g3))
 
       val g4 = basicAttack(g3)
-      assertCommandSuccess (validateBasicMove(g4, Seq((1, 0), (0, 0))))
+      assertCommandSuccess (validateBasicMove(g4, Seq((0, 0), (1, 0))))
       assertCommandFailure (validateBasicAttack(g4))
 
       val g5 = basicMove(g4, Seq((0, 0), (1, 0)))
