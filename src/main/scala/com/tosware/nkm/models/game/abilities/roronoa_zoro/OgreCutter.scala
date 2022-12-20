@@ -51,13 +51,13 @@ case class OgreCutter(abilityId: AbilityId, parentCharacterId: CharacterId) exte
       val targetDirectionOpt = parentCell.get.coordinates.getDirection(targetCoordinatesOpt.get)
       if (targetDirectionOpt.isEmpty) return false
       val teleportCoordinates = targetCoordinatesOpt.get.getInDirection(targetDirectionOpt.get, 2)
-      if (!teleportCoordinates.toCell(gameState.hexMap.get).isFreeToStand) return false
+      if (!teleportCoordinates.toCellOpt(gameState.hexMap.get).fold(false)(_.isFreeToStand)) return false
       true
     }
 
     super.useChecks ++ Seq(
       UseCheck.TargetIsEnemy,
-      cellToTeleportIsFreeToStand() -> "Cell to teleport is not free to stand."
+      cellToTeleportIsFreeToStand() -> "Cell to teleport is not free to stand or does not exist."
     )
   }
 }
