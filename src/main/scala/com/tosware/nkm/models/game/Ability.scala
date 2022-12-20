@@ -37,7 +37,6 @@ case class AbilityMetadata
 
 case class AbilityState
 (
-  parentCharacterId: CharacterId,
   cooldown: Int = 0,
 )
 

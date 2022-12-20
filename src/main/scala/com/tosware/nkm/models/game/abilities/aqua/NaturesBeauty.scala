@@ -20,7 +20,7 @@ case class NaturesBeauty(abilityId: AbilityId, parentCharacterId: CharacterId) e
   override val metadata = NaturesBeauty.metadata
 
   override def rangeCellCoords(implicit gameState: GameState) =
-    gameState.characterById(state.parentCharacterId).get.basicAttackCellCoords(gameState)
+    gameState.characterById(parentCharacterId).get.basicAttackCellCoords(gameState)
   override def targetsInRange(implicit gameState: GameState) =
     rangeCellCoords.whereFriendsOfC(parentCharacterId)
   override def basicAttackCells(implicit gameState: GameState) = parentCharacter.defaultBasicAttackCells

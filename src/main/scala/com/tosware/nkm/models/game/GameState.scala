@@ -285,7 +285,7 @@ case class GameState(
     val abilitiesByCharacter = characters.map(c => (c.id, c.state.abilities))
     val abilityStatesMap: Map[AbilityId, AbilityState] = abilitiesByCharacter.collect
     {
-      case (cid: CharacterId, as: Seq[Ability]) => as.map(a => a.id -> AbilityState(cid))
+      case (cid: CharacterId, as: Seq[Ability]) => as.map(a => a.id -> AbilityState())
     }.flatten.toMap
 
     copy(
