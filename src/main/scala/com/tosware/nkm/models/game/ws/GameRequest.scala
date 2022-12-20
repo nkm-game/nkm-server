@@ -24,6 +24,7 @@ object GameRequest {
   object Action {
     final case class PlaceCharacters(lobbyId: GameId, coordinatesToCharacterIdMap: Map[HexCoordinates, CharacterId]) extends GameRequest
     final case class EndTurn(lobbyId: GameId) extends GameRequest
+    final case class PassTurn(lobbyId: GameId, characterId: CharacterId) extends GameRequest
     final case class Move(lobbyId: GameId, path: Seq[HexCoordinates], characterId: CharacterId) extends GameRequest
     final case class BasicAttack(lobbyId: GameId, attackingCharacterId: CharacterId, targetCharacterId: CharacterId) extends GameRequest
     final case class UseAbilityWithoutTarget(lobbyId: GameId, abilityId: AbilityId) extends GameRequest

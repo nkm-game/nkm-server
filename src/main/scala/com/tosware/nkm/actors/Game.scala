@@ -45,6 +45,8 @@ object Game {
 
   case class EndTurn(playerId: PlayerId) extends Command
 
+  case class PassTurn(playerId: PlayerId, characterId: CharacterId) extends Command
+
   case class MoveCharacter(playerId: PlayerId, path: Seq[HexCoordinates], characterId: CharacterId) extends Command
 
   case class BasicAttackCharacter(playerId: PlayerId, attackingCharacterId: CharacterId, targetCharacterId: CharacterId) extends Command
@@ -88,6 +90,8 @@ object Game {
   case class CharactersBlindPicked(id: GameId, playerId: PlayerId, characterId: Set[CharacterMetadataId]) extends Event
 
   case class TurnEnded(id: GameId, playerId: PlayerId) extends Event
+
+  case class TurnPassed(id: GameId, playerId: PlayerId, characterId: CharacterId) extends Event
 
   case class CharacterMoved(id: GameId, playerId: PlayerId, path: Seq[HexCoordinates], characterId: CharacterId) extends Event
 
@@ -328,6 +332,16 @@ class Game(id: String)(implicit nkmDataService: NkmDataService) extends Persiste
             sender() ! Success()
           }
       }
+    case PassTurn(playerId, characterId) =>
+      GameStateValidator().validatePassTurn(playerId, characterId) match {
+        case failure @ Failure(_) => sender() ! failure
+        case Success(_) =>
+          val e = TurnPassed(id, playerId, characterId)
+          persistAndPublish(e) { _ =>
+            gameState = gameState.passTurn(characterId)
+            sender() ! Success()
+          }
+      }
     case MoveCharacter(playerId, path, characterId) =>
       GameStateValidator().validateBasicMoveCharacter(playerId, path, characterId) match {
         case failure @ Failure(_) => sender() ! failure
@@ -407,12 +421,24 @@ class Game(id: String)(implicit nkmDataService: NkmDataService) extends Persiste
     case TurnEnded(_, _) =>
       gameState = gameState.endTurn()
       log.debug(s"Recovered turn end")
+    case TurnPassed(_, _, characterId) =>
+      gameState = gameState.passTurn(characterId)
+      log.debug(s"Recovered turn pass")
     case CharacterMoved(_, _, hexCoordinates, characterId) =>
       gameState = gameState.basicMoveCharacter(characterId, hexCoordinates)
       log.debug(s"Recovered $characterId to $hexCoordinates")
     case CharacterBasicAttacked(_, _, attackingCharacterId, targetCharacterId) =>
       gameState = gameState.basicAttack(attackingCharacterId, targetCharacterId)
       log.debug(s"Recovered basic attack of $attackingCharacterId to $targetCharacterId")
+    case AbilityUsedWithoutTarget(_, _, abilityId) =>
+      gameState = gameState.useAbilityWithoutTarget(abilityId)
+      log.debug(s"Recovered ability $abilityId use without target")
+    case AbilityUsedOnCoordinates(_, _, abilityId, target, useData) =>
+      gameState = gameState.useAbilityOnCoordinates(abilityId, target, useData)
+      log.debug(s"Recovered ability $abilityId use on coordinates $target")
+    case AbilityUsedOnCharacter(_, _, abilityId, target, useData) =>
+      gameState = gameState.useAbilityOnCharacter(abilityId, target, useData)
+      log.debug(s"Recovered ability $abilityId use on character $target")
     case BanningPhaseTimedOut(_) =>
       log.debug(s"Recovered banning phase timeout")
       gameState = gameState.finishBanningPhase()

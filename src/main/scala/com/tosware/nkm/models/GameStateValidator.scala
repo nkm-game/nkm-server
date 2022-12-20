@@ -54,6 +54,7 @@ case class GameStateValidator()(implicit gameState: GameState) {
     val playerNotHost = "Player is not a host."
     val gameStarted = "Game is started."
     val gameNotStarted = "Game is not started."
+    val gameNotRunning = "Game is not running."
     val playerNotInGame = "Player is not in the game."
     val characterNotInGame = "This character is not in the game."
     val abilityNotInGame = "This ability is not in the game."
@@ -119,10 +120,21 @@ case class GameStateValidator()(implicit gameState: GameState) {
   def validateEndTurn(playerId: PlayerId): CommandResponse =
     if (!playerInGame(playerId)) Failure(Message.playerNotInGame)
     else if (gameStatusIs(GameStatus.NotStarted)) Failure(Message.gameNotStarted)
+    else if (!gameStatusIs(GameStatus.Running)) Failure(Message.gameNotRunning)
     else if (gameState.currentPlayer.id != playerId) Failure(Message.notYourTurn)
     else if (gameState.characterTakingActionThisTurn.isEmpty) Failure("No character took action this turn.")
     else Success()
 
+  def validatePassTurn(playerId: PlayerId, characterId: CharacterId): CommandResponse =
+    if (!playerInGame(playerId)) Failure(Message.playerNotInGame)
+    else if (!characterInGame(characterId)) Failure(Message.characterNotInGame)
+    else if (gameStatusIs(GameStatus.NotStarted)) Failure(Message.gameNotStarted)
+    else if (!gameStatusIs(GameStatus.Running)) Failure(Message.gameNotRunning)
+    else if (gameState.currentPlayer.id != playerId) Failure(Message.notYourTurn)
+    else if (!gameState.playerById(playerId).get.characterIds.contains(characterId)) Failure("You do not own this character.")
+    else if (gameState.characterTakingActionThisTurn.nonEmpty) Failure("Some character already took action this turn.")
+    else if (gameState.characterIdsThatTookActionThisPhase.contains(characterId)) Failure("This character already took action this phase.")
+    else Success()
 
   def validateBasicMoveCharacter(playerId: PlayerId, path: Seq[HexCoordinates], characterId: CharacterId): CommandResponse = {
     if (!playerInGame(playerId)) Failure(Message.playerNotInGame)

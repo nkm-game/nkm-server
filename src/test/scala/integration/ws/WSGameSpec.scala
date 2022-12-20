@@ -838,6 +838,82 @@ class WSGameSpec extends WSTrait {
       }
     }
 
+    "allow turn passing" in {
+      val numberOfPlayers = 2
+      val numberOfCharacters = 1
+
+      val lobbyId = createLobbyForGame(
+        hexMapName = "TestMap",
+        pickType = PickType.BlindPick,
+        numberOfPlayers = numberOfPlayers,
+        numberOfCharacters = numberOfCharacters,
+        clockConfigOpt = Some(ClockConfig.defaultForPickType(PickType.BlindPick).copy(timeAfterPickMillis = 1)),
+      )
+
+      withGameWS {
+        passTurn(lobbyId, "random_id").statusCode shouldBe unauthorized
+        auth(0)
+        passTurn(lobbyId, "random_id").statusCode shouldBe nok
+        val availableCharacters = fetchAndParseGame(lobbyId).blindPickState.get.config.availableCharacters.toSeq
+        val charactersToPick = availableCharacters.take(numberOfCharacters).toSet
+
+        for (i <- 0 until numberOfPlayers) {
+          auth(i)
+          blindPick(lobbyId, charactersToPick).statusCode shouldBe ok
+        }
+        passTurn(lobbyId, "random_id").statusCode shouldBe nok
+
+        Thread.sleep(150)
+
+        val (character0, character1) = {
+          val gameState = fetchAndParseGame(lobbyId)
+
+          val character0 = gameState.players(0).characterIds.head
+          val character1 = gameState.players(1).characterIds.head
+          (character0, character1)
+        }
+
+        {
+          auth(0)
+          placeCharacters(lobbyId, Map(HexCoordinates(3, 10) -> character0)).statusCode shouldBe ok
+          passTurn(lobbyId, character0).statusCode shouldBe nok
+          auth(1)
+          placeCharacters(lobbyId, Map(HexCoordinates(6, 10) -> character1)).statusCode shouldBe ok
+          passTurn(lobbyId, character1).statusCode shouldBe nok
+        }
+
+        auth(0)
+
+        {
+          val gameState = fetchAndParseGame(lobbyId)
+
+          gameState.turn.number shouldBe 0
+          gameState.phase.number shouldBe 0
+        }
+
+        passTurn(lobbyId, character1).statusCode shouldBe nok
+        passTurn(lobbyId, character0).statusCode shouldBe ok
+        passTurn(lobbyId, character0).statusCode shouldBe nok
+        passTurn(lobbyId, character1).statusCode shouldBe nok
+
+        {
+          val gameState = fetchAndParseGame(lobbyId)
+          gameState.turn.number shouldBe 1
+          gameState.phase.number shouldBe 0
+        }
+
+        auth(1)
+        passTurn(lobbyId, character0).statusCode shouldBe nok
+        passTurn(lobbyId, character1).statusCode shouldBe ok
+
+        {
+          val gameState = fetchAndParseGame(lobbyId)
+          gameState.turn.number shouldBe 2
+          gameState.phase.number shouldBe 1
+        }
+      }
+    }
+
     "allow using abilities on characters" in {
       val numberOfPlayers = 2
       val numberOfCharacters = 1

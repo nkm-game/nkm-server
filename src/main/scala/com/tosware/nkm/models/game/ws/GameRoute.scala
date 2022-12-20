@@ -22,6 +22,7 @@ object GameRoute extends StringEnum[GameRoute] {
   // Actions
   case object PlaceCharacters extends GameRoute("place_characters")
   case object EndTurn extends GameRoute("end_turn")
+  case object PassTurn extends GameRoute("pass_turn")
   case object Move extends GameRoute("move")
   case object BasicAttack extends GameRoute("basic_attack")
   case object UseAbilityWithoutTarget extends GameRoute("use_ability_without_target")

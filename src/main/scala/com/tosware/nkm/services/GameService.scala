@@ -78,6 +78,12 @@ class GameService(gamesManagerActor: ActorRef)
     Future.successful(aw(f).asInstanceOf[CommandResponse])
   }
 
+  def passTurn(username: String, request: Action.PassTurn):  Future[CommandResponse] = {
+    val gameActor: ActorRef = getGameActor(request.lobbyId)
+
+    val f = gameActor ? Game.PassTurn(username, request.characterId)
+    Future.successful(aw(f).asInstanceOf[CommandResponse])
+  }
 
   def moveCharacter(username: String, request: Action.Move): Future[CommandResponse] = {
     val gameActor: ActorRef = getGameActor(request.lobbyId)

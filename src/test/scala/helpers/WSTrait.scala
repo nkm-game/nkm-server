@@ -7,7 +7,7 @@ import com.tosware.nkm.models.game.{ClockConfig, GameStateView, PickType, UseDat
 import com.tosware.nkm.models.game.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game.CharacterMetadata.CharacterMetadataId
 import com.tosware.nkm.models.game.hex.HexCoordinates
-import com.tosware.nkm.models.game.ws.GameRequest.Action.{BasicAttack, EndTurn, UseAbilityOnCharacter}
+import com.tosware.nkm.models.game.ws.GameRequest.Action.{BasicAttack, EndTurn, UseAbilityOnCharacter, PassTurn}
 import com.tosware.nkm.models.game.ws.GameRequest.Action.{Move, PlaceCharacters}
 import com.tosware.nkm.models.game.ws.GameRequest.CharacterSelect._
 import com.tosware.nkm.models.game.ws.GameRequest.General._
@@ -153,6 +153,9 @@ trait WSTrait extends UserApiTrait {
 
   def endTurn(lobbyId: String): WebsocketGameResponse =
     sendWSRequestG(GameRoute.EndTurn, EndTurn(lobbyId).toJson.toString)
+
+  def passTurn(lobbyId: String, characterId: CharacterId): WebsocketGameResponse =
+    sendWSRequestG(GameRoute.PassTurn, PassTurn(lobbyId, characterId).toJson.toString)
 
   def fetchGame(lobbyId: String): WebsocketGameResponse =
     sendWSRequestG(GameRoute.GetState, GetState(lobbyId).toJson.toString)

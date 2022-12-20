@@ -22,6 +22,7 @@ object GameResponseType extends StringEnum[GameResponseType] {
   // Actions
   case object PlaceCharacters extends GameResponseType("place_characters")
   case object EndTurn extends GameResponseType("end_turn")
+  case object PassTurn extends GameResponseType("pass_turn")
   case object Move extends GameResponseType("move")
   case object BasicAttack extends GameResponseType("basic_attack")
   case object UseAbility extends GameResponseType("use_ability")
