@@ -244,6 +244,8 @@ class WSLobbySpec extends WSTrait
         startGame(lobbyId).statusCode shouldBe ok
         startGame(lobbyId).statusCode shouldBe nok
 
+        fetchAndParseLobby(lobbyId).gameStarted shouldBe true
+
         Get(s"/api/state/$lobbyId") ~> routes ~> check {
           val gameState = responseAs[GameStateView]
           gameState.gameStatus shouldEqual GameStatus.Running

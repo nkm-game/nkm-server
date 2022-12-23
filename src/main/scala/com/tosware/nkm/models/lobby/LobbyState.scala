@@ -16,6 +16,7 @@ case class LobbyState(
                       numberOfCharactersPerPlayer: Int = 1,
                       numberOfBans: Int = 0,
                       clockConfig: ClockConfig = ClockConfig.empty(),
+                      gameStarted: Boolean = false,
                      )
 {
   def created(): Boolean = creationDate.isDefined

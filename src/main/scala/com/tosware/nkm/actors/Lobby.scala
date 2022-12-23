@@ -6,6 +6,7 @@ import akka.pattern.ask
 import akka.persistence.journal.Tagged
 import akka.persistence.{PersistentActor, RecoveryCompleted}
 import com.tosware.nkm.NkmTimeouts
+import com.tosware.nkm.actors.Game.GameId
 import com.tosware.nkm.models.CommandResponse._
 import com.tosware.nkm.models.UserState.UserId
 import com.tosware.nkm.models.game.{ClockConfig, GameStartDependencies, PickType, Player}
@@ -21,13 +22,11 @@ object Lobby {
 
   sealed trait Command
 
-  case class StartGame(gameActor: ActorRef) extends Command
+  case class Create(name: String, hostUserId: UserId) extends Command
 
-  case class Create(name: String, hostUserId: String) extends Command
+  case class UserJoin(userId: UserId) extends Command
 
-  case class UserJoin(userId: String) extends Command
-
-  case class UserLeave(userId: String) extends Command
+  case class UserLeave(userId: UserId) extends Command
 
   case class SetMapName(hexMapName: String) extends Command
 
@@ -41,32 +40,36 @@ object Lobby {
 
   case class SetClockConfig(clockConfig: ClockConfig) extends Command
 
+  case class StartGame(gameActor: ActorRef) extends Command
+
   sealed trait Event {
-    val id: String
+    val id: GameId
   }
 
-  case class CreateSuccess(id: String, name: String, hostUserId: String, creationDate: LocalDateTime) extends Event
+  case class CreateSuccess(id: GameId, name: String, hostUserId: UserId, creationDate: LocalDateTime) extends Event
 
-  case class UserJoined(id: String, userId: String) extends Event
+  case class UserJoined(id: GameId, userId: String) extends Event
 
-  case class UserLeft(id: String, userId: String) extends Event
+  case class UserLeft(id: GameId, userId: String) extends Event
 
-  case class MapNameSet(id: String, hexMapName: String) extends Event
+  case class MapNameSet(id: GameId, hexMapName: String) extends Event
 
-  case class NumberOfBansSet(id: String, numberOfBans: Int) extends Event
+  case class NumberOfBansSet(id: GameId, numberOfBans: Int) extends Event
 
-  case class NumberOfCharactersPerPlayerSet(id: String, numberOfCharactersPerPlayer: Int) extends Event
+  case class NumberOfCharactersPerPlayerSet(id: GameId, numberOfCharactersPerPlayer: Int) extends Event
 
-  case class PickTypeSet(id: String, pickType: PickType) extends Event
+  case class PickTypeSet(id: GameId, pickType: PickType) extends Event
 
-  case class LobbyNameSet(id: String, name: String) extends Event
+  case class LobbyNameSet(id: GameId, name: String) extends Event
 
-  case class ClockConfigSet(id: String, clockConfig: ClockConfig) extends Event
+  case class ClockConfigSet(id: GameId, clockConfig: ClockConfig) extends Event
 
-  def props(id: String)(implicit nkmDataService: NkmDataService): Props = Props(new Lobby(id))
+  case class GameStarted(id: GameId) extends Event
+
+  def props(id: GameId)(implicit nkmDataService: NkmDataService): Props = Props(new Lobby(id))
 }
 
-class Lobby(id: String)(implicit nkmDataService: NkmDataService)
+class Lobby(id: GameId)(implicit nkmDataService: NkmDataService)
   extends PersistentActor
     with ActorLogging
     with NkmTimeouts {
@@ -111,6 +114,9 @@ class Lobby(id: String)(implicit nkmDataService: NkmDataService)
 
   def setClockConfig(clockConfig: ClockConfig): Unit =
     lobbyState = lobbyState.copy(clockConfig = clockConfig)
+
+  def setGameStarted(): Unit =
+    lobbyState = lobbyState.copy(gameStarted = true)
 
   def persistAndPublish[A](event: A)(handler: A => Unit): Unit = {
     context.system.eventStream.publish(event)
@@ -237,23 +243,27 @@ class Lobby(id: String)(implicit nkmDataService: NkmDataService)
       if (!canStartGame()) {
         sender() ! Failure("Cannot start the game")
       } else {
-        val hexMaps = nkmDataService.getHexMaps
-        log.info("Received game start request")
-        val hostUserId = lobbyState.hostUserId.get
-        val players: List[Player] = lobbyState.userIds.map(i => Player(i)).map {
-          case p: Player if p.name == hostUserId => p.copy(isHost = true)
-          case p: Player => p
+        val e = GameStarted(id)
+        persistAndPublish(e) { _ =>
+          val hexMaps = nkmDataService.getHexMaps
+          log.info("Received game start request")
+          val hostUserId = lobbyState.hostUserId.get
+          val players: List[Player] = lobbyState.userIds.map(i => Player(i)).map {
+            case p: Player if p.name == hostUserId => p.copy(isHost = true)
+            case p: Player => p
+          }
+          val deps = GameStartDependencies(
+            players = players,
+            hexMap = hexMaps.filter(m => m.name == lobbyState.chosenHexMapName.get).head,
+            pickType = lobbyState.pickType,
+            numberOfBansPerPlayer = lobbyState.numberOfBans,
+            numberOfCharactersPerPlayer = lobbyState.numberOfCharactersPerPlayer,
+            nkmDataService.getCharacterMetadatas.toSet,
+            clockConfig = lobbyState.clockConfig
+          )
+          sender() ! aw(gameActor ? Game.StartGame(deps)).asInstanceOf[CommandResponse]
+          setGameStarted()
         }
-        val deps = GameStartDependencies(
-          players = players,
-          hexMap = hexMaps.filter(m => m.name == lobbyState.chosenHexMapName.get).head,
-          pickType = lobbyState.pickType,
-          numberOfBansPerPlayer = lobbyState.numberOfBans,
-          numberOfCharactersPerPlayer = lobbyState.numberOfCharactersPerPlayer,
-          nkmDataService.getCharacterMetadatas.toSet,
-          clockConfig = lobbyState.clockConfig
-        )
-        sender() ! aw(gameActor ? Game.StartGame(deps)).asInstanceOf[CommandResponse]
       }
 
     case e => log.warning(s"Unknown message: $e")
@@ -287,6 +297,9 @@ class Lobby(id: String)(implicit nkmDataService: NkmDataService)
     case ClockConfigSet(_, clockConfig) =>
       setClockConfig(clockConfig)
       log.debug(s"Recovered setting clock config")
+    case GameStarted(_) =>
+      setGameStarted()
+      log.debug(s"Recovered starting game")
     case RecoveryCompleted =>
     case e => log.warning(s"Unknown message: $e")
   }
