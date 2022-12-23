@@ -14,11 +14,8 @@ case class CharacterEffectMetadatasProvider() extends NkmJsonProtocol {
     StatBuff.metadata,
     StatNerf.metadata,
     Stun.metadata,
-    CharacterEffectMetadata(
-      name = CharacterEffectName.Poison,
-      effectType = CharacterEffectType.Negative,
-      description = "Deals damage every time this character takes action.",
-    ),
+    Poison.metadata,
+    MurasamePoison.metadata,
     CharacterEffectMetadata(
       name = CharacterEffectName.Fly,
       effectType = CharacterEffectType.Positive,
