@@ -430,8 +430,8 @@ case class GameState(
     this.copy(abilityStates = abilityStates.updated(abilityId, newState))
   }
 
-  def decrementAbilityCooldown(abilityId: AbilityId): GameState = {
-    val newState = abilityById(abilityId).get.getDecrementCooldownState(this)
+  def decrementAbilityCooldown(abilityId: AbilityId, amount: Int = 1): GameState = {
+    val newState = abilityById(abilityId).get.getDecrementCooldownState(amount)(this)
     this.copy(abilityStates = abilityStates.updated(abilityId, newState))
   }
 

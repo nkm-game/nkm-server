@@ -95,6 +95,7 @@ abstract class Ability(val id: AbilityId, pid: CharacterId) extends Usable {
       UseCheck.Base.IsNotPassive,
       UseCheck.Base.IsNotOnCooldown,
       UseCheck.Base.ParentCharacterOnMap,
+      UseCheck.Base.CanBeUsedByParent,
     ) ++
     Option.when(metadata.abilityType == AbilityType.Ultimate)(UseCheck.Base.PhaseIsGreaterThan(3)).toSet
   }
@@ -113,8 +114,8 @@ abstract class Ability(val id: AbilityId, pid: CharacterId) extends Usable {
   def getCooldownState(implicit gameState: GameState): AbilityState =
     state.copy(cooldown = metadata.variables("cooldown"))
 
-  def getDecrementCooldownState(implicit gameState: GameState): AbilityState =
-    state.copy(cooldown = math.max(state.cooldown - 1, 0))
+  def getDecrementCooldownState(amount: Int = 1)(implicit gameState: GameState): AbilityState =
+    state.copy(cooldown = math.max(state.cooldown - amount, 0))
 
   def toView(implicit gameState: GameState): AbilityView = {
     val canBeUsedResponse = _canBeUsed(baseUseChecks)
@@ -149,6 +150,14 @@ abstract class Ability(val id: AbilityId, pid: CharacterId) extends Usable {
         parentCharacter.isOnMap -> "Parent character is not on map."
       def PhaseIsGreaterThan(i: Int)(implicit gameState: GameState): UseCheck =
         (gameState.phase.number > i) -> s"Phase is not greater than $i."
+      def CanBeUsedByParent(implicit gameState: GameState): UseCheck = {
+        val canBeUsed = metadata.abilityType match {
+          case AbilityType.Passive => true
+          case AbilityType.Normal => !parentCharacter.usedAbilityThisPhase && !parentCharacter.usedBasicAttackThisTurn
+          case AbilityType.Ultimate => !parentCharacter.usedAbilityThisPhase && !parentCharacter.usedBasicAttackThisTurn && !parentCharacter.usedBasicMoveThisTurn
+        }
+        canBeUsed -> s"Ability cannot be used by parent character."
+      }
     }
     object TargetCharacter {
       def InRange(implicit target: CharacterId, useData: UseData, gameState: GameState): UseCheck =

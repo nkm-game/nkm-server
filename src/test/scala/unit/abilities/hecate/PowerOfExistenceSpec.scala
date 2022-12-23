@@ -19,6 +19,9 @@ class PowerOfExistenceSpec
   private val abilityId = s.characters.p0First.state.abilities.head.id
   private val masterThroneAbilityId = s.characters.p0First.state.abilities.tail.head.id
   private val aaGameState: GameState = gameState.basicAttack(s.characters.p0First.id, s.characters.p1First.id)
+    .endTurn()
+    .passTurn(s.characters.p1First.id)
+    .finishPhase()
 
   PowerOfExistence.metadata.name must {
     "be able to use" in {

@@ -376,5 +376,48 @@ class GameStateValidatorSpec
         assertCommandFailure(result)
       }
     }
+
+    "validate using abilities" when {
+      "allow use of ability" in {
+        val incrementGameState = gameState.incrementPhase(4)
+        val result = GameStateValidator()(incrementGameState).validateAbilityUseWithoutTarget(s.characters.p0First.owner.id, abilityId)
+        assertCommandSuccess(result)
+      }
+
+      "disallow use of ultimate ability before phase 3" in {
+        val result = GameStateValidator()(gameState).validateAbilityUseWithoutTarget(s.characters.p0First.owner.id, abilityId)
+        assertCommandFailure(result)
+
+        val increment3GameState = gameState.incrementPhase(3)
+        val result2 = GameStateValidator()(increment3GameState).validateAbilityUseWithoutTarget(s.characters.p0First.owner.id, abilityId)
+        assertCommandFailure(result2)
+
+        val increment4GameState = gameState.incrementPhase(4)
+        val result3 = GameStateValidator()(increment4GameState).validateAbilityUseWithoutTarget(s.characters.p0First.owner.id, abilityId)
+        assertCommandSuccess(result3)
+      }
+
+      "disallow use of ability on cooldown" in {
+        val incrementGameState = gameState.incrementPhase(4)
+        val newGameState = incrementGameState.useAbilityWithoutTarget(abilityId)
+          .endTurn()
+          .passTurn(s.characters.p1First.id)
+        newGameState.abilityById(abilityId).get.state(newGameState).cooldown should be > 0
+        val result = GameStateValidator()(newGameState).validateAbilityUseWithoutTarget(s.characters.p0First.owner.id, abilityId)
+
+        assertCommandFailure(result)
+      }
+      "disallow using ability another time in phase" in {
+        val incrementGameState = gameState.incrementPhase(4)
+        val newGameState = incrementGameState.useAbilityWithoutTarget(abilityId)
+          .endTurn()
+          .passTurn(s.characters.p1First.id)
+          .decrementAbilityCooldown(abilityId, 999)
+        newGameState.abilityById(abilityId).get.state(newGameState).cooldown should be (0)
+        val result = GameStateValidator()(newGameState).validateAbilityUseWithoutTarget(s.characters.p0First.owner.id, abilityId)
+
+        assertCommandFailure(result)
+      }
+    }
   }
 }

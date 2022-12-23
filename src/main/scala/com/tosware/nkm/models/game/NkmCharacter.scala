@@ -63,7 +63,35 @@ case class NkmCharacter
     .ofCharacter(id)
     .nonEmpty
 
-  def hasRefreshed[RefreshEvent <: GameEvent: ClassTag, ActionEvent <: GameEvent: ClassTag](implicit gameState: GameState): Boolean = {
+  private def getUsedAbilitiesThisPhase(implicit gameState: GameState): Seq[Ability] = {
+    (
+    gameState.gameLog.events
+      .inPhase(gameState.phase.number)
+      .ofType[GameEvent.AbilityUsedWithoutTarget]
+    ++
+    gameState.gameLog.events
+      .inPhase(gameState.phase.number)
+      .ofType[GameEvent.AbilityUsedOnCoordinates]
+    ++
+    gameState.gameLog.events
+      .inPhase(gameState.phase.number)
+      .ofType[GameEvent.AbilityUsedOnCharacter]
+    )
+    .map(_.abilityId)
+      .map(aid => gameState.abilityById(aid).get)
+      .filter(a => a.parentCharacter.id == id)
+  }
+
+  def usedAbilityThisPhase(implicit gameState: GameState): Boolean =
+    getUsedAbilitiesThisPhase.nonEmpty
+
+  def usedUltimatumAbilityThisPhase(implicit gameState: GameState): Boolean = {
+    getUsedAbilitiesThisPhase
+      .map(_.metadata.abilityType)
+      .contains(AbilityType.Ultimate)
+  }
+
+  private def hasRefreshed[RefreshEvent <: GameEvent: ClassTag, ActionEvent <: GameEvent: ClassTag](implicit gameState: GameState): Boolean = {
     val lastRefreshIndex = gameState.gameLog.events
       .ofType[RefreshEvent]
       .inTurn(gameState.turn.number)
@@ -87,26 +115,6 @@ case class NkmCharacter
 
   def hasRefreshedBasicAttack(implicit gameState: GameState): Boolean =
     hasRefreshed[GameEvent.BasicAttackRefreshed, GameEvent.CharacterBasicAttacked]
-
-  def usedUltimatumAbilityThisPhase(implicit gameState: GameState): Boolean =
-    (
-    gameState.gameLog.events
-      .inPhase(gameState.phase.number)
-      .ofType[GameEvent.AbilityUsedWithoutTarget]
-    ++
-    gameState.gameLog.events
-      .inPhase(gameState.phase.number)
-      .ofType[GameEvent.AbilityUsedOnCoordinates]
-    ++
-    gameState.gameLog.events
-      .inPhase(gameState.phase.number)
-      .ofType[GameEvent.AbilityUsedOnCharacter]
-    )
-    .map(_.abilityId)
-    .map(aid => gameState.abilityById(aid).get)
-    .filter(a => a.parentCharacter.id == id)
-    .map(_.metadata.abilityType)
-    .contains(AbilityType.Ultimate)
 
   def canBasicMove(implicit gameState: GameState): Boolean = {
     (hasRefreshedBasicMove || !usedBasicMoveThisTurn && !usedUltimatumAbilityThisPhase) &&
