@@ -9,7 +9,7 @@ import scala.util.Random
 object HasToTakeAction {
   val metadata: CharacterEffectMetadata =
     CharacterEffectMetadata(
-      name = CharacterEffectName.Disarm,
+      name = CharacterEffectName.HasToTakeAction,
       effectType = CharacterEffectType.Negative,
       description = "This character has to take action next turn.",
       isCc = true,
