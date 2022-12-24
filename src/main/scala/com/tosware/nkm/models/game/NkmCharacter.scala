@@ -122,7 +122,7 @@ case class NkmCharacter
   }
 
   def canBasicAttack(implicit gameState: GameState): Boolean =
-    (hasRefreshedBasicAttack || !usedBasicAttackThisTurn && !usedUltimatumAbilityThisPhase) &&
+    (hasRefreshedBasicAttack || !usedBasicAttackThisTurn && !usedAbilityThisPhase) &&
       !state.effects.exists(e => basicAttackImpairmentCcNames.contains(e.metadata.name))
 
   def parentCell(implicit gameState: GameState): Option[HexCell] =

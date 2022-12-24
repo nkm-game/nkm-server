@@ -3,6 +3,7 @@ package unit.validators
 import com.tosware.nkm.models.GameStateValidator
 import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.game.abilities.hecate.PowerOfExistence
+import com.tosware.nkm.models.game.abilities.sinon.TacticalEscape
 import com.tosware.nkm.models.game.effects._
 import com.tosware.nkm.models.game.hex.{HexCoordinates, NkmUtils}
 import com.tosware.nkm.models.game.hex.HexUtils.CoordinateSeq
@@ -21,7 +22,7 @@ class GameStateValidatorSpec
     .copy(
       initialSpeed = 3,
       initialBasicAttackRange = 1,
-      initialAbilitiesMetadataIds = Seq(PowerOfExistence.metadata.id)
+      initialAbilitiesMetadataIds = Seq(PowerOfExistence.metadata.id, TacticalEscape.metadata.id)
     )
 
   private val s = scenarios.Simple2v2TestScenario(metadata)
@@ -37,7 +38,8 @@ class GameStateValidatorSpec
     TestHexMapName.Simple2v2Wall
   )
 
-  private val abilityId = s.characters.p0First.state.abilities.head.id
+  private val ultimateAbilityId = s.characters.p0First.state.abilities.head.id
+  private val normalAbilityId = s.characters.p0First.state.abilities(1).id
   private val validator = GameStateValidator()(gameState)
 
   "GameStateValidator" must {
@@ -199,7 +201,7 @@ class GameStateValidatorSpec
       }
 
       "disallow move if character used ultimate ability" in {
-        val newGameState = gameState.useAbilityWithoutTarget(abilityId)
+        val newGameState = gameState.useAbilityWithoutTarget(ultimateAbilityId)
 
         assertCommandFailure {
           GameStateValidator()(newGameState).validateBasicMoveCharacter(gameState.players(0).id,
@@ -385,7 +387,7 @@ class GameStateValidatorSpec
       }
 
       "disallow if character used ultimate ability" in {
-        val newGameState = moveGameState.useAbilityWithoutTarget(abilityId)
+        val newGameState = moveGameState.useAbilityWithoutTarget(ultimateAbilityId)
 
         assertCommandFailure {
           GameStateValidator()(newGameState).validateBasicAttackCharacter(
@@ -414,54 +416,54 @@ class GameStateValidatorSpec
         val incrementGameState = gameState.incrementPhase(4)
         assertCommandSuccess {
           GameStateValidator()(incrementGameState)
-            .validateAbilityUseWithoutTarget(s.characters.p0First.owner.id, abilityId)
+            .validateAbilityUseWithoutTarget(s.characters.p0First.owner.id, ultimateAbilityId)
         }
       }
 
       "disallow use of ultimate ability before phase 4" in {
         assertCommandFailure {
           GameStateValidator()(gameState)
-            .validateAbilityUseWithoutTarget(s.characters.p0First.owner.id, abilityId)
+            .validateAbilityUseWithoutTarget(s.characters.p0First.owner.id, ultimateAbilityId)
         }
 
         val increment3GameState = gameState.incrementPhase(3)
         assertCommandFailure {
           GameStateValidator()(increment3GameState)
-            .validateAbilityUseWithoutTarget(s.characters.p0First.owner.id, abilityId)
+            .validateAbilityUseWithoutTarget(s.characters.p0First.owner.id, ultimateAbilityId)
         }
 
         val increment4GameState = gameState.incrementPhase(4)
         assertCommandSuccess {
           GameStateValidator()(increment4GameState)
-            .validateAbilityUseWithoutTarget(s.characters.p0First.owner.id, abilityId)
+            .validateAbilityUseWithoutTarget(s.characters.p0First.owner.id, ultimateAbilityId)
         }
       }
 
       "disallow use of ability on cooldown" in {
         val incrementGameState = gameState.incrementPhase(4)
-        val newGameState = incrementGameState.useAbilityWithoutTarget(abilityId)
+        val newGameState = incrementGameState.useAbilityWithoutTarget(ultimateAbilityId)
           .endTurn()
           .passTurn(s.characters.p1First.id)
-        newGameState.abilityById(abilityId).get.state(newGameState).cooldown should be > 0
+        newGameState.abilityById(ultimateAbilityId).get.state(newGameState).cooldown should be > 0
 
 
         assertCommandFailure {
           GameStateValidator()(newGameState)
-            .validateAbilityUseWithoutTarget(s.characters.p0First.owner.id, abilityId)
+            .validateAbilityUseWithoutTarget(s.characters.p0First.owner.id, ultimateAbilityId)
         }
       }
       "disallow using ability another time in phase" in {
         val incrementGameState = gameState.incrementPhase(4)
-        val newGameState = incrementGameState.useAbilityWithoutTarget(abilityId)
+        val newGameState = incrementGameState.useAbilityWithoutTarget(ultimateAbilityId)
           .endTurn()
           .passTurn(s.characters.p1First.id)
-          .decrementAbilityCooldown(abilityId, 999)
-        newGameState.abilityById(abilityId).get.state(newGameState).cooldown should be (0)
+          .decrementAbilityCooldown(ultimateAbilityId, 999)
+        newGameState.abilityById(ultimateAbilityId).get.state(newGameState).cooldown should be (0)
 
 
         assertCommandFailure {
           GameStateValidator()(newGameState)
-            .validateAbilityUseWithoutTarget(s.characters.p0First.owner.id, abilityId)
+            .validateAbilityUseWithoutTarget(s.characters.p0First.owner.id, ultimateAbilityId)
         }
       }
     }
@@ -487,6 +489,19 @@ class GameStateValidatorSpec
         .basicAttack(s.characters.p0First.id, s.characters.p1First.id)
         .endTurn()
         .passTurn(s.characters.p1First.id)
+
+      assertCommandFailure {
+        GameStateValidator()(newGameState).validateBasicAttackCharacter(gameState.players(0).id,
+          s.characters.p0First.id,
+          s.characters.p1First.id,
+        )
+      }
+    }
+    "disallow basic attacking after using a basic ability" in {
+      val incrementGameState = gameState.incrementPhase(4)
+      val moveGameState = incrementGameState.teleportCharacter(s.characters.p0First.id, HexCoordinates(2, 0))(random, gameState.id)
+
+      val newGameState = moveGameState.useAbilityWithoutTarget(normalAbilityId)
 
       assertCommandFailure {
         GameStateValidator()(newGameState).validateBasicAttackCharacter(gameState.players(0).id,
