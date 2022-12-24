@@ -5,11 +5,12 @@ import com.tosware.nkm.models.game.{CharacterMetadata, GameState, NkmCharacter}
 import com.tosware.nkm.providers.HexMapProvider.TestHexMapName
 import helpers.TestUtils
 
-case class Simple1v1TestScenario(metadata: CharacterMetadata) extends TestUtils {
+case class Simple1v1TestScenario(metadata: CharacterMetadata, secondMetadata: Option[CharacterMetadata] = None) extends TestUtils {
+  private val metadata2 = secondMetadata.getOrElse(metadata)
   val gameState: GameState = getTestGameState(
     TestHexMapName.Simple1v1, Seq(
       Seq(metadata.copy(name = "Character")),
-      Seq(metadata.copy(name = "Enemy")),
+      Seq(metadata2.copy(name = "Enemy")),
     )
   )
 
