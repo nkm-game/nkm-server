@@ -7,7 +7,7 @@ object Stun {
   val metadata: CharacterEffectMetadata =
     CharacterEffectMetadata(
       name = CharacterEffectName.Stun,
-      effectType = CharacterEffectType.Negative,
+      initialEffectType = CharacterEffectType.Negative,
       description = "This character cannot take action.",
       isCc = true,
     )

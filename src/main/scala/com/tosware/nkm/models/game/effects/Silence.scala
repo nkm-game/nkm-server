@@ -7,7 +7,7 @@ object Silence {
   val metadata: CharacterEffectMetadata = {
     CharacterEffectMetadata(
       name = CharacterEffectName.Silence,
-      effectType = CharacterEffectType.Negative,
+      initialEffectType = CharacterEffectType.Negative,
       description = "This character cannot use abilities.",
       isCc = true,
     )

@@ -10,7 +10,7 @@ object HasToTakeAction {
   val metadata: CharacterEffectMetadata =
     CharacterEffectMetadata(
       name = CharacterEffectName.HasToTakeAction,
-      effectType = CharacterEffectType.Negative,
+      initialEffectType = CharacterEffectType.Negative,
       description = "This character has to take action next turn.",
       isCc = true,
     )

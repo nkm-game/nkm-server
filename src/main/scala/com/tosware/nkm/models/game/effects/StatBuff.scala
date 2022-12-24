@@ -7,7 +7,7 @@ object StatBuff {
   val metadata: CharacterEffectMetadata =
     CharacterEffectMetadata(
       name = CharacterEffectName.StatBuff,
-      effectType = CharacterEffectType.Positive,
+      initialEffectType = CharacterEffectType.Positive,
       description = "Buffs a certain stat in character.",
     )
 }

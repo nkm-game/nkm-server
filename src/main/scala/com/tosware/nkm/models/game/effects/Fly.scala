@@ -7,7 +7,7 @@ object Fly {
   val metadata: CharacterEffectMetadata =
   CharacterEffectMetadata(
     name = CharacterEffectName.Fly,
-    effectType = CharacterEffectType.Positive,
+    initialEffectType = CharacterEffectType.Positive,
     description = "This character can fly, allowing them to pass walls and enemy characters.",
   )
 }

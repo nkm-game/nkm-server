@@ -7,7 +7,7 @@ object Disarm {
   val metadata: CharacterEffectMetadata =
     CharacterEffectMetadata(
       name = CharacterEffectName.Disarm,
-      effectType = CharacterEffectType.Negative,
+      initialEffectType = CharacterEffectType.Negative,
       description = "This character is disarmed and cannot use basic attacks.",
       isCc = true,
     )

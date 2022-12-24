@@ -7,7 +7,7 @@ object Ground {
   val metadata: CharacterEffectMetadata =
     CharacterEffectMetadata(
       name = CharacterEffectName.Ground,
-      effectType = CharacterEffectType.Negative,
+      initialEffectType = CharacterEffectType.Negative,
       description = "This character is grounded and cannot move.",
       isCc = true,
     )

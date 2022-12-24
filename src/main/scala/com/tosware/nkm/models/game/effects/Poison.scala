@@ -12,7 +12,7 @@ object Poison {
   def metadata: CharacterEffectMetadata =
     CharacterEffectMetadata(
       name = CharacterEffectName.Poison,
-      effectType = CharacterEffectType.Negative,
+      initialEffectType = CharacterEffectType.Negative,
       description =
         """Poison.
           |Deals damage at the end of turn.""".stripMargin,
@@ -23,7 +23,7 @@ object MurasamePoison {
   def metadata: CharacterEffectMetadata =
     CharacterEffectMetadata(
       name = CharacterEffectName.MurasamePoison,
-      effectType = CharacterEffectType.Negative,
+      initialEffectType = CharacterEffectType.Negative,
       description =
       """Poison.
         |Deals damage at the end of turn.

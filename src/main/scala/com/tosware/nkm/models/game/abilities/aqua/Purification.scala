@@ -29,7 +29,7 @@ case class Purification(abilityId: AbilityId, parentCharacterId: CharacterId) ex
 
   override def use(target: CharacterId, useData: UseData)(implicit random: Random, gameState: GameState) = {
     val effectIdsToRemove = gameState.characterById(target).get.state.effects
-      .filter(_.metadata.effectType == CharacterEffectType.Negative).map(_.id)
+      .filter(_.effectType == CharacterEffectType.Negative).map(_.id)
 
     gameState
       .abilityHitCharacter(id, target)
@@ -41,7 +41,7 @@ case class Purification(abilityId: AbilityId, parentCharacterId: CharacterId) ex
 
     super.useChecks ++ Seq(
       UseCheck.TargetCharacter.IsFriend,
-      targetCharacter.state.effects.exists(_.metadata.effectType == CharacterEffectType.Negative) ->
+      targetCharacter.state.effects.exists(_.effectType == CharacterEffectType.Negative) ->
         "Target character does not have any negative effects.",
     )
   }

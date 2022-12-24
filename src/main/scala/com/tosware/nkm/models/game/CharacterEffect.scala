@@ -43,7 +43,7 @@ object CharacterEffectType extends Enum[CharacterEffectType] {
 case class CharacterEffectMetadata
 (
   name: CharacterEffectName,
-  effectType: CharacterEffectType,
+  initialEffectType: CharacterEffectType,
   description: String,
   isCc: Boolean = false,
 ) {
@@ -54,6 +54,8 @@ abstract class CharacterEffect(val id: CharacterEffectId) {
   val metadata: CharacterEffectMetadata
   val initialCooldown: Int
 
+  def effectType(implicit gameState: GameState): CharacterEffectType =
+    metadata.initialEffectType
   def state(implicit gameState: GameState): CharacterEffectState =
     gameState.characterEffectStates(id)
   def parentCharacter(implicit gameState: GameState): NkmCharacter =
@@ -70,6 +72,7 @@ abstract class CharacterEffect(val id: CharacterEffectId) {
       metadataId = metadata.id,
       parentCharacterId = parentCharacter.id,
       state = state,
+      effectType = effectType,
     )
 }
 
@@ -81,4 +84,5 @@ case class CharacterEffectView
   metadataId: CharacterEffectMetadataId,
   parentCharacterId: CharacterId,
   state: CharacterEffectState,
+  effectType: CharacterEffectType,
 )

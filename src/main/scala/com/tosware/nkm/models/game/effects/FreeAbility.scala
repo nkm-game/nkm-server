@@ -7,7 +7,7 @@ object FreeAbility {
   val metadata: CharacterEffectMetadata =
   CharacterEffectMetadata(
     name = CharacterEffectName.FreeAbility,
-    effectType = CharacterEffectType.Positive,
+    initialEffectType = CharacterEffectType.Positive,
     description = "This character can use one of his abilities for free.",
   )
 }

@@ -14,7 +14,7 @@ object BlackBlood {
   def metadata: CharacterEffectMetadata =
     CharacterEffectMetadata(
       name = CharacterEffectName.BlackBlood,
-      effectType = CharacterEffectType.Mixed,
+      initialEffectType = CharacterEffectType.Mixed,
       description = "Black Blood",
       isCc = true,
     )
@@ -24,6 +24,11 @@ case class BlackBlood(effectId: CharacterEffectId, initialCooldown: Int, sourceC
   extends CharacterEffect(effectId)
     with GameEventListener {
   val metadata: CharacterEffectMetadata = BlackBlood.metadata
+
+  override def effectType(implicit gameState: GameState): CharacterEffectType =
+    if(parentCharacter.isFriendForC(sourceCharacterId)) CharacterEffectType.Positive
+    else CharacterEffectType.Negative
+
   val radius = NkmConf.int("abilities.crona.blackBlood.radius")
   val damage = NkmConf.int("abilities.crona.blackBlood.damage")
 

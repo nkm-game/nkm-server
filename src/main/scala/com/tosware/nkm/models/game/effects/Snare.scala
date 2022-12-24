@@ -7,7 +7,7 @@ object Snare {
   val metadata: CharacterEffectMetadata =
     CharacterEffectMetadata(
       name = CharacterEffectName.Snare,
-      effectType = CharacterEffectType.Negative,
+      initialEffectType = CharacterEffectType.Negative,
       description = "This character cannot basic move.",
       isCc = true,
     )
