@@ -69,5 +69,24 @@ class GameStateSpec
       p0CharacterKilledGameState.players(1).victoryStatus should be (VictoryStatus.Won)
       p1CharacterKilledGameState.players(0).victoryStatus should be (VictoryStatus.Won)
     }
+    "skip player turn when he has no characters to take action" in {
+      val simple2v2Scenario = scenarios.Simple2v2TestScenario(metadata)
+      val gs = simple2v2Scenario.gameState
+        .executeCharacter(simple2v2Scenario.characters.p0Second.id)(random, "test")
+        .passTurn(simple2v2Scenario.characters.p0First.id)
+        .passTurn(simple2v2Scenario.characters.p1First.id)
+      gs.currentPlayer.id should be (simple2v2Scenario.characters.p1First.owner(gs).id)
+    }
+
+    "finish the phase when there are no characters to take action" in {
+      val simple2v2Scenario = scenarios.Simple2v2TestScenario(metadata)
+      val gs = simple2v2Scenario.gameState
+        .executeCharacter(simple2v2Scenario.characters.p1Second.id)(random, "test")
+        .passTurn(simple2v2Scenario.characters.p0First.id)
+        .passTurn(simple2v2Scenario.characters.p1First.id)
+        .passTurn(simple2v2Scenario.characters.p0Second.id)
+      gs.characterIdsThatTookActionThisPhase should be (Set.empty)
+      gs.phase.number should be (1)
+    }
   }
 }

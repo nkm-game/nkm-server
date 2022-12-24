@@ -60,6 +60,8 @@ case class GameState(
 
   def currentPlayerTime: Long = clock.playerTimes(currentPlayer.id)
 
+  def charactersToTakeAction: Set[CharacterId] = characters.filterNot(_.isDead).map(_.id) -- characterIdsThatTookActionThisPhase
+
   def abilities: Set[Ability] = characters.flatMap(_.state.abilities)
 
   def effects: Set[CharacterEffect] = characters.flatMap(_.state.effects)
@@ -507,6 +509,20 @@ case class GameState(
   def incrementTurn(): GameState =
     this.modify(_.turn).using(oldTurn => Turn(oldTurn.number + 1))
 
+  def finishTurn()(implicit random: Random, causedById: String = id): GameState = {
+    this.incrementTurn()
+      .logEvent(TurnFinished(NkmUtils.randomUUID()))
+      .finishPhaseIfEveryCharacterTookAction()
+      .logEvent(TurnStarted(NkmUtils.randomUUID()))
+      .skipTurnIfNoCharactersToTakeAction()
+  }
+
+  def skipTurnIfNoCharactersToTakeAction()(implicit random: Random, causedById: String = id): GameState = {
+    if(currentPlayer.characterIds.intersect(charactersToTakeAction).isEmpty) {
+      finishTurn()
+    } else this
+  }
+
   def endTurn()(implicit random: Random, causedById: String = id): GameState = {
     val currentCharacterAbilityIds = currentCharacter.get.state.abilities.map(_.id)
     val currentCharacterEffectIds = currentCharacter.get.state.effects.map(_.id)
@@ -515,19 +531,15 @@ case class GameState(
       acc.decrementAbilityCooldown(abilityId)
     })
 
-    val turnFinishedState = decrementAbilityCooldownsState
-      .modify(_.characterIdsThatTookActionThisPhase).using(c => c + characterTakingActionThisTurn.get)
-      .modify(_.characterTakingActionThisTurn).setTo(None)
-      .incrementTurn()
-      .logEvent(TurnFinished(NkmUtils.randomUUID()))
 
-    val decrementEffectCooldownsState = currentCharacterEffectIds.foldLeft(turnFinishedState)((acc, effectId) => {
+    val decrementEffectCooldownsState = currentCharacterEffectIds.foldLeft(decrementAbilityCooldownsState)((acc, effectId) => {
       acc.decrementEffectCooldown(effectId)
     })
 
     decrementEffectCooldownsState
-      .finishPhaseIfEveryCharacterTookAction()
-      .logEvent(TurnStarted(NkmUtils.randomUUID()))
+      .modify(_.characterIdsThatTookActionThisPhase).using(c => c + characterTakingActionThisTurn.get)
+      .modify(_.characterTakingActionThisTurn).setTo(None)
+      .finishTurn()
   }
 
   def passTurn(characterId: CharacterId)(implicit random: Random): GameState =
@@ -545,8 +557,7 @@ case class GameState(
       .logEvent(PhaseFinished(NkmUtils.randomUUID()))
 
   def finishPhaseIfEveryCharacterTookAction()(implicit random: Random): GameState =
-    if(characterIdsThatTookActionThisPhase == characters.map(_.id))
-      this.finishPhase()
+    if(charactersToTakeAction.isEmpty) this.finishPhase()
     else this
 
   def toView(forPlayer: Option[PlayerId]): GameStateView =
