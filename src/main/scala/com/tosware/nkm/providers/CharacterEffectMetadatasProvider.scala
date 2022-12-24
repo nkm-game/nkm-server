@@ -8,14 +8,16 @@ case class CharacterEffectMetadatasProvider() extends NkmJsonProtocol {
   def getCharacterEffectMetadatas: Seq[CharacterEffectMetadata] = Seq(
     BlackBlood.metadata,
     Disarm.metadata,
+    Fly.metadata,
+    FreeAbility.metadata,
     Ground.metadata,
+    HasToTakeAction.metadata,
+    Poison.metadata,
+    MurasamePoison.metadata,
     Silence.metadata,
     Snare.metadata,
     StatBuff.metadata,
     StatNerf.metadata,
     Stun.metadata,
-    Poison.metadata,
-    MurasamePoison.metadata,
-    Fly.metadata
   )
 }

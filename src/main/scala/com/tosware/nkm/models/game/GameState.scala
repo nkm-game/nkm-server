@@ -3,7 +3,6 @@ package com.tosware.nkm.models.game
 import com.softwaremill.quicklens._
 import com.tosware.nkm.Logging
 import com.tosware.nkm.actors.Game.GameId
-import com.tosware.nkm.models.{Damage, DamageType}
 import com.tosware.nkm.models.game.Ability.AbilityId
 import com.tosware.nkm.models.game.CharacterEffect.CharacterEffectId
 import com.tosware.nkm.models.game.CharacterMetadata.CharacterMetadataId
@@ -12,7 +11,10 @@ import com.tosware.nkm.models.game.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game.Player.PlayerId
 import com.tosware.nkm.models.game.blindpick._
 import com.tosware.nkm.models.game.draftpick._
+import com.tosware.nkm.models.game.effects.FreeAbility
+import com.tosware.nkm.models.game.hex.HexUtils._
 import com.tosware.nkm.models.game.hex.{HexCell, HexCoordinates, HexMap, NkmUtils}
+import com.tosware.nkm.models.{Damage, DamageType}
 
 import scala.util.Random
 
@@ -430,6 +432,13 @@ case class GameState(
     this.copy(abilityStates = abilityStates.updated(abilityId, newState))
   }
 
+  def putAbilityOnCooldownOrDecrementFreeAbility(abilityId: AbilityId)(implicit random: Random): GameState = {
+    val freeAbilityEffectOpt = abilityById(abilityId).get.parentCharacter(this).state.effects.ofType[FreeAbility].headOption
+    if(freeAbilityEffectOpt.nonEmpty) {
+      this.decrementEffectCooldown(freeAbilityEffectOpt.get.effectId)
+    } else putAbilityOnCooldown(abilityId)
+  }
+
   def decrementAbilityCooldown(abilityId: AbilityId, amount: Int = 1): GameState = {
     val newState = abilityById(abilityId).get.getDecrementCooldownState(amount)(this)
     this.copy(abilityStates = abilityStates.updated(abilityId, newState))
@@ -452,7 +461,7 @@ case class GameState(
     val newGameState = takeActionWithCharacter(parentCharacter.id)
       .logEvent(AbilityUsedWithoutTarget(NkmUtils.randomUUID(), abilityId))
     ability.use()(random, newGameState)
-      .putAbilityOnCooldown(abilityId)
+      .putAbilityOnCooldownOrDecrementFreeAbility(abilityId)
   }
 
   def useAbilityOnCoordinates(abilityId: AbilityId, target: HexCoordinates, useData: UseData = UseData())(implicit random: Random): GameState = {
@@ -463,7 +472,7 @@ case class GameState(
     val newGameState = takeActionWithCharacter(parentCharacter.id)
     ability.use(target, useData)(random, newGameState)
       .logEvent(AbilityUsedOnCoordinates(NkmUtils.randomUUID(), abilityId, target))
-      .putAbilityOnCooldown(abilityId)
+      .putAbilityOnCooldownOrDecrementFreeAbility(abilityId)
   }
 
   def useAbilityOnCharacter(abilityId: AbilityId, target: CharacterId, useData: UseData = UseData())(implicit random: Random): GameState = {
@@ -474,7 +483,7 @@ case class GameState(
     val newGameState = takeActionWithCharacter(parentCharacter.id)
     ability.use(target, useData)(random, newGameState)
       .logEvent(AbilityUsedOnCharacter(NkmUtils.randomUUID(), abilityId, target))
-      .putAbilityOnCooldown(abilityId)
+      .putAbilityOnCooldownOrDecrementFreeAbility(abilityId)
   }
 
   def incrementTurn(): GameState =

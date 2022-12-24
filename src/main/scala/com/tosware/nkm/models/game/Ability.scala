@@ -3,6 +3,7 @@ package com.tosware.nkm.models.game
 import com.tosware.nkm.models.CommandResponse.{CommandResponse, Failure, Success}
 import com.tosware.nkm.models.game.Ability._
 import com.tosware.nkm.models.game.NkmCharacter.CharacterId
+import com.tosware.nkm.models.game.effects.FreeAbility
 import com.tosware.nkm.models.game.hex.HexUtils._
 import com.tosware.nkm.models.game.hex.{HexCell, HexCoordinates}
 import enumeratum._
@@ -145,7 +146,7 @@ abstract class Ability(val id: AbilityId, pid: CharacterId) extends Usable {
       def IsNotPassive(implicit gameState: GameState): UseCheck =
         (metadata.abilityType != AbilityType.Passive) -> s"Cannot use passive abilities."
       def IsNotOnCooldown(implicit gameState: GameState): UseCheck =
-        (state.cooldown <= 0) -> "Ability is on cooldown."
+        (state.cooldown <= 0 || parentCharacter.state.effects.ofType[FreeAbility].nonEmpty) -> "Ability is on cooldown."
       def ParentCharacterOnMap(implicit gameState: GameState): UseCheck =
         parentCharacter.isOnMap -> "Parent character is not on map."
       def PhaseIsGreaterThan(i: Int)(implicit gameState: GameState): UseCheck =

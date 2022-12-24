@@ -4,6 +4,10 @@ import com.tosware.nkm.NkmConf
 import com.tosware.nkm.models.game.Ability.AbilityId
 import com.tosware.nkm.models.game.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game._
+import com.tosware.nkm.models.game.effects.FreeAbility
+import com.tosware.nkm.models.game.hex.HexUtils._
+
+import scala.util.Random
 
 object AceInTheHole {
   val metadata: AbilityMetadata =
@@ -16,7 +20,27 @@ object AceInTheHole {
     )
 }
 
-case class AceInTheHole(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId) {
+case class AceInTheHole(abilityId: AbilityId, parentCharacterId: CharacterId)
+  extends Ability(abilityId, parentCharacterId)
+    with GameEventListener {
   override val metadata = AceInTheHole.metadata
 
+  private def getDamageThisTurn()(implicit gameState: GameState): Int = {
+    gameState.gameLog.events
+      .inTurn(gameState.turn.number)
+      .ofType[GameEvent.CharacterDamaged]
+      .ofCharacter(parentCharacterId)
+      .map(_.damage.amount).sum
+  }
+
+  override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState = {
+    e match {
+      case GameEvent.CharacterDamaged(_, characterId, _) =>
+        if(characterId != parentCharacterId) return gameState
+        if(getDamageThisTurn() < parentCharacter.state.maxHealthPoints * metadata.variables("maxHpPercent") / 100)
+          gameState
+        else gameState.addEffect(parentCharacterId, FreeAbility(parentCharacterId, 1))(random, id)
+      case _ => gameState
+    }
+  }
 }
