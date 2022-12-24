@@ -212,35 +212,40 @@ class GameStateValidatorSpec
       "disallow move if other character took action in turn" in {
         val newGameState = gameState.takeActionWithCharacter("test_nonexistent_id")
 
-        val result = GameStateValidator()(newGameState).validateBasicMoveCharacter(gameState.players(0).id,
-          CoordinateSeq((0, 0), (1, 0)),
-          s.characters.p0First.id
-        )
-        assertCommandFailure(result)
+        assertCommandFailure {
+          GameStateValidator()(newGameState).validateBasicMoveCharacter(gameState.players(0).id,
+            CoordinateSeq((0, 0), (1, 0)),
+            s.characters.p0First.id
+          )
+
+        }
       }
 
       "disallow move if there is an obstacle on path" in {
-        val result = validator.validateBasicMoveCharacter(gameState.players(0).id,
-          CoordinateSeq((0, 0), (1, -1), (1, 0)),
-          s.characters.p0First.id
-        )
-        assertCommandFailure(result)
+        assertCommandFailure {
+          validator.validateBasicMoveCharacter(gameState.players(0).id,
+            CoordinateSeq((0, 0), (1, -1), (1, 0)),
+            s.characters.p0First.id
+          )
+        }
       }
 
       "disallow move if cell at the end is not free to move" in {
-        val result = validator.validateBasicMoveCharacter(gameState.players(0).id,
-          CoordinateSeq((0, 0), (1, -1)),
-          s.characters.p0First.id
-        )
-        assertCommandFailure(result)
+        assertCommandFailure {
+          validator.validateBasicMoveCharacter(gameState.players(0).id,
+            CoordinateSeq((0, 0), (1, -1)),
+            s.characters.p0First.id
+          )
+        }
       }
 
       "disallow move if moving to not adjacent cell" in {
-        val result = validator.validateBasicMoveCharacter(gameState.players(0).id,
-          CoordinateSeq((0, 0), (0, 2)),
-          s.characters.p0First.id
-        )
-        assertCommandFailure(result)
+        assertCommandFailure {
+          validator.validateBasicMoveCharacter(gameState.players(0).id,
+            CoordinateSeq((0, 0), (0, 2)),
+            s.characters.p0First.id
+          )
+        }
       }
     }
 
@@ -458,6 +463,36 @@ class GameStateValidatorSpec
           GameStateValidator()(newGameState)
             .validateAbilityUseWithoutTarget(s.characters.p0First.owner.id, abilityId)
         }
+      }
+    }
+    "disallow moving for a second time in one phase" in {
+      val newGameState = gameState.basicMoveCharacter(
+        s.characters.p0First.id,
+        CoordinateSeq((0, 0), (1, 0))
+      ).endTurn()
+        .passTurn(s.characters.p1First.id)
+
+      assertCommandFailure{
+        GameStateValidator()(newGameState).validateBasicMoveCharacter(
+          gameState.players(0).id,
+          CoordinateSeq((1, 0), (0, 0)),
+          s.characters.p0First.id,
+        )
+      }
+    }
+
+    "disallow basic attacking for a second time in one phase" in {
+      val moveGameState = gameState.teleportCharacter(s.characters.p0First.id, HexCoordinates(2, 0))(random, gameState.id)
+      val newGameState = moveGameState
+        .basicAttack(s.characters.p0First.id, s.characters.p1First.id)
+        .endTurn()
+        .passTurn(s.characters.p1First.id)
+
+      assertCommandFailure {
+        GameStateValidator()(newGameState).validateBasicAttackCharacter(gameState.players(0).id,
+          s.characters.p0First.id,
+          s.characters.p1First.id,
+        )
       }
     }
   }
