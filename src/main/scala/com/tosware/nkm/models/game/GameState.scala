@@ -319,6 +319,12 @@ case class GameState(
       .logEvent(CharacterBasicAttacked(NkmUtils.randomUUID(), attackingCharacterId, targetCharacterId))
   }
 
+  private def updatePlayer(playerId: PlayerId)(updateFunction: Player => Player): GameState =
+    this.modify(_.players.each).using {
+      case player if player.id == playerId => updateFunction(player)
+      case player => player
+    }
+
   private def updateCharacter(characterId: CharacterId)(updateFunction: NkmCharacter => NkmCharacter): GameState =
     this.modify(_.characters.each).using {
       case character if character.id == characterId => updateFunction(character)
@@ -346,7 +352,7 @@ case class GameState(
       this
     } else {
       updateCharacter(characterId)(_.receiveDamage(damage))
-        .removeFromMapIfDead(characterId) // needs to be removed first in order to avoid infinite triggers
+        .checkIfCharacterDied(characterId) // needs to be removed first in order to avoid infinite triggers
         .logEvent(CharacterDamaged(NkmUtils.randomUUID(), characterId, damage))
     }
   }
@@ -376,12 +382,24 @@ case class GameState(
       .logEvent(CharacterStatSet(NkmUtils.randomUUID(), characterId, statType, amount))
   }
 
-  def removeFromMapIfDead(characterId: CharacterId)(implicit random: Random, causedById: String): GameState =
+  def checkIfCharacterDied(characterId: CharacterId)(implicit random: Random, causedById: String): GameState =
     if(characterById(characterId).get.isDead) {
-      logger.info(characterId + " is dead")
-      logEvent(CharacterDied(NkmUtils.randomUUID(), characterId))
-        .removeCharacterFromMap(characterId)
+      handleCharacterDeath(characterId)
     } else this
+
+  def knockOutPlayer(playerId: PlayerId): GameState =
+    updatePlayer(playerId)(_.modify(_.victoryStatus).setTo(VictoryStatus.Lost))
+      .checkVictoryStatus()
+
+  def checkIfPlayerKnockedOut(playerId: PlayerId): GameState =
+    if(characters.filter(_.owner(this).id == playerId).forall(_.isDead)) {
+      knockOutPlayer(playerId)
+    } else this
+
+  def handleCharacterDeath(characterId: CharacterId)(implicit random: Random, causedById: String): GameState =
+    this.removeCharacterFromMap(characterId)
+      .logEvent(CharacterDied(NkmUtils.randomUUID(), characterId))
+      .checkIfPlayerKnockedOut(characterById(characterId).get.owner(this).id)
 
   def addEffect(characterId: CharacterId, characterEffect: CharacterEffect)(implicit random: Random, causedById: String): GameState =
     updateCharacter(characterId)(_.addEffect(characterEffect))

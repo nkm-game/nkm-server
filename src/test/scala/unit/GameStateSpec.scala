@@ -59,5 +59,15 @@ class GameStateSpec
       abilityUsedGameState.effects.size should be (1)
       endTurnGameState.effects.size should be (0)
     }
+    "end the game when all players are knocked out" in {
+      val p0CharacterKilledGameState = gameState.executeCharacter(s.characters.p0.id)(random, "test")
+      val p1CharacterKilledGameState = gameState.executeCharacter(s.characters.p1.id)(random, "test")
+
+      p0CharacterKilledGameState.gameStatus should be (GameStatus.Finished)
+      p1CharacterKilledGameState.gameStatus should be (GameStatus.Finished)
+
+      p0CharacterKilledGameState.players(1).victoryStatus should be (VictoryStatus.Won)
+      p1CharacterKilledGameState.players(0).victoryStatus should be (VictoryStatus.Won)
+    }
   }
 }
