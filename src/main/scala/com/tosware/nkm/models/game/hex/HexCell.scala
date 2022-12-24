@@ -5,6 +5,7 @@ import com.tosware.nkm.models.game.Player.PlayerId
 import com.tosware.nkm.models.game.hex.HexCellType.Normal
 import com.tosware.nkm.models.game.{GameState, NkmCharacter}
 import HexUtils._
+import com.tosware.nkm.models.game.effects.Fly
 
 import scala.annotation.tailrec
 
@@ -29,8 +30,11 @@ case class HexCell
 ) {
   def isEmpty: Boolean = characterId.isEmpty
   def isFreeToStand: Boolean = isEmpty && cellType != HexCellType.Wall
-  def isFreeToPass(forCharacterId: CharacterId)(implicit gameState: GameState): Boolean =
-    cellType != HexCellType.Wall && characterId.flatMap(cid => gameState.characterById(cid)).fold(true)(_.isFriendForC(forCharacterId))
+  def isFreeToPass(forCharacterId: CharacterId)(implicit gameState: GameState): Boolean = {
+    val forCharacter = gameState.characterById(forCharacterId).get
+    cellType != HexCellType.Wall && characterId.forall(c => forCharacter.isFriendForC(c)) || forCharacter.state.effects.ofType[Fly].nonEmpty
+  }
+
   def character(implicit gameState: GameState): Option[NkmCharacter] =
     characterId.flatMap(cid => gameState.characterById(cid))
 

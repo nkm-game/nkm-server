@@ -1,6 +1,6 @@
 package com.tosware.nkm.providers
 
-import com.tosware.nkm.models.game.hex.HexCellType.{SpawnPoint, Wall}
+import com.tosware.nkm.models.game.hex.HexCellType._
 import com.tosware.nkm.models.game.hex.{HexMap, HexUtils}
 import com.tosware.nkm.providers.HexMapProvider.TestHexMapName
 import com.tosware.nkm.serializers.NkmJsonProtocol
@@ -22,6 +22,7 @@ object HexMapProvider {
     case object Simple2v2Wall extends TestHexMapName
     case object Simple1v9Line extends TestHexMapName
     case object OgreCutter extends TestHexMapName
+    case object Fly extends TestHexMapName
   }
 }
 
@@ -113,12 +114,20 @@ case class HexMapProvider() extends NkmJsonProtocol {
       (0, 0, SpawnPoint, 0),
       (1, 0, SpawnPoint, 1),
     )
+    val flyHexParams: Set[Any] = Set(
+      (0, 0, SpawnPoint, 0),
+      (1, 0, Wall),
+      (2, 0),
+      (3, 0, SpawnPoint, 1),
+      (4, 0),
+    )
     val nameToParams: Map[TestHexMapName, Set[Any]] = Map(
       TestHexMapName.Simple1v1 -> simple1v1HexParams,
       TestHexMapName.Simple2v2 -> simple2v2HexParams,
       TestHexMapName.Simple2v2Wall -> simple2v2WallHexParams,
       TestHexMapName.OgreCutter -> ogreCutterHexParams,
       TestHexMapName.Simple1v9Line -> simple1v9LineHexParams,
+      TestHexMapName.Fly -> flyHexParams,
     )
     nameToParams.map {
       case (name: TestHexMapName, params: Set[Any]) =>
