@@ -20,7 +20,7 @@ trait TestUtils extends Logging {
     case Success(_) =>
     case Failure(m) =>
       logger.error(m)
-      fail()
+      fail(m)
   }
 
   protected def assertCommandFailure(c: CommandResponse): Unit = c match {
