@@ -28,6 +28,7 @@ object CharacterEffectName extends Enum[CharacterEffectName] {
 
   case object MurasamePoison extends CharacterEffectName
   case object BlackBlood extends CharacterEffectName
+  case object ManipulatorOfObjectsImmunity extends CharacterEffectName
 }
 
 sealed trait CharacterEffectType extends EnumEntry
