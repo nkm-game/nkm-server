@@ -99,6 +99,7 @@ case class HexMapProvider() extends NkmJsonProtocol {
     )
 
     val simple1v9LineHexParams: Set[Any] = Set(
+      (-1, 0, Wall),
       (0, 0, SpawnPoint, 0),
       (1, 0, SpawnPoint, 1),
       (2, 0, SpawnPoint, 1),
@@ -109,6 +110,7 @@ case class HexMapProvider() extends NkmJsonProtocol {
       (7, 0, SpawnPoint, 1),
       (8, 0, SpawnPoint, 1),
       (9, 0, SpawnPoint, 1),
+      (10, 0, Wall),
     )
     val simple1v1HexParams: Set[Any] = Set(
       (0, 0, SpawnPoint, 0),
