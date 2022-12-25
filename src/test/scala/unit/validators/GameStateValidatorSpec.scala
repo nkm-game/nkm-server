@@ -5,9 +5,8 @@ import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.game.abilities.hecate.PowerOfExistence
 import com.tosware.nkm.models.game.abilities.sinon.TacticalEscape
 import com.tosware.nkm.models.game.effects._
-import com.tosware.nkm.models.game.hex.{HexCoordinates, NkmUtils}
+import com.tosware.nkm.models.game.hex.{HexCoordinates, NkmUtils, TestHexMapName}
 import com.tosware.nkm.models.game.hex.HexUtils.CoordinateSeq
-import com.tosware.nkm.providers.HexMapProvider.TestHexMapName
 import helpers.{TestUtils, scenarios}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike

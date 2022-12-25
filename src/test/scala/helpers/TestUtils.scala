@@ -6,9 +6,8 @@ import com.tosware.nkm.models.game.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game.PickType.BlindPick
 import com.tosware.nkm.models.game.Player.PlayerId
 import com.tosware.nkm.models.game._
-import com.tosware.nkm.models.game.hex.HexCoordinates
+import com.tosware.nkm.models.game.hex.{HexCoordinates, TestHexMapName}
 import com.tosware.nkm.providers.HexMapProvider
-import com.tosware.nkm.providers.HexMapProvider.TestHexMapName
 import org.scalatest.Assertions.fail
 
 import scala.util.Random

@@ -1,8 +1,7 @@
 package helpers.scenarios
 
-import com.tosware.nkm.models.game.hex.HexCoordinates
+import com.tosware.nkm.models.game.hex.{HexCoordinates, TestHexMapName}
 import com.tosware.nkm.models.game.{CharacterMetadata, GameState, NkmCharacter}
-import com.tosware.nkm.providers.HexMapProvider.TestHexMapName
 import helpers.TestUtils
 
 case class OgreCutterTestScenario(metadata: CharacterMetadata) extends TestUtils {
