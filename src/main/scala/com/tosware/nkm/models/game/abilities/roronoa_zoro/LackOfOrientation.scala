@@ -4,7 +4,6 @@ import com.tosware.nkm.models.game.Ability.AbilityId
 import com.tosware.nkm.models.game.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.game.hex.{HexCoordinates, HexMap}
-import com.tosware.nkm.models.game.hex.HexUtils._
 
 import scala.annotation.tailrec
 import scala.util.Random

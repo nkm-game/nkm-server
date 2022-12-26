@@ -10,7 +10,7 @@ import scala.math.abs
 import scala.reflect.ClassTag
 import scala.util.Random
 
-object HexUtils {
+trait HexUtils {
 
   // TODO in Scala 3
   // type HexParam = (Int, Int) | (Int, Int, HexCellType) | (Int, Int, HexCellType, Int)
@@ -143,3 +143,5 @@ object NkmUtils {
   def randomUUID()(implicit random: Random): String =
     java.util.UUID.nameUUIDFromBytes(random.nextBytes(16)).toString
 }
+
+object HexUtils extends HexUtils

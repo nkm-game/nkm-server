@@ -5,7 +5,6 @@ import com.tosware.nkm.models.game.Ability.AbilityId
 import com.tosware.nkm.models.game.GameEvent.CharacterTookAction
 import com.tosware.nkm.models.game.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game._
-import com.tosware.nkm.models.game.hex.HexUtils._
 
 import scala.util.Random
 

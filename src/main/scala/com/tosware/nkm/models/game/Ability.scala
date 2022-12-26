@@ -4,8 +4,8 @@ import com.tosware.nkm.models.CommandResponse.{CommandResponse, Failure, Success
 import com.tosware.nkm.models.game.Ability._
 import com.tosware.nkm.models.game.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game.effects.FreeAbility
-import com.tosware.nkm.models.game.hex.HexUtils._
-import com.tosware.nkm.models.game.hex.{HexCell, HexCoordinates}
+import com.tosware.nkm.models.game.hex.{HexCell, HexCoordinates, HexUtils}
+import com.tosware.nkm.serializers.NkmJsonProtocol
 import enumeratum._
 
 import scala.util.{Random, Try}
@@ -88,7 +88,7 @@ trait UsableOnCharacter extends UsableOnTarget[CharacterId] { this: Ability =>
     super.useChecks + UseCheck.TargetCharacter.InRange
 }
 
-abstract class Ability(val id: AbilityId, pid: CharacterId) extends Usable {
+abstract class Ability(val id: AbilityId, pid: CharacterId) extends Usable with HexUtils with NkmJsonProtocol {
   val metadata: AbilityMetadata
 
   def baseUseChecks(implicit gameState: GameState): Set[UseCheck] = {

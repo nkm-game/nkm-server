@@ -8,11 +8,12 @@ import com.tosware.nkm.models.game.Player.PlayerId
 import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.game.hex.{HexCoordinates, TestHexMapName}
 import com.tosware.nkm.providers.HexMapProvider
+import com.tosware.nkm.serializers.NkmJsonProtocol
 import org.scalatest.Assertions.fail
 
 import scala.util.Random
 
-trait TestUtils extends Logging {
+trait TestUtils extends Logging with NkmJsonProtocol {
   implicit val random: Random = new Random()
 
   protected def assertCommandSuccess(c: CommandResponse): Unit = c match {

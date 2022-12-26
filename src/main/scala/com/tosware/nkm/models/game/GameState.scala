@@ -372,6 +372,10 @@ case class GameState(
     updateCharacter(characterId)(_.modify(_.state.healthPoints).setTo(amount))
       .logEvent(CharacterHpSet(NkmUtils.randomUUID(), characterId, amount))
 
+  def setShield(characterId: CharacterId, amount: Int)(implicit random: Random, causedBy: String): GameState =
+    updateCharacter(characterId)(_.modify(_.state.shield).setTo(amount))
+      .logEvent(CharacterShieldSet(NkmUtils.randomUUID(), characterId, amount))
+
   def setStat(characterId: CharacterId, statType: StatType, amount: Int)(implicit random: Random, causedBy: String): GameState = {
     val updateStat = statType match {
       case StatType.AttackPoints => modify(_: NkmCharacter)(_.state.pureAttackPoints)

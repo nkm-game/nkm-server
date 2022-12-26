@@ -60,6 +60,9 @@ object GameEvent {
   case class CharacterHpSet(id: GameEventId, characterId: CharacterId, amount: Int)
                            (implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent(id)
     with ContainsCharacterId
+  case class CharacterShieldSet(id: GameEventId, characterId: CharacterId, amount: Int)
+                           (implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent(id)
+    with ContainsCharacterId
   case class CharacterStatSet(id: GameEventId, characterId: CharacterId, statType: StatType, amount: Int)
                              (implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent(id)
     with ContainsCharacterId
