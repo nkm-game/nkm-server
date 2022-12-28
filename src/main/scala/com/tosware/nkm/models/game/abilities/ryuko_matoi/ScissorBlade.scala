@@ -4,6 +4,7 @@ import com.tosware.nkm.NkmConf
 import com.tosware.nkm.models.game.Ability.AbilityId
 import com.tosware.nkm.models.game.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game._
+import com.tosware.nkm.models.game.hex.NkmUtils
 
 import scala.util.Random
 
@@ -22,6 +23,14 @@ object ScissorBlade {
 case class ScissorBlade(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId) with GameEventListener {
   override val metadata = ScissorBlade.metadata
 
-
-  override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState = ???
+  override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
+    e match {
+      case GameEvent.CharacterPreparedToAttack(_, characterId, targetCharacterId) =>
+        if(characterId != parentCharacterId) gameState
+        else {
+          val effect = effects.StatNerf(NkmUtils.randomUUID(), metadata.variables("duration"), StatType.PhysicalDefense, metadata.variables("physicalDefenseDecrease"))
+          gameState.addEffect(targetCharacterId, effect)(random, id)
+        }
+      case _ => gameState
+    }
 }

@@ -316,6 +316,7 @@ case class GameState(
   def basicAttack(attackingCharacterId: CharacterId, targetCharacterId: CharacterId)(implicit random: Random): GameState = {
     implicit val causedBy: CharacterId = attackingCharacterId
     val newGameState = takeActionWithCharacter(attackingCharacterId)
+      .logEvent(CharacterPreparedToAttack(NkmUtils.randomUUID(), attackingCharacterId, targetCharacterId))
     val attackingCharacter = characterById(attackingCharacterId).get
     attackingCharacter.basicAttack(targetCharacterId)(random, newGameState)
       .logEvent(CharacterBasicAttacked(NkmUtils.randomUUID(), attackingCharacterId, targetCharacterId))
