@@ -2,8 +2,12 @@ package com.tosware.nkm.models.game.abilities.ryuko_matoi
 
 import com.tosware.nkm.NkmConf
 import com.tosware.nkm.models.game.Ability.AbilityId
+import com.tosware.nkm.models.game.CharacterEffect.CharacterEffectId
+import com.tosware.nkm.models.game.GameEvent.TurnFinished
 import com.tosware.nkm.models.game.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game._
+import com.tosware.nkm.models.game.hex.NkmUtils
+import com.tosware.nkm.models.{Damage, DamageType}
 
 import scala.util.Random
 
@@ -24,12 +28,54 @@ object GodrobeSenketsu {
     )
 }
 
-case class GodrobeSenketsu(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId) with UsableOnCharacter {
+case class GodrobeSenketsu(
+  abilityId: AbilityId,
+  parentCharacterId: CharacterId,
+  attackDamageBonus: Int = 0,
+  abilityEffects: Set[CharacterEffectId] = Set.empty,
+) extends Ability(abilityId, parentCharacterId) with UsableWithoutTarget with GameEventListener {
   override val metadata = GodrobeSenketsu.metadata
 
-  override def rangeCellCoords(implicit gameState: GameState) = ???
+  private def changeDamageBonus(newAdBonus: Int): GodrobeSenketsu =
+    copy(abilityId, parentCharacterId, newAdBonus, abilityEffects)
 
-  override def targetsInRange(implicit gameState: GameState) = ???
+  private def changeAbilityEffects(aes: Set[CharacterEffectId]): GodrobeSenketsu =
+    copy(abilityId, parentCharacterId, attackDamageBonus, aes)
 
-  override def use(target: CharacterId, useData: UseData)(implicit random: Random, gameState: GameState) = ???
+  private def applyAbilityEffects(adBonus: Int, newestAbility: GodrobeSenketsu)(implicit random: Random, gameState: GameState): GameState = {
+    val e1 = effects.Fly(NkmUtils.randomUUID(), 1)
+    val e2 = effects.StatBuff(NkmUtils.randomUUID(), 1, StatType.AttackPoints, adBonus)
+
+    gameState
+      .addEffect(parentCharacterId, e1)(random, id)
+      .addEffect(parentCharacterId, e2)(random, id)
+      .updateAbility(abilityId, newestAbility.changeAbilityEffects(Set(e1.id, e2.id))) // TODO: fix ability override
+  }
+
+  override def use()(implicit random: Random, gameState: GameState): GameState = {
+    if(state.isEnabled) {
+      gameState
+        .updateAbility(abilityId, changeDamageBonus(0))
+        .removeEffects(characterEffectIds = abilityEffects.toSeq)(random, id)
+        .setAbilityEnabled(abilityId, false)
+    } else {
+      val initialAdBonus = metadata.variables("initialAttackDamageBonus")
+      applyAbilityEffects(initialAdBonus, changeDamageBonus(initialAdBonus))
+        .refreshBasicMove(parentCharacterId)(random, id)
+        .setAbilityEnabled(abilityId, true)
+    }
+  }
+
+  override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
+    e match {
+      case TurnFinished(_) =>
+        val characterIdThatTookAction = gameState.gameLog.characterThatTookActionInTurn(e.turn.number).get
+        if(characterIdThatTookAction != parentCharacter.id) gameState
+        else {
+          val bonusAdPerTurn = metadata.variables("bonusAttackDamagePerTurn")
+          val newAdBonus = attackDamageBonus + bonusAdPerTurn
+          applyAbilityEffects(newAdBonus, changeDamageBonus(newAdBonus))
+            .damageCharacter(parentCharacterId, Damage(DamageType.True, metadata.variables("damage")))(random, id)
+        }
+    }
 }

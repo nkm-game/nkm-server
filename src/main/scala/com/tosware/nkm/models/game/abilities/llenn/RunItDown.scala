@@ -2,7 +2,6 @@ package com.tosware.nkm.models.game.abilities.llenn
 
 import com.tosware.nkm.NkmConf
 import com.tosware.nkm.models.game.Ability.AbilityId
-import com.tosware.nkm.models.game.GameEvent.CharacterTookAction
 import com.tosware.nkm.models.game.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game._
 
@@ -50,12 +49,7 @@ case class RunItDown(abilityId: AbilityId, parentCharacterId: CharacterId, moves
           }
         } else gameState
       case GameEvent.TurnFinished(_) =>
-        val characterIdThatTookAction =
-          gameState.gameLog.events
-          .ofType[CharacterTookAction]
-          .inTurn(e.turn.number)
-          .head
-          .characterId
+        val characterIdThatTookAction = gameState.gameLog.characterThatTookActionInTurn(e.turn.number).get
         if(characterIdThatTookAction == parentCharacterId && movesLeft > 0) {
           gameState.updateAbility(id, setMovesLeft(0))
         } else gameState

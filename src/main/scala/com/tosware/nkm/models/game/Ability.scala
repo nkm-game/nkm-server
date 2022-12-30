@@ -39,6 +39,7 @@ case class AbilityMetadata
 case class AbilityState
 (
   cooldown: Int = 0,
+  isEnabled: Boolean = false,
 )
 
 
@@ -117,6 +118,9 @@ abstract class Ability(val id: AbilityId, pid: CharacterId) extends Usable with 
 
   def getDecrementCooldownState(amount: Int = 1)(implicit gameState: GameState): AbilityState =
     state.copy(cooldown = math.max(state.cooldown - amount, 0))
+
+  def getEnabledChangedState(newEnabled: Boolean)(implicit gameState: GameState): AbilityState =
+    state.copy(isEnabled = newEnabled)
 
   def toView(implicit gameState: GameState): AbilityView = {
     val canBeUsedResponse = _canBeUsed(baseUseChecks)
