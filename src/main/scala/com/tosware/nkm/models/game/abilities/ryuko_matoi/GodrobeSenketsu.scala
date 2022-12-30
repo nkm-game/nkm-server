@@ -66,7 +66,9 @@ case class GodrobeSenketsu(
     }
   }
 
-  override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
+  override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState = {
+    if(!state.isEnabled) return gameState
+
     e match {
       case TurnFinished(_) =>
         val characterIdThatTookAction = gameState.gameLog.characterThatTookActionInTurn(e.turn.number).get
@@ -78,4 +80,5 @@ case class GodrobeSenketsu(
             .damageCharacter(parentCharacterId, Damage(DamageType.True, metadata.variables("damage")))(random, id)
         }
     }
+  }
 }
