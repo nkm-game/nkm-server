@@ -14,11 +14,12 @@ object Infection {
       name = "Infection",
       abilityType = AbilityType.Ultimate,
       description =
-        """Infect enemy with Black Blood for {duration}t.
-          |Infected enemy also receives damage from Black Blood detonation
+        """Character infects enemy with Black Blood for {duration}t.
+          |Infected enemy also receives damage from Black Blood detonation.
           |
           |Range: circular, {range}""".stripMargin,
       variables = NkmConf.extract("abilities.crona.infection"),
+      relatedEffectIds = Seq(effects.BlackBlood.metadata.id),
     )
 }
 

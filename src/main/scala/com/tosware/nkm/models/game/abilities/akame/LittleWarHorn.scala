@@ -7,6 +7,7 @@ import com.tosware.nkm.models.game.CharacterEffect.CharacterEffectId
 import com.tosware.nkm.models.game.GameEvent.EffectRemovedFromCharacter
 import com.tosware.nkm.models.game.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game._
+import com.tosware.nkm.models.game.effects.StatBuff
 import com.tosware.nkm.models.game.hex.NkmUtils
 
 import scala.util.Random
@@ -17,9 +18,10 @@ object LittleWarHorn {
       name = "Little War Horn",
       abilityType = AbilityType.Ultimate,
       description =
-        """Character gains {attackPoints} AD and {speedIncrease} Speed for {duration}t.
-          |When this effect is finished, set this characters base Speed to {finalSpeed}.""".stripMargin,
+        """Character gains {attackPoints} AD and {speedIncrease} speed for {duration}t.
+          |When this effect is finished, set this character's base speed to {finalSpeed}.""".stripMargin,
       variables = NkmConf.extract("abilities.akame.littleWarHorn"),
+      relatedEffectIds = Seq(StatBuff.metadata.id),
     )
 }
 

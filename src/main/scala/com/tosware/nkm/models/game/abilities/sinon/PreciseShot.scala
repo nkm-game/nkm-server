@@ -13,7 +13,11 @@ object PreciseShot {
     AbilityMetadata(
       name = "Precise Shot",
       abilityType = AbilityType.Ultimate,
-      description = "Character shoots enemy dealing physical damage.",
+      description =
+        """Character shoots enemy dealing {damage} physical damage.
+          |
+          |Range: circular, {range}
+          |""".stripMargin,
       variables = NkmConf.extract("abilities.sinon.preciseShot"),
     )
 }

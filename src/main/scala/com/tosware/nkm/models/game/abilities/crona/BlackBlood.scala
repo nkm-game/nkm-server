@@ -18,6 +18,7 @@ object BlackBlood {
           |
           |Radius: circular, {radius}""".stripMargin,
       variables = NkmConf.extract("abilities.crona.blackBlood"),
+      relatedEffectIds = Seq(effects.BlackBlood.metadata.id),
     )
 }
 

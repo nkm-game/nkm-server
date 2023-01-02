@@ -15,7 +15,11 @@ object OneHundredEightPoundPhoenix {
       name = "108 Pound Phoenix",
       alternateName = "百八煩悩鳳",
       abilityType = AbilityType.Ultimate,
-      description = "Character sends 3 shockwaves towards the target enemy, each dealing 18 physical damage",
+      description =
+        """Character sends 3 shockwaves towards the target enemy, each dealing {damage} physical damage.
+          |
+          |Range: linear, {range}
+          |""".stripMargin,
       variables = NkmConf.extract("abilities.roronoaZoro.oneHundredEightPoundPhoenix"),
     )
 }

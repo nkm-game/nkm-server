@@ -16,7 +16,10 @@ object Aster {
       alternateName = "星",
       abilityType = AbilityType.Normal,
       description =
-        "Character shoots rays of energy from Aster, dealing magical damage in a sphere to enemies.".stripMargin,
+        """Character shoots rays of energy from Aster, dealing {damage} magical damage in a sphere to enemies.
+          |
+          |Range: circular, {range}
+          |Radius: circular, {radius}""".stripMargin,
       variables = NkmConf.extract("abilities.hecate.aster"),
     )
 }

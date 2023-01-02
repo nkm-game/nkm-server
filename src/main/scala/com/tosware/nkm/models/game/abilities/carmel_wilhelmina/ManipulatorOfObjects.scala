@@ -5,6 +5,7 @@ import com.tosware.nkm.models.game.Ability.AbilityId
 import com.tosware.nkm.models.game.GameEvent.CharacterBasicAttacked
 import com.tosware.nkm.models.game.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game._
+import com.tosware.nkm.models.game.effects.{ManipulatorOfObjectsImmunity, Snare}
 import com.tosware.nkm.models.game.hex.NkmUtils
 
 import scala.util.Random
@@ -15,9 +16,10 @@ object ManipulatorOfObjects {
       name = "Manipulator of Objects",
       alternateName = "万条の仕手",
       abilityType = AbilityType.Passive,
-      description = """Basic attacks of this character snare enemies for {duration}t.
+      description = """This character's basic attacks snare enemies for {duration}t.
       |This effect cannot be added on the same enemy for {effectTimeout}t.""".stripMargin,
       variables = NkmConf.extract("abilities.carmelWilhelmina.manipulatorOfObjects"),
+      relatedEffectIds = Seq(Snare.metadata.id, ManipulatorOfObjectsImmunity.metadata.id),
     )
 }
 

@@ -15,7 +15,10 @@ object GrenadeThrow {
       name = "Grenade Throw",
       abilityType = AbilityType.Normal,
       description =
-        "Character throws a granade, dealing physical damage in a sphere to all characters.".stripMargin,
+        """Character throws a grenade, dealing {damage} physical damage in a sphere to all characters.
+          |
+          |Range: circular, {range}
+          |Radius: circular, {radius}""".stripMargin,
       variables = NkmConf.extract("abilities.llenn.grenadeThrow"),
     )
 }

@@ -17,7 +17,7 @@ object Switch {
           |You or your friend have to be in a basic attack range of an enemy.
           |You can use basic attack or ultimate ability just after using this ability.
           |
-          |Range: {Range}""".stripMargin,
+          |Range: linear, {range}""".stripMargin,
       variables = NkmConf.extract("abilities.kirito.switch"),
     )
 }

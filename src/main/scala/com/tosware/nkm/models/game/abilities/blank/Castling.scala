@@ -12,7 +12,7 @@ object Castling {
     AbilityMetadata(
       name = "Castling",
       abilityType = AbilityType.Ultimate,
-      description = "Character swaps the posistions of 2 characters on the map.",
+      description = "Character swaps the positions of 2 characters on the map.",
       variables = NkmConf.extract("abilities.blank.castling"),
     )
 }

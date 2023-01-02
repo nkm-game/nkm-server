@@ -4,6 +4,7 @@ import com.tosware.nkm.NkmConf
 import com.tosware.nkm.models.game.Ability.AbilityId
 import com.tosware.nkm.models.game.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game._
+import com.tosware.nkm.models.game.effects.Stun
 import com.tosware.nkm.models.game.hex.NkmUtils
 
 import scala.util.Random
@@ -14,10 +15,11 @@ object ScreechAlpha {
       name = "Screech Alpha",
       abilityType = AbilityType.Normal,
       description =
-        """Stun nearby enemies for {stunDuration}t and slow them by {slowAmount} for {slowDuration}t.
+        """Character stuns nearby enemies for {stunDuration}t and slow them by {slowAmount} for {slowDuration}t.
           |
           |Radius: {radius}""".stripMargin,
       variables = NkmConf.extract("abilities.crona.screechAlpha"),
+      relatedEffectIds = Seq(Stun.metadata.id),
     )
 }
 

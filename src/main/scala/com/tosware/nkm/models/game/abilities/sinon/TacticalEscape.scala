@@ -14,8 +14,9 @@ object TacticalEscape {
     AbilityMetadata(
       name = "Tactical Escape",
       abilityType = AbilityType.Normal,
-      description = "Character increases its speed for a phase.",
+      description = "Character gains {speedIncrease} speed for {duration}t.",
       variables = NkmConf.extract("abilities.sinon.tacticalEscape"),
+      relatedEffectIds = Seq(effects.StatBuff.metadata.id),
     )
 }
 

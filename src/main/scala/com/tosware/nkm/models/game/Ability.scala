@@ -2,6 +2,7 @@ package com.tosware.nkm.models.game
 
 import com.tosware.nkm.models.CommandResponse.{CommandResponse, Failure, Success}
 import com.tosware.nkm.models.game.Ability._
+import com.tosware.nkm.models.game.CharacterEffect.CharacterEffectId
 import com.tosware.nkm.models.game.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game.effects.FreeAbility
 import com.tosware.nkm.models.game.hex.{HexCell, HexCoordinates, HexUtils}
@@ -32,6 +33,7 @@ case class AbilityMetadata
   description: String,
   variables: Map[String, Int] = Map.empty,
   alternateName: String = "",
+  relatedEffectIds: Seq[CharacterEffectId] = Seq.empty,
 ) {
   val id: AbilityMetadataId = name
 }

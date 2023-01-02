@@ -14,7 +14,7 @@ object FiberDecapitation {
       name = "Fiber Decapitation",
       abilityType = AbilityType.Normal,
       description =
-        """Cut through selected enemy, decreasing his physical defense by {physicalDefenseDecrease},
+        """Character cuts through selected enemy, decreasing his physical defense by {physicalDefenseDecrease},
           |dealing {damage} physical damage and landing {targetCellOffset} tiles behind him.
           |
           |Range: {range}""".stripMargin,

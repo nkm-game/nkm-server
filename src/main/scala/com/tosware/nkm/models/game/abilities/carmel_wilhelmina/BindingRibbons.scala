@@ -4,6 +4,7 @@ import com.tosware.nkm.NkmConf
 import com.tosware.nkm.models.game.Ability.AbilityId
 import com.tosware.nkm.models.game.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game._
+import com.tosware.nkm.models.game.effects.{Silence, Snare}
 import com.tosware.nkm.models.game.hex.{HexCoordinates, NkmUtils}
 
 import scala.util.Random
@@ -14,12 +15,13 @@ object BindingRibbons {
       name = "Binding Ribbons",
       abilityType = AbilityType.Normal,
       description =
-        """Cast a spell that silents all hit enemies for {silenceDuration}t.
+        """Character casts a spell that silents all hit enemies for {silenceDuration}t.
           |If it hits at least {enemiesToHitToActivateSnare} enemies, they will be snared for {rootDuration}t.
           |
           |Range: circular, {range}
           |Radius: circular, {radius}""".stripMargin,
       variables = NkmConf.extract("abilities.carmelWilhelmina.bindingRibbons"),
+      relatedEffectIds = Seq(Silence.metadata.id, Snare.metadata.id),
     )
 }
 

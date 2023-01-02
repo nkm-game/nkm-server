@@ -22,6 +22,7 @@ object Murasame {
           |Each stack deals {poisonDamage} true damage at the end of turn.
           |After applying {poisonStacksToDie} stacks target dies immediately.""".stripMargin,
       variables = NkmConf.extract("abilities.akame.murasame"),
+      relatedEffectIds = Seq(MurasamePoison.metadata.id),
     )
 }
 

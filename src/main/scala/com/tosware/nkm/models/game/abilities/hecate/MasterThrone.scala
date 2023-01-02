@@ -16,11 +16,11 @@ object MasterThrone {
       alternateName = "頂の座",
       abilityType = AbilityType.Passive,
       description =
-        """Character can collect Life Energy using base attacks or Normal ability.
+        """Character can gather Life Energy using base attacks or Normal abilities, collecting {healthPercent}% of target's max HP.
           |Life Energy can be collected only once per character.
           |""".stripMargin,
     )
-  val healthPercent = NkmConf.int("abilities.hecate.masterThrone.healthPercent")
+  val healthPercent: Int = NkmConf.int("abilities.hecate.masterThrone.healthPercent")
 }
 
 case class MasterThrone
