@@ -458,8 +458,12 @@ case class GameState(
   }
 
   def afterAbilityUse(abilityId: AbilityId)(implicit random: Random): GameState = {
-    if(abilityStates(abilityId).isEnabled) this
+    implicit val causedById: String = abilityId
+
+    val ngs = if(abilityStates(abilityId).isEnabled) this
     else putAbilityOnCooldownOrDecrementFreeAbility(abilityId)
+
+    ngs.logEvent(AbilityUseFinished(NkmUtils.randomUUID(), abilityId))
   }
 
   def putAbilityOnCooldownOrDecrementFreeAbility(abilityId: AbilityId)(implicit random: Random): GameState = {
@@ -476,6 +480,11 @@ case class GameState(
 
   def setAbilityEnabled(abilityId: AbilityId, newEnabled: Boolean): GameState = {
     val newState = abilityById(abilityId).get.getEnabledChangedState(newEnabled)(this)
+    this.copy(abilityStates = abilityStates.updated(abilityId, newState))
+  }
+
+  def setAbilityVariable(abilityId: AbilityId, key: String, value: String): GameState = {
+    val newState = abilityById(abilityId).get.getVariablesChangedState(key, value)(this)
     this.copy(abilityStates = abilityStates.updated(abilityId, newState))
   }
 

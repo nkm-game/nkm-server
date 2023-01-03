@@ -42,6 +42,9 @@ object GameEvent {
   case class AbilityUsedOnCharacter(id: GameEventId, abilityId: AbilityId, targetCharacterId: CharacterId)
                                    (implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent(id)
     with ContainsAbilityId
+  case class AbilityUseFinished(id: GameEventId, abilityId: AbilityId)
+    (implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent(id)
+    with ContainsAbilityId
   case class CharacterBasicMoved(id: GameEventId, characterId: CharacterId, path: Seq[HexCoordinates])
                                 (implicit phase: Phase, turn: Turn, causedById: String) extends GameEvent(id)
     with ContainsCharacterId

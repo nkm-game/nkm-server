@@ -30,6 +30,7 @@ case class PowerOfExistence(abilityId: AbilityId, parentCharacterId: CharacterId
   override def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] =
     rangeCellCoords.whereEnemiesOfC(parentCharacterId)
 
+
   override def use()(implicit random: Random, gameState: GameState): GameState = {
     val targets = targetsInRange.characters.map(_.id)
     val masterThroneOpt = parentCharacter.state.abilities.collectFirst { case a: MasterThrone => a }
@@ -38,7 +39,7 @@ case class PowerOfExistence(abilityId: AbilityId, parentCharacterId: CharacterId
     val damage = Damage(DamageType.Magical, masterThrone.collectedEnergy / targets.size)
     targets.foldLeft(gameState)((acc, cid) => {
       hitCharacter(cid, damage)(random, acc)
-    }).updateAbility(masterThrone.id, masterThrone.reset())
+    })
   }
 
   private def hitCharacter(target: CharacterId, damage: Damage)(implicit random: Random, gameState: GameState): GameState =

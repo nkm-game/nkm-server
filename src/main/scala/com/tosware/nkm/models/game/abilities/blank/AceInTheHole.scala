@@ -16,6 +16,7 @@ object AceInTheHole {
       description = """If Character takes damage equal to more than {maxHpPercent}% of their maximum HP during the turn of one character, they will be able to use one of their abilities on their next move, regardless of its CD.
                       |It does not affect the actual ability CD count.""".stripMargin,
       variables = NkmConf.extract("abilities.blank.aceInTheHole"),
+      relatedEffectIds = Seq(FreeAbility.metadata.id),
     )
 }
 

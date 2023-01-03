@@ -7,6 +7,7 @@ import com.tosware.nkm.models.game.hex.{HexCoordinates, HexMap}
 
 import scala.annotation.tailrec
 import scala.util.Random
+import spray.json._
 
 object LackOfOrientation {
   val metadata: AbilityMetadata =
@@ -15,11 +16,32 @@ object LackOfOrientation {
       abilityType = AbilityType.Passive,
       description = "Character has a 50% chance to go get lost during basic move.",
     )
+  val timesMovedKey = "timesMoved"
+  val timesLostKey = "timesLost"
 }
 
-case class LackOfOrientation(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId) with BasicMoveOverride {
+case class LackOfOrientation(abilityId: AbilityId, parentCharacterId: CharacterId)
+  extends Ability(abilityId, parentCharacterId)
+    with BasicMoveOverride
+{
+  import LackOfOrientation._
   override val metadata = LackOfOrientation.metadata
 
+  def timesMoved(implicit gameState: GameState): Int =
+    state.variables.get(timesMovedKey)
+      .map(_.parseJson.convertTo[Int])
+      .getOrElse(0)
+
+  def timesLost(implicit gameState: GameState): Int =
+    state.variables.get(timesLostKey)
+      .map(_.parseJson.convertTo[Int])
+      .getOrElse(0)
+
+  private def setTimesMoved(value: Int)(implicit gameState: GameState): GameState =
+    gameState.setAbilityVariable(id, timesMovedKey, value.toJson.toString)
+
+  private def setTimesLost(value: Int)(implicit gameState: GameState): GameState =
+    gameState.setAbilityVariable(id, timesLostKey, value.toJson.toString)
 
   override def basicMove(path: Seq[HexCoordinates])(implicit random: Random, gameState: GameState): GameState = {
     implicit val hexMap: HexMap = gameState.hexMap.get
@@ -45,7 +67,12 @@ case class LackOfOrientation(abilityId: AbilityId, parentCharacterId: CharacterI
     val isLost = random.nextBoolean()
     val newPath = if(isLost) generateCorrectLostPath() else path
 
-    parentCharacter.defaultBasicMove(newPath)
+    val newTimesMoved = timesMoved + 1
+    val newTimesLost = if(isLost) timesLost + 1 else timesLost
+
+    val ngs = setTimesLost(newTimesLost)(setTimesMoved(newTimesMoved))
+
+    parentCharacter.defaultBasicMove(newPath)(random, ngs)
   }
 
 }

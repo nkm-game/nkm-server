@@ -8,6 +8,7 @@ import com.tosware.nkm.models.game.effects.FreeAbility
 import com.tosware.nkm.models.game.hex.{HexCell, HexCoordinates, HexUtils}
 import com.tosware.nkm.serializers.NkmJsonProtocol
 import enumeratum._
+import com.softwaremill.quicklens._
 
 import scala.util.{Random, Try}
 
@@ -42,6 +43,7 @@ case class AbilityState
 (
   cooldown: Int = 0,
   isEnabled: Boolean = false,
+  variables: Map[String, String] = Map.empty,
 )
 
 
@@ -123,6 +125,9 @@ abstract class Ability(val id: AbilityId, pid: CharacterId) extends Usable with 
 
   def getEnabledChangedState(newEnabled: Boolean)(implicit gameState: GameState): AbilityState =
     state.copy(isEnabled = newEnabled)
+
+  def getVariablesChangedState(key: String, value: String)(implicit gameState: GameState): AbilityState =
+    state.modify(_.variables).using(_.updated(key, value))
 
   def toView(implicit gameState: GameState): AbilityView = {
     val canBeUsedResponse = _canBeUsed(baseUseChecks)

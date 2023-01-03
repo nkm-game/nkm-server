@@ -4,7 +4,6 @@ import com.tosware.nkm.NkmConf
 import com.tosware.nkm.models.game.Ability.AbilityId
 import com.tosware.nkm.models.game.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game._
-import com.tosware.nkm.models.game.effects.StatBuff
 
 import scala.util.Random
 
@@ -15,7 +14,6 @@ object PChan {
       abilityType = AbilityType.Passive,
       description = "Character permanently gains {speedIncrease} speed with every death of a friendly character.",
       variables = NkmConf.extract("abilities.llenn.pChan"),
-      relatedEffectIds = Seq(StatBuff.metadata.id),
     )
 }
 
