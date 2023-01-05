@@ -46,6 +46,7 @@ case class NkmCharacter
 {
   private val basicMoveImpairmentCcNames = Seq(CharacterEffectName.Stun, CharacterEffectName.Ground, CharacterEffectName.Snare)
   private val basicAttackImpairmentCcNames = Seq(CharacterEffectName.Stun, CharacterEffectName.Disarm)
+  private val abilityImpairmentCcNames = Seq(CharacterEffectName.Stun, CharacterEffectName.Silence)
 
   def isDead: Boolean = state.healthPoints <= 0
 
@@ -124,6 +125,13 @@ case class NkmCharacter
   def canBasicAttack(implicit gameState: GameState): Boolean =
     (hasRefreshedBasicAttack || !usedBasicAttackThisTurn && !usedAbilityThisPhase) &&
       !state.effects.exists(e => basicAttackImpairmentCcNames.contains(e.metadata.name))
+
+  def canUseAbilityOfType(abilityType: AbilityType)(implicit gameState: GameState): Boolean =
+    (abilityType match {
+      case AbilityType.Passive => true
+      case AbilityType.Normal => !usedAbilityThisPhase && !usedBasicAttackThisTurn
+      case AbilityType.Ultimate => !usedAbilityThisPhase && !usedBasicAttackThisTurn && !usedBasicMoveThisTurn
+    }) && !state.effects.exists(e => abilityImpairmentCcNames.contains(e.metadata.name))
 
   def parentCell(implicit gameState: GameState): Option[HexCell] =
     gameState.hexMap.getCellOfCharacter(id)

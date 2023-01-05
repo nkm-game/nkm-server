@@ -466,6 +466,18 @@ class GameStateValidatorSpec
             .validateAbilityUseWithoutTarget(s.characters.p0First.owner.id, ultimateAbilityId)
         }
       }
+
+      "disallow using ability while stunned" in {
+        val stunEffect = effects.Stun(NkmUtils.randomUUID(), 1)
+        val stunnedGameState = gameState
+          .incrementPhase(4)
+          .addEffect(s.characters.p0First.id, stunEffect)(random, "test")
+
+        assertCommandFailure {
+          GameStateValidator()(stunnedGameState)
+            .validateAbilityUseWithoutTarget(s.characters.p0First.owner.id, ultimateAbilityId)
+        }
+      }
     }
     "disallow moving for a second time in one phase" in {
       val newGameState = gameState.basicMoveCharacter(
