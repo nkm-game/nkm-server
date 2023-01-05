@@ -18,7 +18,7 @@ case class CharacterMetadata
   initialAttackPoints: Int,
   initialBasicAttackRange: Int,
   initialSpeed: Int,
-  initialPsychicalDefense: Int,
+  initialPhysicalDefense: Int,
   initialMagicalDefense: Int,
   initialAbilitiesMetadataIds: Seq[AbilityMetadataId],
 ) {

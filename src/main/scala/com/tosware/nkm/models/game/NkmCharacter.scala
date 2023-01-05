@@ -29,7 +29,7 @@ object NkmCharacter {
         pureAttackPoints = metadata.initialAttackPoints,
         pureBasicAttackRange = metadata.initialBasicAttackRange,
         pureSpeed = metadata.initialSpeed,
-        purePhysicalDefense = metadata.initialPsychicalDefense,
+        purePhysicalDefense = metadata.initialPhysicalDefense,
         pureMagicalDefense = metadata.initialMagicalDefense,
         abilities = AbilityProvider.instantiateAbilities(characterId, metadata.initialAbilitiesMetadataIds),
       )

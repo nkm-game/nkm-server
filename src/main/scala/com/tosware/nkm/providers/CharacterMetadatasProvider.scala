@@ -25,7 +25,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       initialAttackPoints = 8,
       initialBasicAttackRange = 5,
       initialSpeed = 5,
-      initialPsychicalDefense = 15,
+      initialPhysicalDefense = 15,
       initialMagicalDefense = 20,
       initialAbilitiesMetadataIds = Seq(
         NaturesBeauty.metadata.id,
@@ -40,7 +40,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       initialAttackPoints = 12,
       initialBasicAttackRange = 4,
       initialSpeed = 6,
-      initialPsychicalDefense = 20,
+      initialPhysicalDefense = 20,
       initialMagicalDefense = 10,
       initialAbilitiesMetadataIds = Seq.empty
     ),
@@ -51,7 +51,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       initialAttackPoints = 16,
       initialBasicAttackRange = 7,
       initialSpeed = 5,
-      initialPsychicalDefense = 10,
+      initialPhysicalDefense = 10,
       initialMagicalDefense = 15,
       initialAbilitiesMetadataIds = Seq.empty
     ),
@@ -62,7 +62,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       initialAttackPoints = 11,
       initialBasicAttackRange = 6,
       initialSpeed = 5,
-      initialPsychicalDefense = 15,
+      initialPhysicalDefense = 15,
       initialMagicalDefense = 15,
       initialAbilitiesMetadataIds = Seq.empty
     ),
@@ -73,7 +73,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       initialAttackPoints = 14,
       initialBasicAttackRange = 2,
       initialSpeed = 7,
-      initialPsychicalDefense = 15,
+      initialPhysicalDefense = 15,
       initialMagicalDefense = 15,
       initialAbilitiesMetadataIds = Seq.empty
     ),
@@ -84,7 +84,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       initialAttackPoints = 11,
       initialBasicAttackRange = 7,
       initialSpeed = 3,
-      initialPsychicalDefense = 5,
+      initialPhysicalDefense = 5,
       initialMagicalDefense = 20,
       initialAbilitiesMetadataIds = Seq(
         MasterThrone.metadata.id,
@@ -99,7 +99,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       initialAttackPoints = 12,
       initialBasicAttackRange = 6,
       initialSpeed = 5,
-      initialPsychicalDefense = 10,
+      initialPhysicalDefense = 10,
       initialMagicalDefense = 15,
       initialAbilitiesMetadataIds = Seq.empty
     ),
@@ -110,7 +110,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       initialAttackPoints = 27,
       initialBasicAttackRange = 2,
       initialSpeed = 8,
-      initialPsychicalDefense = 40,
+      initialPhysicalDefense = 40,
       initialMagicalDefense = 25,
       initialAbilitiesMetadataIds = Seq(
         LackOfOrientation.metadata.id,
@@ -125,7 +125,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       initialAttackPoints = 20,
       initialBasicAttackRange = 8,
       initialSpeed = 4,
-      initialPsychicalDefense = 5,
+      initialPhysicalDefense = 5,
       initialMagicalDefense = 5,
       initialAbilitiesMetadataIds = Seq(
         SnipersSight.metadata.id,
@@ -140,7 +140,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       initialAttackPoints = 17,
       initialBasicAttackRange = 6,
       initialSpeed = 6,
-      initialPsychicalDefense = 15,
+      initialPhysicalDefense = 15,
       initialMagicalDefense = 15,
       initialAbilitiesMetadataIds = Seq.empty
     ),
@@ -151,7 +151,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       initialAttackPoints = 9,
       initialBasicAttackRange = 3,
       initialSpeed = 6,
-      initialPsychicalDefense = 25,
+      initialPhysicalDefense = 25,
       initialMagicalDefense = 35,
       initialAbilitiesMetadataIds = Seq(
         BlackBlood.metadata.id,
@@ -166,7 +166,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       initialAttackPoints = 16,
       initialBasicAttackRange = 5,
       initialSpeed = 5,
-      initialPsychicalDefense = 15,
+      initialPhysicalDefense = 15,
       initialMagicalDefense = 25,
       initialAbilitiesMetadataIds = Seq.empty
     ),
@@ -177,7 +177,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       initialAttackPoints = 7,
       initialBasicAttackRange = 2,
       initialSpeed = 5,
-      initialPsychicalDefense = 5,
+      initialPhysicalDefense = 5,
       initialMagicalDefense = 5,
       initialAbilitiesMetadataIds = Seq(
         AceInTheHole.metadata.id,
@@ -192,7 +192,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       initialAttackPoints = 15,
       initialBasicAttackRange = 2,
       initialSpeed = 7,
-      initialPsychicalDefense = 15,
+      initialPhysicalDefense = 15,
       initialMagicalDefense = 20,
       initialAbilitiesMetadataIds = Seq.empty
     ),
@@ -203,7 +203,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       initialAttackPoints = 6,
       initialBasicAttackRange = 3,
       initialSpeed = 5,
-      initialPsychicalDefense = 30,
+      initialPhysicalDefense = 30,
       initialMagicalDefense = 45,
       initialAbilitiesMetadataIds = Seq.empty
     ),
@@ -214,7 +214,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       initialAttackPoints = 12,
       initialBasicAttackRange = 3,
       initialSpeed = 6,
-      initialPsychicalDefense = 20,
+      initialPhysicalDefense = 20,
       initialMagicalDefense = 20,
       initialAbilitiesMetadataIds = Seq.empty
     ),
@@ -225,7 +225,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       initialAttackPoints = 13,
       initialBasicAttackRange = 3,
       initialSpeed = 8,
-      initialPsychicalDefense = 15,
+      initialPhysicalDefense = 15,
       initialMagicalDefense = 10,
       initialAbilitiesMetadataIds = Seq(
         PChan.metadata.id,
@@ -240,7 +240,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       initialAttackPoints = 13,
       initialBasicAttackRange = 3,
       initialSpeed = 6,
-      initialPsychicalDefense = 20,
+      initialPhysicalDefense = 20,
       initialMagicalDefense = 15,
       initialAbilitiesMetadataIds = Seq(
         Parry.metadata.id,
@@ -255,7 +255,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       initialAttackPoints = 15,
       initialBasicAttackRange = 5,
       initialSpeed = 6,
-      initialPsychicalDefense = 25,
+      initialPhysicalDefense = 25,
       initialMagicalDefense = 15,
       initialAbilitiesMetadataIds = Seq.empty
     ),
@@ -266,7 +266,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       initialAttackPoints = 9,
       initialBasicAttackRange = 6,
       initialSpeed = 5,
-      initialPsychicalDefense = 10,
+      initialPhysicalDefense = 10,
       initialMagicalDefense = 20,
       initialAbilitiesMetadataIds = Seq.empty
     ),
@@ -277,7 +277,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       initialAttackPoints = 20,
       initialBasicAttackRange = 3,
       initialSpeed = 5,
-      initialPsychicalDefense = 15,
+      initialPhysicalDefense = 15,
       initialMagicalDefense = 20,
       initialAbilitiesMetadataIds = Seq.empty
     ),
@@ -288,7 +288,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       initialAttackPoints = 10,
       initialBasicAttackRange = 5,
       initialSpeed = 5,
-      initialPsychicalDefense = 35,
+      initialPhysicalDefense = 35,
       initialMagicalDefense = 40,
       initialAbilitiesMetadataIds = Seq(
         ManipulatorOfObjects.metadata.id,
@@ -303,7 +303,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       initialAttackPoints = 14,
       initialBasicAttackRange = 4,
       initialSpeed = 6,
-      initialPsychicalDefense = 15,
+      initialPhysicalDefense = 15,
       initialMagicalDefense = 10,
       initialAbilitiesMetadataIds = Seq(
         ScissorBlade.metadata.id,
@@ -318,7 +318,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       initialAttackPoints = 4,
       initialBasicAttackRange = 2,
       initialSpeed = 5,
-      initialPsychicalDefense = 15,
+      initialPhysicalDefense = 15,
       initialMagicalDefense = 15,
       initialAbilitiesMetadataIds = Seq.empty
     ),
@@ -329,7 +329,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       initialAttackPoints = 16,
       initialBasicAttackRange = 3,
       initialSpeed = 7,
-      initialPsychicalDefense = 15,
+      initialPhysicalDefense = 15,
       initialMagicalDefense = 15,
       initialAbilitiesMetadataIds = Seq.empty
     ),
@@ -340,7 +340,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       initialAttackPoints = 12,
       initialBasicAttackRange = 2,
       initialSpeed = 6,
-      initialPsychicalDefense = 25,
+      initialPhysicalDefense = 25,
       initialMagicalDefense = 25,
       initialAbilitiesMetadataIds = Seq.empty
     ),
@@ -351,7 +351,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       initialAttackPoints = 11,
       initialBasicAttackRange = 2,
       initialSpeed = 6,
-      initialPsychicalDefense = 15,
+      initialPhysicalDefense = 15,
       initialMagicalDefense = 15,
       initialAbilitiesMetadataIds = Seq.empty
     ),
@@ -362,7 +362,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       initialAttackPoints = 23,
       initialBasicAttackRange = 3,
       initialSpeed = 7,
-      initialPsychicalDefense = 10,
+      initialPhysicalDefense = 10,
       initialMagicalDefense = 10,
       initialAbilitiesMetadataIds = Seq.empty
     ),
@@ -373,7 +373,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       initialAttackPoints = 9,
       initialBasicAttackRange = 3,
       initialSpeed = 6,
-      initialPsychicalDefense = 10,
+      initialPhysicalDefense = 10,
       initialMagicalDefense = 25,
       initialAbilitiesMetadataIds = Seq.empty
     ),
@@ -384,7 +384,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       initialAttackPoints = 16,
       initialBasicAttackRange = 2,
       initialSpeed = 5,
-      initialPsychicalDefense = 15,
+      initialPhysicalDefense = 15,
       initialMagicalDefense = 25,
       initialAbilitiesMetadataIds = Seq.empty
     ),
@@ -395,7 +395,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       initialAttackPoints = 13,
       initialBasicAttackRange = 3,
       initialSpeed = 7,
-      initialPsychicalDefense = 20,
+      initialPhysicalDefense = 20,
       initialMagicalDefense = 15,
       initialAbilitiesMetadataIds = Seq(
         Murasame.metadata.id,
@@ -413,7 +413,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       initialAttackPoints = 5,
       initialBasicAttackRange = 3,
       initialSpeed = 5,
-      initialPsychicalDefense = 10,
+      initialPhysicalDefense = 10,
       initialMagicalDefense = 10,
       Seq.empty,
     )
