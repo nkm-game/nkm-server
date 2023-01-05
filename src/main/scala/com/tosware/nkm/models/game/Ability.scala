@@ -59,15 +59,7 @@ trait BasicMoveOverride {
   def basicMove(path: Seq[HexCoordinates])(implicit random: Random, gameState: GameState): GameState
 }
 
-trait Usable {
-  def _canBeUsed(useChecks: Set[UseCheck])(implicit gameState: GameState): CommandResponse = {
-    val failures = useChecks.filter(_._1 == false)
-    if(failures.isEmpty) Success()
-    else Failure(failures.map(_._2).mkString("\n"))
-  }
-}
-
-trait UsableWithoutTarget extends Usable { this: Ability =>
+trait UsableWithoutTarget { this: Ability =>
   def use()(implicit random: Random, gameState: GameState): GameState
   def useChecks(implicit gameState: GameState): Set[UseCheck] =
     baseUseChecks
@@ -75,7 +67,7 @@ trait UsableWithoutTarget extends Usable { this: Ability =>
     _canBeUsed(useChecks)
 }
 
-trait UsableOnTarget[T] extends Usable { this: Ability =>
+trait UsableOnTarget[T] { this: Ability =>
   def use(target: T, useData: UseData = UseData())(implicit random: Random, gameState: GameState): GameState
   def useChecks(implicit target: T, useData: UseData, gameState: GameState): Set[UseCheck] =
     baseUseChecks
@@ -93,8 +85,14 @@ trait UsableOnCharacter extends UsableOnTarget[CharacterId] { this: Ability =>
     super.useChecks + UseCheck.TargetCharacter.InRange
 }
 
-abstract class Ability(val id: AbilityId, pid: CharacterId) extends Usable with HexUtils with NkmJsonProtocol {
+abstract class Ability(val id: AbilityId, pid: CharacterId) extends HexUtils with NkmJsonProtocol {
   val metadata: AbilityMetadata
+
+  def _canBeUsed(useChecks: Set[UseCheck])(implicit gameState: GameState): CommandResponse = {
+    val failures = useChecks.filter(_._1 == false)
+    if(failures.isEmpty) Success()
+    else Failure(failures.map(_._2).mkString("\n"))
+  }
 
   def baseUseChecks(implicit gameState: GameState): Set[UseCheck] = {
     Set(
