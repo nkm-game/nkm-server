@@ -1,5 +1,6 @@
 package com.tosware.nkm.models.game.hex
 
+import com.tosware.nkm.NkmUtils
 import enumeratum.{Enum, EnumEntry}
 
 sealed trait TestHexMapName extends EnumEntry
@@ -16,6 +17,6 @@ object TestHexMapName extends Enum[TestHexMapName] {
 }
 
 case class TestHexMap(name: TestHexMapName, params: Set[Any]) {
-  val hexMap: HexMap = HexMap(name.toString, HexUtils.hexCellParamsToCells(params))
+  val hexMap: HexMap = HexMap(name.toString, NkmUtils.hexCellParamsToCells(params))
 }
 

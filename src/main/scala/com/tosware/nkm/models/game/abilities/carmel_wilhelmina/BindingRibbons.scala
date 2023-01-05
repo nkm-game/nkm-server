@@ -1,11 +1,11 @@
 package com.tosware.nkm.models.game.abilities.carmel_wilhelmina
 
-import com.tosware.nkm.NkmConf
+import com.tosware.nkm.{NkmConf, NkmUtils}
 import com.tosware.nkm.models.game.Ability.AbilityId
 import com.tosware.nkm.models.game.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.game.effects.{Silence, Snare}
-import com.tosware.nkm.models.game.hex.{HexCoordinates, NkmUtils}
+import com.tosware.nkm.models.game.hex.HexCoordinates
 
 import scala.util.Random
 

@@ -1,7 +1,6 @@
 package com.tosware.nkm.models.game
 
 import com.softwaremill.quicklens._
-import com.tosware.nkm.Logging
 import com.tosware.nkm.actors.Game.GameId
 import com.tosware.nkm.models.game.Ability.AbilityId
 import com.tosware.nkm.models.game.CharacterEffect.CharacterEffectId
@@ -12,36 +11,38 @@ import com.tosware.nkm.models.game.Player.PlayerId
 import com.tosware.nkm.models.game.blindpick._
 import com.tosware.nkm.models.game.draftpick._
 import com.tosware.nkm.models.game.effects.FreeAbility
-import com.tosware.nkm.models.game.hex.HexUtils._
-import com.tosware.nkm.models.game.hex.{HexCell, HexCoordinates, HexMap, NkmUtils}
+import com.tosware.nkm.models.game.hex._
 import com.tosware.nkm.models.{Damage, DamageType}
+import com.tosware.nkm.{Logging, NkmUtils}
 
 import scala.util.Random
 
-case class GameState(
-                      id: GameId,
-                      charactersMetadata: Set[CharacterMetadata],
-                      gameStatus: GameStatus,
-                      pickType: PickType,
-                      numberOfBans: Int,
-                      numberOfCharactersPerPlayers: Int,
-                      draftPickState: Option[DraftPickState],
-                      blindPickState: Option[BlindPickState],
-                      hexMap: Option[HexMap],
-                      players: Seq[Player],
-                      characters: Set[NkmCharacter],
-                      phase: Phase,
-                      turn: Turn,
-                      characterIdsOutsideMap: Set[CharacterId],
-                      characterIdsThatTookActionThisPhase: Set[CharacterId],
-                      characterTakingActionThisTurn: Option[CharacterId],
-                      playerIdsThatPlacedCharacters: Set[PlayerId],
-                      abilityStates: Map[AbilityId, AbilityState],
-                      characterEffectStates: Map[CharacterEffectId, CharacterEffectState],
-                      clockConfig: ClockConfig,
-                      clock: Clock,
-                      gameLog: GameLog,
-                    ) {
+case class GameState
+(
+  id: GameId,
+  charactersMetadata: Set[CharacterMetadata],
+  gameStatus: GameStatus,
+  pickType: PickType,
+  numberOfBans: Int,
+  numberOfCharactersPerPlayers: Int,
+  draftPickState: Option[DraftPickState],
+  blindPickState: Option[BlindPickState],
+  hexMap: Option[HexMap],
+  players: Seq[Player],
+  characters: Set[NkmCharacter],
+  phase: Phase,
+  turn: Turn,
+  characterIdsOutsideMap: Set[CharacterId],
+  characterIdsThatTookActionThisPhase: Set[CharacterId],
+  characterTakingActionThisTurn: Option[CharacterId],
+  playerIdsThatPlacedCharacters: Set[PlayerId],
+  abilityStates: Map[AbilityId, AbilityState],
+  characterEffectStates: Map[CharacterEffectId, CharacterEffectState],
+  clockConfig: ClockConfig,
+  clock: Clock,
+  gameLog: GameLog,
+) extends NkmUtils
+{
   import GameState._
   private implicit val p: Phase = phase
   private implicit val t: Turn = turn

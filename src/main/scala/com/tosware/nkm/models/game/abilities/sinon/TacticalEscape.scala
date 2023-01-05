@@ -1,11 +1,10 @@
 package com.tosware.nkm.models.game.abilities.sinon
 
-import com.tosware.nkm.NkmConf
+import com.tosware.nkm.{NkmConf, NkmUtils}
 import com.tosware.nkm.models.game.Ability.AbilityId
 import com.tosware.nkm.models.game.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.game.effects.StatBuff
-import com.tosware.nkm.models.game.hex.NkmUtils
 
 import scala.util.Random
 

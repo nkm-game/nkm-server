@@ -7,7 +7,7 @@ import com.tosware.nkm.models.game.CharacterMetadata.CharacterMetadataId
 import com.tosware.nkm.models.game.Player.PlayerId
 import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.game.hex.HexCoordinates
-import com.tosware.nkm.models.game.hex.HexUtils._
+import com.tosware.nkm.NkmUtils._
 
 case class GameStateValidator()(implicit gameState: GameState) {
   private def playerInGame(playerId: PlayerId) =

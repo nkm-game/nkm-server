@@ -1,12 +1,12 @@
 package com.tosware.nkm.models.game
 
 import com.softwaremill.quicklens._
+import com.tosware.nkm.NkmUtils
 import com.tosware.nkm.models.game.CharacterEffect.CharacterEffectId
 import com.tosware.nkm.models.game.CharacterMetadata.CharacterMetadataId
 import com.tosware.nkm.models.game.GameEvent.GameEvent
 import com.tosware.nkm.models.game.NkmCharacter._
 import com.tosware.nkm.models.game.Player.PlayerId
-import com.tosware.nkm.models.game.hex.HexUtils._
 import com.tosware.nkm.models.game.hex._
 import com.tosware.nkm.models.{Damage, DamageType}
 import com.tosware.nkm.providers.AbilityProvider
@@ -42,7 +42,7 @@ case class NkmCharacter
   id: CharacterId,
   metadataId: CharacterMetadataId,
   state: NkmCharacterState,
-)
+) extends NkmUtils
 {
   private val basicMoveImpairmentCcNames = Seq(CharacterEffectName.Stun, CharacterEffectName.Ground, CharacterEffectName.Snare)
   private val basicAttackImpairmentCcNames = Seq(CharacterEffectName.Stun, CharacterEffectName.Disarm)

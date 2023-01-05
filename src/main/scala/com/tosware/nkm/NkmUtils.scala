@@ -1,19 +1,20 @@
-package com.tosware.nkm.models.game.hex
+package com.tosware.nkm
 
 import com.tosware.nkm.models.game.Ability.AbilityId
-import com.tosware.nkm.models.game.GameEvent.{ContainsAbilityId, ContainsCharacterId, GameEvent}
-import com.tosware.nkm.models.game.{GameState, NkmCharacter}
+import com.tosware.nkm.models.game.GameEvent._
 import com.tosware.nkm.models.game.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game.Player.PlayerId
+import com.tosware.nkm.models.game.hex._
+import com.tosware.nkm.models.game.{GameState, NkmCharacter}
+import com.tosware.nkm.serializers.NkmJsonProtocol
 
 import scala.math.abs
 import scala.reflect.ClassTag
 import scala.util.Random
 
-trait HexUtils {
-
-  // TODO in Scala 3
-  // type HexParam = (Int, Int) | (Int, Int, HexCellType) | (Int, Int, HexCellType, Int)
+trait NkmUtils extends NkmJsonProtocol {
+  def randomUUID()(implicit random: Random): String =
+    java.util.UUID.nameUUIDFromBytes(random.nextBytes(16)).toString
 
   def hexCellParamsToCells(params: Set[Any]): Set[HexCell] = {
     params.map {
@@ -138,10 +139,4 @@ trait HexUtils {
   }
 }
 
-
-object NkmUtils {
-  def randomUUID()(implicit random: Random): String =
-    java.util.UUID.nameUUIDFromBytes(random.nextBytes(16)).toString
-}
-
-object HexUtils extends HexUtils
+object NkmUtils extends NkmUtils

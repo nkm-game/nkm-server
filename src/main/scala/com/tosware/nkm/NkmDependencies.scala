@@ -3,7 +3,6 @@ package com.tosware.nkm
 import akka.actor.{ActorRef, ActorSystem}
 import com.tosware.nkm.actors.ws.{GameSessionActor, LobbySessionActor}
 import com.tosware.nkm.actors.{GamesManager, LobbiesManager}
-import com.tosware.nkm.models.game.hex.NkmUtils
 import com.tosware.nkm.services.{GameService, LobbyService, NkmDataService, UserService}
 import com.tosware.nkm.services.http.directives.JwtSecretKey
 import slick.jdbc.JdbcBackend

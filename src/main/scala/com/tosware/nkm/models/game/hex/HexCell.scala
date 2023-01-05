@@ -4,7 +4,7 @@ import com.tosware.nkm.models.game.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game.Player.PlayerId
 import com.tosware.nkm.models.game.hex.HexCellType.Normal
 import com.tosware.nkm.models.game.{GameState, NkmCharacter}
-import HexUtils._
+import com.tosware.nkm.NkmUtils._
 import com.tosware.nkm.models.game.effects.Fly
 
 import scala.annotation.tailrec

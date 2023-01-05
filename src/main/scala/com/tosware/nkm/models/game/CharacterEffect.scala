@@ -1,5 +1,6 @@
 package com.tosware.nkm.models.game
 
+import com.tosware.nkm.NkmUtils
 import com.tosware.nkm.models.game.CharacterEffect._
 import com.tosware.nkm.models.game.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game.hex.HexCell
@@ -51,7 +52,7 @@ case class CharacterEffectMetadata
   def id: CharacterEffectMetadataId = name.toString
 }
 
-abstract class CharacterEffect(val id: CharacterEffectId) {
+abstract class CharacterEffect(val id: CharacterEffectId) extends NkmUtils {
   val metadata: CharacterEffectMetadata
   val initialCooldown: Int
 

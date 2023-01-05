@@ -1,14 +1,14 @@
 package com.tosware.nkm.models.game
 
-import com.tosware.nkm.models.CommandResponse.{CommandResponse, Failure, Success}
+import com.softwaremill.quicklens._
+import com.tosware.nkm.NkmUtils
+import com.tosware.nkm.models.CommandResponse._
 import com.tosware.nkm.models.game.Ability._
 import com.tosware.nkm.models.game.CharacterEffect.CharacterEffectId
 import com.tosware.nkm.models.game.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game.effects.FreeAbility
-import com.tosware.nkm.models.game.hex.{HexCell, HexCoordinates, HexUtils}
-import com.tosware.nkm.serializers.NkmJsonProtocol
+import com.tosware.nkm.models.game.hex.{HexCell, HexCoordinates}
 import enumeratum._
-import com.softwaremill.quicklens._
 
 import scala.util.{Random, Try}
 
@@ -85,7 +85,7 @@ trait UsableOnCharacter extends UsableOnTarget[CharacterId] { this: Ability =>
     super.useChecks + UseCheck.TargetCharacter.InRange
 }
 
-abstract class Ability(val id: AbilityId, pid: CharacterId) extends HexUtils with NkmJsonProtocol {
+abstract class Ability(val id: AbilityId, pid: CharacterId) extends NkmUtils {
   val metadata: AbilityMetadata
 
   def _canBeUsed(useChecks: Set[UseCheck])(implicit gameState: GameState): CommandResponse = {

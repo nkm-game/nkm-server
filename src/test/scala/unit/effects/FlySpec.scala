@@ -3,7 +3,7 @@ package unit.effects
 import com.tosware.nkm.models.GameStateValidator
 import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.game.effects.Fly
-import com.tosware.nkm.models.game.hex.HexUtils.CoordinateSeq
+import com.tosware.nkm.NkmUtils.CoordinateSeq
 import helpers.{TestUtils, scenarios}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike

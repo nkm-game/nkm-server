@@ -4,11 +4,11 @@ import com.tosware.nkm.models.game.Ability
 import com.tosware.nkm.models.game.Ability.AbilityMetadataId
 import com.tosware.nkm.models.game.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game.abilities._
-import com.tosware.nkm.models.game.hex.NkmUtils
 import akame._
 import aqua._
 import blank._
 import carmel_wilhelmina._
+import com.tosware.nkm.NkmUtils
 import crona._
 import hecate._
 import kirito._

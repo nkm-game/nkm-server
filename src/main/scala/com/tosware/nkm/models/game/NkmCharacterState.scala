@@ -2,7 +2,7 @@ package com.tosware.nkm.models.game
 import com.tosware.nkm.models.game.Ability.AbilityId
 import com.tosware.nkm.models.game.CharacterEffect.CharacterEffectId
 import com.tosware.nkm.models.game.effects.{StatBuff, StatNerf}
-import com.tosware.nkm.models.game.hex.HexUtils._
+import com.tosware.nkm.NkmUtils._
 
 case class NkmCharacterState
 (

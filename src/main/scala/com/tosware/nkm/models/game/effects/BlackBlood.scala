@@ -2,11 +2,10 @@ package com.tosware.nkm.models.game.effects
 
 import com.tosware.nkm.NkmConf
 import com.tosware.nkm.models.game.Ability.AbilityId
-import com.tosware.nkm.models.{Damage, DamageType}
 import com.tosware.nkm.models.game.CharacterEffect.CharacterEffectId
 import com.tosware.nkm.models.game.NkmCharacter.CharacterId
-import com.tosware.nkm.models.game.{CharacterEffect, CharacterEffectMetadata, CharacterEffectName, CharacterEffectType, GameEvent, GameEventListener, GameState}
-import com.tosware.nkm.models.game.hex.HexUtils._
+import com.tosware.nkm.models.game._
+import com.tosware.nkm.models.{Damage, DamageType}
 
 import scala.util.Random
 

@@ -1,7 +1,7 @@
 package unit
 
 import com.tosware.nkm.Logging
-import com.tosware.nkm.models.game.hex.HexUtils.{CoordinateSeq, CoordinateSet}
+import com.tosware.nkm.NkmUtils.{CoordinateSeq, CoordinateSet}
 import com.tosware.nkm.models.game.hex.{HexCoordinates, HexDirection}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike

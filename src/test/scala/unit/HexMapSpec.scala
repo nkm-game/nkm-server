@@ -1,8 +1,8 @@
 package unit
 
-import com.tosware.nkm.Logging
+import com.tosware.nkm.{Logging, NkmUtils}
 import com.tosware.nkm.models.game.hex.HexCellType._
-import com.tosware.nkm.models.game.hex.{HexMap, HexUtils}
+import com.tosware.nkm.models.game.hex.HexMap
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
@@ -29,7 +29,7 @@ class HexMapSpec
           (3, -1, Wall),
           (4, -1, Wall),
         )
-      val cells = HexUtils.hexCellParamsToCells(hexParams)
+      val cells = NkmUtils.hexCellParamsToCells(hexParams)
 
       val hexMap = HexMap("test", cells)
       val expected =
