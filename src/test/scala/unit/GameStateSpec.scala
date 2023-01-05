@@ -31,7 +31,7 @@ class GameStateSpec
     "put used ability on cooldown" in {
       val abilityId = littleWarHornAbilityId
       val abilityUsedGameState = gameState.useAbilityWithoutTarget(abilityId)
-      abilityUsedGameState.abilityById(abilityId).get.state(abilityUsedGameState).cooldown should be > 0
+      abilityUsedGameState.abilityById(abilityId).state(abilityUsedGameState).cooldown should be > 0
     }
     "decrement ability cooldowns at end of characters turn" in {
       val abilityId = littleWarHornAbilityId

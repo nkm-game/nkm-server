@@ -21,14 +21,14 @@ case class Castling(abilityId: AbilityId, parentCharacterId: CharacterId) extend
   override val metadata = Castling.metadata
 
   override def rangeCellCoords(implicit gameState: GameState) =
-    gameState.hexMap.get.cells.toCoords
+    gameState.hexMap.cells.toCoords
 
   override def targetsInRange(implicit gameState: GameState) =
     rangeCellCoords.whereCharacters
 
   override def use(target: CharacterId, useData: UseData)(implicit random: Random, gameState: GameState) = {
-    val target1 = gameState.characterById(target).get
-    val target2 = gameState.characterById(useData.data).get
+    val target1 = gameState.characterById(target)
+    val target2 = gameState.characterById(useData.data)
     implicit val causedById: String = id
 
     gameState
@@ -39,8 +39,8 @@ case class Castling(abilityId: AbilityId, parentCharacterId: CharacterId) extend
   }
 
   override def useChecks(implicit target: CharacterId, useData: UseData, gameState: GameState): Set[UseCheck] = {
-    val target1 = gameState.characterById(target).get
-    val target2 = gameState.characterById(useData.data).get
+    val target1 = gameState.characterById(target)
+    val target2 = gameState.characterById(useData.data)
 
     super.useChecks ++ Seq(
       (target1.id != target2.id) -> "Targets have to be different.",

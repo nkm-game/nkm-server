@@ -14,8 +14,8 @@ object Resurrection {
       name = "Resurrection",
       abilityType = AbilityType.Ultimate,
       description =
-        """Character resurrects allied character, that died max. one phase before.
-          |Resurrected character respawns with half base HP on selected spawn point.""".stripMargin,
+        """Character resurrects allied characterOpt, that died max. one phase before.
+          |Resurrected characterOpt respawns with half base HP on selected spawn point.""".stripMargin,
       variables = NkmConf.extract("abilities.aqua.resurrection"),
     )
 }
@@ -24,13 +24,13 @@ case class Resurrection(abilityId: AbilityId, parentCharacterId: CharacterId) ex
   override val metadata = Resurrection.metadata
 
   override def rangeCellCoords(implicit gameState: GameState) =
-    gameState.hexMap.get.getSpawnPointsFor(parentCharacter.owner.id).map(_.coordinates)
+    gameState.hexMap.getSpawnPointsFor(parentCharacter.owner.id).map(_.coordinates)
 
   override def targetsInRange(implicit gameState: GameState) =
     rangeCellCoords.whereEmpty
 
   override def use(target: HexCoordinates, useData: UseData)(implicit random: Random, gameState: GameState) = {
-    val targetCharacter = gameState.characterById(useData.data).get
+    val targetCharacter = gameState.characterById(useData.data)
 
     gameState
       .setHp(targetCharacter.id, targetCharacter.state.maxHealthPoints / 2)(random, id)
@@ -38,16 +38,16 @@ case class Resurrection(abilityId: AbilityId, parentCharacterId: CharacterId) ex
   }
 
   override def useChecks(implicit target: HexCoordinates, useData: UseData, gameState: GameState): Set[(Boolean, CharacterId)] = {
-    val targetCharacter: NkmCharacter = gameState.characterById(useData.data).get
+    val targetCharacter: NkmCharacter = gameState.characterById(useData.data)
 
     super.useChecks ++ Seq(
       UseCheck.TargetCharacter.IsFriend(targetCharacter.id, useData, gameState),
       UseCheck.TargetCoordinates.IsFriendlySpawn,
       UseCheck.TargetCoordinates.IsFreeToStand,
-      targetCharacter.isDead -> "Target character is not dead.",
+      targetCharacter.isDead -> "Target characterOpt is not dead.",
       gameState.gameLog.events.ofType[GameEvent.CharacterDied]
         .ofCharacter(targetCharacter.id)
-        .exists(e => gameState.phase.number - e.phase.number < 2) -> "Target character has not died in the last 2 phases.",
+        .exists(e => gameState.phase.number - e.phase.number < 2) -> "Target characterOpt has not died in the last 2 phases.",
     )
   }
 }

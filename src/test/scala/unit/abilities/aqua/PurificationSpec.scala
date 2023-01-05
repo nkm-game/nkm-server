@@ -32,7 +32,7 @@ class PurificationSpec
 
     "be able to remove negative effects" in {
       val purifiedGameState: GameState = effectGameState.useAbilityOnCharacter(abilityId, s.characters.p0Second.id, UseData())
-      purifiedGameState.characterById(s.characters.p0Second.id).get.state.effects should be (Seq.empty)
+      purifiedGameState.characterById(s.characters.p0Second.id).state.effects should be (Seq.empty)
     }
 
     "not be able to use if target has no negative effects" in {

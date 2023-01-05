@@ -29,10 +29,10 @@ trait TestUtils extends Logging with NkmJsonProtocol {
   }
 
   protected def characterIdOnPoint(hexCoordinates: HexCoordinates)(implicit gameState: GameState): CharacterId =
-    gameState.hexMap.get.getCell(hexCoordinates).get.characterId.get
+    gameState.hexMap.getCell(hexCoordinates).get.characterId.get
 
   protected def characterOnPoint(hexCoordinates: HexCoordinates)(implicit gameState: GameState): NkmCharacter =
-    gameState.characterById(characterIdOnPoint(hexCoordinates)).get
+    gameState.characterById(characterIdOnPoint(hexCoordinates))
 
   protected def getTestGameState(testHexMapName: TestHexMapName, characterMetadatass: Seq[Seq[CharacterMetadata]]): GameState = {
     val playerIds: Seq[PlayerId] = characterMetadatass.indices map(p => s"p$p")
@@ -60,7 +60,7 @@ trait TestUtils extends Logging with NkmJsonProtocol {
 
     val runningGameState = playersWithCharacters.foldLeft(placingGameState){
       case (acc, p) =>
-        val spawnPoints = placingGameState.hexMap.get.getSpawnPointsFor(p.id)(placingGameState)
+        val spawnPoints = placingGameState.hexMap.getSpawnPointsFor(p.id)(placingGameState)
         val spawnsWithCharacters = spawnPoints.map(_.coordinates) zip p.characterIds
         acc.placeCharacters(p.id, spawnsWithCharacters.toMap)
     }

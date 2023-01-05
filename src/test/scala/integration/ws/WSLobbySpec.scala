@@ -250,7 +250,7 @@ class WSLobbySpec extends WSTrait
           val gameState = responseAs[GameStateView]
           gameState.gameStatus shouldEqual GameStatus.Running
           gameState.players.length shouldEqual 2
-          gameState.hexMap.get.name shouldEqual hexMapName
+          gameState.hexMap.name shouldEqual hexMapName
           gameState.numberOfBans shouldEqual 0
           gameState.numberOfCharactersPerPlayers shouldEqual 1
           gameState.pickType shouldEqual PickType.AllRandom
@@ -280,7 +280,7 @@ class WSLobbySpec extends WSTrait
           val gameState = responseAs[GameStateView]
           gameState.gameStatus shouldEqual GameStatus.CharacterPick
           gameState.players.length shouldEqual 2
-          gameState.hexMap.get.name shouldEqual hexMapName
+          gameState.hexMap.name shouldEqual hexMapName
           gameState.numberOfBans shouldEqual numberOfBans
           gameState.numberOfCharactersPerPlayers shouldEqual numberOfCharacters
           gameState.pickType shouldEqual PickType.DraftPick

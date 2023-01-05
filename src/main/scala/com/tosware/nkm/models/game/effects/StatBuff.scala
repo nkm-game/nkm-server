@@ -8,7 +8,7 @@ object StatBuff {
     CharacterEffectMetadata(
       name = CharacterEffectName.StatBuff,
       initialEffectType = CharacterEffectType.Positive,
-      description = "Buffs a certain stat in character.",
+      description = "Buffs a certain stat in characterOpt.",
     )
 }
 

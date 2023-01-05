@@ -38,7 +38,7 @@ class ResurrectionSpec
         s.spawnCoordinates.p0Second,
         UseData(s.characters.p0Second.id),
       )
-      val resurrectedCharacter = resurrectedGameState.characterById(s.characters.p0Second.id).get
+      val resurrectedCharacter = resurrectedGameState.characterById(s.characters.p0Second.id)
       resurrectedCharacter.state.healthPoints should be (resurrectedCharacter.state.maxHealthPoints / 2)
       resurrectedCharacter.parentCell(gameState).map(_.coordinates) should be (Some(HexCoordinates(-1, 0)))
     }

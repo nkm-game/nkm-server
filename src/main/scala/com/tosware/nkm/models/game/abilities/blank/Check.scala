@@ -14,7 +14,7 @@ object Check {
       name = "Check",
       abilityType = AbilityType.Normal,
       description =
-        """Character forces selected enemy character to take action.
+        """Character forces selected enemy characterOpt to take action.
           |It cannot use a basic attack this turn.""".stripMargin,
       variables = NkmConf.extract("abilities.blank.check"),
       relatedEffectIds = Seq(HasToTakeAction.metadata.id, Disarm.metadata.id),
@@ -25,7 +25,7 @@ case class Check(abilityId: AbilityId, parentCharacterId: CharacterId) extends A
   override val metadata = Check.metadata
 
   override def rangeCellCoords(implicit gameState: GameState) =
-    gameState.hexMap.get.cells.toCoords
+    gameState.hexMap.cells.toCoords
 
   override def targetsInRange(implicit gameState: GameState) = {
     rangeCellCoords
@@ -44,7 +44,7 @@ case class Check(abilityId: AbilityId, parentCharacterId: CharacterId) extends A
   override def useChecks(implicit target: CharacterId, useData: UseData, gameState: GameState): Set[UseCheck] = {
     super.useChecks ++ Seq(
       UseCheck.TargetCharacter.IsEnemy,
-      !gameState.characterIdsThatTookActionThisPhase.contains(target) -> "This character already took action in this phase."
+      !gameState.characterIdsThatTookActionThisPhase.contains(target) -> "This characterOpt already took action in this phase."
     )
   }
 }

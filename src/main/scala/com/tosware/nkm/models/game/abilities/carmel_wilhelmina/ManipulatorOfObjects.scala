@@ -15,7 +15,7 @@ object ManipulatorOfObjects {
       name = "Manipulator of Objects",
       alternateName = "万条の仕手",
       abilityType = AbilityType.Passive,
-      description = """This character's basic attacks snare enemies for {duration}t.
+      description = """This characterOpt's basic attacks snare enemies for {duration}t.
       |This effect cannot be added on the same enemy for {effectTimeout}t.""".stripMargin,
       variables = NkmConf.extract("abilities.carmelWilhelmina.manipulatorOfObjects"),
       relatedEffectIds = Seq(Snare.metadata.id, ManipulatorOfObjectsImmunity.metadata.id),
@@ -26,7 +26,7 @@ case class ManipulatorOfObjects(abilityId: AbilityId, parentCharacterId: Charact
   override val metadata = ManipulatorOfObjects.metadata
 
   private def tryToSnare(targetCharacterId: CharacterId)(implicit random: Random, gameState: GameState): GameState = {
-    if(gameState.characterById(targetCharacterId).get.state.effects.ofType[effects.ManipulatorOfObjectsImmunity].nonEmpty)
+    if(gameState.characterById(targetCharacterId).state.effects.ofType[effects.ManipulatorOfObjectsImmunity].nonEmpty)
       gameState
     else {
       val snareEffect = effects.Snare(

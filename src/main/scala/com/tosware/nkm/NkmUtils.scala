@@ -37,7 +37,7 @@ trait NkmUtils extends NkmJsonProtocol {
 
   implicit class HexCoordinatesSetUtils(coords: Set[HexCoordinates])(implicit gameState: GameState) {
     def toCells: Set[HexCell] =
-      gameState.hexMap.get.cells.filter(c => coords.contains(c.coordinates))
+      gameState.hexMap.cells.filter(c => coords.contains(c.coordinates))
 
     def characters: Set[NkmCharacter] =
       toCells.characters
@@ -66,7 +66,7 @@ trait NkmUtils extends NkmJsonProtocol {
 
   implicit class HexCoordinatesSeqUtils(coords: Seq[HexCoordinates])(implicit gameState: GameState) {
     def toCells: Seq[HexCell] =
-      coords.flatMap(c => gameState.hexMap.get.getCell(c))
+      coords.flatMap(c => gameState.hexMap.getCell(c))
   }
 
   implicit class CharacterIdSetUtils(ids: Set[CharacterId])(implicit gameState: GameState) {

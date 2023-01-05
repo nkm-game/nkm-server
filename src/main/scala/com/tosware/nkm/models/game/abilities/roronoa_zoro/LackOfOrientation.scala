@@ -44,7 +44,7 @@ case class LackOfOrientation(abilityId: AbilityId, parentCharacterId: CharacterI
     gameState.setAbilityVariable(id, timesLostKey, value.toJson.toString)
 
   override def basicMove(path: Seq[HexCoordinates])(implicit random: Random, gameState: GameState): GameState = {
-    implicit val hexMap: HexMap = gameState.hexMap.get
+    implicit val hexMap: HexMap = gameState.hexMap
 
     @tailrec
     def generateLostPath(acc: Seq[HexCoordinates], coordsLeft: Int): Seq[HexCoordinates] = {

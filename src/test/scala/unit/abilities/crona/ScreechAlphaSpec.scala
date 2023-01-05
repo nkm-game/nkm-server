@@ -37,7 +37,7 @@ class ScreechAlphaSpec
       val coordsInRange = s.characters.p0.parentCell.get.coordinates.getCircle(abilityRadius)
 
       s.characters.p1.foreach { p =>
-        val effectsNames = newGameState.characterById(p.id).get
+        val effectsNames = newGameState.characterById(p.id)
           .state
           .effects
           .map(_.metadata.name)

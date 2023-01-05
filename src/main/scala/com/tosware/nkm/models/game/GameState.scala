@@ -27,7 +27,7 @@ case class GameState
   numberOfCharactersPerPlayers: Int,
   draftPickState: Option[DraftPickState],
   blindPickState: Option[BlindPickState],
-  hexMap: Option[HexMap],
+  hexMap: HexMap,
   players: Seq[Player],
   characters: Set[NkmCharacter],
   phase: Phase,
@@ -53,11 +53,14 @@ case class GameState
 
   def playerNumber(playerId: PlayerId): Int = players.indexWhere(_.id == playerId)
 
-  def playerById(playerId: PlayerId): Option[Player] = players.find(_.id == playerId)
+  def playerByIdOpt(playerId: PlayerId): Option[Player] = players.find(_.id == playerId)
+
+  def playerById(playerId: PlayerId): Player =
+    playerByIdOpt(playerId).get
 
   def currentPlayer: Player = players(currentPlayerNumber)
 
-  def currentCharacter: Option[NkmCharacter] = characterTakingActionThisTurn.flatMap(characterById)
+  def currentCharacterOpt: Option[NkmCharacter] = characterTakingActionThisTurn.map(characterById)
 
   def currentPlayerTime: Long = clock.playerTimes(currentPlayer.id)
 
@@ -71,11 +74,11 @@ case class GameState
 
   def triggerEffects: Set[CharacterEffect with GameEventListener] = effects.collect {case e: GameEventListener => e}
 
-  def characterById(characterId: CharacterId): Option[NkmCharacter] = characters.find(_.id == characterId)
+  def characterById(characterId: CharacterId): NkmCharacter = characters.find(_.id == characterId).get
 
-  def abilityById(abilityId: AbilityId): Option[Ability] = abilities.find(_.id == abilityId)
+  def abilityById(abilityId: AbilityId): Ability = abilities.find(_.id == abilityId).get
 
-  def effectById(effectId: CharacterEffectId): Option[CharacterEffect] = effects.find(_.id == effectId)
+  def effectById(effectId: CharacterEffectId): CharacterEffect = effects.find(_.id == effectId).get
 
   def characterPickFinished: Boolean = {
     val draftPickFinished = draftPickState.fold(false)(_.pickPhase == DraftPickPhase.Finished)
@@ -135,11 +138,9 @@ case class GameState
   def initializeCharacterPick()(implicit random: Random): GameState =
     updateClock(clock.setPickTime(pickTime))(random, id)
 
-  def setHexMap(hexMap: HexMap): GameState =
-    this.modify(_.hexMap).setTo(Some(hexMap))
-
   def startGame(g: GameStartDependencies)(implicit random: Random): GameState = {
-    setHexMap(g.hexMap).copy(
+    copy(
+      hexMap = g.hexMap,
       charactersMetadata = g.charactersMetadata,
       players = g.players,
       pickType = g.pickType,
@@ -156,7 +157,7 @@ case class GameState
   def placeCharactersRandomlyIfAllRandom()(implicit random: Random): GameState = {
     if (pickType == PickType.AllRandom) {
       // TODO: place characters as now they are outside of the map
-      // TODO: move character assignment to start game
+      // TODO: move characterOpt assignment to start game
       assignCharactersToPlayers().copy(
         playerIdsThatPlacedCharacters = players.map(_.id).toSet,
       ).updateGameStatus(GameStatus.Running)
@@ -292,23 +293,23 @@ case class GameState
   def basicMoveCharacter(characterId: CharacterId, path: Seq[HexCoordinates])(implicit random: Random): GameState = {
     implicit val causedBy: CharacterId = characterId
     val newGameState = takeActionWithCharacter(characterId)
-    characterById(characterId).get.basicMove(path)(random, newGameState)
+    characterById(characterId).basicMove(path)(random, newGameState)
       .logEvent(CharacterBasicMoved(NkmUtils.randomUUID(), characterId, path))
   }
 
   def teleportCharacter(characterId: CharacterId, targetCellCoordinates: HexCoordinates)(implicit random: Random, causedBy: String): GameState = {
-    val parentCellOpt = characterById(characterId).get.parentCell(this)
+    val parentCellOpt = characterById(characterId).parentCell(this)
 
     val removedFromParentCellState = parentCellOpt.fold(this)(c => updateHexCell(c.coordinates)(_.copy(characterId = None)))
-    val targetIsFreeToStand = hexMap.get.getCell(targetCellCoordinates).get.isFreeToStand
-    val characterIsOnMap = characterById(characterId).get.isOnMap(this)
+    val targetIsFreeToStand = hexMap.getCell(targetCellCoordinates).get.isFreeToStand
+    val characterIsOnMap = characterById(characterId).isOnMap(this)
 
     if (targetIsFreeToStand) {
       if (characterIsOnMap)
         removedFromParentCellState.updateHexCell(targetCellCoordinates)(_.copy(characterId = Some(characterId)))
       else removedFromParentCellState.placeCharacter(targetCellCoordinates, characterId)
     } else {
-      // probably just passing by a friendly character
+      // probably just passing by a friendly characterOpt
       removedFromParentCellState.removeCharacterFromMap(characterId)
     }.logEvent(CharacterTeleported(NkmUtils.randomUUID(), characterId, targetCellCoordinates))
   }
@@ -318,7 +319,7 @@ case class GameState
     implicit val causedBy: CharacterId = attackingCharacterId
     val newGameState = takeActionWithCharacter(attackingCharacterId)
       .logEvent(CharacterPreparedToAttack(NkmUtils.randomUUID(), attackingCharacterId, targetCharacterId))
-    val attackingCharacter = characterById(attackingCharacterId).get
+    val attackingCharacter = characterById(attackingCharacterId)
     attackingCharacter.basicAttack(targetCharacterId)(random, newGameState)
       .logEvent(CharacterBasicAttacked(NkmUtils.randomUUID(), attackingCharacterId, targetCharacterId))
   }
@@ -336,7 +337,7 @@ case class GameState
     }
 
   private def updateHexCell(targetCoords: HexCoordinates)(updateFunction: HexCell => HexCell): GameState =
-    this.modify(_.hexMap.each.cells.each).using {
+    this.modify(_.hexMap.cells.each).using {
       case cell if cell.coordinates == targetCoords => updateFunction(cell)
       case cell => cell
     }
@@ -351,8 +352,8 @@ case class GameState
     damageCharacter(characterId, Damage(DamageType.True, Int.MaxValue))
 
   def damageCharacter(characterId: CharacterId, damage: Damage)(implicit random: Random, causedBy: String): GameState = {
-    if(characterById(characterId).get.isDead) {
-      logger.error(s"Unable to damage character $characterId. Character dead.")
+    if(characterById(characterId).isDead) {
+      logger.error(s"Unable to damage characterOpt $characterId. Character dead.")
       this
     } else {
       updateCharacter(characterId)(_.receiveDamage(damage))
@@ -362,8 +363,8 @@ case class GameState
   }
 
   def heal(characterId: CharacterId, amount: Int)(implicit random: Random, causedBy: String): GameState =
-    if(characterById(characterId).get.isDead) {
-      logger.error(s"Unable to heal character $characterId. Character dead.")
+    if(characterById(characterId).isDead) {
+      logger.error(s"Unable to heal characterOpt $characterId. Character dead.")
       this
     } else {
       updateCharacter(characterId)(_.heal(amount))
@@ -391,7 +392,7 @@ case class GameState
   }
 
   def checkIfCharacterDied(characterId: CharacterId)(implicit random: Random, causedById: String): GameState =
-    if(characterById(characterId).get.isDead) {
+    if(characterById(characterId).isDead) {
       handleCharacterDeath(characterId)
     } else this
 
@@ -407,7 +408,7 @@ case class GameState
   def handleCharacterDeath(characterId: CharacterId)(implicit random: Random, causedById: String): GameState =
     this.removeCharacterFromMap(characterId)
       .logEvent(CharacterDied(NkmUtils.randomUUID(), characterId))
-      .checkIfPlayerKnockedOut(characterById(characterId).get.owner(this).id)
+      .checkIfPlayerKnockedOut(characterById(characterId).owner(this).id)
 
   def addEffect(characterId: CharacterId, characterEffect: CharacterEffect)(implicit random: Random, causedById: String): GameState =
     updateCharacter(characterId)(_.addEffect(characterEffect))
@@ -418,14 +419,14 @@ case class GameState
     characterEffectIds.foldLeft(this){case (acc, eid) => acc.removeEffect(eid)}
 
   def removeEffect(characterEffectId: CharacterEffectId)(implicit random: Random, causedById: String): GameState = {
-    val character = effectById(characterEffectId).get.parentCharacter(this)
+    val character = effectById(characterEffectId).parentCharacter(this)
     updateCharacter(character.id)(_.removeEffect(characterEffectId))
       .modify(_.characterEffectStates).using(ces => ces.removed(characterEffectId))
       .logEvent(EffectRemovedFromCharacter(NkmUtils.randomUUID(), characterEffectId))
   }
 
   def removeCharacterFromMap(characterId: CharacterId)(implicit random: Random, causedById: String): GameState = {
-    val parentCellOpt = characterById(characterId).get.parentCell(this)
+    val parentCellOpt = characterById(characterId).parentCell(this)
 
     parentCellOpt.fold(this)(c => updateHexCell(c.coordinates)(_.copy(characterId = None)))
       .modify(_.characterIdsOutsideMap).setTo(characterIdsOutsideMap + characterId)
@@ -454,7 +455,7 @@ case class GameState
     logEvent(BasicAttackRefreshed(NkmUtils.randomUUID(), targetCharacter))
 
   def putAbilityOnCooldown(abilityId: AbilityId): GameState = {
-    val newState = abilityById(abilityId).get.getCooldownState(this)
+    val newState = abilityById(abilityId).getCooldownState(this)
     this.copy(abilityStates = abilityStates.updated(abilityId, newState))
   }
 
@@ -468,29 +469,29 @@ case class GameState
   }
 
   def putAbilityOnCooldownOrDecrementFreeAbility(abilityId: AbilityId)(implicit random: Random): GameState = {
-    val freeAbilityEffectOpt = abilityById(abilityId).get.parentCharacter(this).state.effects.ofType[FreeAbility].headOption
+    val freeAbilityEffectOpt = abilityById(abilityId).parentCharacter(this).state.effects.ofType[FreeAbility].headOption
     if(freeAbilityEffectOpt.nonEmpty) {
       this.decrementEffectCooldown(freeAbilityEffectOpt.get.effectId)
     } else putAbilityOnCooldown(abilityId)
   }
 
   def decrementAbilityCooldown(abilityId: AbilityId, amount: Int = 1): GameState = {
-    val newState = abilityById(abilityId).get.getDecrementCooldownState(amount)(this)
+    val newState = abilityById(abilityId).getDecrementCooldownState(amount)(this)
     this.copy(abilityStates = abilityStates.updated(abilityId, newState))
   }
 
   def setAbilityEnabled(abilityId: AbilityId, newEnabled: Boolean): GameState = {
-    val newState = abilityById(abilityId).get.getEnabledChangedState(newEnabled)(this)
+    val newState = abilityById(abilityId).getEnabledChangedState(newEnabled)(this)
     this.copy(abilityStates = abilityStates.updated(abilityId, newState))
   }
 
   def setAbilityVariable(abilityId: AbilityId, key: String, value: String): GameState = {
-    val newState = abilityById(abilityId).get.getVariablesChangedState(key, value)(this)
+    val newState = abilityById(abilityId).getVariablesChangedState(key, value)(this)
     this.copy(abilityStates = abilityStates.updated(abilityId, newState))
   }
 
   def decrementEffectCooldown(effectId: CharacterEffectId)(implicit random: Random): GameState = {
-    val newState = effectById(effectId).get.getDecrementCooldownState(this)
+    val newState = effectById(effectId).getDecrementCooldownState(this)
     if(newState.cooldown > 0) {
       this.copy(characterEffectStates = characterEffectStates.updated(effectId, newState))
     } else {
@@ -500,7 +501,7 @@ case class GameState
 
   def useAbilityWithoutTarget(abilityId: AbilityId)(implicit random: Random): GameState = {
     implicit val causedById: String = abilityId
-    val ability = abilityById(abilityId).get.asInstanceOf[Ability with UsableWithoutTarget]
+    val ability = abilityById(abilityId).asInstanceOf[Ability with UsableWithoutTarget]
     val parentCharacter = ability.parentCharacter(this)
 
     val newGameState = takeActionWithCharacter(parentCharacter.id)
@@ -511,7 +512,7 @@ case class GameState
 
   def useAbilityOnCoordinates(abilityId: AbilityId, target: HexCoordinates, useData: UseData = UseData())(implicit random: Random): GameState = {
     implicit val causedById: String = abilityId
-    val ability = abilityById(abilityId).get.asInstanceOf[Ability with UsableOnCoordinates]
+    val ability = abilityById(abilityId).asInstanceOf[Ability with UsableOnCoordinates]
     val parentCharacter = ability.parentCharacter(this)
 
     val newGameState = takeActionWithCharacter(parentCharacter.id)
@@ -522,7 +523,7 @@ case class GameState
 
   def useAbilityOnCharacter(abilityId: AbilityId, target: CharacterId, useData: UseData = UseData())(implicit random: Random): GameState = {
     implicit val causedById: String = abilityId
-    val ability = abilityById(abilityId).get.asInstanceOf[Ability with UsableOnCharacter]
+    val ability = abilityById(abilityId).asInstanceOf[Ability with UsableOnCharacter]
     val parentCharacter = ability.parentCharacter(this)
 
     val newGameState = takeActionWithCharacter(parentCharacter.id)
@@ -549,8 +550,8 @@ case class GameState
   }
 
   def endTurn()(implicit random: Random, causedById: String = id): GameState = {
-    val currentCharacterAbilityIds = currentCharacter.get.state.abilities.map(_.id)
-    val currentCharacterEffectIds = currentCharacter.get.state.effects.map(_.id)
+    val currentCharacterAbilityIds = currentCharacterOpt.get.state.abilities.map(_.id)
+    val currentCharacterEffectIds = currentCharacterOpt.get.state.effects.map(_.id)
 
     val decrementAbilityCooldownsState = currentCharacterAbilityIds.foldLeft(this)((acc, abilityId) => {
       acc.decrementAbilityCooldown(abilityId)
@@ -611,20 +612,6 @@ case class GameState
       currentPlayerId = currentPlayer.id,
 
     )
-
-  def shortInfo: String =
-    s"""
-      | id: $id
-      | hexMap: ${hexMap.fold("None")(_.toString)}
-      | characterIdsOutsideMap: $characterIdsOutsideMap
-      | characterIdsThatTookActionThisPhase: $characterIdsThatTookActionThisPhase
-      | characterTakingActionThisTurn: $characterTakingActionThisTurn
-      | phase: $phase
-      | turn: $turn
-      | players: $players
-      | gameStatus: $gameStatus
-      | currentPlayerId: ${if(players.nonEmpty) currentPlayer.id else "None"}
-      |""".stripMargin
 }
 
 object GameState extends Logging {
@@ -639,7 +626,7 @@ object GameState extends Logging {
       numberOfCharactersPerPlayers = 1,
       draftPickState = None,
       blindPickState = None,
-      hexMap = None,
+      hexMap = HexMap("Empty", Set.empty),
       players = Seq(),
       characters = Set(),
       phase = Phase(0),
@@ -668,7 +655,7 @@ case class GameStateView(
                           numberOfCharactersPerPlayers: Int,
                           draftPickState: Option[DraftPickStateView],
                           blindPickState: Option[BlindPickStateView],
-                          hexMap: Option[HexMap],
+                          hexMap: HexMap,
                           players: Seq[Player],
                           characters: Set[NkmCharacterView],
                           abilities: Set[AbilityView],

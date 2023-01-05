@@ -27,7 +27,7 @@ class AquaCronaSpec
 
       }
       val purifiedGameState = bbGameState.useAbilityOnCharacter(purificationId, s.characters.p1.id)
-      purifiedGameState.characterById(s.characters.p1.id).get.state.effects.size should be (0)
+      purifiedGameState.characterById(s.characters.p1.id).state.effects.size should be (0)
     }
   }
 }

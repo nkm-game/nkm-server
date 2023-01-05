@@ -20,9 +20,9 @@ class PChanSpec
     "increase movement speed on death of friend" in {
       val initialSpeed = metadata.initialSpeed
       val newGameState = gameState.damageCharacter(s.characters.p1Second.id, Damage(DamageType.True, 100))(random, gameState.id)
-      newGameState.characterById(s.characters.p0First.id).get.state.pureSpeed should be(initialSpeed)
+      newGameState.characterById(s.characters.p0First.id).state.pureSpeed should be(initialSpeed)
       val newGameState2 = gameState.damageCharacter(s.characters.p0Second.id, Damage(DamageType.True, 100))(random, gameState.id)
-      newGameState2.characterById(s.characters.p0First.id).get.state.pureSpeed should be(initialSpeed + 2)
+      newGameState2.characterById(s.characters.p0First.id).state.pureSpeed should be(initialSpeed + 2)
     }
   }
 }

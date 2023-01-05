@@ -28,22 +28,22 @@ class MasterThroneSpec
 
   MasterThrone.metadata.name must {
     "not be initialized with energy" in {
-      gameState.abilityById(abilityId).get.asInstanceOf[MasterThrone].collectedEnergy should be(0)
+      gameState.abilityById(abilityId).asInstanceOf[MasterThrone].collectedEnergy should be(0)
     }
 
     "be able to collect energy from basic attacks" in {
       val newGameState: GameState = gameState.basicAttack(s.characters.p0First.id, s.characters.p1First.id)
-      newGameState.abilityById(abilityId).get.asInstanceOf[MasterThrone].collectedEnergy(newGameState) should be > 0
+      newGameState.abilityById(abilityId).asInstanceOf[MasterThrone].collectedEnergy(newGameState) should be > 0
     }
 
     "be able to collect energy from normal ability" in {
       val newGameState: GameState = gameState.useAbilityOnCoordinates(asterAbilityId, s.spawnCoordinates.p0Second)
-      newGameState.abilityById(abilityId).get.asInstanceOf[MasterThrone].collectedEnergy(newGameState) should be > 0
+      newGameState.abilityById(abilityId).asInstanceOf[MasterThrone].collectedEnergy(newGameState) should be > 0
     }
 
     "not be able to collect energy from ultimate ability" in {
       val newGameState: GameState = gameState.useAbilityWithoutTarget(powerOfExistenceAbilityId)
-      newGameState.abilityById(abilityId).get.asInstanceOf[MasterThrone].collectedEnergy(newGameState) should be (0)
+      newGameState.abilityById(abilityId).asInstanceOf[MasterThrone].collectedEnergy(newGameState) should be (0)
     }
   }
 }

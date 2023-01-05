@@ -27,7 +27,7 @@ case class Purification(abilityId: AbilityId, parentCharacterId: CharacterId) ex
     rangeCellCoords.whereFriendsOfC(parentCharacterId)
 
   override def use(target: CharacterId, useData: UseData)(implicit random: Random, gameState: GameState) = {
-    val effectIdsToRemove = gameState.characterById(target).get.state.effects
+    val effectIdsToRemove = gameState.characterById(target).state.effects
       .filter(_.effectType == CharacterEffectType.Negative).map(_.id)
 
     gameState
@@ -36,12 +36,12 @@ case class Purification(abilityId: AbilityId, parentCharacterId: CharacterId) ex
   }
 
   override def useChecks(implicit target: CharacterId, useData: UseData, gameState: GameState): Set[UseCheck] = {
-    val targetCharacter: NkmCharacter = gameState.characterById(target).get
+    val targetCharacter: NkmCharacter = gameState.characterById(target)
 
     super.useChecks ++ Seq(
       UseCheck.TargetCharacter.IsFriend,
       targetCharacter.state.effects.exists(_.effectType == CharacterEffectType.Negative) ->
-        "Target character does not have any negative effects.",
+        "Target characterOpt does not have any negative effects.",
     )
   }
 }

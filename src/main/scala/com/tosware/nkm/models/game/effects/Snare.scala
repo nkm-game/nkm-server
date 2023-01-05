@@ -8,7 +8,7 @@ object Snare {
     CharacterEffectMetadata(
       name = CharacterEffectName.Snare,
       initialEffectType = CharacterEffectType.Negative,
-      description = "This character cannot basic move.",
+      description = "This characterOpt cannot basic move.",
       isCc = true,
     )
 }

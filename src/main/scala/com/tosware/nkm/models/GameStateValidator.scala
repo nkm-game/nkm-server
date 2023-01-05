@@ -39,11 +39,10 @@ case class GameStateValidator()(implicit gameState: GameState) {
 
   private def charactersPlacingValid(playerId: PlayerId, coordinatesToCharacterIdMap: Map[HexCoordinates, CharacterId]): (Boolean, String) = {
     if(gameState.playerIdsThatPlacedCharacters.contains(playerId)) return (false, "You have already placed characters.")
-    if(gameState.hexMap.isEmpty) return (false, "HexMap is empty.")
-    if(coordinatesToCharacterIdMap.values.toSet.size != coordinatesToCharacterIdMap.size) return (false, "Duplicated character ids in the map.")
+    if(coordinatesToCharacterIdMap.values.toSet.size != coordinatesToCharacterIdMap.size) return (false, "Duplicated characterOpt ids in the map.")
 
-    val playerCharacterIds: Set[CharacterId] = gameState.playerById(playerId).get.characterIds
-    val playerSpawnPoints: Set[HexCoordinates] = gameState.hexMap.get.getSpawnPointsByNumber(gameState.playerNumber(playerId)).map(_.coordinates)
+    val playerCharacterIds: Set[CharacterId] = gameState.playerByIdOpt(playerId).get.characterIds
+    val playerSpawnPoints: Set[HexCoordinates] = gameState.hexMap.getSpawnPointsByNumber(gameState.playerNumber(playerId)).map(_.coordinates)
 
     if(!coordinatesToCharacterIdMap.keySet.subsetOf(playerSpawnPoints)) return (false, "All coordinates have to be your spawnpoints.")
     if(playerCharacterIds != coordinatesToCharacterIdMap.values.toSet) return (false, "Not all or invalid characters.")
@@ -56,11 +55,11 @@ case class GameStateValidator()(implicit gameState: GameState) {
     val gameNotStarted = "Game is not started."
     val gameNotRunning = "Game is not running."
     val playerNotInGame = "Player is not in the game."
-    val characterNotInGame = "This character is not in the game."
+    val characterNotInGame = "This characterOpt is not in the game."
     val abilityNotInGame = "This ability is not in the game."
     val playerFinishedGame = "This player already finished the game."
-    val gameNotInCharacterPick = "Game is not in character pick phase."
-    val gameNotInCharacterPlacing = "Game is not in character placing phase."
+    val gameNotInCharacterPick = "Game is not in characterOpt pick phase."
+    val gameNotInCharacterPlacing = "Game is not in characterOpt placing phase."
     val banNotValid = "Ban is not valid."
     val pickNotValid = "Pick is not valid."
     val notYourTurn = "This is not your turn."
@@ -122,7 +121,7 @@ case class GameStateValidator()(implicit gameState: GameState) {
     else if (gameStatusIs(GameStatus.NotStarted)) Failure(Message.gameNotStarted)
     else if (!gameStatusIs(GameStatus.Running)) Failure(Message.gameNotRunning)
     else if (gameState.currentPlayer.id != playerId) Failure(Message.notYourTurn)
-    else if (gameState.characterTakingActionThisTurn.isEmpty) Failure("No character took action this turn.")
+    else if (gameState.characterTakingActionThisTurn.isEmpty) Failure("No characterOpt took action this turn.")
     else Success()
 
   def validatePassTurn(playerId: PlayerId, characterId: CharacterId): CommandResponse =
@@ -131,9 +130,9 @@ case class GameStateValidator()(implicit gameState: GameState) {
     else if (gameStatusIs(GameStatus.NotStarted)) Failure(Message.gameNotStarted)
     else if (!gameStatusIs(GameStatus.Running)) Failure(Message.gameNotRunning)
     else if (gameState.currentPlayer.id != playerId) Failure(Message.notYourTurn)
-    else if (!gameState.playerById(playerId).get.characterIds.contains(characterId)) Failure("You do not own this character.")
-    else if (gameState.characterTakingActionThisTurn.nonEmpty) Failure("Some character already took action this turn.")
-    else if (gameState.characterIdsThatTookActionThisPhase.contains(characterId)) Failure("This character already took action this phase.")
+    else if (!gameState.playerByIdOpt(playerId).get.characterIds.contains(characterId)) Failure("You do not own this characterOpt.")
+    else if (gameState.characterTakingActionThisTurn.nonEmpty) Failure("Some characterOpt already took action this turn.")
+    else if (gameState.characterIdsThatTookActionThisPhase.contains(characterId)) Failure("This characterOpt already took action this phase.")
     else Success()
 
   def validateBasicMoveCharacter(playerId: PlayerId, path: Seq[HexCoordinates], characterId: CharacterId): CommandResponse = {
@@ -143,15 +142,15 @@ case class GameStateValidator()(implicit gameState: GameState) {
     else if (gameState.currentPlayer.id != playerId) Failure(Message.notYourTurn)
     else if (path.size < 2) Failure("Empty moves are disallowed.")
     else {
-      val character = gameState.characterById(characterId).get
+      val character = gameState.characterById(characterId)
       val parentCell = character.parentCell
       val pathCells = path.toCells
       if (pathCells.size != path.size) Failure("Not all cells exist on the map.")
       else if (pathCells.exists(c => !c.isFreeToPass(characterId))) Failure("Some of the cells in the path are not free to move.")
-      else if (!gameState.playerById(playerId).get.characterIds.contains(characterId)) Failure("You do not own this character.")
-      else if (gameState.characterTakingActionThisTurn.fold(false)(_ != characterId)) Failure("Other character already took action this turn.")
-      else if (gameState.characterIdsThatTookActionThisPhase.contains(characterId)) Failure("This character already took action this phase.")
-      else if (!character.canBasicMove) Failure("This character is unable to basic move.")
+      else if (!gameState.playerByIdOpt(playerId).get.characterIds.contains(characterId)) Failure("You do not own this characterOpt.")
+      else if (gameState.characterTakingActionThisTurn.fold(false)(_ != characterId)) Failure("Other characterOpt already took action this turn.")
+      else if (gameState.characterIdsThatTookActionThisPhase.contains(characterId)) Failure("This characterOpt already took action this phase.")
+      else if (!character.canBasicMove) Failure("This characterOpt is unable to basic move.")
       else if (gameState.characterIdsOutsideMap.contains(characterId)) Failure("Character outside map.")
       else if (!parentCell.map(_.coordinates).contains(path.head)) Failure("Path has to start with characters parent cell.")
       else if (path.size - 1 > character.state.speed) Failure("You cannot move above speed range.")
@@ -166,17 +165,17 @@ case class GameStateValidator()(implicit gameState: GameState) {
     else if (gameStatusIs(GameStatus.NotStarted)) Failure(Message.gameNotStarted)
     else if (gameState.currentPlayer.id != playerId) Failure(Message.notYourTurn)
     else {
-      val character = gameState.characterById(characterId).get
-      val targetCharacter = gameState.characterById(targetCharacterId).get
+      val character = gameState.characterById(characterId)
+      val targetCharacter = gameState.characterById(targetCharacterId)
       val targetParentCell = targetCharacter.parentCell
-      if (!gameState.playerById(playerId).get.characterIds.contains(characterId)) Failure("You do not own this character.")
-      else if (gameState.characterTakingActionThisTurn.fold(false)(_ != characterId)) Failure("Other character already took action this turn.")
-      else if (gameState.characterIdsThatTookActionThisPhase.contains(characterId)) Failure("This character already took action this phase.")
-      else if (!character.canBasicAttack) Failure("This character is unable to basic attack.")
+      if (!gameState.playerByIdOpt(playerId).get.characterIds.contains(characterId)) Failure("You do not own this characterOpt.")
+      else if (gameState.characterTakingActionThisTurn.fold(false)(_ != characterId)) Failure("Other characterOpt already took action this turn.")
+      else if (gameState.characterIdsThatTookActionThisPhase.contains(characterId)) Failure("This characterOpt already took action this phase.")
+      else if (!character.canBasicAttack) Failure("This characterOpt is unable to basic attack.")
       else if (gameState.characterIdsOutsideMap.contains(characterId)) Failure("Character outside map.")
-      else if (gameState.characterIdsOutsideMap.contains(targetCharacterId)) Failure("Target character outside map.")
-      else if (!character.basicAttackCellCoords.contains(targetParentCell.get.coordinates)) Failure("Target character not in range.")
-      else if (character.owner == targetCharacter.owner) Failure("This character cannot attack friendly characters.")
+      else if (gameState.characterIdsOutsideMap.contains(targetCharacterId)) Failure("Target characterOpt outside map.")
+      else if (!character.basicAttackCellCoords.contains(targetParentCell.get.coordinates)) Failure("Target characterOpt not in range.")
+      else if (character.owner == targetCharacter.owner) Failure("This characterOpt cannot attack friendly characters.")
       else Success()
     }
   }
@@ -187,11 +186,11 @@ case class GameStateValidator()(implicit gameState: GameState) {
     else if (gameStatusIs(GameStatus.NotStarted)) Failure(Message.gameNotStarted)
     else if (gameState.currentPlayer.id != playerId) Failure(Message.notYourTurn)
     else {
-      val ability = gameState.abilityById(abilityId).get.asInstanceOf[Ability with UsableWithoutTarget]
+      val ability = gameState.abilityById(abilityId).asInstanceOf[Ability with UsableWithoutTarget]
       val character = ability.parentCharacter
-      if (!gameState.playerById(playerId).get.characterIds.contains(character.id)) Failure("You do not own this character.")
-      else if (gameState.characterTakingActionThisTurn.fold(false)(_ != character.id)) Failure("Other character already took action this turn.")
-      else if (gameState.characterIdsThatTookActionThisPhase.contains(character.id)) Failure("This character already took action this phase.")
+      if (!gameState.playerByIdOpt(playerId).get.characterIds.contains(character.id)) Failure("You do not own this characterOpt.")
+      else if (gameState.characterTakingActionThisTurn.fold(false)(_ != character.id)) Failure("Other characterOpt already took action this turn.")
+      else if (gameState.characterIdsThatTookActionThisPhase.contains(character.id)) Failure("This characterOpt already took action this phase.")
       else ability.canBeUsed(gameState)
     }
   }
@@ -202,11 +201,11 @@ case class GameStateValidator()(implicit gameState: GameState) {
     else if (gameStatusIs(GameStatus.NotStarted)) Failure(Message.gameNotStarted)
     else if (gameState.currentPlayer.id != playerId) Failure(Message.notYourTurn)
     else {
-      val ability = gameState.abilityById(abilityId).get.asInstanceOf[Ability with UsableOnCharacter]
+      val ability = gameState.abilityById(abilityId).asInstanceOf[Ability with UsableOnCharacter]
       val character = ability.parentCharacter
-      if (!gameState.playerById(playerId).get.characterIds.contains(character.id)) Failure("You do not own this character.")
-      else if (gameState.characterTakingActionThisTurn.fold(false)(_ != character.id)) Failure("Other character already took action this turn.")
-      else if (gameState.characterIdsThatTookActionThisPhase.contains(character.id)) Failure("This character already took action this phase.")
+      if (!gameState.playerByIdOpt(playerId).get.characterIds.contains(character.id)) Failure("You do not own this characterOpt.")
+      else if (gameState.characterTakingActionThisTurn.fold(false)(_ != character.id)) Failure("Other characterOpt already took action this turn.")
+      else if (gameState.characterIdsThatTookActionThisPhase.contains(character.id)) Failure("This characterOpt already took action this phase.")
       else ability.canBeUsed(target, useData, gameState)
     }
   }
@@ -217,11 +216,11 @@ case class GameStateValidator()(implicit gameState: GameState) {
     else if (gameStatusIs(GameStatus.NotStarted)) Failure(Message.gameNotStarted)
     else if (gameState.currentPlayer.id != playerId) Failure(Message.notYourTurn)
     else {
-      val ability = gameState.abilityById(abilityId).get.asInstanceOf[Ability with UsableOnCoordinates]
+      val ability = gameState.abilityById(abilityId).asInstanceOf[Ability with UsableOnCoordinates]
       val character = ability.parentCharacter
-      if (!gameState.playerById(playerId).get.characterIds.contains(character.id)) Failure("You do not own this character.")
-      else if (gameState.characterTakingActionThisTurn.fold(false)(_ != character.id)) Failure("Other character already took action this turn.")
-      else if (gameState.characterIdsThatTookActionThisPhase.contains(character.id)) Failure("This character already took action this phase.")
+      if (!gameState.playerByIdOpt(playerId).get.characterIds.contains(character.id)) Failure("You do not own this characterOpt.")
+      else if (gameState.characterTakingActionThisTurn.fold(false)(_ != character.id)) Failure("Other characterOpt already took action this turn.")
+      else if (gameState.characterIdsThatTookActionThisPhase.contains(character.id)) Failure("This characterOpt already took action this phase.")
       else ability.canBeUsed(target, useData, gameState)
     }
   }

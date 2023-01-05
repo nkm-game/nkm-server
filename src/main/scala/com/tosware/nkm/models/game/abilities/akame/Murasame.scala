@@ -30,7 +30,7 @@ case class Murasame(abilityId: AbilityId, parentCharacterId: CharacterId) extend
 
   private def killCharacterIfFullyStacked(targetCharacterId: CharacterId)(implicit random: Random, gameState: GameState): GameState = {
     val numberOfStacks = gameState
-      .characterById(targetCharacterId).get
+      .characterById(targetCharacterId)
       .state
       .effects
       .count(e => e.metadata.name == CharacterEffectName.MurasamePoison)
@@ -57,7 +57,7 @@ case class Murasame(abilityId: AbilityId, parentCharacterId: CharacterId) extend
           applyPoison(targetCharacterId)
         } else gameState
       case AbilityHitCharacter(_, abilityId, targetCharacterId) =>
-        if(parentCharacterId == gameState.abilityById(abilityId).get.parentCharacter.id) {
+        if(parentCharacterId == gameState.abilityById(abilityId).parentCharacter.id) {
           applyPoison(targetCharacterId)
         } else gameState
       case EffectAddedToCharacter(_, _, targetCharacterId) =>

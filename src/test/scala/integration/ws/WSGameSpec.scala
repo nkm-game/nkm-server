@@ -528,7 +528,7 @@ class WSGameSpec extends WSTrait {
           gameState.clock.isRunning shouldBe true
           gameState.gameStatus shouldBe GameStatus.CharacterPlacing
           val playerTimes = (0 to 2).map(i => gameState.clock.playerTimes(usernames(i)))
-          playerTimes.toSet should have size 1 // times elapsed should be the same for all players in character placing
+          playerTimes.toSet should have size 1 // times elapsed should be the same for all players in characterOpt placing
         }
       }
     }
@@ -637,7 +637,7 @@ class WSGameSpec extends WSTrait {
         val (hexMap, players) = {
           val gameState = fetchAndParseGame(lobbyId)
           gameState.gameStatus shouldBe GameStatus.CharacterPlacing
-          (gameState.hexMap.get, gameState.players)
+          (gameState.hexMap, gameState.players)
         }
 
         (0 until numberOfPlayers) foreach { i =>
@@ -686,7 +686,7 @@ class WSGameSpec extends WSTrait {
           val (hexMap, players) = {
             val gameState = fetchAndParseGame(lobbyId)
             gameState.gameStatus shouldBe GameStatus.CharacterPlacing
-            (gameState.hexMap.get, gameState.players)
+            (gameState.hexMap, gameState.players)
           }
 
           (0 until numberOfPlayers) foreach { i =>
@@ -704,8 +704,8 @@ class WSGameSpec extends WSTrait {
         val gameState = fetchAndParseGame(lobbyId)
 
         val characterToMove = gameState.players(0).characterIds.head
-        val characterCell = gameState.hexMap.get.getCellOfCharacter(characterToMove).get
-        val targetCell = NkmUtils.getAdjacentCells(gameState.hexMap.get.cells, characterCell.coordinates)
+        val characterCell = gameState.hexMap.getCellOfCharacter(characterToMove).get
+        val targetCell = NkmUtils.getAdjacentCells(gameState.hexMap.cells, characterCell.coordinates)
           .filter(c => c.cellType == HexCellType.Normal).head
         moveCharacter(lobbyId, Seq(characterCell, targetCell).map(_.coordinates), characterToMove).statusCode shouldBe ok
         moveCharacter(lobbyId, Seq(characterCell, targetCell).map(_.coordinates), characterToMove).statusCode shouldBe nok

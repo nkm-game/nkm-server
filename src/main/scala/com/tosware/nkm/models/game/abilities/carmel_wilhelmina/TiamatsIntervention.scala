@@ -16,7 +16,7 @@ object TiamatsIntervention {
       name = "Tiamat's Intervention",
       abilityType = AbilityType.Ultimate,
       description =
-        """Character pulls another character in range to a nearby position.
+        """Character pulls another characterOpt in range to a nearby position.
           |If it is an ally, it will gain {shield} shield.
           |If it is an enemy, it will be stunned for {stunDuration}t.
           |
@@ -44,7 +44,7 @@ case class TiamatsIntervention(abilityId: AbilityId, parentCharacterId: Characte
       val stunEffect =  effects.Stun(NkmUtils.randomUUID(), metadata.variables("stunDuration"))
       gs.addEffect(target, stunEffect)(random, id)
     } else {
-      gs.setShield(target, gs.characterById(target).get.state.shield + metadata.variables("shield"))(random, id)
+      gs.setShield(target, gs.characterById(target).state.shield + metadata.variables("shield"))(random, id)
     }
   }
 
@@ -53,7 +53,7 @@ case class TiamatsIntervention(abilityId: AbilityId, parentCharacterId: Characte
     val nearbyFreeCells = parentCell.get.coordinates.getCircle(metadata.variables("moveTargetRange")).whereFreeToStand
     super.useChecks ++ Seq(
       nearbyFreeCells.nonEmpty -> "There are no nearby cells free to stand.",
-      targetCoords.toCell(gameState.hexMap.get).isFreeToStand -> "Target cell is not free to stand.",
+      targetCoords.toCell(gameState.hexMap).isFreeToStand -> "Target cell is not free to stand.",
     )
   }
 }

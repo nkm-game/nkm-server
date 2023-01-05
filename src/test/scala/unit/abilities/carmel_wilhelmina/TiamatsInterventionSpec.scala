@@ -66,7 +66,7 @@ class TiamatsInterventionSpec
         s.characters.p0Second.id,
         UseData(HexCoordinates(1, 0).toJson.toString),
       )
-      val targetCharacter = newGameState.characterById(s.characters.p0Second.id).get
+      val targetCharacter = newGameState.characterById(s.characters.p0Second.id)
       targetCharacter.parentCell(newGameState).get.coordinates should be (HexCoordinates(1, 0))
       targetCharacter.state.shield should be > 0
       targetCharacter.state.effects.ofType[effects.Stun].size should be (0)
@@ -87,7 +87,7 @@ class TiamatsInterventionSpec
         s.characters.p1First.id,
         UseData(HexCoordinates(1, 0).toJson.toString),
       )
-      val targetCharacter = newGameState.characterById(s.characters.p1First.id).get
+      val targetCharacter = newGameState.characterById(s.characters.p1First.id)
       targetCharacter.parentCell(newGameState).get.coordinates should be (HexCoordinates(1, 0))
       targetCharacter.state.shield should be (0)
       targetCharacter.state.effects.ofType[effects.Stun].size should be > 0

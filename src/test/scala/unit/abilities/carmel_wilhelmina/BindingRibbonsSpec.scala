@@ -22,17 +22,17 @@ class BindingRibbonsSpec
   abilityMetadata.name must {
     "silence hit enemies" in {
       val abilityUsedGameState: GameState = s.gameState.useAbilityOnCoordinates(abilityId, s.spawnCoordinates.p0)
-      abilityUsedGameState.characterById(s.characters.p1.head.id).get
+      abilityUsedGameState.characterById(s.characters.p1.head.id)
         .state.effects.ofType[effects.Silence] should not be empty
     }
 
     "silence and snare hit enemies when enough of them are hit" in {
       val twoHitGameState: GameState = s.gameState.useAbilityOnCoordinates(abilityId, HexCoordinates(-1, 0))
-      twoHitGameState.characterById(s.characters.p1.head.id).get
+      twoHitGameState.characterById(s.characters.p1.head.id)
         .state.effects.ofType[effects.Snare] should be (empty)
 
       val threeHitGameState: GameState = s.gameState.useAbilityOnCoordinates(abilityId, s.spawnCoordinates.p0)
-      val hitCharacterEffects = threeHitGameState.characterById(s.characters.p1.head.id).get.state.effects
+      val hitCharacterEffects = threeHitGameState.characterById(s.characters.p1.head.id).state.effects
       hitCharacterEffects.ofType[effects.Silence] should not be empty
       hitCharacterEffects.ofType[effects.Snare] should not be empty
     }

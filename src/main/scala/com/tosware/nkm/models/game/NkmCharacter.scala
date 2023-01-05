@@ -77,8 +77,8 @@ case class NkmCharacter
       .inPhase(gameState.phase.number)
       .ofType[GameEvent.AbilityUsedOnCharacter]
     )
-    .map(_.abilityId)
-      .map(aid => gameState.abilityById(aid).get)
+      .map(_.abilityId)
+      .map(gameState.abilityById)
       .filter(a => a.parentCharacter.id == id)
   }
 
@@ -126,7 +126,7 @@ case class NkmCharacter
       !state.effects.exists(e => basicAttackImpairmentCcNames.contains(e.metadata.name))
 
   def parentCell(implicit gameState: GameState): Option[HexCell] =
-    gameState.hexMap.get.getCellOfCharacter(id)
+    gameState.hexMap.getCellOfCharacter(id)
 
   def owner(implicit gameState: GameState): Player =
     gameState.players.find(_.characterIds.contains(id)).get
@@ -135,10 +135,10 @@ case class NkmCharacter
     !gameState.characterIdsOutsideMap.contains(id)
 
   def isEnemyForC(characterId: CharacterId)(implicit gameState: GameState): Boolean =
-    isEnemyFor(gameState.characterById(characterId).get.owner.id)
+    isEnemyFor(gameState.characterById(characterId).owner.id)
 
   def isFriendForC(characterId: CharacterId)(implicit gameState: GameState): Boolean =
-    isFriendFor(gameState.characterById(characterId).get.owner.id)
+    isFriendFor(gameState.characterById(characterId).owner.id)
 
   def isEnemyFor(playerId: PlayerId)(implicit gameState: GameState): Boolean =
     playerId != owner.id
@@ -164,7 +164,7 @@ case class NkmCharacter
   def defaultBasicMove(path: Seq[HexCoordinates])(implicit random: Random, gameState: GameState): GameState =
     path.tail.foldLeft(gameState)((acc, coordinate) => acc.teleportCharacter(id, coordinate)(random, id))
 
-  // case if character dies on the way? make a test of this and create a new functions with while(onMap)
+  // case if characterOpt dies on the way? make a test of this and create a new functions with while(onMap)
   def basicMove(path: Seq[HexCoordinates])(implicit random: Random, gameState: GameState): GameState =
     basicMoveOverride.fold(defaultBasicMove(path))(_.basicMove(path))
 

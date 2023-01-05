@@ -41,7 +41,7 @@ class BlackBloodSpec
       val coordsInRange = s.characters.p0.parentCell.get.coordinates.getCircle(abilityRange)
 
       s.characters.p1.foreach { p =>
-        val state = newGameState.characterById(p.id).get
+        val state = newGameState.characterById(p.id)
           .state
         val hp = state.healthPoints
         val maxHp = state.maxHealthPoints

@@ -30,7 +30,7 @@ class CastlingSpec
         )
       assertCommandSuccess(r)
     }
-    "not be able to use castling on the same character" in {
+    "not be able to use castling on the same characterOpt" in {
       val r = GameStateValidator()
         .validateAbilityUseOnCharacter(
           s.characters.p0First.owner.id,
@@ -40,7 +40,7 @@ class CastlingSpec
         )
       assertCommandFailure(r)
     }
-    "not be able to use castling on character outside map" in {
+    "not be able to use castling on characterOpt outside map" in {
       implicit val causedBy: GameId = gameState.id
       val s1 = gameState.removeCharacterFromMap(s.characters.p0Second.id)
       val s2 = gameState.removeCharacterFromMap(s.characters.p1First.id)
@@ -71,12 +71,12 @@ class CastlingSpec
         UseData(s.characters.p0Second.id),
       )
       newGameState
-        .characterById(s.characters.p1First.id).get
+        .characterById(s.characters.p1First.id)
         .parentCell.get
         .coordinates shouldBe s.characters.p0Second.parentCell(newGameState).get.coordinates
 
       newGameState
-        .characterById(s.characters.p0Second.id).get
+        .characterById(s.characters.p0Second.id)
         .parentCell.get
         .coordinates shouldBe s.characters.p1First.parentCell(newGameState).get.coordinates
     }

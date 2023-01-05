@@ -25,7 +25,7 @@ class OneHundredEightPoundPhoenixSpec
       assertCommandSuccess(r)
     }
 
-    "be able to damage single character" in {
+    "be able to damage single characterOpt" in {
       val newGameState: GameState = gameState.useAbilityOnCharacter(abilityId, s.characters.p1First.id)
       newGameState.gameLog.events.ofType[GameEvent.CharacterDamaged].count(_.causedById == abilityId) shouldBe 3
       newGameState.gameLog.events.ofType[GameEvent.CharacterDamaged].count(_.characterId == s.characters.p1First.id) shouldBe 3

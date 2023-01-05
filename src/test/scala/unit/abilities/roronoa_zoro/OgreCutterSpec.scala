@@ -46,7 +46,7 @@ class OgreCutterSpec
         .gameLog.events
         .causedBy(s.characters.p0.id)
         .ofType[GameEvent.CharacterDamaged] should not be empty
-      newGameState.hexMap.get
+      newGameState.hexMap
         .getCellOfCharacter(s.characters.p0.id).get
         .coordinates.toTuple shouldBe (5, 0)
     }

@@ -16,7 +16,7 @@ object PowerOfExistence {
       alternateName = "存在の力",
       abilityType = AbilityType.Ultimate,
       description =
-        """Character releases collected Life Energy, dealing magic damage to every enemy character on the map.
+        """Character releases collected Life Energy, dealing magic damage to every enemy characterOpt on the map.
           |Damage equals to collected Life Energy divided by number of enemies.
           |""".stripMargin,
       variables = NkmConf.extract("abilities.hecate.powerOfExistence"),
@@ -26,7 +26,7 @@ object PowerOfExistence {
 case class PowerOfExistence(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId) with UsableWithoutTarget {
   override val metadata = PowerOfExistence.metadata
   override def rangeCellCoords(implicit gameState: GameState) =
-    gameState.hexMap.get.cells.toCoords
+    gameState.hexMap.cells.toCoords
   override def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] =
     rangeCellCoords.whereEnemiesOfC(parentCharacterId)
 

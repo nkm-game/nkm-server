@@ -45,7 +45,7 @@ class GameStateValidatorSpec
   "GameStateValidator" must {
     "pass sanity check" in {
       gameState.characters.count(_.isOnMap(gameState)) should be (s.gameState.characters.size)
-      gameState.hexMap.get.cells.whereCharacters.size should be (s.gameState.characters.size)
+      gameState.hexMap.cells.whereCharacters.size should be (s.gameState.characters.size)
     }
     "validate moving characters and" when {
       "allow move within speed range" in {
@@ -67,10 +67,10 @@ class GameStateValidatorSpec
 
         val newGameState = gameState.basicMoveCharacter( s.characters.p0First.id, CoordinateSeq((0, 0), (-1, 0), (-2, 0)))
         newGameState.characters.count(_.isOnMap(newGameState)) should be (s.gameState.characters.size)
-        newGameState.hexMap.get.cells.whereCharacters.size should be (s.gameState.characters.size)
+        newGameState.hexMap.cells.whereCharacters.size should be (s.gameState.characters.size)
       }
 
-      "disallow if character is not on the map" in {
+      "disallow if characterOpt is not on the map" in {
         val newGameState = gameState.removeCharacterFromMap(s.characters.p0First.id)(random, gameState.id)
 
         assertCommandFailure {
@@ -81,7 +81,7 @@ class GameStateValidatorSpec
         }
       }
 
-      "disallow if character is grounded" in {
+      "disallow if characterOpt is grounded" in {
         val newGameState = gameState.addEffect(s.characters.p0First.id, Ground(NkmUtils.randomUUID(), 1))(random, gameState.id)
 
         assertCommandFailure {
@@ -93,7 +93,7 @@ class GameStateValidatorSpec
         }
       }
 
-      "disallow if character is snared" in {
+      "disallow if characterOpt is snared" in {
         val newGameState = gameState.addEffect(s.characters.p0First.id, Snare(NkmUtils.randomUUID(), 1))(random, gameState.id)
 
         assertCommandFailure {
@@ -105,7 +105,7 @@ class GameStateValidatorSpec
         }
       }
 
-      "disallow if character is stunned" in {
+      "disallow if characterOpt is stunned" in {
         val newGameState = gameState.addEffect(s.characters.p0First.id, Stun(NkmUtils.randomUUID(), 1))(random, gameState.id)
 
         assertCommandFailure {
@@ -187,7 +187,7 @@ class GameStateValidatorSpec
         }
       }
 
-      "disallow move if character already moved" in {
+      "disallow move if characterOpt already moved" in {
         val newGameState = gameState.basicMoveCharacter(
           s.characters.p0First.id,
           CoordinateSeq((0, 0), (1, 0)))
@@ -200,7 +200,7 @@ class GameStateValidatorSpec
         }
       }
 
-      "disallow move if character used ultimate ability" in {
+      "disallow move if characterOpt used ultimate ability" in {
         val newGameState = gameState.useAbilityWithoutTarget(ultimateAbilityId)
 
         assertCommandFailure {
@@ -211,7 +211,7 @@ class GameStateValidatorSpec
         }
       }
 
-      "disallow move if other character took action in turn" in {
+      "disallow move if other characterOpt took action in turn" in {
         val newGameState = gameState.takeActionWithCharacter("test_nonexistent_id")
 
         assertCommandFailure {
@@ -254,7 +254,7 @@ class GameStateValidatorSpec
     "validate attacking characters and" when {
       val moveGameState = gameState.teleportCharacter(s.characters.p0First.id, HexCoordinates(2, 0))(random, gameState.id)
 
-      "allow if character is in attack range without obstacles" in {
+      "allow if characterOpt is in attack range without obstacles" in {
         assertCommandSuccess {
           GameStateValidator()(moveGameState).validateBasicAttackCharacter(s.characters.p0First.owner.id,
             s.characters.p0First.id,
@@ -263,7 +263,7 @@ class GameStateValidatorSpec
         }
       }
 
-      "allow over wall if character is ranged" in {
+      "allow over wall if characterOpt is ranged" in {
         val s = wallRangedScenario
         implicit val gameState: GameState = s.gameState
         assertCommandSuccess {
@@ -274,7 +274,7 @@ class GameStateValidatorSpec
         }
       }
 
-      "disallow over wall if character is melee" in {
+      "disallow over wall if characterOpt is melee" in {
         val s = wallMeleeScenario
         implicit val gameState: GameState = s.gameState
         assertCommandFailure {
@@ -285,7 +285,7 @@ class GameStateValidatorSpec
         }
       }
 
-      "allow over character if character is ranged" in {
+      "allow over characterOpt if characterOpt is ranged" in {
         val s = wallRangedScenario
         implicit val gameState: GameState = s.gameState
         assertCommandSuccess {
@@ -296,7 +296,7 @@ class GameStateValidatorSpec
         }
       }
 
-      "disallow over character if character is melee" in {
+      "disallow over characterOpt if characterOpt is melee" in {
         val s = wallMeleeScenario
         implicit val gameState: GameState = s.gameState
         assertCommandFailure {
@@ -307,7 +307,7 @@ class GameStateValidatorSpec
         }
       }
 
-      "disallow if character is not on the map" in {
+      "disallow if characterOpt is not on the map" in {
         val newGameState = moveGameState.removeCharacterFromMap(s.characters.p0First.id)(random, gameState.id)
 
         assertCommandFailure {
@@ -318,7 +318,7 @@ class GameStateValidatorSpec
         }
       }
 
-      "allow if character is grounded" in {
+      "allow if characterOpt is grounded" in {
         val newGameState = moveGameState.addEffect(s.characters.p0First.id, Ground(NkmUtils.randomUUID(), 1))(random, gameState.id)
 
         assertCommandSuccess {
@@ -330,7 +330,7 @@ class GameStateValidatorSpec
         }
       }
 
-      "allow if character is snared" in {
+      "allow if characterOpt is snared" in {
         val newGameState = moveGameState.addEffect(s.characters.p0First.id, Snare(NkmUtils.randomUUID(), 1))(random, gameState.id)
 
         assertCommandSuccess {
@@ -342,7 +342,7 @@ class GameStateValidatorSpec
         }
       }
 
-      "disallow character is stunned" in {
+      "disallow characterOpt is stunned" in {
         val newGameState = moveGameState.addEffect(s.characters.p0First.id, Stun(NkmUtils.randomUUID(), 1))(random, gameState.id)
 
         assertCommandFailure {
@@ -354,7 +354,7 @@ class GameStateValidatorSpec
         }
       }
 
-      "disallow character is disarmed" in {
+      "disallow characterOpt is disarmed" in {
         val newGameState = moveGameState.addEffect(s.characters.p0First.id, Disarm(NkmUtils.randomUUID(), 1))(random, gameState.id)
 
         assertCommandFailure {
@@ -366,7 +366,7 @@ class GameStateValidatorSpec
         }
       }
 
-      "disallow if character is not in attack range" in {
+      "disallow if characterOpt is not in attack range" in {
         assertCommandFailure {
           validator.validateBasicAttackCharacter(gameState.players(0).id,
             s.characters.p0First.id,
@@ -375,7 +375,7 @@ class GameStateValidatorSpec
         }
       }
 
-      "disallow if character already basic attacked" in {
+      "disallow if characterOpt already basic attacked" in {
         val newState = moveGameState.basicAttack(s.characters.p0First.id, s.characters.p1First.id)
 
         assertCommandFailure {
@@ -386,7 +386,7 @@ class GameStateValidatorSpec
         }
       }
 
-      "disallow if character used ultimate ability" in {
+      "disallow if characterOpt used ultimate ability" in {
         val newGameState = moveGameState.useAbilityWithoutTarget(ultimateAbilityId)
 
         assertCommandFailure {
@@ -398,7 +398,7 @@ class GameStateValidatorSpec
         }
       }
 
-      "disallow move if other character took action in turn" in {
+      "disallow move if other characterOpt took action in turn" in {
         val newGameState = moveGameState.takeActionWithCharacter("test_nonexistent_id")
 
         assertCommandFailure {
@@ -444,7 +444,7 @@ class GameStateValidatorSpec
         val newGameState = incrementGameState.useAbilityWithoutTarget(ultimateAbilityId)
           .endTurn()
           .passTurn(s.characters.p1First.id)
-        newGameState.abilityById(ultimateAbilityId).get.state(newGameState).cooldown should be > 0
+        newGameState.abilityById(ultimateAbilityId).state(newGameState).cooldown should be > 0
 
 
         assertCommandFailure {
@@ -458,7 +458,7 @@ class GameStateValidatorSpec
           .endTurn()
           .passTurn(s.characters.p1First.id)
           .decrementAbilityCooldown(ultimateAbilityId, 999)
-        newGameState.abilityById(ultimateAbilityId).get.state(newGameState).cooldown should be (0)
+        newGameState.abilityById(ultimateAbilityId).state(newGameState).cooldown should be (0)
 
 
         assertCommandFailure {

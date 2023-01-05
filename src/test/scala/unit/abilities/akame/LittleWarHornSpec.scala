@@ -38,7 +38,7 @@ class LittleWarHornSpec
     "add AD and speed buffs" in {
       val newGameState: GameState = gameState.useAbilityWithoutTarget(abilityId)
       val statBuffs = newGameState
-        .characterById(s.characters.p0.id).get
+        .characterById(s.characters.p0.id)
         .state
         .effects
         .ofType[StatBuff]
@@ -62,12 +62,12 @@ class LittleWarHornSpec
 
       val abilityUseGameState: GameState = gameState.useAbilityWithoutTarget(abilityId)
       abilityUseGameState
-        .characterById(s.characters.p0.id).get
+        .characterById(s.characters.p0.id)
         .state.pureSpeed should be (initialSpeed)
 
       val afterDurationGameState = skipPhaseN(duration)(abilityUseGameState)
       afterDurationGameState
-        .characterById(s.characters.p0.id).get
+        .characterById(s.characters.p0.id)
         .state.pureSpeed should not be initialSpeed
     }
   }

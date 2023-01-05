@@ -12,7 +12,7 @@ object SnipersSight {
     AbilityMetadata(
       name = "Sniper's Sight",
       abilityType = AbilityType.Passive,
-      description = "This character's basic attack range is round.",
+      description = "This characterOpt's basic attack range is round.",
     )
 }
 

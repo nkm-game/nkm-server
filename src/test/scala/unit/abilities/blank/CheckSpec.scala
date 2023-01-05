@@ -39,7 +39,7 @@ class CheckSpec
         .endTurn()
 
       abilityGameState
-        .characterById(s.characters.p1First.id).get
+        .characterById(s.characters.p1First.id)
         .state.effects.exists(_.metadata.name == CharacterEffectName.Disarm)
     }
 

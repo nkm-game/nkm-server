@@ -42,10 +42,10 @@ class FiberDecapicationSpec
     }
 
     "be able to decrease physical defense, damage and teleport" in {
-      val oldPhysicalDefense = gameState.characterById(s.characters.p1.id).get.state.purePhysicalDefense
+      val oldPhysicalDefense = gameState.characterById(s.characters.p1.id).state.purePhysicalDefense
 
       val newGameState: GameState = gameState.useAbilityOnCharacter(abilityId, s.characters.p1.id)
-      val newPhysicalDefense = newGameState.characterById(s.characters.p1.id).get.state.purePhysicalDefense
+      val newPhysicalDefense = newGameState.characterById(s.characters.p1.id).state.purePhysicalDefense
 
       oldPhysicalDefense should be > newPhysicalDefense
 
@@ -54,7 +54,7 @@ class FiberDecapicationSpec
         .causedBy(s.characters.p0.id)
         .ofType[GameEvent.CharacterDamaged] should not be empty
 
-      newGameState.hexMap.get
+      newGameState.hexMap
         .getCellOfCharacter(s.characters.p0.id).get
         .coordinates.toTuple shouldBe (6, 0)
     }

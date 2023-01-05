@@ -22,7 +22,7 @@ class AsterSpec
     "be able to use on all coords" in {
       val validator = GameStateValidator()
 
-      val allCoords = s.gameState.hexMap.get.cells.toCoords
+      val allCoords = s.gameState.hexMap.cells.toCoords
       allCoords.foreach { c =>
         val r = validator.validateAbilityUseOnCoordinates(s.characters.p0First.owner.id, abilityId, c)
         assertCommandSuccess(r)

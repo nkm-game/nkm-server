@@ -36,7 +36,7 @@ case class FiberDecapitation(abilityId: AbilityId, parentCharacterId: CharacterI
     rangeCellCoords.whereEnemiesOfC(parentCharacterId)
 
   override def use(target: CharacterId, useData: UseData)(implicit random: Random, gameState: GameState) = {
-    val targetCharacter = gameState.characterById(target).get
+    val targetCharacter = gameState.characterById(target)
     val targetCoordinates = targetCharacter.parentCell.get.coordinates
     val targetDirection = parentCell.get.coordinates.getDirection(targetCoordinates).get
     val teleportCoordinates = targetCoordinates.getInDirection(targetDirection, metadata.variables("targetCellOffset"))
@@ -49,13 +49,13 @@ case class FiberDecapitation(abilityId: AbilityId, parentCharacterId: CharacterI
 
   override def useChecks(implicit target: CharacterId, useData: UseData, gameState: GameState): Set[UseCheck] = {
     def cellToTeleportIsFreeToStand(): Boolean = {
-      val targetCharacter: NkmCharacter = gameState.characterById(target).get
+      val targetCharacter: NkmCharacter = gameState.characterById(target)
       val targetCoordinatesOpt = targetCharacter.parentCell.map(_.coordinates)
       if (targetCoordinatesOpt.isEmpty) return false
       val targetDirectionOpt = parentCell.get.coordinates.getDirection(targetCoordinatesOpt.get)
       if (targetDirectionOpt.isEmpty) return false
       val teleportCoordinates = targetCoordinatesOpt.get.getInDirection(targetDirectionOpt.get, metadata.variables("targetCellOffset"))
-      if (!teleportCoordinates.toCellOpt(gameState.hexMap.get).fold(false)(_.isFreeToStand)) return false
+      if (!teleportCoordinates.toCellOpt(gameState.hexMap).fold(false)(_.isFreeToStand)) return false
       true
     }
 

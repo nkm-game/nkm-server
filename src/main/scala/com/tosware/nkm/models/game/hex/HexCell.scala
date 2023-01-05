@@ -31,12 +31,12 @@ case class HexCell
   def isEmpty: Boolean = characterId.isEmpty
   def isFreeToStand: Boolean = isEmpty && cellType != HexCellType.Wall
   def isFreeToPass(forCharacterId: CharacterId)(implicit gameState: GameState): Boolean = {
-    val forCharacter = gameState.characterById(forCharacterId).get
+    val forCharacter = gameState.characterById(forCharacterId)
     cellType != HexCellType.Wall && characterId.forall(c => forCharacter.isFriendForC(c)) || forCharacter.state.effects.ofType[Fly].nonEmpty
   }
 
-  def character(implicit gameState: GameState): Option[NkmCharacter] =
-    characterId.flatMap(cid => gameState.characterById(cid))
+  def characterOpt(implicit gameState: GameState): Option[NkmCharacter] =
+    characterId.map(cid => gameState.characterById(cid))
 
   def getNeighbour(direction: HexDirection)(implicit hexMap: HexMap): Option[HexCell] =
     coordinates.getNeighbour(direction).toCellOpt
@@ -58,7 +58,7 @@ case class HexCell
     size: Int,
     characterPredicate: NkmCharacter => Boolean = _ => true,
   )(implicit gameState: GameState): Option[NkmCharacter] = {
-    implicit val hexMap: HexMap = gameState.hexMap.get
+    implicit val hexMap: HexMap = gameState.hexMap
 
     @tailrec
     def scan(depth: Int, lastCell: HexCell): Option[NkmCharacter] = {
@@ -66,9 +66,9 @@ case class HexCell
       val neighbour = lastCell.getNeighbour(direction)
       if(neighbour.isEmpty) return None
       if(neighbour.get.characterId.isDefined) {
-        val target = neighbour.get.character.get
+        val target = neighbour.get.characterOpt.get
         if(characterPredicate(target))
-          return Some(neighbour.get.character.get)
+          return Some(neighbour.get.characterOpt.get)
       }
       scan(depth - 1, neighbour.get)
     }
@@ -88,13 +88,13 @@ case class HexCell
                friendlyPlayerIdOpt: Option[PlayerId] = None,
                stopPredicate: HexCell => Boolean = _ => false,
              )(implicit gameState: GameState): Set[HexCell] = {
-    implicit val hexMap: HexMap = gameState.hexMap.get
+    implicit val hexMap: HexMap = gameState.hexMap
 
     def shouldStop(cell: HexCell): Boolean = {
       searchFlags.contains(SearchFlag.StopAtWalls) && cell.cellType == HexCellType.Wall ||
       friendlyPlayerIdOpt.fold(false)(fpId => {
-        searchFlags.contains(SearchFlag.StopAtEnemies) && cell.character.fold(false)(_.isEnemyFor(fpId)) ||
-          searchFlags.contains(SearchFlag.StopAtFriends) && cell.character.fold(false)(_.isFriendFor(fpId))
+        searchFlags.contains(SearchFlag.StopAtEnemies) && cell.characterOpt.fold(false)(_.isEnemyFor(fpId)) ||
+          searchFlags.contains(SearchFlag.StopAtFriends) && cell.characterOpt.fold(false)(_.isFriendFor(fpId))
       }) ||
         stopPredicate(cell)
     }

@@ -19,11 +19,11 @@ class NaturesBeautySpec
       val damagedGameState = s.gameState.setHp(s.characters.p0Second.id, 30)(random, s.gameState.id)
       val healedGameState = damagedGameState.basicAttack(s.characters.p0First.id, s.characters.p0Second.id)
 
-      healedGameState.characterById(s.characters.p0First.id).get
+      healedGameState.characterById(s.characters.p0First.id)
         .isFriendForC(s.characters.p0Second.id)(healedGameState) shouldBe true
 
-      healedGameState.characterById(s.characters.p0Second.id).get
-        .state.healthPoints should be(30 + healedGameState.characterById(s.characters.p0First.id).get.state.attackPoints)
+      healedGameState.characterById(s.characters.p0Second.id)
+        .state.healthPoints should be(30 + healedGameState.characterById(s.characters.p0First.id).state.attackPoints)
     }
   }
 }

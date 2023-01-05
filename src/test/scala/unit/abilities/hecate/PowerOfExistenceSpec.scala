@@ -31,9 +31,9 @@ class PowerOfExistenceSpec
     }
 
     "be able to damage characters" in {
-      aaGameState.abilityById(masterThroneAbilityId).get.asInstanceOf[MasterThrone].collectedEnergy(aaGameState) should be > 0
+      aaGameState.abilityById(masterThroneAbilityId).asInstanceOf[MasterThrone].collectedEnergy(aaGameState) should be > 0
       val abilityUsedGameState: GameState = aaGameState.useAbilityWithoutTarget(abilityId)
-      abilityUsedGameState.abilityById(masterThroneAbilityId).get.asInstanceOf[MasterThrone].collectedEnergy(abilityUsedGameState) should be(0)
+      abilityUsedGameState.abilityById(masterThroneAbilityId).asInstanceOf[MasterThrone].collectedEnergy(abilityUsedGameState) should be(0)
 
       abilityUsedGameState.gameLog.events
         .ofType[GameEvent.CharacterDamaged]

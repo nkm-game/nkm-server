@@ -16,7 +16,7 @@ object MasterThrone {
       abilityType = AbilityType.Passive,
       description =
         """Character can gather Life Energy using base attacks or Normal abilities, collecting {healthPercent}% of target's max HP.
-          |Life Energy can be collected only once per character.
+          |Life Energy can be collected only once per characterOpt.
           |""".stripMargin,
       variables = NkmConf.extract("abilities.hecate.masterThrone"),
     )
@@ -44,7 +44,7 @@ case class MasterThrone
       .getOrElse(0)
 
   def collectEnergy(characterId: CharacterId)(implicit gameState: GameState): GameState = {
-    val energy = (gameState.characterById(characterId).get.state.maxHealthPoints * (metadata.variables("healthPercent") / 100f)).toInt
+    val energy = (gameState.characterById(characterId).state.maxHealthPoints * (metadata.variables("healthPercent") / 100f)).toInt
 
     gameState
       .setAbilityVariable(id, collectedCharacterIdsKey, (collectedCharacterIds + characterId).toJson.toString)
@@ -64,12 +64,12 @@ case class MasterThrone
         collectEnergy(characterId)(gameState)
       case GameEvent.AbilityHitCharacter(_, abilityId, targetCharacterId) =>
         if(collectedCharacterIds.contains(targetCharacterId)) return gameState
-        val ability = gameState.abilityById(abilityId).get
+        val ability = gameState.abilityById(abilityId)
         if(ability.parentCharacter.id != parentCharacterId) return gameState
         if(ability.metadata.abilityType != AbilityType.Normal) return gameState
         collectEnergy(targetCharacterId)(gameState)
       case GameEvent.AbilityUseFinished(_, abilityId) =>
-        val ability = gameState.abilityById(abilityId).get
+        val ability = gameState.abilityById(abilityId)
         if(ability.parentCharacter.id != parentCharacterId) return gameState
         if(ability.metadata.id == PowerOfExistence.metadata.id) reset()
         else gameState

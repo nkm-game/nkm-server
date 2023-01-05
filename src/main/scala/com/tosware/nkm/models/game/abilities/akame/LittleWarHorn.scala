@@ -18,7 +18,7 @@ object LittleWarHorn {
       abilityType = AbilityType.Ultimate,
       description =
         """Character gains {attackPoints} AD and {speedIncrease} speed for {duration}t.
-          |When this effect is finished, set this character's base speed to {finalSpeed}.""".stripMargin,
+          |When this effect is finished, set this characterOpt's base speed to {finalSpeed}.""".stripMargin,
       variables = NkmConf.extract("abilities.akame.littleWarHorn"),
       relatedEffectIds = Seq(StatBuff.metadata.id),
     )

@@ -33,7 +33,7 @@ class MurasameSpec
         s.characters.p1.id
       )
       newGameState
-        .characterById(s.characters.p1.id).get
+        .characterById(s.characters.p1.id)
         .state
         .effects
         .map(_.metadata.name) should contain (MurasamePoison)
@@ -44,7 +44,7 @@ class MurasameSpec
         s.characters.p1.id
       )
       newGameState
-        .characterById(s.characters.p1.id).get
+        .characterById(s.characters.p1.id)
         .state
         .effects
         .map(_.metadata.name) should contain (MurasamePoison)
@@ -55,7 +55,7 @@ class MurasameSpec
         s.characters.p0.id,
         s.characters.p1.id
       )
-      if(n.characterById(s.characters.p1.id).get.isDead) n
+      if(n.characterById(s.characters.p1.id).isDead) n
       else n.passTurn(s.characters.p1.id)
     }
 
@@ -68,7 +68,7 @@ class MurasameSpec
       val newGameState = attackAndSkipN(2)(gameState)
 
       newGameState
-        .characterById(s.characters.p1.id).get
+        .characterById(s.characters.p1.id)
         .state
         .effects
         .map(_.metadata.name).count(_ == MurasamePoison) should be (2)
@@ -78,7 +78,7 @@ class MurasameSpec
       val stacksToKill = abilityMetadata.variables("poisonStacksToDie")
       val newGameState = attackAndSkipN(stacksToKill)(gameState)
 
-      newGameState.characterById(s.characters.p1.id).get.isDead should be (true)
+      newGameState.characterById(s.characters.p1.id).isDead should be (true)
 
       val currentTurn = newGameState.turn.number
 
