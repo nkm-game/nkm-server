@@ -3,6 +3,7 @@ package com.tosware.nkm.models.game
 import com.softwaremill.quicklens._
 import com.tosware.nkm.NkmUtils
 import com.tosware.nkm.models.CommandResponse._
+import com.tosware.nkm.models.Damage
 import com.tosware.nkm.models.game.Ability._
 import com.tosware.nkm.models.game.CharacterEffect.CharacterEffectId
 import com.tosware.nkm.models.game.NkmCharacter.CharacterId
@@ -126,6 +127,11 @@ abstract class Ability(val id: AbilityId, pid: CharacterId) extends NkmUtils {
 
   def getVariablesChangedState(key: String, value: String)(implicit gameState: GameState): AbilityState =
     state.modify(_.variables).using(_.updated(key, value))
+
+  def hitAndDamageCharacter(target: CharacterId, damage: Damage)(implicit random: Random, gameState: GameState): GameState =
+    gameState
+      .abilityHitCharacter(id, target)
+      .damageCharacter(target, damage)(random, id)
 
   def toView(implicit gameState: GameState): AbilityView = {
     val canBeUsedResponse = _canBeUsed(baseUseChecks)

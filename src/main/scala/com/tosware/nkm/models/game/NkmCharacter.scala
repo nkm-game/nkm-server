@@ -59,10 +59,10 @@ case class NkmCharacter
 
   def usedBasicAttackThisTurn(implicit gameState: GameState): Boolean =
     gameState.gameLog.events
-    .inTurn(gameState.turn.number)
-    .ofType[GameEvent.CharacterBasicAttacked]
-    .ofCharacter(id)
-    .nonEmpty
+      .inTurn(gameState.turn.number)
+      .ofType[GameEvent.CharacterBasicAttacked]
+      .ofCharacter(id)
+      .nonEmpty
 
   private def getUsedAbilitiesThisPhase(implicit gameState: GameState): Seq[Ability] = {
     (
