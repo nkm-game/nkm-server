@@ -8,3 +8,6 @@ target
 !/.idea/codeStyles
 !/.idea/vcs.xml
 out
+
+.bsp
+src/main/resources/version.txt

@@ -1,9 +1,9 @@
 package com.tosware.nkm.services
 
-import com.tosware.nkm.models.game.{AbilityMetadata, CharacterEffectMetadata, CharacterMetadata}
-import com.tosware.nkm.providers._
 import com.tosware.nkm.NkmTimeouts
+import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.game.hex.HexMap
+import com.tosware.nkm.providers._
 
 class NkmDataService extends NkmTimeouts
 {
@@ -15,4 +15,6 @@ class NkmDataService extends NkmTimeouts
   def getAbilityMetadatas: Seq[AbilityMetadata] = AbilityMetadatasProvider().getAbilityMetadatas
 
   def getCharacterEffectMetadatas: Seq[CharacterEffectMetadata] = CharacterEffectMetadatasProvider().getCharacterEffectMetadatas
+
+  def getCurrentVersion: String = scala.io.Source.fromResource("version.txt").mkString.trim
 }

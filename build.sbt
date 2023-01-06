@@ -65,7 +65,7 @@ libraryDependencies += "com.github.dnvriend" %% "akka-persistence-inmemory" % "2
 libraryDependencies += "com.github.dnvriend" %% "akka-persistence-jdbc" % AkkaPersistenceVersion
 libraryDependencies += "mysql" % "mysql-connector-java" % "8.0.30"
 
-scalacOptions in Compile ++= Seq(
+Compile / scalacOptions ++= Seq(
   "-deprecation",
   "-feature",
   "-unchecked",

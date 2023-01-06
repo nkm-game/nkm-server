@@ -31,5 +31,11 @@ class PublicDataSpec extends ApiTrait
 
     "return character effect metadatas" in
       assertDataExists[Seq[CharacterEffectMetadata]]("/api/character_effects")
+
+    "return current version" in {
+      Get("/api/version") ~> Route.seal(routes) ~> check {
+        status shouldEqual OK
+      }
+    }
   }
 }
