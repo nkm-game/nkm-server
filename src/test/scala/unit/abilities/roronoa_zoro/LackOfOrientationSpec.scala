@@ -16,11 +16,12 @@ class LackOfOrientationSpec
   //  val lostSeed = 1337
   //  override implicit val random = new Random(lostSeed)
 
-  private val metadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(LackOfOrientation.metadata.id))
-  private val s = scenarios.Simple2v2TestScenario(metadata)
+  private val abilityMetadata = LackOfOrientation.metadata
+  private val characterMetadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
+  private val s = scenarios.Simple2v2TestScenario(characterMetadata)
 
-  LackOfOrientation.metadata.name must {
-    "make parent characterOpt get lost sometimes" in {
+  abilityMetadata.name must {
+    "make parent character get lost sometimes" in {
       def move() = s.gameState.basicMoveCharacter(s.characters.p0First.id, CoordinateSeq((0, 0), (1, 0), (2, 0), (2, 1), (1, 1)))
       def moveAndGetParentCoords() = {
         val moveGameState = move()

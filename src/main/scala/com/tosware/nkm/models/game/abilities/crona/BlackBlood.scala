@@ -13,7 +13,7 @@ object BlackBlood {
       name = "Black Blood",
       abilityType = AbilityType.Passive,
       description =
-        """After receiving damage, characterOpt deals {damage} magical damage to surrounding enemies.
+        """After receiving damage, character deals {damage} magical damage to surrounding enemies.
           |
           |Radius: circular, {radius}""".stripMargin,
       variables = NkmConf.extract("abilities.crona.blackBlood"),

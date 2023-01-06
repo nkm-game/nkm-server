@@ -12,7 +12,7 @@ object PChan {
     AbilityMetadata(
       name = "P-Chan",
       abilityType = AbilityType.Passive,
-      description = "Character permanently gains {speedIncrease} speed with every death of a friendly characterOpt.",
+      description = "Character permanently gains {speedIncrease} speed with every death of a friendly character.",
       variables = NkmConf.extract("abilities.llenn.pChan"),
     )
 }

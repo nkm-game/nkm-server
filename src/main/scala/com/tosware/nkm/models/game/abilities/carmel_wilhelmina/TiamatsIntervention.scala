@@ -16,7 +16,7 @@ object TiamatsIntervention {
       name = "Tiamat's Intervention",
       abilityType = AbilityType.Ultimate,
       description =
-        """Character pulls another characterOpt in range to a nearby position.
+        """Character pulls another character in range to a nearby position.
           |If it is an ally, it will gain {shield} shield.
           |If it is an enemy, it will be stunned for {stunDuration}t.
           |

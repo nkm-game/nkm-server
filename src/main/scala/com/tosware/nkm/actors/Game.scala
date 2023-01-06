@@ -414,7 +414,7 @@ class Game(id: String)(implicit nkmDataService: NkmDataService) extends Persiste
       log.debug(s"Recovered $playerId blind pick")
     case PlacingCharactersStarted(_) =>
       gameState = gameState.startPlacingCharacters()
-      log.debug(s"Recovered start of characterOpt placing")
+      log.debug(s"Recovered start of character placing")
     case CharactersPlaced(_, playerId, coordinatesToCharacterIdMap) =>
       gameState = gameState.placeCharacters(playerId, coordinatesToCharacterIdMap)
       log.debug(s"Recovered placing characters by $playerId to $coordinatesToCharacterIdMap")
@@ -438,7 +438,7 @@ class Game(id: String)(implicit nkmDataService: NkmDataService) extends Persiste
       log.debug(s"Recovered ability $abilityId use on coordinates $target")
     case AbilityUsedOnCharacter(_, _, abilityId, target, useData) =>
       gameState = gameState.useAbilityOnCharacter(abilityId, target, useData)
-      log.debug(s"Recovered ability $abilityId use on characterOpt $target")
+      log.debug(s"Recovered ability $abilityId use on character $target")
     case BanningPhaseTimedOut(_) =>
       log.debug(s"Recovered banning phase timeout")
       gameState = gameState.finishBanningPhase()

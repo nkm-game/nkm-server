@@ -16,7 +16,7 @@ object PowerOfExistence {
       alternateName = "存在の力",
       abilityType = AbilityType.Ultimate,
       description =
-        """Character releases collected Life Energy, dealing magic damage to every enemy characterOpt on the map.
+        """Character releases collected Life Energy, dealing magic damage to every enemy character on the map.
           |Damage equals to collected Life Energy divided by number of enemies.
           |""".stripMargin,
       variables = NkmConf.extract("abilities.hecate.powerOfExistence"),

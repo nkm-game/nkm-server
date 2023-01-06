@@ -41,7 +41,7 @@ case class Purification(abilityId: AbilityId, parentCharacterId: CharacterId) ex
     super.useChecks ++ Seq(
       UseCheck.TargetCharacter.IsFriend,
       targetCharacter.state.effects.exists(_.effectType == CharacterEffectType.Negative) ->
-        "Target characterOpt does not have any negative effects.",
+        "Target character does not have any negative effects.",
     )
   }
 }

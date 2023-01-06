@@ -14,8 +14,8 @@ object Resurrection {
       name = "Resurrection",
       abilityType = AbilityType.Ultimate,
       description =
-        """Character resurrects allied characterOpt, that died max. one phase before.
-          |Resurrected characterOpt respawns with half base HP on selected spawn point.""".stripMargin,
+        """Character resurrects allied character, that died max. one phase before.
+          |Resurrected character respawns with half base HP on selected spawn point.""".stripMargin,
       variables = NkmConf.extract("abilities.aqua.resurrection"),
     )
 }
@@ -44,10 +44,10 @@ case class Resurrection(abilityId: AbilityId, parentCharacterId: CharacterId) ex
       UseCheck.TargetCharacter.IsFriend(targetCharacter.id, useData, gameState),
       UseCheck.TargetCoordinates.IsFriendlySpawn,
       UseCheck.TargetCoordinates.IsFreeToStand,
-      targetCharacter.isDead -> "Target characterOpt is not dead.",
+      targetCharacter.isDead -> "Target character is not dead.",
       gameState.gameLog.events.ofType[GameEvent.CharacterDied]
         .ofCharacter(targetCharacter.id)
-        .exists(e => gameState.phase.number - e.phase.number < 2) -> "Target characterOpt has not died in the last 2 phases.",
+        .exists(e => gameState.phase.number - e.phase.number < 2) -> "Target character has not died in the last 2 phases.",
     )
   }
 }

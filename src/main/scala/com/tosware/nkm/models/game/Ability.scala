@@ -157,27 +157,27 @@ abstract class Ability(val id: AbilityId, pid: CharacterId) extends NkmUtils {
       def IsNotOnCooldown(implicit gameState: GameState): UseCheck =
         (state.cooldown <= 0 || parentCharacter.state.effects.ofType[FreeAbility].nonEmpty) -> "Ability is on cooldown."
       def ParentCharacterOnMap(implicit gameState: GameState): UseCheck =
-        parentCharacter.isOnMap -> "Parent characterOpt is not on map."
+        parentCharacter.isOnMap -> "Parent character is not on map."
       def PhaseIsGreaterThan(i: Int)(implicit gameState: GameState): UseCheck =
         (gameState.phase.number > i) -> s"Phase is not greater than $i."
       def CanBeUsedByParent(implicit gameState: GameState): UseCheck = {
-        parentCharacter.canUseAbilityOfType(metadata.abilityType) -> s"Ability cannot be used by parent characterOpt."
+        parentCharacter.canUseAbilityOfType(metadata.abilityType) -> s"Ability cannot be used by parent character."
       }
     }
     object TargetCharacter {
       def InRange(implicit target: CharacterId, useData: UseData, gameState: GameState): UseCheck =
-        targetsInRange.toCells.exists(_.characterId.contains(target)) -> "Target characterOpt is not in range."
+        targetsInRange.toCells.exists(_.characterId.contains(target)) -> "Target character is not in range."
       def IsEnemy(implicit target: CharacterId, useData: UseData, gameState: GameState): UseCheck =
-        gameState.characterById(target).isEnemyForC(parentCharacter.id) -> "Target characterOpt is not an enemy."
+        gameState.characterById(target).isEnemyForC(parentCharacter.id) -> "Target character is not an enemy."
       def IsFriend(implicit target: CharacterId, useData: UseData, gameState: GameState): UseCheck =
-        gameState.characterById(target).isFriendForC(parentCharacter.id) -> "Target characterOpt is not a friend."
+        gameState.characterById(target).isFriendForC(parentCharacter.id) -> "Target character is not a friend."
       def IsOnMap(implicit target: CharacterId, useData: UseData, gameState: GameState): UseCheck =
-        gameState.characterById(target).isOnMap -> "Target characterOpt is not on map."
+        gameState.characterById(target).isOnMap -> "Target character is not on map."
     }
 
     object TargetCoordinates {
       def InRange(implicit target: HexCoordinates, useData: UseData, gameState: GameState): UseCheck =
-        Seq(target).toCells.nonEmpty -> "Target characterOpt is not in range."
+        Seq(target).toCells.nonEmpty -> "Target character is not in range."
       def IsFreeToStand(implicit target: HexCoordinates, useData: UseData, gameState: GameState): UseCheck =
         Seq(target).toCells.headOption.fold(false)(_.isFreeToStand) -> "Target is not free to stand."
       def IsFriendlySpawn(implicit target: HexCoordinates, useData: UseData, gameState: GameState): UseCheck =

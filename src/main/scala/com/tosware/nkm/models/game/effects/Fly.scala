@@ -8,7 +8,7 @@ object Fly {
   CharacterEffectMetadata(
     name = CharacterEffectName.Fly,
     initialEffectType = CharacterEffectType.Positive,
-    description = "This characterOpt can fly, allowing them to pass walls and enemy characters.",
+    description = "This character can fly, allowing them to pass walls and enemy characters.",
   )
 }
 

@@ -29,7 +29,7 @@ class TacticalEscapeSpec
       assertCommandSuccess(r)
     }
 
-    "be able to modify characterOpt speed" in {
+    "be able to modify character speed" in {
       val abilityUsedGameState: GameState = gameState.useAbilityWithoutTarget(abilityId)
       val oldSpeed = s.characters.p0First.state.speed
       val newSpeed = abilityUsedGameState.characterById(s.characters.p0First.id).state.speed

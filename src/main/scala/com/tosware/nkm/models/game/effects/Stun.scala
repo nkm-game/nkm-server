@@ -8,7 +8,7 @@ object Stun {
     CharacterEffectMetadata(
       name = CharacterEffectName.Stun,
       initialEffectType = CharacterEffectType.Negative,
-      description = "This characterOpt cannot take action.",
+      description = "This character cannot take action.",
       isCc = true,
     )
 }

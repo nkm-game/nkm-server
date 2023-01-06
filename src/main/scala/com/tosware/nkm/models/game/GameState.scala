@@ -10,7 +10,7 @@ import com.tosware.nkm.models.game.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game.Player.PlayerId
 import com.tosware.nkm.models.game.blindpick._
 import com.tosware.nkm.models.game.draftpick._
-import com.tosware.nkm.models.game.effects.FreeAbility
+import com.tosware.nkm.models.game.effects.{Block, FreeAbility}
 import com.tosware.nkm.models.game.hex._
 import com.tosware.nkm.models.{Damage, DamageType}
 import com.tosware.nkm.{Logging, NkmUtils}
@@ -319,9 +319,16 @@ case class GameState
     implicit val causedBy: CharacterId = attackingCharacterId
     val newGameState = takeActionWithCharacter(attackingCharacterId)
       .logEvent(CharacterPreparedToAttack(NkmUtils.randomUUID(), attackingCharacterId, targetCharacterId))
-    val attackingCharacter = characterById(attackingCharacterId)
-    attackingCharacter.basicAttack(targetCharacterId)(random, newGameState)
-      .logEvent(CharacterBasicAttacked(NkmUtils.randomUUID(), attackingCharacterId, targetCharacterId))
+
+    val attackingCharacter = newGameState.characterById(attackingCharacterId)
+    val targetCharacter = newGameState.characterById(targetCharacterId)
+    val blockEffects = targetCharacter.state.effects.ofType[Block]
+    if(blockEffects.nonEmpty) {
+      newGameState.removeEffect(blockEffects.head.id)
+    } else {
+      attackingCharacter.basicAttack(targetCharacterId)(random, newGameState)
+        .logEvent(CharacterBasicAttacked(NkmUtils.randomUUID(), attackingCharacterId, targetCharacterId))
+    }
   }
 
   private def updatePlayer(playerId: PlayerId)(updateFunction: Player => Player): GameState =
@@ -353,7 +360,7 @@ case class GameState
 
   def damageCharacter(characterId: CharacterId, damage: Damage)(implicit random: Random, causedBy: String): GameState = {
     if(characterById(characterId).isDead) {
-      logger.error(s"Unable to damage characterOpt $characterId. Character dead.")
+      logger.error(s"Unable to damage character $characterId. Character dead.")
       this
     } else {
       updateCharacter(characterId)(_.receiveDamage(damage))
@@ -364,7 +371,7 @@ case class GameState
 
   def heal(characterId: CharacterId, amount: Int)(implicit random: Random, causedBy: String): GameState =
     if(characterById(characterId).isDead) {
-      logger.error(s"Unable to heal characterOpt $characterId. Character dead.")
+      logger.error(s"Unable to heal character $characterId. Character dead.")
       this
     } else {
       updateCharacter(characterId)(_.heal(amount))

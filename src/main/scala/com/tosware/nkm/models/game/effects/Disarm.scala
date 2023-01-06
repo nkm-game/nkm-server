@@ -8,7 +8,7 @@ object Disarm {
     CharacterEffectMetadata(
       name = CharacterEffectName.Disarm,
       initialEffectType = CharacterEffectType.Negative,
-      description = "This characterOpt is disarmed and cannot use basic attacks.",
+      description = "This character is disarmed and cannot use basic attacks.",
       isCc = true,
     )
 }

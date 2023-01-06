@@ -18,7 +18,7 @@ object GodrobeSenketsu {
       abilityType = AbilityType.Ultimate,
       description =
         """Character wears Senketsu, gaining flying effect and {initialAttackDamageBonus} AD.
-          |At the end of this characterOpt's turn, gain additional {bonusAttackDamagePerTurn} and receive {damage} true damage.
+          |At the end of this character's turn, gain additional {bonusAttackDamagePerTurn} and receive {damage} true damage.
           |Character can move after using this ability.
           |
           |This ability can be disabled.

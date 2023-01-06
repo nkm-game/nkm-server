@@ -13,7 +13,7 @@ object ScissorBlade {
       name = "ScissorBlade",
       abilityType = AbilityType.Passive,
       description =
-        """This characterOpt's basic attacks decrease physical defense of enemies by {physicalDefenseDecrease} for {duration}t.
+        """This character's basic attacks decrease physical defense of enemies by {physicalDefenseDecrease} for {duration}t.
           |This effect is applied before attack and can stack.""".stripMargin,
       variables = NkmConf.extract("abilities.ryukoMatoi.scissorBlade"),
       relatedEffectIds = Seq(effects.StatNerf.metadata.id)

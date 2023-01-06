@@ -23,13 +23,13 @@ class PublicDataSpec extends ApiTrait
     "return hexmaps" in
       assertDataExists[Seq[HexMap]]("/api/maps")
 
-    "return characterOpt metadatas" in
+    "return character metadatas" in
       assertDataExists[Seq[CharacterMetadata]]("/api/characters")
 
     "return ability metadatas" in
       assertDataExists[Seq[AbilityMetadata]]("/api/abilities")
 
-    "return characterOpt effect metadatas" in
+    "return character effect metadatas" in
       assertDataExists[Seq[CharacterEffectMetadata]]("/api/character_effects")
   }
 }

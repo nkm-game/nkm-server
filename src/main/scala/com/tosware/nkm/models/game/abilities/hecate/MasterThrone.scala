@@ -16,7 +16,7 @@ object MasterThrone {
       abilityType = AbilityType.Passive,
       description =
         """Character can gather Life Energy using base attacks or Normal abilities, collecting {healthPercent}% of target's max HP.
-          |Life Energy can be collected only once per characterOpt.
+          |Life Energy can be collected only once per character.
           |""".stripMargin,
       variables = NkmConf.extract("abilities.hecate.masterThrone"),
     )

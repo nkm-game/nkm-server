@@ -30,7 +30,7 @@ class CastlingSpec
         )
       assertCommandSuccess(r)
     }
-    "not be able to use castling on the same characterOpt" in {
+    "not be able to use castling on the same character" in {
       val r = GameStateValidator()
         .validateAbilityUseOnCharacter(
           s.characters.p0First.owner.id,
@@ -40,7 +40,7 @@ class CastlingSpec
         )
       assertCommandFailure(r)
     }
-    "not be able to use castling on characterOpt outside map" in {
+    "not be able to use castling on character outside map" in {
       implicit val causedBy: GameId = gameState.id
       val s1 = gameState.removeCharacterFromMap(s.characters.p0Second.id)
       val s2 = gameState.removeCharacterFromMap(s.characters.p1First.id)
