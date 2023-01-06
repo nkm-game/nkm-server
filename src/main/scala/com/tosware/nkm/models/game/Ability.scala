@@ -161,7 +161,10 @@ abstract class Ability(val id: AbilityId, pid: CharacterId) extends NkmUtils {
       def PhaseIsGreaterThan(i: Int)(implicit gameState: GameState): UseCheck =
         (gameState.phase.number > i) -> s"Phase is not greater than $i."
       def CanBeUsedByParent(implicit gameState: GameState): UseCheck = {
-        parentCharacter.canUseAbilityOfType(metadata.abilityType) -> s"Ability cannot be used by parent character."
+        (
+          parentCharacter.canUseAbilityOfType(metadata.abilityType) ||
+            parentCharacter.state.effects.ofType[effects.AbilityUnlock].nonEmpty
+          ) -> s"Ability cannot be used by parent character."
       }
     }
     object TargetCharacter {

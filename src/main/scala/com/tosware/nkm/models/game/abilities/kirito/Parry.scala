@@ -15,6 +15,7 @@ object Parry {
       abilityType = AbilityType.Passive,
       description = "Character has a {dodgeChancePercent}% chance to block basic attack of an enemy",
       variables = NkmConf.extract("abilities.kirito.parry"),
+      relatedEffectIds = Seq(effects.Block.metadata.id),
     )
 }
 

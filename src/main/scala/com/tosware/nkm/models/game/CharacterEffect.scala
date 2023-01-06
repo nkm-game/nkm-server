@@ -20,6 +20,7 @@ object CharacterEffectName extends Enum[CharacterEffectName] {
   case object Disarm extends CharacterEffectName
   case object Fly extends CharacterEffectName
   case object FreeAbility extends CharacterEffectName
+  case object AbilityUnlock extends CharacterEffectName
   case object Ground extends CharacterEffectName
   case object HasToTakeAction extends CharacterEffectName
   case object ManipulatorOfObjectsImmunity extends CharacterEffectName
