@@ -38,13 +38,14 @@ case class HexMapProvider() extends NkmJsonProtocol {
 
   def getTestHexMaps: Seq[TestHexMap] =
     Seq(
+      testmap.FiberDecapication.hexMap,
       testmap.Fly.hexMap,
       testmap.OgreCutter.hexMap,
-      testmap.FiberDecapication.hexMap,
       testmap.Simple1v1.hexMap,
       testmap.Simple1v9Line.hexMap,
       testmap.Simple2v2.hexMap,
       testmap.Simple2v2Wall.hexMap,
+      testmap.Simple2v2v2.hexMap,
     )
 
   def getTestHexMap(name: TestHexMapName): HexMap =

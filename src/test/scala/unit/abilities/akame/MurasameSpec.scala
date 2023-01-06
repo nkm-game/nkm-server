@@ -79,12 +79,9 @@ class MurasameSpec
 
       newGameState.characterById(s.characters.p1.id).isDead should be (true)
 
-      val currentTurn = newGameState.turn.number
-
       newGameState
         .gameLog
         .events
-        .inTurn(currentTurn)
         .ofType[CharacterDied] should not be empty
     }
   }

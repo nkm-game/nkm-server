@@ -247,10 +247,13 @@ case class GameState
   def unpause()(implicit random: Random): GameState =
     updateClock(clock.unpause())(random, id)
 
-  def surrender(playerIds: PlayerId*): GameState = {
+  def surrender(playerIds: PlayerId*)(implicit random: Random): GameState = {
     def filterPlayers: Player => Boolean = p => playerIds.contains(p.name)
 
-    this.modify(_.players.eachWhere(filterPlayers).victoryStatus).setTo(VictoryStatus.Lost).checkVictoryStatus()
+    this
+      .modify(_.players.eachWhere(filterPlayers).victoryStatus).setTo(VictoryStatus.Lost)
+      .checkVictoryStatus()
+      .skipTurnIfPlayerKnockedOut()(random, playerIds.mkString(", "))
   }
 
   def ban(playerId: PlayerId, characterIds: Set[CharacterMetadataId]): GameState =
@@ -267,14 +270,14 @@ case class GameState
     ).updateClock(clock.setPickTime(clockConfig.maxPickTimeMillis))(random, id)
       .checkIfCharacterPickFinished()
 
-  def draftPickTimeout(): GameState =
+  def draftPickTimeout()(implicit random: Random): GameState =
     surrender(draftPickState.get.currentPlayerPicking.get)
 
   def blindPick(playerId: PlayerId, characterIds: Set[CharacterMetadataId])(implicit random: Random): GameState =
     copy(blindPickState = blindPickState.map(_.pick(playerId, characterIds)))
       .checkIfCharacterPickFinished()
 
-  def blindPickTimeout(): GameState =
+  def blindPickTimeout()(implicit random: Random): GameState =
     surrender(blindPickState.get.pickingPlayers: _*)
 
   def checkIfPlacingCharactersFinished(): GameState =
@@ -403,11 +406,12 @@ case class GameState
       handleCharacterDeath(characterId)
     } else this
 
-  def knockOutPlayer(playerId: PlayerId): GameState =
+  def knockOutPlayer(playerId: PlayerId)(implicit random: Random): GameState =
     updatePlayer(playerId)(_.modify(_.victoryStatus).setTo(VictoryStatus.Lost))
       .checkVictoryStatus()
+      .skipTurnIfPlayerKnockedOut()(random, playerId)
 
-  def checkIfPlayerKnockedOut(playerId: PlayerId): GameState =
+  def checkIfPlayerKnockedOut(playerId: PlayerId)(implicit random: Random): GameState =
     if(characters.filter(_.owner(this).id == playerId).forall(_.isDead)) {
       knockOutPlayer(playerId)
     } else this
@@ -547,13 +551,20 @@ case class GameState
       .logEvent(TurnFinished(NkmUtils.randomUUID()))
       .finishPhaseIfEveryCharacterTookAction()
       .logEvent(TurnStarted(NkmUtils.randomUUID()))
+      .skipTurnIfPlayerKnockedOut()
       .skipTurnIfNoCharactersToTakeAction()
   }
 
-  def skipTurnIfNoCharactersToTakeAction()(implicit random: Random, causedById: String = id): GameState = {
-    if(currentPlayer.characterIds.intersect(charactersToTakeAction).isEmpty) {
+  def skipTurnIfNoCharactersToTakeAction()(implicit random: Random, causedById: String = id): GameState =
+    if(currentPlayer.characterIds.intersect(charactersToTakeAction).isEmpty)
       finishTurn()
-    } else this
+    else this
+
+  def skipTurnIfPlayerKnockedOut()(implicit random: Random, causedById: String = id): GameState = {
+    if(gameStatus != GameStatus.Running) return this // prevent infinite loop if no one is playing
+    if(currentPlayer.victoryStatus != VictoryStatus.Pending)
+      finishTurn()
+    else this
   }
 
   def endTurn()(implicit random: Random, causedById: String = id): GameState = {
