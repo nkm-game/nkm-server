@@ -7,11 +7,9 @@ import com.tosware.nkm.models.game.abilities.hecate.PowerOfExistence
 import com.tosware.nkm.models.game.abilities.sinon.TacticalEscape
 import com.tosware.nkm.models.game.effects._
 import com.tosware.nkm.models.game.hex.{HexCoordinates, TestHexMapName}
-import com.tosware.nkm.NkmUtils.CoordinateSeq
 import helpers.{TestUtils, scenarios}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
-import com.tosware.nkm.NkmUtils._
 
 class GameStateValidatorSpec
   extends AnyWordSpecLike

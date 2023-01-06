@@ -1,6 +1,5 @@
 package unit.abilities.blank
 
-import com.tosware.nkm.actors.Game.GameId
 import com.tosware.nkm.models.GameStateValidator
 import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.game.abilities.blank.Castling
@@ -41,7 +40,6 @@ class CastlingSpec
       assertCommandFailure(r)
     }
     "not be able to use castling on character outside map" in {
-      implicit val causedBy: GameId = gameState.id
       val s1 = gameState.removeCharacterFromMap(s.characters.p0Second.id)
       val s2 = gameState.removeCharacterFromMap(s.characters.p1First.id)
 

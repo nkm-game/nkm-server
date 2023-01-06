@@ -25,9 +25,10 @@ object Switch {
 case class Switch(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId) with UsableOnCharacter {
   override val metadata = Switch.metadata
 
-  override def rangeCellCoords(implicit gameState: GameState) = ???
+  override def rangeCellCoords(implicit gameState: GameState) = Set()
 
-  override def targetsInRange(implicit gameState: GameState) = ???
+  override def targetsInRange(implicit gameState: GameState) = Set()
 
-  override def use(target: CharacterId, useData: UseData)(implicit random: Random, gameState: GameState) = ???
+  override def use(target: CharacterId, useData: UseData)(implicit random: Random, gameState: GameState) =
+    gameState
 }

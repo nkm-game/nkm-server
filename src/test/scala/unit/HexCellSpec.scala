@@ -1,7 +1,6 @@
 package unit
 
 import com.tosware.nkm.Logging
-import com.tosware.nkm.NkmUtils._
 import com.tosware.nkm.models.game.hex._
 import com.tosware.nkm.models.game.{CharacterMetadata, GameState}
 import helpers.{TestUtils, scenarios}

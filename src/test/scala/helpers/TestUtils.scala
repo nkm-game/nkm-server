@@ -1,20 +1,20 @@
 package helpers
 
-import com.tosware.nkm.Logging
-import com.tosware.nkm.models.CommandResponse.{CommandResponse, Failure, Success}
+import com.tosware.nkm.models.CommandResponse._
 import com.tosware.nkm.models.game.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game.PickType.BlindPick
 import com.tosware.nkm.models.game.Player.PlayerId
 import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.game.hex.{HexCoordinates, TestHexMapName}
 import com.tosware.nkm.providers.HexMapProvider
-import com.tosware.nkm.serializers.NkmJsonProtocol
+import com.tosware.nkm.{Logging, NkmUtils}
 import org.scalatest.Assertions.fail
 
 import scala.util.Random
 
-trait TestUtils extends Logging with NkmJsonProtocol {
+trait TestUtils extends Logging with NkmUtils {
   implicit val random: Random = new Random()
+  implicit val causedById: String = "test"
 
   protected def assertCommandSuccess(c: CommandResponse): Unit = c match {
     case Success(_) =>

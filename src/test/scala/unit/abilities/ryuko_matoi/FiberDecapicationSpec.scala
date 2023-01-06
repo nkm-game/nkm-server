@@ -4,7 +4,6 @@ import com.tosware.nkm.models.GameStateValidator
 import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.game.abilities.ryuko_matoi.FiberDecapitation
 import com.tosware.nkm.models.game.hex.HexCoordinates
-import com.tosware.nkm.NkmUtils._
 import helpers.{TestUtils, scenarios}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
