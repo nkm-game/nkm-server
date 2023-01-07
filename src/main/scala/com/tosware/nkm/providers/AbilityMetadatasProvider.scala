@@ -6,6 +6,7 @@ import akame._
 import aqua._
 import blank._
 import carmel_wilhelmina._
+import ebisuzawa_kurumi._
 import crona._
 import hecate._
 import kirito._
@@ -36,6 +37,10 @@ case class AbilityMetadatasProvider() extends NkmJsonProtocol {
     BlackBlood.metadata,
     ScreechAlpha.metadata,
     Infection.metadata,
+
+    Contact.metadata,
+    Survivor.metadata,
+    FinalSolution.metadata,
 
     MasterThrone.metadata,
     Aster.metadata,

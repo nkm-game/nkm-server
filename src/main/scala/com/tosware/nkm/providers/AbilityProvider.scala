@@ -4,12 +4,13 @@ import com.tosware.nkm.models.game.Ability
 import com.tosware.nkm.models.game.Ability.AbilityMetadataId
 import com.tosware.nkm.models.game.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game.abilities._
+import com.tosware.nkm.NkmUtils
 import akame._
 import aqua._
 import blank._
 import carmel_wilhelmina._
-import com.tosware.nkm.NkmUtils
 import crona._
+import ebisuzawa_kurumi._
 import hecate._
 import kirito._
 import llenn._
@@ -19,7 +20,7 @@ import sinon._
 
 import scala.util.Random
 
-object AbilityProvider {
+object AbilityProvider extends NkmUtils {
   def instantiateAbilities(characterId: CharacterId, metadataIds: Seq[AbilityMetadataId])(implicit random: Random): Seq[Ability] = {
     metadataIds.map {
       case Murasame.metadata.id =>
@@ -56,6 +57,13 @@ object AbilityProvider {
         ScreechAlpha(NkmUtils.randomUUID(), characterId)
       case Infection.metadata.id =>
         Infection(NkmUtils.randomUUID(), characterId)
+
+      case Contact.metadata.id =>
+        Contact(randomUUID(), characterId)
+      case Survivor.metadata.id =>
+        Survivor(randomUUID(), characterId)
+      case FinalSolution.metadata.id =>
+        FinalSolution(randomUUID(), characterId)
 
       case MasterThrone.metadata.id =>
         MasterThrone(NkmUtils.randomUUID(), characterId)

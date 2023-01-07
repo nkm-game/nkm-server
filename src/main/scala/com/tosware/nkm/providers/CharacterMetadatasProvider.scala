@@ -6,6 +6,7 @@ import aqua._
 import blank._
 import carmel_wilhelmina._
 import crona._
+import ebisuzawa_kurumi._
 import hecate._
 import kirito._
 import llenn._
@@ -54,6 +55,21 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       initialPhysicalDefense = 10,
       initialMagicalDefense = 15,
       initialAbilitiesMetadataIds = Seq.empty
+    ),
+    CharacterMetadata(
+      name = "Ebisuzawa Kurumi",
+      attackType = AttackType.Ranged,
+      initialHealthPoints = 54,
+      initialAttackPoints = 16,
+      initialBasicAttackRange = 3,
+      initialSpeed = 8,
+      initialPhysicalDefense = 15,
+      initialMagicalDefense = 5,
+      initialAbilitiesMetadataIds = Seq(
+        Contact.metadata.id,
+        Survivor.metadata.id,
+        FinalSolution.metadata.id,
+      )
     ),
     CharacterMetadata(
       name = "Gilgamesh",
