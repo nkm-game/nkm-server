@@ -34,7 +34,7 @@ case class RunItDown(abilityId: AbilityId, parentCharacterId: CharacterId)
       .map(_.parseJson.convertTo[Int])
       .getOrElse(0)
 
-  private def setMovesLeft(value: Int)(implicit gameState: GameState): GameState =
+  private def setMovesLeft(value: Int)(implicit random: Random, gameState: GameState): GameState =
     gameState.setAbilityVariable(id, movesLeftKey, value.toJson.toString)
 
 

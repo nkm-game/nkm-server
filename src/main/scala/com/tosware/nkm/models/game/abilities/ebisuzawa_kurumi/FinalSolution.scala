@@ -14,8 +14,7 @@ object FinalSolution {
       name = "Final Solution",
       abilityType = AbilityType.Ultimate,
       description =
-        """Character brutally finishes the enemy, dealing {missingHpBonusDamagePercent}% missing HP physical damage and
-          |applying bleeding effect dealing {bleedDamage} true damage over {bleedDuration}t.
+        """Character brutally finishes the enemy, dealing {missingHpBonusDamagePercent}% missing HP physical damage and |applying bleeding effect dealing {bleedDamage} true damage over {bleedDuration}t.
           |
           |Range: linear, {range}
           |""".stripMargin,

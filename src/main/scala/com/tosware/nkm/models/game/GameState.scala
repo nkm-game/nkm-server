@@ -496,9 +496,11 @@ case class GameState
     this.copy(abilityStates = abilityStates.updated(abilityId, newState))
   }
 
-  def setAbilityVariable(abilityId: AbilityId, key: String, value: String): GameState = {
+  def setAbilityVariable(abilityId: AbilityId, key: String, value: String)(implicit random: Random): GameState = {
+    implicit val causedById: String = abilityId
     val newState = abilityById(abilityId).getVariablesChangedState(key, value)(this)
     this.copy(abilityStates = abilityStates.updated(abilityId, newState))
+      .logEvent(AbilityVariableSet(randomUUID(), abilityId, key, value))
   }
 
   def decrementEffectCooldown(effectId: CharacterEffectId)(implicit random: Random): GameState = {

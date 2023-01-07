@@ -37,10 +37,10 @@ case class LackOfOrientation(abilityId: AbilityId, parentCharacterId: CharacterI
       .map(_.parseJson.convertTo[Int])
       .getOrElse(0)
 
-  private def setTimesMoved(value: Int)(implicit gameState: GameState): GameState =
+  private def setTimesMoved(value: Int)(implicit random: Random, gameState: GameState): GameState =
     gameState.setAbilityVariable(id, timesMovedKey, value.toJson.toString)
 
-  private def setTimesLost(value: Int)(implicit gameState: GameState): GameState =
+  private def setTimesLost(value: Int)(implicit random: Random, gameState: GameState): GameState =
     gameState.setAbilityVariable(id, timesLostKey, value.toJson.toString)
 
   override def basicMove(path: Seq[HexCoordinates])(implicit random: Random, gameState: GameState): GameState = {
@@ -70,7 +70,7 @@ case class LackOfOrientation(abilityId: AbilityId, parentCharacterId: CharacterI
     val newTimesMoved = timesMoved + 1
     val newTimesLost = if(isLost) timesLost + 1 else timesLost
 
-    val ngs = setTimesLost(newTimesLost)(setTimesMoved(newTimesMoved))
+    val ngs = setTimesLost(newTimesLost)(random, setTimesMoved(newTimesMoved))
 
     parentCharacter.defaultBasicMove(newPath)(random, ngs)
   }

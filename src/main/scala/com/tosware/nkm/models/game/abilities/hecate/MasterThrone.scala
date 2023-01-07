@@ -43,7 +43,7 @@ case class MasterThrone
       .map(_.parseJson.convertTo[Int])
       .getOrElse(0)
 
-  def collectEnergy(characterId: CharacterId)(implicit gameState: GameState): GameState = {
+  def collectEnergy(characterId: CharacterId)(implicit random: Random, gameState: GameState): GameState = {
     val energy = (gameState.characterById(characterId).state.maxHealthPoints * (metadata.variables("healthPercent") / 100f)).toInt
 
     gameState
@@ -51,7 +51,7 @@ case class MasterThrone
       .setAbilityVariable(id, collectedEnergyKey, (collectedEnergy + energy).toJson.toString)
   }
 
-  private def reset()(implicit gameState: GameState): GameState =
+  private def reset()(implicit random: Random, gameState: GameState): GameState =
     gameState
       .setAbilityVariable(id, collectedCharacterIdsKey, Set.empty[CharacterId].toJson.toString)
       .setAbilityVariable(id, collectedEnergyKey, 0.toJson.toString)
@@ -61,13 +61,13 @@ case class MasterThrone
       case GameEvent.CharacterBasicAttacked(_, characterId, targetCharacterId) =>
         if(characterId != parentCharacterId) return gameState
         if(collectedCharacterIds.contains(targetCharacterId)) return gameState
-        collectEnergy(characterId)(gameState)
+        collectEnergy(characterId)
       case GameEvent.AbilityHitCharacter(_, abilityId, targetCharacterId) =>
         if(collectedCharacterIds.contains(targetCharacterId)) return gameState
         val ability = gameState.abilityById(abilityId)
         if(ability.parentCharacter.id != parentCharacterId) return gameState
         if(ability.metadata.abilityType != AbilityType.Normal) return gameState
-        collectEnergy(targetCharacterId)(gameState)
+        collectEnergy(targetCharacterId)
       case GameEvent.AbilityUseFinished(_, abilityId) =>
         val ability = gameState.abilityById(abilityId)
         if(ability.parentCharacter.id != parentCharacterId) return gameState

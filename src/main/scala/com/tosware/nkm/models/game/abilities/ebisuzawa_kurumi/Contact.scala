@@ -50,7 +50,7 @@ case class Contact
       case GameEvent.CharacterBasicAttacked(_, characterId, targetCharacterId) =>
         if(characterId != parentCharacterId) return gameState
         if(hitCharacterIds.contains(targetCharacterId)) return gameState
-        hitCharacter(characterId)
+        hitCharacter(targetCharacterId)
       case GameEvent.AbilityHitCharacter(_, abilityId, targetCharacterId) =>
         if(hitCharacterIds.contains(targetCharacterId)) return gameState
         val ability = gameState.abilityById(abilityId)
