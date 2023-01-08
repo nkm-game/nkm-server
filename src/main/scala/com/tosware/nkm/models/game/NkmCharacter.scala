@@ -245,10 +245,10 @@ case class NkmCharacter
   def removeEffect(effectId: CharacterEffectId): NkmCharacter =
     this.modify(_.state.effects).using(_.filterNot(_.id == effectId))
 
-  def toView(implicit gameState: GameState): NkmCharacterView = NkmCharacterView(
+  def toView(forPlayer: Option[PlayerId])(implicit gameState: GameState): NkmCharacterView = NkmCharacterView(
     id = id,
     metadataId = metadataId,
-    state = state.toView,
+    state = state.toView(forPlayer, owner.id),
     ownerId = owner.id,
     isDead = isDead,
     canBasicMove = canBasicMove,
@@ -263,7 +263,7 @@ case class NkmCharacterView
 (
   id: CharacterId,
   metadataId: CharacterMetadataId,
-  state: NkmCharacterStateView,
+  state: Option[NkmCharacterStateView],
   ownerId: PlayerId,
   isDead: Boolean,
   canBasicMove: Boolean,

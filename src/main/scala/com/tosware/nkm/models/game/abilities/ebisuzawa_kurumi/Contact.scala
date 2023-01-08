@@ -15,8 +15,8 @@ object Contact {
       name = "Contact",
       abilityType = AbilityType.Passive,
       description =
-        """Attack or ability that hits an enemy deals bonus {damage} physical damage.
-          |This effect is used only once per character.
+        """Character's attack or ability that hits an enemy deals bonus {damage} physical damage.
+          |This effect can be applied only once per character.
           |""".stripMargin,
       variables = NkmConf.extract("abilities.ebisuzawa_kurumi.contact"),
     )

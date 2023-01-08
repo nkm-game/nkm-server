@@ -1,8 +1,9 @@
 package com.tosware.nkm.models.game
 import com.tosware.nkm.models.game.Ability.AbilityId
 import com.tosware.nkm.models.game.CharacterEffect.CharacterEffectId
-import com.tosware.nkm.models.game.effects.{StatBuff, StatNerf}
+import com.tosware.nkm.models.game.effects.{Invisibility, StatBuff, StatNerf}
 import com.tosware.nkm.NkmUtils._
+import com.tosware.nkm.models.game.Player.PlayerId
 
 case class NkmCharacterState
 (
@@ -30,20 +31,25 @@ case class NkmCharacterState
   def physicalDefense: Int = purePhysicalDefense + calculateEffectModifier(StatType.PhysicalDefense)
   def magicalDefense: Int = pureMagicalDefense + calculateEffectModifier(StatType.MagicalDefense)
 
-  def toView: NkmCharacterStateView = NkmCharacterStateView(
-    name = name,
-    attackType: AttackType,
-    maxHealthPoints = maxHealthPoints,
-    healthPoints = healthPoints,
-    attackPoints = attackPoints,
-    basicAttackRange = basicAttackRange,
-    speed = speed,
-    physicalDefense = physicalDefense,
-    magicalDefense = magicalDefense,
-    shield = shield,
-    abilities = abilities.map(_.id),
-    effects = effects.map(_.id),
-  )
+  def toView(forPlayer: Option[PlayerId], ownerId: PlayerId): Option[NkmCharacterStateView] = {
+    if(effects.ofType[Invisibility].nonEmpty && !forPlayer.contains(ownerId)) None
+    else Some(
+      NkmCharacterStateView(
+        name = name,
+        attackType: AttackType,
+        maxHealthPoints = maxHealthPoints,
+        healthPoints = healthPoints,
+        attackPoints = attackPoints,
+        basicAttackRange = basicAttackRange,
+        speed = speed,
+        physicalDefense = physicalDefense,
+        magicalDefense = magicalDefense,
+        shield = shield,
+        abilities = abilities.map(_.id),
+        effects = effects.map(_.id),
+      )
+    )
+  }
 }
 
 case class NkmCharacterStateView

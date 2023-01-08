@@ -3,12 +3,13 @@ package com.tosware.nkm.models.game.hex
 import com.tosware.nkm.models.game.GameState
 import com.tosware.nkm.models.game.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game.Player.PlayerId
+import com.tosware.nkm.models.game.effects.Invisibility
+import com.softwaremill.quicklens._
 
-object HexMap {
-  def empty(): HexMap = HexMap("Empty HexMap", Set.empty)
-}
+trait HexMapLike {
+  val name: String
+  val cells: Set[HexCell]
 
-case class HexMap(name: String, cells: Set[HexCell]) {
   def getCell(hexCoordinates: HexCoordinates): Option[HexCell] = cells.find(_.coordinates == hexCoordinates)
 
   def getSpawnPoints: Set[HexCell] = cells.filter(c => c.cellType == HexCellType.SpawnPoint)
@@ -62,3 +63,26 @@ case class HexMap(name: String, cells: Set[HexCell]) {
 
   override def toString: String = name
 }
+
+object HexMap {
+  def empty: HexMap = HexMap("Empty HexMap", Set.empty)
+}
+
+case class HexMap(name: String, cells: Set[HexCell]) extends HexMapLike {
+  def toView(forPlayerOpt: Option[PlayerId])(implicit gameState: GameState): HexMapView = {
+    val otherInvisibleCharacterCoords =
+      gameState.characters
+        .filterNot(c => forPlayerOpt.contains(c.owner.id))
+        .filter(_.state.effects.ofType[Invisibility].nonEmpty)
+        .flatMap(_.parentCell.map(_.coordinates))
+
+    val hiddenCharactersMap = this.modify(_.cells.each).using {
+      case cell if otherInvisibleCharacterCoords.contains(cell.coordinates) => cell.modify(_.characterId).setTo(None)
+      case cell => cell
+    }
+
+    HexMapView(name, hiddenCharactersMap.cells)
+  }
+}
+
+case class HexMapView(name: String, cells: Set[HexCell]) extends HexMapLike

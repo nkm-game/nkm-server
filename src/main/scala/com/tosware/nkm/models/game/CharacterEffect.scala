@@ -15,14 +15,17 @@ sealed trait CharacterEffectName extends EnumEntry
 object CharacterEffectName extends Enum[CharacterEffectName] {
   val values: IndexedSeq[CharacterEffectName] = findValues
 
+  case object AbilityUnlock extends CharacterEffectName
+  case object ApplyEffectOnBasicAttack extends CharacterEffectName
   case object BlackBlood extends CharacterEffectName
   case object Block extends CharacterEffectName
   case object Disarm extends CharacterEffectName
+  case object NextBasicAttackBuff extends CharacterEffectName
   case object Fly extends CharacterEffectName
   case object FreeAbility extends CharacterEffectName
-  case object AbilityUnlock extends CharacterEffectName
   case object Ground extends CharacterEffectName
   case object HasToTakeAction extends CharacterEffectName
+  case object Invisibility extends CharacterEffectName
   case object ManipulatorOfObjectsImmunity extends CharacterEffectName
   case object MurasamePoison extends CharacterEffectName
   case object Poison extends CharacterEffectName

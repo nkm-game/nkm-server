@@ -6,16 +6,19 @@ import com.tosware.nkm.serializers.NkmJsonProtocol
 
 case class CharacterEffectMetadatasProvider() extends NkmJsonProtocol {
   def getCharacterEffectMetadatas: Seq[CharacterEffectMetadata] = Seq(
+    AbilityUnlock.metadata,
+    ApplyEffectOnBasicAttack.metadata,
     BlackBlood.metadata,
     Block.metadata,
     Disarm.metadata,
     Fly.metadata,
     FreeAbility.metadata,
-    AbilityUnlock.metadata,
     Ground.metadata,
     HasToTakeAction.metadata,
+    Invisibility.metadata,
     ManipulatorOfObjectsImmunity.metadata,
     MurasamePoison.metadata,
+    NextBasicAttackBuff.metadata,
     Poison.metadata,
     Silence.metadata,
     Snare.metadata,

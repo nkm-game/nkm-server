@@ -17,13 +17,31 @@ object Survivor {
           |This character's next basic attack will deal {bonusDamagePercent}% damage and will stun the target for {stunDuration}t.
           |""".stripMargin,
       variables = NkmConf.extract("abilities.ebisuzawa_kurumi.survivor"),
-      relatedEffectIds = Seq(effects.Stun.metadata.id),
+      relatedEffectIds = Seq(
+        effects.Invisibility.metadata.id,
+        effects.NextBasicAttackBuff.metadata.id,
+        effects.ApplyEffectOnBasicAttack.metadata.id,
+        effects.Stun.metadata.id,
+      ),
     )
 }
 
-case class Survivor(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId) with UsableWithoutTarget {
+case class Survivor(abilityId: AbilityId, parentCharacterId: CharacterId)
+  extends Ability(abilityId, parentCharacterId)
+    with UsableWithoutTarget {
   override val metadata = Survivor.metadata
 
   override def use()(implicit random: Random, gameState: GameState): GameState =
     gameState
+      .addEffect(parentCharacterId, effects.Invisibility(randomUUID(), metadata.variables("invisibilityDuration")))(random, id)
+      .addEffect(parentCharacterId, effects.ApplyEffectOnBasicAttack(
+        randomUUID(),
+        Int.MaxValue,
+        effects.Stun(randomUUID(), metadata.variables("stunDuration"))),
+      )(random, id)
+      .addEffect(parentCharacterId, effects.NextBasicAttackBuff(
+        randomUUID(),
+        Int.MaxValue,
+        metadata.variables("bonusDamagePercent") * parentCharacter.state.attackPoints), // TODO calculate buff at attack
+      )(random, id)
 }
