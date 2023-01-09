@@ -31,6 +31,8 @@ case class NkmCharacterState
   def physicalDefense: Int = purePhysicalDefense + calculateEffectModifier(StatType.PhysicalDefense)
   def magicalDefense: Int = pureMagicalDefense + calculateEffectModifier(StatType.MagicalDefense)
 
+  def missingHp: Int = maxHealthPoints - healthPoints
+
   def toView(forPlayer: Option[PlayerId], ownerId: PlayerId): Option[NkmCharacterStateView] = {
     if(effects.ofType[Invisibility].nonEmpty && !forPlayer.contains(ownerId)) None
     else Some(

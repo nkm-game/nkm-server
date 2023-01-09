@@ -1,6 +1,7 @@
 package com.tosware.nkm.models.game.abilities.ebisuzawa_kurumi
 
 import com.tosware.nkm.NkmConf
+import com.tosware.nkm.models.{Damage, DamageType}
 import com.tosware.nkm.models.game.Ability.AbilityId
 import com.tosware.nkm.models.game.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game._
@@ -14,7 +15,7 @@ object FinalSolution {
       name = "Final Solution",
       abilityType = AbilityType.Ultimate,
       description =
-        """Character brutally finishes the enemy, dealing {missingHpBonusDamagePercent}% missing HP physical damage and |applying bleeding effect dealing {bleedDamage} true damage over {bleedDuration}t.
+        """Character brutally finishes the enemy, dealing {missingHpBonusDamagePercent}% missing HP physical damage and applying bleeding effect dealing {bleedDamage} true damage over {bleedDuration}t.
           |
           |Range: linear, {range}
           |""".stripMargin,
@@ -33,6 +34,13 @@ case class FinalSolution(abilityId: AbilityId, parentCharacterId: CharacterId)
   override def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] =
     rangeCellCoords.whereEnemiesOfC(parentCharacterId)
 
-  override def use(target: CharacterId, useData: UseData)(implicit random: Random, gameState: GameState): GameState =
-    gameState
+  override def use(target: CharacterId, useData: UseData)(implicit random: Random, gameState: GameState): GameState = {
+    val targetMissingHp = gameState.characterById(target).state.missingHp
+    val damage = Damage(DamageType.Physical, targetMissingHp)
+    val bleedDamage = Damage(DamageType.True, metadata.variables("bleedDamage"))
+    val bleedEffect = effects.Poison(randomUUID(), metadata.variables("bleedDuration"), bleedDamage)
+
+    hitAndDamageCharacter(target, damage)
+      .addEffect(target, bleedEffect)(random, id)
+  }
 }

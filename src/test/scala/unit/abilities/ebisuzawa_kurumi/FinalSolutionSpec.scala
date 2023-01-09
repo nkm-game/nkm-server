@@ -1,18 +1,18 @@
-package unit.abilities.sinon
+package unit.abilities.ebisuzawa_kurumi
 
 import com.tosware.nkm.models.GameStateValidator
 import com.tosware.nkm.models.game._
-import com.tosware.nkm.models.game.abilities.sinon.PreciseShot
+import com.tosware.nkm.models.game.abilities.ebisuzawa_kurumi.FinalSolution
 import helpers.{TestUtils, scenarios}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
-class PreciseShotSpec
+class FinalSolutionSpec
   extends AnyWordSpecLike
     with Matchers
     with TestUtils
 {
-  private val abilityMetadata = PreciseShot.metadata
+  private val abilityMetadata = FinalSolution.metadata
   private val metadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
   private val s = scenarios.Simple2v2TestScenario(metadata)
   private implicit val gameState: GameState = s.gameState.incrementPhase(4)
@@ -27,8 +27,13 @@ class PreciseShotSpec
     }
 
     "be able to deal damage" in {
-      val newGameState: GameState = gameState.useAbilityOnCharacter(abilityId, s.characters.p1First.id)
-      newGameState.gameLog.events.ofType[GameEvent.CharacterDamaged].exists(_.causedById == abilityId) should be (true)
+      val ngs: GameState = gameState.useAbilityOnCharacter(abilityId, s.characters.p1First.id)
+      ngs.gameLog.events.ofType[GameEvent.CharacterDamaged].exists(_.causedById == abilityId) should be (true)
+    }
+
+    "apply bleeding effect" in {
+      val ngs: GameState = gameState.useAbilityOnCharacter(abilityId, s.characters.p1First.id)
+      ngs.characterById(s.characters.p1First.id).state.effects.ofType[effects.Poison] should not be empty
     }
   }
 }
