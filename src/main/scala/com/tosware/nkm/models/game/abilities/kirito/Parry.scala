@@ -24,7 +24,7 @@ case class Parry(abilityId: AbilityId, parentCharacterId: CharacterId) extends A
 
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
     e match {
-      case CharacterPreparedToAttack(_, _, targetCharacterId) =>
+      case CharacterPreparedToAttack(_, _, _, _, _, targetCharacterId) =>
         if(targetCharacterId != parentCharacterId) return gameState
         val dodged: Boolean = random.between(0f, 100f) < (metadata.variables("dodgeChancePercent"))
         if(!dodged) return gameState

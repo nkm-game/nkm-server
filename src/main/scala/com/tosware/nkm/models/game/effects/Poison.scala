@@ -35,7 +35,7 @@ case class Poison(effectId: CharacterEffectId, initialCooldown: Int, damage: Dam
     with GameEventListener {
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
     e match {
-      case TurnFinished(_) =>
+      case TurnFinished(_, _, _, _) =>
         val characterIdThatTookAction = gameState.gameLog.characterThatTookActionInTurn(e.turn.number).get
         if(characterIdThatTookAction == parentCharacter.id) {
           gameState.damageCharacter(parentCharacter.id, damage)(random, id)

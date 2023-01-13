@@ -28,7 +28,7 @@ case class BlackBlood(abilityId: AbilityId, parentCharacterId: CharacterId)
 
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
     e match {
-      case GameEvent.CharactersPicked(_) =>
+      case GameEvent.CharactersPicked(_, _, _, _) =>
         val effect = effects.BlackBlood(NkmUtils.randomUUID(), Int.MaxValue, parentCharacterId, abilityId)
         gameState.addEffect(parentCharacterId, effect)(random, abilityId)
       case _ =>

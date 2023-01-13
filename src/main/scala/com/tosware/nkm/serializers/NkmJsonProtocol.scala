@@ -1,5 +1,6 @@
 package com.tosware.nkm.serializers
 
+import com.tosware.nkm.models.game.GameEvent._
 import com.tosware.nkm.models.game.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game.hex.HexCoordinates
 import pl.iterators.kebs.json.{KebsEnumFormats, KebsSpray}
@@ -8,6 +9,8 @@ import spray.json._
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import scala.util.Try
+
+final case class GameEventSerialized(className: String, eventJson: String)
 
 trait NkmJsonProtocol
   extends DefaultJsonProtocol
@@ -40,6 +43,80 @@ trait NkmJsonProtocol
     override def read(json: JsValue) = json match {
       case JsObject(fields) => fields.map{case (coordinates, characterId) => (coordinates.parseJson.convertTo[HexCoordinates], characterId.convertTo[String])}
       case x => deserializationError(s"Expected object, but got $x.")
+    }
+  }
+
+
+  implicit object GameEventFormat extends RootJsonFormat[GameEvent] {
+    override def write(obj: GameEvent): JsValue = {
+      JsObject((obj match {
+        case e: ClockUpdated => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
+        case e: CharacterPlaced => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
+        case e: EffectAddedToCell => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
+        case e: EffectAddedToCharacter => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
+        case e: EffectRemovedFromCharacter => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
+        case e: AbilityHitCharacter => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
+        case e: AbilityUsedWithoutTarget => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
+        case e: AbilityUsedOnCoordinates => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
+        case e: AbilityUsedOnCharacter => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
+        case e: AbilityUseFinished => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
+        case e: AbilityVariableSet => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
+        case e: CharacterBasicMoved => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
+        case e: CharacterPreparedToAttack => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
+        case e: CharacterBasicAttacked => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
+        case e: CharacterTeleported => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
+        case e: CharacterDamaged => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
+        case e: CharacterHealed => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
+        case e: CharacterHpSet => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
+        case e: CharacterShieldSet => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
+        case e: CharacterStatSet => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
+        case e: CharacterDied => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
+        case e: CharacterRemovedFromMap => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
+        case e: CharacterTookAction => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
+        case e: BasicAttackRefreshed => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
+        case e: BasicMoveRefreshed => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
+        case e: CharactersPicked => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
+        case e: TurnFinished => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
+        case e: TurnStarted => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
+        case e: PhaseFinished => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
+        case unknown => deserializationError(s"json deserialize error: $unknown")
+      }).asJsObject.fields)
+    }
+
+    override def read(json: JsValue): GameEvent = {
+      val ges = json.convertTo[GameEventSerialized]
+      ges.className match {
+        case "ClockUpdated" => ges.eventJson.parseJson.convertTo[ClockUpdated]
+        case "CharacterPlaced" => ges.eventJson.parseJson.convertTo[CharacterPlaced]
+        case "EffectAddedToCell" => ges.eventJson.parseJson.convertTo[EffectAddedToCell]
+        case "EffectAddedToCharacter" => ges.eventJson.parseJson.convertTo[EffectAddedToCharacter]
+        case "EffectRemovedFromCharacter" => ges.eventJson.parseJson.convertTo[EffectRemovedFromCharacter]
+        case "AbilityHitCharacter" => ges.eventJson.parseJson.convertTo[AbilityHitCharacter]
+        case "AbilityUsedWithoutTarget" => ges.eventJson.parseJson.convertTo[AbilityUsedWithoutTarget]
+        case "AbilityUsedOnCoordinates" => ges.eventJson.parseJson.convertTo[AbilityUsedOnCoordinates]
+        case "AbilityUsedOnCharacter" => ges.eventJson.parseJson.convertTo[AbilityUsedOnCharacter]
+        case "AbilityUseFinished" => ges.eventJson.parseJson.convertTo[AbilityUseFinished]
+        case "AbilityVariableSet" => ges.eventJson.parseJson.convertTo[AbilityVariableSet]
+        case "CharacterBasicMoved" => ges.eventJson.parseJson.convertTo[CharacterBasicMoved]
+        case "CharacterPreparedToAttack" => ges.eventJson.parseJson.convertTo[CharacterPreparedToAttack]
+        case "CharacterBasicAttacked" => ges.eventJson.parseJson.convertTo[CharacterBasicAttacked]
+        case "CharacterTeleported" => ges.eventJson.parseJson.convertTo[CharacterTeleported]
+        case "CharacterDamaged" => ges.eventJson.parseJson.convertTo[CharacterDamaged]
+        case "CharacterHealed" => ges.eventJson.parseJson.convertTo[CharacterHealed]
+        case "CharacterHpSet" => ges.eventJson.parseJson.convertTo[CharacterHpSet]
+        case "CharacterShieldSet" => ges.eventJson.parseJson.convertTo[CharacterShieldSet]
+        case "CharacterStatSet" => ges.eventJson.parseJson.convertTo[CharacterStatSet]
+        case "CharacterDied" => ges.eventJson.parseJson.convertTo[CharacterDied]
+        case "CharacterRemovedFromMap" => ges.eventJson.parseJson.convertTo[CharacterRemovedFromMap]
+        case "CharacterTookAction" => ges.eventJson.parseJson.convertTo[CharacterTookAction]
+        case "BasicAttackRefreshed" => ges.eventJson.parseJson.convertTo[BasicAttackRefreshed]
+        case "BasicMoveRefreshed" => ges.eventJson.parseJson.convertTo[BasicMoveRefreshed]
+        case "CharactersPicked" => ges.eventJson.parseJson.convertTo[CharactersPicked]
+        case "TurnFinished" => ges.eventJson.parseJson.convertTo[TurnFinished]
+        case "TurnStarted" => ges.eventJson.parseJson.convertTo[TurnStarted]
+        case "PhaseFinished" => ges.eventJson.parseJson.convertTo[PhaseFinished]
+        case unrecognized => serializationError(s"json serialization error $unrecognized")
+      }
     }
   }
 }

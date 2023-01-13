@@ -45,7 +45,7 @@ case class RunItDown(abilityId: AbilityId, parentCharacterId: CharacterId)
 
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState = {
     e match {
-      case GameEvent.CharacterBasicMoved(_, characterId, _) =>
+      case GameEvent.CharacterBasicMoved(_, _, _, _, characterId, _) =>
         if(characterId != parentCharacterId) return gameState
         if(movesLeft <= 0) return gameState
 
@@ -56,7 +56,7 @@ case class RunItDown(abilityId: AbilityId, parentCharacterId: CharacterId)
 
         ngs.refreshBasicMove(parentCharacterId)(random, id)
 
-      case GameEvent.TurnFinished(_) =>
+      case GameEvent.TurnFinished(_, _, _, _) =>
         val characterIdThatTookAction = gameState.gameLog.characterThatTookActionInTurn(e.turn.number).get
         if (characterIdThatTookAction != parentCharacterId) return gameState
         if(movesLeft <= 0) return gameState

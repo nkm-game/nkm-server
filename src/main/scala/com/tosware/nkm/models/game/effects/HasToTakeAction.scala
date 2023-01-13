@@ -24,7 +24,7 @@ case class HasToTakeAction(effectId: CharacterEffectId, initialCooldown: Int)
 
     override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState = {
       e match {
-        case TurnStarted(_) =>
+        case TurnStarted(_, _, _, _) =>
           if(gameState.currentPlayer.id == parentCharacter.owner.id) {
             gameState.takeActionWithCharacter(parentCharacter.id)
           } else gameState

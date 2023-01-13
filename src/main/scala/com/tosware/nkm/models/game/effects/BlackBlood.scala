@@ -33,7 +33,7 @@ case class BlackBlood(effectId: CharacterEffectId, initialCooldown: Int, sourceC
 
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
     e match {
-      case e @ GameEvent.CharacterDamaged(_, characterId, _) =>
+      case e @ GameEvent.CharacterDamaged(_, _, _, _, characterId, _) =>
         if(e.causedById == sourceAbilityId) return gameState // activate only once, prevents infinite loop
         if(characterId != parentCharacter.id) return gameState
         if(!parentCharacter.isOnMap) return gameState

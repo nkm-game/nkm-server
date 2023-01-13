@@ -25,7 +25,7 @@ case class ScissorBlade(abilityId: AbilityId, parentCharacterId: CharacterId) ex
 
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
     e match {
-      case GameEvent.CharacterPreparedToAttack(_, characterId, targetCharacterId) =>
+      case GameEvent.CharacterPreparedToAttack(_, _, _, _, characterId, targetCharacterId) =>
         if(characterId != parentCharacterId) gameState
         else {
           val effect = effects.StatNerf(NkmUtils.randomUUID(), metadata.variables("duration"), StatType.PhysicalDefense, metadata.variables("physicalDefenseDecrease"))

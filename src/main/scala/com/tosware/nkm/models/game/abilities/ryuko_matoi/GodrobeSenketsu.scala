@@ -69,7 +69,7 @@ case class GodrobeSenketsu(
     if(!state.isEnabled) return gameState
 
     e match {
-      case TurnFinished(_) =>
+      case TurnFinished(_, _, _, _) =>
         val characterIdThatTookAction = gameState.gameLog.characterThatTookActionInTurn(e.turn.number).get
         if(characterIdThatTookAction != parentCharacter.id) gameState
         else {
@@ -78,6 +78,8 @@ case class GodrobeSenketsu(
           applyAbilityEffects(newAdBonus, changeDamageBonus(newAdBonus))
             .damageCharacter(parentCharacterId, Damage(DamageType.True, metadata.variables("damage")))(random, id)
         }
+      case _ =>
+        gameState
     }
   }
 }

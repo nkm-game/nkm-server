@@ -124,7 +124,7 @@ case class GameState
       .executeEventTriggers(e)
 
   private def updateClock(newClock: Clock)(implicit random: Random, causedById: String): GameState =
-    copy(clock = newClock).logEvent(ClockUpdated(NkmUtils.randomUUID(), newClock))
+    copy(clock = newClock).logEvent(ClockUpdated(NkmUtils.randomUUID(), phase, turn, causedById, newClock))
 
   private def updateGameStatus(newGameStatus: GameStatus): GameState =
     copy(gameStatus = newGameStatus)
@@ -225,7 +225,7 @@ case class GameState
       updateGameStatus(GameStatus.CharacterPicked)
         .updateClock(clock.setPickTime(clockConfig.timeAfterPickMillis))(random, id)
         .assignCharactersToPlayers()
-        .logEvent(CharactersPicked(NkmUtils.randomUUID()))
+        .logEvent(CharactersPicked(NkmUtils.randomUUID(), phase, turn, causedById))
     } else this
   }
 
@@ -288,19 +288,19 @@ case class GameState
       .copy(playerIdsThatPlacedCharacters = playerIdsThatPlacedCharacters + playerId)
       .checkIfPlacingCharactersFinished()
 
-  def placeCharacter(targetCellCoordinates: HexCoordinates, characterId: CharacterId)(implicit random: Random, causedBy: String): GameState =
+  def placeCharacter(targetCellCoordinates: HexCoordinates, characterId: CharacterId)(implicit random: Random, causedById: String): GameState =
     updateHexCell(targetCellCoordinates)(_.copy(characterId = Some(characterId)))
     .modify(_.characterIdsOutsideMap).using(_.filter(_ != characterId))
-      .logEvent(CharacterPlaced(NkmUtils.randomUUID(), characterId, targetCellCoordinates))
+      .logEvent(CharacterPlaced(NkmUtils.randomUUID(), phase, turn, causedById, characterId, targetCellCoordinates))
 
   def basicMoveCharacter(characterId: CharacterId, path: Seq[HexCoordinates])(implicit random: Random): GameState = {
-    implicit val causedBy: CharacterId = characterId
+    implicit val causedById: CharacterId = characterId
     val newGameState = takeActionWithCharacter(characterId)
     characterById(characterId).basicMove(path)(random, newGameState)
-      .logEvent(CharacterBasicMoved(NkmUtils.randomUUID(), characterId, path))
+      .logEvent(CharacterBasicMoved(NkmUtils.randomUUID(), phase, turn, causedById, characterId, path))
   }
 
-  def teleportCharacter(characterId: CharacterId, targetCellCoordinates: HexCoordinates)(implicit random: Random, causedBy: String): GameState = {
+  def teleportCharacter(characterId: CharacterId, targetCellCoordinates: HexCoordinates)(implicit random: Random, causedById: String): GameState = {
     val parentCellOpt = characterById(characterId).parentCell(this)
 
     val removedFromParentCellState = parentCellOpt.fold(this)(c => updateHexCell(c.coordinates)(_.copy(characterId = None)))
@@ -314,14 +314,14 @@ case class GameState
     } else {
       // probably just passing by a friendly characterOpt
       removedFromParentCellState.removeCharacterFromMap(characterId)
-    }.logEvent(CharacterTeleported(NkmUtils.randomUUID(), characterId, targetCellCoordinates))
+    }.logEvent(CharacterTeleported(NkmUtils.randomUUID(), phase, turn, causedById, characterId, targetCellCoordinates))
   }
 
 
   def basicAttack(attackingCharacterId: CharacterId, targetCharacterId: CharacterId)(implicit random: Random): GameState = {
-    implicit val causedBy: CharacterId = attackingCharacterId
+    implicit val causedById: CharacterId = attackingCharacterId
     val newGameState = takeActionWithCharacter(attackingCharacterId)
-      .logEvent(CharacterPreparedToAttack(NkmUtils.randomUUID(), attackingCharacterId, targetCharacterId))
+      .logEvent(CharacterPreparedToAttack(NkmUtils.randomUUID(), phase, turn, causedById, attackingCharacterId, targetCharacterId))
 
     val attackingCharacter = newGameState.characterById(attackingCharacterId)
     val targetCharacter = newGameState.characterById(targetCharacterId)
@@ -330,7 +330,7 @@ case class GameState
       newGameState.removeEffect(blockEffects.head.id)
     } else {
       attackingCharacter.basicAttack(targetCharacterId)(random, newGameState)
-        .logEvent(CharacterBasicAttacked(NkmUtils.randomUUID(), attackingCharacterId, targetCharacterId))
+        .logEvent(CharacterBasicAttacked(NkmUtils.randomUUID(), phase, turn, causedById, attackingCharacterId, targetCharacterId))
     }
   }
 
@@ -358,38 +358,38 @@ case class GameState
       case ability => ability
     }
 
-  def executeCharacter(characterId: CharacterId)(implicit random: Random, causedBy: String): GameState =
+  def executeCharacter(characterId: CharacterId)(implicit random: Random, causedById: String): GameState =
     damageCharacter(characterId, Damage(DamageType.True, Int.MaxValue))
 
-  def damageCharacter(characterId: CharacterId, damage: Damage)(implicit random: Random, causedBy: String): GameState = {
+  def damageCharacter(characterId: CharacterId, damage: Damage)(implicit random: Random, causedById: String): GameState = {
     if(characterById(characterId).isDead) {
       logger.error(s"Unable to damage character $characterId. Character dead.")
       this
     } else {
       updateCharacter(characterId)(_.receiveDamage(damage))
         .checkIfCharacterDied(characterId) // needs to be removed first in order to avoid infinite triggers
-        .logEvent(CharacterDamaged(NkmUtils.randomUUID(), characterId, damage))
+        .logEvent(CharacterDamaged(NkmUtils.randomUUID(), phase, turn, causedById, characterId, damage))
     }
   }
 
-  def heal(characterId: CharacterId, amount: Int)(implicit random: Random, causedBy: String): GameState =
+  def heal(characterId: CharacterId, amount: Int)(implicit random: Random, causedById: String): GameState =
     if(characterById(characterId).isDead) {
       logger.error(s"Unable to heal character $characterId. Character dead.")
       this
     } else {
       updateCharacter(characterId)(_.heal(amount))
-        .logEvent(CharacterHealed(NkmUtils.randomUUID(), characterId, amount))
+        .logEvent(CharacterHealed(NkmUtils.randomUUID(), phase, turn, causedById, characterId, amount))
     }
 
-  def setHp(characterId: CharacterId, amount: Int)(implicit random: Random, causedBy: String): GameState =
+  def setHp(characterId: CharacterId, amount: Int)(implicit random: Random, causedById: String): GameState =
     updateCharacter(characterId)(_.modify(_.state.healthPoints).setTo(amount))
-      .logEvent(CharacterHpSet(NkmUtils.randomUUID(), characterId, amount))
+      .logEvent(CharacterHpSet(NkmUtils.randomUUID(), phase, turn, causedById, characterId, amount))
 
-  def setShield(characterId: CharacterId, amount: Int)(implicit random: Random, causedBy: String): GameState =
+  def setShield(characterId: CharacterId, amount: Int)(implicit random: Random, causedById: String): GameState =
     updateCharacter(characterId)(_.modify(_.state.shield).setTo(amount))
-      .logEvent(CharacterShieldSet(NkmUtils.randomUUID(), characterId, amount))
+      .logEvent(CharacterShieldSet(NkmUtils.randomUUID(), phase, turn, causedById, characterId, amount))
 
-  def setStat(characterId: CharacterId, statType: StatType, amount: Int)(implicit random: Random, causedBy: String): GameState = {
+  def setStat(characterId: CharacterId, statType: StatType, amount: Int)(implicit random: Random, causedById: String): GameState = {
     val updateStat = statType match {
       case StatType.AttackPoints => modify(_: NkmCharacter)(_.state.pureAttackPoints)
       case StatType.BasicAttackRange => modify(_: NkmCharacter)(_.state.pureBasicAttackRange)
@@ -398,7 +398,7 @@ case class GameState
       case StatType.MagicalDefense => modify(_: NkmCharacter)(_.state.pureMagicalDefense)
     }
     updateCharacter(characterId)(c => updateStat(c).setTo(amount))
-      .logEvent(CharacterStatSet(NkmUtils.randomUUID(), characterId, statType, amount))
+      .logEvent(CharacterStatSet(NkmUtils.randomUUID(), phase, turn, causedById, characterId, statType, amount))
   }
 
   def checkIfCharacterDied(characterId: CharacterId)(implicit random: Random, causedById: String): GameState =
@@ -418,13 +418,13 @@ case class GameState
 
   def handleCharacterDeath(characterId: CharacterId)(implicit random: Random, causedById: String): GameState =
     this.removeCharacterFromMap(characterId)
-      .logEvent(CharacterDied(NkmUtils.randomUUID(), characterId))
+      .logEvent(CharacterDied(NkmUtils.randomUUID(), phase, turn, causedById, characterId))
       .checkIfPlayerKnockedOut(characterById(characterId).owner(this).id)
 
   def addEffect(characterId: CharacterId, characterEffect: CharacterEffect)(implicit random: Random, causedById: String): GameState =
     updateCharacter(characterId)(_.addEffect(characterEffect))
       .modify(_.characterEffectStates).using(ces => ces.updated(characterEffect.id, CharacterEffectState(characterEffect.initialCooldown)))
-      .logEvent(EffectAddedToCharacter(NkmUtils.randomUUID(), characterEffect.id, characterId))
+      .logEvent(EffectAddedToCharacter(NkmUtils.randomUUID(), phase, turn, causedById, characterEffect.id, characterId))
 
   def removeEffects(characterEffectIds: Seq[CharacterEffectId])(implicit random: Random, causedById: String): GameState =
     characterEffectIds.foldLeft(this){case (acc, eid) => acc.removeEffect(eid)}
@@ -433,7 +433,7 @@ case class GameState
     val character = effectById(characterEffectId).parentCharacter(this)
     updateCharacter(character.id)(_.removeEffect(characterEffectId))
       .modify(_.characterEffectStates).using(ces => ces.removed(characterEffectId))
-      .logEvent(EffectRemovedFromCharacter(NkmUtils.randomUUID(), characterEffectId))
+      .logEvent(EffectRemovedFromCharacter(NkmUtils.randomUUID(), phase, turn, causedById, characterEffectId))
   }
 
   def removeCharacterFromMap(characterId: CharacterId)(implicit random: Random, causedById: String): GameState = {
@@ -441,7 +441,7 @@ case class GameState
 
     parentCellOpt.fold(this)(c => updateHexCell(c.coordinates)(_.copy(characterId = None)))
       .modify(_.characterIdsOutsideMap).setTo(characterIdsOutsideMap + characterId)
-      .logEvent(CharacterRemovedFromMap(NkmUtils.randomUUID(), characterId))
+      .logEvent(CharacterRemovedFromMap(NkmUtils.randomUUID(), phase, turn, causedById, characterId))
   }
 
   def takeActionWithCharacter(characterId: CharacterId)(implicit random: Random): GameState = {
@@ -451,19 +451,19 @@ case class GameState
       return this
     this.modify(_.characterTakingActionThisTurn)
       .setTo(Some(characterId))
-      .logEvent(CharacterTookAction(NkmUtils.randomUUID(), characterId))
+      .logEvent(CharacterTookAction(NkmUtils.randomUUID(), phase, turn, causedById, characterId))
   }
 
   def abilityHitCharacter(abilityId: AbilityId, targetCharacter: CharacterId)(implicit random: Random): GameState = {
     implicit val causedById: String = abilityId
-    logEvent(AbilityHitCharacter(NkmUtils.randomUUID(), abilityId: AbilityId, targetCharacter: CharacterId))
+    logEvent(AbilityHitCharacter(NkmUtils.randomUUID(), phase, turn, causedById, abilityId: AbilityId, targetCharacter: CharacterId))
   }
 
   def refreshBasicMove(targetCharacter: CharacterId)(implicit random: Random, causedById: String): GameState =
-    logEvent(BasicMoveRefreshed(NkmUtils.randomUUID(), targetCharacter))
+    logEvent(BasicMoveRefreshed(NkmUtils.randomUUID(), phase, turn, causedById, targetCharacter))
 
   def refreshBasicAttack(targetCharacter: CharacterId)(implicit random: Random, causedById: String): GameState =
-    logEvent(BasicAttackRefreshed(NkmUtils.randomUUID(), targetCharacter))
+    logEvent(BasicAttackRefreshed(NkmUtils.randomUUID(), phase, turn, causedById, targetCharacter))
 
   def putAbilityOnCooldown(abilityId: AbilityId): GameState = {
     val newState = abilityById(abilityId).getCooldownState(this)
@@ -476,7 +476,7 @@ case class GameState
     val ngs = if(abilityStates(abilityId).isEnabled) this
     else putAbilityOnCooldownOrDecrementFreeAbility(abilityId)
 
-    ngs.logEvent(AbilityUseFinished(NkmUtils.randomUUID(), abilityId))
+    ngs.logEvent(AbilityUseFinished(NkmUtils.randomUUID(), phase, turn, causedById, abilityId))
   }
 
   def putAbilityOnCooldownOrDecrementFreeAbility(abilityId: AbilityId)(implicit random: Random): GameState = {
@@ -500,7 +500,7 @@ case class GameState
     implicit val causedById: String = abilityId
     val newState = abilityById(abilityId).getVariablesChangedState(key, value)(this)
     this.copy(abilityStates = abilityStates.updated(abilityId, newState))
-      .logEvent(AbilityVariableSet(randomUUID(), abilityId, key, value))
+      .logEvent(AbilityVariableSet(randomUUID(), phase, turn, causedById, abilityId, key, value))
   }
 
   def decrementEffectCooldown(effectId: CharacterEffectId)(implicit random: Random): GameState = {
@@ -518,7 +518,7 @@ case class GameState
     val parentCharacter = ability.parentCharacter(this)
 
     val newGameState = takeActionWithCharacter(parentCharacter.id)
-      .logEvent(AbilityUsedWithoutTarget(NkmUtils.randomUUID(), abilityId))
+      .logEvent(AbilityUsedWithoutTarget(NkmUtils.randomUUID(), phase, turn, causedById, abilityId))
     ability.use()(random, newGameState)
       .afterAbilityUse(abilityId)
   }
@@ -529,7 +529,7 @@ case class GameState
     val parentCharacter = ability.parentCharacter(this)
 
     val newGameState = takeActionWithCharacter(parentCharacter.id)
-      .logEvent(AbilityUsedOnCoordinates(NkmUtils.randomUUID(), abilityId, target))
+      .logEvent(AbilityUsedOnCoordinates(NkmUtils.randomUUID(), phase, turn, causedById, abilityId, target))
     ability.use(target, useData)(random, newGameState)
       .afterAbilityUse(abilityId)
   }
@@ -540,7 +540,7 @@ case class GameState
     val parentCharacter = ability.parentCharacter(this)
 
     val newGameState = takeActionWithCharacter(parentCharacter.id)
-      .logEvent(AbilityUsedOnCharacter(NkmUtils.randomUUID(), abilityId, target))
+      .logEvent(AbilityUsedOnCharacter(NkmUtils.randomUUID(), phase, turn, causedById, abilityId, target))
     ability.use(target, useData)(random, newGameState)
       .afterAbilityUse(abilityId)
   }
@@ -550,9 +550,9 @@ case class GameState
 
   def finishTurn()(implicit random: Random, causedById: String = id): GameState = {
     this.incrementTurn()
-      .logEvent(TurnFinished(NkmUtils.randomUUID()))
+      .logEvent(TurnFinished(NkmUtils.randomUUID(), phase, turn, causedById))
       .finishPhaseIfEveryCharacterTookAction()
-      .logEvent(TurnStarted(NkmUtils.randomUUID()))
+      .logEvent(TurnStarted(NkmUtils.randomUUID(), phase, turn, causedById))
       .skipTurnIfPlayerKnockedOut()
       .skipTurnIfNoCharactersToTakeAction()
   }
@@ -600,13 +600,13 @@ case class GameState
   def finishPhase()(implicit random: Random, causedById: String = id): GameState =
     refreshCharacterTakenActions()
       .incrementPhase()
-      .logEvent(PhaseFinished(NkmUtils.randomUUID()))
+      .logEvent(PhaseFinished(NkmUtils.randomUUID(), phase, turn, causedById))
 
   def finishPhaseIfEveryCharacterTookAction()(implicit random: Random): GameState =
     if(charactersToTakeAction.isEmpty) this.finishPhase()
     else this
 
-  def toView(forPlayer: Option[PlayerId]): GameStateView =
+  def toView(forPlayerOpt: Option[PlayerId]): GameStateView =
     GameStateView(
       id = id,
       charactersMetadata = charactersMetadata,
@@ -614,11 +614,11 @@ case class GameState
       pickType = pickType,
       numberOfBans = numberOfBans,
       numberOfCharactersPerPlayers = numberOfCharactersPerPlayers,
-      draftPickState = draftPickState.map(_.toView(forPlayer)),
-      blindPickState = blindPickState.map(_.toView(forPlayer)),
-      hexMap = hexMap.toView(forPlayer)(this),
+      draftPickState = draftPickState.map(_.toView(forPlayerOpt)),
+      blindPickState = blindPickState.map(_.toView(forPlayerOpt)),
+      hexMap = hexMap.toView(forPlayerOpt)(this),
       players = players,
-      characters = characters.map(_.toView(forPlayer)(this)),
+      characters = characters.map(_.toView(forPlayerOpt)(this)),
       phase = phase,
       turn = turn,
       characterIdsOutsideMap = characterIdsOutsideMap,
@@ -629,8 +629,8 @@ case class GameState
       effects = effects.map(_.toView(this)),
       clockConfig = clockConfig,
       clock = clock,
+      gameLog = gameLog.toView(forPlayerOpt),
       currentPlayerId = currentPlayer.id,
-
     )
 }
 
@@ -688,6 +688,7 @@ case class GameStateView(
                           playerIdsThatPlacedCharacters: Set[PlayerId],
                           clockConfig: ClockConfig,
                           clock: Clock,
+                          gameLog: GameLogView,
 
                           currentPlayerId: PlayerId,
                         )

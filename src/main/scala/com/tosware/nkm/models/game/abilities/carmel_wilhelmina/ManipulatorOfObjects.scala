@@ -45,7 +45,7 @@ case class ManipulatorOfObjects(abilityId: AbilityId, parentCharacterId: Charact
 
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
     e match {
-      case CharacterBasicAttacked(_, characterId, targetCharacterId) =>
+      case CharacterBasicAttacked(_, _, _, _, characterId, targetCharacterId) =>
         if(parentCharacterId == characterId) {
           tryToSnare(targetCharacterId)
         } else gameState

@@ -35,7 +35,7 @@ case class AceInTheHole(abilityId: AbilityId, parentCharacterId: CharacterId)
 
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState = {
     e match {
-      case GameEvent.CharacterDamaged(_, characterId, _) =>
+      case GameEvent.CharacterDamaged(_, _, _, _, characterId, _) =>
         if(characterId != parentCharacterId) return gameState
         if(getDamageThisTurn() < parentCharacter.state.maxHealthPoints * metadata.variables("maxHpPercent") / 100)
           gameState

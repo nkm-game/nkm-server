@@ -22,7 +22,7 @@ case class ApplyEffectOnBasicAttack(effectId: CharacterEffectId, initialCooldown
 
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
     e match {
-      case GameEvent.CharacterBasicAttacked(_, characterId, targetCharacterId) =>
+      case GameEvent.CharacterBasicAttacked(_, _, _, _, characterId, targetCharacterId) =>
         if(characterId != parentCharacter.id) return gameState
         gameState
           .addEffect(targetCharacterId, effectToApply)(random, id)
