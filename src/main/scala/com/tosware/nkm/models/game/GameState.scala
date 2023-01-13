@@ -123,6 +123,9 @@ case class GameState
     copy(gameLog = gameLog.modify(_.events).using(es => es :+ e))
       .executeEventTriggers(e)
 
+  private def logEvents(es: Seq[GameEvent])(implicit random: Random): GameState =
+    es.foldLeft(this){case (acc, event) => acc.logEvent(event)}
+
   private def updateClock(newClock: Clock)(implicit random: Random, causedById: String): GameState =
     copy(clock = newClock).logEvent(ClockUpdated(NkmUtils.randomUUID(), phase, turn, causedById, newClock))
 
@@ -208,7 +211,7 @@ case class GameState
     val abilitiesByCharacter = characters.map(c => (c.id, c.state.abilities))
     val abilityStatesMap: Map[AbilityId, AbilityState] = abilitiesByCharacter.collect
     {
-      case (cid: CharacterId, as: Seq[Ability]) => as.map(a => a.id -> AbilityState())
+      case (_: CharacterId, as: Seq[Ability]) => as.map(a => a.id -> AbilityState())
     }.flatten.toMap
 
     copy(
@@ -252,6 +255,7 @@ case class GameState
 
     this
       .modify(_.players.eachWhere(filterPlayers).victoryStatus).setTo(VictoryStatus.Lost)
+      .logEvents(playerIds.map(pid => PlayerLost(randomUUID(), phase, turn, id, pid)))
       .checkVictoryStatus()
       .skipTurnIfPlayerKnockedOut()(random, playerIds.mkString(", "))
   }

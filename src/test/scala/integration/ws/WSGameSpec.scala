@@ -77,7 +77,7 @@ class WSGameSpec extends WSTrait {
         surrender(lobbyId).statusCode shouldBe ok
 
         val observedResponse = fetchResponse()
-        observedResponse.gameResponseType shouldBe GameResponseType.State
+        observedResponse.gameResponseType shouldBe GameResponseType.Event
         observedResponse.statusCode shouldBe ok
       }
     }

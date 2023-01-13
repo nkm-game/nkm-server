@@ -96,6 +96,8 @@ object GameEvent {
   case class BasicMoveRefreshed(id: GameEventId, phase: Phase, turn: Turn, causedById: String, characterId: CharacterId)
                                 extends GameEvent
     with ContainsCharacterId
+  case class PlayerLost(id: GameEventId, phase: Phase, turn: Turn, causedById: String, playerId: PlayerId)
+    extends GameEvent
   case class CharactersPicked(id: GameEventId, phase: Phase, turn: Turn, causedById: String)
                               extends GameEvent
   case class TurnFinished(id: GameEventId, phase: Phase, turn: Turn, causedById: String)

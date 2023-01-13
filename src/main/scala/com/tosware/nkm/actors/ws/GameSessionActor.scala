@@ -2,7 +2,7 @@ package com.tosware.nkm.actors.ws
 
 import akka.actor.Props
 import akka.http.scaladsl.model.StatusCodes
-import com.tosware.nkm.actors._
+import com.tosware.nkm.models.GameEventMapped
 import com.tosware.nkm.models.game.ws._
 import com.tosware.nkm.services._
 import spray.json._
@@ -17,19 +17,18 @@ class GameSessionActor(implicit gameService: GameService)
 {
   override def preStart(): Unit = {
     log.info("GameSessionActor started")
-    context.system.eventStream.subscribe(self, classOf[Game.Event])
+    context.system.eventStream.subscribe(self, classOf[GameEventMapped])
   }
 
   override def receive: Receive = super.receive.orElse[Any, Unit]{
-    case e: Game.Event =>
-      val lobbyId = e.id
-
+    case e: GameEventMapped =>
       // TODO: use async proprely
-      getObservers(lobbyId).foreach { ob =>
+      getObservers(e.gameId).foreach { ob =>
         val authStatus = getAuthStatus(ob)
-        val gameState = aw(gameService.getGameStateView(lobbyId, authStatus))
-        val response = WebsocketGameResponse(GameResponseType.State, StatusCodes.OK.intValue, gameState.toJson.toString)
-        ob ! WebsocketUser.OutgoingMessage(response.toJson.toString)
+        if(!e.event.hiddenFor(authStatus)) {
+          val response = WebsocketGameResponse(GameResponseType.Event, StatusCodes.OK.intValue, e.toJson.toString)
+          ob ! WebsocketUser.OutgoingMessage(response.toJson.toString)
+        }
       }
   }
 }
