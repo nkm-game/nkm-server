@@ -656,6 +656,29 @@ class WSGameSpec extends WSTrait {
       }
     }
 
+    "place all characters in all random pick" in {
+      val gameId = createLobbyForGame(
+        pickType = PickType.AllRandom,
+        hexMapName = "Shuriken",
+        clockConfigOpt = Some(ClockConfig.defaultForPickType(PickType.AllRandom).copy(timeAfterPickMillis = 1)),
+        numberOfCharacters = 2,
+        numberOfPlayers = 2,
+      )
+
+
+      withGameWS {
+        auth(0)
+
+        Thread.sleep(150)
+
+        val gs = fetchAndParseGame(gameId)
+
+        gs.characterIdsOutsideMap.size should be (0)
+        gs.hexMap.getSpawnPoints.flatMap(_.characterId).size should be (4)
+        gs.gameStatus should be (GameStatus.Running)
+      }
+    }
+
     "allow moving characters" in {
       val numberOfPlayers = 3
       val numberOfCharacters = 2

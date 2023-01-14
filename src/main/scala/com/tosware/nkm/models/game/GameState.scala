@@ -81,6 +81,7 @@ case class GameState
   def effectById(effectId: CharacterEffectId): CharacterEffect = effects.find(_.id == effectId).get
 
   def characterPickFinished: Boolean = {
+    if(pickType == PickType.AllRandom) return true
     val draftPickFinished = draftPickState.fold(false)(_.pickPhase == DraftPickPhase.Finished)
     val blindPickFinished = blindPickState.fold(false)(_.pickPhase == BlindPickPhase.Finished)
     draftPickFinished || blindPickFinished
@@ -157,15 +158,22 @@ case class GameState
     ).initializeCharacterPick()
   }
 
-  def placeCharactersRandomlyIfAllRandom()(implicit random: Random): GameState = {
-    if (pickType == PickType.AllRandom) {
-      // TODO: place characters as now they are outside of the map
-      // TODO: move characterOpt assignment to start game
-      assignCharactersToPlayers().copy(
-        playerIdsThatPlacedCharacters = players.map(_.id).toSet,
-      ).updateGameStatus(GameStatus.Running)
-    } else this
+  def placeCharactersRandomly()(implicit random: Random): GameState = {
+    players.foldLeft(this){
+      case (acc, p) => {
+        val spawnCoords = hexMap.getSpawnPointsFor(p.id)(this).map(_.coordinates)
+        val characterIdsShuffled = random.shuffle(p.characterIds.toSeq)
+        val coordinatesToCharacterIdMap = spawnCoords.zip(characterIdsShuffled).toMap
+        acc.placeCharacters(p.id, coordinatesToCharacterIdMap)(random)
+      }
+    }
   }
+
+  def pickAndPlaceCharactersRandomlyIfAllRandom()(implicit random: Random): GameState =
+    if (pickType == PickType.AllRandom)
+      assignCharactersToPlayers()
+        .placeCharactersRandomly()
+    else this
 
   def checkVictoryStatus(): GameState = {
     def filterPendingPlayers: Player => Boolean = _.victoryStatus == VictoryStatus.Pending
@@ -223,17 +231,16 @@ case class GameState
   }
 
   def checkIfCharacterPickFinished()(implicit random: Random): GameState = {
-    implicit val causedById: String = id
     if(characterPickFinished) {
       updateGameStatus(GameStatus.CharacterPicked)
         .updateClock(clock.setPickTime(clockConfig.timeAfterPickMillis))(random, id)
         .assignCharactersToPlayers()
-        .logEvent(CharactersPicked(NkmUtils.randomUUID(), phase, turn, causedById))
+        .logEvent(CharactersPicked(NkmUtils.randomUUID(), phase, turn, id))
     } else this
   }
 
   def startPlacingCharacters()(implicit random: Random): GameState =
-    updateGameStatus(GameStatus.CharacterPlacing).placeCharactersRandomlyIfAllRandom()
+    updateGameStatus(GameStatus.CharacterPlacing).pickAndPlaceCharactersRandomlyIfAllRandom()
 
   def decreasePickTime(timeMillis: Long)(implicit random: Random): GameState =
     updateClock(clock.decreasePickTime(timeMillis))(random, id)
