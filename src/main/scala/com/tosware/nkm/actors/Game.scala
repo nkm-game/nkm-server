@@ -2,6 +2,7 @@ package com.tosware.nkm.actors
 
 import akka.actor.{ActorLogging, Cancellable, Props}
 import akka.persistence.{PersistentActor, RecoveryCompleted}
+import com.tosware.nkm.actors.Game.GameId
 import com.tosware.nkm.models.CommandResponse._
 import com.tosware.nkm.models.{GameEventMapped, GameStateValidator}
 import com.tosware.nkm.models.game.Ability.AbilityId
@@ -61,7 +62,9 @@ object Game {
   //
   case class CharacterSelectTimeout(pickNumber: Int) extends Command
 
-  case class EndTurnTimeout(turnNumber: Int) extends Command
+  case class CharacterPlacingTimeout() extends Command
+
+  case class TurnTimeout(turnNumber: Int) extends Command
   //////////////////////////////
 
   sealed trait Event {
@@ -105,22 +108,24 @@ object Game {
 
   // CLOCK TIMEOUTS /////////////////////
   //
-  case class BanningPhaseTimedOut(id: String) extends Event
+  case class BanningPhaseTimedOut(id: GameId) extends Event
 
-  case class DraftPickTimedOut(id: String) extends Event
+  case class DraftPickTimedOut(id: GameId) extends Event
 
-  case class BlindPickTimedOut(id: String) extends Event
+  case class BlindPickTimedOut(id: GameId) extends Event
 
-  case class TimeAfterPickTimedOut(id: String) extends Event
+  case class TimeAfterPickTimedOut(id: GameId) extends Event
 
-  case class TurnTimedOut(id: String) extends Event
+  case class CharacterPlacingTimedOut(id: GameId) extends Event
+
+  case class TurnTimedOut(id: GameId) extends Event
   //////////////////////////////
 
 
-  def props(id: String)(implicit nkmDataService: NkmDataService): Props = Props(new Game(id))
+  def props(id: GameId)(implicit nkmDataService: NkmDataService): Props = Props(new Game(id))
 }
 
-class Game(id: String)(implicit nkmDataService: NkmDataService) extends PersistentActor with ActorLogging {
+class Game(id: GameId)(implicit nkmDataService: NkmDataService) extends PersistentActor with ActorLogging {
   import Game._
   import context.dispatcher
 
@@ -161,9 +166,9 @@ class Game(id: String)(implicit nkmDataService: NkmDataService) extends Persiste
 
     val timeout = gameState.gameStatus match {
       case GameStatus.NotStarted | GameStatus.Finished => ???
-      case GameStatus.CharacterPick | GameStatus.CharacterPicked =>
-        gameState.clock.pickTime.millis
-      case GameStatus.CharacterPlacing | GameStatus.Running =>
+      case GameStatus.CharacterPick | GameStatus.CharacterPicked | GameStatus.CharacterPlacing =>
+        gameState.clock.sharedTime.millis
+      case GameStatus.Running =>
         gameState.currentPlayerTime.millis
     }
 
@@ -171,8 +176,10 @@ class Game(id: String)(implicit nkmDataService: NkmDataService) extends Persiste
       case GameStatus.NotStarted | GameStatus.Finished => ???
       case GameStatus.CharacterPick | GameStatus.CharacterPicked =>
         CharacterSelectTimeout(gameState.timeoutNumber)
-      case GameStatus.CharacterPlacing | GameStatus.Running =>
-        EndTurnTimeout(gameState.turn.number)
+      case GameStatus.CharacterPlacing =>
+        CharacterPlacingTimeout()
+      case GameStatus.Running =>
+        TurnTimeout(gameState.turn.number)
     }
     scheduledTimeout.cancel()
     scheduledTimeout = context.system.scheduler.scheduleOnce(timeout)(self ! eventToSchedule)
@@ -212,9 +219,7 @@ class Game(id: String)(implicit nkmDataService: NkmDataService) extends Persiste
           persistAndPublish(DraftPickTimedOut(id))(_ => updateGameState(gameState.draftPickTimeout()))
 
         def blindPickTimeout(): Unit =
-          persistAndPublish(BlindPickTimedOut(id)) { _ =>
-            updateGameState(gameState.blindPickTimeout())
-          }
+          persistAndPublish(BlindPickTimedOut(id))(_ => updateGameState(gameState.blindPickTimeout()))
 
         gameState.pickType match {
           case PickType.AllRandom =>
@@ -244,6 +249,14 @@ class Game(id: String)(implicit nkmDataService: NkmDataService) extends Persiste
         }
       }
       scheduleDefault()
+    case CharacterPlacingTimeout() =>
+      persistAndPublish(CharacterPlacingTimedOut(id))(_ => updateGameState(gameState.placingCharactersTimeout()))
+      scheduleDefault()
+    case TurnTimeout(turnNumber) =>
+      if(gameState.turn.number == turnNumber) {
+        persistAndPublish(TurnTimedOut(id))(_ => updateGameState(gameState.surrender(gameState.currentPlayer.id)))
+        scheduleDefault()
+      }
     case Pause(playerId) =>
       GameStateValidator().validatePause(playerId) match {
         case failure @ Failure(_) => sender() ! failure
@@ -455,6 +468,12 @@ class Game(id: String)(implicit nkmDataService: NkmDataService) extends Persiste
     case BlindPickTimedOut(_) =>
       log.debug(s"Recovered blind pick timeout")
       updateGameState(gameState.blindPickTimeout())
+    case CharacterPlacingTimedOut(_) =>
+      log.debug(s"Recovered character placing timeout")
+      updateGameState(gameState.placingCharactersTimeout())
+    case TurnTimedOut(_) =>
+      log.debug(s"Recovered turn timeout")
+      updateGameState(gameState.surrender(gameState.currentPlayer.id))
     case RecoveryCompleted =>
       // start a timer
       scheduleDefault()

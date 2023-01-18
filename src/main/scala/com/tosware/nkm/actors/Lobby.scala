@@ -252,6 +252,11 @@ class Lobby(id: GameId)(implicit nkmDataService: NkmDataService)
             case p: Player if p.name == hostUserId => p.copy(isHost = true)
             case p: Player => p
           }
+          val clockConfig: ClockConfig =
+            if (lobbyState.clockConfig == ClockConfig.empty())
+              ClockConfig.defaultForPickType(lobbyState.pickType)
+            else
+              lobbyState.clockConfig
           val deps = GameStartDependencies(
             players = players,
             hexMap = hexMaps.filter(m => m.name == lobbyState.chosenHexMapName.get).head,
@@ -259,7 +264,7 @@ class Lobby(id: GameId)(implicit nkmDataService: NkmDataService)
             numberOfBansPerPlayer = lobbyState.numberOfBans,
             numberOfCharactersPerPlayer = lobbyState.numberOfCharactersPerPlayer,
             nkmDataService.getCharacterMetadatas.toSet,
-            clockConfig = lobbyState.clockConfig
+            clockConfig = clockConfig,
           )
           sender() ! aw(gameActor ? Game.StartGame(deps)).asInstanceOf[CommandResponse]
           setGameStarted()

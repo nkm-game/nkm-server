@@ -679,6 +679,60 @@ class WSGameSpec extends WSTrait {
       }
     }
 
+    "place randomly characters that were not placed in time" in {
+      val numberOfPlayers = 3
+      val numberOfCharacters = 2
+
+      val lobbyId = createLobbyForGame(
+        pickType = PickType.BlindPick,
+        numberOfPlayers = numberOfPlayers,
+        numberOfCharacters = numberOfCharacters,
+        clockConfigOpt = Some(ClockConfig.defaultForPickType(PickType.BlindPick).copy(
+          timeAfterPickMillis = 1,
+          timeForCharacterPlacing = 350,
+        )),
+      )
+
+      withGameWS {
+        auth(0)
+        val availableCharacters = fetchAndParseGame(lobbyId).blindPickState.get.config.availableCharacters.toSeq
+        val charactersToPick = availableCharacters.take(numberOfCharacters).toSet
+
+        blindPick(lobbyId, charactersToPick).statusCode shouldBe ok
+
+        auth(1)
+        blindPick(lobbyId, charactersToPick).statusCode shouldBe ok
+
+        auth(2)
+        blindPick(lobbyId, charactersToPick).statusCode shouldBe ok
+
+        Thread.sleep(150)
+
+        val (hexMap, players) = {
+          val gameState = fetchAndParseGame(lobbyId)
+          gameState.gameStatus shouldBe GameStatus.CharacterPlacing
+          (gameState.hexMap, gameState.players)
+        }
+
+        (0 until (numberOfPlayers - 1)) foreach { i =>
+          auth(i)
+          val spawnPoints = hexMap.getSpawnPointsByNumber(i)
+          val characterIds = players(i).characterIds
+          val coordinatesToCharacterIdMap = spawnPoints.map(_.coordinates).zip(characterIds).toMap
+          placeCharacters(lobbyId, coordinatesToCharacterIdMap).statusCode shouldBe ok
+        }
+
+        Thread.sleep(250)
+
+        {
+          val gs = fetchAndParseGame(lobbyId)
+          gs.gameStatus shouldBe GameStatus.Running
+          gs.characterIdsOutsideMap.size should be (0)
+          gs.hexMap.getSpawnPoints.flatMap(_.characterId).size should be (6)
+        }
+      }
+    }
+
     "allow moving characters" in {
       val numberOfPlayers = 3
       val numberOfCharacters = 2

@@ -4,26 +4,30 @@ import com.tosware.nkm.NkmConf
 
 object ClockConfig {
   def empty(): ClockConfig =
-    ClockConfig(0, 0, 0, 0, 0)
+    ClockConfig(0, 0, 0, 0, 0, 0)
   def defaultForPickType(pickType: PickType): ClockConfig = pickType match {
     case PickType.AllRandom => fromNkmConf("clock.allRandom")
     case PickType.DraftPick => fromNkmConf("clock.draftPick")
     case PickType.BlindPick => fromNkmConf("clock.blindPick")
   }
-  def fromNkmConf(path: String): ClockConfig =
+  def fromNkmConf(path: String): ClockConfig = {
+    val c = NkmConf.extract(path)
     ClockConfig(
-      initialTimeMillis = NkmConf.int(s"$path.initialTimeMillis"),
-      incrementMillis = NkmConf.int(s"$path.incrementMillis"),
-      maxBanTimeMillis = NkmConf.int(s"$path.maxBanTimeMillis"),
-      maxPickTimeMillis = NkmConf.int(s"$path.maxPickTimeMillis"),
-      timeAfterPickMillis = NkmConf.int(s"$path.timeAfterPickMillis"),
+      initialTimeMillis = c("initialTimeMillis"),
+      incrementMillis = c("incrementMillis"),
+      maxBanTimeMillis = c("maxBanTimeMillis"),
+      maxPickTimeMillis = c("maxPickTimeMillis"),
+      timeAfterPickMillis = c("timeAfterPickMillis"),
+      timeForCharacterPlacing = c("timeForCharacterPlacing"),
     )
+  }
 }
 
 case class ClockConfig(
-                        initialTimeMillis: Long,
-                        incrementMillis: Long,
-                        maxBanTimeMillis: Long,
-                        maxPickTimeMillis: Long,
-                        timeAfterPickMillis: Long,
-                      )
+  initialTimeMillis: Long,
+  incrementMillis: Long,
+  maxBanTimeMillis: Long,
+  maxPickTimeMillis: Long,
+  timeAfterPickMillis: Long,
+  timeForCharacterPlacing: Long,
+)

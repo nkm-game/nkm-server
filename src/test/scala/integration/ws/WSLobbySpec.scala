@@ -246,9 +246,11 @@ class WSLobbySpec extends WSTrait
 
         fetchAndParseLobby(lobbyId).gameStarted shouldBe true
 
+        Thread.sleep(150)
+
         Get(s"/api/state/$lobbyId") ~> routes ~> check {
           val gameState = responseAs[GameStateView]
-          gameState.gameStatus shouldEqual GameStatus.Running
+          gameState.gameStatus shouldEqual GameStatus.CharacterPicked
           gameState.players.length shouldEqual 2
           gameState.hexMap.name shouldEqual hexMapName
           gameState.numberOfBans shouldEqual 0

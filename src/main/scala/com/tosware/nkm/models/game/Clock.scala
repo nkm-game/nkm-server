@@ -12,17 +12,17 @@ object Clock {
 
 case class Clock(
                   playerTimes: Map[PlayerId, Long],
-                  pickTime: Long = 0,
+                  sharedTime: Long = 0,
                   isRunning: Boolean = true,
                 ) {
-  def setPickTime(timeMillis: Long): Clock =
-    copy(pickTime = timeMillis)
+  def setSharedTime(timeMillis: Long): Clock =
+    copy(sharedTime = timeMillis)
 
   def setTime(playerId: PlayerId, timeMillis: Long): Clock =
     copy(playerTimes = playerTimes.updated(playerId, timeMillis))
 
-  def decreasePickTime(timeMillis: Long): Clock =
-    copy(pickTime = Math.max(pickTime - timeMillis, 0))
+  def decreaseSharedTime(timeMillis: Long): Clock =
+    copy(sharedTime = Math.max(sharedTime - timeMillis, 0))
 
   def decreaseTime(playerId: PlayerId, timeMillis: Long): Clock = {
     val newTime = Math.max(playerTimes(playerId) - timeMillis, 0)
