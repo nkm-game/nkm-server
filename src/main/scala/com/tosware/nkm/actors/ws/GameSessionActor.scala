@@ -26,7 +26,7 @@ class GameSessionActor(implicit gameService: GameService)
       getObservers(e.gameId).foreach { ob =>
         val authStatus = getAuthStatus(ob)
         if(!e.event.hiddenFor(authStatus)) {
-          val response = WebsocketGameResponse(GameResponseType.Event, StatusCodes.OK.intValue, e.toJson.toString)
+          val response = WebsocketGameResponse(GameResponseType.Event, StatusCodes.OK.intValue, e.event.toJson.toString)
           ob ! WebsocketUser.OutgoingMessage(response.toJson.toString)
         }
       }
