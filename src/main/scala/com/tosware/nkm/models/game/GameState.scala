@@ -51,6 +51,10 @@ case class GameState
 
   def currentPlayerNumber: Int = turn.number % players.size
 
+  def isBlindPickingPhase: Boolean = blindPickState.fold(false)(_.pickPhase == BlindPickPhase.Picking)
+
+  def isDraftBanningPhase: Boolean = draftPickState.fold(false)(_.pickPhase == DraftPickPhase.Banning)
+
   def playerNumber(playerId: PlayerId): Int = players.indexWhere(_.id == playerId)
 
   def playerByIdOpt(playerId: PlayerId): Option[Player] = players.find(_.id == playerId)
@@ -245,7 +249,7 @@ case class GameState
       .initializeCharacterPlacing()
       .pickAndPlaceCharactersRandomlyIfAllRandom()
 
-  def decreasePickTime(timeMillis: Long)(implicit random: Random): GameState =
+  def decreaseSharedTime(timeMillis: Long)(implicit random: Random): GameState =
     updateClock(clock.decreaseSharedTime(timeMillis))(random, id)
 
   def decreaseTime(playerId: PlayerId, timeMillis: Long)(implicit random: Random): GameState =

@@ -82,6 +82,19 @@ class WSGameSpec extends WSTrait {
       }
     }
 
+    "allow getting current clock" in {
+      val lobbyId = createLobbyForGame(
+        pickType = PickType.DraftPick,
+      )
+
+      withGameWS {
+        auth(0)
+        val gameState = fetchAndParseGame(lobbyId)
+        val clock = fetchAndParseClock(lobbyId)
+        gameState.clock should not be clock
+      }
+    }
+
     "allow surrendering during draft pick" in {
       val lobbyId = createLobbyForGame(
         pickType = PickType.DraftPick,

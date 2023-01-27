@@ -3,11 +3,11 @@ package helpers
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.testkit.WSProbe
 import com.tosware.nkm.models.game.Ability.AbilityId
-import com.tosware.nkm.models.game.{ClockConfig, GameStateView, PickType, UseData}
+import com.tosware.nkm.models.game.{Clock, ClockConfig, GameStateView, PickType, UseData}
 import com.tosware.nkm.models.game.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game.CharacterMetadata.CharacterMetadataId
 import com.tosware.nkm.models.game.hex.HexCoordinates
-import com.tosware.nkm.models.game.ws.GameRequest.Action.{BasicAttack, EndTurn, UseAbilityOnCharacter, PassTurn}
+import com.tosware.nkm.models.game.ws.GameRequest.Action.{BasicAttack, EndTurn, PassTurn, UseAbilityOnCharacter}
 import com.tosware.nkm.models.game.ws.GameRequest.Action.{Move, PlaceCharacters}
 import com.tosware.nkm.models.game.ws.GameRequest.CharacterSelect._
 import com.tosware.nkm.models.game.ws.GameRequest.General._
@@ -160,9 +160,18 @@ trait WSTrait extends UserApiTrait {
   def fetchGame(lobbyId: String): WebsocketGameResponse =
     sendWSRequestG(GameRoute.GetState, GetState(lobbyId).toJson.toString)
 
+  def fetchClock(lobbyId: String): WebsocketGameResponse =
+    sendWSRequestG(GameRoute.GetCurrentClock, GetCurrentClock(lobbyId).toJson.toString)
+
   def fetchAndParseGame(lobbyId: String): GameStateView = {
     val gameResponse = fetchGame(lobbyId)
     gameResponse.statusCode shouldBe StatusCodes.OK.intValue
     gameResponse.body.parseJson.convertTo[GameStateView]
+  }
+
+  def fetchAndParseClock(lobbyId: String): Clock = {
+    val r = fetchClock(lobbyId)
+    r.statusCode shouldBe StatusCodes.OK.intValue
+    r.body.parseJson.convertTo[Clock]
   }
 }

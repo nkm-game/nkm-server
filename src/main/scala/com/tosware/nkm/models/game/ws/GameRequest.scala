@@ -13,6 +13,7 @@ object GameRequest {
     final case class Auth(token: String) extends GameRequest
     final case class Observe(lobbyId: String) extends GameRequest
     final case class GetState(lobbyId: String) extends GameRequest
+    final case class GetCurrentClock(lobbyId: String) extends GameRequest
     final case class Pause(lobbyId: String) extends GameRequest
     final case class Surrender(lobbyId: String) extends GameRequest
   }

@@ -73,6 +73,10 @@ trait GameWebsocketUserBehaviour extends WebsocketUserBehaviour {
         val lobbyId = request.requestJson.parseJson.convertTo[GetState].lobbyId
         val gameStateView = aw(gameService.getGameStateView(lobbyId, authStatus.username))
         WebsocketGameResponse(GameResponseType.State, StatusCodes.OK.intValue, gameStateView.toJson.toString)
+      case GameRoute.GetCurrentClock =>
+        val lobbyId = request.requestJson.parseJson.convertTo[GetCurrentClock].lobbyId
+        val clock = aw(gameService.getCurrentClock(lobbyId))
+        WebsocketGameResponse(GameResponseType.GetCurrentClock, StatusCodes.OK.intValue, clock.toJson.toString)
       case GameRoute.Pause =>
         val lobbyId = request.requestJson.parseJson.convertTo[Pause].lobbyId
         implicit val responseType: GameResponseType = GameResponseType.Pause

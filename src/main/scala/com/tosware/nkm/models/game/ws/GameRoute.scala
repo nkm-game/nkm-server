@@ -11,6 +11,7 @@ object GameRoute extends StringEnum[GameRoute] {
   case object Auth extends GameRoute("auth")
   case object Observe extends GameRoute("observe")
   case object GetState extends GameRoute("state")
+  case object GetCurrentClock extends GameRoute("clock")
   case object Pause extends GameRoute("pause")
   case object Surrender extends GameRoute("surrender")
 

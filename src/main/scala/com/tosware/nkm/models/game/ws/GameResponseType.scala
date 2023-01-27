@@ -11,6 +11,7 @@ object GameResponseType extends StringEnum[GameResponseType] {
   case object Auth extends GameResponseType("auth")
   case object Observe extends GameResponseType("observe")
   case object State extends GameResponseType("state")
+  case object GetCurrentClock extends GameResponseType("clock")
   case object Pause extends GameResponseType("pause")
   case object Surrender extends GameResponseType("surrender")
 

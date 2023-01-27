@@ -26,6 +26,8 @@ object Game {
 
   case object GetState extends Query
 
+  case object GetCurrentClock extends Query
+
   case class GetStateView(forPlayer: Option[PlayerId]) extends Query
 
   sealed trait Command
@@ -70,7 +72,7 @@ object Game {
   sealed trait Event {
     val id: GameId
   }
-  case class PickTimeDecreased(id: GameId, time: Long) extends Event
+  case class SharedTimeDecreased(id: GameId, time: Long) extends Event
 
   case class TimeDecreased(id: GameId, playerId: PlayerId, time: Long) extends Event
 
@@ -148,6 +150,17 @@ class Game(id: GameId)(implicit nkmDataService: NkmDataService) extends Persiste
 
   def updateTimestamp(): Unit = lastTimestamp = Instant.now()
 
+  def getCurrentClock(): Clock = {
+    val timeToDecrease: Long = millisSinceLastMove()
+    val isAfterPickPhase = gameState.gameStatus == GameStatus.CharacterPicked
+    val isSharedTime = gameState.isBlindPickingPhase || gameState.isDraftBanningPhase || isAfterPickPhase
+
+    if(isSharedTime)
+      gameState.clock.decreaseSharedTime(timeToDecrease)
+    else
+      gameState.clock.decreaseTime(gameState.currentPlayer.id, timeToDecrease)
+  }
+
   def millisSinceLastMove(): Long = ChronoUnit.MILLIS.between(lastTimestamp, Instant.now())
 
   def persistAndPublishAll[A](events: Seq[A])(handler: A => Unit): Unit = {
@@ -190,6 +203,10 @@ class Game(id: GameId)(implicit nkmDataService: NkmDataService) extends Persiste
     case GetState =>
       log.debug(s"GAME STATE REQUEST: ${gameState.toString}")
       sender() ! gameState
+    case GetCurrentClock =>
+      val clock = getCurrentClock()
+      log.debug(s"CLOCK REQUEST: ${clock.toString}")
+      sender() ! clock
     case GetStateView(forPlayer) =>
       val gameStateView = gameState.toView(forPlayer)
       log.debug(s"GAME STATE VIEW REQUEST: ${gameStateView.toString}")
@@ -266,12 +283,12 @@ class Game(id: GameId)(implicit nkmDataService: NkmDataService) extends Persiste
             val isBlindPickingPhase = gameState.blindPickState.fold(false)(_.pickPhase == BlindPickPhase.Picking)
             val isDraftBanningPhase = gameState.draftPickState.fold(false)(_.pickPhase == DraftPickPhase.Banning)
             val isAfterPickPhase = gameState.gameStatus == GameStatus.CharacterPicked
-            val isPickTime = isBlindPickingPhase || isDraftBanningPhase || isAfterPickPhase
+            val isSharedTime = isBlindPickingPhase || isDraftBanningPhase || isAfterPickPhase
 
-            if(isPickTime) {
-              persistAndPublishAll(Seq(PickTimeDecreased(id, timeToDecrease), GamePaused(id))) { _ =>
+            if(isSharedTime) {
+              persistAndPublishAll(Seq(SharedTimeDecreased(id, timeToDecrease), GamePaused(id))) { _ =>
                 scheduledTimeout.cancel()
-                updateGameState(gameState.decreasePickTime(timeToDecrease).pause())
+                updateGameState(gameState.decreaseSharedTime(timeToDecrease).pause())
                 sender() ! Success()
               }
             } else {

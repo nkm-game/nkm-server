@@ -3,7 +3,7 @@ package com.tosware.nkm.services
 import akka.actor.ActorRef
 import akka.pattern.ask
 import com.tosware.nkm.NkmTimeouts
-import com.tosware.nkm.actors.Game.{GetState, GetStateView}
+import com.tosware.nkm.actors.Game.{GetCurrentClock, GetState, GetStateView}
 import com.tosware.nkm.actors._
 import com.tosware.nkm.models.CommandResponse
 import com.tosware.nkm.models.game.Player.PlayerId
@@ -131,4 +131,10 @@ class GameService(gamesManagerActor: ActorRef)
 
   def getGameStateView(lobbyId: String, forPlayer: Option[PlayerId]): Future[GameStateView] =
     getGameStateView(getGameActor(lobbyId), forPlayer)
+
+  def getCurrentClock(gameActor: ActorRef): Future[Clock] =
+    (gameActor ? GetCurrentClock).mapTo[Clock]
+
+  def getCurrentClock(lobbyId: String): Future[Clock] =
+    getCurrentClock(getGameActor(lobbyId))
 }
