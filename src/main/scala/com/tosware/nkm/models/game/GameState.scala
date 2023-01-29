@@ -47,13 +47,18 @@ case class GameState
   private implicit val p: Phase = phase
   private implicit val t: Turn = turn
 
-  def host: Player = players.find(_.isHost).get
+  def hostId: PlayerId = players.find(_.isHost).get.id
 
   def currentPlayerNumber: Int = turn.number % players.size
 
   def isBlindPickingPhase: Boolean = blindPickState.fold(false)(_.pickPhase == BlindPickPhase.Picking)
 
   def isDraftBanningPhase: Boolean = draftPickState.fold(false)(_.pickPhase == DraftPickPhase.Banning)
+
+  def isInCharacterSelect: Boolean = Seq(GameStatus.CharacterPick, GameStatus.CharacterPicked).contains(gameStatus)
+
+  def isSharedTime: Boolean = Seq(GameStatus.CharacterPicked, GameStatus.CharacterPlacing).contains(gameStatus) ||
+    isBlindPickingPhase || isDraftBanningPhase
 
   def playerNumber(playerId: PlayerId): Int = players.indexWhere(_.id == playerId)
 
@@ -653,7 +658,15 @@ case class GameState
       clockConfig = clockConfig,
       clock = clock,
       gameLog = gameLog.toView(forPlayerOpt),
+
       currentPlayerId = currentPlayer.id,
+      hostId = hostId ,
+      isBlindPickingPhase = isBlindPickingPhase,
+      isDraftBanningPhase = isDraftBanningPhase,
+      isInCharacterSelect = isInCharacterSelect,
+      isSharedTime = isSharedTime,
+      currentPlayerTime = currentPlayerTime,
+      charactersToTakeAction = charactersToTakeAction,
     )
 }
 
@@ -690,28 +703,35 @@ object GameState extends Logging {
 }
 
 case class GameStateView(
-                          id: GameId,
-                          charactersMetadata: Set[CharacterMetadata],
-                          gameStatus: GameStatus,
-                          pickType: PickType,
-                          numberOfBans: Int,
-                          numberOfCharactersPerPlayers: Int,
-                          draftPickState: Option[DraftPickStateView],
-                          blindPickState: Option[BlindPickStateView],
-                          hexMap: HexMapView,
-                          players: Seq[Player],
-                          characters: Set[NkmCharacterView],
-                          abilities: Set[AbilityView],
-                          effects: Set[CharacterEffectView],
-                          phase: Phase,
-                          turn: Turn,
-                          characterIdsOutsideMap: Set[CharacterId],
-                          characterIdsThatTookActionThisPhase: Set[CharacterId],
-                          characterTakingActionThisTurn: Option[CharacterId],
-                          playerIdsThatPlacedCharacters: Set[PlayerId],
-                          clockConfig: ClockConfig,
-                          clock: Clock,
-                          gameLog: GameLogView,
+  id: GameId,
+  charactersMetadata: Set[CharacterMetadata],
+  gameStatus: GameStatus,
+  pickType: PickType,
+  numberOfBans: Int,
+  numberOfCharactersPerPlayers: Int,
+  draftPickState: Option[DraftPickStateView],
+  blindPickState: Option[BlindPickStateView],
+  hexMap: HexMapView,
+  players: Seq[Player],
+  characters: Set[NkmCharacterView],
+  abilities: Set[AbilityView],
+  effects: Set[CharacterEffectView],
+  phase: Phase,
+  turn: Turn,
+  characterIdsOutsideMap: Set[CharacterId],
+  characterIdsThatTookActionThisPhase: Set[CharacterId],
+  characterTakingActionThisTurn: Option[CharacterId],
+  playerIdsThatPlacedCharacters: Set[PlayerId],
+  clockConfig: ClockConfig,
+  clock: Clock,
+  gameLog: GameLogView,
 
-                          currentPlayerId: PlayerId,
-                        )
+  currentPlayerId: PlayerId,
+  hostId: PlayerId,
+  isBlindPickingPhase: Boolean,
+  isDraftBanningPhase: Boolean,
+  isInCharacterSelect: Boolean,
+  isSharedTime: Boolean,
+  currentPlayerTime: Long,
+  charactersToTakeAction: Set[CharacterId],
+)

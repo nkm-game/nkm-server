@@ -139,6 +139,8 @@ class Game(id: GameId)(implicit nkmDataService: NkmDataService) extends Persiste
   var lastTimestamp: Instant = Instant.now()
   var scheduledTimeout: Cancellable = Cancellable.alreadyCancelled
 
+  def v(): GameStateValidator = GameStateValidator()(gameState)
+
   def updateGameState(newGameState: GameState): Unit = {
     val lastGameState = gameState
     gameState = newGameState
@@ -148,20 +150,23 @@ class Game(id: GameId)(implicit nkmDataService: NkmDataService) extends Persiste
     newGameEvents.foreach(context.system.eventStream.publish)
   }
 
+  def updateGameStateAndScheduleDefault(newGameState: GameState): Unit = {
+    updateGameState(newGameState)
+    scheduleDefault()
+  }
+
   def updateTimestamp(): Unit = lastTimestamp = Instant.now()
+
+  def millisSinceLastMove(): Long = ChronoUnit.MILLIS.between(lastTimestamp, Instant.now())
 
   def getCurrentClock(): Clock = {
     val timeToDecrease: Long = millisSinceLastMove()
-    val isAfterPickPhase = gameState.gameStatus == GameStatus.CharacterPicked
-    val isSharedTime = gameState.isBlindPickingPhase || gameState.isDraftBanningPhase || isAfterPickPhase
 
-    if(isSharedTime)
+    if(gameState.isSharedTime)
       gameState.clock.decreaseSharedTime(timeToDecrease)
     else
       gameState.clock.decreaseTime(gameState.currentPlayer.id, timeToDecrease)
   }
-
-  def millisSinceLastMove(): Long = ChronoUnit.MILLIS.between(lastTimestamp, Instant.now())
 
   def persistAndPublishAll[A](events: Seq[A])(handler: A => Unit): Unit = {
     log.warning("EVENT " + events.toString)
@@ -177,16 +182,13 @@ class Game(id: GameId)(implicit nkmDataService: NkmDataService) extends Persiste
     if(Seq(GameStatus.NotStarted, GameStatus.Finished).contains(gameState.gameStatus))
       return
 
-    val timeout = gameState.gameStatus match {
-      case GameStatus.NotStarted | GameStatus.Finished => ???
-      case GameStatus.CharacterPick | GameStatus.CharacterPicked | GameStatus.CharacterPlacing =>
-        gameState.clock.sharedTime.millis
-      case GameStatus.Running =>
-        gameState.currentPlayerTime.millis
-    }
+    val timeout = if(gameState.isSharedTime)
+      gameState.clock.sharedTime.millis
+    else
+      gameState.currentPlayerTime.millis
 
-    val eventToSchedule: Command = gameState.gameStatus match {
-      case GameStatus.NotStarted | GameStatus.Finished => ???
+    val timeoutToSchedule: Command = gameState.gameStatus match {
+      case GameStatus.Finished | GameStatus.NotStarted => ???
       case GameStatus.CharacterPick | GameStatus.CharacterPicked =>
         CharacterSelectTimeout(gameState.timeoutNumber)
       case GameStatus.CharacterPlacing =>
@@ -195,239 +197,290 @@ class Game(id: GameId)(implicit nkmDataService: NkmDataService) extends Persiste
         TurnTimeout(gameState.turn.number)
     }
     scheduledTimeout.cancel()
-    scheduledTimeout = context.system.scheduler.scheduleOnce(timeout)(self ! eventToSchedule)
+    log.error(gameState.gameStatus.toString)
+    log.error("TIMER: " + timeout + " " + timeoutToSchedule)
+    scheduledTimeout = context.system.scheduler.scheduleOnce(timeout)(self ! timeoutToSchedule)
     updateTimestamp()
+  }
+
+
+  def handleCharacterSelectTimeout(pickNumber: Int): Unit = {
+    def startPlacingCharactersAfterTimeout(): Unit =
+      persistAndPublishAll(Seq(
+        TimeAfterPickTimedOut(id),
+        PlacingCharactersStarted(id),
+      ))(_ => updateGameStateAndScheduleDefault(gameState.startPlacingCharacters()))
+
+    def banningPhaseTimeout(): Unit =
+      persistAndPublish(BanningPhaseTimedOut(id))(_ => updateGameStateAndScheduleDefault(gameState.finishBanningPhase()))
+
+    def draftPickTimeout(): Unit =
+      persistAndPublish(DraftPickTimedOut(id))(_ => updateGameStateAndScheduleDefault(gameState.draftPickTimeout()))
+
+    def blindPickTimeout(): Unit =
+      persistAndPublish(BlindPickTimedOut(id))(_ => updateGameStateAndScheduleDefault(gameState.blindPickTimeout()))
+
+    gameState.pickType match {
+      case PickType.AllRandom =>
+        startPlacingCharactersAfterTimeout()
+      case PickType.DraftPick =>
+        val draftPickState = gameState.draftPickState.get
+        if (draftPickState.pickNumber == pickNumber) {
+          draftPickState.pickPhase match {
+            case DraftPickPhase.Banning =>
+              banningPhaseTimeout()
+            case DraftPickPhase.Picking =>
+              draftPickTimeout()
+            case DraftPickPhase.Finished =>
+              startPlacingCharactersAfterTimeout()
+          }
+        }
+      case PickType.BlindPick =>
+        val blindPickState = gameState.blindPickState.get
+        if (blindPickState.pickNumber == pickNumber) {
+          blindPickState.pickPhase match {
+            case BlindPickPhase.Picking =>
+              blindPickTimeout()
+            case BlindPickPhase.Finished =>
+              startPlacingCharactersAfterTimeout()
+          }
+        }
+    }
+  }
+
+  def pauseGame(): Unit =
+  {
+    val timeToDecrease: Long = millisSinceLastMove()
+    if(gameState.isSharedTime) {
+      persistAndPublishAll(Seq(
+        SharedTimeDecreased(id, timeToDecrease),
+        GamePaused(id))
+      ) { _ =>
+        scheduledTimeout.cancel()
+        updateGameState(gameState.decreaseSharedTime(timeToDecrease).pause())
+        sender() ! Success()
+      }
+    } else {
+      persistAndPublishAll(Seq(TimeDecreased(id, gameState.currentPlayer.id, timeToDecrease), GamePaused(id))) { _ =>
+        scheduledTimeout.cancel()
+        updateGameState(gameState.decreaseTime(gameState.currentPlayer.id, timeToDecrease).pause())
+        sender() ! Success()
+      }
+    }
+  }
+
+
+  def unpauseGame(): Unit = {
+    val e = GameUnpaused(id)
+    persistAndPublish(e) { _ =>
+      updateGameStateAndScheduleDefault(gameState.unpause())
+      sender() ! Success()
+    }
+  }
+
+  def validate(response: CommandResponse)(onSuccess: () => Unit): Unit = {
+    response match {
+      case failure @ Failure(_) => sender() ! failure
+      case Success(_) =>
+        onSuccess()
+    }
+  }
+
+  def startGame(gameStartDependencies: GameStartDependencies): Unit = {
+    val e = GameStarted(id, gameStartDependencies)
+    persistAndPublish(e) { _ =>
+      updateGameStateAndScheduleDefault(gameState.startGame(gameStartDependencies))
+      sender() ! Success()
+    }
+  }
+
+
+  def surrender(playerId: PlayerId): Unit = {
+    val e = Surrendered(id, playerId)
+    persistAndPublish(e) { _ =>
+      updateGameStateAndScheduleDefault(gameState.surrender(playerId))
+      sender() ! Success()
+    }
+  }
+
+  def banCharacters(playerId: PlayerId, characterIds: Set[CharacterMetadataId]): Unit =
+  {
+    val e = CharactersBanned(id, playerId, characterIds)
+    persistAndPublish(e) { _ =>
+      updateGameState(gameState.ban(playerId, characterIds))
+      if(!gameState.isDraftBanningPhase)
+        scheduleDefault()
+      sender() ! Success()
+    }
+  }
+
+  def pickCharacter(playerId: PlayerId, characterId: CharacterMetadataId): Unit = {
+    val e = CharacterPicked(id, playerId, characterId)
+    persistAndPublish(e) { _ =>
+      updateGameStateAndScheduleDefault(gameState.pick(playerId, characterId))
+      sender() ! Success()
+    }
+  }
+
+  def blindPickCharacters(playerId: PlayerId, characterIds: Set[CharacterMetadataId]): Unit = {
+    val e = CharactersBlindPicked(id, playerId, characterIds)
+    persistAndPublish(e) { _ =>
+      updateGameState(gameState.blindPick(playerId, characterIds))
+      sender() ! Success()
+      if(gameState.characterPickFinished)
+        scheduleDefault()
+    }
+  }
+
+
+  def placeCharacters(playerId: PlayerId, coordinatesToCharacterIdMap: Map[HexCoordinates, CharacterId]): Unit =
+  {
+    val e = CharactersPlaced(id, playerId, coordinatesToCharacterIdMap)
+    persistAndPublish(e) { _ =>
+      updateGameState(gameState.placeCharacters(playerId, coordinatesToCharacterIdMap))
+      sender() ! Success()
+      if(gameState.placingCharactersFinished)
+        scheduleDefault()
+    }
+  }
+
+
+  def endTurn(playerId: PlayerId): Unit = {
+    val e = TurnEnded(id, playerId)
+    persistAndPublish(e) { _ =>
+      updateGameStateAndScheduleDefault(gameState.endTurn())
+      sender() ! Success()
+    }
+  }
+
+  def passTurn(playerId: PlayerId, characterId: CharacterId): Unit = {
+    val e = TurnPassed(id, playerId, characterId)
+    persistAndPublish(e) { _ =>
+      updateGameStateAndScheduleDefault(gameState.passTurn(characterId))
+      sender() ! Success()
+    }
+  }
+
+  def moveCharacter(playerId: PlayerId, path: Seq[HexCoordinates], characterId: CharacterId): Unit = {
+    val e = CharacterMoved(id, playerId, path, characterId)
+    persistAndPublish(e) { _ =>
+      updateGameState(gameState.basicMoveCharacter(characterId, path))
+      sender() ! Success()
+    }
+  }
+
+
+  def basicAttackCharacter(playerId: PlayerId, attackingCharacterId: CharacterId, targetCharacterId: CharacterId): Unit = {
+    val e = CharacterBasicAttacked(id, playerId, attackingCharacterId, targetCharacterId)
+    persistAndPublish(e) { _ =>
+      updateGameState(gameState.basicAttack(attackingCharacterId, targetCharacterId))
+      sender() ! Success()
+    }
+  }
+
+  def useAbilityWithoutTarget(playerId: PlayerId, abilityId: AbilityId): Unit = {
+    val e = AbilityUsedWithoutTarget(id, playerId, abilityId)
+    persistAndPublish(e) { _ =>
+      updateGameState(gameState.useAbilityWithoutTarget(abilityId))
+      sender() ! Success()
+    }
+  }
+
+  def useAbilityOnCoordinates(playerId: PlayerId, abilityId: AbilityId, target: HexCoordinates, useData: UseData): Unit = {
+    val e = AbilityUsedOnCoordinates(id, playerId, abilityId, target, useData)
+    persistAndPublish(e) { _ =>
+      updateGameState(gameState.useAbilityOnCoordinates(abilityId, target, useData))
+      sender() ! Success()
+    }
+  }
+
+  def useAbilityOnCharacter(playerId: PlayerId, abilityId: AbilityId, target: CharacterId, useData: UseData): Unit = {
+    val e = AbilityUsedOnCharacter(id, playerId, abilityId, target, useData)
+    persistAndPublish(e) { _ =>
+      updateGameState(gameState.useAbilityOnCharacter(abilityId, target, useData))
+      sender() ! Success()
+    }
   }
 
   override def receive: Receive = {
     case GetState =>
-      log.debug(s"GAME STATE REQUEST: ${gameState.toString}")
       sender() ! gameState
     case GetCurrentClock =>
-      val clock = getCurrentClock()
-      log.debug(s"CLOCK REQUEST: ${clock.toString}")
-      sender() ! clock
+      sender() ! getCurrentClock()
     case GetStateView(forPlayer) =>
-      val gameStateView = gameState.toView(forPlayer)
-      log.debug(s"GAME STATE VIEW REQUEST: ${gameStateView.toString}")
-      sender() ! gameStateView
+      sender() ! gameState.toView(forPlayer)
     case StartGame(gameStartDependencies) =>
-      GameStateValidator().validateStartGame() match {
-        case failure @ Failure(_) => sender() ! failure
-        case Success(_) =>
-          val e = GameStarted(id, gameStartDependencies)
-          persistAndPublish(e) { _ =>
-            updateGameState(gameState.startGame(gameStartDependencies))
-            sender() ! Success()
-            scheduleDefault()
-          }
-      }
+      validate(v().validateStartGame())(() => startGame(gameStartDependencies))
+    case Pause(playerId) =>
+      validate(v().validatePause(playerId))(() => {
+        if (gameState.clock.isRunning)
+          pauseGame()
+        else
+          unpauseGame()
+      })
+    case Surrender(playerId) =>
+      validate(v().validateSurrender(playerId))(() =>
+        surrender(playerId)
+      )
+    case BanCharacters(playerId, characterIds) =>
+      validate(v().validateBanCharacters(playerId, characterIds))(() =>
+        banCharacters(playerId, characterIds)
+      )
+    case PickCharacter(playerId, characterId) =>
+      validate(v().validatePickCharacter(playerId, characterId))(() =>
+        pickCharacter(playerId, characterId)
+      )
+    case BlindPickCharacters(playerId, characterIds) =>
+      validate(v().validateBlindPickCharacters(playerId, characterIds))(() =>
+        blindPickCharacters(playerId, characterIds)
+      )
+    case PlaceCharacters(playerId, coordinatesToCharacterIdMap) =>
+      validate(v().validatePlacingCharacters(playerId, coordinatesToCharacterIdMap))(() =>
+        placeCharacters(playerId, coordinatesToCharacterIdMap)
+      )
+    case EndTurn(playerId) =>
+      validate(v().validateEndTurn(playerId))(() =>
+        endTurn(playerId)
+      )
+    case PassTurn(playerId, characterId) =>
+      validate(v().validatePassTurn(playerId, characterId))(() =>
+        passTurn(playerId, characterId)
+      )
+    case MoveCharacter(playerId, path, characterId) =>
+      validate(v().validateBasicMoveCharacter(playerId, path, characterId))(() =>
+        moveCharacter(playerId, path, characterId)
+      )
+    case BasicAttackCharacter(playerId, attackingCharacterId, targetCharacterId) =>
+      validate(v().validateBasicAttackCharacter(playerId, attackingCharacterId, targetCharacterId))(() =>
+        basicAttackCharacter(playerId, attackingCharacterId, targetCharacterId)
+      )
+    case UseAbilityWithoutTarget(playerId, abilityId) =>
+      validate(v().validateAbilityUseWithoutTarget(playerId, abilityId))(() =>
+        useAbilityWithoutTarget(playerId, abilityId)
+      )
+    case UseAbilityOnCoordinates(playerId, abilityId, target, useData) =>
+      validate(v().validateAbilityUseOnCoordinates(playerId, abilityId, target, useData))(() =>
+        useAbilityOnCoordinates(playerId, abilityId, target, useData)
+      )
+    case UseAbilityOnCharacter(playerId, abilityId, target, useData) =>
+      validate(v().validateAbilityUseOnCharacter(playerId, abilityId, target, useData))(() =>
+        useAbilityOnCharacter(playerId, abilityId, target, useData)
+      )
     case CharacterSelectTimeout(pickNumber) =>
-      if(Seq(GameStatus.CharacterPick, GameStatus.CharacterPicked).contains(gameState.gameStatus)) {
-        def startPlacingCharactersAfterTimeout(): Unit =
-          persistAndPublishAll(Seq(TimeAfterPickTimedOut(id), PlacingCharactersStarted(id))) { _ =>
-            updateGameState(gameState.startPlacingCharacters())
-          }
-
-        def banningPhaseTimeout(): Unit =
-          persistAndPublish(BanningPhaseTimedOut(id))(_ => updateGameState(gameState.finishBanningPhase()))
-
-        def draftPickTimeout(): Unit =
-          persistAndPublish(DraftPickTimedOut(id))(_ => updateGameState(gameState.draftPickTimeout()))
-
-        def blindPickTimeout(): Unit =
-          persistAndPublish(BlindPickTimedOut(id))(_ => updateGameState(gameState.blindPickTimeout()))
-
-        gameState.pickType match {
-          case PickType.AllRandom =>
-            startPlacingCharactersAfterTimeout()
-          case PickType.DraftPick =>
-            val draftPickState = gameState.draftPickState.get
-            if (draftPickState.pickNumber == pickNumber) {
-              draftPickState.pickPhase match {
-                case DraftPickPhase.Banning =>
-                  banningPhaseTimeout()
-                case DraftPickPhase.Picking =>
-                  draftPickTimeout()
-                case DraftPickPhase.Finished =>
-                  startPlacingCharactersAfterTimeout()
-              }
-            }
-          case PickType.BlindPick =>
-            val blindPickState = gameState.blindPickState.get
-            if (blindPickState.pickNumber == pickNumber) {
-              blindPickState.pickPhase match {
-                case BlindPickPhase.Picking =>
-                  blindPickTimeout()
-                case BlindPickPhase.Finished =>
-                  startPlacingCharactersAfterTimeout()
-              }
-            }
-        }
+      if(gameState.isInCharacterSelect) {
+        handleCharacterSelectTimeout(pickNumber)
       }
-      scheduleDefault()
     case CharacterPlacingTimeout() =>
-      persistAndPublish(CharacterPlacingTimedOut(id))(_ => updateGameState(gameState.placingCharactersTimeout()))
-      scheduleDefault()
+      if(gameState.gameStatus == GameStatus.CharacterPlacing) {
+        persistAndPublish(CharacterPlacingTimedOut(id))(_ => {
+          updateGameStateAndScheduleDefault(gameState.placingCharactersTimeout())
+        })
+      }
     case TurnTimeout(turnNumber) =>
       if(gameState.turn.number == turnNumber) {
-        persistAndPublish(TurnTimedOut(id))(_ => updateGameState(gameState.surrender(gameState.currentPlayer.id)))
-        scheduleDefault()
-      }
-    case Pause(playerId) =>
-      GameStateValidator().validatePause(playerId) match {
-        case failure @ Failure(_) => sender() ! failure
-        case Success(_) =>
-          if(gameState.clock.isRunning) {
-            val timeToDecrease: Long = millisSinceLastMove()
-            val isBlindPickingPhase = gameState.blindPickState.fold(false)(_.pickPhase == BlindPickPhase.Picking)
-            val isDraftBanningPhase = gameState.draftPickState.fold(false)(_.pickPhase == DraftPickPhase.Banning)
-            val isAfterPickPhase = gameState.gameStatus == GameStatus.CharacterPicked
-            val isSharedTime = isBlindPickingPhase || isDraftBanningPhase || isAfterPickPhase
-
-            if(isSharedTime) {
-              persistAndPublishAll(Seq(SharedTimeDecreased(id, timeToDecrease), GamePaused(id))) { _ =>
-                scheduledTimeout.cancel()
-                updateGameState(gameState.decreaseSharedTime(timeToDecrease).pause())
-                sender() ! Success()
-              }
-            } else {
-              persistAndPublishAll(Seq(TimeDecreased(id, gameState.currentPlayer.id, timeToDecrease), GamePaused(id))) { _ =>
-                scheduledTimeout.cancel()
-                updateGameState(gameState.decreaseTime(gameState.currentPlayer.id, timeToDecrease).pause())
-                sender() ! Success()
-              }
-            }
-          } else {
-            val e = GameUnpaused(id)
-            persistAndPublish(e) { _ =>
-              updateGameState(gameState.unpause())
-              sender() ! Success()
-              scheduleDefault()
-            }
-          }
-      }
-    case Surrender(playerId) =>
-      GameStateValidator().validateSurrender(playerId) match {
-        case failure @ Failure(_) => sender() ! failure
-        case Success(_) =>
-          val e = Surrendered(id, playerId)
-          persistAndPublish(e) { _ =>
-            updateGameState(gameState.surrender(playerId))
-            sender() ! Success()
-          }
-      }
-    case BanCharacters(playerId, characterIds) =>
-      GameStateValidator().validateBanCharacters(playerId, characterIds) match {
-        case failure @ Failure(_) => sender() ! failure
-        case Success(_) =>
-          val e = CharactersBanned(id, playerId, characterIds)
-          persistAndPublish(e) { _ =>
-            updateGameState(gameState.ban(playerId, characterIds))
-            sender() ! Success()
-          }
-      }
-    case PickCharacter(playerId, characterId) =>
-      GameStateValidator().validatePickCharacter(playerId, characterId) match {
-        case failure @ Failure(_) => sender() ! failure
-        case Success(_) =>
-          val e = CharacterPicked(id, playerId, characterId)
-          persistAndPublish(e) { _ =>
-            updateGameState(gameState.pick(playerId, characterId))
-            sender() ! Success()
-          }
-      }
-    case BlindPickCharacters(playerId, characterIds) =>
-      GameStateValidator().validateBlindPickCharacters(playerId, characterIds) match {
-        case failure @ Failure(_) => sender() ! failure
-        case Success(_) =>
-          val e = CharactersBlindPicked(id, playerId, characterIds)
-          persistAndPublish(e) { _ =>
-            updateGameState(gameState.blindPick(playerId, characterIds))
-            sender() ! Success()
-            if(gameState.characterPickFinished)
-              scheduleDefault()
-          }
-      }
-    case PlaceCharacters(playerId, coordinatesToCharacterIdMap) =>
-      GameStateValidator().validatePlacingCharacters(playerId, coordinatesToCharacterIdMap) match {
-        case failure @ Failure(_) => sender() ! failure
-        case Success(_) =>
-          val e = CharactersPlaced(id, playerId, coordinatesToCharacterIdMap)
-          persistAndPublish(e) { _ =>
-            updateGameState(gameState.placeCharacters(playerId, coordinatesToCharacterIdMap))
-            sender() ! Success()
-          }
-      }
-    case EndTurn(playerId) =>
-      GameStateValidator().validateEndTurn(playerId) match {
-        case failure @ Failure(_) => sender() ! failure
-        case Success(_) =>
-          val e = TurnEnded(id, playerId)
-          persistAndPublish(e) { _ =>
-            updateGameState(gameState.endTurn())
-            sender() ! Success()
-          }
-      }
-    case PassTurn(playerId, characterId) =>
-      GameStateValidator().validatePassTurn(playerId, characterId) match {
-        case failure @ Failure(_) => sender() ! failure
-        case Success(_) =>
-          val e = TurnPassed(id, playerId, characterId)
-          persistAndPublish(e) { _ =>
-            updateGameState(gameState.passTurn(characterId))
-            sender() ! Success()
-          }
-      }
-    case MoveCharacter(playerId, path, characterId) =>
-      GameStateValidator().validateBasicMoveCharacter(playerId, path, characterId) match {
-        case failure @ Failure(_) => sender() ! failure
-        case Success(_) =>
-          val e = CharacterMoved(id, playerId, path, characterId)
-          persistAndPublish(e) { _ =>
-            updateGameState(gameState.basicMoveCharacter(characterId, path))
-            sender() ! Success()
-          }
-      }
-    case BasicAttackCharacter(playerId, attackingCharacterId, targetCharacterId) =>
-      GameStateValidator().validateBasicAttackCharacter(playerId, attackingCharacterId, targetCharacterId) match {
-        case failure @ Failure(_) => sender() ! failure
-        case Success(_) =>
-          val e = CharacterBasicAttacked(id, playerId, attackingCharacterId, targetCharacterId)
-          persistAndPublish(e) { _ =>
-            updateGameState(gameState.basicAttack(attackingCharacterId, targetCharacterId))
-            sender() ! Success()
-          }
-      }
-    case UseAbilityWithoutTarget(playerId, abilityId) =>
-      GameStateValidator().validateAbilityUseWithoutTarget(playerId, abilityId) match {
-        case failure @ Failure(_) => sender() ! failure
-        case Success(_) =>
-          val e = AbilityUsedWithoutTarget(id, playerId, abilityId)
-          persistAndPublish(e) { _ =>
-            updateGameState(gameState.useAbilityWithoutTarget(abilityId))
-            sender() ! Success()
-          }
-      }
-    case UseAbilityOnCoordinates(playerId, abilityId, target, useData) =>
-      GameStateValidator().validateAbilityUseOnCoordinates(playerId, abilityId, target, useData) match {
-        case failure @ Failure(_) => sender() ! failure
-        case Success(_) =>
-          val e = AbilityUsedOnCoordinates(id, playerId, abilityId, target, useData)
-          persistAndPublish(e) { _ =>
-            updateGameState(gameState.useAbilityOnCoordinates(abilityId, target, useData))
-            sender() ! Success()
-          }
-      }
-    case UseAbilityOnCharacter(playerId, abilityId, target, useData) =>
-      GameStateValidator().validateAbilityUseOnCharacter(playerId, abilityId, target, useData) match {
-        case failure @ Failure(_) => sender() ! failure
-        case Success(_) =>
-          val e = AbilityUsedOnCharacter(id, playerId, abilityId, target, useData)
-          persistAndPublish(e) { _ =>
-            updateGameState(gameState.useAbilityOnCharacter(abilityId, target, useData))
-            sender() ! Success()
-          }
+        persistAndPublish(TurnTimedOut(id))(_ =>
+          updateGameStateAndScheduleDefault(gameState.surrender(gameState.currentPlayer.id))
+        )
       }
 
     case e => log.warning(s"Unknown message: $e")
