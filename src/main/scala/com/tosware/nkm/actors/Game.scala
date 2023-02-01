@@ -160,6 +160,7 @@ class Game(id: GameId)(implicit nkmDataService: NkmDataService) extends Persiste
   def millisSinceLastMove(): Long = ChronoUnit.MILLIS.between(lastTimestamp, Instant.now())
 
   def getCurrentClock(): Clock = {
+    if(!gameState.clock.isRunning) return gameState.clock;
     val timeToDecrease: Long = millisSinceLastMove()
 
     if(gameState.isSharedTime)

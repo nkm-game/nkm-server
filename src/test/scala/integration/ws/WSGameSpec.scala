@@ -568,13 +568,13 @@ class WSGameSpec extends WSTrait {
         pause(lobbyId)
 
         {
-          val gameState = fetchAndParseGame(lobbyId)
-          gameState.clock.isRunning shouldBe false
+          val clock = fetchAndParseClock(lobbyId)
+          clock.isRunning shouldBe false
 
-          val playerTimes = (0 to 2).map(i => gameState.clock.playerTimes(usernames(i)))
+          val playerTimes = (0 to 2).map(i => clock.playerTimes(usernames(i)))
           playerTimes.toSet should have size 1 // times elapsed should be the same for all players in ban phase
 
-          fetchAndParseGame(lobbyId).clock.playerTimes(usernames(0)) shouldBe playerTimes(0)
+          fetchAndParseClock(lobbyId).playerTimes(usernames(0)) shouldBe playerTimes(0)
         }
 
         pause(lobbyId)
@@ -587,13 +587,13 @@ class WSGameSpec extends WSTrait {
         pause(lobbyId)
 
         {
-          val gameState = fetchAndParseGame(lobbyId)
-          gameState.clock.isRunning shouldBe false
+          val clock = fetchAndParseClock(lobbyId)
+          clock.isRunning shouldBe false
 
-          val playerTimes = (0 to 2).map(i => gameState.clock.playerTimes(usernames(i)))
+          val playerTimes = (0 to 2).map(i => clock.playerTimes(usernames(i)))
 
-          fetchAndParseGame(lobbyId).clock.playerTimes(usernames(0)) shouldBe playerTimes(0)
           playerTimes(0) should be < playerTimes(1) // each player pick time is individual
+          fetchAndParseClock(lobbyId).playerTimes(usernames(0)) shouldBe playerTimes(0)
         }
 
         pause(lobbyId)
