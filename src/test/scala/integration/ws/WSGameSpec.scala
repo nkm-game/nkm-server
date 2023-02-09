@@ -1051,5 +1051,45 @@ class WSGameSpec extends WSTrait {
         useAbilityOnCharacter(lobbyId, ability0, character1).statusCode shouldBe ok
       }
     }
+
+    "decrease time on clock in game" in {
+      val numberOfPlayers = 2
+      val numberOfCharacters = 1
+
+      val lobbyId = createLobbyForGame(
+        pickType = PickType.AllRandom,
+        hexMapName = "Shuriken",
+        clockConfigOpt = Some(ClockConfig.defaultForPickType(PickType.AllRandom).copy(timeAfterPickMillis = 1)),
+        numberOfCharacters = numberOfCharacters,
+        numberOfPlayers = numberOfPlayers,
+      )
+
+      withGameWS {
+        auth(0)
+
+        val gs = fetchAndParseGame(lobbyId)
+        val cids = gs.players.map(_.characterIds)
+
+        val clock1 = fetchAndParseClock(lobbyId)
+        Thread.sleep(50)
+        val clock2 = fetchAndParseClock(lobbyId)
+
+        clock2.playerTimes(usernames(0)) should be < clock1.playerTimes(usernames(0))
+        clock2.playerTimes(usernames(1)) should be (clock1.playerTimes(usernames(1)))
+
+        passTurn(lobbyId, cids(0).head).statusCode shouldBe ok
+
+        val clock3 = fetchAndParseClock(lobbyId)
+        Thread.sleep(50)
+        val clock4 = fetchAndParseClock(lobbyId)
+
+        clock3.playerTimes(usernames(0)) should be < clock1.playerTimes(usernames(0))
+
+        clock4.playerTimes(usernames(0)) should be (clock3.playerTimes(usernames(0)))
+        clock4.playerTimes(usernames(1)) should be < clock3.playerTimes(usernames(1))
+
+      }
+    }
+
   }
 }

@@ -15,6 +15,8 @@ import com.tosware.nkm.models.game.hex._
 import com.tosware.nkm.models.{Damage, DamageType}
 import com.tosware.nkm.{Logging, NkmUtils}
 
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 import scala.util.Random
 
 case class GameState
@@ -40,6 +42,7 @@ case class GameState
   characterEffectStates: Map[CharacterEffectId, CharacterEffectState],
   clockConfig: ClockConfig,
   clock: Clock,
+  lastTimestamp: Instant,
   gameLog: GameLog,
 ) extends NkmUtils
 {
@@ -72,6 +75,19 @@ case class GameState
   def currentCharacterOpt: Option[NkmCharacter] = characterTakingActionThisTurn.map(characterById)
 
   def currentPlayerTime: Long = clock.playerTimes(currentPlayer.id)
+
+  def millisSinceLastClockUpdate(): Long = ChronoUnit.MILLIS.between(lastTimestamp, Instant.now())
+
+  def getCurrentClock(): Clock = {
+    if(!clock.isRunning) return clock;
+    val timeToDecrease: Long = millisSinceLastClockUpdate()
+
+    if(isSharedTime)
+      clock.decreaseSharedTime(timeToDecrease)
+    else
+      clock.decreaseTime(currentPlayer.id, timeToDecrease)
+  }
+
 
   def charactersToTakeAction: Set[CharacterId] = characters.filterNot(_.isDead).map(_.id) -- characterIdsThatTookActionThisPhase
 
@@ -120,6 +136,8 @@ case class GameState
 
   }
 
+  def updateTimestamp(): GameState = copy(lastTimestamp = Instant.now())
+
   private def executeEventTriggers(e: GameEvent)(implicit random: Random): GameState = {
     val stateAfterAbilityTriggers = triggerAbilities.foldLeft(this)((acc, ability) => {
       handleTrigger(e, ability)(random, acc)
@@ -137,7 +155,8 @@ case class GameState
     es.foldLeft(this){case (acc, event) => acc.logEvent(event)}
 
   private def updateClock(newClock: Clock)(implicit random: Random, causedById: String): GameState =
-    copy(clock = newClock).logEvent(ClockUpdated(NkmUtils.randomUUID(), phase, turn, causedById, newClock))
+    updateTimestamp().
+      copy(clock = newClock).logEvent(ClockUpdated(NkmUtils.randomUUID(), phase, turn, causedById, newClock))
 
   private def updateGameStatus(newGameStatus: GameStatus): GameState =
     copy(gameStatus = newGameStatus)
@@ -263,8 +282,16 @@ case class GameState
   def increaseTime(playerId: PlayerId, timeMillis: Long)(implicit random: Random): GameState =
     updateClock(clock.increaseTime(playerId, timeMillis))(random, playerId)
 
-  def pause()(implicit random: Random): GameState =
-    updateClock(clock.pause())(random, id)
+  def pause()(implicit random: Random): GameState = {
+    val timeToDecrease: Long = millisSinceLastClockUpdate()
+    val ngs = if(isSharedTime) {
+      decreaseSharedTime(timeToDecrease)
+    } else {
+      decreaseTime(currentPlayer.id, timeToDecrease)
+    }
+
+    ngs.updateClock(ngs.clock.pause())(random, id)
+  }
 
   def unpause()(implicit random: Random): GameState =
     updateClock(clock.unpause())(random, id)
@@ -577,7 +604,9 @@ case class GameState
     this.modify(_.turn).using(oldTurn => Turn(oldTurn.number + 1))
 
   def finishTurn()(implicit random: Random, causedById: String = id): GameState = {
-    this.incrementTurn()
+    this
+      .decreaseTime(currentPlayer.id, millisSinceLastClockUpdate())
+      .incrementTurn()
       .logEvent(TurnFinished(NkmUtils.randomUUID(), phase, turn, causedById))
       .finishPhaseIfEveryCharacterTookAction()
       .logEvent(TurnStarted(NkmUtils.randomUUID(), phase, turn, causedById))
@@ -697,6 +726,7 @@ object GameState extends Logging {
       characterEffectStates = Map(),
       clockConfig = defaultClockConfig,
       clock = Clock.fromConfig(defaultClockConfig, Seq()),
+      lastTimestamp = Instant.now(),
       gameLog = GameLog(Seq.empty),
     )
   }

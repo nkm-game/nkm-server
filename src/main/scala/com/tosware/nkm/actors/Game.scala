@@ -15,8 +15,6 @@ import com.tosware.nkm.models.game.draftpick.DraftPickPhase
 import com.tosware.nkm.models.game.hex.HexCoordinates
 import com.tosware.nkm.services.NkmDataService
 
-import java.time.Instant
-import java.time.temporal.ChronoUnit
 import scala.concurrent.duration._
 import scala.util.Random
 
@@ -72,10 +70,6 @@ object Game {
   sealed trait Event {
     val id: GameId
   }
-  case class SharedTimeDecreased(id: GameId, time: Long) extends Event
-
-  case class TimeDecreased(id: GameId, playerId: PlayerId, time: Long) extends Event
-
   case class GamePaused(id: GameId) extends Event
 
   case class GameUnpaused(id: GameId) extends Event
@@ -136,7 +130,7 @@ class Game(id: GameId)(implicit nkmDataService: NkmDataService) extends Persiste
   implicit val random: Random = new Random(id.hashCode)
 
   implicit var gameState: GameState = GameState.empty(id)
-  var lastTimestamp: Instant = Instant.now()
+
   var scheduledTimeout: Cancellable = Cancellable.alreadyCancelled
 
   def v(): GameStateValidator = GameStateValidator()(gameState)
@@ -153,20 +147,6 @@ class Game(id: GameId)(implicit nkmDataService: NkmDataService) extends Persiste
   def updateGameStateAndScheduleDefault(newGameState: GameState): Unit = {
     updateGameState(newGameState)
     scheduleDefault()
-  }
-
-  def updateTimestamp(): Unit = lastTimestamp = Instant.now()
-
-  def millisSinceLastMove(): Long = ChronoUnit.MILLIS.between(lastTimestamp, Instant.now())
-
-  def getCurrentClock(): Clock = {
-    if(!gameState.clock.isRunning) return gameState.clock;
-    val timeToDecrease: Long = millisSinceLastMove()
-
-    if(gameState.isSharedTime)
-      gameState.clock.decreaseSharedTime(timeToDecrease)
-    else
-      gameState.clock.decreaseTime(gameState.currentPlayer.id, timeToDecrease)
   }
 
   def persistAndPublishAll[A](events: Seq[A])(handler: A => Unit): Unit = {
@@ -198,10 +178,7 @@ class Game(id: GameId)(implicit nkmDataService: NkmDataService) extends Persiste
         TurnTimeout(gameState.turn.number)
     }
     scheduledTimeout.cancel()
-    log.error(gameState.gameStatus.toString)
-    log.error("TIMER: " + timeout + " " + timeoutToSchedule)
     scheduledTimeout = context.system.scheduler.scheduleOnce(timeout)(self ! timeoutToSchedule)
-    updateTimestamp()
   }
 
 
@@ -250,34 +227,18 @@ class Game(id: GameId)(implicit nkmDataService: NkmDataService) extends Persiste
   }
 
   def pauseGame(): Unit =
-  {
-    val timeToDecrease: Long = millisSinceLastMove()
-    if(gameState.isSharedTime) {
-      persistAndPublishAll(Seq(
-        SharedTimeDecreased(id, timeToDecrease),
-        GamePaused(id))
-      ) { _ =>
-        scheduledTimeout.cancel()
-        updateGameState(gameState.decreaseSharedTime(timeToDecrease).pause())
-        sender() ! Success()
-      }
-    } else {
-      persistAndPublishAll(Seq(TimeDecreased(id, gameState.currentPlayer.id, timeToDecrease), GamePaused(id))) { _ =>
-        scheduledTimeout.cancel()
-        updateGameState(gameState.decreaseTime(gameState.currentPlayer.id, timeToDecrease).pause())
-        sender() ! Success()
-      }
+    persistAndPublish(GamePaused(id)) { _ =>
+      scheduledTimeout.cancel()
+      updateGameState(gameState.pause())
+      sender() ! Success()
     }
-  }
 
 
-  def unpauseGame(): Unit = {
-    val e = GameUnpaused(id)
-    persistAndPublish(e) { _ =>
+  def unpauseGame(): Unit =
+    persistAndPublish(GameUnpaused(id)) { _ =>
       updateGameStateAndScheduleDefault(gameState.unpause())
       sender() ! Success()
     }
-  }
 
   def validate(response: CommandResponse)(onSuccess: () => Unit): Unit = {
     response match {
@@ -407,7 +368,7 @@ class Game(id: GameId)(implicit nkmDataService: NkmDataService) extends Persiste
     case GetState =>
       sender() ! gameState
     case GetCurrentClock =>
-      sender() ! getCurrentClock()
+      sender() ! gameState.getCurrentClock()
     case GetStateView(forPlayer) =>
       sender() ! gameState.toView(forPlayer)
     case StartGame(gameStartDependencies) =>
