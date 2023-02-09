@@ -128,5 +128,13 @@ class GameStateSpec
 //      gs.characterIdsOutsideMap should contain (s.characters.p1Second.id)
       gs2.passTurn(s.characters.p0First.id).currentPlayer.id should be (s.characters.p2First.owner(gs).id)
     }
+
+    "pause the clock on game end" in {
+      val p0CharacterKilledGameState = gameState.executeCharacter(s.characters.p0.id)(random, "test")
+      val p1CharacterKilledGameState = gameState.executeCharacter(s.characters.p1.id)(random, "test")
+
+      p0CharacterKilledGameState.clock.isRunning should be (false)
+      p1CharacterKilledGameState.clock.isRunning should be (false)
+    }
   }
 }

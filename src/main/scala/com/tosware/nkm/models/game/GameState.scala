@@ -204,17 +204,21 @@ case class GameState
         .placeCharactersRandomly(players.map(_.id).toSet)
     else this
 
-  def checkVictoryStatus(): GameState = {
+  def finishGame()(implicit random: Random): GameState =
+    updateGameStatus(GameStatus.Finished)
+      .updateClock(clock.pause())(random, id)
+
+  def checkVictoryStatus()(implicit random: Random): GameState = {
     def filterPendingPlayers: Player => Boolean = _.victoryStatus == VictoryStatus.Pending
 
     if (gameStatus == GameStatus.CharacterPick && players.count(_.victoryStatus == VictoryStatus.Lost) > 0) {
       this.modify(_.players.eachWhere(filterPendingPlayers).victoryStatus)
         .setTo(VictoryStatus.Drawn)
-        .updateGameStatus(GameStatus.Finished)
+        .finishGame()
     } else if (players.count(_.victoryStatus == VictoryStatus.Pending) == 1) {
       this.modify(_.players.eachWhere(filterPendingPlayers).victoryStatus)
         .setTo(VictoryStatus.Won)
-        .updateGameStatus(GameStatus.Finished)
+        .finishGame()
     } else this
   }
 
