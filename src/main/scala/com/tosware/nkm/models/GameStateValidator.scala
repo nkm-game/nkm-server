@@ -52,6 +52,7 @@ case class GameStateValidator()(implicit gameState: GameState) {
   private object Message {
     val playerNotHost = "Player is not a host."
     val gameStarted = "Game is started."
+    val gameFinished = "Game is finished."
     val gameNotStarted = "Game is not started."
     val gameNotRunning = "Game is not running."
     val playerNotInGame = "Player is not in the game."
@@ -72,7 +73,8 @@ case class GameStateValidator()(implicit gameState: GameState) {
 
   def validatePause(playerId: PlayerId): CommandResponse = {
     if (!playerIsHost(playerId)) Failure(Message.playerNotHost)
-    Success()
+    else if (gameStatusIs(GameStatus.Finished)) Failure(Message.gameFinished)
+    else Success()
   }
 
   def validateSurrender(playerId: PlayerId): CommandResponse = {
@@ -139,6 +141,7 @@ case class GameStateValidator()(implicit gameState: GameState) {
     if (!playerInGame(playerId)) Failure(Message.playerNotInGame)
     else if (!characterInGame(characterId)) Failure(Message.characterNotInGame)
     else if (gameStatusIs(GameStatus.NotStarted)) Failure(Message.gameNotStarted)
+    else if (!gameStatusIs(GameStatus.Running)) Failure(Message.gameNotRunning)
     else if (gameState.currentPlayer.id != playerId) Failure(Message.notYourTurn)
     else if (path.size < 2) Failure("Empty moves are disallowed.")
     else {
@@ -163,6 +166,7 @@ case class GameStateValidator()(implicit gameState: GameState) {
     if (!playerInGame(playerId)) Failure(Message.playerNotInGame)
     else if (!characterInGame(characterId)) Failure(Message.characterNotInGame)
     else if (gameStatusIs(GameStatus.NotStarted)) Failure(Message.gameNotStarted)
+    else if (!gameStatusIs(GameStatus.Running)) Failure(Message.gameNotRunning)
     else if (gameState.currentPlayer.id != playerId) Failure(Message.notYourTurn)
     else {
       val character = gameState.characterById(characterId)
@@ -184,6 +188,7 @@ case class GameStateValidator()(implicit gameState: GameState) {
     if (!playerInGame(playerId)) Failure(Message.playerNotInGame)
     else if (!abilityInGame(abilityId)) Failure(Message.abilityNotInGame)
     else if (gameStatusIs(GameStatus.NotStarted)) Failure(Message.gameNotStarted)
+    else if (!gameStatusIs(GameStatus.Running)) Failure(Message.gameNotRunning)
     else if (gameState.currentPlayer.id != playerId) Failure(Message.notYourTurn)
     else {
       val ability = gameState.abilityById(abilityId).asInstanceOf[Ability with UsableWithoutTarget]
@@ -199,6 +204,7 @@ case class GameStateValidator()(implicit gameState: GameState) {
     if (!playerInGame(playerId)) Failure(Message.playerNotInGame)
     else if (!abilityInGame(abilityId)) Failure(Message.abilityNotInGame)
     else if (gameStatusIs(GameStatus.NotStarted)) Failure(Message.gameNotStarted)
+    else if (!gameStatusIs(GameStatus.Running)) Failure(Message.gameNotRunning)
     else if (gameState.currentPlayer.id != playerId) Failure(Message.notYourTurn)
     else {
       val ability = gameState.abilityById(abilityId).asInstanceOf[Ability with UsableOnCharacter]
@@ -214,6 +220,7 @@ case class GameStateValidator()(implicit gameState: GameState) {
     if (!playerInGame(playerId)) Failure(Message.playerNotInGame)
     else if (!abilityInGame(abilityId)) Failure(Message.abilityNotInGame)
     else if (gameStatusIs(GameStatus.NotStarted)) Failure(Message.gameNotStarted)
+    else if (!gameStatusIs(GameStatus.Running)) Failure(Message.gameNotRunning)
     else if (gameState.currentPlayer.id != playerId) Failure(Message.notYourTurn)
     else {
       val ability = gameState.abilityById(abilityId).asInstanceOf[Ability with UsableOnCoordinates]
