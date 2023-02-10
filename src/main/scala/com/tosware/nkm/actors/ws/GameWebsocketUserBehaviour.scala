@@ -19,10 +19,10 @@ trait GameWebsocketUserBehaviour extends WebsocketUserBehaviour {
   override def parseIncomingMessage(outgoing: ActorRef, username: Option[String], text: String): Unit =
     try {
       val request = text.parseJson.convertTo[WebsocketGameRequest]
-      log.info(s"${request.requestPath}")
+      log.info(s"[${username.getOrElse("")}] ${request.requestPath}")
       log.debug(s"Request: $request")
       val response = parseWebsocketGameRequest(request, outgoing, self, AuthStatus(username))
-      log.info(s"${response.gameResponseType}(${response.statusCode})")
+      log.info(s"[${username.getOrElse("")}] ${response.gameResponseType}(${response.statusCode})")
       val responseLogLevel = if(response.statusCode == StatusCodes.OK.intValue) DebugLevel else WarningLevel
       log.log(responseLogLevel, s"Response: $response")
       outgoing ! OutgoingMessage(response.toJson.toString)

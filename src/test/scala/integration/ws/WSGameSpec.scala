@@ -564,6 +564,8 @@ class WSGameSpec extends WSTrait {
         auth(1)
         ban(lobbyId, Set(availableCharacters(8), availableCharacters(9))).statusCode shouldBe ok
 
+        pause(lobbyId).statusCode shouldBe nok
+
         auth(0)
         pause(lobbyId)
 

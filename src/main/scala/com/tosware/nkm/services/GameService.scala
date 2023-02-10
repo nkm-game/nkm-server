@@ -28,7 +28,7 @@ class GameService(gamesManagerActor: ActorRef)
       .gameActor
   }
 
-  def pause(username: String, lobbyId: String) = {
+  def pause(username: String, lobbyId: String): Future[CommandResponse] = {
     val gameActor: ActorRef = getGameActor(lobbyId)
 
     val pauseFuture = gameActor ? Game.Pause(username)
