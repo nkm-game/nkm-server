@@ -3,6 +3,7 @@ package com.tosware.nkm.models.game
 import com.tosware.nkm.models.Damage
 import com.tosware.nkm.models.game.Ability.AbilityId
 import com.tosware.nkm.models.game.CharacterEffect.CharacterEffectId
+import com.tosware.nkm.models.game.CharacterMetadata.CharacterMetadataId
 import com.tosware.nkm.models.game.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game.Player.PlayerId
 import com.tosware.nkm.models.game.hex.HexCoordinates
@@ -97,6 +98,22 @@ object GameEvent {
     extends GameEvent
       with ContainsCharacterId
   case class PlayerLost(id: GameEventId, phase: Phase, turn: Turn, causedById: String, playerId: PlayerId)
+    extends GameEvent
+  case class PlayerSurrendered(id: GameEventId, phase: Phase, turn: Turn, causedById: String, playerId: PlayerId)
+    extends GameEvent
+  case class PlayerBanned(id: GameEventId, phase: Phase, turn: Turn, causedById: String, playerId: PlayerId, characterIds: Set[CharacterMetadataId])
+    extends GameEvent
+  case class PlayerFinishedBanning(id: GameEventId, phase: Phase, turn: Turn, causedById: String, playerId: PlayerId)
+    extends GameEvent
+  case class PlayerPicked(id: GameEventId, phase: Phase, turn: Turn, causedById: String, playerId: PlayerId, characterId: CharacterMetadataId)
+    extends GameEvent
+  case class PlayerBlindPicked(id: GameEventId, phase: Phase, turn: Turn, causedById: String, playerId: PlayerId, characterIds: Set[CharacterMetadataId])
+    extends GameEvent
+  case class PlayerFinishedBlindPicking(id: GameEventId, phase: Phase, turn: Turn, causedById: String, playerId: PlayerId)
+    extends GameEvent
+  case class BanningPhaseFinished(id: GameEventId, phase: Phase, turn: Turn, causedById: String)
+    extends GameEvent
+  case class PlacingCharactersFinished(id: GameEventId, phase: Phase, turn: Turn, causedById: String)
     extends GameEvent
   case class CharactersPicked(id: GameEventId, phase: Phase, turn: Turn, causedById: String)
     extends GameEvent

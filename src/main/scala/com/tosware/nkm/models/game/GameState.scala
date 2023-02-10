@@ -155,20 +155,22 @@ case class GameState
     es.foldLeft(this){case (acc, event) => acc.logEvent(event)}
 
   private def updateClock(newClock: Clock)(implicit random: Random, causedById: String): GameState =
-    updateTimestamp().
-      copy(clock = newClock).logEvent(ClockUpdated(NkmUtils.randomUUID(), phase, turn, causedById, newClock))
+    updateTimestamp()
+      .copy(clock = newClock)
+      .logEvent(ClockUpdated(NkmUtils.randomUUID(), phase, turn, causedById, newClock))
 
   private def updateGameStatus(newGameStatus: GameStatus): GameState =
     copy(gameStatus = newGameStatus)
 
-  private def characterPickInitialPickTime: Long = pickType match {
-    case PickType.AllRandom => clockConfig.timeAfterPickMillis
-    case PickType.DraftPick => clockConfig.maxBanTimeMillis
-    case PickType.BlindPick => clockConfig.maxPickTimeMillis
-  }
 
-  def initializeCharacterPick()(implicit random: Random): GameState =
+  def initializeCharacterPick()(implicit random: Random): GameState = {
+    val characterPickInitialPickTime: Long = pickType match {
+      case PickType.AllRandom => clockConfig.timeAfterPickMillis
+      case PickType.DraftPick => clockConfig.maxBanTimeMillis
+      case PickType.BlindPick => clockConfig.maxPickTimeMillis
+    }
     updateClock(clock.setSharedTime(characterPickInitialPickTime))(random, id)
+  }
 
   def initializeCharacterPlacing()(implicit random: Random): GameState =
     updateClock(clock.setSharedTime(clockConfig.timeForCharacterPlacing))(random, id)
@@ -305,23 +307,28 @@ case class GameState
 
     this
       .modify(_.players.eachWhere(filterPlayers).victoryStatus).setTo(VictoryStatus.Lost)
-      .logEvents(playerIds.map(pid => PlayerLost(randomUUID(), phase, turn, id, pid)))
+      .logEvents(
+        playerIds.map(pid => PlayerSurrendered(randomUUID(), phase, turn, pid, pid)) ++
+        playerIds.map(pid => PlayerLost(randomUUID(), phase, turn, id, pid))
+      )
       .checkVictoryStatus()
       .skipTurnIfPlayerKnockedOut()(random, playerIds.mkString(", "))
   }
 
-  def ban(playerId: PlayerId, characterIds: Set[CharacterMetadataId]): GameState =
+  def ban(playerId: PlayerId, characterIds: Set[CharacterMetadataId])(implicit random: Random): GameState =
     copy(draftPickState = draftPickState.map(_.ban(playerId, characterIds)))
+      .logEvent(PlayerBanned(randomUUID(), phase, turn, playerId, playerId, characterIds))
+      .logEvent(PlayerFinishedBanning(randomUUID(), phase, turn, playerId, playerId))
 
   def finishBanningPhase()(implicit random: Random): GameState =
-    copy(
-      draftPickState = draftPickState.map(_.finishBanning()),
-    ).updateClock(clock.setSharedTime(clockConfig.maxPickTimeMillis))(random, id)
+    copy(draftPickState = draftPickState.map(_.finishBanning()))
+      .updateClock(clock.setSharedTime(clockConfig.maxPickTimeMillis))(random, id)
+      .logEvent(BanningPhaseFinished(randomUUID(), phase, turn, id))
 
   def pick(playerId: PlayerId, characterId: CharacterMetadataId)(implicit random: Random): GameState =
-    copy(
-      draftPickState = draftPickState.map(_.pick(playerId, characterId)),
-    ).updateClock(clock.setSharedTime(clockConfig.maxPickTimeMillis))(random, id)
+    copy(draftPickState = draftPickState.map(_.pick(playerId, characterId)))
+      .updateClock(clock.setSharedTime(clockConfig.maxPickTimeMillis))(random, id)
+      .logEvent(PlayerPicked(randomUUID(), phase, turn, playerId, playerId, characterId))
       .checkIfCharacterPickFinished()
 
   def draftPickTimeout()(implicit random: Random): GameState =
@@ -330,6 +337,8 @@ case class GameState
   def blindPick(playerId: PlayerId, characterIds: Set[CharacterMetadataId])(implicit random: Random): GameState =
     copy(blindPickState = blindPickState.map(_.pick(playerId, characterIds)))
       .checkIfCharacterPickFinished()
+      .logEvent(PlayerBlindPicked(randomUUID(), phase, turn, playerId, playerId, characterIds))
+      .logEvent(PlayerFinishedBlindPicking(randomUUID(), phase, turn, playerId, playerId))
 
   def blindPickTimeout()(implicit random: Random): GameState =
     surrender(blindPickState.get.pickingPlayers: _*)
@@ -339,8 +348,11 @@ case class GameState
     placeCharactersRandomly(pidsThatDidNotPlace)
   }
 
-  def checkIfPlacingCharactersFinished(): GameState =
-    if(placingCharactersFinished) updateGameStatus(GameStatus.Running) else this
+  def checkIfPlacingCharactersFinished()(implicit random: Random): GameState =
+    if(placingCharactersFinished)
+      logEvent(PlacingCharactersFinished(randomUUID(), phase, turn, id))
+        .updateGameStatus(GameStatus.Running)
+    else this
 
   def placeCharacters(playerId: PlayerId, coordinatesToCharacterIdMap: Map[HexCoordinates, CharacterId])(implicit random: Random): GameState =
     coordinatesToCharacterIdMap.foldLeft(this){case (acc, (coordinate, characterId)) => acc.placeCharacter(coordinate, characterId)(random, playerId)}
@@ -350,7 +362,7 @@ case class GameState
   def placeCharacter(targetCellCoordinates: HexCoordinates, characterId: CharacterId)(implicit random: Random, causedById: String): GameState =
     updateHexCell(targetCellCoordinates)(_.copy(characterId = Some(characterId)))
     .modify(_.characterIdsOutsideMap).using(_.filter(_ != characterId))
-      .logEvent(CharacterPlaced(NkmUtils.randomUUID(), phase, turn, causedById, characterId, targetCellCoordinates))
+      .logEvent(CharacterPlaced(randomUUID(), phase, turn, causedById, characterId, targetCellCoordinates))
 
   def basicMoveCharacter(characterId: CharacterId, path: Seq[HexCoordinates])(implicit random: Random): GameState = {
     implicit val causedById: CharacterId = characterId
