@@ -574,6 +574,13 @@ case class GameState
       .logEvent(AbilityVariableSet(randomUUID(), phase, turn, causedById, abilityId, key, value))
   }
 
+  def setEffectVariable(effectId: CharacterEffectId, key: String, value: String)(implicit random: Random): GameState = {
+    implicit val causedById: String = effectId
+    val newState = effectById(effectId).getVariablesChangedState(key, value)(this)
+    this.copy(characterEffectStates = characterEffectStates.updated(effectId, newState))
+      .logEvent(EffectVariableSet(randomUUID(), phase, turn, causedById, effectId, key, value))
+  }
+
   def decrementEffectCooldown(effectId: CharacterEffectId)(implicit random: Random): GameState = {
     val newState = effectById(effectId).getDecrementCooldownState(this)
     if(newState.cooldown > 0) {

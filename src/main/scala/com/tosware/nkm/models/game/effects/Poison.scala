@@ -4,6 +4,8 @@ import com.tosware.nkm.models.Damage
 import com.tosware.nkm.models.game.CharacterEffect.CharacterEffectId
 import com.tosware.nkm.models.game.GameEvent.TurnFinished
 import com.tosware.nkm.models.game._
+import com.tosware.nkm.models.game.effects.Poison.damageKey
+import spray.json._
 
 import scala.util.Random
 
@@ -16,6 +18,8 @@ object Poison {
         """Poison.
           |Deals damage at the end of turn.""".stripMargin,
     )
+
+  val damageKey: String = "damage"
 }
 
 object MurasamePoison {
@@ -35,6 +39,10 @@ case class Poison(effectId: CharacterEffectId, initialCooldown: Int, damage: Dam
     with GameEventListener {
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
     e match {
+      case GameEvent.EffectAddedToCharacter(_, _, _, _, eid, _) =>
+        if(effectId == eid)
+          return gameState.setEffectVariable(id, damageKey, damage.toJson.toString)
+        gameState
       case TurnFinished(_, _, _, _) =>
         val characterIdThatTookAction = gameState.gameLog.characterThatTookActionInTurn(e.turn.number).get
         if(characterIdThatTookAction == parentCharacter.id) {

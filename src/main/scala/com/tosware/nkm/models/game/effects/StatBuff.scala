@@ -1,7 +1,10 @@
 package com.tosware.nkm.models.game.effects
 
 import com.tosware.nkm.models.game.CharacterEffect.CharacterEffectId
-import com.tosware.nkm.models.game.{CharacterEffect, CharacterEffectMetadata, CharacterEffectName, CharacterEffectType, StatType}
+import com.tosware.nkm.models.game.effects.StatBuff.{statTypeKey, statValueKey}
+import com.tosware.nkm.models.game.{CharacterEffect, CharacterEffectMetadata, CharacterEffectName, CharacterEffectType, GameEvent, GameEventListener, GameState, StatType}
+
+import scala.util.Random
 
 object StatBuff {
   val metadata: CharacterEffectMetadata =
@@ -10,8 +13,25 @@ object StatBuff {
       initialEffectType = CharacterEffectType.Positive,
       description = "Buffs a certain stat in character.",
     )
+
+  val statTypeKey: String = "statType"
+  val statValueKey: String = "statValue"
 }
 
-case class StatBuff(effectId: CharacterEffectId, initialCooldown: Int, statType: StatType, value: Int) extends CharacterEffect(effectId) {
+case class StatBuff(effectId: CharacterEffectId, initialCooldown: Int, statType: StatType, value: Int)
+  extends CharacterEffect(effectId)
+    with GameEventListener
+{
   val metadata: CharacterEffectMetadata = StatBuff.metadata
+
+  override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
+    e match {
+      case GameEvent.EffectAddedToCharacter(_, _, _, _, eid, _) =>
+        if(effectId == eid)
+          return gameState
+            .setEffectVariable(id, statTypeKey, statType.toString)
+            .setEffectVariable(id, statValueKey, value.toString)
+        gameState
+      case _ => gameState
+    }
 }

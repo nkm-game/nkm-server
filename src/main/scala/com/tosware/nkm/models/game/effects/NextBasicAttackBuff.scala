@@ -2,6 +2,7 @@ package com.tosware.nkm.models.game.effects
 
 import com.tosware.nkm.models.game.CharacterEffect.CharacterEffectId
 import com.tosware.nkm.models.game._
+import com.tosware.nkm.models.game.effects.NextBasicAttackBuff.adBuffKey
 
 import scala.util.Random
 
@@ -13,16 +14,22 @@ object NextBasicAttackBuff {
       description = "Buffs next basic attack.",
       isCc = true,
     )
+
+  val adBuffKey: String = "adBuff"
 }
 
 case class NextBasicAttackBuff(effectId: CharacterEffectId, initialCooldown: Int, adBuff: Int)
   extends CharacterEffect(effectId)
     with GameEventListener {
   val metadata: CharacterEffectMetadata = NextBasicAttackBuff.metadata
-  val eid = randomUUID()(new Random()) // TODO use effect state
+  val eid = randomUUID()(new Random())
 
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
     e match {
+      case GameEvent.EffectAddedToCharacter(_, _, _, _, eid, _) =>
+        if(effectId == eid)
+          return gameState.setEffectVariable(id, adBuffKey, adBuff.toString)
+        gameState
       case GameEvent.CharacterPreparedToAttack(_, _, _, _, characterId, _) =>
         if(characterId != parentCharacter.id) return gameState
         gameState.addEffect(characterId, StatBuff(eid, 1, StatType.AttackPoints, adBuff))(random, id)

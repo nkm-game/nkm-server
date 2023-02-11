@@ -1,5 +1,6 @@
 package com.tosware.nkm.models.game
 
+import com.softwaremill.quicklens._
 import com.tosware.nkm.NkmUtils
 import com.tosware.nkm.models.game.CharacterEffect._
 import com.tosware.nkm.models.game.NkmCharacter.CharacterId
@@ -72,6 +73,9 @@ abstract class CharacterEffect(val id: CharacterEffectId) extends NkmUtils {
   def getDecrementCooldownState(implicit gameState: GameState): CharacterEffectState =
     state.copy(cooldown = math.max(state.cooldown - 1, 0))
 
+  def getVariablesChangedState(key: String, value: String)(implicit gameState: GameState): CharacterEffectState =
+    state.modify(_.variables).using(_.updated(key, value))
+
   def toView(implicit gameState: GameState): CharacterEffectView =
     CharacterEffectView(
       id = id,
@@ -82,7 +86,11 @@ abstract class CharacterEffect(val id: CharacterEffectId) extends NkmUtils {
     )
 }
 
-case class CharacterEffectState(cooldown: Int)
+case class CharacterEffectState
+(
+  cooldown: Int,
+  variables: Map[String, String] = Map.empty,
+)
 
 case class CharacterEffectView
 (

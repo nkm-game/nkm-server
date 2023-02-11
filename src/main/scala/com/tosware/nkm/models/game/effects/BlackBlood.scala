@@ -5,6 +5,7 @@ import com.tosware.nkm.models.game.Ability.AbilityId
 import com.tosware.nkm.models.game.CharacterEffect.CharacterEffectId
 import com.tosware.nkm.models.game.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game._
+import com.tosware.nkm.models.game.effects.BlackBlood.{sourceAbilityIdKey, sourceCharacterIdKey}
 import com.tosware.nkm.models.{Damage, DamageType}
 
 import scala.util.Random
@@ -17,6 +18,9 @@ object BlackBlood {
       description = "Black Blood",
       isCc = true,
     )
+
+  val sourceCharacterIdKey: String = "sourceCharacterId"
+  val sourceAbilityIdKey: String = "sourceAbilityId"
 }
 
 case class BlackBlood(effectId: CharacterEffectId, initialCooldown: Int, sourceCharacterId: CharacterId, sourceAbilityId: AbilityId)
@@ -33,6 +37,12 @@ case class BlackBlood(effectId: CharacterEffectId, initialCooldown: Int, sourceC
 
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
     e match {
+      case GameEvent.EffectAddedToCharacter(_, _, _, _, eid, _) =>
+        if(effectId == eid)
+          return gameState
+            .setEffectVariable(id, sourceCharacterIdKey, sourceCharacterId)
+            .setEffectVariable(id, sourceAbilityIdKey, sourceAbilityId)
+        gameState
       case e @ GameEvent.CharacterDamaged(_, _, _, _, characterId, _) =>
         if(e.causedById == sourceAbilityId) return gameState // activate only once, prevents infinite loop
         if(characterId != parentCharacter.id) return gameState
