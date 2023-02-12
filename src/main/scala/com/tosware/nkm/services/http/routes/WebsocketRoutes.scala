@@ -1,17 +1,15 @@
 package com.tosware.nkm.services.http.routes
 
-import akka.NotUsed
+import akka.{Done, NotUsed}
 import akka.actor.{ActorRef, ActorSystem, PoisonPill}
 import akka.http.scaladsl.model.ws.{BinaryMessage, Message, TextMessage}
 import akka.http.scaladsl.server.Directives._
-import akka.stream.OverflowStrategy
+import akka.stream.{CompletionStrategy, OverflowStrategy}
 import akka.stream.scaladsl.{Flow, Sink, Source}
 import com.tosware.nkm.actors.ws._
 import com.tosware.nkm.services.http.directives.{JwtDirective, JwtSecretKey}
 import com.tosware.nkm.services.{GameService, LobbyService}
 import com.tosware.nkm.{Logging, NkmDependencies}
-
-import scala.annotation.nowarn
 
 class WebsocketRoutes(deps: NkmDependencies) extends JwtDirective with Logging
 {
@@ -27,18 +25,30 @@ class WebsocketRoutes(deps: NkmDependencies) extends JwtDirective with Logging
     val incomingMessages =
       Flow[Message].map {
         case TextMessage.Strict(text) => WebsocketUser.IncomingMessage(text)
-        case message: TextMessage => ???
-        case message: BinaryMessage => ???
+        case message: TextMessage =>
+          logger.error("user sent non strict text message: " + message)
+          ???
+        case message: BinaryMessage =>
+          logger.error("user sent binary message: " + message)
+          ???
       }.to(Sink.actorRef[WebsocketUser.IncomingMessage](userActor, PoisonPill, onFailureMessage))
 
-    @nowarn("cat=deprecation")
-    val outgoingMessages =
-      Source.actorRef[WebsocketUser.OutgoingMessage](10, OverflowStrategy.fail)
-        .mapMaterializedValue { outActor =>
-          userActor ! WebsocketUser.Connected(outActor)
-          NotUsed
-        }.map(
-        (outMsg: WebsocketUser.OutgoingMessage) => TextMessage(outMsg.text))
+    val outgoingMessages = Source.actorRef(
+      completionMatcher = {
+        case Done =>
+          // complete stream immediately if we send it Done
+          CompletionStrategy.immediately
+      },
+      // never fail the stream because of a message
+      failureMatcher = PartialFunction.empty,
+      bufferSize = 100,
+      overflowStrategy = OverflowStrategy.dropHead
+    ).mapMaterializedValue { outActor =>
+      userActor ! WebsocketUser.Connected(outActor)
+      NotUsed
+    }.map(
+      (outMsg: WebsocketUser.OutgoingMessage) => TextMessage(outMsg.text))
+
 
     // then combine both to a flow
     Flow.fromSinkAndSource(incomingMessages, outgoingMessages)
