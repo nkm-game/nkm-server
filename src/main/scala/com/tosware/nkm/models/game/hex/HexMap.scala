@@ -1,6 +1,6 @@
 package com.tosware.nkm.models.game.hex
 
-import com.tosware.nkm.models.game.GameState
+import com.tosware.nkm.models.game.{GameState, GameStatus}
 import com.tosware.nkm.models.game.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game.Player.PlayerId
 import com.tosware.nkm.models.game.effects.Invisibility
@@ -78,6 +78,9 @@ case class HexMap(name: String, cells: Set[HexCell]) extends HexMapLike {
 
     val hiddenCharactersMap = this.modify(_.cells.each).using {
       case cell if otherInvisibleCharacterCoords.contains(cell.coordinates) => cell.modify(_.characterId).setTo(None)
+      case cell if gameState.gameStatus == GameStatus.CharacterPlacing &&
+        cell.characterOpt(gameState).fold(true)(c => !forPlayerOpt.contains(c.owner.id))
+      => cell.modify(_.characterId).setTo(None)
       case cell => cell
     }
 

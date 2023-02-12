@@ -662,11 +662,20 @@ class WSGameSpec extends WSTrait {
           val coordinatesToCharacterIdMap = spawnPoints.map(_.coordinates).zip(characterIds).toMap
           placeCharacters(lobbyId, coordinatesToCharacterIdMap).statusCode shouldBe ok
           placeCharacters(lobbyId, coordinatesToCharacterIdMap).statusCode shouldBe nok
+
+          // character placing should be secret
+          val ngs = fetchAndParseGame(lobbyId)
+          val visibleCharacterCount = ngs.hexMap.cells.count(_.characterId.nonEmpty)
+          if(ngs.gameStatus == GameStatus.CharacterPlacing)
+            visibleCharacterCount should be (numberOfCharacters)
+          else
+            visibleCharacterCount should be (numberOfPlayers * numberOfCharacters)
         }
 
         {
           val gameState = fetchAndParseGame(lobbyId)
           gameState.gameStatus shouldBe GameStatus.Running
+          gameState.hexMap.cells.count(_.characterId.nonEmpty) should be (numberOfPlayers * numberOfCharacters)
         }
       }
     }
