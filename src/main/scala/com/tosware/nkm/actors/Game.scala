@@ -139,7 +139,9 @@ class Game(id: GameId)(implicit nkmDataService: NkmDataService) extends Persiste
     val lastGameState = gameState
     gameState = newGameState
 
-    val newGameEvents = newGameState.gameLog.events.drop(lastGameState.gameLog.events.size).map(e => GameEventMapped(id, e))
+    val newGameEvents = newGameState.gameLog.events
+      .drop(lastGameState.gameLog.events.size)
+      .map(e => GameEventMapped(id, e, newGameState.hiddenEvents.find(_.eid == e.id)))
 
     newGameEvents.foreach(context.system.eventStream.publish)
   }

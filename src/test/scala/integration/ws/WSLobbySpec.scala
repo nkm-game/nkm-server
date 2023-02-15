@@ -1,5 +1,6 @@
 package integration.ws
 
+import akka.http.scaladsl.testkit.WSProbe
 import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.lobby.ws._
 import helpers.WSTrait
@@ -8,17 +9,17 @@ class WSLobbySpec extends WSTrait
 {
   import spray.json._
 
-  def sendRequest(request: WebsocketLobbyRequest): Unit = sendRequestL(request)
-  def fetchResponse(): WebsocketLobbyResponse = fetchResponseL()
-  def sendWSRequest(route: LobbyRoute, requestJson: String = ""): WebsocketLobbyResponse = sendWSRequestL(route, requestJson)
-  def auth(tokenId: Int): WebsocketLobbyResponse = authL(tokenId)
-  def observe(lobbyId: String): WebsocketLobbyResponse = observeL(lobbyId)
+  def sendRequest(request: WebsocketLobbyRequest)(implicit wsClient: WSProbe): Unit = sendRequestL(request)
+  def fetchResponse()(implicit wsClient: WSProbe): WebsocketLobbyResponse = fetchResponseL()
+  def sendWSRequest(route: LobbyRoute, requestJson: String = "")(implicit wsClient: WSProbe): WebsocketLobbyResponse = sendWSRequestL(route, requestJson)
+  def auth(tokenId: Int)(implicit wsClient: WSProbe): WebsocketLobbyResponse = authL(tokenId)
+  def observe(lobbyId: String)(implicit wsClient: WSProbe): WebsocketLobbyResponse = observeL(lobbyId)
 
   val lobbyName = "lobby_name"
 
   "WS" must {
     "respond to invalid requests" in {
-      withLobbyWS {
+      withLobbyWS { implicit wsClient: WSProbe =>
         wsClient.sendMessage("invalid request")
         val response = fetchResponse()
         response.statusCode shouldBe 500
@@ -27,19 +28,19 @@ class WSLobbySpec extends WSTrait
     }
 
     "fetch empty lobbies state" in {
-      withLobbyWS {
+      withLobbyWS { implicit wsClient: WSProbe =>
         fetchLobbies().body shouldBe "[]"
       }
     }
 
     "allow authenticating" in {
-      withLobbyWS {
+      withLobbyWS { implicit wsClient: WSProbe =>
         auth(0).statusCode shouldBe ok
       }
     }
 
     "allow observing" in {
-      withLobbyWS {
+      withLobbyWS { implicit wsClient: WSProbe =>
         auth(0)
         val lobbyId = createLobby(lobbyName).body
         observe(lobbyId).statusCode shouldBe ok
@@ -60,7 +61,7 @@ class WSLobbySpec extends WSTrait
     }
 
     "allow creating lobbies" in {
-      withLobbyWS {
+      withLobbyWS { implicit wsClient: WSProbe =>
         auth(0)
 
         val createLobbyRequest = LobbyRequest.LobbyCreation(lobbyName).toJson.toString
@@ -75,7 +76,7 @@ class WSLobbySpec extends WSTrait
     }
 
     "allow joining and leaving lobbies" in {
-      withLobbyWS {
+      withLobbyWS { implicit wsClient: WSProbe =>
         auth(0)
         val lobbyId = createLobby(lobbyName).body
 
@@ -102,7 +103,7 @@ class WSLobbySpec extends WSTrait
     }
 
     "disallow joining a lobby you are already in" in {
-      withLobbyWS {
+      withLobbyWS { implicit wsClient: WSProbe =>
         auth(0)
         val lobbyId = createLobby(lobbyName).body
 
@@ -115,7 +116,7 @@ class WSLobbySpec extends WSTrait
     }
 
     "disallow leaving a lobby you are already in" in {
-      withLobbyWS {
+      withLobbyWS { implicit wsClient: WSProbe =>
         auth(0)
         val lobbyId = createLobby(lobbyName).body
 
@@ -129,7 +130,7 @@ class WSLobbySpec extends WSTrait
 
     "allow setting map name in a lobby for a host" in {
       val hexMapNames = List("Linia", "1v1v1")
-      withLobbyWS {
+      withLobbyWS { implicit wsClient: WSProbe =>
         auth(0)
         val lobbyId = createLobby(lobbyName).body
 
@@ -142,7 +143,7 @@ class WSLobbySpec extends WSTrait
 
     "disallow setting invalid map name" in {
       val hexMapName = "this map does not exist"
-      withLobbyWS {
+      withLobbyWS { implicit wsClient: WSProbe =>
         auth(0)
         val lobbyId = createLobby(lobbyName).body
         setHexMap(lobbyId, hexMapName).statusCode shouldBe nok
@@ -151,7 +152,7 @@ class WSLobbySpec extends WSTrait
 
     "allow setting pick type in a lobby for a host" in {
       val pickTypes = PickType.values
-      withLobbyWS {
+      withLobbyWS { implicit wsClient: WSProbe =>
         auth(0)
         val lobbyId = createLobby(lobbyName).body
 
@@ -164,7 +165,7 @@ class WSLobbySpec extends WSTrait
 
     "allow setting number of bans in a lobby for a host" in {
       val numberOfBansList = List(5,3,2,1,0,3)
-      withLobbyWS {
+      withLobbyWS { implicit wsClient: WSProbe =>
         auth(0)
         val lobbyId = createLobby(lobbyName).body
 
@@ -177,7 +178,7 @@ class WSLobbySpec extends WSTrait
 
     "disallow setting invalid number of bans in a lobby for a host" in {
       val numberOfBansList = List(-1, -4, -234)
-      withLobbyWS {
+      withLobbyWS { implicit wsClient: WSProbe =>
         auth(0)
         val lobbyId = createLobby(lobbyName).body
 
@@ -189,7 +190,7 @@ class WSLobbySpec extends WSTrait
 
     "allow setting number of characters in a lobby for a host" in {
       val numberOfCharactersList = List(5,3,2,3,8)
-      withLobbyWS {
+      withLobbyWS { implicit wsClient: WSProbe =>
         auth(0)
         val lobbyId = createLobby(lobbyName).body
 
@@ -202,7 +203,7 @@ class WSLobbySpec extends WSTrait
 
     "disallow setting invalid number of characters in a lobby for a host" in {
       val numberOfCharactersList = List(-1, 0, -234)
-      withLobbyWS {
+      withLobbyWS { implicit wsClient: WSProbe =>
         auth(0)
         val lobbyId = createLobby(lobbyName).body
 
@@ -214,7 +215,7 @@ class WSLobbySpec extends WSTrait
 
     "allow setting lobby name in a lobby for a host" in {
       val lobbyName2 = "lobby_name2"
-      withLobbyWS {
+      withLobbyWS { implicit wsClient: WSProbe =>
         auth(0)
         val lobbyId = createLobby(lobbyName).body
         setLobbyName(lobbyId, lobbyName2).statusCode shouldBe ok
@@ -223,7 +224,7 @@ class WSLobbySpec extends WSTrait
     }
 
     "allow setting clock config in a lobby for a host" in {
-      withLobbyWS {
+      withLobbyWS { implicit wsClient: WSProbe =>
         auth(0)
         val lobbyId = createLobby(lobbyName).body
         val newConfig = ClockConfig.defaultForPickType(PickType.DraftPick).copy(maxBanTimeMillis = 500)
@@ -234,7 +235,7 @@ class WSLobbySpec extends WSTrait
 
     "allow to start a game" in {
       val hexMapName = "Linia"
-      withLobbyWS {
+      withLobbyWS { implicit wsClient: WSProbe =>
         auth(0)
         val lobbyId = createLobby(lobbyName).body
         setHexMap(lobbyId, hexMapName)
@@ -267,7 +268,7 @@ class WSLobbySpec extends WSTrait
       val pickType = PickType.DraftPick
       val numberOfBans = 4
       val numberOfCharacters = 5
-      withLobbyWS {
+      withLobbyWS { implicit wsClient: WSProbe =>
         auth(0)
         val lobbyId = createLobby(lobbyName).body
         setHexMap(lobbyId, hexMapName)
@@ -291,7 +292,7 @@ class WSLobbySpec extends WSTrait
     }
 
     "disallow starting game without hexmap" in {
-      withLobbyWS {
+      withLobbyWS { implicit wsClient: WSProbe =>
         auth(0)
         val lobbyId = createLobby(lobbyName).body
         auth(1)
@@ -303,7 +304,7 @@ class WSLobbySpec extends WSTrait
 
     "disallow starting game with 1 or 0 players" in {
       val hexMapName = "Linia"
-      withLobbyWS {
+      withLobbyWS { implicit wsClient: WSProbe =>
         auth(0)
         val lobbyId = createLobby(lobbyName).body
         setHexMap(lobbyId, hexMapName).statusCode shouldBe ok
@@ -316,12 +317,12 @@ class WSLobbySpec extends WSTrait
     "disallow setting stuff in a lobby for non host persons" in {
       var lobbyId: String = ""
 
-      withLobbyWS {
+      withLobbyWS { implicit wsClient: WSProbe =>
         auth(0)
         lobbyId = createLobby(lobbyName).body
       }
 
-      withLobbyWS {
+      withLobbyWS { implicit wsClient: WSProbe =>
         setHexMap(lobbyId, "Linia").statusCode shouldBe unauthorized
         setPickType(lobbyId, PickType.AllRandom).statusCode shouldBe unauthorized
         setNumberOfBans(lobbyId, 3).statusCode shouldBe unauthorized
@@ -336,7 +337,7 @@ class WSLobbySpec extends WSTrait
 
     "disallow setting stuff in a lobby after game start" in {
       val hexMapName = "Linia"
-      withLobbyWS {
+      withLobbyWS { implicit wsClient: WSProbe =>
         auth(0)
         val lobbyId = createLobby(lobbyName).body
         setHexMap(lobbyId, hexMapName)
@@ -362,7 +363,7 @@ class WSLobbySpec extends WSTrait
       val numberOfBans = 4
       val numberOfCharacters = 5
 
-      withLobbyWS {
+      withLobbyWS { implicit wsClient: WSProbe =>
         auth(0)
         val lobbyId = createLobby(lobbyName).body
         setHexMap(lobbyId, hexMapName).statusCode shouldBe ok

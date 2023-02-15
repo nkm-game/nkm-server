@@ -19,6 +19,8 @@ import java.time.Instant
 import java.time.temporal.ChronoUnit
 import scala.util.Random
 
+case class EventHideData(eid: GameEventId, showOnlyFor: Seq[PlayerId], revealCondition: RevealCondition)
+
 case class GameState
 (
   id: GameId,
@@ -44,6 +46,7 @@ case class GameState
   clock: Clock,
   lastTimestamp: Instant,
   gameLog: GameLog,
+  hiddenEvents: Seq[EventHideData],
 ) extends NkmUtils
 {
   import GameState._
@@ -105,6 +108,15 @@ case class GameState
 
   def effectById(effectId: CharacterEffectId): CharacterEffect = effects.find(_.id == effectId).get
 
+  def hiddenEventsFor(forPlayerOpt: Option[PlayerId]): Seq[EventHideData] =
+    if(forPlayerOpt.isEmpty)
+      hiddenEvents
+    else
+      hiddenEvents.filterNot(_.showOnlyFor.contains(forPlayerOpt.get))
+
+  def hiddenEidsFor(forPlayerOpt: Option[PlayerId]): Seq[GameEventId] =
+    hiddenEventsFor(forPlayerOpt).map(_.eid)
+
   def characterPickFinished: Boolean = {
     if(pickType == PickType.AllRandom) return true
     val draftPickFinished = draftPickState.fold(false)(_.pickPhase == DraftPickPhase.Finished)
@@ -153,6 +165,13 @@ case class GameState
 
   private def logEvents(es: Seq[GameEvent])(implicit random: Random): GameState =
     es.foldLeft(this){case (acc, event) => acc.logEvent(event)}
+
+  def logAndHideEvent(e: GameEvent, showOnlyFor: Seq[PlayerId], revealCondition: RevealCondition)(implicit random: Random): GameState =
+    copy(hiddenEvents = hiddenEvents :+ EventHideData(e.id, showOnlyFor, revealCondition))
+      .logEvent(e)
+
+  def reveal(revealCondition: RevealCondition)(implicit random: Random): GameState =
+    copy(hiddenEvents = hiddenEvents.filterNot(_.revealCondition == revealCondition))
 
   private def updateClock(newClock: Clock)(implicit random: Random, causedById: String): GameState =
     updateTimestamp()
@@ -270,6 +289,7 @@ case class GameState
       updateGameStatus(GameStatus.CharacterPicked)
         .updateClock(clock.setSharedTime(clockConfig.timeAfterPickMillis))(random, id)
         .assignCharactersToPlayers()
+        .reveal(RevealCondition.BlindPickFinished)
         .logEvent(CharactersPicked(NkmUtils.randomUUID(), phase, turn, id))
     } else this
   }
@@ -336,9 +356,9 @@ case class GameState
 
   def blindPick(playerId: PlayerId, characterIds: Set[CharacterMetadataId])(implicit random: Random): GameState =
     copy(blindPickState = blindPickState.map(_.pick(playerId, characterIds)))
-      .checkIfCharacterPickFinished()
-      .logEvent(PlayerBlindPicked(randomUUID(), phase, turn, playerId, playerId, characterIds))
+      .logAndHideEvent(PlayerBlindPicked(randomUUID(), phase, turn, playerId, playerId, characterIds), Seq(playerId), RevealCondition.BlindPickFinished)
       .logEvent(PlayerFinishedBlindPicking(randomUUID(), phase, turn, playerId, playerId))
+      .checkIfCharacterPickFinished()
 
   def blindPickTimeout()(implicit random: Random): GameState =
     surrender(blindPickState.get.pickingPlayers: _*)
@@ -351,6 +371,7 @@ case class GameState
   def checkIfPlacingCharactersFinished()(implicit random: Random): GameState =
     if(placingCharactersFinished)
       logEvent(PlacingCharactersFinished(randomUUID(), phase, turn, id))
+        .reveal(RevealCondition.CharacterPlacingFinished)
         .updateGameStatus(GameStatus.Running)
     else this
 
@@ -359,10 +380,16 @@ case class GameState
       .copy(playerIdsThatPlacedCharacters = playerIdsThatPlacedCharacters + playerId)
       .checkIfPlacingCharactersFinished()
 
-  def placeCharacter(targetCellCoordinates: HexCoordinates, characterId: CharacterId)(implicit random: Random, causedById: String): GameState =
-    updateHexCell(targetCellCoordinates)(_.copy(characterId = Some(characterId)))
-    .modify(_.characterIdsOutsideMap).using(_.filter(_ != characterId))
-      .logEvent(CharacterPlaced(randomUUID(), phase, turn, causedById, characterId, targetCellCoordinates))
+  def placeCharacter(targetCellCoordinates: HexCoordinates, characterId: CharacterId)(implicit random: Random, causedById: String): GameState = {
+    val ngs = updateHexCell(targetCellCoordinates)(_.copy(characterId = Some(characterId)))
+      .modify(_.characterIdsOutsideMap).using(_.filter(_ != characterId))
+    val cpEvent = CharacterPlaced(randomUUID(), phase, turn, causedById, characterId, targetCellCoordinates)
+    if(gameStatus == GameStatus.CharacterPlacing) {
+      ngs.logAndHideEvent(cpEvent, Seq(characterById(characterId).owner(ngs).id), RevealCondition.CharacterPlacingFinished)
+    } else {
+      ngs.logEvent(cpEvent)
+    }
+  }
 
   def basicMoveCharacter(characterId: CharacterId, path: Seq[HexCoordinates])(implicit random: Random): GameState = {
     implicit val causedById: CharacterId = characterId
@@ -709,7 +736,7 @@ case class GameState
       effects = effects.map(_.toView(this)),
       clockConfig = clockConfig,
       clock = clock,
-      gameLog = gameLog.toView(forPlayerOpt),
+      gameLog = gameLog.toView(forPlayerOpt)(this),
 
       currentPlayerId = currentPlayer.id,
       hostId = hostId ,
@@ -751,6 +778,7 @@ object GameState extends Logging {
       clock = Clock.fromConfig(defaultClockConfig, Seq()),
       lastTimestamp = Instant.now(),
       gameLog = GameLog(Seq.empty),
+      hiddenEvents = Seq(),
     )
   }
 }

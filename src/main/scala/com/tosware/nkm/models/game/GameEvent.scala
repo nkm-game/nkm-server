@@ -16,7 +16,6 @@ object GameEvent {
     implicit val phase: Phase
     implicit val turn: Turn
     implicit val causedById: String
-    val hiddenFor: Set[Option[PlayerId]] = Set.empty
     def index(implicit gameState: GameState): Int =
       gameState.gameLog.events.indexWhere(_.id == id)
   }

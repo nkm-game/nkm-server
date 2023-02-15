@@ -13,12 +13,11 @@ trait GameLogLike {
       .inTurn(turnNumber)
       .headOption
       .map(_.characterId)
-
 }
 
 case class GameLog(events: Seq[GameEvent]) extends GameLogLike {
-  def toView(forPlayerOpt: Option[PlayerId]): GameLogView = {
-    val eventsFiltered = events.filterNot(_.hiddenFor.contains(forPlayerOpt))
+  def toView(forPlayerOpt: Option[PlayerId])(implicit gameState: GameState): GameLogView = {
+    val eventsFiltered = events.filterNot(e => gameState.hiddenEidsFor(forPlayerOpt).contains(e.id))
     GameLogView(eventsFiltered)
   }
 }

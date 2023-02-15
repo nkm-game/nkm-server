@@ -2,7 +2,7 @@ package helpers
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import com.tosware.nkm.serializers.NkmJsonProtocol
-import com.tosware.nkm.{DBManager, Logging, NkmTimeouts}
+import com.tosware.nkm.{DBManager, Logging, NkmTimeouts, NkmUtils}
 import com.typesafe.config.{Config, ConfigFactory}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
@@ -19,6 +19,7 @@ trait NkmIntegrationTestTrait
     with NkmTimeouts
     with SprayJsonSupport
     with Logging
+    with NkmUtils
     {
   implicit val db: JdbcBackend.Database = Database.forConfig("slick.db")
 

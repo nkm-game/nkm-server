@@ -30,7 +30,7 @@ class WSGameSpec extends WSTrait {
   ): String = {
     var lobbyId = ""
     val clockConfig = clockConfigOpt.getOrElse(ClockConfig.defaultForPickType(pickType))
-    withLobbyWS {
+    withLobbyWS { implicit wsClient: WSProbe =>
       authL(0)
       lobbyId = createLobby(lobbyName).body
       setHexMap(lobbyId, hexMapName)
@@ -54,7 +54,7 @@ class WSGameSpec extends WSTrait {
 
   "WS" must {
     "respond to invalid requests" in {
-      withGameWS {
+      withGameWS { implicit wsClient: WSProbe =>
         wsClient.sendMessage("invalid request")
         val response = fetchResponse()
         response.statusCode shouldBe 500
@@ -63,7 +63,7 @@ class WSGameSpec extends WSTrait {
     }
 
     "allow authenticating" in {
-      withGameWS {
+      withGameWS { implicit wsClient: WSProbe =>
         auth(0).statusCode shouldBe ok
       }
     }
@@ -71,7 +71,7 @@ class WSGameSpec extends WSTrait {
     "allow observing" in {
       val lobbyId = createLobbyForGame()
 
-      withGameWS {
+      withGameWS { implicit wsClient: WSProbe =>
         auth(0)
         observe(lobbyId).statusCode shouldBe ok
         surrender(lobbyId).statusCode shouldBe ok
@@ -87,7 +87,7 @@ class WSGameSpec extends WSTrait {
         pickType = PickType.DraftPick,
       )
 
-      withGameWS {
+      withGameWS { implicit wsClient: WSProbe =>
         auth(0)
         val gameState = fetchAndParseGame(lobbyId)
         val clock = fetchAndParseClock(lobbyId)
@@ -100,7 +100,7 @@ class WSGameSpec extends WSTrait {
         pickType = PickType.DraftPick,
       )
 
-      withGameWS {
+      withGameWS { implicit wsClient: WSProbe =>
         auth(0)
 
         {
@@ -144,7 +144,7 @@ class WSGameSpec extends WSTrait {
         numberOfPlayers = 4,
       )
 
-      withGameWS {
+      withGameWS { implicit wsClient: WSProbe =>
         auth(0)
 
         Thread.sleep(150)
@@ -165,7 +165,7 @@ class WSGameSpec extends WSTrait {
         clockConfigOpt = Some(ClockConfig.defaultForPickType(PickType.AllRandom).copy(timeAfterPickMillis = 1)),
       )
 
-      withGameWS {
+      withGameWS { implicit wsClient: WSProbe =>
         auth(0)
 
         Thread.sleep(150)
@@ -207,7 +207,7 @@ class WSGameSpec extends WSTrait {
         numberOfCharacters = 2,
       )
 
-      withGameWS {
+      withGameWS { implicit wsClient: WSProbe =>
         auth(0)
         val availableCharacters = fetchAndParseGame(lobbyId).draftPickState.get.config.availableCharacters
 
@@ -234,7 +234,7 @@ class WSGameSpec extends WSTrait {
         numberOfCharacters = 2,
       )
 
-      withGameWS {
+      withGameWS { implicit wsClient: WSProbe =>
         auth(0)
         val availableCharacters = fetchAndParseGame(lobbyId).draftPickState.get.config.availableCharacters.toSeq
 
@@ -271,7 +271,7 @@ class WSGameSpec extends WSTrait {
         numberOfCharacters = 2,
       )
 
-      withGameWS {
+      withGameWS { implicit wsClient: WSProbe =>
         val availableCharacters = fetchAndParseGame(lobbyId).draftPickState.get.config.availableCharacters
         val player0Bans = Set.empty[CharacterMetadata.CharacterMetadataId]
         val player1Bans = Set(availableCharacters.head, availableCharacters.tail.head)
@@ -353,7 +353,10 @@ class WSGameSpec extends WSTrait {
         numberOfCharacters = numberOfCharacters,
       )
 
-      withGameWS {
+      val observerTokenId = 1
+      val es = fetchAndParseEventsAsync(lobbyId, observerTokenId, 5)(WSProbe())
+
+      withGameWS { implicit wsClient: WSProbe =>
         auth(0)
         val availableCharacters = fetchAndParseGame(lobbyId).blindPickState.get.config.availableCharacters.toSeq
         val charactersToPick = availableCharacters.take(numberOfCharacters).toSet
@@ -371,6 +374,10 @@ class WSGameSpec extends WSTrait {
         gameState.blindPickState.get.pickPhase shouldBe BlindPickPhase.Finished
         gameState.gameStatus shouldBe GameStatus.CharacterPicked
       }
+
+      val p0observedEvents = aw(es)
+      p0observedEvents.ofType[GameEvent.PlayerBlindPicked].count(_.playerId != usernames(observerTokenId)) should be (0)
+      p0observedEvents.ofType[GameEvent.PlayerBlindPicked].count(_.playerId == usernames(observerTokenId)) should be (1)
     }
 
     "hide blind pick information of other players picks during picking" in {
@@ -382,7 +389,7 @@ class WSGameSpec extends WSTrait {
         numberOfCharacters = numberOfCharacters,
       )
 
-      withGameWS {
+      withGameWS { implicit wsClient: WSProbe =>
         auth(0)
         val availableCharacters = fetchAndParseGame(lobbyId).blindPickState.get.config.availableCharacters.toSeq
         val charactersToPick = availableCharacters.take(numberOfCharacters).toSet
@@ -391,7 +398,6 @@ class WSGameSpec extends WSTrait {
 
         auth(2)
         blindPick(lobbyId, charactersToPick).statusCode shouldBe ok
-
 
         // check
         auth(0)
@@ -428,7 +434,7 @@ class WSGameSpec extends WSTrait {
         clockConfigOpt = Some(ClockConfig.defaultForPickType(PickType.BlindPick).copy(maxPickTimeMillis = maxPickTimeMillis)),
       )
 
-      withGameWS {
+      withGameWS { implicit wsClient: WSProbe =>
         auth(0)
 
         Thread.sleep(150)
@@ -452,7 +458,7 @@ class WSGameSpec extends WSTrait {
         clockConfigOpt = Some(ClockConfig.defaultForPickType(PickType.BlindPick).copy(maxPickTimeMillis = maxPickTimeMillis)),
       )
 
-      withGameWS {
+      withGameWS { implicit wsClient: WSProbe =>
         val availableCharacters = fetchAndParseGame(lobbyId).blindPickState.get.config.availableCharacters.toSeq
         auth(0)
         blindPick(lobbyId, availableCharacters.take(numberOfCharacters).toSet)
@@ -479,7 +485,7 @@ class WSGameSpec extends WSTrait {
         clockConfigOpt = Some(ClockConfig.defaultForPickType(PickType.BlindPick).copy(timeAfterPickMillis = 500)),
       )
 
-      withGameWS {
+      withGameWS { implicit wsClient: WSProbe =>
         auth(0)
         val availableCharacters = fetchAndParseGame(lobbyId).blindPickState.get.config.availableCharacters.toSeq
         val charactersToPick = availableCharacters.take(numberOfCharacters).toSet
@@ -555,7 +561,7 @@ class WSGameSpec extends WSTrait {
         clockConfigOpt = Some(ClockConfig.defaultForPickType(PickType.DraftPick).copy(timeAfterPickMillis = 500)),
       )
 
-      withGameWS {
+      withGameWS { implicit wsClient: WSProbe =>
         val availableCharacters = fetchAndParseGame(lobbyId).draftPickState.get.config.availableCharacters.toSeq
 
         auth(0)
@@ -634,7 +640,11 @@ class WSGameSpec extends WSTrait {
         clockConfigOpt = Some(ClockConfig.defaultForPickType(PickType.BlindPick).copy(timeAfterPickMillis = 1)),
       )
 
-      withGameWS {
+      val observerTokenId = 2
+
+      val es = fetchAndParseEventsAsync(lobbyId, observerTokenId, 10)(WSProbe())
+
+      withGameWS { implicit wsClient: WSProbe =>
         auth(0)
         val availableCharacters = fetchAndParseGame(lobbyId).blindPickState.get.config.availableCharacters.toSeq
         val charactersToPick = availableCharacters.take(numberOfCharacters).toSet
@@ -666,18 +676,28 @@ class WSGameSpec extends WSTrait {
           // character placing should be secret
           val ngs = fetchAndParseGame(lobbyId)
           val visibleCharacterCount = ngs.hexMap.cells.count(_.characterId.nonEmpty)
-          if(ngs.gameStatus == GameStatus.CharacterPlacing)
+          if(ngs.gameStatus == GameStatus.CharacterPlacing) {
             visibleCharacterCount should be (numberOfCharacters)
-          else
+            ngs.gameLog.events.ofType[GameEvent.CharacterPlaced].size should be (numberOfCharacters)
+          }
+          else {
             visibleCharacterCount should be (numberOfPlayers * numberOfCharacters)
+            // events are revealed
+            ngs.gameLog.events.ofType[GameEvent.CharacterPlaced].size should be (numberOfPlayers * numberOfCharacters)
+          }
         }
 
         {
           val gameState = fetchAndParseGame(lobbyId)
           gameState.gameStatus shouldBe GameStatus.Running
           gameState.hexMap.cells.count(_.characterId.nonEmpty) should be (numberOfPlayers * numberOfCharacters)
+          gameState.gameLog.events.ofType[GameEvent.CharacterPlaced].size should be (numberOfPlayers * numberOfCharacters)
         }
       }
+
+      val p0observedEvents = aw(es)
+      p0observedEvents.ofType[GameEvent.CharacterPlaced].count(_.causedById != usernames(observerTokenId)) should be (0)
+      p0observedEvents.ofType[GameEvent.CharacterPlaced].count(_.causedById == usernames(observerTokenId)) should be (numberOfCharacters)
     }
 
     "place all characters in all random pick" in {
@@ -690,7 +710,7 @@ class WSGameSpec extends WSTrait {
       )
 
 
-      withGameWS {
+      withGameWS { implicit wsClient: WSProbe =>
         auth(0)
 
         Thread.sleep(150)
@@ -717,7 +737,7 @@ class WSGameSpec extends WSTrait {
         )),
       )
 
-      withGameWS {
+      withGameWS { implicit wsClient: WSProbe =>
         auth(0)
         val availableCharacters = fetchAndParseGame(lobbyId).blindPickState.get.config.availableCharacters.toSeq
         val charactersToPick = availableCharacters.take(numberOfCharacters).toSet
@@ -768,7 +788,7 @@ class WSGameSpec extends WSTrait {
         clockConfigOpt = Some(ClockConfig.defaultForPickType(PickType.BlindPick).copy(timeAfterPickMillis = 1)),
       )
 
-      withGameWS {
+      withGameWS { implicit wsClient: WSProbe =>
         auth(0)
         val availableCharacters = fetchAndParseGame(lobbyId).blindPickState.get.config.availableCharacters.toSeq
         val charactersToPick = availableCharacters.take(numberOfCharacters).toSet
@@ -825,7 +845,7 @@ class WSGameSpec extends WSTrait {
         clockConfigOpt = Some(ClockConfig.defaultForPickType(PickType.BlindPick).copy(timeAfterPickMillis = 1)),
       )
 
-      withGameWS {
+      withGameWS { implicit wsClient: WSProbe =>
         auth(0)
         val availableCharacters = fetchAndParseGame(lobbyId).blindPickState.get.config.availableCharacters.toSeq
         // reverse hack to get someone with sufficient attack range
@@ -873,7 +893,7 @@ class WSGameSpec extends WSTrait {
         clockConfigOpt = Some(ClockConfig.defaultForPickType(PickType.BlindPick).copy(timeAfterPickMillis = 1)),
       )
 
-      withGameWS {
+      withGameWS { implicit wsClient: WSProbe =>
         endTurn(lobbyId).statusCode shouldBe unauthorized
         auth(0)
         endTurn(lobbyId).statusCode shouldBe nok
@@ -952,7 +972,7 @@ class WSGameSpec extends WSTrait {
         clockConfigOpt = Some(ClockConfig.defaultForPickType(PickType.BlindPick).copy(timeAfterPickMillis = 1)),
       )
 
-      withGameWS {
+      withGameWS { implicit wsClient: WSProbe =>
         passTurn(lobbyId, "random_id").statusCode shouldBe unauthorized
         auth(0)
         passTurn(lobbyId, "random_id").statusCode shouldBe nok
@@ -1028,7 +1048,7 @@ class WSGameSpec extends WSTrait {
         clockConfigOpt = Some(ClockConfig.defaultForPickType(PickType.BlindPick).copy(timeAfterPickMillis = 1)),
       )
 
-      withGameWS {
+      withGameWS { implicit wsClient: WSProbe =>
         auth(0)
         val charactersToPick = Set("Roronoa Zoro")
 
@@ -1075,7 +1095,7 @@ class WSGameSpec extends WSTrait {
         numberOfPlayers = numberOfPlayers,
       )
 
-      withGameWS {
+      withGameWS { implicit wsClient: WSProbe =>
         auth(0)
 
         val gs = fetchAndParseGame(lobbyId)
@@ -1098,9 +1118,7 @@ class WSGameSpec extends WSTrait {
 
         clock4.playerTimes(usernames(0)) should be (clock3.playerTimes(usernames(0)))
         clock4.playerTimes(usernames(1)) should be < clock3.playerTimes(usernames(1))
-
       }
     }
-
   }
 }
