@@ -26,6 +26,7 @@ object GameEvent {
     val abilityId: AbilityId
   }
 
+  case class EventsRevealed(id: GameEventId, phase: Phase, turn: Turn, causedById: String, eventIds: Seq[GameEventId]) extends GameEvent
   case class ClockUpdated(id: GameEventId, phase: Phase, turn: Turn, causedById: String, newClock: Clock) extends GameEvent
   case class CharacterPlaced(id: GameEventId, phase: Phase, turn: Turn, causedById: String, characterId: CharacterId, target: HexCoordinates)
     extends GameEvent

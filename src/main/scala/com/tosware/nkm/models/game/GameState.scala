@@ -172,6 +172,7 @@ case class GameState
 
   def reveal(revealCondition: RevealCondition)(implicit random: Random): GameState =
     copy(hiddenEvents = hiddenEvents.filterNot(_.revealCondition == revealCondition))
+      .logEvent(EventsRevealed(randomUUID(), phase, turn, id, hiddenEvents.filter(_.revealCondition == revealCondition).map(_.eid)))
 
   private def updateClock(newClock: Clock)(implicit random: Random, causedById: String): GameState =
     updateTimestamp()
@@ -337,12 +338,13 @@ case class GameState
 
   def ban(playerId: PlayerId, characterIds: Set[CharacterMetadataId])(implicit random: Random): GameState =
     copy(draftPickState = draftPickState.map(_.ban(playerId, characterIds)))
-      .logEvent(PlayerBanned(randomUUID(), phase, turn, playerId, playerId, characterIds))
+      .logAndHideEvent(PlayerBanned(randomUUID(), phase, turn, playerId, playerId, characterIds), Seq(playerId), RevealCondition.BanningPhaseFinished)
       .logEvent(PlayerFinishedBanning(randomUUID(), phase, turn, playerId, playerId))
 
   def finishBanningPhase()(implicit random: Random): GameState =
     copy(draftPickState = draftPickState.map(_.finishBanning()))
       .updateClock(clock.setSharedTime(clockConfig.maxPickTimeMillis))(random, id)
+      .reveal(RevealCondition.BanningPhaseFinished)
       .logEvent(BanningPhaseFinished(randomUUID(), phase, turn, id))
 
   def pick(playerId: PlayerId, characterId: CharacterMetadataId)(implicit random: Random): GameState =
