@@ -14,6 +14,7 @@ import ebisuzawa_kurumi._
 import hecate._
 import kirito._
 import llenn._
+import nibutani_shinka._
 import roronoa_zoro._
 import ryuko_matoi._
 import sinon._
@@ -24,39 +25,39 @@ object AbilityProvider extends NkmUtils {
   def instantiateAbilities(characterId: CharacterId, metadataIds: Seq[AbilityMetadataId])(implicit random: Random): Seq[Ability] = {
     metadataIds.map {
       case Murasame.metadata.id =>
-        Murasame(NkmUtils.randomUUID(), characterId)
+        Murasame(randomUUID(), characterId)
       case Eliminate.metadata.id =>
-        Eliminate(NkmUtils.randomUUID(), characterId)
+        Eliminate(randomUUID(), characterId)
       case LittleWarHorn.metadata.id =>
-        LittleWarHorn(NkmUtils.randomUUID(), characterId)
+        LittleWarHorn(randomUUID(), characterId)
 
       case NaturesBeauty.metadata.id =>
-        NaturesBeauty(NkmUtils.randomUUID(), characterId)
+        NaturesBeauty(randomUUID(), characterId)
       case Purification.metadata.id =>
-        Purification(NkmUtils.randomUUID(), characterId)
+        Purification(randomUUID(), characterId)
       case Resurrection.metadata.id =>
-        Resurrection(NkmUtils.randomUUID(), characterId)
+        Resurrection(randomUUID(), characterId)
 
       case AceInTheHole.metadata.id =>
-        AceInTheHole(NkmUtils.randomUUID(), characterId)
+        AceInTheHole(randomUUID(), characterId)
       case Check.metadata.id =>
-        Check(NkmUtils.randomUUID(), characterId)
+        Check(randomUUID(), characterId)
       case Castling.metadata.id =>
-        Castling(NkmUtils.randomUUID(), characterId)
+        Castling(randomUUID(), characterId)
 
       case ManipulatorOfObjects.metadata.id =>
-        ManipulatorOfObjects(NkmUtils.randomUUID(), characterId)
+        ManipulatorOfObjects(randomUUID(), characterId)
       case BindingRibbons.metadata.id =>
-        BindingRibbons(NkmUtils.randomUUID(), characterId)
+        BindingRibbons(randomUUID(), characterId)
       case TiamatsIntervention.metadata.id =>
-        TiamatsIntervention(NkmUtils.randomUUID(), characterId)
+        TiamatsIntervention(randomUUID(), characterId)
 
       case BlackBlood.metadata.id =>
-        BlackBlood(NkmUtils.randomUUID(), characterId)
+        BlackBlood(randomUUID(), characterId)
       case ScreechAlpha.metadata.id =>
-        ScreechAlpha(NkmUtils.randomUUID(), characterId)
+        ScreechAlpha(randomUUID(), characterId)
       case Infection.metadata.id =>
-        Infection(NkmUtils.randomUUID(), characterId)
+        Infection(randomUUID(), characterId)
 
       case Contact.metadata.id =>
         Contact(randomUUID(), characterId)
@@ -66,46 +67,53 @@ object AbilityProvider extends NkmUtils {
         FinalSolution(randomUUID(), characterId)
 
       case MasterThrone.metadata.id =>
-        MasterThrone(NkmUtils.randomUUID(), characterId)
+        MasterThrone(randomUUID(), characterId)
       case Aster.metadata.id =>
-        Aster(NkmUtils.randomUUID(), characterId)
+        Aster(randomUUID(), characterId)
       case PowerOfExistence.metadata.id =>
-        PowerOfExistence(NkmUtils.randomUUID(), characterId)
+        PowerOfExistence(randomUUID(), characterId)
 
       case Parry.metadata.id =>
-        Parry(NkmUtils.randomUUID(), characterId)
+        Parry(randomUUID(), characterId)
       case Switch.metadata.id =>
-        Switch(NkmUtils.randomUUID(), characterId)
+        Switch(randomUUID(), characterId)
       case StarburstStream.metadata.id =>
-        StarburstStream(NkmUtils.randomUUID(), characterId)
+        StarburstStream(randomUUID(), characterId)
 
       case PChan.metadata.id =>
-        PChan(NkmUtils.randomUUID(), characterId)
+        PChan(randomUUID(), characterId)
       case GrenadeThrow.metadata.id =>
-        GrenadeThrow(NkmUtils.randomUUID(), characterId)
+        GrenadeThrow(randomUUID(), characterId)
       case RunItDown.metadata.id =>
-        RunItDown(NkmUtils.randomUUID(), characterId)
+        RunItDown(randomUUID(), characterId)
+
+      case Mabinogion.metadata.id =>
+        Mabinogion(randomUUID(), characterId)
+      case SummerBreeze.metadata.id =>
+        SummerBreeze(randomUUID(), characterId)
+      case FairyOfLove.metadata.id =>
+        FairyOfLove(randomUUID(), characterId)
 
       case LackOfOrientation.metadata.id =>
-        LackOfOrientation(NkmUtils.randomUUID(), characterId)
+        LackOfOrientation(randomUUID(), characterId)
       case OgreCutter.metadata.id =>
-        OgreCutter(NkmUtils.randomUUID(), characterId)
+        OgreCutter(randomUUID(), characterId)
       case OneHundredEightPoundPhoenix.metadata.id =>
-        OneHundredEightPoundPhoenix(NkmUtils.randomUUID(), characterId)
+        OneHundredEightPoundPhoenix(randomUUID(), characterId)
 
       case ScissorBlade.metadata.id =>
-        ScissorBlade(NkmUtils.randomUUID(), characterId)
+        ScissorBlade(randomUUID(), characterId)
       case FiberDecapitation.metadata.id =>
-        FiberDecapitation(NkmUtils.randomUUID(), characterId)
+        FiberDecapitation(randomUUID(), characterId)
       case GodrobeSenketsu.metadata.id =>
-        GodrobeSenketsu(NkmUtils.randomUUID(), characterId)
+        GodrobeSenketsu(randomUUID(), characterId)
 
       case SnipersSight.metadata.id =>
-        SnipersSight(NkmUtils.randomUUID(), characterId)
+        SnipersSight(randomUUID(), characterId)
       case TacticalEscape.metadata.id =>
-        TacticalEscape(NkmUtils.randomUUID(), characterId)
+        TacticalEscape(randomUUID(), characterId)
       case PreciseShot.metadata.id =>
-        PreciseShot(NkmUtils.randomUUID(), characterId)
+        PreciseShot(randomUUID(), characterId)
     }
   }
 }

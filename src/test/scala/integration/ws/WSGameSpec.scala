@@ -1108,6 +1108,8 @@ class WSGameSpec extends WSTrait {
         numberOfPlayers = numberOfPlayers,
       )
 
+      Thread.sleep(150)
+
       withGameWS { implicit wsClient: WSProbe =>
         auth(0)
 

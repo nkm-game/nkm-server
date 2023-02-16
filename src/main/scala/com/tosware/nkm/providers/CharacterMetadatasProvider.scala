@@ -10,6 +10,7 @@ import ebisuzawa_kurumi._
 import hecate._
 import kirito._
 import llenn._
+import nibutani_shinka._
 import roronoa_zoro._
 import ryuko_matoi._
 import sinon._
@@ -284,7 +285,11 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       initialSpeed = 5,
       initialPhysicalDefense = 10,
       initialMagicalDefense = 20,
-      initialAbilitiesMetadataIds = Seq.empty
+      initialAbilitiesMetadataIds = Seq(
+        Mabinogion.metadata.id,
+        SummerBreeze.metadata.id,
+        FairyOfLove.metadata.id,
+      )
     ),
     CharacterMetadata(
       name = "Sakai Yuuji",

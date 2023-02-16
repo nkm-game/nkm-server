@@ -11,6 +11,7 @@ import crona._
 import hecate._
 import kirito._
 import llenn._
+import nibutani_shinka._
 import roronoa_zoro._
 import ryuko_matoi._
 import sinon._
@@ -53,6 +54,10 @@ case class AbilityMetadatasProvider() extends NkmJsonProtocol {
     PChan.metadata,
     GrenadeThrow.metadata,
     RunItDown.metadata,
+
+    Mabinogion.metadata,
+    SummerBreeze.metadata,
+    FairyOfLove.metadata,
 
     LackOfOrientation.metadata,
     OgreCutter.metadata,

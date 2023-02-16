@@ -17,6 +17,7 @@ object CharacterEffectName extends Enum[CharacterEffectName] {
   val values: IndexedSeq[CharacterEffectName] = findValues
 
   case object AbilityUnlock extends CharacterEffectName
+  case object AbilityEnchant extends CharacterEffectName
   case object ApplyEffectOnBasicAttack extends CharacterEffectName
   case object BlackBlood extends CharacterEffectName
   case object Block extends CharacterEffectName

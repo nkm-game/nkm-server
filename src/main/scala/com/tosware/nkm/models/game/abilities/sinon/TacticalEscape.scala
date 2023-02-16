@@ -1,6 +1,6 @@
 package com.tosware.nkm.models.game.abilities.sinon
 
-import com.tosware.nkm.{NkmConf, NkmUtils}
+import com.tosware.nkm.NkmConf
 import com.tosware.nkm.models.game.Ability.AbilityId
 import com.tosware.nkm.models.game.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game._
@@ -24,5 +24,5 @@ case class TacticalEscape(abilityId: AbilityId, parentCharacterId: CharacterId) 
 
   override def use()(implicit random: Random, gameState: GameState): GameState =
     gameState.
-      addEffect(parentCharacterId, StatBuff(NkmUtils.randomUUID(), metadata.variables("duration"), StatType.Speed, metadata.variables("speedIncrease")))(random, id)
+      addEffect(parentCharacterId, StatBuff(randomUUID(), metadata.variables("duration"), StatType.Speed, metadata.variables("speedIncrease")))(random, id)
 }

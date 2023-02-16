@@ -7,7 +7,7 @@ import com.tosware.nkm.models.Damage
 import com.tosware.nkm.models.game.Ability._
 import com.tosware.nkm.models.game.CharacterEffect.CharacterEffectId
 import com.tosware.nkm.models.game.NkmCharacter.CharacterId
-import com.tosware.nkm.models.game.effects.FreeAbility
+import com.tosware.nkm.models.game.effects.{AbilityEnchant, FreeAbility}
 import com.tosware.nkm.models.game.hex.{HexCell, HexCoordinates}
 import enumeratum._
 
@@ -115,6 +115,9 @@ abstract class Ability(val id: AbilityId, pid: CharacterId) extends NkmUtils {
 
   def parentCell(implicit gameState: GameState): Option[HexCell] =
     parentCharacter.parentCell
+
+  def isEnchanted(implicit gameState: GameState): Boolean =
+    parentCharacter.state.effects.ofType[AbilityEnchant].exists(_.abilityType == metadata.abilityType)
 
   def getCooldownState(implicit gameState: GameState): AbilityState =
     state.copy(cooldown = metadata.variables("cooldown"))
