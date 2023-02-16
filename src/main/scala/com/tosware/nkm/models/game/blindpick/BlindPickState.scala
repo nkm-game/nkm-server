@@ -29,6 +29,7 @@ case class BlindPickState(
   def validatePick(playerId: PlayerId, characters: Set[CharacterMetadataId]): Boolean = {
     if (!characters.subsetOf(config.availableCharacters)) return false
     if (!characterSelection.get(playerId).fold(false)(_.isEmpty)) return false
+    if (characters.size != config.numberOfCharactersPerPlayer) return false
     true
   }
 
