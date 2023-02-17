@@ -1,6 +1,6 @@
-package com.tosware.nkm.models.game.blindpick
+package com.tosware.nkm.models.game.pick.blindpick
 
-import com.tosware.nkm.models.game.CharacterMetadata.CharacterMetadataId
+import com.tosware.nkm.models.game.character.CharacterMetadata.CharacterMetadataId
 import com.tosware.nkm.models.game.Player.PlayerId
 
 object BlindPickState {
@@ -50,9 +50,3 @@ case class BlindPickState(
     BlindPickStateView(config, filteredCharacterSelection, pickPhase)
   }
 }
-
-case class BlindPickStateView(
-                           config: BlindPickConfig,
-                           characterSelection: Map[PlayerId, Set[CharacterMetadataId]],
-                           pickPhase: BlindPickPhase,
-                         )

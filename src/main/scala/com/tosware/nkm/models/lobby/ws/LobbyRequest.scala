@@ -1,6 +1,7 @@
 package com.tosware.nkm.models.lobby.ws
 
-import com.tosware.nkm.models.game.{ClockConfig, PickType}
+import com.tosware.nkm.models.game.ClockConfig
+import com.tosware.nkm.models.game.pick.PickType
 
 object LobbyRequest {
   sealed trait LobbyRequest

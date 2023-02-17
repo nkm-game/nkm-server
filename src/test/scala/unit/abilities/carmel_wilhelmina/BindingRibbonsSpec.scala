@@ -2,6 +2,7 @@ package unit.abilities.carmel_wilhelmina
 
 import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.game.abilities.carmel_wilhelmina.BindingRibbons
+import com.tosware.nkm.models.game.character.CharacterMetadata
 import com.tosware.nkm.models.game.hex.HexCoordinates
 import helpers.{TestUtils, scenarios}
 import org.scalatest.matchers.should.Matchers

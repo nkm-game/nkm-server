@@ -2,6 +2,7 @@ package integration.ws
 
 import akka.http.scaladsl.testkit.WSProbe
 import com.tosware.nkm.models.game._
+import com.tosware.nkm.models.game.pick.PickType
 import com.tosware.nkm.models.lobby.ws._
 import helpers.WSTrait
 

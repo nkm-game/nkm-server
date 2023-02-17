@@ -1,9 +1,11 @@
 package com.tosware.nkm.models.game.abilities.aqua
 
 import com.tosware.nkm.NkmConf
-import com.tosware.nkm.models.game.Ability.AbilityId
-import com.tosware.nkm.models.game.NkmCharacter.CharacterId
+import com.tosware.nkm.models.game.ability.Ability.AbilityId
+import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game._
+import com.tosware.nkm.models.game.ability.{Ability, AbilityMetadata, AbilityType, UsableOnCoordinates, UseData}
+import com.tosware.nkm.models.game.character.NkmCharacter
 import com.tosware.nkm.models.game.hex.HexCoordinates
 
 import scala.util.Random

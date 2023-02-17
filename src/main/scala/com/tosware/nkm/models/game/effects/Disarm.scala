@@ -1,7 +1,7 @@
 package com.tosware.nkm.models.game.effects
 
-import com.tosware.nkm.models.game.CharacterEffect.CharacterEffectId
-import com.tosware.nkm.models.game.{CharacterEffect, CharacterEffectMetadata, CharacterEffectName, CharacterEffectType}
+import com.tosware.nkm.models.game.character_effect.{CharacterEffect, CharacterEffectMetadata, CharacterEffectName, CharacterEffectType}
+import com.tosware.nkm.models.game.character_effect.CharacterEffect.CharacterEffectId
 
 object Disarm {
   val metadata: CharacterEffectMetadata =

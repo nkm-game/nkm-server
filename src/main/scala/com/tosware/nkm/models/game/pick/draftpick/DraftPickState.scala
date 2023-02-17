@@ -1,6 +1,6 @@
-package com.tosware.nkm.models.game.draftpick
+package com.tosware.nkm.models.game.pick.draftpick
 
-import com.tosware.nkm.models.game.CharacterMetadata.CharacterMetadataId
+import com.tosware.nkm.models.game.character.CharacterMetadata.CharacterMetadataId
 import com.tosware.nkm.models.game.Player.PlayerId
 
 object DraftPickState {
@@ -94,14 +94,3 @@ case class DraftPickState(config: DraftPickConfig,
     DraftPickStateView(config, bansFiltered, characterSelection, bannedCharactersFiltered, pickedCharacters, charactersAvailableToPick, currentPlayerPicking, pickPhase)
   }
 }
-
-case class DraftPickStateView(
-                               config: DraftPickConfig,
-                               bans: Map[PlayerId, Option[Set[CharacterMetadataId]]],
-                               characterSelection: Map[PlayerId, Seq[CharacterMetadataId]],
-                               bannedCharacters: Set[CharacterMetadataId],
-                               pickedCharacters: Set[CharacterMetadataId],
-                               charactersAvailableToPick: Set[CharacterMetadataId],
-                               currentPlayerPicking: Option[PlayerId],
-                               pickPhase: DraftPickPhase,
-                             )

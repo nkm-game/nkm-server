@@ -1,11 +1,12 @@
 package com.tosware.nkm
 
-import com.tosware.nkm.models.game.Ability.AbilityId
+import com.tosware.nkm.models.game.ability.Ability.AbilityId
 import com.tosware.nkm.models.game.GameEvent._
-import com.tosware.nkm.models.game.NkmCharacter.CharacterId
+import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game.Player.PlayerId
 import com.tosware.nkm.models.game.hex._
-import com.tosware.nkm.models.game.{GameState, NkmCharacter}
+import com.tosware.nkm.models.game.GameState
+import com.tosware.nkm.models.game.character.NkmCharacter
 import com.tosware.nkm.serializers.NkmJsonProtocol
 
 import scala.math.abs

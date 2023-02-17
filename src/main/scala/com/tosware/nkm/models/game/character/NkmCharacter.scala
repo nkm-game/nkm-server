@@ -1,14 +1,16 @@
-package com.tosware.nkm.models.game
+package com.tosware.nkm.models.game.character
 
 import com.softwaremill.quicklens._
 import com.tosware.nkm.NkmUtils
-import com.tosware.nkm.models.game.CharacterEffect.CharacterEffectId
-import com.tosware.nkm.models.game.CharacterMetadata.CharacterMetadataId
+import com.tosware.nkm.models.game.character_effect.CharacterEffect.CharacterEffectId
+import CharacterMetadata.CharacterMetadataId
 import com.tosware.nkm.models.game.GameEvent.GameEvent
-import com.tosware.nkm.models.game.NkmCharacter._
 import com.tosware.nkm.models.game.Player.PlayerId
+import com.tosware.nkm.models.game._
+import com.tosware.nkm.models.game.ability._
+import com.tosware.nkm.models.game.character.NkmCharacter._
+import com.tosware.nkm.models.game.character_effect.{CharacterEffect, CharacterEffectName}
 import com.tosware.nkm.models.game.hex._
-import com.tosware.nkm.models.{Damage, DamageType}
 import com.tosware.nkm.providers.AbilityProvider
 
 import scala.reflect.ClassTag
@@ -17,7 +19,7 @@ import scala.util.Random
 object NkmCharacter {
   type CharacterId = String
 
-  def fromMetadata(characterId: CharacterId, metadata: CharacterMetadata)(implicit random: Random) = {
+  def fromMetadata(characterId: CharacterId, metadata: CharacterMetadata)(implicit random: Random): NkmCharacter = {
     NkmCharacter(
       id = characterId,
       metadataId = metadata.id,
@@ -258,17 +260,3 @@ case class NkmCharacter
     basicAttackTargets = basicAttackTargets,
   )
 }
-
-case class NkmCharacterView
-(
-  id: CharacterId,
-  metadataId: CharacterMetadataId,
-  state: Option[NkmCharacterStateView],
-  ownerId: PlayerId,
-  isDead: Boolean,
-  canBasicMove: Boolean,
-  canBasicAttack: Boolean,
-  isOnMap: Boolean,
-  basicAttackCellCoords: Set[HexCoordinates],
-  basicAttackTargets: Set[HexCoordinates],
-)

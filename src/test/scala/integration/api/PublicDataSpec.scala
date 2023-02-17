@@ -3,8 +3,10 @@ package integration.api
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.unmarshalling.FromResponseUnmarshaller
+import com.tosware.nkm.models.game.ability.AbilityMetadata
+import com.tosware.nkm.models.game.character.CharacterMetadata
 import com.tosware.nkm.models.game.hex.HexMap
-import com.tosware.nkm.models.game.{AbilityMetadata, CharacterEffectMetadata, CharacterMetadata}
+import com.tosware.nkm.models.game.character_effect.CharacterEffectMetadata
 import helpers.ApiTrait
 
 import scala.reflect.ClassTag

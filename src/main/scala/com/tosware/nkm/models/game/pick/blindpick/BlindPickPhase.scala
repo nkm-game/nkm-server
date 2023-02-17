@@ -1,4 +1,4 @@
-package com.tosware.nkm.models.game.blindpick
+package com.tosware.nkm.models.game.pick.blindpick
 
 import enumeratum._
 

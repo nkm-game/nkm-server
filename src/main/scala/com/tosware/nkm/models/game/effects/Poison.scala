@@ -1,9 +1,9 @@
 package com.tosware.nkm.models.game.effects
 
-import com.tosware.nkm.models.Damage
-import com.tosware.nkm.models.game.CharacterEffect.CharacterEffectId
+import com.tosware.nkm.models.game.character_effect.CharacterEffect.CharacterEffectId
 import com.tosware.nkm.models.game.GameEvent.TurnFinished
 import com.tosware.nkm.models.game._
+import com.tosware.nkm.models.game.character_effect.{CharacterEffect, CharacterEffectMetadata, CharacterEffectName, CharacterEffectType}
 import com.tosware.nkm.models.game.effects.Poison.damageKey
 import spray.json._
 

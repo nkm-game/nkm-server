@@ -1,10 +1,11 @@
 package helpers
 
 import com.tosware.nkm.models.CommandResponse._
-import com.tosware.nkm.models.game.NkmCharacter.CharacterId
-import com.tosware.nkm.models.game.PickType.BlindPick
+import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
+import com.tosware.nkm.models.game.pick.PickType.BlindPick
 import com.tosware.nkm.models.game.Player.PlayerId
 import com.tosware.nkm.models.game._
+import com.tosware.nkm.models.game.character.{CharacterMetadata, NkmCharacter}
 import com.tosware.nkm.models.game.hex.{HexCoordinates, TestHexMapName}
 import com.tosware.nkm.providers.HexMapProvider
 import com.tosware.nkm.{Logging, NkmUtils}

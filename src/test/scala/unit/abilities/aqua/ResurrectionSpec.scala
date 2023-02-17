@@ -1,9 +1,11 @@
 package unit.abilities.aqua
 
 import com.tosware.nkm.models.game.abilities.aqua.Resurrection
+import com.tosware.nkm.models.game.ability.UseData
 import com.tosware.nkm.models.game.hex.HexCoordinates
-import com.tosware.nkm.models.game.{CharacterMetadata, GameState, UseData}
-import com.tosware.nkm.models.{Damage, DamageType, GameStateValidator}
+import com.tosware.nkm.models.game.{Damage, DamageType, GameState}
+import com.tosware.nkm.models.game.character.CharacterMetadata
+import com.tosware.nkm.models.GameStateValidator
 import helpers.{TestUtils, scenarios}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike

@@ -2,17 +2,20 @@ package com.tosware.nkm.models.game
 
 import com.softwaremill.quicklens._
 import com.tosware.nkm.actors.Game.GameId
-import com.tosware.nkm.models.game.Ability.AbilityId
-import com.tosware.nkm.models.game.CharacterEffect.CharacterEffectId
-import com.tosware.nkm.models.game.CharacterMetadata.CharacterMetadataId
+import com.tosware.nkm.models.game.ability.Ability.AbilityId
+import com.tosware.nkm.models.game.character_effect.CharacterEffect.CharacterEffectId
+import com.tosware.nkm.models.game.character.CharacterMetadata.CharacterMetadataId
 import com.tosware.nkm.models.game.GameEvent._
-import com.tosware.nkm.models.game.NkmCharacter.CharacterId
+import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game.Player.PlayerId
-import com.tosware.nkm.models.game.blindpick._
-import com.tosware.nkm.models.game.draftpick._
+import com.tosware.nkm.models.game.ability.{Ability, AbilityState, AbilityView, UsableOnCharacter, UsableOnCoordinates, UsableWithoutTarget, UseData}
+import com.tosware.nkm.models.game.character.{CharacterMetadata, NkmCharacter, NkmCharacterView}
+import com.tosware.nkm.models.game.character_effect.{CharacterEffect, CharacterEffectState, CharacterEffectView}
 import com.tosware.nkm.models.game.effects.{Block, FreeAbility}
 import com.tosware.nkm.models.game.hex._
-import com.tosware.nkm.models.{Damage, DamageType}
+import com.tosware.nkm.models.game.pick.PickType
+import com.tosware.nkm.models.game.pick.blindpick.{BlindPickConfig, BlindPickPhase, BlindPickState, BlindPickStateView}
+import com.tosware.nkm.models.game.pick.draftpick.{DraftPickConfig, DraftPickPhase, DraftPickState, DraftPickStateView}
 import com.tosware.nkm.{Logging, NkmUtils}
 
 import java.time.Instant

@@ -1,15 +1,14 @@
 package com.tosware.nkm.models.game.hex
 
-import com.tosware.nkm.models.game.NkmCharacter.CharacterId
+import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game.Player.PlayerId
 import com.tosware.nkm.models.game.hex.HexCellType.Normal
-import com.tosware.nkm.models.game.{GameState, NkmCharacter}
+import com.tosware.nkm.models.game.GameState
 import com.tosware.nkm.NkmUtils._
+import com.tosware.nkm.models.game.character.NkmCharacter
 import com.tosware.nkm.models.game.effects.Fly
 
 import scala.annotation.tailrec
-
-case class HexCellEffect(cooldown: Int)
 
 object HexCell {
   def empty

@@ -1,4 +1,4 @@
-package com.tosware.nkm.models.game
+package com.tosware.nkm.models.game.pick
 
 import enumeratum._
 

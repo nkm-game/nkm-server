@@ -1,10 +1,9 @@
 package com.tosware.nkm.models.game
 
-import com.tosware.nkm.models.Damage
-import com.tosware.nkm.models.game.Ability.AbilityId
-import com.tosware.nkm.models.game.CharacterEffect.CharacterEffectId
-import com.tosware.nkm.models.game.CharacterMetadata.CharacterMetadataId
-import com.tosware.nkm.models.game.NkmCharacter.CharacterId
+import com.tosware.nkm.models.game.ability.Ability.AbilityId
+import com.tosware.nkm.models.game.character_effect.CharacterEffect.CharacterEffectId
+import com.tosware.nkm.models.game.character.CharacterMetadata.CharacterMetadataId
+import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game.Player.PlayerId
 import com.tosware.nkm.models.game.hex.HexCoordinates
 

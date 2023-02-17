@@ -5,14 +5,16 @@ import akka.persistence.{PersistentActor, RecoveryCompleted}
 import com.tosware.nkm.actors.Game.GameId
 import com.tosware.nkm.models.CommandResponse._
 import com.tosware.nkm.models.{GameEventMapped, GameStateValidator}
-import com.tosware.nkm.models.game.Ability.AbilityId
-import com.tosware.nkm.models.game.NkmCharacter.CharacterId
-import com.tosware.nkm.models.game.CharacterMetadata.CharacterMetadataId
+import com.tosware.nkm.models.game.ability.Ability.AbilityId
+import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
+import com.tosware.nkm.models.game.character.CharacterMetadata.CharacterMetadataId
 import com.tosware.nkm.models.game.Player.PlayerId
 import com.tosware.nkm.models.game._
-import com.tosware.nkm.models.game.blindpick.BlindPickPhase
-import com.tosware.nkm.models.game.draftpick.DraftPickPhase
+import com.tosware.nkm.models.game.ability.UseData
 import com.tosware.nkm.models.game.hex.HexCoordinates
+import com.tosware.nkm.models.game.pick.PickType
+import com.tosware.nkm.models.game.pick.blindpick.BlindPickPhase
+import com.tosware.nkm.models.game.pick.draftpick.DraftPickPhase
 import com.tosware.nkm.services.NkmDataService
 
 import scala.concurrent.duration._

@@ -1,9 +1,11 @@
-package com.tosware.nkm.models.game
-import com.tosware.nkm.models.game.Ability.AbilityId
-import com.tosware.nkm.models.game.CharacterEffect.CharacterEffectId
-import com.tosware.nkm.models.game.effects.{Invisibility, StatBuff, StatNerf}
+package com.tosware.nkm.models.game.character
+
 import com.tosware.nkm.NkmUtils._
 import com.tosware.nkm.models.game.Player.PlayerId
+import com.tosware.nkm.models.game._
+import com.tosware.nkm.models.game.ability.Ability
+import com.tosware.nkm.models.game.character_effect.CharacterEffect
+import com.tosware.nkm.models.game.effects._
 
 case class NkmCharacterState
 (
@@ -36,7 +38,7 @@ case class NkmCharacterState
   def toView(forPlayer: Option[PlayerId], ownerId: PlayerId): Option[NkmCharacterStateView] = {
     if(effects.ofType[Invisibility].nonEmpty && !forPlayer.contains(ownerId)) None
     else Some(
-      NkmCharacterStateView(
+      character.NkmCharacterStateView(
         name = name,
         attackType: AttackType,
         maxHealthPoints = maxHealthPoints,
@@ -53,19 +55,3 @@ case class NkmCharacterState
     )
   }
 }
-
-case class NkmCharacterStateView
-(
-  name: String,
-  attackType: AttackType,
-  maxHealthPoints: Int,
-  healthPoints: Int,
-  attackPoints: Int,
-  basicAttackRange: Int,
-  speed: Int,
-  physicalDefense: Int,
-  magicalDefense: Int,
-  shield: Int,
-  abilities: Seq[AbilityId] = Seq.empty,
-  effects: Seq[CharacterEffectId] = Seq.empty,
-)

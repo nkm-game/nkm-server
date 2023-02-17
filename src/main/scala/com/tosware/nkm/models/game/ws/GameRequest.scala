@@ -1,10 +1,10 @@
 package com.tosware.nkm.models.game.ws
 
 import com.tosware.nkm.actors.Game.GameId
-import com.tosware.nkm.models.game.Ability.AbilityId
-import com.tosware.nkm.models.game.NkmCharacter.CharacterId
-import com.tosware.nkm.models.game.CharacterMetadata.CharacterMetadataId
-import com.tosware.nkm.models.game.UseData
+import com.tosware.nkm.models.game.ability.Ability.AbilityId
+import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
+import com.tosware.nkm.models.game.character.CharacterMetadata.CharacterMetadataId
+import com.tosware.nkm.models.game.ability.UseData
 import com.tosware.nkm.models.game.hex.HexCoordinates
 
 object GameRequest {

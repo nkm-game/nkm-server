@@ -1,15 +1,14 @@
-package com.tosware.nkm.models.game
+package com.tosware.nkm.models.game.ability
 
 import com.softwaremill.quicklens._
 import com.tosware.nkm.NkmUtils
 import com.tosware.nkm.models.CommandResponse._
-import com.tosware.nkm.models.Damage
-import com.tosware.nkm.models.game.Ability._
-import com.tosware.nkm.models.game.CharacterEffect.CharacterEffectId
-import com.tosware.nkm.models.game.NkmCharacter.CharacterId
+import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
+import com.tosware.nkm.models.game._
+import com.tosware.nkm.models.game.ability.Ability._
+import com.tosware.nkm.models.game.character.NkmCharacter
 import com.tosware.nkm.models.game.effects.{AbilityEnchant, FreeAbility}
 import com.tosware.nkm.models.game.hex.{HexCell, HexCoordinates}
-import enumeratum._
 
 import scala.util.{Random, Try}
 
@@ -17,73 +16,6 @@ object Ability {
   type AbilityId = String
   type AbilityMetadataId = String
   type UseCheck = (Boolean, String)
-}
-
-sealed trait AbilityType extends EnumEntry
-object AbilityType extends Enum[AbilityType] {
-  val values = findValues
-
-  case object Passive extends AbilityType
-  case object Normal extends AbilityType
-  case object Ultimate extends AbilityType
-}
-
-case class AbilityMetadata
-(
-  name: String,
-  abilityType: AbilityType,
-  description: String,
-  variables: Map[String, Int] = Map.empty,
-  alternateName: String = "",
-  relatedEffectIds: Seq[CharacterEffectId] = Seq.empty,
-) {
-  val id: AbilityMetadataId = name
-}
-
-case class AbilityState
-(
-  cooldown: Int = 0,
-  isEnabled: Boolean = false,
-  variables: Map[String, String] = Map.empty,
-)
-
-
-case class UseData(data: String = "")
-
-trait BasicAttackOverride {
-  def basicAttackCells(implicit gameState: GameState): Set[HexCoordinates]
-  def basicAttackTargets(implicit gameState: GameState): Set[HexCoordinates]
-  def basicAttack(targetCharacterId: CharacterId)(implicit random: Random, gameState: GameState): GameState
-}
-
-trait BasicMoveOverride {
-  def basicMove(path: Seq[HexCoordinates])(implicit random: Random, gameState: GameState): GameState
-}
-
-trait UsableWithoutTarget { this: Ability =>
-  def use()(implicit random: Random, gameState: GameState): GameState
-  def useChecks(implicit gameState: GameState): Set[UseCheck] =
-    baseUseChecks
-  final def canBeUsed(implicit gameState: GameState): CommandResponse =
-    _canBeUsed(useChecks)
-}
-
-trait UsableOnTarget[T] { this: Ability =>
-  def use(target: T, useData: UseData = UseData())(implicit random: Random, gameState: GameState): GameState
-  def useChecks(implicit target: T, useData: UseData, gameState: GameState): Set[UseCheck] =
-    baseUseChecks
-  final def canBeUsed(implicit target: T, useData: UseData, gameState: GameState): CommandResponse =
-    _canBeUsed(useChecks)
-}
-
-trait UsableOnCoordinates extends UsableOnTarget[HexCoordinates] { this: Ability =>
-  override def useChecks(implicit target: HexCoordinates, useData: UseData, gameState: GameState): Set[UseCheck] =
-    super.useChecks + UseCheck.TargetCoordinates.InRange
-}
-
-trait UsableOnCharacter extends UsableOnTarget[CharacterId] { this: Ability =>
-  override def useChecks(implicit target: CharacterId, useData: UseData, gameState: GameState): Set[UseCheck] =
-    super.useChecks + UseCheck.TargetCharacter.InRange
 }
 
 abstract class Ability(val id: AbilityId, pid: CharacterId) extends NkmUtils {
@@ -198,14 +130,3 @@ abstract class Ability(val id: AbilityId, pid: CharacterId) extends NkmUtils {
   }
 }
 
-case class AbilityView
-(
-  id: AbilityId,
-  metadataId: AbilityMetadataId,
-  parentCharacterId: CharacterId,
-  state: AbilityState,
-  rangeCellCoords: Set[HexCoordinates],
-  targetsInRange: Set[HexCoordinates],
-  canBeUsed: Boolean,
-  canBeUsedFailureMessage: Option[String],
-)

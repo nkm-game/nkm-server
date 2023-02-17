@@ -1,9 +1,10 @@
 package com.tosware.nkm.models.game.abilities.hecate
 
 import com.tosware.nkm.NkmConf
-import com.tosware.nkm.models.game.Ability.AbilityId
-import com.tosware.nkm.models.game.NkmCharacter.CharacterId
+import com.tosware.nkm.models.game.ability.Ability.AbilityId
+import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game._
+import com.tosware.nkm.models.game.ability.{Ability, AbilityMetadata, AbilityType}
 import spray.json._
 
 import scala.util.Random

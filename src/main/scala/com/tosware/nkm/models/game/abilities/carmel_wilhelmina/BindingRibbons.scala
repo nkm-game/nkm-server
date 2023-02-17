@@ -1,9 +1,10 @@
 package com.tosware.nkm.models.game.abilities.carmel_wilhelmina
 
 import com.tosware.nkm.{NkmConf, NkmUtils}
-import com.tosware.nkm.models.game.Ability.AbilityId
-import com.tosware.nkm.models.game.NkmCharacter.CharacterId
+import com.tosware.nkm.models.game.ability.Ability.AbilityId
+import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game._
+import com.tosware.nkm.models.game.ability.{Ability, AbilityMetadata, AbilityType, UsableOnCoordinates, UseData}
 import com.tosware.nkm.models.game.effects.{Silence, Snare}
 import com.tosware.nkm.models.game.hex.HexCoordinates
 

@@ -14,7 +14,7 @@ import nibutani_shinka._
 import roronoa_zoro._
 import ryuko_matoi._
 import sinon._
-import com.tosware.nkm.models.game.{AttackType, CharacterMetadata}
+import com.tosware.nkm.models.game.character.{AttackType, CharacterMetadata}
 import com.tosware.nkm.serializers.NkmJsonProtocol
 
 case class CharacterMetadatasProvider() extends NkmJsonProtocol {

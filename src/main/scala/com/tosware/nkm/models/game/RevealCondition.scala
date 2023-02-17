@@ -1,6 +1,6 @@
 package com.tosware.nkm.models.game
 
-import com.tosware.nkm.models.game.NkmCharacter.CharacterId
+import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
 
 sealed trait RevealCondition
 object RevealCondition {

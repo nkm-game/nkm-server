@@ -1,11 +1,11 @@
 package com.tosware.nkm.providers
 
-import com.tosware.nkm.models.game.AbilityMetadata
 import com.tosware.nkm.models.game.abilities._
 import akame._
 import aqua._
 import blank._
 import carmel_wilhelmina._
+import com.tosware.nkm.models.game.ability.AbilityMetadata
 import ebisuzawa_kurumi._
 import crona._
 import hecate._

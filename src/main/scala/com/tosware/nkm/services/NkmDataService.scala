@@ -1,7 +1,9 @@
 package com.tosware.nkm.services
 
 import com.tosware.nkm.NkmTimeouts
-import com.tosware.nkm.models.game._
+import com.tosware.nkm.models.game.ability.AbilityMetadata
+import com.tosware.nkm.models.game.character.CharacterMetadata
+import com.tosware.nkm.models.game.character_effect.CharacterEffectMetadata
 import com.tosware.nkm.models.game.hex.HexMap
 import com.tosware.nkm.providers._
 

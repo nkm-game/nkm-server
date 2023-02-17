@@ -1,9 +1,10 @@
 package com.tosware.nkm.models.game.abilities.blank
 
 import com.tosware.nkm.{NkmConf, NkmUtils}
-import com.tosware.nkm.models.game.Ability.{AbilityId, UseCheck}
-import com.tosware.nkm.models.game.NkmCharacter.CharacterId
+import com.tosware.nkm.models.game.ability.Ability.{AbilityId, UseCheck}
+import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game._
+import com.tosware.nkm.models.game.ability.{Ability, AbilityMetadata, AbilityType, UsableOnCharacter, UseData}
 import com.tosware.nkm.models.game.effects.{Disarm, HasToTakeAction}
 
 import scala.util.Random

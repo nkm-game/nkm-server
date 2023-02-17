@@ -3,6 +3,7 @@ package unit.abilities.ebisuzawa_kurumi
 import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.game.abilities.ebisuzawa_kurumi.Contact
 import com.tosware.nkm.models.game.abilities.hecate._
+import com.tosware.nkm.models.game.character.CharacterMetadata
 import helpers.{TestUtils, scenarios}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike

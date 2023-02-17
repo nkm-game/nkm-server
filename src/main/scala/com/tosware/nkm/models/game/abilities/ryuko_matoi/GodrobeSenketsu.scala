@@ -1,12 +1,12 @@
 package com.tosware.nkm.models.game.abilities.ryuko_matoi
 
 import com.tosware.nkm.{NkmConf, NkmUtils}
-import com.tosware.nkm.models.game.Ability.AbilityId
-import com.tosware.nkm.models.game.CharacterEffect.CharacterEffectId
+import com.tosware.nkm.models.game.ability.Ability.AbilityId
+import com.tosware.nkm.models.game.character_effect.CharacterEffect.CharacterEffectId
 import com.tosware.nkm.models.game.GameEvent.TurnFinished
-import com.tosware.nkm.models.game.NkmCharacter.CharacterId
+import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game._
-import com.tosware.nkm.models.{Damage, DamageType}
+import com.tosware.nkm.models.game.ability.{Ability, AbilityMetadata, AbilityType, UsableWithoutTarget}
 
 import scala.util.Random
 

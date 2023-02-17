@@ -1,4 +1,4 @@
-package com.tosware.nkm.models
+package com.tosware.nkm.models.game
 
 import enumeratum.{Enum, EnumEntry}
 

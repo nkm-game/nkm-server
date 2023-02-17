@@ -1,6 +1,7 @@
 package com.tosware.nkm.models.game
 
 import com.tosware.nkm.NkmConf
+import com.tosware.nkm.models.game.pick.PickType
 
 object ClockConfig {
   def empty(): ClockConfig =

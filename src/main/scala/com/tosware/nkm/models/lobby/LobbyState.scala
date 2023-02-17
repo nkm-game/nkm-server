@@ -1,7 +1,8 @@
 package com.tosware.nkm.models.lobby
 
-import com.tosware.nkm.models.game.{ClockConfig, PickType}
-import com.tosware.nkm.models.game.PickType.AllRandom
+import com.tosware.nkm.models.game.ClockConfig
+import com.tosware.nkm.models.game.pick.PickType
+import com.tosware.nkm.models.game.pick.PickType.AllRandom
 
 import java.time.LocalDateTime
 
