@@ -23,8 +23,8 @@ class HexCoordinatesSpec
       HexCoordinates(0, -3).getNeighbour(HexDirection.E) should be (HexCoordinates(1, -3))
     }
     "calculate correct line" in {
-      HexCoordinates(0, 0).getLine(HexDirection.E, 0) should be (Set.empty)
-      HexCoordinates(-2, 2).getLine(HexDirection.SE, 3) should be (CoordinateSet((-1, 1), (0, 0), (1, -1)))
+      HexCoordinates(0, 0).getLine(HexDirection.E, 0) should be (Seq.empty)
+      HexCoordinates(-2, 2).getLine(HexDirection.SE, 3) should be (CoordinateSeq((-1, 1), (0, 0), (1, -1)))
     }
 
     "calculate correct lines" in {

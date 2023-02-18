@@ -410,14 +410,15 @@ case class GameState
     val targetIsFreeToStand = hexMap.getCell(targetCellCoordinates).get.isFreeToStand
     val characterIsOnMap = characterById(characterId).isOnMap(this)
 
-    if (targetIsFreeToStand) {
+    val ngs = if (targetIsFreeToStand) {
       if (characterIsOnMap)
         removedFromParentCellState.updateHexCell(targetCellCoordinates)(_.copy(characterId = Some(characterId)))
       else removedFromParentCellState.placeCharacter(targetCellCoordinates, characterId)
     } else {
       // probably just passing by a friendly characterOpt
       removedFromParentCellState.removeCharacterFromMap(characterId)
-    }.logEvent(CharacterTeleported(NkmUtils.randomUUID(), phase, turn, causedById, characterId, targetCellCoordinates))
+    }
+    ngs.logEvent(CharacterTeleported(NkmUtils.randomUUID(), phase, turn, causedById, characterId, targetCellCoordinates))
   }
 
 

@@ -27,11 +27,11 @@ case class HexCoordinates(x: Int, z: Int) {
     getNeighbour(hexDirection).getInDirection(hexDirection, distance - 1)
   }
 
-  def getLine(direction: HexDirection, size: Int): Set[HexCoordinates] = {
-    if(size <= 0) return Set.empty
+  def getLine(direction: HexDirection, size: Int): Seq[HexCoordinates] = {
+    if(size <= 0) return Seq.empty
     val neighbour = getNeighbour(direction)
-    if(size == 1) return Set(neighbour)
-    neighbour.getLine(direction, size - 1) + neighbour
+    if(size == 1) return Seq(neighbour)
+    neighbour +: neighbour.getLine(direction, size - 1)
   }
 
   def getLines(directions: Set[HexDirection], size: Int): Set[HexCoordinates] =

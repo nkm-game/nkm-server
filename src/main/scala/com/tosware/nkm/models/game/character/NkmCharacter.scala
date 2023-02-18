@@ -178,8 +178,6 @@ case class NkmCharacter
   def basicMove(path: Seq[HexCoordinates])(implicit random: Random, gameState: GameState): GameState =
     basicMoveOverride.fold(defaultBasicMove(path))(_.basicMove(path))
 
-
-
   def defaultMeleeBasicAttackCells(implicit gameState: GameState): Set[HexCoordinates] = {
     if(parentCell.isEmpty) return Set.empty
     val range = state.basicAttackRange
