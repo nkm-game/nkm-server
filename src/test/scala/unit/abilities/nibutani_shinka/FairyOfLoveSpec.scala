@@ -19,7 +19,7 @@ class FairyOfLoveSpec
   private val metadata = CharacterMetadata.empty()
     .copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
   private val s = scenarios.Simple2v2TestScenario(metadata)
-  private implicit val gameState: GameState = s.gameState
+  private implicit val gameState: GameState = s.gameState.incrementPhase(4)
   private val abilityId = s.characters.p0First.state.abilities.head.id
 
   abilityMetadata.name must {

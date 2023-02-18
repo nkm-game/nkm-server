@@ -17,13 +17,13 @@ class GodrobeSenketsuSpec
   private val metadata = CharacterMetadata.empty()
     .copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
   private val s = scenarios.Simple1v1TestScenario(metadata)
-  private implicit val gameState: GameState = s.gameState.incrementPhase(4)
+  private val gameState: GameState = s.gameState.incrementPhase(4)
   private val abilityId = s.characters.p0.state.abilities.head.id
 
   abilityMetadata.name must {
     "be able to use" in {
       assertCommandSuccess {
-        GameStateValidator().validateAbilityUseWithoutTarget(s.characters.p0.owner.id, abilityId)
+        GameStateValidator()(gameState).validateAbilityUseWithoutTarget(s.characters.p0.owner(gameState).id, abilityId)
       }
     }
 
@@ -70,13 +70,13 @@ class GodrobeSenketsuSpec
       abilityUsedGameState.abilityStates(abilityId).cooldown should be (0)
 
       assertCommandFailure {
-        GameStateValidator()(abilityUsedGameState).validateAbilityUseWithoutTarget(s.characters.p0.owner.id, abilityId)
+        GameStateValidator()(abilityUsedGameState).validateAbilityUseWithoutTarget(s.characters.p0.owner(gameState).id, abilityId)
       }
       assertCommandSuccess {
         val gs = abilityUsedGameState
           .endTurn()
           .passTurn(s.characters.p1.id)
-        GameStateValidator()(gs).validateAbilityUseWithoutTarget(s.characters.p0.owner.id, abilityId)
+        GameStateValidator()(gs).validateAbilityUseWithoutTarget(s.characters.p0.owner(gameState).id, abilityId)
       }
 
       val abilityDisabledGameState: GameState = abilityUsedGameState

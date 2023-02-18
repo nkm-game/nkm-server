@@ -43,7 +43,7 @@ class MabinogionSpec
 
   abilityMetadata.name must {
     "heal all nearby characters" in {
-      healEvents.size shouldBe abilityRange
+      healEvents.size shouldBe abilityRange + 1
     }
     "shield only friendly characters" in {
       shieldEvents.size shouldBe 1
@@ -62,8 +62,8 @@ class MabinogionSpec
     }
 
     "add speed to friends only when enchanted" in {
-      turnPassedGs.gameLog.events.ofType[GameEvent.EffectAddedToCharacter].causedBy(abilityId) shouldBe 0
-      enchantedTurnPassedGs.gameLog.events.ofType[GameEvent.EffectAddedToCharacter].causedBy(abilityId) shouldBe 1
+      turnPassedGs.gameLog.events.ofType[GameEvent.EffectAddedToCharacter].causedBy(abilityId).size shouldBe 0
+      enchantedTurnPassedGs.gameLog.events.ofType[GameEvent.EffectAddedToCharacter].causedBy(abilityId).size shouldBe 1
     }
 
     "not add shield above treshold" in {
