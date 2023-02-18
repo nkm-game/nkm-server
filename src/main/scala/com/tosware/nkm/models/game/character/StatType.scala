@@ -1,4 +1,4 @@
-package com.tosware.nkm.models.game
+package com.tosware.nkm.models.game.character
 
 import enumeratum._
 
@@ -12,5 +12,3 @@ object StatType extends Enum[StatType] {
   case object PhysicalDefense extends StatType
   case object MagicalDefense extends StatType
 }
-
-

@@ -5,6 +5,7 @@ import com.tosware.nkm.models.game.ability.Ability.AbilityId
 import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.game.ability.{Ability, AbilityMetadata, AbilityType}
+import com.tosware.nkm.models.game.event.{GameEvent, GameEventListener}
 
 import scala.util.Random
 

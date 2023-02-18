@@ -1,11 +1,13 @@
-package com.tosware.nkm.models.game
+package com.tosware.nkm.models.game.event
 
+import com.tosware.nkm.models.game.Player.PlayerId
 import com.tosware.nkm.models.game.ability.Ability.AbilityId
-import com.tosware.nkm.models.game.character_effect.CharacterEffect.CharacterEffectId
 import com.tosware.nkm.models.game.character.CharacterMetadata.CharacterMetadataId
 import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
-import com.tosware.nkm.models.game.Player.PlayerId
+import com.tosware.nkm.models.game.character_effect.CharacterEffect.CharacterEffectId
 import com.tosware.nkm.models.game.hex.HexCoordinates
+import com.tosware.nkm.models.game._
+import com.tosware.nkm.models.game.character.StatType
 
 object GameEvent {
   type GameEventId = String

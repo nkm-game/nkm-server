@@ -4,6 +4,7 @@ import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.game.abilities.nibutani_shinka.Mabinogion
 import com.tosware.nkm.models.game.ability.AbilityType
 import com.tosware.nkm.models.game.character.CharacterMetadata
+import com.tosware.nkm.models.game.event.GameEvent
 import helpers.{TestUtils, scenarios}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike

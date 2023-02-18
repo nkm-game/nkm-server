@@ -2,27 +2,61 @@ package com.tosware.nkm.models.game
 
 import com.softwaremill.quicklens._
 import com.tosware.nkm.actors.Game.GameId
-import com.tosware.nkm.models.game.ability.Ability.AbilityId
-import com.tosware.nkm.models.game.character_effect.CharacterEffect.CharacterEffectId
-import com.tosware.nkm.models.game.character.CharacterMetadata.CharacterMetadataId
-import com.tosware.nkm.models.game.GameEvent._
-import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
+import com.tosware.nkm.models.game.event.GameEvent._
 import com.tosware.nkm.models.game.Player.PlayerId
-import com.tosware.nkm.models.game.ability.{Ability, AbilityState, AbilityView, UsableOnCharacter, UsableOnCoordinates, UsableWithoutTarget, UseData}
-import com.tosware.nkm.models.game.character.{CharacterMetadata, NkmCharacter, NkmCharacterView}
-import com.tosware.nkm.models.game.character_effect.{CharacterEffect, CharacterEffectState, CharacterEffectView}
+import com.tosware.nkm.models.game.ability.Ability.AbilityId
+import com.tosware.nkm.models.game.ability._
+import com.tosware.nkm.models.game.character.CharacterMetadata.CharacterMetadataId
+import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
+import com.tosware.nkm.models.game.character.{CharacterMetadata, NkmCharacter, StatType}
+import com.tosware.nkm.models.game.character_effect.CharacterEffect.CharacterEffectId
+import com.tosware.nkm.models.game.character_effect.{CharacterEffect, CharacterEffectState}
 import com.tosware.nkm.models.game.effects.{Block, FreeAbility}
+import com.tosware.nkm.models.game.event.{EventHideData, GameEventListener, GameLog, RevealCondition}
 import com.tosware.nkm.models.game.hex._
 import com.tosware.nkm.models.game.pick.PickType
-import com.tosware.nkm.models.game.pick.blindpick.{BlindPickConfig, BlindPickPhase, BlindPickState, BlindPickStateView}
-import com.tosware.nkm.models.game.pick.draftpick.{DraftPickConfig, DraftPickPhase, DraftPickState, DraftPickStateView}
+import com.tosware.nkm.models.game.pick.blindpick._
+import com.tosware.nkm.models.game.pick.draftpick._
 import com.tosware.nkm.{Logging, NkmUtils}
 
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import scala.util.Random
 
-case class EventHideData(eid: GameEventId, showOnlyFor: Seq[PlayerId], revealCondition: RevealCondition)
+object GameState extends Logging {
+  def empty(id: String): GameState = {
+    val defaultPickType = PickType.AllRandom
+    val defaultClockConfig = ClockConfig.defaultForPickType(defaultPickType)
+
+    GameState(
+      id = id,
+      charactersMetadata = Set(),
+      numberOfBans = 0,
+      numberOfCharactersPerPlayers = 1,
+      draftPickState = None,
+      blindPickState = None,
+      hexMap = HexMap.empty,
+      players = Seq(),
+      characters = Set(),
+      phase = Phase(0),
+      turn = Turn(0),
+      gameStatus = GameStatus.NotStarted,
+      pickType = defaultPickType,
+      characterIdsOutsideMap = Set(),
+      characterIdsThatTookActionThisPhase = Set(),
+      characterTakingActionThisTurn = None,
+      playerIdsThatPlacedCharacters = Set(),
+      abilityStates = Map(),
+      characterEffectStates = Map(),
+      clockConfig = defaultClockConfig,
+      clock = Clock.fromConfig(defaultClockConfig, Seq()),
+      lastTimestamp = Instant.now(),
+      gameLog = GameLog(Seq.empty),
+      hiddenEvents = Seq(),
+    )
+  }
+}
+
 
 case class GameState
 (
@@ -170,7 +204,7 @@ case class GameState
     es.foldLeft(this){case (acc, event) => acc.logEvent(event)}
 
   def logAndHideEvent(e: GameEvent, showOnlyFor: Seq[PlayerId], revealCondition: RevealCondition)(implicit random: Random): GameState =
-    copy(hiddenEvents = hiddenEvents :+ EventHideData(e.id, showOnlyFor, revealCondition))
+    copy(hiddenEvents = hiddenEvents :+ event.EventHideData(e.id, showOnlyFor, revealCondition))
       .logEvent(e)
 
   def reveal(revealCondition: RevealCondition)(implicit random: Random): GameState =
@@ -739,7 +773,7 @@ case class GameState
       abilities = abilities.map(_.toView(this)),
       effects = effects.map(_.toView(this)),
       clockConfig = clockConfig,
-      clock = clock,
+      clock = getCurrentClock(),
       gameLog = gameLog.toView(forPlayerOpt)(this),
 
       currentPlayerId = currentPlayer.id,
@@ -752,71 +786,3 @@ case class GameState
       charactersToTakeAction = charactersToTakeAction,
     )
 }
-
-object GameState extends Logging {
-  def empty(id: String): GameState = {
-    val defaultPickType = PickType.AllRandom
-    val defaultClockConfig = ClockConfig.defaultForPickType(defaultPickType)
-
-    GameState(
-      id = id,
-      charactersMetadata = Set(),
-      numberOfBans = 0,
-      numberOfCharactersPerPlayers = 1,
-      draftPickState = None,
-      blindPickState = None,
-      hexMap = HexMap.empty,
-      players = Seq(),
-      characters = Set(),
-      phase = Phase(0),
-      turn = Turn(0),
-      gameStatus = GameStatus.NotStarted,
-      pickType = defaultPickType,
-      characterIdsOutsideMap = Set(),
-      characterIdsThatTookActionThisPhase = Set(),
-      characterTakingActionThisTurn = None,
-      playerIdsThatPlacedCharacters = Set(),
-      abilityStates = Map(),
-      characterEffectStates = Map(),
-      clockConfig = defaultClockConfig,
-      clock = Clock.fromConfig(defaultClockConfig, Seq()),
-      lastTimestamp = Instant.now(),
-      gameLog = GameLog(Seq.empty),
-      hiddenEvents = Seq(),
-    )
-  }
-}
-
-case class GameStateView(
-  id: GameId,
-  charactersMetadata: Set[CharacterMetadata],
-  gameStatus: GameStatus,
-  pickType: PickType,
-  numberOfBans: Int,
-  numberOfCharactersPerPlayers: Int,
-  draftPickState: Option[DraftPickStateView],
-  blindPickState: Option[BlindPickStateView],
-  hexMap: HexMapView,
-  players: Seq[Player],
-  characters: Set[NkmCharacterView],
-  abilities: Set[AbilityView],
-  effects: Set[CharacterEffectView],
-  phase: Phase,
-  turn: Turn,
-  characterIdsOutsideMap: Set[CharacterId],
-  characterIdsThatTookActionThisPhase: Set[CharacterId],
-  characterTakingActionThisTurn: Option[CharacterId],
-  playerIdsThatPlacedCharacters: Set[PlayerId],
-  clockConfig: ClockConfig,
-  clock: Clock,
-  gameLog: GameLogView,
-
-  currentPlayerId: PlayerId,
-  hostId: PlayerId,
-  isBlindPickingPhase: Boolean,
-  isDraftBanningPhase: Boolean,
-  isInCharacterSelect: Boolean,
-  isSharedTime: Boolean,
-  currentPlayerTime: Long,
-  charactersToTakeAction: Set[CharacterId],
-)

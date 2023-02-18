@@ -6,7 +6,7 @@ import com.tosware.nkm.models.game.ability.Ability.AbilityId
 import com.tosware.nkm.models.game.{Clock, ClockConfig, GameStateView}
 import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game.character.CharacterMetadata.CharacterMetadataId
-import com.tosware.nkm.models.game.GameEvent.GameEvent
+import com.tosware.nkm.models.game.event.GameEvent.GameEvent
 import com.tosware.nkm.models.game.ability.UseData
 import com.tosware.nkm.models.game.hex.HexCoordinates
 import com.tosware.nkm.models.game.pick.PickType

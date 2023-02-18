@@ -6,6 +6,7 @@ import com.tosware.nkm.models.game.hex.{HexCellType, HexCoordinates}
 import com.tosware.nkm.models.game.ws._
 import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.game.character.CharacterMetadata
+import com.tosware.nkm.models.game.event.GameEvent
 import com.tosware.nkm.models.game.pick.PickType
 import com.tosware.nkm.models.game.pick.blindpick.BlindPickPhase
 import com.tosware.nkm.models.game.pick.draftpick.DraftPickPhase

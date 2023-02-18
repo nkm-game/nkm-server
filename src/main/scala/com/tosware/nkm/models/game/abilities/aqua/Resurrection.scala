@@ -6,6 +6,7 @@ import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.game.ability.{Ability, AbilityMetadata, AbilityType, UsableOnCoordinates, UseData}
 import com.tosware.nkm.models.game.character.NkmCharacter
+import com.tosware.nkm.models.game.event.GameEvent
 import com.tosware.nkm.models.game.hex.HexCoordinates
 
 import scala.util.Random

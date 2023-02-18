@@ -5,6 +5,7 @@ import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.game.ability.AbilityType
 import com.tosware.nkm.models.game.character_effect.{CharacterEffect, CharacterEffectMetadata, CharacterEffectName, CharacterEffectType}
 import com.tosware.nkm.models.game.effects.AbilityEnchant.abilityTypeKey
+import com.tosware.nkm.models.game.event.{GameEvent, GameEventListener}
 
 import scala.util.Random
 

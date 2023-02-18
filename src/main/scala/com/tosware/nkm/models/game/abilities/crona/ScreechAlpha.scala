@@ -5,6 +5,7 @@ import com.tosware.nkm.models.game.ability.Ability.AbilityId
 import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.game.ability.{Ability, AbilityMetadata, AbilityType, UsableWithoutTarget}
+import com.tosware.nkm.models.game.character.StatType
 import com.tosware.nkm.models.game.effects.Stun
 
 import scala.util.Random

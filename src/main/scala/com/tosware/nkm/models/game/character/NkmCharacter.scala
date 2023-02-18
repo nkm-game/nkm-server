@@ -4,12 +4,13 @@ import com.softwaremill.quicklens._
 import com.tosware.nkm.NkmUtils
 import com.tosware.nkm.models.game.character_effect.CharacterEffect.CharacterEffectId
 import CharacterMetadata.CharacterMetadataId
-import com.tosware.nkm.models.game.GameEvent.GameEvent
+import com.tosware.nkm.models.game.event.GameEvent.GameEvent
 import com.tosware.nkm.models.game.Player.PlayerId
 import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.game.ability._
 import com.tosware.nkm.models.game.character.NkmCharacter._
 import com.tosware.nkm.models.game.character_effect.{CharacterEffect, CharacterEffectName}
+import com.tosware.nkm.models.game.event.GameEvent
 import com.tosware.nkm.models.game.hex._
 import com.tosware.nkm.providers.AbilityProvider
 

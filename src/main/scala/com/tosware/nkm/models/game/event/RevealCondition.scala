@@ -1,4 +1,4 @@
-package com.tosware.nkm.models.game
+package com.tosware.nkm.models.game.event
 
 import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
 

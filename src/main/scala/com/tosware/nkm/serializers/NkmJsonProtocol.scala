@@ -1,6 +1,6 @@
 package com.tosware.nkm.serializers
 
-import com.tosware.nkm.models.game.GameEvent._
+import com.tosware.nkm.models.game.event.GameEvent._
 import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game.hex.HexCoordinates
 import pl.iterators.kebs.json.{KebsEnumFormats, KebsSpray}
