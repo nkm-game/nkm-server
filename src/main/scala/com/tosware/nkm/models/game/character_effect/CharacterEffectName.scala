@@ -17,6 +17,7 @@ object CharacterEffectName extends Enum[CharacterEffectName] {
   case object FreeAbility extends CharacterEffectName
   case object Ground extends CharacterEffectName
   case object HasToTakeAction extends CharacterEffectName
+  case object HealOverTime extends CharacterEffectName
   case object Invisibility extends CharacterEffectName
   case object ManipulatorOfObjectsImmunity extends CharacterEffectName
   case object MurasamePoison extends CharacterEffectName

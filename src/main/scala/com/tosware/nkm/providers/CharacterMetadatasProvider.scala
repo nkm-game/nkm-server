@@ -9,6 +9,7 @@ import crona._
 import ebisuzawa_kurumi._
 import hecate._
 import kirito._
+import liones_elizabeth._
 import llenn._
 import nibutani_shinka._
 import roronoa_zoro._
@@ -341,7 +342,11 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       initialSpeed = 5,
       initialPhysicalDefense = 15,
       initialMagicalDefense = 15,
-      initialAbilitiesMetadataIds = Seq.empty
+      initialAbilitiesMetadataIds = Seq(
+        ImmenseHealingPowers.metadata.id,
+        Invigorate.metadata.id,
+        PowerOfTheGoddess.metadata.id,
+      )
     ),
     CharacterMetadata(
       name = "Satou Kazuma",

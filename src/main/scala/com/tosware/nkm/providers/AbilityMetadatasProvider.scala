@@ -1,15 +1,16 @@
 package com.tosware.nkm.providers
 
 import com.tosware.nkm.models.game.abilities._
+import com.tosware.nkm.models.game.ability.AbilityMetadata
 import akame._
 import aqua._
 import blank._
 import carmel_wilhelmina._
-import com.tosware.nkm.models.game.ability.AbilityMetadata
 import ebisuzawa_kurumi._
 import crona._
 import hecate._
 import kirito._
+import liones_elizabeth._
 import llenn._
 import nibutani_shinka._
 import roronoa_zoro._
@@ -50,6 +51,10 @@ case class AbilityMetadatasProvider() extends NkmJsonProtocol {
     Parry.metadata,
     Switch.metadata,
     StarburstStream.metadata,
+
+    ImmenseHealingPowers.metadata,
+    Invigorate.metadata,
+    PowerOfTheGoddess.metadata,
 
     PChan.metadata,
     GrenadeThrow.metadata,

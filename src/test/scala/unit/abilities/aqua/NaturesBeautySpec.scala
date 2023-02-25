@@ -11,10 +11,11 @@ class NaturesBeautySpec
     with Matchers
     with TestUtils
 {
-  private val metadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(NaturesBeauty.metadata.id))
+  private val abilityMetadata = NaturesBeauty.metadata
+  private val metadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
   private val s = scenarios.Simple2v2TestScenario(metadata)
 
-  NaturesBeauty.metadata.name must {
+  abilityMetadata.name must {
     "be able to heal friends via basic attacks" in {
       val damagedGameState = s.gameState.setHp(s.characters.p0Second.id, 30)(random, s.gameState.id)
       val healedGameState = damagedGameState.basicAttack(s.characters.p0First.id, s.characters.p0Second.id)

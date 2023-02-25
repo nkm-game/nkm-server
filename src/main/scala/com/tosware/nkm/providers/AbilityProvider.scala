@@ -1,6 +1,7 @@
 package com.tosware.nkm.providers
 
 import com.tosware.nkm.models.game.ability.Ability.AbilityMetadataId
+import com.tosware.nkm.models.game.ability.Ability
 import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game.abilities._
 import com.tosware.nkm.NkmUtils
@@ -8,11 +9,11 @@ import akame._
 import aqua._
 import blank._
 import carmel_wilhelmina._
-import com.tosware.nkm.models.game.ability.Ability
 import crona._
 import ebisuzawa_kurumi._
 import hecate._
 import kirito._
+import liones_elizabeth._
 import llenn._
 import nibutani_shinka._
 import roronoa_zoro._
@@ -79,6 +80,13 @@ object AbilityProvider extends NkmUtils {
         Switch(randomUUID(), characterId)
       case StarburstStream.metadata.id =>
         StarburstStream(randomUUID(), characterId)
+
+      case ImmenseHealingPowers.metadata.id =>
+        ImmenseHealingPowers(randomUUID(), characterId)
+      case Invigorate.metadata.id =>
+        Invigorate(randomUUID(), characterId)
+      case PowerOfTheGoddess.metadata.id =>
+        PowerOfTheGoddess(randomUUID(), characterId)
 
       case PChan.metadata.id =>
         PChan(randomUUID(), characterId)

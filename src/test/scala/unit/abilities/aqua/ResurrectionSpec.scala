@@ -15,11 +15,13 @@ class ResurrectionSpec
     with Matchers
     with TestUtils
 {
-  private val metadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(Resurrection.metadata.id))
+  private val abilityMetadata = Resurrection.metadata
+  private val metadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
   private val s = scenarios.Simple2v2TestScenario(metadata)
   private val gameState: GameState = s.gameState.incrementPhase(4)
   private val abilityId = s.characters.p0First.state.abilities.head.id
-  Resurrection.metadata.name must {
+
+  abilityMetadata.name must {
     "be able to use on characters that died in the same phase" in {
       val deadGameState = gameState.damageCharacter(s.characters.p0Second.id, Damage(DamageType.True, 99999))(random, gameState.id)
 

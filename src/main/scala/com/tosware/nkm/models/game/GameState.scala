@@ -174,6 +174,16 @@ case class GameState
     case GameStatus.CharacterPlacing | GameStatus.Running | GameStatus.Finished =>
       turn.number
   }
+
+  def backtrackCauseToCharacterId(causedById: String): Option[CharacterId] =
+    if(characters.map(_.id).contains(causedById))
+      Some(causedById)
+    else if(effects.map(_.id).contains(causedById))
+      Some(effectById(causedById).parentCharacter(this).id)
+    else if(abilities.map(_.id).contains(causedById))
+      Some(abilityById(causedById).parentCharacter(this).id)
+    else None
+
   private def handleTrigger(event: GameEvent, trigger: GameEventListener)(implicit random: Random, gameState: GameState) = {
     try {
       trigger.onEvent(event)(random, gameState)
@@ -515,9 +525,28 @@ case class GameState
       logger.error(s"Unable to heal character $characterId. Character dead.")
       this
     } else {
-      updateCharacter(characterId)(_.heal(amount))
-        .logEvent(CharacterHealed(NkmUtils.randomUUID(), phase, turn, causedById, characterId, amount))
+      val healPreparedId = randomUUID()
+      val healPreparedGs = logEvent(HealPrepared(healPreparedId, phase, turn, causedById, characterId, amount))
+
+      val additionalHealing = healPreparedGs.gameLog.events
+        .inTurn(turn.number)
+        .ofType[HealAmplified]
+        .filter(_.healPreparedId == healPreparedId)
+        .map(_.additionalAmount)
+        .sum
+
+      val resultHealing = amount + additionalHealing
+
+      healPreparedGs
+        .updateCharacter(characterId)(_.heal(resultHealing))
+        .logEvent(CharacterHealed(randomUUID(), phase, turn, causedById, characterId, resultHealing))
     }
+
+  def amplifyHeal(healPreparedId: GameEventId, additionalAmount: Int)(implicit random: Random, causedById: String): GameState =
+    if(additionalAmount == 0)
+      this
+    else
+      logEvent(HealAmplified(randomUUID(), phase, turn, causedById, healPreparedId, additionalAmount))
 
   def setHp(characterId: CharacterId, amount: Int)(implicit random: Random, causedById: String): GameState =
     updateCharacter(characterId)(_.modify(_.state.healthPoints).setTo(amount))

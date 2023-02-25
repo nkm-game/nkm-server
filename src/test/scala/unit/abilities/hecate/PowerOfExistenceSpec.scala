@@ -14,7 +14,8 @@ class PowerOfExistenceSpec
     with Matchers
     with TestUtils
 {
-  private val metadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(PowerOfExistence.metadata.id, MasterThrone.metadata.id))
+  private val abilityMetadata = PowerOfExistence.metadata
+  private val metadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id, MasterThrone.metadata.id))
   private val s = scenarios.Simple2v2TestScenario(metadata)
   private implicit val gameState: GameState = s.gameState.incrementPhase(4)
   private val abilityId = s.characters.p0First.state.abilities.head.id
@@ -24,11 +25,12 @@ class PowerOfExistenceSpec
     .passTurn(s.characters.p1First.id)
     .finishPhase()
 
-  PowerOfExistence.metadata.name must {
+  abilityMetadata.name must {
     "be able to use" in {
-      val validator = GameStateValidator()(aaGameState)
-      val r = validator.validateAbilityUseWithoutTarget(s.characters.p0First.owner.id, abilityId)
-      assertCommandSuccess(r)
+      assertCommandSuccess {
+        GameStateValidator()(aaGameState)
+          .validateAbilityUseWithoutTarget(s.characters.p0First.owner.id, abilityId)
+      }
     }
 
     "be able to damage characters" in {
