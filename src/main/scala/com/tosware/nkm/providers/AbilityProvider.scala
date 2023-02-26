@@ -7,6 +7,7 @@ import com.tosware.nkm.models.game.abilities._
 import com.tosware.nkm.NkmUtils
 import akame._
 import aqua._
+import ayatsuji_ayase._
 import blank._
 import carmel_wilhelmina._
 import crona._
@@ -38,6 +39,13 @@ object AbilityProvider extends NkmUtils {
         Purification(randomUUID(), characterId)
       case Resurrection.metadata.id =>
         Resurrection(randomUUID(), characterId)
+
+      case CrackTheSky.metadata.id =>
+        CrackTheSky(randomUUID(), characterId)
+      case MarkOfTheWind.metadata.id =>
+        MarkOfTheWind(randomUUID(), characterId)
+      case SamuraisSwiftness.metadata.id =>
+        SamuraisSwiftness(randomUUID(), characterId)
 
       case AceInTheHole.metadata.id =>
         AceInTheHole(randomUUID(), characterId)

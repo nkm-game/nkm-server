@@ -52,7 +52,7 @@ case class Murasame(abilityId: AbilityId, parentCharacterId: CharacterId) extend
     gameState.addEffect(targetCharacterId, poisonEffect)(random, id)
   }
 
-  override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState) =
+  override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
     e match {
       case CharacterBasicAttacked(_, _, _, _, characterId, targetCharacterId) =>
         if(parentCharacterId == characterId) {

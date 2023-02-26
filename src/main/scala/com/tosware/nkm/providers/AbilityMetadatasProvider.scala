@@ -4,6 +4,7 @@ import com.tosware.nkm.models.game.abilities._
 import com.tosware.nkm.models.game.ability.AbilityMetadata
 import akame._
 import aqua._
+import ayatsuji_ayase._
 import blank._
 import carmel_wilhelmina._
 import ebisuzawa_kurumi._
@@ -27,6 +28,10 @@ case class AbilityMetadatasProvider() extends NkmJsonProtocol {
     NaturesBeauty.metadata,
     Purification.metadata,
     Resurrection.metadata,
+
+    CrackTheSky.metadata,
+    MarkOfTheWind.metadata,
+    SamuraisSwiftness.metadata,
 
     AceInTheHole.metadata,
     Check.metadata,

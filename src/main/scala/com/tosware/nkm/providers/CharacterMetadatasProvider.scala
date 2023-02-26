@@ -3,6 +3,7 @@ package com.tosware.nkm.providers
 import com.tosware.nkm.models.game.abilities._
 import akame._
 import aqua._
+import ayatsuji_ayase._
 import blank._
 import carmel_wilhelmina._
 import crona._
@@ -34,6 +35,21 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
         NaturesBeauty.metadata.id,
         Purification.metadata.id,
         Resurrection.metadata.id,
+      )
+    ),
+    CharacterMetadata(
+      name = "Ayatsuji Ayase",
+      attackType = AttackType.Melee,
+      initialHealthPoints = 48,
+      initialAttackPoints = 16,
+      initialBasicAttackRange = 4,
+      initialSpeed = 5,
+      initialPhysicalDefense = 20,
+      initialMagicalDefense = 5,
+      initialAbilitiesMetadataIds = Seq(
+        CrackTheSky.metadata.id,
+        MarkOfTheWind.metadata.id,
+        SamuraisSwiftness.metadata.id,
       )
     ),
     CharacterMetadata(

@@ -184,7 +184,7 @@ case class GameState
       Some(abilityById(causedById).parentCharacter(this).id)
     else None
 
-  private def handleTrigger(event: GameEvent, trigger: GameEventListener)(implicit random: Random, gameState: GameState) = {
+  private def handleTrigger(event: GameEvent, trigger: GameEventListener)(implicit random: Random, gameState: GameState): GameState = {
     try {
       trigger.onEvent(event)(random, gameState)
     } catch {
@@ -192,7 +192,6 @@ case class GameState
         logger.error(e.getMessage)
         gameState
     }
-
   }
 
   def updateTimestamp(): GameState = copy(lastTimestamp = Instant.now())
