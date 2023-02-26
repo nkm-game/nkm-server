@@ -43,7 +43,7 @@ class ImmenseHealingPowersSpec
       .passTurn(s.characters.p0Second.id)
 
   private def potgUsedGs(gs: GameState): GameState =
-    gs.useAbilityWithoutTarget(potgAbilityId)
+    gs.useAbility(potgAbilityId)
 
   private def naturesBeautyUsedGs(gs: GameState): GameState =
     gs.basicAttack(s.characters.p0First.id, s.characters.p0Second.id)

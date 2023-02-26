@@ -29,14 +29,14 @@ class LittleWarHornSpec
   abilityMetadata.name must {
     "be able to use" in {
       val r = GameStateValidator()
-        .validateAbilityUseWithoutTarget(
+        .validateAbilityUse(
           s.characters.p0.owner.id,
           abilityId,
         )
       assertCommandSuccess(r)
     }
     "add AD and speed buffs" in {
-      val newGameState: GameState = gameState.useAbilityWithoutTarget(abilityId)
+      val newGameState: GameState = gameState.useAbility(abilityId)
       val statBuffs = newGameState
         .characterById(s.characters.p0.id)
         .state
@@ -60,7 +60,7 @@ class LittleWarHornSpec
       val duration = abilityMetadata.variables("duration")
       val initialSpeed = s.characters.p0.state.pureSpeed
 
-      val abilityUseGameState: GameState = gameState.useAbilityWithoutTarget(abilityId)
+      val abilityUseGameState: GameState = gameState.useAbility(abilityId)
       abilityUseGameState
         .characterById(s.characters.p0.id)
         .state.pureSpeed should be (initialSpeed)

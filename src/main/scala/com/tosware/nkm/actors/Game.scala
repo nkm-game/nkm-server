@@ -54,7 +54,7 @@ object Game {
 
   case class BasicAttackCharacter(playerId: PlayerId, attackingCharacterId: CharacterId, targetCharacterId: CharacterId) extends Command
 
-  case class UseAbilityWithoutTarget(playerId: PlayerId, abilityId: AbilityId) extends Command
+  case class UseAbility(playerId: PlayerId, abilityId: AbilityId, useData: UseData) extends Command
 
   case class UseAbilityOnCoordinates(playerId: PlayerId, abilityId: AbilityId, target: HexCoordinates, useData: UseData) extends Command
 
@@ -98,7 +98,7 @@ object Game {
 
   case class CharacterBasicAttacked(id: GameId, playerId: PlayerId, attackingCharacterId: CharacterId, targetCharacterId: CharacterId) extends Event
 
-  case class AbilityUsedWithoutTarget(id: GameId, playerId: PlayerId, abilityId: AbilityId) extends Event
+  case class AbilityUsed(id: GameId, playerId: PlayerId, abilityId: AbilityId, useData: UseData) extends Event
 
   case class AbilityUsedOnCoordinates(id: GameId, playerId: PlayerId, abilityId: AbilityId, target: HexCoordinates, useData: UseData) extends Event
 
@@ -344,10 +344,10 @@ class Game(id: GameId)(implicit nkmDataService: NkmDataService) extends Persiste
     }
   }
 
-  def useAbilityWithoutTarget(playerId: PlayerId, abilityId: AbilityId): Unit = {
-    val e = AbilityUsedWithoutTarget(id, playerId, abilityId)
+  def useAbility(playerId: PlayerId, abilityId: AbilityId, useData: UseData): Unit = {
+    val e = AbilityUsed(id, playerId, abilityId, useData)
     persistAndPublish(e) { _ =>
-      updateGameState(gameState.useAbilityWithoutTarget(abilityId))
+      updateGameState(gameState.useAbility(abilityId, useData))
       sender() ! Success()
     }
   }
@@ -420,9 +420,9 @@ class Game(id: GameId)(implicit nkmDataService: NkmDataService) extends Persiste
       validate(v().validateBasicAttackCharacter(playerId, attackingCharacterId, targetCharacterId))(() =>
         basicAttackCharacter(playerId, attackingCharacterId, targetCharacterId)
       )
-    case UseAbilityWithoutTarget(playerId, abilityId) =>
-      validate(v().validateAbilityUseWithoutTarget(playerId, abilityId))(() =>
-        useAbilityWithoutTarget(playerId, abilityId)
+    case UseAbility(playerId, abilityId, useData) =>
+      validate(v().validateAbilityUse(playerId, abilityId, useData))(() =>
+        useAbility(playerId, abilityId, useData)
       )
     case UseAbilityOnCoordinates(playerId, abilityId, target, useData) =>
       validate(v().validateAbilityUseOnCoordinates(playerId, abilityId, target, useData))(() =>
@@ -486,9 +486,9 @@ class Game(id: GameId)(implicit nkmDataService: NkmDataService) extends Persiste
     case CharacterBasicAttacked(_, _, attackingCharacterId, targetCharacterId) =>
       updateGameState(gameState.basicAttack(attackingCharacterId, targetCharacterId))
       log.debug(s"Recovered basic attack of $attackingCharacterId to $targetCharacterId")
-    case AbilityUsedWithoutTarget(_, _, abilityId) =>
-      updateGameState(gameState.useAbilityWithoutTarget(abilityId))
-      log.debug(s"Recovered ability $abilityId use without target")
+    case AbilityUsed(_, _, abilityId, useData) =>
+      updateGameState(gameState.useAbility(abilityId, useData))
+      log.debug(s"Recovered ability $abilityId use")
     case AbilityUsedOnCoordinates(_, _, abilityId, target, useData) =>
       updateGameState(gameState.useAbilityOnCoordinates(abilityId, target, useData))
       log.debug(s"Recovered ability $abilityId use on coordinates $target")

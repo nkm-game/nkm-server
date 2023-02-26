@@ -29,13 +29,13 @@ class PowerOfExistenceSpec
     "be able to use" in {
       assertCommandSuccess {
         GameStateValidator()(aaGameState)
-          .validateAbilityUseWithoutTarget(s.characters.p0First.owner.id, abilityId)
+          .validateAbilityUse(s.characters.p0First.owner.id, abilityId)
       }
     }
 
     "be able to damage characters" in {
       aaGameState.abilityById(masterThroneAbilityId).asInstanceOf[MasterThrone].collectedEnergy(aaGameState) should be > 0
-      val abilityUsedGameState: GameState = aaGameState.useAbilityWithoutTarget(abilityId)
+      val abilityUsedGameState: GameState = aaGameState.useAbility(abilityId)
       abilityUsedGameState.abilityById(masterThroneAbilityId).asInstanceOf[MasterThrone].collectedEnergy(abilityUsedGameState) should be(0)
 
       abilityUsedGameState.gameLog.events

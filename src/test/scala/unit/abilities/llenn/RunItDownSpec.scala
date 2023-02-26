@@ -21,12 +21,12 @@ class RunItDownSpec
 
   RunItDown.metadata.name must {
     "be able to use" in {
-      val r = GameStateValidator().validateAbilityUseWithoutTarget(s.characters.p0First.owner.id, abilityId)
+      val r = GameStateValidator().validateAbilityUse(s.characters.p0First.owner.id, abilityId)
       assertCommandSuccess(r)
     }
 
     "be able to move and attack three times after using" in {
-      val abilityUsedGameState: GameState = gameState.useAbilityWithoutTarget(abilityId)
+      val abilityUsedGameState: GameState = gameState.useAbility(abilityId)
 
       def validateBasicAttack(gameState: GameState) =
         GameStateValidator()(gameState).validateBasicAttackCharacter(pid,

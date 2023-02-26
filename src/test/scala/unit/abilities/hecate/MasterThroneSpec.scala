@@ -43,7 +43,7 @@ class MasterThroneSpec
     }
 
     "not be able to collect energy from ultimate ability" in {
-      val newGameState: GameState = gameState.useAbilityWithoutTarget(powerOfExistenceAbilityId)
+      val newGameState: GameState = gameState.useAbility(powerOfExistenceAbilityId)
       newGameState.abilityById(abilityId).asInstanceOf[MasterThrone].collectedEnergy(newGameState) should be (0)
     }
   }

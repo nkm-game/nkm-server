@@ -58,7 +58,7 @@ trait NkmJsonProtocol
         case e: EffectRemovedFromCharacter => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
         case e: EffectVariableSet => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
         case e: AbilityHitCharacter => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
-        case e: AbilityUsedWithoutTarget => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
+        case e: AbilityUsed => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
         case e: AbilityUsedOnCoordinates => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
         case e: AbilityUsedOnCharacter => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
         case e: AbilityUseFinished => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
@@ -107,7 +107,7 @@ trait NkmJsonProtocol
         case "EffectRemovedFromCharacter" => ges.eventJson.parseJson.convertTo[EffectRemovedFromCharacter]
         case "EffectVariableSet" => ges.eventJson.parseJson.convertTo[EffectVariableSet]
         case "AbilityHitCharacter" => ges.eventJson.parseJson.convertTo[AbilityHitCharacter]
-        case "AbilityUsedWithoutTarget" => ges.eventJson.parseJson.convertTo[AbilityUsedWithoutTarget]
+        case "AbilityUsed" => ges.eventJson.parseJson.convertTo[AbilityUsed]
         case "AbilityUsedOnCoordinates" => ges.eventJson.parseJson.convertTo[AbilityUsedOnCoordinates]
         case "AbilityUsedOnCharacter" => ges.eventJson.parseJson.convertTo[AbilityUsedOnCharacter]
         case "AbilityUseFinished" => ges.eventJson.parseJson.convertTo[AbilityUseFinished]

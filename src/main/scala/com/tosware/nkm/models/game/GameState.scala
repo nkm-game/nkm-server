@@ -685,14 +685,14 @@ case class GameState
     }
   }
 
-  def useAbilityWithoutTarget(abilityId: AbilityId)(implicit random: Random): GameState = {
+  def useAbility(abilityId: AbilityId, useData: UseData = UseData())(implicit random: Random): GameState = {
     implicit val causedById: String = abilityId
-    val ability = abilityById(abilityId).asInstanceOf[Ability with UsableWithoutTarget]
+    val ability = abilityById(abilityId).asInstanceOf[Ability with Usable]
     val parentCharacter = ability.parentCharacter(this)
 
     val newGameState = takeActionWithCharacter(parentCharacter.id)
-      .logEvent(AbilityUsedWithoutTarget(NkmUtils.randomUUID(), phase, turn, causedById, abilityId))
-    ability.use()(random, newGameState)
+      .logEvent(AbilityUsed(randomUUID(), phase, turn, causedById, abilityId))
+    ability.use(useData)(random, newGameState)
       .afterAbilityUse(abilityId)
   }
 
@@ -702,7 +702,7 @@ case class GameState
     val parentCharacter = ability.parentCharacter(this)
 
     val newGameState = takeActionWithCharacter(parentCharacter.id)
-      .logEvent(AbilityUsedOnCoordinates(NkmUtils.randomUUID(), phase, turn, causedById, abilityId, target))
+      .logEvent(AbilityUsedOnCoordinates(randomUUID(), phase, turn, causedById, abilityId, target))
     ability.use(target, useData)(random, newGameState)
       .afterAbilityUse(abilityId)
   }
@@ -713,7 +713,7 @@ case class GameState
     val parentCharacter = ability.parentCharacter(this)
 
     val newGameState = takeActionWithCharacter(parentCharacter.id)
-      .logEvent(AbilityUsedOnCharacter(NkmUtils.randomUUID(), phase, turn, causedById, abilityId, target))
+      .logEvent(AbilityUsedOnCharacter(randomUUID(), phase, turn, causedById, abilityId, target))
     ability.use(target, useData)(random, newGameState)
       .afterAbilityUse(abilityId)
   }

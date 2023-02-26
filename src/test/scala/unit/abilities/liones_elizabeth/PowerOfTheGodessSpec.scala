@@ -24,12 +24,12 @@ class PowerOfTheGodessSpec
     "be able to use" in {
       assertCommandSuccess {
         GameStateValidator()(gameState)
-          .validateAbilityUseWithoutTarget(s.characters.p0First.owner(gameState).id, abilityId)
+          .validateAbilityUse(s.characters.p0First.owner(gameState).id, abilityId)
       }
     }
 
     "be able to heal characters" in {
-      val ags: GameState = gameState.useAbilityWithoutTarget(abilityId)
+      val ags: GameState = gameState.useAbility(abilityId)
 
       ags.gameLog.events
         .ofType[GameEvent.CharacterHealed]

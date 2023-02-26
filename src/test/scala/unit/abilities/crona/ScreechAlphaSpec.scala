@@ -25,12 +25,12 @@ class ScreechAlphaSpec
   abilityMetadata.name must {
     "be able to use" in {
       val r = GameStateValidator()
-        .validateAbilityUseWithoutTarget(s.characters.p0.owner.id, abilityId)
+        .validateAbilityUse(s.characters.p0.owner.id, abilityId)
       assertCommandSuccess(r)
     }
 
     "be able to stun and slow nearby enemies" in {
-      val newGameState: GameState = gameState.useAbilityWithoutTarget(abilityId)
+      val newGameState: GameState = gameState.useAbility(abilityId)
       newGameState.gameLog.events
         .ofType[GameEvent.EffectAddedToCharacter]
         .causedBy(abilityId).size shouldBe abilityRadius * 2

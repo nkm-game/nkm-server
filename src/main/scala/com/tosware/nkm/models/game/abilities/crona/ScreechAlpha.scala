@@ -4,7 +4,7 @@ import com.tosware.nkm.{NkmConf, NkmUtils}
 import com.tosware.nkm.models.game.ability.Ability.AbilityId
 import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game._
-import com.tosware.nkm.models.game.ability.{Ability, AbilityMetadata, AbilityType, UsableWithoutTarget}
+import com.tosware.nkm.models.game.ability.{Ability, AbilityMetadata, AbilityType, Usable, UseData}
 import com.tosware.nkm.models.game.character.StatType
 import com.tosware.nkm.models.game.effects.Stun
 
@@ -26,7 +26,7 @@ object ScreechAlpha {
 
 case class ScreechAlpha(abilityId: AbilityId, parentCharacterId: CharacterId)
   extends Ability(abilityId, parentCharacterId)
-    with UsableWithoutTarget {
+    with Usable {
   override val metadata = ScreechAlpha.metadata
 
   override def rangeCellCoords(implicit gameState: GameState) =
@@ -50,7 +50,7 @@ case class ScreechAlpha(abilityId: AbilityId, parentCharacterId: CharacterId)
       .addEffect(target, silenceEffect)(random, abilityId)
       .addEffect(target, slowEffect)(random, abilityId)
   }
-  override def use()(implicit random: Random, gameState: GameState): GameState =
+  override def use(useData: UseData)(implicit random: Random, gameState: GameState): GameState =
     targetsInRange.characters.map(_.id)
       .foldLeft(gameState)((acc, cid) => {
         addEffects(cid)(random, acc)

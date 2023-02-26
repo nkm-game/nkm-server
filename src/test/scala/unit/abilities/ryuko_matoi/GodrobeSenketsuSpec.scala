@@ -23,12 +23,12 @@ class GodrobeSenketsuSpec
   abilityMetadata.name must {
     "be able to use" in {
       assertCommandSuccess {
-        GameStateValidator()(gameState).validateAbilityUseWithoutTarget(s.characters.p0.owner(gameState).id, abilityId)
+        GameStateValidator()(gameState).validateAbilityUse(s.characters.p0.owner(gameState).id, abilityId)
       }
     }
 
     "apply flying effect" in {
-      val abilityUsedGameState: GameState = gameState.useAbilityWithoutTarget(abilityId)
+      val abilityUsedGameState: GameState = gameState.useAbility(abilityId)
       abilityUsedGameState.characterById(s.characters.p0.id).state.effects.ofType[effects.Fly].size should be > 0
     }
 
@@ -36,7 +36,7 @@ class GodrobeSenketsuSpec
       val oldAD = s.characters.p0.state.attackPoints
       val oldHP = s.characters.p0.state.healthPoints
 
-      val abilityUsedGameState: GameState = gameState.useAbilityWithoutTarget(abilityId)
+      val abilityUsedGameState: GameState = gameState.useAbility(abilityId)
       val newAD1 = abilityUsedGameState.characterById(s.characters.p0.id).state.attackPoints
       val newHP1 = abilityUsedGameState.characterById(s.characters.p0.id).state.healthPoints
 
@@ -64,25 +64,25 @@ class GodrobeSenketsuSpec
 
     "be able to enable and disable effect" in {
       val oldAD = s.characters.p0.state.attackPoints
-      val abilityUsedGameState: GameState = gameState.useAbilityWithoutTarget(abilityId)
+      val abilityUsedGameState: GameState = gameState.useAbility(abilityId)
 
       abilityUsedGameState.abilityStates(abilityId).isEnabled should be (true)
       abilityUsedGameState.abilityStates(abilityId).cooldown should be (0)
 
       assertCommandFailure {
-        GameStateValidator()(abilityUsedGameState).validateAbilityUseWithoutTarget(s.characters.p0.owner(gameState).id, abilityId)
+        GameStateValidator()(abilityUsedGameState).validateAbilityUse(s.characters.p0.owner(gameState).id, abilityId)
       }
       assertCommandSuccess {
         val gs = abilityUsedGameState
           .endTurn()
           .passTurn(s.characters.p1.id)
-        GameStateValidator()(gs).validateAbilityUseWithoutTarget(s.characters.p0.owner(gameState).id, abilityId)
+        GameStateValidator()(gs).validateAbilityUse(s.characters.p0.owner(gameState).id, abilityId)
       }
 
       val abilityDisabledGameState: GameState = abilityUsedGameState
         .endTurn()
         .passTurn(s.characters.p1.id)
-        .useAbilityWithoutTarget(abilityId)
+        .useAbility(abilityId)
 
       abilityDisabledGameState.characterById(s.characters.p0.id).state.effects.ofType[effects.Fly].size should be (0)
 

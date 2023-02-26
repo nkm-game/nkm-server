@@ -26,7 +26,7 @@ class FairyOfLoveSpec
     "be able to use" in {
       assertCommandSuccess {
         GameStateValidator()
-          .validateAbilityUseWithoutTarget(
+          .validateAbilityUse(
             s.characters.p0First.owner.id,
             abilityId,
           )
@@ -34,7 +34,7 @@ class FairyOfLoveSpec
     }
 
     "enchant passive ability" in {
-      val abilityUsedGameState: GameState = gameState.useAbilityWithoutTarget(abilityId)
+      val abilityUsedGameState: GameState = gameState.useAbility(abilityId)
       val enchantEffects = abilityUsedGameState.characterById(s.characters.p0First.id).state.effects.ofType[AbilityEnchant]
       enchantEffects should not be empty
       enchantEffects.head.abilityType should be (AbilityType.Passive)

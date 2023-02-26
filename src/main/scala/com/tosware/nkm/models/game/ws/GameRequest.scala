@@ -28,7 +28,7 @@ object GameRequest {
     final case class PassTurn(lobbyId: GameId, characterId: CharacterId) extends GameRequest
     final case class Move(lobbyId: GameId, path: Seq[HexCoordinates], characterId: CharacterId) extends GameRequest
     final case class BasicAttack(lobbyId: GameId, attackingCharacterId: CharacterId, targetCharacterId: CharacterId) extends GameRequest
-    final case class UseAbilityWithoutTarget(lobbyId: GameId, abilityId: AbilityId) extends GameRequest
+    final case class UseAbility(lobbyId: GameId, abilityId: AbilityId, useData: UseData) extends GameRequest
     final case class UseAbilityOnCoordinates(lobbyId: GameId, abilityId: AbilityId, target: HexCoordinates, useData: UseData) extends GameRequest
     final case class UseAbilityOnCharacter(lobbyId: GameId, abilityId: AbilityId, target: CharacterId, useData: UseData) extends GameRequest
   }

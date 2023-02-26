@@ -24,7 +24,7 @@ class TacticalEscapeSpec
     "be able to use" in {
       assertCommandSuccess {
         GameStateValidator()
-          .validateAbilityUseWithoutTarget(
+          .validateAbilityUse(
             s.characters.p0First.owner.id,
             abilityId,
           )
@@ -32,7 +32,7 @@ class TacticalEscapeSpec
     }
 
     "be able to modify character speed" in {
-      val abilityUsedGameState: GameState = gameState.useAbilityWithoutTarget(abilityId)
+      val abilityUsedGameState: GameState = gameState.useAbility(abilityId)
       val oldSpeed = s.characters.p0First.state.speed
       val newSpeed = abilityUsedGameState.characterById(s.characters.p0First.id).state.speed
       oldSpeed should be < newSpeed

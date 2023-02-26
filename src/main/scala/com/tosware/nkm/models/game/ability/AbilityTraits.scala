@@ -18,11 +18,11 @@ trait BasicMoveOverride {
   def basicMove(path: Seq[HexCoordinates])(implicit random: Random, gameState: GameState): GameState
 }
 
-trait UsableWithoutTarget { this: Ability =>
-  def use()(implicit random: Random, gameState: GameState): GameState
+trait Usable { this: Ability =>
+  def use(useData: UseData = UseData())(implicit random: Random, gameState: GameState): GameState
   def useChecks(implicit gameState: GameState): Set[UseCheck] =
     baseUseChecks
-  final def canBeUsed(implicit gameState: GameState): CommandResponse =
+  final def canBeUsed(implicit useData: UseData, gameState: GameState): CommandResponse =
     _canBeUsed(useChecks)
 }
 

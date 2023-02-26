@@ -4,7 +4,7 @@ import com.tosware.nkm.NkmConf
 import com.tosware.nkm.models.game.ability.Ability.AbilityId
 import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game._
-import com.tosware.nkm.models.game.ability.{Ability, AbilityMetadata, AbilityType, UsableWithoutTarget}
+import com.tosware.nkm.models.game.ability.{Ability, AbilityMetadata, AbilityType, Usable, UseData}
 import com.tosware.nkm.models.game.hex.HexCoordinates
 
 import scala.util.Random
@@ -23,14 +23,14 @@ object PowerOfExistence {
     )
 }
 
-case class PowerOfExistence(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId) with UsableWithoutTarget {
+case class PowerOfExistence(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId) with Usable {
   override val metadata = PowerOfExistence.metadata
   override def rangeCellCoords(implicit gameState: GameState) =
     gameState.hexMap.cells.toCoords
   override def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] =
     rangeCellCoords.whereEnemiesOfC(parentCharacterId)
 
-  override def use()(implicit random: Random, gameState: GameState): GameState = {
+  override def use(useData: UseData)(implicit random: Random, gameState: GameState): GameState = {
     val targets = targetsInRange.characters.map(_.id)
     val masterThroneOpt = parentCharacter.state.abilities.collectFirst { case a: MasterThrone => a }
     if(masterThroneOpt.isEmpty) return gameState

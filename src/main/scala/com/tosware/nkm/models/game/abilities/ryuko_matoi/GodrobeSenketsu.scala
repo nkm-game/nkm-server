@@ -37,7 +37,7 @@ object GodrobeSenketsu {
 case class GodrobeSenketsu(
   abilityId: AbilityId,
   parentCharacterId: CharacterId,
-) extends Ability(abilityId, parentCharacterId) with UsableWithoutTarget with GameEventListener {
+) extends Ability(abilityId, parentCharacterId) with Usable with GameEventListener {
   override val metadata = GodrobeSenketsu.metadata
 
   private def damageBonus(implicit gameState: GameState): Int =
@@ -62,7 +62,7 @@ case class GodrobeSenketsu(
       .addEffect(parentCharacterId, e2)(random, id)
   }
 
-  override def use()(implicit random: Random, gameState: GameState): GameState = {
+  override def use(useData: UseData)(implicit random: Random, gameState: GameState): GameState = {
     if(state.isEnabled) {
       changeDamageBonus(0)
         .removeEffects(abilityEffects().toSeq)(random, id)

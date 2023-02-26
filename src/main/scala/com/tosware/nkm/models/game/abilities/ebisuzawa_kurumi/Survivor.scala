@@ -4,7 +4,7 @@ import com.tosware.nkm.NkmConf
 import com.tosware.nkm.models.game.ability.Ability.AbilityId
 import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game._
-import com.tosware.nkm.models.game.ability.{Ability, AbilityMetadata, AbilityType, UsableWithoutTarget}
+import com.tosware.nkm.models.game.ability.{Ability, AbilityMetadata, AbilityType, Usable, UseData}
 
 import scala.util.Random
 
@@ -29,10 +29,10 @@ object Survivor {
 
 case class Survivor(abilityId: AbilityId, parentCharacterId: CharacterId)
   extends Ability(abilityId, parentCharacterId)
-    with UsableWithoutTarget {
+    with Usable {
   override val metadata = Survivor.metadata
 
-  override def use()(implicit random: Random, gameState: GameState): GameState =
+  override def use(useData: UseData)(implicit random: Random, gameState: GameState): GameState =
     gameState
       .addEffect(parentCharacterId, effects.Invisibility(randomUUID(), metadata.variables("invisibilityDuration")))(random, id)
       .addEffect(parentCharacterId, effects.ApplyEffectOnBasicAttack(

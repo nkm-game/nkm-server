@@ -8,7 +8,7 @@ import com.tosware.nkm.models.game.Player.PlayerId
 import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.game.hex.HexCoordinates
 import com.tosware.nkm.NkmUtils._
-import com.tosware.nkm.models.game.ability.{Ability, UsableOnCharacter, UsableOnCoordinates, UsableWithoutTarget, UseData}
+import com.tosware.nkm.models.game.ability.{Ability, UsableOnCharacter, UsableOnCoordinates, Usable, UseData}
 
 case class GameStateValidator()(implicit gameState: GameState) {
   private def playerInGame(playerId: PlayerId) =
@@ -185,19 +185,19 @@ case class GameStateValidator()(implicit gameState: GameState) {
     }
   }
 
-  def validateAbilityUseWithoutTarget(playerId: PlayerId, abilityId: AbilityId): CommandResponse = {
+  def validateAbilityUse(playerId: PlayerId, abilityId: AbilityId, useData: UseData = UseData()): CommandResponse = {
     if (!playerInGame(playerId)) Failure(Message.playerNotInGame)
     else if (!abilityInGame(abilityId)) Failure(Message.abilityNotInGame)
     else if (gameStatusIs(GameStatus.NotStarted)) Failure(Message.gameNotStarted)
     else if (!gameStatusIs(GameStatus.Running)) Failure(Message.gameNotRunning)
     else if (gameState.currentPlayer.id != playerId) Failure(Message.notYourTurn)
     else {
-      val ability = gameState.abilityById(abilityId).asInstanceOf[Ability with UsableWithoutTarget]
+      val ability = gameState.abilityById(abilityId).asInstanceOf[Ability with Usable]
       val character = ability.parentCharacter
       if (!gameState.playerByIdOpt(playerId).get.characterIds.contains(character.id)) Failure("You do not own this character.")
       else if (gameState.characterTakingActionThisTurn.fold(false)(_ != character.id)) Failure("Other character already took action this turn.")
       else if (gameState.characterIdsThatTookActionThisPhase.contains(character.id)) Failure("This character already took action this phase.")
-      else ability.canBeUsed(gameState)
+      else ability.canBeUsed(useData, gameState)
     }
   }
 

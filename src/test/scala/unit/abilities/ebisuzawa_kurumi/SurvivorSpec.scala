@@ -21,14 +21,14 @@ class SurvivorSpec
 
   abilityMetadata.name must {
     "apply basic attack buffs" in {
-      val ngs: GameState = gameState.useAbilityWithoutTarget(abilityId)
+      val ngs: GameState = gameState.useAbility(abilityId)
       ngs.characterById(s.characters.p0First.id).state.effects.ofType[NextBasicAttackBuff] should not be empty
       ngs.basicAttack(s.characters.p0First.id, s.characters.p1First.id)
         .characterById(s.characters.p1First.id).state.effects.ofType[effects.Stun].size should be > 0
     }
 
     "become invisible" in {
-      val ngs: GameState = gameState.useAbilityWithoutTarget(abilityId)
+      val ngs: GameState = gameState.useAbility(abilityId)
       val character = ngs.characterById(s.characters.p0First.id)
 
       val p0CharacterView = character.toView(Some(s.characters.p0First.owner.id))(ngs)

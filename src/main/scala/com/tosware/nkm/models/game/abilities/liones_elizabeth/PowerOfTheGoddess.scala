@@ -19,14 +19,14 @@ object PowerOfTheGoddess {
     )
 }
 
-case class PowerOfTheGoddess(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId) with UsableWithoutTarget {
+case class PowerOfTheGoddess(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId) with Usable {
   override val metadata: AbilityMetadata = PowerOfTheGoddess.metadata
   override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =
     gameState.hexMap.cells.toCoords
   override def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] =
     rangeCellCoords.whereFriendsOfC(parentCharacterId)
 
-  override def use()(implicit random: Random, gameState: GameState): GameState = {
+  override def use(useData: UseData)(implicit random: Random, gameState: GameState): GameState = {
     val targets = targetsInRange.characters.map(_.id)
     targets.foldLeft(gameState)((acc, cid) => {
       acc.heal(cid, metadata.variables("heal"))(random, id)

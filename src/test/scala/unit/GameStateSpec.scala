@@ -32,13 +32,13 @@ class GameStateSpec
 
     "put used ability on cooldown" in {
       val abilityId = littleWarHornAbilityId
-      val abilityUsedGameState = gameState.useAbilityWithoutTarget(abilityId)
+      val abilityUsedGameState = gameState.useAbility(abilityId)
       abilityUsedGameState.abilityById(abilityId).state(abilityUsedGameState).cooldown should be > 0
     }
 
     "decrement ability cooldowns at end of characters turn" in {
       val abilityId = littleWarHornAbilityId
-      val abilityUsedGameState = gameState.useAbilityWithoutTarget(abilityId)
+      val abilityUsedGameState = gameState.useAbility(abilityId)
       val endTurnGameState = abilityUsedGameState.endTurn()
 
       val oldCooldown = abilityUsedGameState.abilityStates(abilityId).cooldown
@@ -48,7 +48,7 @@ class GameStateSpec
 
     "decrement effect cooldowns at end of characters turn" in {
       val abilityId = littleWarHornAbilityId
-      val abilityUsedGameState = gameState.useAbilityWithoutTarget(abilityId)
+      val abilityUsedGameState = gameState.useAbility(abilityId)
       val endTurnGameState = abilityUsedGameState.endTurn()
 
       val oldCooldown = abilityUsedGameState.characterEffectStates.values.head.cooldown
@@ -58,7 +58,7 @@ class GameStateSpec
 
     "remove effects from characters with expired cooldowns" in {
       val abilityId = tacticalEscapeAbilityId // effect with cooldown == 1
-      val abilityUsedGameState = gameState.useAbilityWithoutTarget(abilityId)
+      val abilityUsedGameState = gameState.useAbility(abilityId)
       val endTurnGameState = abilityUsedGameState.endTurn()
 
       abilityUsedGameState.effects.size should be (1)

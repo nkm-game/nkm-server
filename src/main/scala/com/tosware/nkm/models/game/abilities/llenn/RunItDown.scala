@@ -5,7 +5,7 @@ import com.tosware.nkm.models.game.ability.Ability.AbilityId
 import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.game.abilities.llenn.RunItDown.movesLeftKey
-import com.tosware.nkm.models.game.ability.{Ability, AbilityMetadata, AbilityType, UsableWithoutTarget}
+import com.tosware.nkm.models.game.ability.{Ability, AbilityMetadata, AbilityType, Usable, UseData}
 import com.tosware.nkm.models.game.event.{GameEvent, GameEventListener}
 import spray.json._
 
@@ -26,7 +26,7 @@ object RunItDown {
 
 case class RunItDown(abilityId: AbilityId, parentCharacterId: CharacterId)
   extends Ability(abilityId, parentCharacterId)
-    with UsableWithoutTarget
+    with Usable
     with GameEventListener
 {
   override val metadata = RunItDown.metadata
@@ -40,7 +40,7 @@ case class RunItDown(abilityId: AbilityId, parentCharacterId: CharacterId)
     gameState.setAbilityVariable(id, movesLeftKey, value.toJson.toString)
 
 
-  override def use()(implicit random: Random, gameState: GameState): GameState =
+  override def use(useData: UseData)(implicit random: Random, gameState: GameState): GameState =
     setMovesLeft(3)
     .refreshBasicMove(parentCharacterId)(random, id)
     .refreshBasicAttack(parentCharacterId)(random, id)

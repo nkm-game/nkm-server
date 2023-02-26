@@ -75,7 +75,7 @@ class SwitchSpec
 
       assertCommandSuccess {
         GameStateValidator()(ngs)
-          .validateAbilityUseWithoutTarget(
+          .validateAbilityUse(
             s.characters.p0First.owner.id,
             ultimateAbilityId,
           )

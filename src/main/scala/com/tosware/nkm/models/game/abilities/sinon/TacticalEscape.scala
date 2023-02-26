@@ -4,7 +4,7 @@ import com.tosware.nkm.NkmConf
 import com.tosware.nkm.models.game.ability.Ability.AbilityId
 import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game._
-import com.tosware.nkm.models.game.ability.{Ability, AbilityMetadata, AbilityType, UsableWithoutTarget}
+import com.tosware.nkm.models.game.ability.{Ability, AbilityMetadata, AbilityType, Usable, UseData}
 import com.tosware.nkm.models.game.character.StatType
 import com.tosware.nkm.models.game.effects.StatBuff
 
@@ -21,10 +21,10 @@ object TacticalEscape {
     )
 }
 
-case class TacticalEscape(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId) with UsableWithoutTarget {
+case class TacticalEscape(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId) with Usable {
   override val metadata = TacticalEscape.metadata
 
-  override def use()(implicit random: Random, gameState: GameState): GameState =
+  override def use(useData: UseData)(implicit random: Random, gameState: GameState): GameState =
     gameState.
       addEffect(parentCharacterId, StatBuff(randomUUID(), metadata.variables("duration"), StatType.Speed, metadata.variables("speedIncrease")))(random, id)
 }

@@ -71,7 +71,7 @@ case class NkmCharacter
     (
     gameState.gameLog.events
       .inPhase(gameState.phase.number)
-      .ofType[GameEvent.AbilityUsedWithoutTarget]
+      .ofType[GameEvent.AbilityUsed]
     ++
     gameState.gameLog.events
       .inPhase(gameState.phase.number)

@@ -99,10 +99,10 @@ class GameService(gamesManagerActor: ActorRef)
     Future.successful(aw(f).asInstanceOf[CommandResponse])
   }
 
-  def useAbilityWithoutTarget(username: String, request: Action.UseAbilityWithoutTarget): Future[CommandResponse] = {
+  def useAbility(username: String, request: Action.UseAbility): Future[CommandResponse] = {
     val gameActor: ActorRef = getGameActor(request.lobbyId)
 
-    val f = gameActor ? Game.UseAbilityWithoutTarget(username, request.abilityId)
+    val f = gameActor ? Game.UseAbility(username, request.abilityId, request.useData)
     Future.successful(aw(f).asInstanceOf[CommandResponse])
   }
 
