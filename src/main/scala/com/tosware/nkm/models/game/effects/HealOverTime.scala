@@ -13,7 +13,7 @@ object HealOverTime {
   def metadata: CharacterEffectMetadata =
     CharacterEffectMetadata(
       name = CharacterEffectName.HealOverTime,
-      initialEffectType = CharacterEffectType.Negative,
+      initialEffectType = CharacterEffectType.Positive,
       description =
         """Heals at the end of turn.""".stripMargin,
     )
