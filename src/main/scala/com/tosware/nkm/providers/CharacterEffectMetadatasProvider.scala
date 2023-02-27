@@ -16,6 +16,7 @@ case class CharacterEffectMetadatasProvider() extends NkmJsonProtocol {
     FreeAbility.metadata,
     Ground.metadata,
     HasToTakeAction.metadata,
+    HealOverTime.metadata,
     Invisibility.metadata,
     ManipulatorOfObjectsImmunity.metadata,
     MurasamePoison.metadata,
