@@ -40,12 +40,12 @@ object AbilityProvider extends NkmUtils {
       case Resurrection.metadata.id =>
         Resurrection(randomUUID(), characterId)
 
-      case CrackTheSky.metadata.id =>
-        CrackTheSky(randomUUID(), characterId)
-      case MarkOfTheWind.metadata.id =>
-        MarkOfTheWind(randomUUID(), characterId)
       case SamuraisSwiftness.metadata.id =>
         SamuraisSwiftness(randomUUID(), characterId)
+      case MarkOfTheWind.metadata.id =>
+        MarkOfTheWind(randomUUID(), characterId)
+      case CrackTheSky.metadata.id =>
+        CrackTheSky(randomUUID(), characterId)
 
       case AceInTheHole.metadata.id =>
         AceInTheHole(randomUUID(), characterId)

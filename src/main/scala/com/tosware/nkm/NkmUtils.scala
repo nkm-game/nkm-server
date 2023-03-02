@@ -25,7 +25,7 @@ trait NkmUtils extends NkmJsonProtocol {
     }
   }
 
-  def getAdjacentCells(cells: Set[HexCell], targetCellCoordinates: HexCoordinates): Set[HexCell] = {
+  def getAdjacentCells[T <: HexCellLike](cells: Set[T], targetCellCoordinates: HexCoordinates): Set[T] = {
     cells.filter(c =>
       abs(c.coordinates.x - targetCellCoordinates.x) <= 1
         && abs(c.coordinates.y - targetCellCoordinates.y) <= 1

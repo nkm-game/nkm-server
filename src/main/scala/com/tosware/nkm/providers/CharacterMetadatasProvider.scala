@@ -47,9 +47,9 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       initialPhysicalDefense = 20,
       initialMagicalDefense = 5,
       initialAbilitiesMetadataIds = Seq(
-        CrackTheSky.metadata.id,
-        MarkOfTheWind.metadata.id,
         SamuraisSwiftness.metadata.id,
+        MarkOfTheWind.metadata.id,
+        CrackTheSky.metadata.id,
       )
     ),
     CharacterMetadata(

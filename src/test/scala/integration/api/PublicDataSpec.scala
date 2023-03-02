@@ -5,7 +5,7 @@ import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.unmarshalling.FromResponseUnmarshaller
 import com.tosware.nkm.models.game.ability.AbilityMetadata
 import com.tosware.nkm.models.game.character.CharacterMetadata
-import com.tosware.nkm.models.game.hex.HexMap
+import com.tosware.nkm.models.game.hex.{HexCell, HexMap}
 import com.tosware.nkm.models.game.character_effect.CharacterEffectMetadata
 import helpers.ApiTrait
 
@@ -23,7 +23,7 @@ class PublicDataSpec extends ApiTrait
     }
 
     "return hexmaps" in
-      assertDataExists[Seq[HexMap]]("/api/maps")
+      assertDataExists[Seq[HexMap[HexCell]]]("/api/maps")
 
     "return character metadatas" in
       assertDataExists[Seq[CharacterMetadata]]("/api/characters")

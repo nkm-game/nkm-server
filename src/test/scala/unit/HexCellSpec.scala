@@ -17,7 +17,7 @@ class HexCellSpec
   private val metadata = CharacterMetadata.empty()
   private val s = scenarios.Simple2v2TestScenario(metadata)
   implicit val gameState: GameState = s.gameState
-  implicit val hexMap: HexMap = s.gameState.hexMap
+  implicit val hexMap: HexMap[HexCell] = s.gameState.hexMap
   "HexCell" must {
     "calculate correct neighbours" in {
       HexCoordinates(0, 0).toCell.getNeighbour(HexDirection.W).get.coordinates should be (HexCoordinates(-1, 0))

@@ -5,7 +5,6 @@ import com.tosware.nkm.models.game.GameState
 import com.tosware.nkm.models.game.ability.Ability.AbilityId
 import com.tosware.nkm.models.game.ability._
 import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
-import com.tosware.nkm.models.game.hex.HexCoordinates
 
 import scala.util.Random
 
@@ -22,10 +21,11 @@ object CrackTheSky {
 
 case class CrackTheSky(abilityId: AbilityId, parentCharacterId: CharacterId)
   extends Ability(abilityId, parentCharacterId)
-    with UsableOnCoordinates
+    with Usable
 {
 
   override val metadata: AbilityMetadata = MarkOfTheWind.metadata
 
-  override def use(target: HexCoordinates, useData: UseData)(implicit random: Random, gameState: GameState): GameState = ???
+  override def use(useData: UseData)(implicit random: Random, gameState: GameState): GameState =
+    gameState
 }

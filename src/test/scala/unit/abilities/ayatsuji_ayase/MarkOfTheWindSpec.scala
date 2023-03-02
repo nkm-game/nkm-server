@@ -3,11 +3,14 @@ package unit.abilities.ayatsuji_ayase
 import com.tosware.nkm.models.GameStateValidator
 import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.game.abilities.ayatsuji_ayase.{CrackTheSky, MarkOfTheWind}
+import com.tosware.nkm.models.game.ability.UseData
 import com.tosware.nkm.models.game.character.CharacterMetadata
+import com.tosware.nkm.models.game.event.GameEvent
 import com.tosware.nkm.models.game.hex.HexCoordinates
 import helpers.{TestUtils, scenarios}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
+import spray.json._
 
 class MarkOfTheWindSpec
   extends AnyWordSpecLike
@@ -26,23 +29,90 @@ class MarkOfTheWindSpec
   private val crackAbilityId =
     s.characters.p0.state.abilities(1).id
 
+  private val markGs: GameState = gameState
+    .useAbilityOnCoordinates(markAbilityId, HexCoordinates(0, 0))
+    .endTurn()
+    .passTurn(s.characters.p1.id)
+
+  private val crackGs: GameState = markGs
+    .useAbility(crackAbilityId, UseData(CoordinateSet((0, 0)).toJson.toString))
+    .endTurn()
+    .passTurn(s.characters.p1.id)
+
+  private val doubleMarkGs: GameState = gameState
+    .useAbilityOnCoordinates(markAbilityId, HexCoordinates(1, 0))
+    .endTurn()
+    .passTurn(s.characters.p1.id)
+
+  private val doubleCrackGs: GameState = doubleMarkGs
+    .useAbility(crackAbilityId, UseData(CoordinateSet((0, 0), (1, 0)).toJson.toString))
+    .endTurn()
+    .passTurn(s.characters.p1.id)
+
   MarkOfTheWind.metadata.name must {
     "be able to set up traps" in {
       assertCommandSuccess {
         GameStateValidator()(gameState)
           .validateAbilityUseOnCoordinates(s.characters.p0.owner.id, markAbilityId, HexCoordinates(0, 0))
       }
+
+      assertCommandSuccess {
+        GameStateValidator()(crackGs)
+          .validateAbilityUseOnCoordinates(s.characters.p0.owner.id, markAbilityId, HexCoordinates(0, 0))
+      }
     }
 
-    "be able to detonate selected traps" in {
-      fail()
-      val ngs: GameState = gameState.useAbility(markAbilityId, ???)
-      val ngs: GameState = gameState.useAbility(crackAbilityId, ???)
+    "not be able to set up traps on the same tile" in {
+      assertCommandFailure {
+        GameStateValidator()(markGs)
+          .validateAbilityUseOnCoordinates(s.characters.p0.owner.id, markAbilityId, HexCoordinates(0, 0))
+      }
+    }
+
+    "not be able to set up traps outside map" in {
+      assertCommandFailure {
+        GameStateValidator()(gameState)
+          .validateAbilityUseOnCoordinates(s.characters.p0.owner.id, markAbilityId, HexCoordinates(-10, 0))
+      }
+    }
+
+    "be able to detonate selected trap" in {
+      HexCoordinates(0, 0).toCell(markGs.hexMap).effects.size should be > 0
+      HexCoordinates(0, 0).toCell(crackGs.hexMap).effects.size should be (0)
+      crackGs.gameLog.events.ofType[GameEvent.CharacterDamaged].causedBy(crackAbilityId).size should be (1)
+    }
+
+    "be able to detonate several selected traps" in {
+      HexCoordinates(0, 0).toCell(doubleMarkGs.hexMap).effects.size should be > 0
+      HexCoordinates(1, 0).toCell(doubleMarkGs.hexMap).effects.size should be > 0
+
+      HexCoordinates(0, 0).toCell(doubleCrackGs.hexMap).effects.size should be (0)
+      HexCoordinates(1, 0).toCell(doubleCrackGs.hexMap).effects.size should be > 0
+
+      crackGs.gameLog.events.ofType[GameEvent.CharacterDamaged].causedBy(crackAbilityId).size should be (2)
     }
 
     "delete first trap if set above the limit" in {
+      // TODO: increase test map size
       fail()
-      val ngs: GameState = gameState.useAbility(markAbilityId, ???)
+    }
+
+    "hide the traps from other players" in {
+      HexCoordinates(0, 0)
+        .toCell(markGs.hexMap)
+        .toView(Some(s.characters.p0.id))
+        .effects.size should be (1)
+
+      HexCoordinates(0, 0)
+        .toCell(markGs.hexMap)
+        .toView(Some(s.characters.p1.id))
+        .effects.size should be (0)
+
+      markGs.gameLog.toView(Some(s.characters.p0.id))
+        .events.ofType[GameEvent.EffectAddedToCell].size should be (1)
+
+      markGs.gameLog.toView(Some(s.characters.p1.id))
+        .events.ofType[GameEvent.EffectAddedToCell].size should be (0)
     }
   }
 }

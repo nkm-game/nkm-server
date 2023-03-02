@@ -11,7 +11,7 @@ import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game.character.{CharacterMetadata, NkmCharacter, StatType}
 import com.tosware.nkm.models.game.character_effect.CharacterEffect.CharacterEffectId
 import com.tosware.nkm.models.game.character_effect.{CharacterEffect, CharacterEffectState}
-import com.tosware.nkm.models.game.effects.{Block, FreeAbility}
+import com.tosware.nkm.models.game.effects.{Block, FreeAbility, Invisibility}
 import com.tosware.nkm.models.game.event.{EventHideData, GameEventListener, GameLog, RevealCondition}
 import com.tosware.nkm.models.game.hex._
 import com.tosware.nkm.models.game.pick.PickType
@@ -35,7 +35,7 @@ object GameState extends Logging {
       numberOfCharactersPerPlayers = 1,
       draftPickState = None,
       blindPickState = None,
-      hexMap = HexMap.empty,
+      hexMap = HexMap.empty[HexCell],
       players = Seq(),
       characters = Set(),
       phase = Phase(0),
@@ -68,7 +68,7 @@ case class GameState
   numberOfCharactersPerPlayers: Int,
   draftPickState: Option[DraftPickState],
   blindPickState: Option[BlindPickState],
-  hexMap: HexMap,
+  hexMap: HexMap[HexCell],
   players: Seq[Player],
   characters: Set[NkmCharacter],
   phase: Phase,
@@ -183,6 +183,12 @@ case class GameState
     else if(abilities.map(_.id).contains(causedById))
       Some(abilityById(causedById).parentCharacter(this).id)
     else None
+
+  def invisibleCharacterCoords(forPlayerOpt: Option[PlayerId])(implicit gameState: GameState): Set[HexCoordinates] =
+    characters
+      .filterNot(c => forPlayerOpt.contains(c.owner.id))
+      .filter(_.state.effects.ofType[Invisibility].nonEmpty)
+      .flatMap(_.parentCell.map(_.coordinates))
 
   private def handleTrigger(event: GameEvent, trigger: GameEventListener)(implicit random: Random, gameState: GameState): GameState = {
     try {

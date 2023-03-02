@@ -4,7 +4,7 @@ import com.tosware.nkm.models.game.ability.Ability.AbilityId
 import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.game.ability.{Ability, AbilityMetadata, AbilityType, BasicMoveOverride}
-import com.tosware.nkm.models.game.hex.{HexCoordinates, HexMap}
+import com.tosware.nkm.models.game.hex.{HexCell, HexCoordinates, HexMap}
 
 import scala.annotation.tailrec
 import scala.util.Random
@@ -45,7 +45,7 @@ case class LackOfOrientation(abilityId: AbilityId, parentCharacterId: CharacterI
     gameState.setAbilityVariable(id, timesLostKey, value.toJson.toString)
 
   override def basicMove(path: Seq[HexCoordinates])(implicit random: Random, gameState: GameState): GameState = {
-    implicit val hexMap: HexMap = gameState.hexMap
+    implicit val hexMap: HexMap[HexCell] = gameState.hexMap
 
     @tailrec
     def generateLostPath(acc: Seq[HexCoordinates], coordsLeft: Int): Seq[HexCoordinates] = {

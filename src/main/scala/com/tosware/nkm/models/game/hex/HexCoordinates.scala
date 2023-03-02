@@ -51,12 +51,10 @@ case class HexCoordinates(x: Int, z: Int) {
 
   def toTuple: (Int, Int) = (x, z)
 
-  def toCellOpt(implicit hexMap: HexMap): Option[HexCell] =
+  def toCellOpt[T <: HexCellLike](implicit hexMap: HexMap[T]): Option[T] =
     hexMap.getCell(this)
 
-  def toCell(implicit hexMap: HexMap): HexCell =
+  def toCell[T <: HexCellLike](implicit hexMap: HexMap[T]): T =
     toCellOpt.get
-
-
 }
 

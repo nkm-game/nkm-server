@@ -4,22 +4,22 @@ import com.tosware.nkm.models.game.GameState
 import com.tosware.nkm.models.game.Player.PlayerId
 import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
 
-trait HexMapLike {
+trait HexMapLike[T <: HexCellLike] {
   val name: String
-  val cells: Set[HexCell]
+  val cells: Set[T]
 
-  def getCell(hexCoordinates: HexCoordinates): Option[HexCell] = cells.find(_.coordinates == hexCoordinates)
+  def getCell(hexCoordinates: HexCoordinates): Option[T] = cells.find(_.coordinates == hexCoordinates)
 
-  def getSpawnPoints: Set[HexCell] = cells.filter(c => c.cellType == HexCellType.SpawnPoint)
+  def getSpawnPoints: Set[T] = cells.filter(c => c.cellType == HexCellType.SpawnPoint)
 
-  def getSpawnPointsByNumber(n: Int): Set[HexCell] = getSpawnPoints.filter(_.spawnNumber.forall(_ == n))
+  def getSpawnPointsByNumber(n: Int): Set[T] = getSpawnPoints.filter(_.spawnNumber.forall(_ == n))
 
-  def getSpawnPointsFor(playerId: PlayerId)(implicit gameState: GameState): Set[HexCell] =
+  def getSpawnPointsFor(playerId: PlayerId)(implicit gameState: GameState): Set[T] =
     getSpawnPointsByNumber(gameState.playerNumber(playerId))
 
   def maxNumberOfCharacters: Int = getSpawnPoints.map(_.spawnNumber.get).size
 
-  def getCellOfCharacter(id: CharacterId): Option[HexCell] =
+  def getCellOfCharacter(id: CharacterId): Option[T] =
     cells.find(c => c.characterId.nonEmpty && c.characterId.get == id)
 
   def toTextUi: String = {
@@ -60,4 +60,7 @@ trait HexMapLike {
   }
 
   override def toString: String = name
+
+  def toView(forPlayerOpt: Option[PlayerId])(implicit gameState: GameState): HexMapView =
+    HexMapView(name, cells.map(_.toView(forPlayerOpt)))
 }

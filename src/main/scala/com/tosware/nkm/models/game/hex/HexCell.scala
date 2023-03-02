@@ -1,12 +1,11 @@
 package com.tosware.nkm.models.game.hex
 
-import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
-import com.tosware.nkm.models.game.Player.PlayerId
-import com.tosware.nkm.models.game.hex.HexCellType.Normal
-import com.tosware.nkm.models.game.GameState
 import com.tosware.nkm.NkmUtils._
+import com.tosware.nkm.models.game.GameState
+import com.tosware.nkm.models.game.Player.PlayerId
 import com.tosware.nkm.models.game.character.NkmCharacter
-import com.tosware.nkm.models.game.effects.Fly
+import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
+import com.tosware.nkm.models.game.hex.HexCellType.Normal
 
 import scala.annotation.tailrec
 
@@ -26,25 +25,15 @@ case class HexCell
   characterId: Option[CharacterId],
   effects: Seq[HexCellEffect],
   spawnNumber: Option[Int],
-) {
-  def isEmpty: Boolean = characterId.isEmpty
-  def isFreeToStand: Boolean = isEmpty && cellType != HexCellType.Wall
-  def isFreeToPass(forCharacterId: CharacterId)(implicit gameState: GameState): Boolean = {
-    val forCharacter = gameState.characterById(forCharacterId)
-    cellType != HexCellType.Wall && characterId.forall(c => forCharacter.isFriendForC(c)) || forCharacter.state.effects.ofType[Fly].nonEmpty
-  }
-
-  def characterOpt(implicit gameState: GameState): Option[NkmCharacter] =
-    characterId.map(cid => gameState.characterById(cid))
-
-  def getNeighbour(direction: HexDirection)(implicit hexMap: HexMap): Option[HexCell] =
+) extends HexCellLike {
+  def getNeighbour(direction: HexDirection)(implicit hexMap: HexMap[HexCell]): Option[HexCell] =
     coordinates.getNeighbour(direction).toCellOpt
 
   def getLine(
-               direction: HexDirection,
-               size: Int,
-               stopPredicate: HexCell => Boolean = _ => false,
-             )(implicit hexMap: HexMap): Set[HexCell] = {
+    direction: HexDirection,
+    size: Int,
+    stopPredicate: HexCell => Boolean = _ => false,
+  )(implicit hexMap: HexMap[HexCell]): Set[HexCell] = {
     if(size <= 0) return Set.empty
     val neighbour = getNeighbour(direction)
     if(neighbour.fold(true)(c => stopPredicate(c))) return Set.empty
@@ -57,7 +46,7 @@ case class HexCell
     size: Int,
     characterPredicate: NkmCharacter => Boolean = _ => true,
   )(implicit gameState: GameState): Option[NkmCharacter] = {
-    implicit val hexMap: HexMap = gameState.hexMap
+    implicit val hexMap: HexMap[HexCell] = gameState.hexMap
 
     @tailrec
     def scan(depth: Int, lastCell: HexCell): Option[NkmCharacter] = {
@@ -75,26 +64,26 @@ case class HexCell
   }
 
   def getLines(
-               directions: Set[HexDirection],
-               size: Int,
-               stopPredicate: HexCell => Boolean = _ => false,
-             )(implicit hexMap: HexMap): Set[HexCell] =
+    directions: Set[HexDirection],
+    size: Int,
+    stopPredicate: HexCell => Boolean = _ => false,
+  )(implicit hexMap: HexMap[HexCell]): Set[HexCell] =
     directions.flatMap(d => getLine(d, size, stopPredicate))
 
   def getArea(
-               depth: Int,
-               searchFlags: Set[SearchFlag] = Set.empty,
-               friendlyPlayerIdOpt: Option[PlayerId] = None,
-               stopPredicate: HexCell => Boolean = _ => false,
-             )(implicit gameState: GameState): Set[HexCell] = {
-    implicit val hexMap: HexMap = gameState.hexMap
+    depth: Int,
+    searchFlags: Set[SearchFlag] = Set.empty,
+    friendlyPlayerIdOpt: Option[PlayerId] = None,
+    stopPredicate: HexCell => Boolean = _ => false,
+  )(implicit gameState: GameState): Set[HexCell] = {
+    implicit val hexMap: HexMap[HexCell] = gameState.hexMap
 
     def shouldStop(cell: HexCell): Boolean = {
       searchFlags.contains(SearchFlag.StopAtWalls) && cell.cellType == HexCellType.Wall ||
-      friendlyPlayerIdOpt.fold(false)(fpId => {
-        searchFlags.contains(SearchFlag.StopAtEnemies) && cell.characterOpt.fold(false)(_.isEnemyFor(fpId)) ||
-          searchFlags.contains(SearchFlag.StopAtFriends) && cell.characterOpt.fold(false)(_.isFriendFor(fpId))
-      }) ||
+        friendlyPlayerIdOpt.fold(false)(fpId => {
+          searchFlags.contains(SearchFlag.StopAtEnemies) && cell.characterOpt.fold(false)(_.isEnemyFor(fpId)) ||
+            searchFlags.contains(SearchFlag.StopAtFriends) && cell.characterOpt.fold(false)(_.isFriendFor(fpId))
+        }) ||
         stopPredicate(cell)
     }
 
@@ -123,4 +112,6 @@ case class HexCell
       getLines(HexDirection.values.toSet, depth, shouldStop) + this
     else getAreaInner(depth, Set(this), Set(this))
   }
+
 }
+

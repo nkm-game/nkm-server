@@ -22,7 +22,6 @@ object MarkOfTheWind {
           |Max. number of traps: {trapLimit}""".stripMargin,
       variables = NkmConf.extract("abilities.ayatsuji_ayase.markOfTheWind"),
     )
-  val setUpTrapsKey: String = "setUpTraps"
 }
 
 case class MarkOfTheWind(abilityId: AbilityId, parentCharacterId: CharacterId)
@@ -32,5 +31,6 @@ case class MarkOfTheWind(abilityId: AbilityId, parentCharacterId: CharacterId)
 
   override val metadata: AbilityMetadata = MarkOfTheWind.metadata
 
-  override def use(target: HexCoordinates, useData: UseData)(implicit random: Random, gameState: GameState): GameState = ???
+  override def use(target: HexCoordinates, useData: UseData)(implicit random: Random, gameState: GameState): GameState =
+    gameState
 }
