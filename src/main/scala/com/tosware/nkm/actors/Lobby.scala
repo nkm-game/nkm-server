@@ -260,7 +260,7 @@ class Lobby(id: GameId)(implicit nkmDataService: NkmDataService)
               lobbyState.clockConfig
           val deps = GameStartDependencies(
             players = players,
-            hexMap = hexMaps.filter(m => m.name == lobbyState.chosenHexMapName.get).head,
+            hexMap = hexMaps.filter(m => m.name == lobbyState.chosenHexMapName.get).head.toHexMap,
             pickType = lobbyState.pickType,
             numberOfBansPerPlayer = lobbyState.numberOfBans,
             numberOfCharactersPerPlayer = lobbyState.numberOfCharactersPerPlayer,

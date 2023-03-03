@@ -8,7 +8,7 @@ import akka.stream.scaladsl.Sink
 import com.tosware.nkm.NkmTimeouts
 import com.tosware.nkm.actors._
 import com.tosware.nkm.models.game._
-import com.tosware.nkm.models.game.hex.{HexCell, HexMap}
+import com.tosware.nkm.models.game.hex.HexMap
 import com.tosware.nkm.models.lobby._
 import com.tosware.nkm.models.lobby.ws.LobbyRequest._
 import slick.jdbc.JdbcBackend
@@ -175,7 +175,7 @@ class LobbyService(lobbiesManagerActor: ActorRef)(
     if (lobbyState.chosenHexMapName.isEmpty) return Failure("Chosen hex map name is empty")
     if (lobbyState.userIds.length < 2) return Failure("There are less than 2 players")
 
-    val chosenHexMap: HexMap[HexCell] = nkmDataService.getHexMaps.find(_.name == lobbyState.chosenHexMapName.get).get
+    val chosenHexMap: HexMap = nkmDataService.getHexMaps.find(_.name == lobbyState.chosenHexMapName.get).get.toHexMap
     if(chosenHexMap.maxNumberOfCharacters < lobbyState.userIds.length) return Failure("There are more players than allowed for this map")
 
     if (gameState.gameStatus != GameStatus.NotStarted) return Failure("Game is already started")

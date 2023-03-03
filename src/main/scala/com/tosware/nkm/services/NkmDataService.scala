@@ -4,12 +4,12 @@ import com.tosware.nkm.NkmTimeouts
 import com.tosware.nkm.models.game.ability.AbilityMetadata
 import com.tosware.nkm.models.game.character.CharacterMetadata
 import com.tosware.nkm.models.game.character_effect.CharacterEffectMetadata
-import com.tosware.nkm.models.game.hex.{HexCell, HexMap}
+import com.tosware.nkm.models.game.hex.HexMapTemplate
 import com.tosware.nkm.providers._
 
 class NkmDataService extends NkmTimeouts
 {
-  def getHexMaps: Seq[HexMap[HexCell]] = HexMapProvider().getHexMaps
+  def getHexMaps: Seq[HexMapTemplate] = HexMapProvider().getHexMaps
 
   def getCharacterMetadatas: Seq[CharacterMetadata] = CharacterMetadatasProvider().getCharacterMetadatas
     .filter(_.initialAbilitiesMetadataIds.size >= 3)

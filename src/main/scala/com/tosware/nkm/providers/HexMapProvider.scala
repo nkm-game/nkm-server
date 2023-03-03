@@ -1,6 +1,6 @@
 package com.tosware.nkm.providers
 
-import com.tosware.nkm.models.game.hex.{HexCell, HexMap, TestHexMap, TestHexMapName, testmap}
+import com.tosware.nkm.models.game.hex._
 import com.tosware.nkm.serializers.NkmJsonProtocol
 import spray.json._
 
@@ -9,9 +9,8 @@ import java.util.jar.JarFile
 import scala.io.Source
 import scala.jdk.CollectionConverters.EnumerationHasAsScala
 
-
 case class HexMapProvider() extends NkmJsonProtocol {
-  def getHexMaps: Seq[HexMap[HexCell]] = {
+  def getHexMaps: Seq[HexMapTemplate] = {
     val path = "HexMaps"
     val jarFile = new File(getClass.getProtectionDomain.getCodeSource.getLocation.getPath)
     val filePaths = if (jarFile.isFile) {
@@ -30,7 +29,7 @@ case class HexMapProvider() extends NkmJsonProtocol {
     }
     val mapList = filePaths
       .map(p => Source.fromResource(p).mkString)
-      .map(s => s.parseJson.convertTo[HexMap[HexCell]])
+      .map(s => s.parseJson.convertTo[HexMapTemplate])
 
     mapList
   }
@@ -48,6 +47,6 @@ case class HexMapProvider() extends NkmJsonProtocol {
       testmap.SummerBreeze.hexMap,
     )
 
-  def getTestHexMap(name: TestHexMapName): HexMap[HexCell] =
+  def getTestHexMap(name: TestHexMapName): HexMap =
     getTestHexMaps.find(_.name == name).get.hexMap
 }

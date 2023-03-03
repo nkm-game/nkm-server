@@ -1,11 +1,12 @@
 package com.tosware.nkm.models.game.hex
 
 import com.tosware.nkm.NkmUtils._
-import com.tosware.nkm.models.game.GameState
+import com.tosware.nkm.models.game.{GameState, GameStatus}
 import com.tosware.nkm.models.game.Player.PlayerId
 import com.tosware.nkm.models.game.character.NkmCharacter
 import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game.hex.HexCellType.Normal
+import com.tosware.nkm.models.game.hex_effect.HexCellEffect
 
 import scala.annotation.tailrec
 
@@ -26,14 +27,16 @@ case class HexCell
   effects: Seq[HexCellEffect],
   spawnNumber: Option[Int],
 ) extends HexCellLike {
-  def getNeighbour(direction: HexDirection)(implicit hexMap: HexMap[HexCell]): Option[HexCell] =
+  val id: HexCoordinates = coordinates
+
+  def getNeighbour(direction: HexDirection)(implicit hexMap: HexMap): Option[HexCell] =
     coordinates.getNeighbour(direction).toCellOpt
 
   def getLine(
     direction: HexDirection,
     size: Int,
     stopPredicate: HexCell => Boolean = _ => false,
-  )(implicit hexMap: HexMap[HexCell]): Set[HexCell] = {
+  )(implicit hexMap: HexMap): Set[HexCell] = {
     if(size <= 0) return Set.empty
     val neighbour = getNeighbour(direction)
     if(neighbour.fold(true)(c => stopPredicate(c))) return Set.empty
@@ -46,7 +49,7 @@ case class HexCell
     size: Int,
     characterPredicate: NkmCharacter => Boolean = _ => true,
   )(implicit gameState: GameState): Option[NkmCharacter] = {
-    implicit val hexMap: HexMap[HexCell] = gameState.hexMap
+    implicit val hexMap: HexMap = gameState.hexMap
 
     @tailrec
     def scan(depth: Int, lastCell: HexCell): Option[NkmCharacter] = {
@@ -67,7 +70,7 @@ case class HexCell
     directions: Set[HexDirection],
     size: Int,
     stopPredicate: HexCell => Boolean = _ => false,
-  )(implicit hexMap: HexMap[HexCell]): Set[HexCell] =
+  )(implicit hexMap: HexMap): Set[HexCell] =
     directions.flatMap(d => getLine(d, size, stopPredicate))
 
   def getArea(
@@ -76,7 +79,7 @@ case class HexCell
     friendlyPlayerIdOpt: Option[PlayerId] = None,
     stopPredicate: HexCell => Boolean = _ => false,
   )(implicit gameState: GameState): Set[HexCell] = {
-    implicit val hexMap: HexMap[HexCell] = gameState.hexMap
+    implicit val hexMap: HexMap = gameState.hexMap
 
     def shouldStop(cell: HexCell): Boolean = {
       searchFlags.contains(SearchFlag.StopAtWalls) && cell.cellType == HexCellType.Wall ||
@@ -113,5 +116,24 @@ case class HexCell
     else getAreaInner(depth, Set(this), Set(this))
   }
 
+  def toTemplate: HexCellTemplate =
+    HexCellTemplate(coordinates, cellType, spawnNumber)
+
+  def toView(forPlayerOpt: Option[PlayerId])(implicit gameState: GameState): HexCellView = {
+    val characterIdOpt =
+      if (gameState.invisibleCharacterCoords(forPlayerOpt).contains(coordinates))
+        None
+      else if (gameState.gameStatus == GameStatus.CharacterPlacing && characterOpt(gameState).fold(true)(c => !forPlayerOpt.contains(c.owner.id)))
+        None
+      else characterId
+
+    HexCellView(
+      coordinates = coordinates,
+      cellType = cellType,
+      characterId = characterIdOpt,
+      effects = effects.map(_.toView),
+      spawnNumber = spawnNumber,
+    )
+  }
 }
 

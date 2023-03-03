@@ -14,6 +14,8 @@ import com.tosware.nkm.models.game.character_effect.{CharacterEffect, CharacterE
 import com.tosware.nkm.models.game.effects.{Block, FreeAbility, Invisibility}
 import com.tosware.nkm.models.game.event.{EventHideData, GameEventListener, GameLog, RevealCondition}
 import com.tosware.nkm.models.game.hex._
+import com.tosware.nkm.models.game.hex_effect.HexCellEffect.HexCellEffectId
+import com.tosware.nkm.models.game.hex_effect.HexCellEffectState
 import com.tosware.nkm.models.game.pick.PickType
 import com.tosware.nkm.models.game.pick.blindpick._
 import com.tosware.nkm.models.game.pick.draftpick._
@@ -35,7 +37,7 @@ object GameState extends Logging {
       numberOfCharactersPerPlayers = 1,
       draftPickState = None,
       blindPickState = None,
-      hexMap = HexMap.empty[HexCell],
+      hexMap = HexMap.empty,
       players = Seq(),
       characters = Set(),
       phase = Phase(0),
@@ -48,6 +50,7 @@ object GameState extends Logging {
       playerIdsThatPlacedCharacters = Set(),
       abilityStates = Map(),
       characterEffectStates = Map(),
+      hexCellEffectStates = Map(),
       clockConfig = defaultClockConfig,
       clock = Clock.fromConfig(defaultClockConfig, Seq()),
       lastTimestamp = Instant.now(),
@@ -68,7 +71,7 @@ case class GameState
   numberOfCharactersPerPlayers: Int,
   draftPickState: Option[DraftPickState],
   blindPickState: Option[BlindPickState],
-  hexMap: HexMap[HexCell],
+  hexMap: HexMap,
   players: Seq[Player],
   characters: Set[NkmCharacter],
   phase: Phase,
@@ -79,6 +82,7 @@ case class GameState
   playerIdsThatPlacedCharacters: Set[PlayerId],
   abilityStates: Map[AbilityId, AbilityState],
   characterEffectStates: Map[CharacterEffectId, CharacterEffectState],
+  hexCellEffectStates: Map[HexCellEffectId, HexCellEffectState],
   clockConfig: ClockConfig,
   clock: Clock,
   lastTimestamp: Instant,

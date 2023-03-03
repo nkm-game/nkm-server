@@ -1,0 +1,32 @@
+  def migrateHexMaps(): Unit = {
+    val path = "HexMaps"
+    val uri = getClass.getResource(s"/$path/").toURI
+    val mainPath = Paths.get(uri).toString
+    val jarFile = new File(getClass.getProtectionDomain.getCodeSource.getLocation.getPath)
+    val filePaths = if (jarFile.isFile) {
+      val jar = new JarFile(jarFile)
+      val it = jar.entries().asScala.map(e => e.getName)
+        .filter(n => n.startsWith(s"$path/") && n.endsWith(".json")).toList
+      jar.close()
+      it
+    } else {
+      val hexMapFolderPath = getClass.getResource(s"/$path/").getPath
+      new File(hexMapFolderPath).listFiles
+        .map(e => e.getName)
+        .filter(n => n.endsWith(".json"))
+        .map(n => s"$path/$n")
+        .toSeq
+    }
+
+    filePaths
+      .foreach(p => {
+        val newMapView = Source.fromResource(p).mkString.parseJson.convertTo[HexMapView]
+        val newMap = HexMap(newMapView.name, newMapView.cells.map(c => HexCell.empty(c.coordinates, c.cellType, c.spawnNumber))).toTemplate
+        val newPath = mainPath + "/" + newMap.name + ".json"
+        println(newPath)
+        Files.write(
+          Paths.get(newPath),
+          newMap.toJson.toString.getBytes(StandardCharsets.UTF_8)
+        )
+      })
+  }

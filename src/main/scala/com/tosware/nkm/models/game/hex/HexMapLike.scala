@@ -60,7 +60,4 @@ trait HexMapLike[T <: HexCellLike] {
   }
 
   override def toString: String = name
-
-  def toView(forPlayerOpt: Option[PlayerId])(implicit gameState: GameState): HexMapView =
-    HexMapView(name, cells.map(_.toView(forPlayerOpt)))
 }
