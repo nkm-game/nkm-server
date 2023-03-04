@@ -33,11 +33,6 @@ case class Aster(abilityId: AbilityId, parentCharacterId: CharacterId) extends A
   override def use(target: HexCoordinates, useData: UseData)(implicit random: Random, gameState: GameState): GameState = {
     val targets = target.getCircle(metadata.variables("radius")).whereEnemiesOfC(parentCharacterId).characters.map(_.id)
     val damage = Damage(DamageType.Magical, metadata.variables("damage"))
-    targets.foldLeft(gameState)((acc, cid) => blastCharacter(cid, damage)(random, acc))
+    targets.foldLeft(gameState)((acc, cid) => hitAndDamageCharacter(cid, damage)(random, acc))
   }
-
-  private def blastCharacter(target: CharacterId, damage: Damage)(implicit random: Random, gameState: GameState): GameState =
-    gameState
-      .abilityHitCharacter(id, target)
-      .damageCharacter(target, damage)(random, id)
 }

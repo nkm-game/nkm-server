@@ -22,7 +22,7 @@ class MarkOfTheWindSpec
       MarkOfTheWind.metadata.id,
       CrackTheSky.metadata.id,
     ))
-  private val s = scenarios.Simple1v1TestScenario(metadata)
+  private val s = scenarios.Spacey1v1TestScenario(metadata)
   private implicit val gameState: GameState = s.gameState
   private val markAbilityId =
     s.characters.p0.state.abilities(0).id
@@ -39,7 +39,7 @@ class MarkOfTheWindSpec
     .endTurn()
     .passTurn(s.characters.p1.id)
 
-  private val doubleMarkGs: GameState = gameState
+  private val doubleMarkGs: GameState = markGs
     .useAbilityOnCoordinates(markAbilityId, HexCoordinates(1, 0))
     .endTurn()
     .passTurn(s.characters.p1.id)
@@ -48,6 +48,14 @@ class MarkOfTheWindSpec
     .useAbility(crackAbilityId, UseData(CoordinateSeq((0, 0), (1, 0)).toJson.toString))
     .endTurn()
     .passTurn(s.characters.p1.id)
+
+  private val fiveMarkGs: GameState = doubleMarkGs
+    .useAbilityOnCoordinates(markAbilityId, HexCoordinates(2, 0)).endTurn().passTurn(s.characters.p1.id)
+    .useAbilityOnCoordinates(markAbilityId, HexCoordinates(3, 0)).endTurn().passTurn(s.characters.p1.id)
+    .useAbilityOnCoordinates(markAbilityId, HexCoordinates(4, 0)).endTurn().passTurn(s.characters.p1.id)
+
+  private val sixMarkGs: GameState = fiveMarkGs
+    .useAbilityOnCoordinates(markAbilityId, HexCoordinates(5, 0)).endTurn().passTurn(s.characters.p1.id)
 
   MarkOfTheWind.metadata.name must {
     "be able to set up traps" in {
@@ -123,24 +131,24 @@ class MarkOfTheWindSpec
 
 
     "be able to deal damage by detonating selected trap" in {
-      HexCoordinates(0, 0).toCell(markGs).effects.size should be > 0
+      HexCoordinates(0, 0).toCell(markGs).effects.size should be (1)
       HexCoordinates(0, 0).toCell(crackGs).effects.size should be (0)
       crackGs.gameLog.events.ofType[GameEvent.CharacterDamaged].causedBy(crackAbilityId).size should be (1)
     }
 
     "be able to deal damage by detonating several selected traps" in {
-      HexCoordinates(0, 0).toCell(doubleMarkGs).effects.size should be > 0
-      HexCoordinates(1, 0).toCell(doubleMarkGs).effects.size should be > 0
+      HexCoordinates(0, 0).toCell(doubleMarkGs).effects.size should be (1)
+      HexCoordinates(1, 0).toCell(doubleMarkGs).effects.size should be (1)
 
       HexCoordinates(0, 0).toCell(doubleCrackGs).effects.size should be (0)
-      HexCoordinates(1, 0).toCell(doubleCrackGs).effects.size should be > 0
+      HexCoordinates(1, 0).toCell(doubleCrackGs).effects.size should be (0)
 
-      crackGs.gameLog.events.ofType[GameEvent.CharacterDamaged].causedBy(crackAbilityId).size should be (2)
+      doubleCrackGs.gameLog.events.ofType[GameEvent.CharacterDamaged].causedBy(crackAbilityId).size should be (2)
     }
 
     "delete first trap if set above the limit" in {
-      // TODO: increase test map size
-      fail()
+      HexCoordinates(0, 0).toCell(fiveMarkGs).effects.size should be (1)
+      HexCoordinates(0, 0).toCell(sixMarkGs).effects.size should be (0)
     }
 
     "hide the traps from other players" in {

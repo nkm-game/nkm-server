@@ -186,7 +186,7 @@ class Game(id: GameId)(implicit nkmDataService: NkmDataService) extends Persiste
   }
 
 
-  def handleCharacterSelectTimeout(pickNumber: Int): Unit = {
+  def handleCharacterSelectTimeout(pickNumber: Int)(implicit random: Random, causedById: String): Unit = {
     def startPlacingCharactersAfterTimeout(): Unit =
       persistAndPublishAll(Seq(
         TimeAfterPickTimedOut(id),
@@ -261,7 +261,7 @@ class Game(id: GameId)(implicit nkmDataService: NkmDataService) extends Persiste
   }
 
 
-  def surrender(playerId: PlayerId): Unit = {
+  def surrender(playerId: PlayerId)(implicit random: Random, causedById: String): Unit = {
     val e = Surrendered(id, playerId)
     persistAndPublish(e) { _ =>
       updateGameStateAndScheduleDefault(gameState.surrender(playerId))
@@ -280,7 +280,7 @@ class Game(id: GameId)(implicit nkmDataService: NkmDataService) extends Persiste
     }
   }
 
-  def pickCharacter(playerId: PlayerId, characterId: CharacterMetadataId): Unit = {
+  def pickCharacter(playerId: PlayerId, characterId: CharacterMetadataId)(implicit random: Random, causedById: String): Unit = {
     val e = CharacterPicked(id, playerId, characterId)
     persistAndPublish(e) { _ =>
       updateGameStateAndScheduleDefault(gameState.pick(playerId, characterId))
@@ -288,7 +288,7 @@ class Game(id: GameId)(implicit nkmDataService: NkmDataService) extends Persiste
     }
   }
 
-  def blindPickCharacters(playerId: PlayerId, characterIds: Set[CharacterMetadataId]): Unit = {
+  def blindPickCharacters(playerId: PlayerId, characterIds: Set[CharacterMetadataId])(implicit random: Random, causedById: String): Unit = {
     val e = CharactersBlindPicked(id, playerId, characterIds)
     persistAndPublish(e) { _ =>
       updateGameState(gameState.blindPick(playerId, characterIds))
@@ -299,7 +299,7 @@ class Game(id: GameId)(implicit nkmDataService: NkmDataService) extends Persiste
   }
 
 
-  def placeCharacters(playerId: PlayerId, coordinatesToCharacterIdMap: Map[HexCoordinates, CharacterId]): Unit =
+  def placeCharacters(playerId: PlayerId, coordinatesToCharacterIdMap: Map[HexCoordinates, CharacterId])(implicit random: Random, causedById: String): Unit =
   {
     val e = CharactersPlaced(id, playerId, coordinatesToCharacterIdMap)
     persistAndPublish(e) { _ =>
@@ -386,7 +386,7 @@ class Game(id: GameId)(implicit nkmDataService: NkmDataService) extends Persiste
       })
     case Surrender(playerId) =>
       validate(v().validateSurrender(playerId))(() =>
-        surrender(playerId)
+        surrender(playerId)(random, playerId)
       )
     case BanCharacters(playerId, characterIds) =>
       validate(v().validateBanCharacters(playerId, characterIds))(() =>
@@ -394,15 +394,15 @@ class Game(id: GameId)(implicit nkmDataService: NkmDataService) extends Persiste
       )
     case PickCharacter(playerId, characterId) =>
       validate(v().validatePickCharacter(playerId, characterId))(() =>
-        pickCharacter(playerId, characterId)
+        pickCharacter(playerId, characterId)(random, playerId)
       )
     case BlindPickCharacters(playerId, characterIds) =>
       validate(v().validateBlindPickCharacters(playerId, characterIds))(() =>
-        blindPickCharacters(playerId, characterIds)
+        blindPickCharacters(playerId, characterIds)(random, playerId)
       )
     case PlaceCharacters(playerId, coordinatesToCharacterIdMap) =>
       validate(v().validatePlacingCharacters(playerId, coordinatesToCharacterIdMap))(() =>
-        placeCharacters(playerId, coordinatesToCharacterIdMap)
+        placeCharacters(playerId, coordinatesToCharacterIdMap)(random, playerId)
       )
     case EndTurn(playerId) =>
       validate(v().validateEndTurn(playerId))(() =>
@@ -434,18 +434,18 @@ class Game(id: GameId)(implicit nkmDataService: NkmDataService) extends Persiste
       )
     case CharacterSelectTimeout(pickNumber) =>
       if(gameState.isInCharacterSelect) {
-        handleCharacterSelectTimeout(pickNumber)
+        handleCharacterSelectTimeout(pickNumber)(random, id)
       }
     case CharacterPlacingTimeout() =>
       if(gameState.gameStatus == GameStatus.CharacterPlacing) {
         persistAndPublish(CharacterPlacingTimedOut(id))(_ => {
-          updateGameStateAndScheduleDefault(gameState.placingCharactersTimeout())
+          updateGameStateAndScheduleDefault(gameState.placingCharactersTimeout()(random, id))
         })
       }
     case TurnTimeout(turnNumber) =>
       if(gameState.turn.number == turnNumber) {
         persistAndPublish(TurnTimedOut(id))(_ =>
-          updateGameStateAndScheduleDefault(gameState.surrender(gameState.currentPlayer.id))
+          updateGameStateAndScheduleDefault(gameState.surrender(gameState.currentPlayer.id)(random, id))
         )
       }
 
@@ -457,22 +457,22 @@ class Game(id: GameId)(implicit nkmDataService: NkmDataService) extends Persiste
       updateGameState(gameState.startGame(gameStartDependencies))
       log.debug(s"Recovered game start")
     case Surrendered(_, playerId) =>
-      updateGameState(gameState.surrender(playerId))
+      updateGameState(gameState.surrender(playerId)(random, playerId))
       log.debug(s"Recovered $playerId surrender")
     case CharactersBanned(_, playerId, characterIds) =>
       updateGameState(gameState.ban(playerId, characterIds))
       log.debug(s"Recovered $playerId ban")
     case CharacterPicked(_, playerId, characterId) =>
-      updateGameState(gameState.pick(playerId, characterId))
+      updateGameState(gameState.pick(playerId, characterId)(random, playerId))
       log.debug(s"Recovered $playerId pick")
     case CharactersBlindPicked(_, playerId, characterIds) =>
-      updateGameState(gameState.blindPick(playerId, characterIds))
+      updateGameState(gameState.blindPick(playerId, characterIds)(random, playerId))
       log.debug(s"Recovered $playerId blind pick")
     case PlacingCharactersStarted(_) =>
-      updateGameState(gameState.startPlacingCharacters())
+      updateGameState(gameState.startPlacingCharacters()(random, id))
       log.debug(s"Recovered start of character placing")
     case CharactersPlaced(_, playerId, coordinatesToCharacterIdMap) =>
-      updateGameState(gameState.placeCharacters(playerId, coordinatesToCharacterIdMap))
+      updateGameState(gameState.placeCharacters(playerId, coordinatesToCharacterIdMap)(random, playerId))
       log.debug(s"Recovered placing characters by $playerId to $coordinatesToCharacterIdMap")
     case TurnEnded(_, _) =>
       updateGameState(gameState.endTurn())
@@ -500,16 +500,16 @@ class Game(id: GameId)(implicit nkmDataService: NkmDataService) extends Persiste
       updateGameState(gameState.finishBanningPhase())
     case DraftPickTimedOut(_) =>
       log.debug(s"Recovered draft pick timeout")
-      updateGameState(gameState.draftPickTimeout())
+      updateGameState(gameState.draftPickTimeout()(random, id))
     case BlindPickTimedOut(_) =>
       log.debug(s"Recovered blind pick timeout")
-      updateGameState(gameState.blindPickTimeout())
+      updateGameState(gameState.blindPickTimeout()(random, id))
     case CharacterPlacingTimedOut(_) =>
       log.debug(s"Recovered character placing timeout")
-      updateGameState(gameState.placingCharactersTimeout())
+      updateGameState(gameState.placingCharactersTimeout()(random, id))
     case TurnTimedOut(_) =>
       log.debug(s"Recovered turn timeout")
-      updateGameState(gameState.surrender(gameState.currentPlayer.id))
+      updateGameState(gameState.surrender(gameState.currentPlayer.id)(random, id))
     case RecoveryCompleted =>
       // start a timer
       scheduleDefault()
