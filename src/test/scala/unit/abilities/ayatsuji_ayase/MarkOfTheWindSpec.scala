@@ -35,7 +35,7 @@ class MarkOfTheWindSpec
     .passTurn(s.characters.p1.id)
 
   private val crackGs: GameState = markGs
-    .useAbility(crackAbilityId, UseData(CoordinateSet((0, 0)).toJson.toString))
+    .useAbility(crackAbilityId, UseData(CoordinateSeq((0, 0)).toJson.toString))
     .endTurn()
     .passTurn(s.characters.p1.id)
 
@@ -45,7 +45,7 @@ class MarkOfTheWindSpec
     .passTurn(s.characters.p1.id)
 
   private val doubleCrackGs: GameState = doubleMarkGs
-    .useAbility(crackAbilityId, UseData(CoordinateSet((0, 0), (1, 0)).toJson.toString))
+    .useAbility(crackAbilityId, UseData(CoordinateSeq((0, 0), (1, 0)).toJson.toString))
     .endTurn()
     .passTurn(s.characters.p1.id)
 
@@ -76,18 +76,64 @@ class MarkOfTheWindSpec
       }
     }
 
-    "be able to detonate selected trap" in {
-      HexCoordinates(0, 0).toCell(markGs.hexMap).effects.size should be > 0
-      HexCoordinates(0, 0).toCell(crackGs.hexMap).effects.size should be (0)
+
+    "be able to detonate traps" in {
+      assertCommandSuccess {
+        GameStateValidator()(markGs)
+          .validateAbilityUse(s.characters.p0.owner.id, crackAbilityId, UseData(CoordinateSeq((0, 0)).toJson.toString))
+      }
+
+      assertCommandSuccess {
+        GameStateValidator()(doubleMarkGs)
+          .validateAbilityUse(s.characters.p0.owner.id, crackAbilityId, UseData(CoordinateSeq((0, 0)).toJson.toString))
+      }
+
+      assertCommandSuccess {
+        GameStateValidator()(doubleMarkGs)
+          .validateAbilityUse(s.characters.p0.owner.id, crackAbilityId, UseData(CoordinateSeq((1, 0)).toJson.toString))
+      }
+
+      assertCommandSuccess {
+        GameStateValidator()(doubleMarkGs)
+          .validateAbilityUse(s.characters.p0.owner.id, crackAbilityId, UseData(CoordinateSeq((0, 0), (1, 0)).toJson.toString))
+      }
+    }
+
+    "not be able to detonate non existent traps" in {
+      assertCommandFailure {
+        GameStateValidator()(markGs)
+          .validateAbilityUse(s.characters.p0.owner.id, crackAbilityId, UseData(CoordinateSeq((0, 0), (1, 0)).toJson.toString))
+      }
+
+      assertCommandFailure {
+        GameStateValidator()(markGs)
+          .validateAbilityUse(s.characters.p0.owner.id, crackAbilityId, UseData(CoordinateSeq((1, 0)).toJson.toString))
+      }
+
+      assertCommandFailure {
+        GameStateValidator()(markGs)
+          .validateAbilityUse(s.characters.p0.owner.id, crackAbilityId, UseData(CoordinateSeq((0, 0), (-1000, 0)).toJson.toString))
+      }
+
+      assertCommandFailure {
+        GameStateValidator()(markGs)
+          .validateAbilityUse(s.characters.p0.owner.id, crackAbilityId, UseData(CoordinateSeq((-1000, 0)).toJson.toString))
+      }
+    }
+
+
+    "be able to deal damage by detonating selected trap" in {
+      HexCoordinates(0, 0).toCell(markGs).effects.size should be > 0
+      HexCoordinates(0, 0).toCell(crackGs).effects.size should be (0)
       crackGs.gameLog.events.ofType[GameEvent.CharacterDamaged].causedBy(crackAbilityId).size should be (1)
     }
 
-    "be able to detonate several selected traps" in {
-      HexCoordinates(0, 0).toCell(doubleMarkGs.hexMap).effects.size should be > 0
-      HexCoordinates(1, 0).toCell(doubleMarkGs.hexMap).effects.size should be > 0
+    "be able to deal damage by detonating several selected traps" in {
+      HexCoordinates(0, 0).toCell(doubleMarkGs).effects.size should be > 0
+      HexCoordinates(1, 0).toCell(doubleMarkGs).effects.size should be > 0
 
-      HexCoordinates(0, 0).toCell(doubleCrackGs.hexMap).effects.size should be (0)
-      HexCoordinates(1, 0).toCell(doubleCrackGs.hexMap).effects.size should be > 0
+      HexCoordinates(0, 0).toCell(doubleCrackGs).effects.size should be (0)
+      HexCoordinates(1, 0).toCell(doubleCrackGs).effects.size should be > 0
 
       crackGs.gameLog.events.ofType[GameEvent.CharacterDamaged].causedBy(crackAbilityId).size should be (2)
     }
@@ -99,12 +145,12 @@ class MarkOfTheWindSpec
 
     "hide the traps from other players" in {
       HexCoordinates(0, 0)
-        .toCell(markGs.hexMap)
+        .toCell(markGs)
         .toView(Some(s.characters.p0.id))
         .effects.size should be (1)
 
       HexCoordinates(0, 0)
-        .toCell(markGs.hexMap)
+        .toCell(markGs)
         .toView(Some(s.characters.p1.id))
         .effects.size should be (0)
 

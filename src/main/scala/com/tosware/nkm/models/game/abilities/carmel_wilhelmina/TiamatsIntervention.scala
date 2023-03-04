@@ -54,7 +54,7 @@ case class TiamatsIntervention(abilityId: AbilityId, parentCharacterId: Characte
     val nearbyFreeCells = parentCell.get.coordinates.getCircle(metadata.variables("moveTargetRange")).whereFreeToStand
     super.useChecks ++ Seq(
       nearbyFreeCells.nonEmpty -> "There are no nearby cells free to stand.",
-      targetCoords.toCell(gameState.hexMap).isFreeToStand -> "Target cell is not free to stand.",
+      targetCoords.toCell.isFreeToStand -> "Target cell is not free to stand.",
     )
   }
 }

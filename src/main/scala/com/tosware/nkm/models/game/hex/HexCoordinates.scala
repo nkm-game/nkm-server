@@ -1,4 +1,6 @@
 package com.tosware.nkm.models.game.hex
+import com.tosware.nkm.models.game.GameState
+
 import scala.math._
 
 case class HexCoordinates(x: Int, z: Int) {
@@ -51,10 +53,10 @@ case class HexCoordinates(x: Int, z: Int) {
 
   def toTuple: (Int, Int) = (x, z)
 
-  def toCellOpt(implicit hexMap: HexMap): Option[HexCell] =
-    hexMap.getCell(this)
+  def toCellOpt(implicit gameState: GameState): Option[HexCell] =
+    gameState.hexMap.getCell(this)
 
-  def toCell(implicit hexMap: HexMap): HexCell =
+  def toCell(implicit gameState: GameState): HexCell =
     toCellOpt.get
 }
 

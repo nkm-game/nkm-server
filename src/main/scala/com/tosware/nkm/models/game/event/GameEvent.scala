@@ -8,6 +8,7 @@ import com.tosware.nkm.models.game.character_effect.CharacterEffect.CharacterEff
 import com.tosware.nkm.models.game.hex.HexCoordinates
 import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.game.character.StatType
+import com.tosware.nkm.models.game.hex_effect.HexCellEffect.HexCellEffectId
 
 object GameEvent {
   type GameEventId = String
@@ -32,7 +33,9 @@ object GameEvent {
   case class CharacterPlaced(id: GameEventId, phase: Phase, turn: Turn, causedById: String, characterId: CharacterId, target: HexCoordinates)
     extends GameEvent
       with ContainsCharacterId
-  case class EffectAddedToCell(id: GameEventId, phase: Phase, turn: Turn, causedById: String, effectId: String, target: HexCoordinates)
+  case class EffectAddedToCell(id: GameEventId, phase: Phase, turn: Turn, causedById: String, hexCellEffectId: HexCellEffectId, target: HexCoordinates)
+    extends GameEvent
+  case class EffectRemovedFromCell(id: GameEventId, phase: Phase, turn: Turn, causedById: String, hexCellEffectId: HexCellEffectId)
     extends GameEvent
   case class EffectAddedToCharacter(id: GameEventId, phase: Phase, turn: Turn, causedById: String, effectId: CharacterEffectId, characterId: CharacterId)
     extends GameEvent

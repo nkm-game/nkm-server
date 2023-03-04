@@ -55,7 +55,7 @@ case class OgreCutter(abilityId: AbilityId, parentCharacterId: CharacterId) exte
       val targetDirectionOpt = parentCell.get.coordinates.getDirection(targetCoordinatesOpt.get)
       if (targetDirectionOpt.isEmpty) return false
       val teleportCoordinates = targetCoordinatesOpt.get.getInDirection(targetDirectionOpt.get, 2)
-      if (!teleportCoordinates.toCellOpt(gameState.hexMap).fold(false)(_.isFreeToStand)) return false
+      if (!teleportCoordinates.toCellOpt.fold(false)(_.isFreeToStand)) return false
       true
     }
 

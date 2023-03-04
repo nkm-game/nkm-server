@@ -20,7 +20,7 @@ trait BasicMoveOverride {
 
 trait Usable { this: Ability =>
   def use(useData: UseData = UseData())(implicit random: Random, gameState: GameState): GameState
-  def useChecks(implicit gameState: GameState): Set[UseCheck] =
+  def useChecks(implicit useData: UseData, gameState: GameState): Set[UseCheck] =
     baseUseChecks
   final def canBeUsed(implicit useData: UseData, gameState: GameState): CommandResponse =
     _canBeUsed(useChecks)

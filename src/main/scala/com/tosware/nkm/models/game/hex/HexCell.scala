@@ -1,5 +1,6 @@
 package com.tosware.nkm.models.game.hex
 
+import com.softwaremill.quicklens.ModifyPimp
 import com.tosware.nkm.NkmUtils._
 import com.tosware.nkm.models.game.{GameState, GameStatus}
 import com.tosware.nkm.models.game.Player.PlayerId
@@ -7,6 +8,7 @@ import com.tosware.nkm.models.game.character.NkmCharacter
 import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game.hex.HexCellType.Normal
 import com.tosware.nkm.models.game.hex_effect.HexCellEffect
+import com.tosware.nkm.models.game.hex_effect.HexCellEffect.HexCellEffectId
 
 import scala.annotation.tailrec
 
@@ -29,14 +31,20 @@ case class HexCell
 ) extends HexCellLike {
   val id: HexCoordinates = coordinates
 
-  def getNeighbour(direction: HexDirection)(implicit hexMap: HexMap): Option[HexCell] =
+  def addEffect(effect: HexCellEffect): HexCell =
+    this.modify(_.effects).using(_ :+ effect)
+
+  def removeEffect(effectId: HexCellEffectId): HexCell =
+    this.modify(_.effects).using(_.filterNot(_.id == effectId))
+
+  def getNeighbour(direction: HexDirection)(implicit gameState: GameState): Option[HexCell] =
     coordinates.getNeighbour(direction).toCellOpt
 
   def getLine(
     direction: HexDirection,
     size: Int,
     stopPredicate: HexCell => Boolean = _ => false,
-  )(implicit hexMap: HexMap): Set[HexCell] = {
+  )(implicit gameState: GameState): Set[HexCell] = {
     if(size <= 0) return Set.empty
     val neighbour = getNeighbour(direction)
     if(neighbour.fold(true)(c => stopPredicate(c))) return Set.empty
@@ -70,7 +78,7 @@ case class HexCell
     directions: Set[HexDirection],
     size: Int,
     stopPredicate: HexCell => Boolean = _ => false,
-  )(implicit hexMap: HexMap): Set[HexCell] =
+  )(implicit gameState: GameState): Set[HexCell] =
     directions.flatMap(d => getLine(d, size, stopPredicate))
 
   def getArea(

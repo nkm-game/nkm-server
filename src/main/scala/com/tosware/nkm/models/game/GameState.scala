@@ -15,7 +15,7 @@ import com.tosware.nkm.models.game.effects.{Block, FreeAbility, Invisibility}
 import com.tosware.nkm.models.game.event.{EventHideData, GameEventListener, GameLog, RevealCondition}
 import com.tosware.nkm.models.game.hex._
 import com.tosware.nkm.models.game.hex_effect.HexCellEffect.HexCellEffectId
-import com.tosware.nkm.models.game.hex_effect.HexCellEffectState
+import com.tosware.nkm.models.game.hex_effect.{HexCellEffect, HexCellEffectState}
 import com.tosware.nkm.models.game.pick.PickType
 import com.tosware.nkm.models.game.pick.blindpick._
 import com.tosware.nkm.models.game.pick.draftpick._
@@ -139,6 +139,8 @@ case class GameState
 
   def effects: Set[CharacterEffect] = characters.flatMap(_.state.effects)
 
+  def hexCellEffects: Set[HexCellEffect] = hexMap.cells.flatMap(_.effects)
+
   def triggerAbilities: Set[Ability with GameEventListener] = abilities.collect {case a: GameEventListener => a}
 
   def triggerEffects: Set[CharacterEffect with GameEventListener] = effects.collect {case e: GameEventListener => e}
@@ -148,6 +150,8 @@ case class GameState
   def abilityById(abilityId: AbilityId): Ability = abilities.find(_.id == abilityId).get
 
   def effectById(effectId: CharacterEffectId): CharacterEffect = effects.find(_.id == effectId).get
+
+  def hexCellEffectById(effectId: HexCellEffectId): HexCellEffect = hexCellEffects.find(_.id == effectId).get
 
   def hiddenEventsFor(forPlayerOpt: Option[PlayerId]): Seq[EventHideData] =
     if(forPlayerOpt.isEmpty)
@@ -594,13 +598,13 @@ case class GameState
 
   def handleCharacterDeath(characterId: CharacterId)(implicit random: Random, causedById: String): GameState =
     this.removeCharacterFromMap(characterId)
-      .logEvent(CharacterDied(NkmUtils.randomUUID(), phase, turn, causedById, characterId))
+      .logEvent(CharacterDied(randomUUID(), phase, turn, causedById, characterId))
       .checkIfPlayerKnockedOut(characterById(characterId).owner(this).id)
 
   def addEffect(characterId: CharacterId, characterEffect: CharacterEffect)(implicit random: Random, causedById: String): GameState =
     updateCharacter(characterId)(_.addEffect(characterEffect))
       .modify(_.characterEffectStates).using(ces => ces.updated(characterEffect.id, CharacterEffectState(characterEffect.initialCooldown)))
-      .logEvent(EffectAddedToCharacter(NkmUtils.randomUUID(), phase, turn, causedById, characterEffect.id, characterId))
+      .logEvent(EffectAddedToCharacter(randomUUID(), phase, turn, causedById, characterEffect.id, characterId))
 
   def removeEffects(characterEffectIds: Seq[CharacterEffectId])(implicit random: Random, causedById: String): GameState =
     characterEffectIds.foldLeft(this){case (acc, eid) => acc.removeEffect(eid)}
@@ -609,7 +613,22 @@ case class GameState
     val character = effectById(characterEffectId).parentCharacter(this)
     updateCharacter(character.id)(_.removeEffect(characterEffectId))
       .modify(_.characterEffectStates).using(ces => ces.removed(characterEffectId))
-      .logEvent(EffectRemovedFromCharacter(NkmUtils.randomUUID(), phase, turn, causedById, characterEffectId))
+      .logEvent(EffectRemovedFromCharacter(randomUUID(), phase, turn, causedById, characterEffectId))
+  }
+
+  def addHexCellEffect(coordinates: HexCoordinates, hexCellEffect: HexCellEffect)(implicit random: Random, causedById: String): GameState =
+    updateHexCell(coordinates)(_.addEffect(hexCellEffect))
+      .modify(_.hexCellEffectStates).using(hes => hes.updated(hexCellEffect.id, HexCellEffectState(hexCellEffect.initialCooldown)))
+      .logEvent(EffectAddedToCell(randomUUID(), phase, turn, causedById, hexCellEffect.id, coordinates))
+
+  def removeHexCellEffects(heids: Seq[HexCellEffectId])(implicit random: Random, causedById: String): GameState =
+    heids.foldLeft(this){case (acc, eid) => acc.removeHexCellEffect(eid)}
+
+  def removeHexCellEffect(heid: HexCellEffectId)(implicit random: Random, causedById: String): GameState = {
+    val coordinates = hexCellEffectById(heid).parentCell(this).coordinates
+    updateHexCell(coordinates)(_.removeEffect(heid))
+      .modify(_.hexCellEffectStates).using(hes => hes.removed(heid))
+      .logEvent(EffectRemovedFromCell(randomUUID(), phase, turn, causedById, heid))
   }
 
   def removeCharacterFromMap(characterId: CharacterId)(implicit random: Random, causedById: String): GameState = {
@@ -617,7 +636,7 @@ case class GameState
 
     parentCellOpt.fold(this)(c => updateHexCell(c.coordinates)(_.copy(characterId = None)))
       .modify(_.characterIdsOutsideMap).setTo(characterIdsOutsideMap + characterId)
-      .logEvent(CharacterRemovedFromMap(NkmUtils.randomUUID(), phase, turn, causedById, characterId))
+      .logEvent(CharacterRemovedFromMap(randomUUID(), phase, turn, causedById, characterId))
   }
 
   def takeActionWithCharacter(characterId: CharacterId)(implicit random: Random): GameState = {
