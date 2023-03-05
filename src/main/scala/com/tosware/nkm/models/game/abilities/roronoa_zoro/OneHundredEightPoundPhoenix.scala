@@ -13,12 +13,12 @@ object OneHundredEightPoundPhoenix {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "108 Pound Phoenix",
-      alternateName = "百八煩悩鳳",
+      alternateName = "百八煩悩鳳 (Hyakuhachi Pound Hō)",
       abilityType = AbilityType.Ultimate,
       description =
         """Character sends 3 shockwaves towards the target enemy, each dealing {damage} physical damage.
           |
-          |Range: linear, {range}
+          |Range: linear, stops at walls and enemies, {range}
           |""".stripMargin,
       variables = NkmConf.extract("abilities.roronoaZoro.oneHundredEightPoundPhoenix"),
     )

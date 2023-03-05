@@ -15,7 +15,7 @@ object ManipulatorOfObjects {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "Manipulator of Objects",
-      alternateName = "万条の仕手",
+      alternateName = "万条の仕手 (Banjō no Shite)",
       abilityType = AbilityType.Passive,
       description = """This character's basic attacks snare enemies for {duration}t.
       |This effect cannot be added on the same enemy for {effectTimeout}t.""".stripMargin,

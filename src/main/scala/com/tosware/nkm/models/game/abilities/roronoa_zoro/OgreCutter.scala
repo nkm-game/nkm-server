@@ -14,12 +14,12 @@ object OgreCutter {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "Ogre Cutter",
-      alternateName = "鬼斬り",
+      alternateName = "鬼斬り (Oni Giri)",
       abilityType = AbilityType.Normal,
       description =
         """Character basic attacks selected target in range and teleports 2 tiles behind it.
           |
-          |Range: linear, {range}""".stripMargin,
+          |Range: linear, stops at walls and enemies, {range}""".stripMargin,
       variables = NkmConf.extract("abilities.roronoaZoro.ogreCutter"),
     )
 }

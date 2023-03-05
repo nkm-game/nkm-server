@@ -18,7 +18,7 @@ object GodrobeSenketsu {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "Godrobe Senketsu",
-      alternateName = "神衣鮮血",
+      alternateName = "神衣鮮血 (Kamui Senketsu)",
       abilityType = AbilityType.Ultimate,
       description =
         """Character wears Senketsu, gaining flying effect and {initialAttackDamageBonus} AD.

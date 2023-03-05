@@ -16,6 +16,7 @@ import llenn._
 import nibutani_shinka._
 import roronoa_zoro._
 import ryuko_matoi._
+import shana._
 import sinon._
 import com.tosware.nkm.serializers.NkmJsonProtocol
 
@@ -76,6 +77,10 @@ case class AbilityMetadatasProvider() extends NkmJsonProtocol {
     ScissorBlade.metadata,
     FiberDecapitation.metadata,
     GodrobeSenketsu.metadata,
+
+    WingsOfCrimson.metadata,
+    GreatBladeOfCrimson.metadata,
+    FinalBattleSecretTechnique.metadata,
 
     SnipersSight.metadata,
     TacticalEscape.metadata,

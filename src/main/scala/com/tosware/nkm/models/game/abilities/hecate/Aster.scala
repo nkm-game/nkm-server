@@ -13,7 +13,7 @@ object Aster {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "Aster",
-      alternateName = "星",
+      alternateName = "星 (Asuteru)",
       abilityType = AbilityType.Normal,
       description =
         """Character shoots rays of energy from Aster, dealing {damage} magical damage in a sphere to enemies.

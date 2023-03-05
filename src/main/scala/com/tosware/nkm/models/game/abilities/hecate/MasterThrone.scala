@@ -14,7 +14,7 @@ object MasterThrone {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "Master Throne",
-      alternateName = "頂の座",
+      alternateName = "頂の座 (Itadaki no Kura)",
       abilityType = AbilityType.Passive,
       description =
         """Character can gather Life Energy using base attacks or Normal abilities, collecting {healthPercent}% of target's max HP.

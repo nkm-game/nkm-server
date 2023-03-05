@@ -19,6 +19,7 @@ import llenn._
 import nibutani_shinka._
 import roronoa_zoro._
 import ryuko_matoi._
+import shana._
 import sinon._
 
 import scala.util.Random
@@ -123,6 +124,13 @@ object AbilityProvider extends NkmUtils {
         FiberDecapitation(randomUUID(), characterId)
       case GodrobeSenketsu.metadata.id =>
         GodrobeSenketsu(randomUUID(), characterId)
+
+      case WingsOfCrimson.metadata.id =>
+        WingsOfCrimson(randomUUID(), characterId)
+      case GreatBladeOfCrimson.metadata.id =>
+        GreatBladeOfCrimson(randomUUID(), characterId)
+      case FinalBattleSecretTechnique.metadata.id =>
+        FinalBattleSecretTechnique(randomUUID(), characterId)
 
       case SnipersSight.metadata.id =>
         SnipersSight(randomUUID(), characterId)

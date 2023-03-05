@@ -4,6 +4,7 @@
 - Add ability variables in `nkm.conf`
 - Add ability metadata in `AbilityMetadatasProvider`
 - Add character effects metadata in `CharacterEffectMetadatasProvider`
+- Add hex cell effects metadata in `HexCellEffectMetadatasProvider`
 - Add character metadata in `CharacterMetadatasProvider`
 - Add ability instantiation mapping in `AbilityProvider`
 ### Implement Abilities

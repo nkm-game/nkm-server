@@ -13,7 +13,7 @@ object PowerOfExistence {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "Power Of Existence",
-      alternateName = "存在の力",
+      alternateName = "存在の力 (Sonzai no Chikara)",
       abilityType = AbilityType.Ultimate,
       description =
         """Character releases collected Life Energy, dealing magic damage to every enemy character on the map.

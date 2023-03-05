@@ -15,6 +15,7 @@ import llenn._
 import nibutani_shinka._
 import roronoa_zoro._
 import ryuko_matoi._
+import shana._
 import sinon._
 import com.tosware.nkm.models.game.character.{AttackType, CharacterMetadata}
 import com.tosware.nkm.serializers.NkmJsonProtocol
@@ -228,7 +229,11 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       initialSpeed = 7,
       initialPhysicalDefense = 15,
       initialMagicalDefense = 20,
-      initialAbilitiesMetadataIds = Seq.empty
+      initialAbilitiesMetadataIds = Seq(
+        WingsOfCrimson.metadata.id,
+        GreatBladeOfCrimson.metadata.id,
+        FinalBattleSecretTechnique.metadata.id,
+      )
     ),
     CharacterMetadata(
       name = "Yoshino",
