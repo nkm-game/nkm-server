@@ -50,10 +50,12 @@ trait NkmJsonProtocol
   implicit object GameEventFormat extends RootJsonFormat[GameEvent] {
     override def write(obj: GameEvent): JsValue = {
       JsObject((obj match {
+        case e: GameStatusUpdated => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
         case e: EventsRevealed => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
         case e: ClockUpdated => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
         case e: CharacterPlaced => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
         case e: EffectAddedToCell => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
+        case e: EffectRemovedFromCell => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
         case e: EffectAddedToCharacter => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
         case e: EffectRemovedFromCharacter => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
         case e: EffectVariableSet => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
@@ -99,10 +101,12 @@ trait NkmJsonProtocol
     override def read(json: JsValue): GameEvent = {
       val ges = json.convertTo[GameEventSerialized]
       ges.className match {
+        case "GameStatusUpdated" => ges.eventJson.parseJson.convertTo[GameStatusUpdated]
         case "EventsRevealed" => ges.eventJson.parseJson.convertTo[EventsRevealed]
         case "ClockUpdated" => ges.eventJson.parseJson.convertTo[ClockUpdated]
         case "CharacterPlaced" => ges.eventJson.parseJson.convertTo[CharacterPlaced]
         case "EffectAddedToCell" => ges.eventJson.parseJson.convertTo[EffectAddedToCell]
+        case "EffectRemovedFromCell" => ges.eventJson.parseJson.convertTo[EffectRemovedFromCell]
         case "EffectAddedToCharacter" => ges.eventJson.parseJson.convertTo[EffectAddedToCharacter]
         case "EffectRemovedFromCharacter" => ges.eventJson.parseJson.convertTo[EffectRemovedFromCharacter]
         case "EffectVariableSet" => ges.eventJson.parseJson.convertTo[EffectVariableSet]

@@ -658,7 +658,7 @@ class WSGameSpec extends WSTrait {
 
       val observerTokenId = 2
 
-      val es = fetchAndParseEventsAsync(lobbyId, observerTokenId, 12)(WSProbe())
+      val es = fetchAndParseEventsAsync(lobbyId, observerTokenId, 15)(WSProbe())
 
       withGameWS { implicit wsClient: WSProbe =>
         auth(0)
