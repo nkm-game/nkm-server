@@ -626,7 +626,7 @@ case class GameState
     heids.foldLeft(this){case (acc, eid) => acc.removeHexCellEffect(eid)}
 
   def removeHexCellEffect(heid: HexCellEffectId)(implicit random: Random, causedById: String): GameState = {
-    val coordinates = hexCellEffectById(heid).parentCell(this).coordinates
+    val coordinates = hexCellEffectById(heid).parentCell(this).get.coordinates
     updateHexCell(coordinates)(_.removeEffect(heid))
       .modify(_.hexCellEffectStates).using(hes => hes.removed(heid))
       .logEvent(EffectRemovedFromCell(randomUUID(), phase, turn, causedById, heid))

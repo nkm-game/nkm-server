@@ -18,8 +18,8 @@ abstract class HexCellEffect(val id: HexCellEffectId) extends NkmUtils {
     metadata.initialEffectType
   def state(implicit gameState: GameState): HexCellEffectState =
     gameState.hexCellEffectStates(id)
-  def parentCell(implicit gameState: GameState): HexCell =
-    gameState.hexMap.cells.find(_.effects.exists(_.id == id)).get
+  def parentCell(implicit gameState: GameState): Option[HexCell] =
+    gameState.hexMap.cells.find(_.effects.exists(_.id == id))
 
   def getDecrementCooldownState(implicit gameState: GameState): HexCellEffectState =
     state.copy(cooldown = math.max(state.cooldown - 1, 0))
@@ -31,7 +31,6 @@ abstract class HexCellEffect(val id: HexCellEffectId) extends NkmUtils {
     HexCellEffectView(
       id = id,
       metadataId = metadata.id,
-      parentCellCoordinates = parentCell.coordinates,
       state = state,
       effectType = effectType,
     )

@@ -23,7 +23,7 @@ class MarkOfTheWindSpec
       CrackTheSky.metadata.id,
     ))
   private val s = scenarios.Spacey1v1TestScenario(metadata)
-  private implicit val gameState: GameState = s.gameState
+  private val gameState: GameState = s.gameState
   private val markAbilityId =
     s.characters.p0.state.abilities(0).id
   private val crackAbilityId =
@@ -61,26 +61,26 @@ class MarkOfTheWindSpec
     "be able to set up traps" in {
       assertCommandSuccess {
         GameStateValidator()(gameState)
-          .validateAbilityUseOnCoordinates(s.characters.p0.owner.id, markAbilityId, HexCoordinates(0, 0))
+          .validateAbilityUseOnCoordinates(s.owners.p0, markAbilityId, HexCoordinates(0, 0))
       }
 
       assertCommandSuccess {
         GameStateValidator()(crackGs)
-          .validateAbilityUseOnCoordinates(s.characters.p0.owner.id, markAbilityId, HexCoordinates(0, 0))
+          .validateAbilityUseOnCoordinates(s.owners.p0, markAbilityId, HexCoordinates(0, 0))
       }
     }
 
     "not be able to set up traps on the same tile" in {
       assertCommandFailure {
         GameStateValidator()(markGs)
-          .validateAbilityUseOnCoordinates(s.characters.p0.owner.id, markAbilityId, HexCoordinates(0, 0))
+          .validateAbilityUseOnCoordinates(s.owners.p0, markAbilityId, HexCoordinates(0, 0))
       }
     }
 
     "not be able to set up traps outside map" in {
       assertCommandFailure {
         GameStateValidator()(gameState)
-          .validateAbilityUseOnCoordinates(s.characters.p0.owner.id, markAbilityId, HexCoordinates(-10, 0))
+          .validateAbilityUseOnCoordinates(s.owners.p0, markAbilityId, HexCoordinates(-10, 0))
       }
     }
 
@@ -88,44 +88,44 @@ class MarkOfTheWindSpec
     "be able to detonate traps" in {
       assertCommandSuccess {
         GameStateValidator()(markGs)
-          .validateAbilityUse(s.characters.p0.owner.id, crackAbilityId, UseData(CoordinateSeq((0, 0)).toJson.toString))
+          .validateAbilityUse(s.owners.p0, crackAbilityId, UseData(CoordinateSeq((0, 0)).toJson.toString))
       }
 
       assertCommandSuccess {
         GameStateValidator()(doubleMarkGs)
-          .validateAbilityUse(s.characters.p0.owner.id, crackAbilityId, UseData(CoordinateSeq((0, 0)).toJson.toString))
+          .validateAbilityUse(s.owners.p0, crackAbilityId, UseData(CoordinateSeq((0, 0)).toJson.toString))
       }
 
       assertCommandSuccess {
         GameStateValidator()(doubleMarkGs)
-          .validateAbilityUse(s.characters.p0.owner.id, crackAbilityId, UseData(CoordinateSeq((1, 0)).toJson.toString))
+          .validateAbilityUse(s.owners.p0, crackAbilityId, UseData(CoordinateSeq((1, 0)).toJson.toString))
       }
 
       assertCommandSuccess {
         GameStateValidator()(doubleMarkGs)
-          .validateAbilityUse(s.characters.p0.owner.id, crackAbilityId, UseData(CoordinateSeq((0, 0), (1, 0)).toJson.toString))
+          .validateAbilityUse(s.owners.p0, crackAbilityId, UseData(CoordinateSeq((0, 0), (1, 0)).toJson.toString))
       }
     }
 
     "not be able to detonate non existent traps" in {
       assertCommandFailure {
         GameStateValidator()(markGs)
-          .validateAbilityUse(s.characters.p0.owner.id, crackAbilityId, UseData(CoordinateSeq((0, 0), (1, 0)).toJson.toString))
+          .validateAbilityUse(s.owners.p0, crackAbilityId, UseData(CoordinateSeq((0, 0), (1, 0)).toJson.toString))
       }
 
       assertCommandFailure {
         GameStateValidator()(markGs)
-          .validateAbilityUse(s.characters.p0.owner.id, crackAbilityId, UseData(CoordinateSeq((1, 0)).toJson.toString))
+          .validateAbilityUse(s.owners.p0, crackAbilityId, UseData(CoordinateSeq((1, 0)).toJson.toString))
       }
 
       assertCommandFailure {
         GameStateValidator()(markGs)
-          .validateAbilityUse(s.characters.p0.owner.id, crackAbilityId, UseData(CoordinateSeq((0, 0), (-1000, 0)).toJson.toString))
+          .validateAbilityUse(s.owners.p0, crackAbilityId, UseData(CoordinateSeq((0, 0), (-1000, 0)).toJson.toString))
       }
 
       assertCommandFailure {
         GameStateValidator()(markGs)
-          .validateAbilityUse(s.characters.p0.owner.id, crackAbilityId, UseData(CoordinateSeq((-1000, 0)).toJson.toString))
+          .validateAbilityUse(s.owners.p0, crackAbilityId, UseData(CoordinateSeq((-1000, 0)).toJson.toString))
       }
     }
 
@@ -154,18 +154,18 @@ class MarkOfTheWindSpec
     "hide the traps from other players" in {
       HexCoordinates(0, 0)
         .toCell(markGs)
-        .toView(Some(s.characters.p0.id))
+        .toView(Some(s.characters.p0.id))(markGs)
         .effects.size should be (1)
 
       HexCoordinates(0, 0)
         .toCell(markGs)
-        .toView(Some(s.characters.p1.id))
+        .toView(Some(s.characters.p1.id))(markGs)
         .effects.size should be (0)
 
-      markGs.gameLog.toView(Some(s.characters.p0.id))
+      markGs.gameLog.toView(Some(s.characters.p0.id))(markGs)
         .events.ofType[GameEvent.EffectAddedToCell].size should be (1)
 
-      markGs.gameLog.toView(Some(s.characters.p1.id))
+      markGs.gameLog.toView(Some(s.characters.p1.id))(markGs)
         .events.ofType[GameEvent.EffectAddedToCell].size should be (0)
     }
   }
