@@ -26,7 +26,7 @@ object Mabinogion {
           |- shield is tripled
           |- all friends in range gain {enchantedSpeed} speed for one phase
           |""".stripMargin,
-      variables = NkmConf.extract("abilities.nibutaniShinka.mabinogion"),
+      variables = NkmConf.extract("abilities.nibutani_shinka.mabinogion"),
     )
 }
 

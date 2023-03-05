@@ -21,7 +21,7 @@ object SummerBreeze {
           |
           |Range: linear, {range}
           |""".stripMargin,
-      variables = NkmConf.extract("abilities.nibutaniShinka.summerBreeze"),
+      variables = NkmConf.extract("abilities.nibutani_shinka.summerBreeze"),
       relatedEffectIds = Seq(effects.Stun.metadata.id),
     )
 }

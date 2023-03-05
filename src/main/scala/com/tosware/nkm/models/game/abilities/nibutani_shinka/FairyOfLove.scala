@@ -15,7 +15,7 @@ object FairyOfLove {
       name = "Fairy Of Love",
       abilityType = AbilityType.Ultimate,
       description = "Character enchants the passive ability for {duration}t.",
-      variables = NkmConf.extract("abilities.nibutaniShinka.fairyOfLove"),
+      variables = NkmConf.extract("abilities.nibutani_shinka.fairyOfLove"),
       relatedEffectIds = Seq(effects.AbilityEnchant.metadata.id),
     )
 }
