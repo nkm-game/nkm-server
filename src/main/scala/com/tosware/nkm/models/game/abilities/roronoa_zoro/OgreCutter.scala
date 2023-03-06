@@ -20,7 +20,7 @@ object OgreCutter {
         """Character basic attacks selected target in range and teleports 2 tiles behind it.
           |
           |Range: linear, stops at walls and enemies, {range}""".stripMargin,
-      variables = NkmConf.extract("abilities.roronoaZoro.ogreCutter"),
+      variables = NkmConf.extract("abilities.roronoa_zoro.ogreCutter"),
     )
 }
 

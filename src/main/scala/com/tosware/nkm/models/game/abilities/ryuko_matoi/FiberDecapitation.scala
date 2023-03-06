@@ -19,7 +19,7 @@ object FiberDecapitation {
         """Character cuts through selected enemy, decreasing his physical defense by {physicalDefenseDecrease},
           |dealing {damage} physical damage and landing {targetCellOffset} tiles behind him.
           |Range: linear, stops at walls and enemies, {range}""".stripMargin,
-      variables = NkmConf.extract("abilities.ryukoMatoi.fiberDecapitation"),
+      variables = NkmConf.extract("abilities.ryuko_matoi.fiberDecapitation"),
     )
 }
 

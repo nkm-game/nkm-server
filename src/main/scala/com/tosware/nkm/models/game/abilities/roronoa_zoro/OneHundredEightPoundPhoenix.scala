@@ -20,7 +20,7 @@ object OneHundredEightPoundPhoenix {
           |
           |Range: linear, stops at walls and enemies, {range}
           |""".stripMargin,
-      variables = NkmConf.extract("abilities.roronoaZoro.oneHundredEightPoundPhoenix"),
+      variables = NkmConf.extract("abilities.roronoa_zoro.oneHundredEightPoundPhoenix"),
     )
 }
 
