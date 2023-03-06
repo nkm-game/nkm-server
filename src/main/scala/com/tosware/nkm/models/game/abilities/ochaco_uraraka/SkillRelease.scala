@@ -18,7 +18,7 @@ object SkillRelease {
         """Character releases their ability, and all characters lose Zero Gravity effect.
           |Enemies that lost Zero Gravity are stunned for {stunDuration}t.
           |""".stripMargin,
-      variables = NkmConf.extract("abilities.ochaco_uraraka.skill_release"),
+      variables = NkmConf.extract("abilities.ochaco_uraraka.skillRelease"),
     )
 }
 

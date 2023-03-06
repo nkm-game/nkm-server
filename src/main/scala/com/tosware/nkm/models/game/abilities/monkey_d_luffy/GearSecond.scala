@@ -17,7 +17,7 @@ object GearSecond {
       description =
         """Character gains {bonusSpeed} speed and enchants their normal ability for {duration}t.
           |""".stripMargin,
-      variables = NkmConf.extract("abilities.shana.finalBattleSecretTechnique"),
+      variables = NkmConf.extract("abilities.monkey_d_luffy.gearSecond"),
       relatedEffectIds = Seq(
         effects.StatBuff.metadata.id,
         effects.AbilityEnchant.metadata.id,
