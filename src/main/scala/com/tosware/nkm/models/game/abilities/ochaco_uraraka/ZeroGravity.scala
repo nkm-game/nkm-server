@@ -1,26 +1,31 @@
-package com.tosware.nkm.models.game.abilities.aqua
+package com.tosware.nkm.models.game.abilities.ochaco_uraraka
 
-import com.tosware.nkm.models.game.ability.Ability.AbilityId
-import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
+import com.tosware.nkm.NkmConf
 import com.tosware.nkm.models.game._
-import com.tosware.nkm.models.game.ability.{Ability, AbilityMetadata, AbilityType, BasicAttackOverride}
+import com.tosware.nkm.models.game.ability.Ability.AbilityId
+import com.tosware.nkm.models.game.ability._
+import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game.hex.HexCoordinates
 
 import scala.util.Random
 
-object NaturesBeauty {
+object ZeroGravity {
   val metadata: AbilityMetadata =
     AbilityMetadata(
-      name = "Nature's Beauty",
+      name = "Zero Gravity",
+      alternateName = "無重力 (Zero Gurabiti)",
       abilityType = AbilityType.Passive,
-      description = "Character can use basic attacks on allies, healing them instead of dealing damage.",
+      description =
+        """Character can attack friendly characters, but instead of dealing damage applies Zero Gravity effect on them for {duration}t.
+          |Characters with Zero Gravity effect can fly.""".stripMargin,
+      variables = NkmConf.extract("abilities.ochaco_uraraka.zeroGravity"),
     )
 }
 
-case class NaturesBeauty(abilityId: AbilityId, parentCharacterId: CharacterId)
+case class ZeroGravity(abilityId: AbilityId, parentCharacterId: CharacterId)
   extends Ability(abilityId, parentCharacterId)
     with BasicAttackOverride {
-  override val metadata: AbilityMetadata = NaturesBeauty.metadata
+  override val metadata: AbilityMetadata = ZeroGravity.metadata
 
   override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =
     gameState.characterById(parentCharacterId).basicAttackCellCoords(gameState)
@@ -33,7 +38,6 @@ case class NaturesBeauty(abilityId: AbilityId, parentCharacterId: CharacterId)
   override def basicAttack(targetCharacterId: CharacterId)(implicit random: Random, gameState: GameState): GameState =
     if(gameState.characterById(targetCharacterId).isFriendForC(parentCharacterId))
       gameState
-        .heal(targetCharacterId, parentCharacter.state.attackPoints)(random, id)
     else
       parentCharacter
         .defaultBasicAttack(targetCharacterId)
