@@ -7,14 +7,18 @@ import ayatsuji_ayase._
 import blank._
 import carmel_wilhelmina._
 import crona._
+import dekomori_sanae._
 import ebisuzawa_kurumi._
 import hecate._
 import kirito._
 import liones_elizabeth._
 import llenn._
+import monkey_d_luffy._
 import nibutani_shinka._
+import ochaco_uraraka._
 import roronoa_zoro._
 import ryuko_matoi._
+import satou_kazuma._
 import shana._
 import sinon._
 import com.tosware.nkm.models.game.character.{AttackType, CharacterMetadata}
@@ -23,6 +27,47 @@ import com.tosware.nkm.serializers.NkmJsonProtocol
 case class CharacterMetadatasProvider() extends NkmJsonProtocol {
 
   def getCharacterMetadatas: Seq[CharacterMetadata] = Seq(
+    CharacterMetadata(
+      name = "『 』",
+      attackType = AttackType.Melee,
+      initialHealthPoints = 42,
+      initialAttackPoints = 7,
+      initialBasicAttackRange = 2,
+      initialSpeed = 5,
+      initialPhysicalDefense = 5,
+      initialMagicalDefense = 5,
+      initialAbilitiesMetadataIds = Seq(
+        AceInTheHole.metadata.id,
+        Check.metadata.id,
+        Castling.metadata.id,
+      )
+    ),
+    CharacterMetadata(
+      name = "Akame",
+      attackType = AttackType.Melee,
+      initialHealthPoints = 67,
+      initialAttackPoints = 13,
+      initialBasicAttackRange = 3,
+      initialSpeed = 7,
+      initialPhysicalDefense = 20,
+      initialMagicalDefense = 15,
+      initialAbilitiesMetadataIds = Seq(
+        Murasame.metadata.id,
+        Eliminate.metadata.id,
+        LittleWarHorn.metadata.id,
+      )
+    ),
+    CharacterMetadata(
+      name = "Asuna",
+      attackType = AttackType.Melee,
+      initialHealthPoints = 66,
+      initialAttackPoints = 12,
+      initialBasicAttackRange = 4,
+      initialSpeed = 6,
+      initialPhysicalDefense = 20,
+      initialMagicalDefense = 10,
+      initialAbilitiesMetadataIds = Seq.empty
+    ),
     CharacterMetadata(
       name = "Aqua",
       attackType = AttackType.Ranged,
@@ -54,130 +99,19 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       )
     ),
     CharacterMetadata(
-      name = "Asuna",
-      attackType = AttackType.Melee,
-      initialHealthPoints = 66,
-      initialAttackPoints = 12,
-      initialBasicAttackRange = 4,
-      initialSpeed = 6,
-      initialPhysicalDefense = 20,
-      initialMagicalDefense = 10,
-      initialAbilitiesMetadataIds = Seq.empty
-    ),
-    CharacterMetadata(
-      name = "Dekomori Sanae",
+      name = "Carmel Wilhelmina",
       attackType = AttackType.Ranged,
-      initialHealthPoints = 46,
-      initialAttackPoints = 16,
-      initialBasicAttackRange = 7,
-      initialSpeed = 5,
-      initialPhysicalDefense = 10,
-      initialMagicalDefense = 15,
-      initialAbilitiesMetadataIds = Seq.empty
-    ),
-    CharacterMetadata(
-      name = "Ebisuzawa Kurumi",
-      attackType = AttackType.Ranged,
-      initialHealthPoints = 54,
-      initialAttackPoints = 16,
-      initialBasicAttackRange = 3,
-      initialSpeed = 8,
-      initialPhysicalDefense = 15,
-      initialMagicalDefense = 5,
-      initialAbilitiesMetadataIds = Seq(
-        Contact.metadata.id,
-        Survivor.metadata.id,
-        FinalSolution.metadata.id,
-      )
-    ),
-    CharacterMetadata(
-      name = "Gilgamesh",
-      attackType = AttackType.Ranged,
-      initialHealthPoints = 51,
-      initialAttackPoints = 11,
-      initialBasicAttackRange = 6,
-      initialSpeed = 5,
-      initialPhysicalDefense = 15,
-      initialMagicalDefense = 15,
-      initialAbilitiesMetadataIds = Seq.empty
-    ),
-    CharacterMetadata(
-      name = "Hanekawa Tsubasa",
-      attackType = AttackType.Melee,
-      initialHealthPoints = 70,
-      initialAttackPoints = 14,
-      initialBasicAttackRange = 2,
-      initialSpeed = 7,
-      initialPhysicalDefense = 15,
-      initialMagicalDefense = 15,
-      initialAbilitiesMetadataIds = Seq.empty
-    ),
-    CharacterMetadata(
-      name = "Hecate",
-      attackType = AttackType.Ranged,
-      initialHealthPoints = 59,
-      initialAttackPoints = 11,
-      initialBasicAttackRange = 7,
-      initialSpeed = 3,
-      initialPhysicalDefense = 5,
-      initialMagicalDefense = 20,
-      initialAbilitiesMetadataIds = Seq(
-        MasterThrone.metadata.id,
-        Aster.metadata.id,
-        PowerOfExistence.metadata.id,
-      )
-    ),
-    CharacterMetadata(
-      name = "Rem",
-      attackType = AttackType.Melee,
-      initialHealthPoints = 54,
-      initialAttackPoints = 12,
-      initialBasicAttackRange = 6,
-      initialSpeed = 5,
-      initialPhysicalDefense = 10,
-      initialMagicalDefense = 15,
-      initialAbilitiesMetadataIds = Seq.empty
-    ),
-    CharacterMetadata(
-      name = "Roronoa Zoro",
-      attackType = AttackType.Melee,
       initialHealthPoints = 87,
-      initialAttackPoints = 27,
-      initialBasicAttackRange = 2,
-      initialSpeed = 8,
-      initialPhysicalDefense = 40,
-      initialMagicalDefense = 25,
+      initialAttackPoints = 10,
+      initialBasicAttackRange = 5,
+      initialSpeed = 5,
+      initialPhysicalDefense = 35,
+      initialMagicalDefense = 40,
       initialAbilitiesMetadataIds = Seq(
-        LackOfOrientation.metadata.id,
-        OgreCutter.metadata.id,
-        OneHundredEightPoundPhoenix.metadata.id,
+        ManipulatorOfObjects.metadata.id,
+        BindingRibbons.metadata.id,
+        TiamatsIntervention.metadata.id,
       )
-    ),
-    CharacterMetadata(
-      name = "Sinon",
-      attackType = AttackType.Ranged,
-      initialHealthPoints = 43,
-      initialAttackPoints = 20,
-      initialBasicAttackRange = 8,
-      initialSpeed = 4,
-      initialPhysicalDefense = 5,
-      initialMagicalDefense = 5,
-      initialAbilitiesMetadataIds = Seq(
-        SnipersSight.metadata.id,
-        TacticalEscape.metadata.id,
-        PreciseShot.metadata.id,
-      )
-    ),
-    CharacterMetadata(
-      name = "Yasaka Mahiro",
-      attackType = AttackType.Ranged,
-      initialHealthPoints = 48,
-      initialAttackPoints = 17,
-      initialBasicAttackRange = 6,
-      initialSpeed = 6,
-      initialPhysicalDefense = 15,
-      initialMagicalDefense = 15,
-      initialAbilitiesMetadataIds = Seq.empty
     ),
     CharacterMetadata(
       name = "Crona",
@@ -195,81 +129,48 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       )
     ),
     CharacterMetadata(
-      name = "Itsuka Kotori",
-      attackType = AttackType.Melee,
-      initialHealthPoints = 55,
-      initialAttackPoints = 16,
-      initialBasicAttackRange = 5,
-      initialSpeed = 5,
-      initialPhysicalDefense = 15,
-      initialMagicalDefense = 25,
-      initialAbilitiesMetadataIds = Seq.empty
-    ),
-    CharacterMetadata(
-      name = "『 』",
-      attackType = AttackType.Melee,
-      initialHealthPoints = 42,
-      initialAttackPoints = 7,
-      initialBasicAttackRange = 2,
-      initialSpeed = 5,
-      initialPhysicalDefense = 5,
-      initialMagicalDefense = 5,
-      initialAbilitiesMetadataIds = Seq(
-        AceInTheHole.metadata.id,
-        Check.metadata.id,
-        Castling.metadata.id,
-      )
-    ),
-    CharacterMetadata(
-      name = "Shana",
-      attackType = AttackType.Melee,
-      initialHealthPoints = 62,
-      initialAttackPoints = 15,
-      initialBasicAttackRange = 2,
-      initialSpeed = 7,
-      initialPhysicalDefense = 15,
-      initialMagicalDefense = 20,
-      initialAbilitiesMetadataIds = Seq(
-        WingsOfCrimson.metadata.id,
-        GreatBladeOfCrimson.metadata.id,
-        FinalBattleSecretTechnique.metadata.id,
-      )
-    ),
-    CharacterMetadata(
-      name = "Yoshino",
-      attackType = AttackType.Melee,
-      initialHealthPoints = 91,
-      initialAttackPoints = 6,
-      initialBasicAttackRange = 3,
-      initialSpeed = 5,
-      initialPhysicalDefense = 30,
-      initialMagicalDefense = 45,
-      initialAbilitiesMetadataIds = Seq.empty
-    ),
-    CharacterMetadata(
-      name = "Kurogane Ikki",
-      attackType = AttackType.Melee,
-      initialHealthPoints = 63,
-      initialAttackPoints = 12,
-      initialBasicAttackRange = 3,
-      initialSpeed = 6,
-      initialPhysicalDefense = 20,
-      initialMagicalDefense = 20,
-      initialAbilitiesMetadataIds = Seq.empty
-    ),
-    CharacterMetadata(
-      name = "Llenn",
+      name = "Dekomori Sanae",
       attackType = AttackType.Ranged,
-      initialHealthPoints = 51,
-      initialAttackPoints = 13,
+      initialHealthPoints = 46,
+      initialAttackPoints = 16,
+      initialBasicAttackRange = 7,
+      initialSpeed = 5,
+      initialPhysicalDefense = 10,
+      initialMagicalDefense = 15,
+      initialAbilitiesMetadataIds = Seq(
+        WickedEyesServant.metadata.id,
+        MjolnirHammer.metadata.id,
+        MjolnirDestinyImpulse.metadata.id,
+      )
+    ),
+    CharacterMetadata(
+      name = "Ebisuzawa Kurumi",
+      attackType = AttackType.Ranged,
+      initialHealthPoints = 54,
+      initialAttackPoints = 16,
       initialBasicAttackRange = 3,
       initialSpeed = 8,
       initialPhysicalDefense = 15,
-      initialMagicalDefense = 10,
+      initialMagicalDefense = 5,
       initialAbilitiesMetadataIds = Seq(
-        PChan.metadata.id,
-        GrenadeThrow.metadata.id,
-        RunItDown.metadata.id,
+        Contact.metadata.id,
+        Survivor.metadata.id,
+        FinalSolution.metadata.id,
+      )
+    ),
+    CharacterMetadata(
+      name = "Hecate",
+      attackType = AttackType.Ranged,
+      initialHealthPoints = 59,
+      initialAttackPoints = 11,
+      initialBasicAttackRange = 7,
+      initialSpeed = 3,
+      initialPhysicalDefense = 5,
+      initialMagicalDefense = 20,
+      initialAbilitiesMetadataIds = Seq(
+        MasterThrone.metadata.id,
+        Aster.metadata.id,
+        PowerOfExistence.metadata.id,
       )
     ),
     CharacterMetadata(
@@ -288,6 +189,36 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       )
     ),
     CharacterMetadata(
+      name = "Liones Elizabeth",
+      attackType = AttackType.Melee,
+      initialHealthPoints = 63,
+      initialAttackPoints = 4,
+      initialBasicAttackRange = 2,
+      initialSpeed = 5,
+      initialPhysicalDefense = 15,
+      initialMagicalDefense = 15,
+      initialAbilitiesMetadataIds = Seq(
+        ImmenseHealingPowers.metadata.id,
+        Invigorate.metadata.id,
+        PowerOfTheGoddess.metadata.id,
+      )
+    ),
+    CharacterMetadata(
+      name = "Llenn",
+      attackType = AttackType.Ranged,
+      initialHealthPoints = 51,
+      initialAttackPoints = 13,
+      initialBasicAttackRange = 3,
+      initialSpeed = 8,
+      initialPhysicalDefense = 15,
+      initialMagicalDefense = 10,
+      initialAbilitiesMetadataIds = Seq(
+        PChan.metadata.id,
+        GrenadeThrow.metadata.id,
+        RunItDown.metadata.id,
+      )
+    ),
+    CharacterMetadata(
       name = "Monkey D. Luffy",
       attackType = AttackType.Melee,
       initialHealthPoints = 59,
@@ -296,7 +227,11 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       initialSpeed = 6,
       initialPhysicalDefense = 25,
       initialMagicalDefense = 15,
-      initialAbilitiesMetadataIds = Seq.empty
+      initialAbilitiesMetadataIds = Seq(
+        RubberHuman.metadata.id,
+        RubberRubberFruit.metadata.id,
+        GearSecond.metadata.id,
+      )
     ),
     CharacterMetadata(
       name = "Nibutani Shinka",
@@ -314,29 +249,33 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       )
     ),
     CharacterMetadata(
-      name = "Sakai Yuuji",
+      name = "Ochaco Uraraka",
       attackType = AttackType.Melee,
-      initialHealthPoints = 70,
-      initialAttackPoints = 20,
-      initialBasicAttackRange = 3,
-      initialSpeed = 5,
+      initialHealthPoints = 62,
+      initialAttackPoints = 11,
+      initialBasicAttackRange = 2,
+      initialSpeed = 6,
       initialPhysicalDefense = 15,
-      initialMagicalDefense = 20,
-      initialAbilitiesMetadataIds = Seq.empty
+      initialMagicalDefense = 15,
+      initialAbilitiesMetadataIds = Seq(
+        ZeroGravity.metadata.id,
+        ReducedWeight.metadata.id,
+        SkillRelease.metadata.id,
+      )
     ),
     CharacterMetadata(
-      name = "Carmel Wilhelmina",
-      attackType = AttackType.Ranged,
+      name = "Roronoa Zoro",
+      attackType = AttackType.Melee,
       initialHealthPoints = 87,
-      initialAttackPoints = 10,
-      initialBasicAttackRange = 5,
-      initialSpeed = 5,
-      initialPhysicalDefense = 35,
-      initialMagicalDefense = 40,
+      initialAttackPoints = 27,
+      initialBasicAttackRange = 2,
+      initialSpeed = 8,
+      initialPhysicalDefense = 40,
+      initialMagicalDefense = 25,
       initialAbilitiesMetadataIds = Seq(
-        ManipulatorOfObjects.metadata.id,
-        BindingRibbons.metadata.id,
-        TiamatsIntervention.metadata.id,
+        LackOfOrientation.metadata.id,
+        OgreCutter.metadata.id,
+        OneHundredEightPoundPhoenix.metadata.id,
       )
     ),
     CharacterMetadata(
@@ -355,21 +294,6 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       )
     ),
     CharacterMetadata(
-      name = "Liones Elizabeth",
-      attackType = AttackType.Melee,
-      initialHealthPoints = 63,
-      initialAttackPoints = 4,
-      initialBasicAttackRange = 2,
-      initialSpeed = 5,
-      initialPhysicalDefense = 15,
-      initialMagicalDefense = 15,
-      initialAbilitiesMetadataIds = Seq(
-        ImmenseHealingPowers.metadata.id,
-        Invigorate.metadata.id,
-        PowerOfTheGoddess.metadata.id,
-      )
-    ),
-    CharacterMetadata(
       name = "Satou Kazuma",
       attackType = AttackType.Melee,
       initialHealthPoints = 66,
@@ -378,7 +302,41 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       initialSpeed = 7,
       initialPhysicalDefense = 15,
       initialMagicalDefense = 15,
-      initialAbilitiesMetadataIds = Seq.empty
+      initialAbilitiesMetadataIds = Seq(
+        HighLuck.metadata.id,
+        DrainTouch.metadata.id,
+        Steal.metadata.id,
+      )
+    ),
+    CharacterMetadata(
+      name = "Shana",
+      attackType = AttackType.Melee,
+      initialHealthPoints = 62,
+      initialAttackPoints = 15,
+      initialBasicAttackRange = 2,
+      initialSpeed = 7,
+      initialPhysicalDefense = 15,
+      initialMagicalDefense = 20,
+      initialAbilitiesMetadataIds = Seq(
+        WingsOfCrimson.metadata.id,
+        GreatBladeOfCrimson.metadata.id,
+        FinalBattleSecretTechnique.metadata.id,
+      )
+    ),
+    CharacterMetadata(
+      name = "Sinon",
+      attackType = AttackType.Ranged,
+      initialHealthPoints = 43,
+      initialAttackPoints = 20,
+      initialBasicAttackRange = 8,
+      initialSpeed = 4,
+      initialPhysicalDefense = 5,
+      initialMagicalDefense = 5,
+      initialAbilitiesMetadataIds = Seq(
+        SnipersSight.metadata.id,
+        TacticalEscape.metadata.id,
+        PreciseShot.metadata.id,
+      )
     ),
     CharacterMetadata(
       name = "Derieri",
@@ -389,17 +347,6 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       initialSpeed = 6,
       initialPhysicalDefense = 25,
       initialMagicalDefense = 25,
-      initialAbilitiesMetadataIds = Seq.empty
-    ),
-    CharacterMetadata(
-      name = "Ochaco Uraraka",
-      attackType = AttackType.Melee,
-      initialHealthPoints = 62,
-      initialAttackPoints = 11,
-      initialBasicAttackRange = 2,
-      initialSpeed = 6,
-      initialPhysicalDefense = 15,
-      initialMagicalDefense = 15,
       initialAbilitiesMetadataIds = Seq.empty
     ),
     CharacterMetadata(
@@ -436,19 +383,92 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       initialAbilitiesMetadataIds = Seq.empty
     ),
     CharacterMetadata(
-      name = "Akame",
+      name = "Yoshino",
       attackType = AttackType.Melee,
-      initialHealthPoints = 67,
-      initialAttackPoints = 13,
+      initialHealthPoints = 91,
+      initialAttackPoints = 6,
       initialBasicAttackRange = 3,
-      initialSpeed = 7,
+      initialSpeed = 5,
+      initialPhysicalDefense = 30,
+      initialMagicalDefense = 45,
+      initialAbilitiesMetadataIds = Seq.empty
+    ),
+    CharacterMetadata(
+      name = "Kurogane Ikki",
+      attackType = AttackType.Melee,
+      initialHealthPoints = 63,
+      initialAttackPoints = 12,
+      initialBasicAttackRange = 3,
+      initialSpeed = 6,
       initialPhysicalDefense = 20,
+      initialMagicalDefense = 20,
+      initialAbilitiesMetadataIds = Seq.empty
+    ),
+    CharacterMetadata(
+      name = "Gilgamesh",
+      attackType = AttackType.Ranged,
+      initialHealthPoints = 51,
+      initialAttackPoints = 11,
+      initialBasicAttackRange = 6,
+      initialSpeed = 5,
+      initialPhysicalDefense = 15,
       initialMagicalDefense = 15,
-      initialAbilitiesMetadataIds = Seq(
-        Murasame.metadata.id,
-        Eliminate.metadata.id,
-        LittleWarHorn.metadata.id,
-      )
+      initialAbilitiesMetadataIds = Seq.empty
+    ),
+    CharacterMetadata(
+      name = "Hanekawa Tsubasa",
+      attackType = AttackType.Melee,
+      initialHealthPoints = 70,
+      initialAttackPoints = 14,
+      initialBasicAttackRange = 2,
+      initialSpeed = 7,
+      initialPhysicalDefense = 15,
+      initialMagicalDefense = 15,
+      initialAbilitiesMetadataIds = Seq.empty
+    ),
+    CharacterMetadata(
+      name = "Rem",
+      attackType = AttackType.Melee,
+      initialHealthPoints = 54,
+      initialAttackPoints = 12,
+      initialBasicAttackRange = 6,
+      initialSpeed = 5,
+      initialPhysicalDefense = 10,
+      initialMagicalDefense = 15,
+      initialAbilitiesMetadataIds = Seq.empty
+    ),
+    CharacterMetadata(
+      name = "Sakai Yuuji",
+      attackType = AttackType.Melee,
+      initialHealthPoints = 70,
+      initialAttackPoints = 20,
+      initialBasicAttackRange = 3,
+      initialSpeed = 5,
+      initialPhysicalDefense = 15,
+      initialMagicalDefense = 20,
+      initialAbilitiesMetadataIds = Seq.empty
+    ),
+    CharacterMetadata(
+      name = "Yasaka Mahiro",
+      attackType = AttackType.Ranged,
+      initialHealthPoints = 48,
+      initialAttackPoints = 17,
+      initialBasicAttackRange = 6,
+      initialSpeed = 6,
+      initialPhysicalDefense = 15,
+      initialMagicalDefense = 15,
+      initialAbilitiesMetadataIds = Seq.empty
+    ),
+    CharacterMetadata(
+      name = "Itsuka Kotori",
+      attackType = AttackType.Melee,
+      initialHealthPoints = 55,
+      initialAttackPoints = 16,
+      initialBasicAttackRange = 5,
+      initialSpeed = 5,
+      initialPhysicalDefense = 15,
+      initialMagicalDefense = 25,
+      initialAbilitiesMetadataIds = Seq.empty
     ),
   )
 

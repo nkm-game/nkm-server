@@ -7,15 +7,19 @@ import aqua._
 import ayatsuji_ayase._
 import blank._
 import carmel_wilhelmina._
-import ebisuzawa_kurumi._
 import crona._
+import dekomori_sanae._
+import ebisuzawa_kurumi._
 import hecate._
 import kirito._
 import liones_elizabeth._
 import llenn._
+import monkey_d_luffy._
 import nibutani_shinka._
+import ochaco_uraraka._
 import roronoa_zoro._
 import ryuko_matoi._
+import satou_kazuma._
 import shana._
 import sinon._
 import com.tosware.nkm.serializers.NkmJsonProtocol
@@ -46,6 +50,10 @@ case class AbilityMetadatasProvider() extends NkmJsonProtocol {
     ScreechAlpha.metadata,
     Infection.metadata,
 
+    WickedEyesServant.metadata,
+    MjolnirHammer.metadata,
+    MjolnirDestinyImpulse.metadata,
+
     Contact.metadata,
     Survivor.metadata,
     FinalSolution.metadata,
@@ -66,9 +74,17 @@ case class AbilityMetadatasProvider() extends NkmJsonProtocol {
     GrenadeThrow.metadata,
     RunItDown.metadata,
 
+    RubberHuman.metadata,
+    RubberRubberFruit.metadata,
+    GearSecond.metadata,
+
     Mabinogion.metadata,
     SummerBreeze.metadata,
     FairyOfLove.metadata,
+
+    ZeroGravity.metadata,
+    ReducedWeight.metadata,
+    SkillRelease.metadata,
 
     LackOfOrientation.metadata,
     OgreCutter.metadata,
@@ -77,6 +93,10 @@ case class AbilityMetadatasProvider() extends NkmJsonProtocol {
     ScissorBlade.metadata,
     FiberDecapitation.metadata,
     GodrobeSenketsu.metadata,
+
+    HighLuck.metadata,
+    DrainTouch.metadata,
+    Steal.metadata,
 
     WingsOfCrimson.metadata,
     GreatBladeOfCrimson.metadata,

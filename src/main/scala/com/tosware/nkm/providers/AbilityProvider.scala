@@ -11,14 +11,18 @@ import ayatsuji_ayase._
 import blank._
 import carmel_wilhelmina._
 import crona._
+import dekomori_sanae._
 import ebisuzawa_kurumi._
 import hecate._
 import kirito._
 import liones_elizabeth._
 import llenn._
+import monkey_d_luffy._
 import nibutani_shinka._
+import ochaco_uraraka._
 import roronoa_zoro._
 import ryuko_matoi._
+import satou_kazuma._
 import shana._
 import sinon._
 
@@ -69,6 +73,13 @@ object AbilityProvider extends NkmUtils {
       case Infection.metadata.id =>
         Infection(randomUUID(), characterId)
 
+      case WickedEyesServant.metadata.id =>
+        WickedEyesServant(randomUUID(), characterId)
+      case MjolnirHammer.metadata.id =>
+        MjolnirHammer(randomUUID(), characterId)
+      case MjolnirDestinyImpulse.metadata.id =>
+        MjolnirDestinyImpulse(randomUUID(), characterId)
+
       case Contact.metadata.id =>
         Contact(randomUUID(), characterId)
       case Survivor.metadata.id =>
@@ -104,12 +115,26 @@ object AbilityProvider extends NkmUtils {
       case RunItDown.metadata.id =>
         RunItDown(randomUUID(), characterId)
 
+      case RubberHuman.metadata.id =>
+        RubberHuman(randomUUID(), characterId)
+      case RubberRubberFruit.metadata.id =>
+        RubberRubberFruit(randomUUID(), characterId)
+      case GearSecond.metadata.id =>
+        GearSecond(randomUUID(), characterId)
+
       case Mabinogion.metadata.id =>
         Mabinogion(randomUUID(), characterId)
       case SummerBreeze.metadata.id =>
         SummerBreeze(randomUUID(), characterId)
       case FairyOfLove.metadata.id =>
         FairyOfLove(randomUUID(), characterId)
+
+      case ZeroGravity.metadata.id =>
+        ZeroGravity(randomUUID(), characterId)
+      case ReducedWeight.metadata.id =>
+        ReducedWeight(randomUUID(), characterId)
+      case SkillRelease.metadata.id =>
+        SkillRelease(randomUUID(), characterId)
 
       case LackOfOrientation.metadata.id =>
         LackOfOrientation(randomUUID(), characterId)
@@ -124,6 +149,13 @@ object AbilityProvider extends NkmUtils {
         FiberDecapitation(randomUUID(), characterId)
       case GodrobeSenketsu.metadata.id =>
         GodrobeSenketsu(randomUUID(), characterId)
+
+      case HighLuck.metadata.id =>
+        HighLuck(randomUUID(), characterId)
+      case DrainTouch.metadata.id =>
+        DrainTouch(randomUUID(), characterId)
+      case Steal.metadata.id =>
+        Steal(randomUUID(), characterId)
 
       case WingsOfCrimson.metadata.id =>
         WingsOfCrimson(randomUUID(), characterId)
