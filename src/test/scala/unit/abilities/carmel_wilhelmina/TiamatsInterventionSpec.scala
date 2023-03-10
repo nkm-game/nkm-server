@@ -1,5 +1,6 @@
 package unit.abilities.carmel_wilhelmina
 
+import com.tosware.nkm._
 import com.tosware.nkm.models.GameStateValidator
 import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.game.abilities.carmel_wilhelmina.TiamatsIntervention

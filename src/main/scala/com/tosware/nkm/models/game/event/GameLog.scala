@@ -1,7 +1,7 @@
 package com.tosware.nkm.models.game.event
 
+import com.tosware.nkm._
 import com.tosware.nkm.models.game.GameState
-import com.tosware.nkm.models.game.Player.PlayerId
 import com.tosware.nkm.models.game.event.GameEvent.GameEvent
 
 case class GameLog(events: Seq[GameEvent]) extends GameLogLike {

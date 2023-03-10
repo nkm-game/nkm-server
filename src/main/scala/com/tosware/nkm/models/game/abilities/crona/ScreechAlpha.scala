@@ -1,10 +1,8 @@
 package com.tosware.nkm.models.game.abilities.crona
 
-import com.tosware.nkm.{NkmConf, NkmUtils}
-import com.tosware.nkm.models.game.ability.Ability.AbilityId
-import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
+import com.tosware.nkm._
 import com.tosware.nkm.models.game._
-import com.tosware.nkm.models.game.ability.{Ability, AbilityMetadata, AbilityType, Usable, UseData}
+import com.tosware.nkm.models.game.ability._
 import com.tosware.nkm.models.game.character.StatType
 import com.tosware.nkm.models.game.effects.Stun
 
@@ -37,11 +35,11 @@ case class ScreechAlpha(abilityId: AbilityId, parentCharacterId: CharacterId)
 
   private def addEffects(target: CharacterId)(implicit random: Random, gameState: GameState) = {
     val silenceEffect = effects.Stun(
-      NkmUtils.randomUUID(),
+      randomUUID(),
       metadata.variables("stunDuration")
     )
     val slowEffect = effects.StatNerf(
-      NkmUtils.randomUUID(),
+      randomUUID(),
       metadata.variables("slowDuration"),
       StatType.Speed,
       metadata.variables("slowAmount")

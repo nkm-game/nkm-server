@@ -1,5 +1,6 @@
 package unit.effects
 
+import com.tosware.nkm._
 import com.tosware.nkm.models.GameStateValidator
 import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.game.character.CharacterMetadata

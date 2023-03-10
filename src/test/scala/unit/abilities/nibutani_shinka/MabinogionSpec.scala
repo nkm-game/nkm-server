@@ -1,5 +1,6 @@
 package unit.abilities.nibutani_shinka
 
+import com.tosware.nkm._
 import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.game.abilities.nibutani_shinka.Mabinogion
 import com.tosware.nkm.models.game.ability.AbilityType

@@ -1,6 +1,6 @@
 package unit.abilities.aqua
 
-import com.tosware.nkm.NkmUtils
+import com.tosware.nkm._
 import com.tosware.nkm.models.GameStateValidator
 import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.game.abilities.aqua.Purification
@@ -21,10 +21,10 @@ class PurificationSpec
   private val s = scenarios.Simple2v2TestScenario(metadata)
   private val abilityId = s.characters.p0First.state.abilities.head.id
   private val effectGameState = s.gameState
-    .addEffect(s.characters.p0Second.id, Disarm(NkmUtils.randomUUID(), 5))(random, s.gameState.id)
-    .addEffect(s.characters.p0Second.id, Stun(NkmUtils.randomUUID(), 5))(random, s.gameState.id)
-    .addEffect(s.characters.p0Second.id, Ground(NkmUtils.randomUUID(), 5))(random, s.gameState.id)
-    .addEffect(s.characters.p0Second.id, Silence(NkmUtils.randomUUID(), 5))(random, s.gameState.id)
+    .addEffect(s.characters.p0Second.id, Disarm(randomUUID(), 5))(random, s.gameState.id)
+    .addEffect(s.characters.p0Second.id, Stun(randomUUID(), 5))(random, s.gameState.id)
+    .addEffect(s.characters.p0Second.id, Ground(randomUUID(), 5))(random, s.gameState.id)
+    .addEffect(s.characters.p0Second.id, Silence(randomUUID(), 5))(random, s.gameState.id)
 
   abilityMetadata.name must {
     "be able to use" in {

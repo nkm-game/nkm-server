@@ -1,11 +1,11 @@
 package com.tosware.nkm.models.game.effects
 
-import com.tosware.nkm.models.game.character_effect.{CharacterEffect, CharacterEffectMetadata, CharacterEffectName, CharacterEffectType}
-import com.tosware.nkm.models.game.character_effect.CharacterEffect.CharacterEffectId
-import com.tosware.nkm.models.game.effects.StatBuff.{statTypeKey, statValueKey}
-import com.tosware.nkm.models.game.event.{GameEvent, GameEventListener}
+import com.tosware.nkm._
 import com.tosware.nkm.models.game.GameState
 import com.tosware.nkm.models.game.character.StatType
+import com.tosware.nkm.models.game.character_effect._
+import com.tosware.nkm.models.game.effects.StatBuff.{statTypeKey, statValueKey}
+import com.tosware.nkm.models.game.event.{GameEvent, GameEventListener}
 
 import scala.util.Random
 

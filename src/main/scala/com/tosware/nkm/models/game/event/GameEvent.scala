@@ -1,17 +1,11 @@
 package com.tosware.nkm.models.game.event
 
-import com.tosware.nkm.models.game.Player.PlayerId
-import com.tosware.nkm.models.game.ability.Ability.AbilityId
-import com.tosware.nkm.models.game.character.CharacterMetadata.CharacterMetadataId
-import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
-import com.tosware.nkm.models.game.character_effect.CharacterEffect.CharacterEffectId
-import com.tosware.nkm.models.game.hex.HexCoordinates
+import com.tosware.nkm._
 import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.game.character.StatType
-import com.tosware.nkm.models.game.hex_effect.HexCellEffect.HexCellEffectId
+import com.tosware.nkm.models.game.hex.HexCoordinates
 
 object GameEvent {
-  type GameEventId = String
   sealed trait GameEvent
   {
     val id: GameEventId

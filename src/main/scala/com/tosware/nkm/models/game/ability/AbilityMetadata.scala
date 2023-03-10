@@ -1,7 +1,6 @@
 package com.tosware.nkm.models.game.ability
 
-import com.tosware.nkm.models.game.character_effect.CharacterEffect.CharacterEffectId
-import com.tosware.nkm.models.game.ability.Ability.AbilityMetadataId
+import com.tosware.nkm._
 
 case class AbilityMetadata
 (

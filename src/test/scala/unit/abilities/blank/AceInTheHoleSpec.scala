@@ -2,7 +2,7 @@ package unit.abilities.blank
 
 import com.tosware.nkm.models.GameStateValidator
 import com.tosware.nkm.models.game._
-import com.tosware.nkm.models.game.abilities.blank.{AceInTheHole, Castling, Check}
+import com.tosware.nkm.models.game.abilities.blank._
 import com.tosware.nkm.models.game.ability.UseData
 import com.tosware.nkm.models.game.character.CharacterMetadata
 import helpers.{TestUtils, scenarios}

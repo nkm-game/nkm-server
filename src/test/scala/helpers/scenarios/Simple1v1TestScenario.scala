@@ -1,8 +1,9 @@
 package helpers.scenarios
 
+import com.tosware.nkm._
+import com.tosware.nkm.models.game.GameState
 import com.tosware.nkm.models.game.character.{CharacterMetadata, NkmCharacter}
 import com.tosware.nkm.models.game.hex.{HexCoordinates, TestHexMapName}
-import com.tosware.nkm.models.game.GameState
 import helpers.TestUtils
 
 case class Simple1v1TestScenario(metadata: CharacterMetadata, secondMetadata: Option[CharacterMetadata] = None) extends TestUtils {
@@ -22,5 +23,10 @@ case class Simple1v1TestScenario(metadata: CharacterMetadata, secondMetadata: Op
   object characters {
     val p0: NkmCharacter = characterOnPoint(spawnCoordinates.p0)(gameState)
     val p1: NkmCharacter = characterOnPoint(spawnCoordinates.p1)(gameState)
+  }
+
+  object owners {
+    val p0: PlayerId = characters.p0.owner(gameState).id
+    val p1: PlayerId = characters.p1.owner(gameState).id
   }
 }

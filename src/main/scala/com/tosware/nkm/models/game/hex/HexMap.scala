@@ -1,7 +1,7 @@
 package com.tosware.nkm.models.game.hex
 
+import com.tosware.nkm._
 import com.tosware.nkm.models.game.GameState
-import com.tosware.nkm.models.game.Player.PlayerId
 
 object HexMap {
   def empty: HexMap = HexMap("Empty HexMap", Set.empty)

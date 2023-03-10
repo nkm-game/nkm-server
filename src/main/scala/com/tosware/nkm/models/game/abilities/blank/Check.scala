@@ -1,10 +1,8 @@
 package com.tosware.nkm.models.game.abilities.blank
 
-import com.tosware.nkm.{NkmConf, NkmUtils}
-import com.tosware.nkm.models.game.ability.Ability.{AbilityId, UseCheck}
-import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
+import com.tosware.nkm._
 import com.tosware.nkm.models.game._
-import com.tosware.nkm.models.game.ability.{Ability, AbilityMetadata, AbilityType, UsableOnCharacter, UseData}
+import com.tosware.nkm.models.game.ability._
 import com.tosware.nkm.models.game.effects.{Disarm, HasToTakeAction}
 
 import scala.util.Random
@@ -38,8 +36,8 @@ case class Check(abilityId: AbilityId, parentCharacterId: CharacterId) extends A
   override def use(target: CharacterId, useData: UseData)(implicit random: Random, gameState: GameState) = {
     gameState
       .abilityHitCharacter(id, target)
-      .addEffect(target, effects.Disarm(NkmUtils.randomUUID(), metadata.variables("disarmDuration")))(random, id)
-      .addEffect(target, effects.HasToTakeAction(NkmUtils.randomUUID(), 1))(random, id)
+      .addEffect(target, effects.Disarm(randomUUID(), metadata.variables("disarmDuration")))(random, id)
+      .addEffect(target, effects.HasToTakeAction(randomUUID(), 1))(random, id)
   }
 
   override def useChecks(implicit target: CharacterId, useData: UseData, gameState: GameState): Set[UseCheck] = {

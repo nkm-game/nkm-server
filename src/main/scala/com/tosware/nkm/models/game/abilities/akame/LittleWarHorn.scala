@@ -1,15 +1,12 @@
 package com.tosware.nkm.models.game.abilities.akame
 
 import com.softwaremill.quicklens._
-import com.tosware.nkm.{NkmConf, NkmUtils}
-import com.tosware.nkm.models.game.ability.Ability.AbilityId
-import com.tosware.nkm.models.game.character_effect.CharacterEffect.CharacterEffectId
-import com.tosware.nkm.models.game.event.GameEvent.EffectRemovedFromCharacter
-import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
+import com.tosware.nkm._
 import com.tosware.nkm.models.game._
-import com.tosware.nkm.models.game.ability.{Ability, AbilityMetadata, AbilityType, Usable, UseData}
+import com.tosware.nkm.models.game.ability._
 import com.tosware.nkm.models.game.character.StatType
 import com.tosware.nkm.models.game.effects.StatBuff
+import com.tosware.nkm.models.game.event.GameEvent.EffectRemovedFromCharacter
 import com.tosware.nkm.models.game.event.{GameEvent, GameEventListener}
 
 import scala.util.Random
@@ -40,8 +37,8 @@ case class LittleWarHorn(abilityId: AbilityId, parentCharacterId: CharacterId, e
     this.modify(_.effectIdToListen).setTo(effectId)
 
   override def use(useData: UseData)(implicit random: Random, gameState: GameState): GameState = {
-    val adEffect = effects.StatBuff(NkmUtils.randomUUID(), duration, StatType.AttackPoints, metadata.variables("attackPoints"))
-    val speedEffect = effects.StatBuff(NkmUtils.randomUUID(), duration, StatType.Speed, metadata.variables("speedIncrease"))
+    val adEffect = effects.StatBuff(randomUUID(), duration, StatType.AttackPoints, metadata.variables("attackPoints"))
+    val speedEffect = effects.StatBuff(randomUUID(), duration, StatType.Speed, metadata.variables("speedIncrease"))
     gameState
       .addEffect(parentCharacterId, adEffect)(random, id)
       .addEffect(parentCharacterId, speedEffect)(random, id)

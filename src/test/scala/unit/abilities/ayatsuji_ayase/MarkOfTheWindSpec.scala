@@ -1,5 +1,6 @@
 package unit.abilities.ayatsuji_ayase
 
+import com.tosware.nkm._
 import com.tosware.nkm.models.GameStateValidator
 import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.game.abilities.ayatsuji_ayase.{CrackTheSky, MarkOfTheWind}

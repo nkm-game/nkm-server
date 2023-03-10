@@ -1,7 +1,6 @@
 package com.tosware.nkm.models.game.pick.blindpick
 
-import com.tosware.nkm.models.game.character.CharacterMetadata.CharacterMetadataId
-import com.tosware.nkm.models.game.Player.PlayerId
+import com.tosware.nkm._
 
 object BlindPickState {
   def empty(config: BlindPickConfig): BlindPickState = BlindPickState(

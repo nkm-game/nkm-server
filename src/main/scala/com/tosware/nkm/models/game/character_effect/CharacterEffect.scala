@@ -1,17 +1,15 @@
 package com.tosware.nkm.models.game.character_effect
 
 import com.softwaremill.quicklens._
-import com.tosware.nkm.NkmUtils
+import com.tosware.nkm._
 import com.tosware.nkm.models.game.GameState
 import com.tosware.nkm.models.game.character.NkmCharacter
-import com.tosware.nkm.models.game.character_effect.CharacterEffect._
 import com.tosware.nkm.models.game.hex.HexCell
-object CharacterEffect {
-  type CharacterEffectId = String
-  type CharacterEffectMetadataId = String
-}
+import com.tosware.nkm.serializers.NkmJsonProtocol
 
-abstract class CharacterEffect(val id: CharacterEffectId) extends NkmUtils {
+abstract class CharacterEffect(val id: CharacterEffectId)
+  extends NkmJsonProtocol
+{
   val metadata: CharacterEffectMetadata
   val initialCooldown: Int
 

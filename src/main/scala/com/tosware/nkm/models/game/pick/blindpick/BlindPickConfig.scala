@@ -1,8 +1,7 @@
 package com.tosware.nkm.models.game.pick.blindpick
 
+import com.tosware.nkm._
 import com.tosware.nkm.models.game.GameStartDependencies
-import com.tosware.nkm.models.game.character.CharacterMetadata.CharacterMetadataId
-import com.tosware.nkm.models.game.Player.PlayerId
 
 
 object BlindPickConfig {

@@ -1,13 +1,11 @@
 package com.tosware.nkm.models.game.abilities.akame
 
-import com.tosware.nkm.{NkmConf, NkmUtils}
-import com.tosware.nkm.models.game.ability.Ability.AbilityId
-import com.tosware.nkm.models.game.event.GameEvent.{AbilityHitCharacter, CharacterBasicAttacked, EffectAddedToCharacter}
-import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
+import com.tosware.nkm._
 import com.tosware.nkm.models.game._
-import com.tosware.nkm.models.game.ability.{Ability, AbilityMetadata, AbilityType}
+import com.tosware.nkm.models.game.ability._
 import com.tosware.nkm.models.game.character_effect.CharacterEffectName
 import com.tosware.nkm.models.game.effects.MurasamePoison
+import com.tosware.nkm.models.game.event.GameEvent._
 import com.tosware.nkm.models.game.event.{GameEvent, GameEventListener}
 
 import scala.util.Random
@@ -44,7 +42,7 @@ case class Murasame(abilityId: AbilityId, parentCharacterId: CharacterId) extend
 
   private def applyPoison(targetCharacterId: CharacterId)(implicit random: Random, gameState: GameState): GameState = {
     val poisonEffect = effects.Poison(
-      NkmUtils.randomUUID(),
+      randomUUID(),
       Int.MaxValue,
       Damage(DamageType.True, metadata.variables("poisonDamage")),
       MurasamePoison.metadata,

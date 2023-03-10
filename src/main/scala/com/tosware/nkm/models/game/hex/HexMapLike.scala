@@ -1,8 +1,7 @@
 package com.tosware.nkm.models.game.hex
 
+import com.tosware.nkm._
 import com.tosware.nkm.models.game.GameState
-import com.tosware.nkm.models.game.Player.PlayerId
-import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
 
 trait HexMapLike[T <: HexCellLike] {
   val name: String

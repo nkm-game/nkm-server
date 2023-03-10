@@ -1,15 +1,14 @@
 package integration.ws
 
 import akka.http.scaladsl.testkit.WSProbe
-import com.tosware.nkm.NkmUtils
-import com.tosware.nkm.models.game.hex.{HexCellType, HexCoordinates}
-import com.tosware.nkm.models.game.ws._
+import com.tosware.nkm._
 import com.tosware.nkm.models.game._
-import com.tosware.nkm.models.game.character.CharacterMetadata
 import com.tosware.nkm.models.game.event.GameEvent
+import com.tosware.nkm.models.game.hex.{HexCellType, HexCoordinates}
 import com.tosware.nkm.models.game.pick.PickType
 import com.tosware.nkm.models.game.pick.blindpick.BlindPickPhase
 import com.tosware.nkm.models.game.pick.draftpick.DraftPickPhase
+import com.tosware.nkm.models.game.ws._
 import helpers.WSTrait
 
 class WSGameSpec extends WSTrait {
@@ -286,7 +285,7 @@ class WSGameSpec extends WSTrait {
 
       withGameWS { implicit wsClient: WSProbe =>
         val availableCharacters = fetchAndParseGame(lobbyId).draftPickState.get.config.availableCharacters
-        val player0Bans = Set.empty[CharacterMetadata.CharacterMetadataId]
+        val player0Bans = Set.empty[CharacterMetadataId]
         val player1Bans = Set(availableCharacters.head, availableCharacters.tail.head)
         val player2Bans = Set(availableCharacters.head)
 
@@ -842,7 +841,7 @@ class WSGameSpec extends WSTrait {
 
         val characterToMove = gameState.players(0).characterIds.head
         val characterCell = gameState.hexMap.getCellOfCharacter(characterToMove).get
-        val targetCell = NkmUtils.getAdjacentCells(gameState.hexMap.cells, characterCell.coordinates)
+        val targetCell = getAdjacentCells(gameState.hexMap.cells, characterCell.coordinates)
           .filter(c => c.cellType == HexCellType.Normal).head
         moveCharacter(lobbyId, Seq(characterCell, targetCell).map(_.coordinates), characterToMove).statusCode shouldBe ok
         moveCharacter(lobbyId, Seq(characterCell, targetCell).map(_.coordinates), characterToMove).statusCode shouldBe nok

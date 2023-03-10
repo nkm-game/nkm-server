@@ -1,7 +1,7 @@
 package com.tosware.nkm.models.game.effects
 
-import com.tosware.nkm.models.game.character_effect.{CharacterEffect, CharacterEffectMetadata, CharacterEffectName, CharacterEffectType}
-import com.tosware.nkm.models.game.character_effect.CharacterEffect.CharacterEffectId
+import com.tosware.nkm._
+import com.tosware.nkm.models.game.character_effect._
 
 object Snare {
   val metadata: CharacterEffectMetadata =

@@ -1,10 +1,8 @@
 package com.tosware.nkm.models.game.abilities.carmel_wilhelmina
 
-import com.tosware.nkm.{NkmConf, NkmUtils}
-import com.tosware.nkm.models.game.ability.Ability.AbilityId
-import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
+import com.tosware.nkm._
 import com.tosware.nkm.models.game._
-import com.tosware.nkm.models.game.ability.{Ability, AbilityMetadata, AbilityType, UsableOnCoordinates, UseData}
+import com.tosware.nkm.models.game.ability._
 import com.tosware.nkm.models.game.effects.{Silence, Snare}
 import com.tosware.nkm.models.game.hex.HexCoordinates
 
@@ -36,11 +34,11 @@ case class BindingRibbons(abilityId: AbilityId, parentCharacterId: CharacterId) 
     val silencedGameState =
       gameState
         .abilityHitCharacter(id, target)
-        .addEffect(target, effects.Silence(NkmUtils.randomUUID(), metadata.variables("silenceDuration")))(random, id)
+        .addEffect(target, effects.Silence(randomUUID(), metadata.variables("silenceDuration")))(random, id)
 
     if(targetsHit >= metadata.variables("enemiesToHitToActivateSnare")) {
       silencedGameState
-        .addEffect(target, effects.Snare(NkmUtils.randomUUID(), metadata.variables("rootDuration")))(random, id)
+        .addEffect(target, effects.Snare(randomUUID(), metadata.variables("rootDuration")))(random, id)
     } else silencedGameState
   }
 

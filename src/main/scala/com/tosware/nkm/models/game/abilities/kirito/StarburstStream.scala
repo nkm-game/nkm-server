@@ -1,11 +1,9 @@
 package com.tosware.nkm.models.game.abilities.kirito
 
-import com.tosware.nkm.NkmConf
-import com.tosware.nkm.models.game.ability.Ability.AbilityId
-import com.tosware.nkm.models.game.event.GameEvent.{AbilityUsedOnCharacter, CharacterBasicAttacked}
-import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
+import com.tosware.nkm._
 import com.tosware.nkm.models.game._
-import com.tosware.nkm.models.game.ability.{Ability, AbilityMetadata, AbilityType, UsableOnCharacter, UseData}
+import com.tosware.nkm.models.game.ability._
+import com.tosware.nkm.models.game.event.GameEvent.{AbilityUsedOnCharacter, CharacterBasicAttacked}
 import com.tosware.nkm.models.game.event.{GameEvent, GameEventListener}
 import com.tosware.nkm.models.game.hex.{HexCoordinates, SearchFlag}
 

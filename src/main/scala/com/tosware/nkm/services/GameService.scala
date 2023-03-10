@@ -2,11 +2,10 @@ package com.tosware.nkm.services
 
 import akka.actor.ActorRef
 import akka.pattern.ask
-import com.tosware.nkm.NkmTimeouts
-import com.tosware.nkm.actors.Game.{GetCurrentClock, GetState, GetStateView}
+import com.tosware.nkm.{NkmTimeouts, _}
+import com.tosware.nkm.actors.Game._
 import com.tosware.nkm.actors._
 import com.tosware.nkm.models.CommandResponse
-import com.tosware.nkm.models.game.Player.PlayerId
 import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.game.ws.GameRequest._
 import slick.jdbc.JdbcBackend

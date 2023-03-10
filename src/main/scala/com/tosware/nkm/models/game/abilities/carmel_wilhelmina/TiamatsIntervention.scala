@@ -1,10 +1,8 @@
 package com.tosware.nkm.models.game.abilities.carmel_wilhelmina
 
-import com.tosware.nkm.{NkmConf, NkmUtils}
-import com.tosware.nkm.models.game.ability.Ability.{AbilityId, UseCheck}
-import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
+import com.tosware.nkm._
 import com.tosware.nkm.models.game._
-import com.tosware.nkm.models.game.ability.{Ability, AbilityMetadata, AbilityType, UsableOnCharacter, UseData}
+import com.tosware.nkm.models.game.ability._
 import com.tosware.nkm.models.game.effects.Stun
 import com.tosware.nkm.models.game.hex.HexCoordinates
 import spray.json._
@@ -42,7 +40,7 @@ case class TiamatsIntervention(abilityId: AbilityId, parentCharacterId: Characte
     val targetCoords = useData.data.parseJson.convertTo[HexCoordinates]
     val gs = gameState.teleportCharacter(target, targetCoords)(random, id)
     if(parentCharacter.isEnemyForC(target)) {
-      val stunEffect =  effects.Stun(NkmUtils.randomUUID(), metadata.variables("stunDuration"))
+      val stunEffect =  effects.Stun(randomUUID(), metadata.variables("stunDuration"))
       gs.addEffect(target, stunEffect)(random, id)
     } else {
       gs.setShield(target, gs.characterById(target).state.shield + metadata.variables("shield"))(random, id)

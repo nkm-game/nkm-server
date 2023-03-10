@@ -1,6 +1,6 @@
 package com.tosware.nkm.models.game.hex_effects
 
-import com.tosware.nkm.models.game.hex_effect.HexCellEffect.HexCellEffectId
+import com.tosware.nkm._
 import com.tosware.nkm.models.game.hex_effect._
 
 object MarkOfTheWind {

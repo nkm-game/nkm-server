@@ -1,7 +1,8 @@
 package com.tosware.nkm
 
-import scala.jdk.CollectionConverters._
 import com.typesafe.config._
+
+import scala.jdk.CollectionConverters._
 
 object NkmConf extends Logging {
   val config: Config = ConfigFactory.load("nkm.conf")

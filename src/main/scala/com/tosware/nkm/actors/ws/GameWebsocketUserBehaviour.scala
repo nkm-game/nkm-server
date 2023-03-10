@@ -3,7 +3,7 @@ package com.tosware.nkm.actors.ws
 import akka.actor.ActorRef
 import akka.event.Logging.{DebugLevel, WarningLevel}
 import akka.http.scaladsl.model.StatusCodes
-import com.tosware.nkm.models.CommandResponse.{CommandResponse, Failure, Success}
+import com.tosware.nkm.models.CommandResponse._
 import com.tosware.nkm.models.game.ws._
 import com.tosware.nkm.services.GameService
 import com.tosware.nkm.services.http.directives.JwtSecretKey

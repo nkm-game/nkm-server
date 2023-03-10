@@ -1,9 +1,8 @@
 package com.tosware.nkm.models.game.ability
 
+import com.tosware.nkm._
 import com.tosware.nkm.models.CommandResponse.CommandResponse
 import com.tosware.nkm.models.game.GameState
-import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
-import com.tosware.nkm.models.game.ability.Ability.UseCheck
 import com.tosware.nkm.models.game.hex.HexCoordinates
 
 import scala.util.Random

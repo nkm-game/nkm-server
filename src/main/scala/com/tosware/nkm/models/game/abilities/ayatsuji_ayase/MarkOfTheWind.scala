@@ -1,11 +1,9 @@
 package com.tosware.nkm.models.game.abilities.ayatsuji_ayase
 
-import com.tosware.nkm.NkmConf
+import com.tosware.nkm._
 import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.game.abilities.ayatsuji_ayase.MarkOfTheWind.trapLocationsKey
-import com.tosware.nkm.models.game.ability.Ability.{AbilityId, UseCheck}
 import com.tosware.nkm.models.game.ability._
-import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game.hex.HexCoordinates
 import com.tosware.nkm.models.game.hex_effect.HexCellEffectName
 import spray.json._

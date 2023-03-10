@@ -2,8 +2,8 @@ package com.tosware.nkm
 
 import akka.util.Timeout
 
-import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
+import scala.concurrent.{Await, Future}
 
 trait NkmTimeouts {
   private val _atMost = NkmConf.int("asyncTimeout").millis

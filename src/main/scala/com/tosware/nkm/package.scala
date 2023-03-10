@@ -1,20 +1,34 @@
-package com.tosware.nkm
+package com.tosware
 
-import com.tosware.nkm.models.game.ability.Ability.AbilityId
-import com.tosware.nkm.models.game.event.GameEvent._
-import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
-import com.tosware.nkm.models.game.Player.PlayerId
-import com.tosware.nkm.models.game.hex._
 import com.tosware.nkm.models.game.GameState
 import com.tosware.nkm.models.game.character.NkmCharacter
-import com.tosware.nkm.serializers.NkmJsonProtocol
+import com.tosware.nkm.models.game.event.GameEvent._
+import com.tosware.nkm.models.game.hex._
 
 import scala.math.abs
 import scala.reflect.ClassTag
 import scala.util.Random
 
-trait NkmUtils extends NkmJsonProtocol {
-  def randomUUID()(implicit random: Random): String =
+package object nkm {
+  type UserId = String
+  type PlayerId = String
+  type GameId = String
+
+  type GameEventId = String
+
+  type CharacterMetadataId = String
+  type CharacterId = String
+
+  type AbilityMetadataId = String
+  type AbilityId = String
+  type UseCheck = (Boolean, String)
+
+  type CharacterEffectMetadataId = String
+  type CharacterEffectId = String
+
+  type HexCellEffectMetadataId = String
+  type HexCellEffectId = String
+    def randomUUID()(implicit random: Random): String =
     java.util.UUID.nameUUIDFromBytes(random.nextBytes(16)).toString
 
   def hexCellParamsToCells(params: Set[Any]): Set[HexCell] = {
@@ -139,5 +153,3 @@ trait NkmUtils extends NkmJsonProtocol {
       es.collect {case e: A => e}
   }
 }
-
-object NkmUtils extends NkmUtils

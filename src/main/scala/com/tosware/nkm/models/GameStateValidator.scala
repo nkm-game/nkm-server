@@ -1,14 +1,10 @@
 package com.tosware.nkm.models
 
+import com.tosware.nkm._
 import com.tosware.nkm.models.CommandResponse._
-import com.tosware.nkm.models.game.ability.Ability.AbilityId
-import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
-import com.tosware.nkm.models.game.character.CharacterMetadata.CharacterMetadataId
-import com.tosware.nkm.models.game.Player.PlayerId
 import com.tosware.nkm.models.game._
+import com.tosware.nkm.models.game.ability._
 import com.tosware.nkm.models.game.hex.HexCoordinates
-import com.tosware.nkm.NkmUtils._
-import com.tosware.nkm.models.game.ability.{Ability, UsableOnCharacter, UsableOnCoordinates, Usable, UseData}
 
 case class GameStateValidator()(implicit gameState: GameState) {
   private def playerInGame(playerId: PlayerId) =

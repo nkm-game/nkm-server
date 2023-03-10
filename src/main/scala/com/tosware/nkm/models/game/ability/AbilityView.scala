@@ -1,7 +1,6 @@
 package com.tosware.nkm.models.game.ability
 
-import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
-import com.tosware.nkm.models.game.ability.Ability.{AbilityId, AbilityMetadataId}
+import com.tosware.nkm._
 import com.tosware.nkm.models.game.hex.HexCoordinates
 
 case class AbilityView

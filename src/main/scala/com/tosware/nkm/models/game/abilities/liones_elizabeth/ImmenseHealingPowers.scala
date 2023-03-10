@@ -1,10 +1,8 @@
 package com.tosware.nkm.models.game.abilities.liones_elizabeth
 
-import com.tosware.nkm.NkmConf
+import com.tosware.nkm._
 import com.tosware.nkm.models.game.GameState
-import com.tosware.nkm.models.game.ability.Ability.AbilityId
 import com.tosware.nkm.models.game.ability._
-import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game.event.{GameEvent, GameEventListener}
 
 import scala.util.Random

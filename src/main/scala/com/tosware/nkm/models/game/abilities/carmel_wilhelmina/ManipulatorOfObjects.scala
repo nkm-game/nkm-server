@@ -1,12 +1,10 @@
 package com.tosware.nkm.models.game.abilities.carmel_wilhelmina
 
-import com.tosware.nkm.{NkmConf, NkmUtils}
-import com.tosware.nkm.models.game.ability.Ability.AbilityId
-import com.tosware.nkm.models.game.event.GameEvent.CharacterBasicAttacked
-import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
+import com.tosware.nkm._
 import com.tosware.nkm.models.game._
-import com.tosware.nkm.models.game.ability.{Ability, AbilityMetadata, AbilityType}
+import com.tosware.nkm.models.game.ability._
 import com.tosware.nkm.models.game.effects.{ManipulatorOfObjectsImmunity, Snare}
+import com.tosware.nkm.models.game.event.GameEvent.CharacterBasicAttacked
 import com.tosware.nkm.models.game.event.{GameEvent, GameEventListener}
 
 import scala.util.Random
@@ -32,11 +30,11 @@ case class ManipulatorOfObjects(abilityId: AbilityId, parentCharacterId: Charact
       gameState
     else {
       val snareEffect = effects.Snare(
-        NkmUtils.randomUUID(),
+        randomUUID(),
         metadata.variables("duration"),
       )
       val immunityEffect = effects.ManipulatorOfObjectsImmunity(
-        NkmUtils.randomUUID(),
+        randomUUID(),
         metadata.variables("effectTimeout"),
       )
       gameState

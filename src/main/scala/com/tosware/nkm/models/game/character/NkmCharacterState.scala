@@ -1,7 +1,6 @@
 package com.tosware.nkm.models.game.character
 
-import com.tosware.nkm.NkmUtils._
-import com.tosware.nkm.models.game.Player.PlayerId
+import com.tosware.nkm._
 import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.game.ability.Ability
 import com.tosware.nkm.models.game.character_effect.CharacterEffect

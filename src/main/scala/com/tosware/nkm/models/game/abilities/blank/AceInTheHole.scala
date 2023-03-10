@@ -1,10 +1,8 @@
 package com.tosware.nkm.models.game.abilities.blank
 
-import com.tosware.nkm.NkmConf
-import com.tosware.nkm.models.game.ability.Ability.AbilityId
-import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
+import com.tosware.nkm._
 import com.tosware.nkm.models.game._
-import com.tosware.nkm.models.game.ability.{Ability, AbilityMetadata, AbilityType}
+import com.tosware.nkm.models.game.ability._
 import com.tosware.nkm.models.game.effects.FreeAbility
 import com.tosware.nkm.models.game.event.{GameEvent, GameEventListener}
 

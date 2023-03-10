@@ -1,10 +1,8 @@
 package com.tosware.nkm.models.game.abilities.crona
 
-import com.tosware.nkm.{NkmConf, NkmUtils}
-import com.tosware.nkm.models.game.ability.Ability.AbilityId
-import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
+import com.tosware.nkm._
 import com.tosware.nkm.models.game._
-import com.tosware.nkm.models.game.ability.{Ability, AbilityMetadata, AbilityType, UsableOnCharacter, UseData}
+import com.tosware.nkm.models.game.ability._
 
 import scala.util.Random
 
@@ -35,7 +33,7 @@ case class Infection(abilityId: AbilityId, parentCharacterId: CharacterId)
     rangeCellCoords.whereEnemiesOfC(parentCharacterId)
 
   override def use(target: CharacterId, useData: UseData)(implicit random: Random, gameState: GameState) = {
-    val effect = effects.BlackBlood(NkmUtils.randomUUID(), metadata.variables("duration"), parentCharacterId, abilityId)
+    val effect = effects.BlackBlood(randomUUID(), metadata.variables("duration"), parentCharacterId, abilityId)
     gameState.addEffect(target, effect)(random, abilityId)
   }
 }

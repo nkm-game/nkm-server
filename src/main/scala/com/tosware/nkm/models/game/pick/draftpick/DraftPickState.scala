@@ -1,7 +1,6 @@
 package com.tosware.nkm.models.game.pick.draftpick
 
-import com.tosware.nkm.models.game.character.CharacterMetadata.CharacterMetadataId
-import com.tosware.nkm.models.game.Player.PlayerId
+import com.tosware.nkm._
 
 object DraftPickState {
   def empty(config: DraftPickConfig): DraftPickState = DraftPickState(

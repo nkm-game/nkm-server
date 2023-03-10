@@ -1,12 +1,10 @@
 package com.tosware.nkm.models.game.character
 
-import com.tosware.nkm.models.game.ability.Ability.AbilityMetadataId
-import com.tosware.nkm.models.game.character.CharacterMetadata._
+import com.tosware.nkm._
 
 object CharacterMetadata {
   def empty(name: String = "Empty"): CharacterMetadata =
     CharacterMetadata(name, AttackType.Melee, 100, 10, 5, 5, 10, 10, Seq.empty)
-  type CharacterMetadataId = String
 }
 
 

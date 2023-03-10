@@ -1,8 +1,8 @@
 package helpers
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
+import com.tosware.nkm._
 import com.tosware.nkm.serializers.NkmJsonProtocol
-import com.tosware.nkm.{DBManager, Logging, NkmTimeouts, NkmUtils}
 import com.typesafe.config.{Config, ConfigFactory}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
@@ -19,8 +19,7 @@ trait NkmIntegrationTestTrait
     with NkmTimeouts
     with SprayJsonSupport
     with Logging
-    with NkmUtils
-    {
+{
   implicit val db: JdbcBackend.Database = Database.forConfig("slick.db")
 
   override def beforeAll(): Unit = {
@@ -33,6 +32,6 @@ trait NkmIntegrationTestTrait
   override def beforeEach(): Unit = {
     DBManager.dropAllTables(db)
     DBManager.createNeededTables(db)
-//    logger.info("FATAL: tables created")
+    //    logger.info("FATAL: tables created")
   }
 }

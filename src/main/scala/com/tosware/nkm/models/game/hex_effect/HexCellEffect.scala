@@ -1,16 +1,11 @@
 package com.tosware.nkm.models.game.hex_effect
 
 import com.softwaremill.quicklens._
-import com.tosware.nkm.NkmUtils
+import com.tosware.nkm._
 import com.tosware.nkm.models.game.GameState
 import com.tosware.nkm.models.game.hex.HexCell
-import com.tosware.nkm.models.game.hex_effect.HexCellEffect._
-object HexCellEffect {
-  type HexCellEffectId = String
-  type HexCellEffectMetadataId = String
-}
 
-abstract class HexCellEffect(val id: HexCellEffectId) extends NkmUtils {
+abstract class HexCellEffect(val id: HexCellEffectId) {
   val metadata: HexCellEffectMetadata
   val initialCooldown: Int
 

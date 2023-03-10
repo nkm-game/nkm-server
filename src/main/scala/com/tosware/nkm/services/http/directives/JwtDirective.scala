@@ -5,7 +5,7 @@ import akka.http.scaladsl.server.Directive1
 import akka.http.scaladsl.server.Directives.{complete, optionalHeaderValueByName, provide}
 import com.tosware.nkm.models.JwtContent
 import com.tosware.nkm.serializers.NkmJsonProtocol
-import pdi.jwt.{Jwt, JwtAlgorithm, JwtClaim, JwtSprayJson}
+import pdi.jwt._
 import spray.json._
 
 import java.time.Instant

@@ -1,34 +1,31 @@
 package com.tosware.nkm.providers
 
-import com.tosware.nkm.models.game.ability.Ability.AbilityMetadataId
+import com.tosware.nkm._
+import com.tosware.nkm.models.game.abilities.akame._
+import com.tosware.nkm.models.game.abilities.aqua._
+import com.tosware.nkm.models.game.abilities.ayatsuji_ayase._
+import com.tosware.nkm.models.game.abilities.blank._
+import com.tosware.nkm.models.game.abilities.carmel_wilhelmina._
+import com.tosware.nkm.models.game.abilities.crona._
+import com.tosware.nkm.models.game.abilities.dekomori_sanae._
+import com.tosware.nkm.models.game.abilities.ebisuzawa_kurumi._
+import com.tosware.nkm.models.game.abilities.hecate._
+import com.tosware.nkm.models.game.abilities.kirito._
+import com.tosware.nkm.models.game.abilities.liones_elizabeth._
+import com.tosware.nkm.models.game.abilities.llenn._
+import com.tosware.nkm.models.game.abilities.monkey_d_luffy._
+import com.tosware.nkm.models.game.abilities.nibutani_shinka._
+import com.tosware.nkm.models.game.abilities.ochaco_uraraka._
+import com.tosware.nkm.models.game.abilities.roronoa_zoro._
+import com.tosware.nkm.models.game.abilities.ryuko_matoi._
+import com.tosware.nkm.models.game.abilities.satou_kazuma._
+import com.tosware.nkm.models.game.abilities.shana._
+import com.tosware.nkm.models.game.abilities.sinon._
 import com.tosware.nkm.models.game.ability.Ability
-import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
-import com.tosware.nkm.models.game.abilities._
-import com.tosware.nkm.NkmUtils
-import akame._
-import aqua._
-import ayatsuji_ayase._
-import blank._
-import carmel_wilhelmina._
-import crona._
-import dekomori_sanae._
-import ebisuzawa_kurumi._
-import hecate._
-import kirito._
-import liones_elizabeth._
-import llenn._
-import monkey_d_luffy._
-import nibutani_shinka._
-import ochaco_uraraka._
-import roronoa_zoro._
-import ryuko_matoi._
-import satou_kazuma._
-import shana._
-import sinon._
 
 import scala.util.Random
 
-object AbilityProvider extends NkmUtils {
+object AbilityProvider {
   def instantiateAbilities(characterId: CharacterId, metadataIds: Seq[AbilityMetadataId])(implicit random: Random): Seq[Ability] = {
     metadataIds.map {
       case Murasame.metadata.id =>

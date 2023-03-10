@@ -1,19 +1,18 @@
 package helpers
 
+import com.tosware.nkm._
 import com.tosware.nkm.models.CommandResponse._
-import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
-import com.tosware.nkm.models.game.pick.PickType.BlindPick
-import com.tosware.nkm.models.game.Player.PlayerId
 import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.game.character.{CharacterMetadata, NkmCharacter}
 import com.tosware.nkm.models.game.hex.{HexCoordinates, TestHexMapName}
+import com.tosware.nkm.models.game.pick.PickType.BlindPick
 import com.tosware.nkm.providers.HexMapProvider
-import com.tosware.nkm.{Logging, NkmUtils}
+import com.tosware.nkm.serializers.NkmJsonProtocol
 import org.scalatest.Assertions.fail
 
 import scala.util.Random
 
-trait TestUtils extends Logging with NkmUtils {
+trait TestUtils extends Logging with NkmJsonProtocol {
   implicit val random: Random = new Random()
   implicit val causedById: String = "test"
 

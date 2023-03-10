@@ -1,9 +1,7 @@
 package com.tosware.nkm.models.game
 
-import com.tosware.nkm.actors.Game.GameId
-import com.tosware.nkm.models.game.Player.PlayerId
+import com.tosware.nkm._
 import com.tosware.nkm.models.game.ability.AbilityView
-import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game.character.{CharacterMetadata, NkmCharacterView}
 import com.tosware.nkm.models.game.character_effect.CharacterEffectView
 import com.tosware.nkm.models.game.event.GameLogView

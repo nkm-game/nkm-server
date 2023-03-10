@@ -1,24 +1,19 @@
 package com.tosware.nkm.models.game.ability
 
 import com.softwaremill.quicklens._
-import com.tosware.nkm.NkmUtils
+import com.tosware.nkm._
 import com.tosware.nkm.models.CommandResponse._
-import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
 import com.tosware.nkm.models.game._
-import com.tosware.nkm.models.game.ability.Ability._
 import com.tosware.nkm.models.game.character.NkmCharacter
 import com.tosware.nkm.models.game.effects.{AbilityEnchant, FreeAbility}
 import com.tosware.nkm.models.game.hex.{HexCell, HexCoordinates}
+import com.tosware.nkm.serializers.NkmJsonProtocol
 
 import scala.util.{Random, Try}
 
-object Ability {
-  type AbilityId = String
-  type AbilityMetadataId = String
-  type UseCheck = (Boolean, String)
-}
-
-abstract class Ability(val id: AbilityId, pid: CharacterId) extends NkmUtils {
+abstract class Ability(val id: AbilityId, pid: CharacterId)
+  extends NkmJsonProtocol
+{
   val metadata: AbilityMetadata
 
   def _canBeUsed(useChecks: Set[UseCheck])(implicit gameState: GameState): CommandResponse = {

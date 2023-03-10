@@ -2,26 +2,21 @@ package com.tosware.nkm.actors
 
 import akka.actor.{ActorLogging, Cancellable, Props}
 import akka.persistence.{PersistentActor, RecoveryCompleted}
-import com.tosware.nkm.actors.Game.GameId
+import com.tosware.nkm._
 import com.tosware.nkm.models.CommandResponse._
-import com.tosware.nkm.models.{GameEventMapped, GameStateValidator}
-import com.tosware.nkm.models.game.ability.Ability.AbilityId
-import com.tosware.nkm.models.game.character.NkmCharacter.CharacterId
-import com.tosware.nkm.models.game.character.CharacterMetadata.CharacterMetadataId
-import com.tosware.nkm.models.game.Player.PlayerId
 import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.game.ability.UseData
 import com.tosware.nkm.models.game.hex.HexCoordinates
 import com.tosware.nkm.models.game.pick.PickType
 import com.tosware.nkm.models.game.pick.blindpick.BlindPickPhase
 import com.tosware.nkm.models.game.pick.draftpick.DraftPickPhase
+import com.tosware.nkm.models.{GameEventMapped, GameStateValidator}
 import com.tosware.nkm.services.NkmDataService
 
 import scala.concurrent.duration._
 import scala.util.Random
 
 object Game {
-  type GameId = String
   sealed trait Query
 
   case object GetState extends Query

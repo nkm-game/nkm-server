@@ -2,10 +2,10 @@ package com.tosware.nkm.actors.ws
 
 import akka.actor.ActorRef
 import akka.http.scaladsl.model.StatusCodes
+import com.tosware.nkm.models.CommandResponse._
 import com.tosware.nkm.models.lobby.ws._
 import com.tosware.nkm.services.LobbyService
 import com.tosware.nkm.services.http.directives.JwtSecretKey
-import com.tosware.nkm.models.CommandResponse._
 import spray.json._
 
 import scala.concurrent.Await
