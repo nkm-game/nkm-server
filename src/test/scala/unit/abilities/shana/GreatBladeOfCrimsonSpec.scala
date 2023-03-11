@@ -3,7 +3,7 @@ package unit.abilities.shana
 import com.tosware.nkm.models.GameStateValidator
 import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.game.abilities.shana.GreatBladeOfCrimson
-import com.tosware.nkm.models.game.character.CharacterMetadata
+import com.tosware.nkm.models.game.character.{CharacterMetadata, StatType}
 import helpers.{TestUtils, scenarios}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
@@ -32,16 +32,12 @@ class GreatBladeOfCrimsonSpec
       }
     }
 
-    "increase character AD" in {
-      val oldSpeed = s.p(0)(0).character.state.attackPoints
-      val newSpeed = abilityUsedGameState.characterById(s.p(0)(0).character.id).state.attackPoints
-      oldSpeed should be < newSpeed
+    "apply AD buff" in {
+      assertBuffExists(StatType.AttackPoints, s.p(0)(0).character.id)(abilityUsedGameState)
     }
 
-    "increase basic attack range" in {
-      val oldRange = s.p(0)(0).character.state.basicAttackRange
-      val newRange = abilityUsedGameState.characterById(s.p(0)(0).character.id).state.basicAttackRange
-      oldRange should be < newRange
+    "apply basic attack range buff" in {
+      assertBuffExists(StatType.BasicAttackRange, s.p(0)(0).character.id)(abilityUsedGameState)
     }
   }
 }

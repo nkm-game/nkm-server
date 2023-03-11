@@ -3,7 +3,7 @@ package unit.abilities.sinon
 import com.tosware.nkm.models.GameStateValidator
 import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.game.abilities.sinon.TacticalEscape
-import com.tosware.nkm.models.game.character.CharacterMetadata
+import com.tosware.nkm.models.game.character.{CharacterMetadata, StatType}
 import helpers.{TestUtils, scenarios}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
@@ -14,28 +14,25 @@ class TacticalEscapeSpec
     with TestUtils
 {
   private val abilityMetadata = TacticalEscape.metadata
-  private val metadata = CharacterMetadata.empty()
-    .copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
+  private val metadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
   private val s = scenarios.Simple2v2TestScenario(metadata)
-  private implicit val gameState: GameState = s.gameState
-  private val abilityId = s.characters.p0First.state.abilities.head.id
+  private val gameState: GameState = s.gameState
+  private val abilityId = s.p(0)(0).character.state.abilities.head.id
+  private val abilityUsedGameState: GameState = gameState.useAbility(abilityId)
 
   abilityMetadata.name must {
     "be able to use" in {
       assertCommandSuccess {
-        GameStateValidator()
+        GameStateValidator()(gameState)
           .validateAbilityUse(
-            s.characters.p0First.owner.id,
+            s.p(0)(0).ownerId,
             abilityId,
           )
       }
     }
 
-    "be able to modify character speed" in {
-      val abilityUsedGameState: GameState = gameState.useAbility(abilityId)
-      val oldSpeed = s.characters.p0First.state.speed
-      val newSpeed = abilityUsedGameState.characterById(s.characters.p0First.id).state.speed
-      oldSpeed should be < newSpeed
+    "be able to apply speed buff" in {
+      assertBuffExists(StatType.Speed, s.p(0)(0).character.id)(abilityUsedGameState)
     }
   }
 }
