@@ -3,9 +3,11 @@ package helpers.scenarios
 import com.tosware.nkm.models.game.GameState
 import com.tosware.nkm.models.game.character.{CharacterMetadata, NkmCharacter}
 import com.tosware.nkm.models.game.hex.{HexCoordinates, TestHexMapName}
-import helpers.TestUtils
+import helpers.TestScenario
 
-case class Simple2v2TestScenario(metadata: CharacterMetadata, mapName: TestHexMapName = TestHexMapName.Simple2v2) extends TestUtils {
+case class Simple2v2TestScenario(metadata: CharacterMetadata, mapName: TestHexMapName = TestHexMapName.Simple2v2)
+  extends TestScenario
+{
   val gameState: GameState = getTestGameState(
     mapName, Seq(
       Seq(metadata.copy(name = "Empty1"), metadata.copy(name = "Empty2")),

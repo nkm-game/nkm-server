@@ -4,9 +4,11 @@ import com.tosware.nkm._
 import com.tosware.nkm.models.game.GameState
 import com.tosware.nkm.models.game.character.{CharacterMetadata, NkmCharacter}
 import com.tosware.nkm.models.game.hex.{HexCoordinates, TestHexMapName}
-import helpers.TestUtils
+import helpers.TestScenario
 
-case class Spacey1v1TestScenario(metadata: CharacterMetadata, secondMetadata: Option[CharacterMetadata] = None) extends TestUtils {
+case class Spacey1v1TestScenario(metadata: CharacterMetadata, secondMetadata: Option[CharacterMetadata] = None)
+  extends TestScenario
+{
   private val metadata2 = secondMetadata.getOrElse(metadata)
   val gameState: GameState = getTestGameState(
     TestHexMapName.Simple1v1, Seq(

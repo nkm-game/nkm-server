@@ -16,6 +16,20 @@ trait TestUtils extends Logging with NkmJsonProtocol {
   implicit val random: Random = new Random()
   implicit val causedById: String = "test"
 
+  case class TestCharacterData(spawnCoordinates: HexCoordinates)(implicit gameState: GameState) {
+    def character: NkmCharacter = characterOnPoint(spawnCoordinates)(gameState)
+    def ownerId: PlayerId = character.owner(gameState).id
+  }
+
+  protected def bindPlayerData()(implicit gameState: GameState): Seq[Seq[TestCharacterData]] =
+    gameState.players.map(_.id).map(pid => {
+      val spawnCoords = gameState.hexMap.getSpawnPointsFor(pid)(gameState).map(_.coordinates).toSeq
+      bindCharacterData(spawnCoords)(gameState)
+    })
+
+  protected def bindCharacterData(cs: Seq[HexCoordinates])(implicit gameState: GameState): Seq[TestCharacterData] =
+    cs.map(c => TestCharacterData(c))
+
   protected def assertCommandSuccess(c: CommandResponse): Unit = c match {
     case Success(_) =>
     case Failure(m) =>

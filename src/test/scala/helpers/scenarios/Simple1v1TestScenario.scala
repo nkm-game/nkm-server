@@ -4,9 +4,11 @@ import com.tosware.nkm._
 import com.tosware.nkm.models.game.GameState
 import com.tosware.nkm.models.game.character.{CharacterMetadata, NkmCharacter}
 import com.tosware.nkm.models.game.hex.{HexCoordinates, TestHexMapName}
-import helpers.TestUtils
+import helpers.TestScenario
 
-case class Simple1v1TestScenario(metadata: CharacterMetadata, secondMetadata: Option[CharacterMetadata] = None) extends TestUtils {
+case class Simple1v1TestScenario(metadata: CharacterMetadata, secondMetadata: Option[CharacterMetadata] = None)
+  extends TestScenario
+{
   private val metadata2 = secondMetadata.getOrElse(metadata)
   val gameState: GameState = getTestGameState(
     TestHexMapName.Simple1v1, Seq(
@@ -14,6 +16,9 @@ case class Simple1v1TestScenario(metadata: CharacterMetadata, secondMetadata: Op
       Seq(metadata2.copy(name = "Enemy")),
     )
   )
+
+  val p0: TestCharacterData = TestCharacterData(HexCoordinates(0, 0))(gameState)
+  val p1: TestCharacterData = TestCharacterData(HexCoordinates(1, 0))(gameState)
 
   object spawnCoordinates {
     val p0: HexCoordinates = HexCoordinates(0, 0)
