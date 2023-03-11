@@ -3,6 +3,7 @@ package com.tosware.nkm.models.game.abilities.shana
 import com.tosware.nkm._
 import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.game.ability._
+import com.tosware.nkm.models.game.character.StatType
 import com.tosware.nkm.models.game.event.{GameEvent, GameEventListener}
 
 import scala.util.Random
@@ -33,8 +34,10 @@ case class WingsOfCrimson(abilityId: AbilityId, parentCharacterId: CharacterId)
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
     e match {
       case GameEvent.CharacterDamaged(_, _, _, _, characterId, _) =>
-        if(characterId != parentCharacter.id) return gameState
+        if(characterId != parentCharacterId) return gameState
         gameState
+          .addEffect(parentCharacterId, effects.Fly(randomUUID(), metadata.variables("duration")))(random, id)
+          .addEffect(parentCharacterId, effects.StatBuff(randomUUID(), metadata.variables("duration"), StatType.Speed, metadata.variables("bonusSpeed")))(random, id)
       case _ =>
         gameState
     }

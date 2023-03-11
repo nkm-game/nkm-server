@@ -3,16 +3,24 @@ package helpers
 import com.tosware.nkm._
 import com.tosware.nkm.models.CommandResponse._
 import com.tosware.nkm.models.game._
-import com.tosware.nkm.models.game.character.{CharacterMetadata, NkmCharacter}
+import com.tosware.nkm.models.game.character.{CharacterMetadata, NkmCharacter, StatType}
 import com.tosware.nkm.models.game.hex.{HexCoordinates, TestHexMapName}
 import com.tosware.nkm.models.game.pick.PickType.BlindPick
 import com.tosware.nkm.providers.HexMapProvider
 import com.tosware.nkm.serializers.NkmJsonProtocol
-import org.scalatest.Assertions.fail
+import org.scalatest.Assertion
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
 
+import scala.reflect.ClassTag
 import scala.util.Random
 
-trait TestUtils extends Logging with NkmJsonProtocol {
+trait TestUtils
+  extends AnyWordSpecLike
+    with Matchers
+    with Logging
+    with NkmJsonProtocol
+    {
   implicit val random: Random = new Random()
   implicit val causedById: String = "test"
 
@@ -41,6 +49,22 @@ trait TestUtils extends Logging with NkmJsonProtocol {
     case Success(_) => fail()
     case Failure(m) => logger.info(m)
   }
+
+  protected def assertEffectExistsOfType[A: ClassTag](cid: CharacterId)(gameState: GameState): Assertion =
+    gameState
+      .characterById(cid)
+      .state
+      .effects
+      .ofType[A]
+      .size should be > 0
+
+  protected def assertBuffExists(statType: StatType, cid: CharacterId)(gameState: GameState): Assertion =
+    gameState
+      .characterById(cid)
+      .state
+      .effects
+      .ofType[effects.StatBuff]
+      .map(_.statType) should contain (statType)
 
   protected def characterIdOnPoint(hexCoordinates: HexCoordinates)(implicit gameState: GameState): CharacterId =
     gameState.hexMap.getCell(hexCoordinates).get.characterId.get
