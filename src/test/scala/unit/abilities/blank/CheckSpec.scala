@@ -18,40 +18,40 @@ class CheckSpec
   private val characterMetadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
   private val s = scenarios.Simple2v2TestScenario(characterMetadata)
   private implicit val gameState: GameState = s.gameState
-  private val abilityId = s.characters.p0First.state.abilities.head.id
+  private val abilityId = s.p(0)(0).character.state.abilities.head.id
 
   abilityMetadata.name must {
     "be able to use" in {
       val r = GameStateValidator()
-        .validateAbilityUseOnCharacter(s.characters.p0First.owner.id, abilityId, s.characters.p1First.id)
+        .validateAbilityUseOnCharacter(s.p(0)(0).character.owner.id, abilityId, s.p(1)(0).character.id)
       assertCommandSuccess(r)
     }
 
     "force to take a turn" in {
       val abilityGameState: GameState = gameState
-        .useAbilityOnCharacter(abilityId, s.characters.p1First.id)
+        .useAbilityOnCharacter(abilityId, s.p(1)(0).character.id)
         .endTurn()
 
-      abilityGameState.characterTakingActionThisTurn should be (Some(s.characters.p1First.id))
+      abilityGameState.characterTakingActionThisTurn should be (Some(s.p(1)(0).character.id))
     }
 
     "apply disarm" in {
       val abilityGameState: GameState = gameState
-        .useAbilityOnCharacter(abilityId, s.characters.p1First.id)
+        .useAbilityOnCharacter(abilityId, s.p(1)(0).character.id)
         .endTurn()
 
       abilityGameState
-        .characterById(s.characters.p1First.id)
+        .characterById(s.p(1)(0).character.id)
         .state.effects.exists(_.metadata.name == CharacterEffectName.Disarm)
     }
 
     "be unable to use on enemies that already took action" in {
       val passGameState: GameState = gameState
-        .passTurn(s.characters.p0Second.id)
-        .passTurn(s.characters.p1First.id)
+        .passTurn(s.p(0)(1).character.id)
+        .passTurn(s.p(1)(0).character.id)
 
       val r = GameStateValidator()(passGameState)
-        .validateAbilityUseOnCharacter(s.characters.p0First.owner.id, abilityId, s.characters.p1First.id)
+        .validateAbilityUseOnCharacter(s.p(0)(0).character.owner.id, abilityId, s.p(1)(0).character.id)
       assertCommandFailure(r)
     }
   }

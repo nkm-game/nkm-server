@@ -22,10 +22,10 @@ class LackOfOrientationSpec
 
   abilityMetadata.name must {
     "make parent character get lost sometimes" in {
-      def move() = s.gameState.basicMoveCharacter(s.characters.p0First.id, CoordinateSeq((0, 0), (1, 0), (2, 0), (2, 1), (1, 1)))
+      def move() = s.gameState.basicMoveCharacter(s.p(0)(0).character.id, CoordinateSeq((0, 0), (1, 0), (2, 0), (2, 1), (1, 1)))
       def moveAndGetParentCoords() = {
         val moveGameState = move()
-        moveGameState.characterById(s.characters.p0First.id).parentCell(moveGameState).get.coordinates
+        moveGameState.characterById(s.p(0)(0).character.id).parentCell(moveGameState).get.coordinates
       }
       val results = (0 to 50).map(_ => moveAndGetParentCoords()).map(_.toTuple)
       results.toSet.size should be > 2

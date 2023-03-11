@@ -18,18 +18,18 @@ class PowerOfExistenceSpec
   private val metadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id, MasterThrone.metadata.id))
   private val s = scenarios.Simple2v2TestScenario(metadata)
   private implicit val gameState: GameState = s.gameState.incrementPhase(4)
-  private val abilityId = s.characters.p0First.state.abilities.head.id
-  private val masterThroneAbilityId = s.characters.p0First.state.abilities.tail.head.id
-  private val aaGameState: GameState = gameState.basicAttack(s.characters.p0First.id, s.characters.p1First.id)
+  private val abilityId = s.p(0)(0).character.state.abilities.head.id
+  private val masterThroneAbilityId = s.p(0)(0).character.state.abilities.tail.head.id
+  private val aaGameState: GameState = gameState.basicAttack(s.p(0)(0).character.id, s.p(1)(0).character.id)
     .endTurn()
-    .passTurn(s.characters.p1First.id)
+    .passTurn(s.p(1)(0).character.id)
     .finishPhase()
 
   abilityMetadata.name must {
     "be able to use" in {
       assertCommandSuccess {
         GameStateValidator()(aaGameState)
-          .validateAbilityUse(s.characters.p0First.owner.id, abilityId)
+          .validateAbilityUse(s.p(0)(0).character.owner.id, abilityId)
       }
     }
 

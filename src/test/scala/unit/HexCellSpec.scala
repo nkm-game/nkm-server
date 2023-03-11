@@ -46,9 +46,9 @@ class HexCellSpec
       HexCoordinates(0, 0).toCell.getArea(
         10,
         Set(SearchFlag.StopAtEnemies),
-        Some(s.characters.p0First.owner.id),
+        Some(s.p(0)(0).character.owner.id),
       ).toCoords should be (
-        hexMap.cells.toCoords -- hexMap.cells.whereEnemiesOfC(s.characters.p0First.id).toCoords
+        hexMap.cells.toCoords -- hexMap.cells.whereEnemiesOfC(s.p(0)(0).character.id).toCoords
       )
     }
   }

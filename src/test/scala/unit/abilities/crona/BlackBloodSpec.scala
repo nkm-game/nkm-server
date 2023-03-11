@@ -16,7 +16,7 @@ class BlackBloodSpec
   private val abilityMetadata = BlackBlood.metadata
   private val characterMetadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
   private val s = scenarios.Simple1v9LineTestScenario(characterMetadata)
-  private val gameState: GameState = s.gameState.passTurn(s.characters.p0.id)
+  private val gameState: GameState = s.gameState.passTurn(s.p(0)(0).character.id)
   private val abilityId = s.p(0)(0).character.state.abilities.head.id
   private val abilityRange = abilityMetadata.variables("radius")
   private val attackingCharacter = s.p(1)(0).character

@@ -18,7 +18,7 @@ class GrenadeThrowSpec
   private val metadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(GrenadeThrow.metadata.id))
   private val s = scenarios.Simple2v2TestScenario(metadata)
   private implicit val gameState: GameState = s.gameState
-  private val abilityId = s.characters.p0First.state.abilities.head.id
+  private val abilityId = s.p(0)(0).character.state.abilities.head.id
 
   GrenadeThrow.metadata.name must {
     "be able to use on all coords" in {
@@ -26,7 +26,7 @@ class GrenadeThrowSpec
 
       val allCoords = gameState.hexMap.cells.toCoords
       allCoords.foreach { c =>
-        val r = validator.validateAbilityUseOnCoordinates(s.characters.p0First.owner.id, abilityId, c)
+        val r = validator.validateAbilityUseOnCoordinates(s.p(0)(0).character.owner.id, abilityId, c)
         assertCommandSuccess(r)
       }
     }

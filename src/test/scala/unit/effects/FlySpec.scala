@@ -17,24 +17,24 @@ class FlySpec
   private val effectMetadata = Fly.metadata
   private val metadata = CharacterMetadata.empty()
   private val s = scenarios.FlyTestScenario(metadata)
-  private implicit val gameState: GameState = s.gameState.addEffect(s.characters.p0.id, Fly("test_id", 2))
+  private implicit val gameState: GameState = s.gameState.addEffect(s.p(0)(0).character.id, Fly("test_id", 2))
 
   effectMetadata.name.toString must {
     "allow flying over walls" in {
       val r = GameStateValidator()
         .validateBasicMoveCharacter(
-          s.characters.p0.owner.id,
+          s.p(0)(0).character.owner.id,
           CoordinateSeq((0, 0), (1, 0), (2, 0)),
-          s.characters.p0.id,
+          s.p(0)(0).character.id,
         )
       assertCommandSuccess(r)
     }
     "allow flying over enemy characters" in {
       val r = GameStateValidator()
         .validateBasicMoveCharacter(
-          s.characters.p0.owner.id,
+          s.p(0)(0).character.owner.id,
           CoordinateSeq((0, 0), (1, 0), (2, 0), (3, 0), (4, 0)),
-          s.characters.p0.id,
+          s.p(0)(0).character.id,
         )
       assertCommandSuccess(r)
     }

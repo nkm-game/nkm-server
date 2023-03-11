@@ -17,12 +17,12 @@ class RunItDownSpec
   private val metadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(RunItDown.metadata.id))
   private val s = scenarios.Simple2v2TestScenario(metadata)
   private implicit val gameState: GameState = s.gameState.incrementPhase(4)
-  private val abilityId = s.characters.p0First.state.abilities.head.id
+  private val abilityId = s.p(0)(1).character.state.abilities.head.id
   private val pid = gameState.players.head.id
 
   RunItDown.metadata.name must {
     "be able to use" in {
-      val r = GameStateValidator().validateAbilityUse(s.characters.p0First.owner.id, abilityId)
+      val r = GameStateValidator().validateAbilityUse(s.p(0)(1).character.owner.id, abilityId)
       assertCommandSuccess(r)
     }
 
@@ -31,21 +31,21 @@ class RunItDownSpec
 
       def validateBasicAttack(gameState: GameState) =
         GameStateValidator()(gameState).validateBasicAttackCharacter(pid,
-          s.characters.p0First.id,
-          s.characters.p1First.id,
+          s.p(0)(1).character.id,
+          s.p(1)(0).character.id,
         )
 
       def validateBasicMove(gameState: GameState, cs: Seq[(Int, Int)]) =
         GameStateValidator()(gameState).validateBasicMoveCharacter(pid,
           CoordinateSeq(cs: _*),
-          s.characters.p0First.id
+          s.p(0)(1).character.id
         )
 
       def basicAttack(gameState: GameState) =
-        gameState.basicAttack(s.characters.p0First.id, s.characters.p1First.id)
+        gameState.basicAttack(s.p(0)(1).character.id, s.p(1)(0).character.id)
 
       def basicMove(gameState: GameState, cs: Seq[(Int, Int)]) =
-        gameState.basicMoveCharacter(s.characters.p0First.id, CoordinateSeq(cs: _*))
+        gameState.basicMoveCharacter(s.p(0)(1).character.id, CoordinateSeq(cs: _*))
 
       assertCommandSuccess (validateBasicMove(abilityUsedGameState, Seq((0, 0), (1, 0))))
       assertCommandSuccess (validateBasicAttack(abilityUsedGameState))

@@ -18,13 +18,13 @@ class PowerOfTheGodessSpec
   private val metadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
   private val s = scenarios.Simple2v2TestScenario(metadata)
   private val gameState: GameState = s.gameState.incrementPhase(4)
-  private val abilityId = s.characters.p0First.state.abilities.head.id
+  private val abilityId = s.p(0)(0).character.state.abilities.head.id
 
   abilityMetadata.name must {
     "be able to use" in {
       assertCommandSuccess {
         GameStateValidator()(gameState)
-          .validateAbilityUse(s.characters.p0First.owner(gameState).id, abilityId)
+          .validateAbilityUse(s.p(0)(0).ownerId, abilityId)
       }
     }
 

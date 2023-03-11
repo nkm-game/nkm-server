@@ -1,9 +1,8 @@
 package helpers.scenarios
 
-import com.tosware.nkm._
 import com.tosware.nkm.models.game.GameState
-import com.tosware.nkm.models.game.character.{CharacterMetadata, NkmCharacter}
-import com.tosware.nkm.models.game.hex.{HexCoordinates, TestHexMapName}
+import com.tosware.nkm.models.game.character.CharacterMetadata
+import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.TestScenario
 
 case class Spacey1v1TestScenario(metadata: CharacterMetadata, secondMetadata: Option[CharacterMetadata] = None)
@@ -16,19 +15,4 @@ case class Spacey1v1TestScenario(metadata: CharacterMetadata, secondMetadata: Op
       Seq(metadata2.copy(name = "Enemy")),
     )
   )
-
-  object spawnCoordinates {
-    val p0: HexCoordinates = HexCoordinates(0, 0)
-    val p1: HexCoordinates = HexCoordinates(1, 0)
-  }
-
-  object characters {
-    val p0: NkmCharacter = characterOnPoint(spawnCoordinates.p0)(gameState)
-    val p1: NkmCharacter = characterOnPoint(spawnCoordinates.p1)(gameState)
-  }
-
-  object owners {
-    val p0: PlayerId = characters.p0.owner(gameState).id
-    val p1: PlayerId = characters.p1.owner(gameState).id
-  }
 }

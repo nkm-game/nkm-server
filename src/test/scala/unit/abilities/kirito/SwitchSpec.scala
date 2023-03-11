@@ -24,30 +24,30 @@ class SwitchSpec
     )
   private val s = scenarios.Simple2v2TestScenario(characterMetadata)
   private implicit val gameState: GameState = s.gameState.incrementPhase(4)
-  private val abilityId = s.characters.p0First.state.abilities.head.id
-  private val ultimateAbilityId = s.characters.p0First.state.abilities.tail.head.id
+  private val abilityId = s.p(0)(0).character.state.abilities.head.id
+  private val ultimateAbilityId = s.p(0)(0).character.state.abilities.tail.head.id
 
   abilityMetadata.name must {
     "be able to switch" when {
       "character is in range of an enemy" in {
-        val ngs = gameState.teleportCharacter(s.characters.p0First.id, HexCoordinates(2, 0))
+        val ngs = gameState.teleportCharacter(s.p(0)(0).character.id, HexCoordinates(2, 0))
         assertCommandSuccess {
           GameStateValidator()(ngs)
             .validateAbilityUseOnCharacter(
-              s.characters.p0First.owner.id,
+              s.p(0)(0).character.owner.id,
               abilityId,
-              s.characters.p0Second.id,
+              s.p(0)(1).character.id,
             )
         }
       }
       "friend is in range of an enemy" in {
-        val ngs = gameState.teleportCharacter(s.characters.p0Second.id, HexCoordinates(2, 0))
+        val ngs = gameState.teleportCharacter(s.p(0)(1).character.id, HexCoordinates(2, 0))
         assertCommandSuccess {
           GameStateValidator()(ngs)
             .validateAbilityUseOnCharacter(
-              s.characters.p0First.owner.id,
+              s.p(0)(0).character.owner.id,
               abilityId,
-              s.characters.p0Second.id,
+              s.p(0)(1).character.id,
             )
         }
       }
@@ -55,28 +55,28 @@ class SwitchSpec
 
     "be able to basic attack after using switch" in {
       val ngs = gameState
-        .teleportCharacter(s.characters.p0Second.id, HexCoordinates(2, 0))
-        .useAbilityOnCharacter(abilityId, s.characters.p0Second.id)
+        .teleportCharacter(s.p(0)(1).character.id, HexCoordinates(2, 0))
+        .useAbilityOnCharacter(abilityId, s.p(0)(1).character.id)
 
       assertCommandSuccess {
         GameStateValidator()(ngs)
           .validateBasicAttackCharacter(
-            s.characters.p0First.owner.id,
-            s.characters.p0First.id,
-            s.characters.p1First.id,
+            s.p(0)(0).character.owner.id,
+            s.p(0)(0).character.id,
+            s.p(1)(0).character.id,
           )
       }
     }
 
     "be able to use ultimate ability after using switch" in {
       val ngs = gameState
-        .teleportCharacter(s.characters.p0Second.id, HexCoordinates(2, 0))
-        .useAbilityOnCharacter(abilityId, s.characters.p0Second.id)
+        .teleportCharacter(s.p(0)(1).character.id, HexCoordinates(2, 0))
+        .useAbilityOnCharacter(abilityId, s.p(0)(1).character.id)
 
       assertCommandSuccess {
         GameStateValidator()(ngs)
           .validateAbilityUse(
-            s.characters.p0First.owner.id,
+            s.p(0)(0).character.owner.id,
             ultimateAbilityId,
           )
       }
@@ -86,9 +86,9 @@ class SwitchSpec
       assertCommandFailure {
         GameStateValidator()(gameState)
           .validateAbilityUseOnCharacter(
-            s.characters.p0First.owner.id,
+            s.p(0)(0).character.owner.id,
             abilityId,
-            s.characters.p0Second.id,
+            s.p(0)(1).character.id,
           )
       }
     }
@@ -97,24 +97,24 @@ class SwitchSpec
       assertCommandFailure {
         GameStateValidator()(gameState)
           .validateAbilityUseOnCharacter(
-            s.characters.p0First.owner.id,
+            s.p(0)(0).character.owner.id,
             abilityId,
-            s.characters.p1First.id,
+            s.p(1)(0).character.id,
           )
       }
     }
 
     "not be able to use switch on character outside map" in {
         val ngs = gameState
-          .teleportCharacter(s.characters.p0First.id, HexCoordinates(2, 0))
-          .removeCharacterFromMap(s.characters.p0Second.id)
+          .teleportCharacter(s.p(0)(0).character.id, HexCoordinates(2, 0))
+          .removeCharacterFromMap(s.p(0)(1).character.id)
 
         assertCommandFailure {
           GameStateValidator()(ngs)
             .validateAbilityUseOnCharacter(
-              s.characters.p0First.owner.id,
+              s.p(0)(0).character.owner.id,
               abilityId,
-              s.characters.p0Second.id,
+              s.p(0)(1).character.id,
             )
         }
     }

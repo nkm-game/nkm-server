@@ -21,11 +21,11 @@ class MasterThroneSpec
   private val s = scenarios.Simple2v2TestScenario(metadata)
   private implicit val gameState: GameState = s.gameState
   private val abilityId =
-    s.characters.p0First.state.abilities(0).id
+    s.p(0)(0).character.state.abilities(0).id
   private val asterAbilityId =
-    s.characters.p0First.state.abilities(1).id
+    s.p(0)(0).character.state.abilities(1).id
   private val powerOfExistenceAbilityId =
-    s.characters.p0First.state.abilities(2).id
+    s.p(0)(0).character.state.abilities(2).id
 
   MasterThrone.metadata.name must {
     "not be initialized with energy" in {
@@ -33,12 +33,12 @@ class MasterThroneSpec
     }
 
     "be able to collect energy from basic attacks" in {
-      val newGameState: GameState = gameState.basicAttack(s.characters.p0First.id, s.characters.p1First.id)
+      val newGameState: GameState = gameState.basicAttack(s.p(0)(0).character.id, s.p(1)(0).character.id)
       newGameState.abilityById(abilityId).asInstanceOf[MasterThrone].collectedEnergy(newGameState) should be > 0
     }
 
     "be able to collect energy from normal ability" in {
-      val newGameState: GameState = gameState.useAbilityOnCoordinates(asterAbilityId, s.spawnCoordinates.p0Second)
+      val newGameState: GameState = gameState.useAbilityOnCoordinates(asterAbilityId, s.p(0)(1).spawnCoordinates)
       newGameState.abilityById(abilityId).asInstanceOf[MasterThrone].collectedEnergy(newGameState) should be > 0
     }
 

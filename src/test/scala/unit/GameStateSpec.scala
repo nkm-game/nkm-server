@@ -22,8 +22,8 @@ class GameStateSpec
 
   private val s = scenarios.Simple1v1TestScenario(metadata)
   private val gameState: GameState = s.gameState
-  private val littleWarHornAbilityId = s.characters.p0.state.abilities(0).id
-  private val tacticalEscapeAbilityId = s.characters.p0.state.abilities(1).id
+  private val littleWarHornAbilityId = s.p(0)(0).character.state.abilities(0).id
+  private val tacticalEscapeAbilityId = s.p(0)(0).character.state.abilities(1).id
 
   "GameState" must {
     "start abilities with cooldown 0" in {
@@ -66,8 +66,8 @@ class GameStateSpec
     }
 
     "end the game when all players are knocked out" in {
-      val p0CharacterKilledGameState = gameState.executeCharacter(s.characters.p0.id)(random, "test")
-      val p1CharacterKilledGameState = gameState.executeCharacter(s.characters.p1.id)(random, "test")
+      val p0CharacterKilledGameState = gameState.executeCharacter(s.p(0)(0).character.id)(random, "test")
+      val p1CharacterKilledGameState = gameState.executeCharacter(s.p(1)(0).character.id)(random, "test")
 
       p0CharacterKilledGameState.gameStatus should be (GameStatus.Finished)
       p1CharacterKilledGameState.gameStatus should be (GameStatus.Finished)
@@ -79,19 +79,19 @@ class GameStateSpec
     "skip player turn when he has no characters to take action" in {
       val simple2v2Scenario = scenarios.Simple2v2TestScenario(metadata)
       val gs = simple2v2Scenario.gameState
-        .executeCharacter(simple2v2Scenario.characters.p0Second.id)(random, "test")
-        .passTurn(simple2v2Scenario.characters.p0First.id)
-        .passTurn(simple2v2Scenario.characters.p1First.id)
-      gs.currentPlayer.id should be (simple2v2Scenario.characters.p1First.owner(gs).id)
+        .executeCharacter(simple2v2Scenario.p(0)(1).character.id)(random, "test")
+        .passTurn(simple2v2Scenario.p(0)(0).character.id)
+        .passTurn(simple2v2Scenario.p(1)(0).character.id)
+      gs.currentPlayer.id should be (simple2v2Scenario.p(1)(0).ownerId)
     }
 
     "finish the phase when there are no characters to take action" in {
       val simple2v2Scenario = scenarios.Simple2v2TestScenario(metadata)
       val gs = simple2v2Scenario.gameState
-        .executeCharacter(simple2v2Scenario.characters.p1Second.id)(random, "test")
-        .passTurn(simple2v2Scenario.characters.p0First.id)
-        .passTurn(simple2v2Scenario.characters.p1First.id)
-        .passTurn(simple2v2Scenario.characters.p0Second.id)
+        .executeCharacter(simple2v2Scenario.p(1)(1).character.id)(random, "test")
+        .passTurn(simple2v2Scenario.p(0)(0).character.id)
+        .passTurn(simple2v2Scenario.p(1)(0).character.id)
+        .passTurn(simple2v2Scenario.p(0)(1).character.id)
       gs.characterIdsThatTookActionThisPhase should be (Set.empty)
       gs.phase.number should be (1)
     }
@@ -99,40 +99,40 @@ class GameStateSpec
     "handle knocking out one player correctly" in {
       val s = scenarios.Simple2v2v2TestScenario(metadata)
       val gs = s.gameState
-        .executeCharacter(s.characters.p0First.id)
-        .executeCharacter(s.characters.p0Second.id)
+        .executeCharacter(s.p(0)(0).character.id)
+        .executeCharacter(s.p(0)(1).character.id)
 
-      gs.currentPlayer.id should be (s.characters.p1First.owner(gs).id)
+      gs.currentPlayer.id should be (s.p(1)(0).ownerId)
 
       val gs2 = s.gameState
-        .executeCharacter(s.characters.p1First.id)
-        .executeCharacter(s.characters.p1Second.id)
+        .executeCharacter(s.p(1)(0).character.id)
+        .executeCharacter(s.p(1)(1).character.id)
 
-      gs2.currentPlayer.id should be (s.characters.p0First.owner(gs).id)
-      gs2.passTurn(s.characters.p0First.id).currentPlayer.id should be (s.characters.p2First.owner(gs).id)
+      gs2.currentPlayer.id should be (s.p(0)(0).ownerId)
+      gs2.passTurn(s.p(0)(0).character.id).currentPlayer.id should be (s.p(2)(0).ownerId)
     }
 
     "handle surrender of one player correctly" in {
       val s = scenarios.Simple2v2v2TestScenario(metadata)
       val gs = s.gameState
-        .surrender(s.characters.p0First.owner(s.gameState).id)
+        .surrender(s.p(0)(0).ownerId)
 
-      gs.currentPlayer.id should be (s.characters.p1First.owner(gs).id)
-//      gs.characterIdsOutsideMap should contain (s.characters.p0First.id)
-//      gs.characterIdsOutsideMap should contain (s.characters.p0Second.id)
+      gs.currentPlayer.id should be (s.p(1)(0).ownerId)
+//      gs.characterIdsOutsideMap should contain (s.p(0)(0).character.id)
+//      gs.characterIdsOutsideMap should contain (s.p(0)(1).character.id)
 
       val gs2 = s.gameState
-        .surrender(s.characters.p1First.owner(s.gameState).id)
+        .surrender(s.p(1)(0).ownerId)
 
-      gs2.currentPlayer.id should be (s.characters.p0First.owner(gs).id)
-//      gs.characterIdsOutsideMap should contain (s.characters.p1First.id)
-//      gs.characterIdsOutsideMap should contain (s.characters.p1Second.id)
-      gs2.passTurn(s.characters.p0First.id).currentPlayer.id should be (s.characters.p2First.owner(gs).id)
+      gs2.currentPlayer.id should be (s.p(0)(0).ownerId)
+//      gs.characterIdsOutsideMap should contain (s.p(1)(0).character.id)
+//      gs.characterIdsOutsideMap should contain (s.p(1)(1).character.id)
+      gs2.passTurn(s.p(0)(0).character.id).currentPlayer.id should be (s.p(2)(0).ownerId)
     }
 
     "pause the clock on game end" in {
-      val p0CharacterKilledGameState = gameState.executeCharacter(s.characters.p0.id)(random, "test")
-      val p1CharacterKilledGameState = gameState.executeCharacter(s.characters.p1.id)(random, "test")
+      val p0CharacterKilledGameState = gameState.executeCharacter(s.p(0)(0).character.id)(random, "test")
+      val p1CharacterKilledGameState = gameState.executeCharacter(s.p(1)(0).character.id)(random, "test")
 
       p0CharacterKilledGameState.clock.isRunning should be (false)
       p1CharacterKilledGameState.clock.isRunning should be (false)

@@ -17,31 +17,31 @@ class SurvivorSpec
   private val characterMetadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
   private val s = scenarios.Simple2v2TestScenario(characterMetadata)
   private implicit val gameState: GameState = s.gameState
-  private val abilityId = s.characters.p0First.state.abilities.head.id
+  private val abilityId = s.p(0)(0).character.state.abilities.head.id
 
   abilityMetadata.name must {
     "apply basic attack buffs" in {
       val ngs: GameState = gameState.useAbility(abilityId)
-      ngs.characterById(s.characters.p0First.id).state.effects.ofType[NextBasicAttackBuff] should not be empty
-      ngs.basicAttack(s.characters.p0First.id, s.characters.p1First.id)
-        .characterById(s.characters.p1First.id).state.effects.ofType[effects.Stun].size should be > 0
+      ngs.characterById(s.p(0)(0).character.id).state.effects.ofType[NextBasicAttackBuff] should not be empty
+      ngs.basicAttack(s.p(0)(0).character.id, s.p(1)(0).character.id)
+        .characterById(s.p(1)(0).character.id).state.effects.ofType[effects.Stun].size should be > 0
     }
 
     "become invisible" in {
       val ngs: GameState = gameState.useAbility(abilityId)
-      val character = ngs.characterById(s.characters.p0First.id)
+      val character = ngs.characterById(s.p(0)(0).character.id)
 
-      val p0CharacterView = character.toView(Some(s.characters.p0First.owner.id))(ngs)
-      val p1CharacterView = character.toView(Some(s.characters.p1First.owner.id))(ngs)
+      val p0CharacterView = character.toView(Some(s.p(0)(0).character.owner.id))(ngs)
+      val p1CharacterView = character.toView(Some(s.p(1)(0).character.owner.id))(ngs)
 
       p0CharacterView.state should not be None
       p1CharacterView.state should be (None)
 
-      val p0MapView = ngs.hexMap.toView(Some(s.characters.p0First.owner.id))(ngs)
-      val p1MapView = ngs.hexMap.toView(Some(s.characters.p1First.owner.id))(ngs)
+      val p0MapView = ngs.hexMap.toView(Some(s.p(0)(0).character.owner.id))(ngs)
+      val p1MapView = ngs.hexMap.toView(Some(s.p(1)(0).character.owner.id))(ngs)
 
-      p0MapView.getCellOfCharacter(s.characters.p0First.id) should not be None
-      p1MapView.getCellOfCharacter(s.characters.p0First.id) should be (None)
+      p0MapView.getCellOfCharacter(s.p(0)(0).character.id) should not be None
+      p1MapView.getCellOfCharacter(s.p(0)(0).character.id) should be (None)
     }
   }
 }

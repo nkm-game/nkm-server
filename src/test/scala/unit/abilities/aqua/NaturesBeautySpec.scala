@@ -17,14 +17,14 @@ class NaturesBeautySpec
 
   abilityMetadata.name must {
     "be able to heal friends via basic attacks" in {
-      val damagedGameState = s.gameState.setHp(s.characters.p0Second.id, 30)(random, s.gameState.id)
-      val healedGameState = damagedGameState.basicAttack(s.characters.p0First.id, s.characters.p0Second.id)
+      val damagedGameState = s.gameState.setHp(s.p(0)(1).character.id, 30)(random, s.gameState.id)
+      val healedGameState = damagedGameState.basicAttack(s.p(0)(0).character.id, s.p(0)(1).character.id)
 
-      healedGameState.characterById(s.characters.p0First.id)
-        .isFriendForC(s.characters.p0Second.id)(healedGameState) shouldBe true
+      healedGameState.characterById(s.p(0)(0).character.id)
+        .isFriendForC(s.p(0)(1).character.id)(healedGameState) shouldBe true
 
-      healedGameState.characterById(s.characters.p0Second.id)
-        .state.healthPoints should be(30 + healedGameState.characterById(s.characters.p0First.id).state.attackPoints)
+      healedGameState.characterById(s.p(0)(1).character.id)
+        .state.healthPoints should be(30 + healedGameState.characterById(s.p(0)(0).character.id).state.attackPoints)
     }
   }
 }

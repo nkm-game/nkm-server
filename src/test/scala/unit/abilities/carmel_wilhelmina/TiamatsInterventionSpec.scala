@@ -21,33 +21,33 @@ class TiamatsInterventionSpec
   private val characterMetadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
   private val s = scenarios.Simple2v2TestScenario(characterMetadata)
   private implicit val gameState: GameState = s.gameState.incrementPhase(4)
-  private val abilityId = s.characters.p0First.state.abilities.head.id
+  private val abilityId = s.p(0)(0).character.state.abilities.head.id
 
   abilityMetadata.name must {
     "not be able to use when there are no tiles nearby to pull" in {
       val s = scenarios.Simple1v9LineTestScenario(characterMetadata)
       val gs = s.gameState.incrementPhase(4)
-      val abilityId = s.characters.p0.state.abilities.head.id
+      val abilityId = s.p(0)(0).character.state.abilities.head.id
       assertCommandFailure {
         GameStateValidator()(gs)
           .validateAbilityUseOnCharacter(
-            s.characters.p0.owner(gs).id,
+            s.p(0)(0).ownerId,
             abilityId,
-            s.characters.p1.head.id,
+            s.p(1)(0).character.id,
             UseData(HexCoordinates(1, 0).toJson.toString),
           )
       }
     }
     "not be able to use on cell that is not free to stand" in {
       val s = scenarios.Simple1v9LineTestScenario(characterMetadata)
-      val gs = s.gameState.incrementPhase(4).executeCharacter(s.characters.p1(1).id)(random, "test")
-      val abilityId = s.characters.p0.state.abilities.head.id
+      val gs = s.gameState.incrementPhase(4).executeCharacter(s.p(1)(1).character.id)(random, "test")
+      val abilityId = s.p(0)(0).character.state.abilities.head.id
       assertCommandFailure {
         GameStateValidator()(gs)
           .validateAbilityUseOnCharacter(
-            s.characters.p0.owner(gs).id,
+            s.p(0)(0).ownerId,
             abilityId,
-            s.characters.p1.head.id,
+            s.p(1)(0).character.id,
             UseData(HexCoordinates(1, 0).toJson.toString),
           )
       }
@@ -56,19 +56,19 @@ class TiamatsInterventionSpec
       assertCommandSuccess {
         GameStateValidator()
           .validateAbilityUseOnCharacter(
-            s.characters.p0First.owner.id,
+            s.p(0)(0).character.owner.id,
             abilityId,
-            s.characters.p0Second.id,
+            s.p(0)(1).character.id,
             UseData(HexCoordinates(1, 0).toJson.toString),
           )
       }
 
       val newGameState = gameState.useAbilityOnCharacter(
         abilityId,
-        s.characters.p0Second.id,
+        s.p(0)(1).character.id,
         UseData(HexCoordinates(1, 0).toJson.toString),
       )
-      val targetCharacter = newGameState.characterById(s.characters.p0Second.id)
+      val targetCharacter = newGameState.characterById(s.p(0)(1).character.id)
       targetCharacter.parentCell(newGameState).get.coordinates should be (HexCoordinates(1, 0))
       targetCharacter.state.shield should be > 0
       targetCharacter.state.effects.ofType[effects.Stun].size should be (0)
@@ -77,19 +77,19 @@ class TiamatsInterventionSpec
       assertCommandSuccess {
         GameStateValidator()
           .validateAbilityUseOnCharacter(
-            s.characters.p0First.owner.id,
+            s.p(0)(0).character.owner.id,
             abilityId,
-            s.characters.p1First.id,
+            s.p(1)(0).character.id,
             UseData(HexCoordinates(1, 0).toJson.toString),
           )
       }
 
       val newGameState = gameState.useAbilityOnCharacter(
         abilityId,
-        s.characters.p1First.id,
+        s.p(1)(0).character.id,
         UseData(HexCoordinates(1, 0).toJson.toString),
       )
-      val targetCharacter = newGameState.characterById(s.characters.p1First.id)
+      val targetCharacter = newGameState.characterById(s.p(1)(0).character.id)
       targetCharacter.parentCell(newGameState).get.coordinates should be (HexCoordinates(1, 0))
       targetCharacter.state.shield should be (0)
       targetCharacter.state.effects.ofType[effects.Stun].size should be > 0

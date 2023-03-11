@@ -19,13 +19,13 @@ class ScreechAlphaSpec
   private val characterMetadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
   private val s = scenarios.Simple1v9LineTestScenario(characterMetadata)
   private implicit val gameState: GameState = s.gameState
-  private val abilityId = s.characters.p0.state.abilities.head.id
+  private val abilityId = s.p(0)(0).character.state.abilities.head.id
   private val abilityRadius = abilityMetadata.variables("radius")
 
   abilityMetadata.name must {
     "be able to use" in {
       val r = GameStateValidator()
-        .validateAbilityUse(s.characters.p0.owner.id, abilityId)
+        .validateAbilityUse(s.p(0)(0).character.owner.id, abilityId)
       assertCommandSuccess(r)
     }
 
@@ -35,17 +35,13 @@ class ScreechAlphaSpec
         .ofType[GameEvent.EffectAddedToCharacter]
         .causedBy(abilityId).size shouldBe abilityRadius * 2
 
-      val coordsInRange = s.characters.p0.parentCell.get.coordinates.getCircle(abilityRadius)
+      val coordsInRange = s.p(0)(0).character.parentCell.get.coordinates.getCircle(abilityRadius)
 
-      s.characters.p1.foreach { p =>
-        val effectsNames = newGameState.characterById(p.id)
-          .state
-          .effects
-          .map(_.metadata.name)
-        if(coordsInRange.contains(p.parentCell.get.coordinates)) {
-          effectsNames should (contain (Stun) and contain (StatNerf))
+      s.p(1).map(_.character).foreach { c =>
+        if(coordsInRange.contains(c.parentCell.get.coordinates)) {
+          assertEffectsExist(Seq(Stun, StatNerf), c.id)(newGameState)
         } else {
-          effectsNames should be (empty)
+          assertEffectsDoNotExist(Seq(Stun, StatNerf), c.id)(newGameState)
         }
       }
     }

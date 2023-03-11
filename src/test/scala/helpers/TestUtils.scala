@@ -4,6 +4,7 @@ import com.tosware.nkm._
 import com.tosware.nkm.models.CommandResponse._
 import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.game.character.{CharacterMetadata, NkmCharacter, StatType}
+import com.tosware.nkm.models.game.character_effect.CharacterEffectName
 import com.tosware.nkm.models.game.hex.{HexCoordinates, TestHexMapName}
 import com.tosware.nkm.models.game.pick.PickType.BlindPick
 import com.tosware.nkm.providers.HexMapProvider
@@ -20,7 +21,7 @@ trait TestUtils
     with Matchers
     with Logging
     with NkmJsonProtocol
-    {
+{
   implicit val random: Random = new Random()
   implicit val causedById: String = "test"
 
@@ -57,6 +58,28 @@ trait TestUtils
       .effects
       .ofType[A]
       .size should be > 0
+
+  protected def assertEffectsExist(effectNames: Seq[CharacterEffectName], cid: CharacterId)(gameState: GameState): Assertion =
+    gameState
+      .characterById(cid)
+      .state
+      .effects
+      .map(_.metadata.name) should contain allElementsOf effectNames
+
+  protected def assertEffectsDoNotExist(effectNames: Seq[CharacterEffectName], cid: CharacterId)(gameState: GameState): Assertion =
+    gameState
+      .characterById(cid)
+      .state
+      .effects
+      .map(_.metadata.name) should contain noElementsOf effectNames
+
+  protected def assertEffectDoesNotExistsOfType[A: ClassTag](cid: CharacterId)(gameState: GameState): Assertion =
+    gameState
+      .characterById(cid)
+      .state
+      .effects
+      .ofType[A]
+      .size should be (0)
 
   protected def assertBuffExists(statType: StatType, cid: CharacterId)(gameState: GameState): Assertion =
     gameState

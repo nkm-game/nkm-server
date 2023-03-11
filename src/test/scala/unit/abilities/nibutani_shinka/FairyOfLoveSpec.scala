@@ -20,14 +20,14 @@ class FairyOfLoveSpec
     .copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
   private val s = scenarios.Simple2v2TestScenario(metadata)
   private implicit val gameState: GameState = s.gameState.incrementPhase(4)
-  private val abilityId = s.characters.p0First.state.abilities.head.id
+  private val abilityId = s.p(0)(0).character.state.abilities.head.id
 
   abilityMetadata.name must {
     "be able to use" in {
       assertCommandSuccess {
         GameStateValidator()
           .validateAbilityUse(
-            s.characters.p0First.owner.id,
+            s.p(0)(0).character.owner.id,
             abilityId,
           )
       }
@@ -35,7 +35,7 @@ class FairyOfLoveSpec
 
     "enchant passive ability" in {
       val abilityUsedGameState: GameState = gameState.useAbility(abilityId)
-      val enchantEffects = abilityUsedGameState.characterById(s.characters.p0First.id).state.effects.ofType[AbilityEnchant]
+      val enchantEffects = abilityUsedGameState.characterById(s.p(0)(0).character.id).state.effects.ofType[AbilityEnchant]
       enchantEffects should not be empty
       enchantEffects.head.abilityType should be (AbilityType.Passive)
     }

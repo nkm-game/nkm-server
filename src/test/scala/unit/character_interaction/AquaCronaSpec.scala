@@ -15,19 +15,19 @@ class AquaCronaSpec
   private val characters = CharacterMetadatasProvider().getCharacterMetadatas
   private val s = scenarios.Simple1v1TestScenario(characters.find(_.name == "Crona").get, characters.find(_.name == "Aqua"))
   private implicit val gameState: GameState = s.gameState.incrementPhase(4)
-  private val blackBloodId = s.characters.p0.state.abilities(2).id
-  private val purificationId = s.characters.p1.state.abilities(1).id
+  private val blackBloodId = s.p(0)(0).character.state.abilities(2).id
+  private val purificationId = s.p(1)(0).character.state.abilities(1).id
 
   "Aqua with Crona" must {
     "purify Black Blood" in {
-      val bbGameState = gameState.useAbilityOnCharacter(blackBloodId, s.characters.p1.id).endTurn()
+      val bbGameState = gameState.useAbilityOnCharacter(blackBloodId, s.p(1)(0).character.id).endTurn()
       assertCommandSuccess {
         GameStateValidator()(bbGameState)
-          .validateAbilityUseOnCharacter(s.characters.p1.owner.id, purificationId, s.characters.p1.id)
+          .validateAbilityUseOnCharacter(s.p(1)(0).character.owner.id, purificationId, s.p(1)(0).character.id)
 
       }
-      val purifiedGameState = bbGameState.useAbilityOnCharacter(purificationId, s.characters.p1.id)
-      purifiedGameState.characterById(s.characters.p1.id).state.effects.size should be (0)
+      val purifiedGameState = bbGameState.useAbilityOnCharacter(purificationId, s.p(1)(0).character.id)
+      purifiedGameState.characterById(s.p(1)(0).character.id).state.effects.size should be (0)
     }
   }
 }

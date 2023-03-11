@@ -24,13 +24,13 @@ class LittleWarHornSpec
     )
   private val s = scenarios.Simple1v1TestScenario(characterMetadata)
   private implicit val gameState: GameState = s.gameState.incrementPhase(4)
-  private val abilityId = s.characters.p0.state.abilities.head.id
+  private val abilityId = s.p(0)(0).character.state.abilities.head.id
 
   abilityMetadata.name must {
     "be able to use" in {
       val r = GameStateValidator()
         .validateAbilityUse(
-          s.characters.p0.owner.id,
+          s.p(0)(0).character.owner.id,
           abilityId,
         )
       assertCommandSuccess(r)
@@ -38,7 +38,7 @@ class LittleWarHornSpec
     "add AD and speed buffs" in {
       val newGameState: GameState = gameState.useAbility(abilityId)
       val statBuffs = newGameState
-        .characterById(s.characters.p0.id)
+        .characterById(s.p(0)(0).character.id)
         .state
         .effects
         .ofType[StatBuff]
@@ -48,8 +48,8 @@ class LittleWarHornSpec
 
     def skipPhase(gameState: GameState): GameState =
       gameState
-        .passTurn(s.characters.p0.id)
-        .passTurn(s.characters.p1.id)
+        .passTurn(s.p(0)(0).character.id)
+        .passTurn(s.p(1)(0).character.id)
 
     @tailrec
     def skipPhaseN(n: Int)(gameState: GameState): GameState =
@@ -58,16 +58,16 @@ class LittleWarHornSpec
 
     "set characters base speed after duration time" in {
       val duration = abilityMetadata.variables("duration")
-      val initialSpeed = s.characters.p0.state.pureSpeed
+      val initialSpeed = s.p(0)(0).character.state.pureSpeed
 
       val abilityUseGameState: GameState = gameState.useAbility(abilityId)
       abilityUseGameState
-        .characterById(s.characters.p0.id)
+        .characterById(s.p(0)(0).character.id)
         .state.pureSpeed should be (initialSpeed)
 
       val afterDurationGameState = skipPhaseN(duration)(abilityUseGameState)
       afterDurationGameState
-        .characterById(s.characters.p0.id)
+        .characterById(s.p(0)(0).character.id)
         .state.pureSpeed should not be initialSpeed
     }
   }

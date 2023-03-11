@@ -18,48 +18,48 @@ class CastlingSpec
   private val characterMetadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
   private val s = scenarios.Simple2v2TestScenario(characterMetadata)
   private implicit val gameState: GameState = s.gameState.incrementPhase(4)
-  private val abilityId = s.characters.p0First.state.abilities.head.id
+  private val abilityId = s.p(0)(0).character.state.abilities.head.id
 
   abilityMetadata.name must {
     "be able to use castling on characters on map" in {
       val r = GameStateValidator()
         .validateAbilityUseOnCharacter(
-          s.characters.p0First.owner.id,
+          s.p(0)(0).character.owner.id,
           abilityId,
-          s.characters.p1First.id,
-          UseData(s.characters.p0Second.id),
+          s.p(1)(0).character.id,
+          UseData(s.p(0)(1).character.id),
         )
       assertCommandSuccess(r)
     }
     "not be able to use castling on the same character" in {
       val r = GameStateValidator()
         .validateAbilityUseOnCharacter(
-          s.characters.p0First.owner.id,
+          s.p(0)(0).character.owner.id,
           abilityId,
-          s.characters.p1First.id,
-          UseData(s.characters.p1First.id),
+          s.p(1)(0).character.id,
+          UseData(s.p(1)(0).character.id),
         )
       assertCommandFailure(r)
     }
     "not be able to use castling on character outside map" in {
-      val s1 = gameState.removeCharacterFromMap(s.characters.p0Second.id)
-      val s2 = gameState.removeCharacterFromMap(s.characters.p1First.id)
+      val s1 = gameState.removeCharacterFromMap(s.p(0)(1).character.id)
+      val s2 = gameState.removeCharacterFromMap(s.p(1)(0).character.id)
 
       val r1 = GameStateValidator()(s1)
         .validateAbilityUseOnCharacter(
-          s.characters.p0First.owner.id,
+          s.p(0)(0).character.owner.id,
           abilityId,
-          s.characters.p1First.id,
-          UseData(s.characters.p0Second.id),
+          s.p(1)(0).character.id,
+          UseData(s.p(0)(1).character.id),
         )
       assertCommandFailure(r1)
 
       val r2 = GameStateValidator()(s2)
         .validateAbilityUseOnCharacter(
-          s.characters.p0First.owner.id,
+          s.p(0)(0).character.owner.id,
           abilityId,
-          s.characters.p1First.id,
-          UseData(s.characters.p0Second.id),
+          s.p(1)(0).character.id,
+          UseData(s.p(0)(1).character.id),
         )
       assertCommandFailure(r2)
     }
@@ -67,18 +67,18 @@ class CastlingSpec
     "swap positions with castling" in {
       val newGameState = gameState.useAbilityOnCharacter(
         abilityId,
-        s.characters.p1First.id,
-        UseData(s.characters.p0Second.id),
+        s.p(1)(0).character.id,
+        UseData(s.p(0)(1).character.id),
       )
       newGameState
-        .characterById(s.characters.p1First.id)
+        .characterById(s.p(1)(0).character.id)
         .parentCell.get
-        .coordinates shouldBe s.characters.p0Second.parentCell(newGameState).get.coordinates
+        .coordinates shouldBe s.p(0)(1).character.parentCell(newGameState).get.coordinates
 
       newGameState
-        .characterById(s.characters.p0Second.id)
+        .characterById(s.p(0)(1).character.id)
         .parentCell.get
-        .coordinates shouldBe s.characters.p1First.parentCell(newGameState).get.coordinates
+        .coordinates shouldBe s.p(1)(0).character.parentCell(newGameState).get.coordinates
     }
   }
 }

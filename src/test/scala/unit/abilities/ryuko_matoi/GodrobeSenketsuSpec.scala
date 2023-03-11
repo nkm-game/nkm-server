@@ -18,75 +18,75 @@ class GodrobeSenketsuSpec
     .copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
   private val s = scenarios.Simple1v1TestScenario(metadata)
   private val gameState: GameState = s.gameState.incrementPhase(4)
-  private val abilityId = s.characters.p0.state.abilities.head.id
+  private val abilityId = s.p(0)(0).character.state.abilities.head.id
 
   abilityMetadata.name must {
     "be able to use" in {
       assertCommandSuccess {
-        GameStateValidator()(gameState).validateAbilityUse(s.characters.p0.owner(gameState).id, abilityId)
+        GameStateValidator()(gameState).validateAbilityUse(s.p(0)(0).ownerId, abilityId)
       }
     }
 
     "apply flying effect" in {
       val abilityUsedGameState: GameState = gameState.useAbility(abilityId)
-      abilityUsedGameState.characterById(s.characters.p0.id).state.effects.ofType[effects.Fly].size should be > 0
+      abilityUsedGameState.characterById(s.p(0)(0).character.id).state.effects.ofType[effects.Fly].size should be > 0
     }
 
     "be able to incrementally increase damage while receiving damage" in {
-      val oldAD = s.characters.p0.state.attackPoints
-      val oldHP = s.characters.p0.state.healthPoints
+      val oldAD = s.p(0)(0).character.state.attackPoints
+      val oldHP = s.p(0)(0).character.state.healthPoints
 
       val abilityUsedGameState: GameState = gameState.useAbility(abilityId)
-      val newAD1 = abilityUsedGameState.characterById(s.characters.p0.id).state.attackPoints
-      val newHP1 = abilityUsedGameState.characterById(s.characters.p0.id).state.healthPoints
+      val newAD1 = abilityUsedGameState.characterById(s.p(0)(0).character.id).state.attackPoints
+      val newHP1 = abilityUsedGameState.characterById(s.p(0)(0).character.id).state.healthPoints
 
       oldAD should be < newAD1
       oldHP should be (newHP1)
 
       val oneTurnPassedGameState: GameState = abilityUsedGameState
         .endTurn()
-        .passTurn(s.characters.p1.id)
-      val newAD2 = oneTurnPassedGameState.characterById(s.characters.p0.id).state.attackPoints
-      val newHP2 = oneTurnPassedGameState.characterById(s.characters.p0.id).state.healthPoints
+        .passTurn(s.p(1)(0).character.id)
+      val newAD2 = oneTurnPassedGameState.characterById(s.p(0)(0).character.id).state.attackPoints
+      val newHP2 = oneTurnPassedGameState.characterById(s.p(0)(0).character.id).state.healthPoints
 
       newAD1 should be < newAD2
       newHP1 should be > newHP2
 
       val twoTurnsPassedGameState: GameState = oneTurnPassedGameState
-        .passTurn(s.characters.p0.id)
-        .passTurn(s.characters.p1.id)
-      val newAD3 = twoTurnsPassedGameState.characterById(s.characters.p0.id).state.attackPoints
-      val newHP3 = twoTurnsPassedGameState.characterById(s.characters.p0.id).state.healthPoints
+        .passTurn(s.p(0)(0).character.id)
+        .passTurn(s.p(1)(0).character.id)
+      val newAD3 = twoTurnsPassedGameState.characterById(s.p(0)(0).character.id).state.attackPoints
+      val newHP3 = twoTurnsPassedGameState.characterById(s.p(0)(0).character.id).state.healthPoints
 
       newAD2 should be < newAD3
       newHP2 should be > newHP3
     }
 
     "be able to enable and disable effect" in {
-      val oldAD = s.characters.p0.state.attackPoints
+      val oldAD = s.p(0)(0).character.state.attackPoints
       val abilityUsedGameState: GameState = gameState.useAbility(abilityId)
 
       abilityUsedGameState.abilityStates(abilityId).isEnabled should be (true)
       abilityUsedGameState.abilityStates(abilityId).cooldown should be (0)
 
       assertCommandFailure {
-        GameStateValidator()(abilityUsedGameState).validateAbilityUse(s.characters.p0.owner(gameState).id, abilityId)
+        GameStateValidator()(abilityUsedGameState).validateAbilityUse(s.p(0)(0).ownerId, abilityId)
       }
       assertCommandSuccess {
         val gs = abilityUsedGameState
           .endTurn()
-          .passTurn(s.characters.p1.id)
-        GameStateValidator()(gs).validateAbilityUse(s.characters.p0.owner(gameState).id, abilityId)
+          .passTurn(s.p(1)(0).character.id)
+        GameStateValidator()(gs).validateAbilityUse(s.p(0)(0).ownerId, abilityId)
       }
 
       val abilityDisabledGameState: GameState = abilityUsedGameState
         .endTurn()
-        .passTurn(s.characters.p1.id)
+        .passTurn(s.p(1)(0).character.id)
         .useAbility(abilityId)
 
-      abilityDisabledGameState.characterById(s.characters.p0.id).state.effects.ofType[effects.Fly].size should be (0)
+      abilityDisabledGameState.characterById(s.p(0)(0).character.id).state.effects.ofType[effects.Fly].size should be (0)
 
-      val newAD = abilityDisabledGameState.characterById(s.characters.p0.id).state.attackPoints
+      val newAD = abilityDisabledGameState.characterById(s.p(0)(0).character.id).state.attackPoints
       oldAD should be (newAD)
       abilityDisabledGameState.abilityStates(abilityId).isEnabled should be (false)
       abilityDisabledGameState.abilityStates(abilityId).cooldown should be (abilityMetadata.variables("cooldown"))

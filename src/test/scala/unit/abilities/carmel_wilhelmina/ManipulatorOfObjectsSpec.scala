@@ -21,17 +21,17 @@ class ManipulatorOfObjectsSpec
 
   abilityMetadata.name must {
     "root enemies" in {
-      val attackedGameState = gameState.basicAttack(s.characters.p0.id, s.characters.p1.id)
-      attackedGameState.characterById(s.characters.p1.id).state.effects.ofType[Snare] should not be empty
+      val attackedGameState = gameState.basicAttack(s.p(0)(0).character.id, s.p(1)(0).character.id)
+      attackedGameState.characterById(s.p(1)(0).character.id).state.effects.ofType[Snare] should not be empty
     }
     "disallow rooting enemies in another phase" in {
       val attackedSecondTimeGameState = gameState
-        .basicAttack(s.characters.p0.id, s.characters.p1.id)
+        .basicAttack(s.p(0)(0).character.id, s.p(1)(0).character.id)
         .endTurn()
-        .passTurn(s.characters.p1.id)
-        .basicAttack(s.characters.p0.id, s.characters.p1.id)
+        .passTurn(s.p(1)(0).character.id)
+        .basicAttack(s.p(0)(0).character.id, s.p(1)(0).character.id)
 
-      attackedSecondTimeGameState.characterById(s.characters.p1.id).state.effects.ofType[Snare] should be (empty)
+      attackedSecondTimeGameState.characterById(s.p(1)(0).character.id).state.effects.ofType[Snare] should be (empty)
     }
   }
 }

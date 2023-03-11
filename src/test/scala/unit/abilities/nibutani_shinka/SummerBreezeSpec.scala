@@ -19,33 +19,33 @@ class SummerBreezeSpec
   private val metadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
   private val s = scenarios.SummerBreezeTestScenario(metadata)
   private val gameState: GameState = s.gameState
-  private val abilityId = s.characters.p0.state.abilities.head.id
+  private val abilityId = s.p(0)(0).character.state.abilities.head.id
 
-  private val abilityUsedOnP1FirstGs = gameState.useAbilityOnCharacter(abilityId, s.characters.p1First.id)
-  private val abilityUsedOnP1SecondGs = gameState.useAbilityOnCharacter(abilityId, s.characters.p1Second.id)
+  private val abilityUsedOnP1FirstGs = gameState.useAbilityOnCharacter(abilityId, s.p(1)(0).character.id)
+  private val abilityUsedOnP1SecondGs = gameState.useAbilityOnCharacter(abilityId, s.p(1)(1).character.id)
   private val abilityUsedOnP1FirstWithoutSecondGs = gameState
-    .executeCharacter(s.characters.p1Second.id)
-    .useAbilityOnCharacter(abilityId, s.characters.p1First.id)
+    .executeCharacter(s.p(1)(1).character.id)
+    .useAbilityOnCharacter(abilityId, s.p(1)(0).character.id)
 
   abilityMetadata.name must {
     "be able to use" in {
       assertCommandSuccess {
         GameStateValidator()(gameState)
-          .validateAbilityUseOnCharacter(s.characters.p0.owner(gameState).id, abilityId, s.characters.p1First.id)
+          .validateAbilityUseOnCharacter(s.p(0)(0).ownerId, abilityId, s.p(1)(0).character.id)
       }
 
       assertCommandSuccess {
         GameStateValidator()(gameState)
-          .validateAbilityUseOnCharacter(s.characters.p0.owner(gameState).id, abilityId, s.characters.p1Second.id)
+          .validateAbilityUseOnCharacter(s.p(0)(0).ownerId, abilityId, s.p(1)(1).character.id)
       }
     }
 
     "knockback on use till wall or character" in {
-      s.characters.p1First.parentCell(abilityUsedOnP1FirstGs).get
+      s.p(1)(0).character.parentCell(abilityUsedOnP1FirstGs).get
         .coordinates.toTuple shouldBe (3, 0)
-      s.characters.p1Second.parentCell(abilityUsedOnP1SecondGs).get
+      s.p(1)(1).character.parentCell(abilityUsedOnP1SecondGs).get
         .coordinates.toTuple shouldBe (7, 0)
-      s.characters.p1First.parentCell(abilityUsedOnP1FirstWithoutSecondGs).get
+      s.p(1)(0).character.parentCell(abilityUsedOnP1FirstWithoutSecondGs).get
         .coordinates.toTuple shouldBe (7, 0)
     }
 

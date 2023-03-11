@@ -26,13 +26,13 @@ class ContactSpec
   private val s = scenarios.Simple2v2TestScenario(characterMetadata)
   private implicit val gameState: GameState = s.gameState
   private val abilityId =
-    s.characters.p0First.state.abilities(0).id
+    s.p(0)(0).character.state.abilities(0).id
   private val asterAbilityId =
-    s.characters.p0First.state.abilities(1).id
+    s.p(0)(0).character.state.abilities(1).id
 
   abilityMetadata.name must {
     "be able to deal bonus damage from basic attacks" in {
-      val newGameState: GameState = gameState.basicAttack(s.characters.p0First.id, s.characters.p1First.id)
+      val newGameState: GameState = gameState.basicAttack(s.p(0)(0).character.id, s.p(1)(0).character.id)
       newGameState.gameLog.events
         .ofType[GameEvent.AbilityHitCharacter]
         .ofAbility(abilityId)
@@ -40,7 +40,7 @@ class ContactSpec
     }
 
     "be able to deal bonus damage from an ability" in {
-      val newGameState: GameState = gameState.useAbilityOnCoordinates(asterAbilityId, s.spawnCoordinates.p0Second)
+      val newGameState: GameState = gameState.useAbilityOnCoordinates(asterAbilityId, s.p(0)(1).spawnCoordinates)
       newGameState.gameLog.events
         .ofType[GameEvent.AbilityHitCharacter]
         .ofAbility(abilityId)
@@ -49,15 +49,15 @@ class ContactSpec
 
     "not be able to deal bonus damage more than one time per character" in {
       val newGameState: GameState = gameState
-        .basicAttack(s.characters.p0First.id, s.characters.p1First.id)
-        .passTurn(s.characters.p1First.id)
-        .passTurn(s.characters.p0Second.id)
-        .passTurn(s.characters.p1Second.id)
-        .basicAttack(s.characters.p0First.id, s.characters.p1First.id)
-        .passTurn(s.characters.p1First.id)
-        .passTurn(s.characters.p0Second.id)
-        .passTurn(s.characters.p1Second.id)
-        .basicAttack(s.characters.p0First.id, s.characters.p1First.id)
+        .basicAttack(s.p(0)(0).character.id, s.p(1)(0).character.id)
+        .passTurn(s.p(1)(0).character.id)
+        .passTurn(s.p(0)(1).character.id)
+        .passTurn(s.p(1)(1).character.id)
+        .basicAttack(s.p(0)(0).character.id, s.p(1)(0).character.id)
+        .passTurn(s.p(1)(0).character.id)
+        .passTurn(s.p(0)(1).character.id)
+        .passTurn(s.p(1)(1).character.id)
+        .basicAttack(s.p(0)(0).character.id, s.p(1)(0).character.id)
 
       newGameState.gameLog.events
         .ofType[GameEvent.AbilityHitCharacter]

@@ -1,8 +1,8 @@
 package helpers.scenarios
 
 import com.tosware.nkm.models.game.GameState
-import com.tosware.nkm.models.game.character.{CharacterMetadata, NkmCharacter}
-import com.tosware.nkm.models.game.hex.{HexCoordinates, TestHexMapName}
+import com.tosware.nkm.models.game.character.CharacterMetadata
+import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.TestScenario
 
 case class FlyTestScenario(metadata: CharacterMetadata)
@@ -14,14 +14,4 @@ case class FlyTestScenario(metadata: CharacterMetadata)
       Seq(metadata.copy(name = "Empty2")),
     )
   )
-
-  object spawnCoordinates {
-    val p0: HexCoordinates = HexCoordinates(0, 0)
-    val p1: HexCoordinates = HexCoordinates(3, 0)
-  }
-
-  object characters {
-    val p0: NkmCharacter = characterOnPoint(spawnCoordinates.p0)(gameState)
-    val p1: NkmCharacter = characterOnPoint(spawnCoordinates.p1)(gameState)
-  }
 }

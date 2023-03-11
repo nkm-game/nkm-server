@@ -19,18 +19,18 @@ class EliminateSpec
     .copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
   private val s = scenarios.Simple1v1TestScenario(characterMetadata)
   private implicit val gameState: GameState = s.gameState
-  private val abilityId = s.characters.p0.state.abilities.head.id
+  private val abilityId = s.p(0)(0).character.state.abilities.head.id
 
   abilityMetadata.name must {
     "be able to use" in {
       val r = GameStateValidator()
-        .validateAbilityUseOnCharacter(s.characters.p0.owner.id, abilityId, s.characters.p1.id)
+        .validateAbilityUseOnCharacter(s.p(0)(0).character.owner.id, abilityId, s.p(1)(0).character.id)
       assertCommandSuccess(r)
     }
     "deal damage" in {
       val newGameState: GameState = gameState.useAbilityOnCharacter(
         abilityId,
-        s.characters.p1.id
+        s.p(1)(0).character.id
       )
 
       newGameState

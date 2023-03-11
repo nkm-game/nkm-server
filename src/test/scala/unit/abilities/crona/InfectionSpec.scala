@@ -18,18 +18,18 @@ class InfectionSpec
   private val characterMetadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
   private val s = scenarios.Simple2v2TestScenario(characterMetadata)
   private implicit val gameState: GameState = s.gameState.incrementPhase(4)
-  private val abilityId = s.characters.p0First.state.abilities.head.id
-  private val abilityId2 = s.characters.p0Second.state.abilities.head.id
+  private val abilityId = s.p(0)(0).character.state.abilities.head.id
+  private val abilityId2 = s.p(0)(1).character.state.abilities.head.id
 
   abilityMetadata.name must {
     "be able to use" in {
       val r = GameStateValidator()
-        .validateAbilityUseOnCharacter(s.characters.p0First.owner.id, abilityId, s.characters.p1First.id)
+        .validateAbilityUseOnCharacter(s.p(0)(0).character.owner.id, abilityId, s.p(1)(0).character.id)
       assertCommandSuccess(r)
     }
 
     "be able to infect and deal damage" in {
-      val abilityGameState: GameState = gameState.useAbilityOnCharacter(abilityId, s.characters.p1First.id)
+      val abilityGameState: GameState = gameState.useAbilityOnCharacter(abilityId, s.p(1)(0).character.id)
       abilityGameState.gameLog.events
         .ofType[GameEvent.EffectAddedToCharacter]
         .causedBy(abilityId).size shouldBe 1
@@ -37,8 +37,8 @@ class InfectionSpec
       val attackGameState =
         abilityGameState
           .endTurn()
-          .passTurn(s.characters.p0Second.id)
-          .basicAttack(s.characters.p0Second.id, s.characters.p1First.id)
+          .passTurn(s.p(0)(1).character.id)
+          .basicAttack(s.p(0)(1).character.id, s.p(1)(0).character.id)
 
       attackGameState.gameLog.events
         .ofType[GameEvent.CharacterDamaged]
@@ -48,13 +48,13 @@ class InfectionSpec
 
     "be able to trigger loop correctly" in {
       val newGameState: GameState = gameState
-        .useAbilityOnCharacter(abilityId, s.characters.p1First.id)
+        .useAbilityOnCharacter(abilityId, s.p(1)(0).character.id)
         .endTurn()
-        .passTurn(s.characters.p0Second.id)
-        .useAbilityOnCharacter(abilityId2, s.characters.p1Second.id)
+        .passTurn(s.p(0)(1).character.id)
+        .useAbilityOnCharacter(abilityId2, s.p(1)(1).character.id)
         .endTurn()
-        .passTurn(s.characters.p0First.id)
-        .basicAttack(s.characters.p0Second.id, s.characters.p1First.id)
+        .passTurn(s.p(0)(0).character.id)
+        .basicAttack(s.p(0)(1).character.id, s.p(1)(0).character.id)
 
       newGameState.gameLog.events
         .ofType[GameEvent.CharacterDied]

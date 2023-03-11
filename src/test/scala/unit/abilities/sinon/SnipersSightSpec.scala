@@ -21,10 +21,10 @@ class SnipersSightSpec
 
   abilityMetadata.name must {
     "be able to attack characters in radial range" in {
-      val ngs = gameState.teleportCharacter(s.characters.p0First.id, HexCoordinates(0, 1))(random, gameState.id)
+      val ngs = gameState.teleportCharacter(s.p(0)(0).character.id, HexCoordinates(0, 1))(random, gameState.id)
       assertCommandSuccess {
         GameStateValidator()(ngs)
-          .validateBasicAttackCharacter(s.characters.p0First.owner(gameState).id, s.characters.p0First.id, s.characters.p1Second.id)
+          .validateBasicAttackCharacter(s.p(0)(0).ownerId, s.p(0)(0).character.id, s.p(1)(1).character.id)
       }
     }
   }

@@ -24,27 +24,27 @@ class AceInTheHoleSpec
   private val s = scenarios.Simple1v1TestScenario(characterMetadata)
   private implicit val gameState: GameState = s.gameState.incrementPhase(4)
   private val damagedGameState = gameState.damageCharacter(
-    s.characters.p0.id,
-    Damage(DamageType.True, (s.characters.p0.state.maxHealthPoints * 0.5).toInt)
+    s.p(0)(0).character.id,
+    Damage(DamageType.True, (s.p(0)(0).character.state.maxHealthPoints * 0.5).toInt)
   )(random, gameState.id)
-  private val checkAbilityId = s.characters.p0.state.abilities(1).id
-  private val castlingAbilityId = s.characters.p0.state.abilities(2).id
+  private val checkAbilityId = s.p(0)(0).character.state.abilities(1).id
+  private val castlingAbilityId = s.p(0)(0).character.state.abilities(2).id
 
   abilityMetadata.name must {
     "be able to use any free ability" when {
       "free ability was not on CD" in {
         assertCommandSuccess {
           GameStateValidator()(damagedGameState)
-            .validateAbilityUseOnCharacter(s.characters.p0.owner.id, checkAbilityId, s.characters.p1.id)
+            .validateAbilityUseOnCharacter(s.p(0)(0).character.owner.id, checkAbilityId, s.p(1)(0).character.id)
         }
         assertCommandSuccess {
           GameStateValidator()(damagedGameState)
-            .validateAbilityUseOnCharacter(s.characters.p0.owner.id, castlingAbilityId, s.characters.p1.id, UseData(s.characters.p0.id))
+            .validateAbilityUseOnCharacter(s.p(0)(0).character.owner.id, castlingAbilityId, s.p(1)(0).character.id, UseData(s.p(0)(0).character.id))
         }
-        val checkUsedGameState = damagedGameState.useAbilityOnCharacter(checkAbilityId, s.characters.p1.id)
+        val checkUsedGameState = damagedGameState.useAbilityOnCharacter(checkAbilityId, s.p(1)(0).character.id)
         checkUsedGameState.abilityStates(checkAbilityId).cooldown should be (0)
 
-        val castlingUsedGameState = damagedGameState.useAbilityOnCharacter(castlingAbilityId, s.characters.p1.id, UseData(s.characters.p0.id))
+        val castlingUsedGameState = damagedGameState.useAbilityOnCharacter(castlingAbilityId, s.p(1)(0).character.id, UseData(s.p(0)(0).character.id))
         castlingUsedGameState.abilityStates(castlingAbilityId).cooldown should be (0)
       }
       "free ability was on CD" in {
@@ -55,16 +55,16 @@ class AceInTheHoleSpec
         val castlingCd = cdGameState.abilityStates(castlingAbilityId).cooldown
         assertCommandSuccess {
           GameStateValidator()(cdGameState)
-            .validateAbilityUseOnCharacter(s.characters.p0.owner.id, checkAbilityId, s.characters.p1.id)
+            .validateAbilityUseOnCharacter(s.p(0)(0).character.owner.id, checkAbilityId, s.p(1)(0).character.id)
         }
         assertCommandSuccess {
           GameStateValidator()(cdGameState)
-            .validateAbilityUseOnCharacter(s.characters.p0.owner.id, castlingAbilityId, s.characters.p1.id, UseData(s.characters.p0.id))
+            .validateAbilityUseOnCharacter(s.p(0)(0).character.owner.id, castlingAbilityId, s.p(1)(0).character.id, UseData(s.p(0)(0).character.id))
         }
-        val checkUsedGameState = cdGameState.useAbilityOnCharacter(checkAbilityId, s.characters.p1.id)
+        val checkUsedGameState = cdGameState.useAbilityOnCharacter(checkAbilityId, s.p(1)(0).character.id)
         checkUsedGameState.abilityStates(checkAbilityId).cooldown should be (checkCd)
 
-        val castlingUsedGameState = cdGameState.useAbilityOnCharacter(castlingAbilityId, s.characters.p1.id, UseData(s.characters.p0.id))
+        val castlingUsedGameState = cdGameState.useAbilityOnCharacter(castlingAbilityId, s.p(1)(0).character.id, UseData(s.p(0)(0).character.id))
         castlingUsedGameState.abilityStates(castlingAbilityId).cooldown should be (castlingCd)
       }
     }
@@ -74,25 +74,25 @@ class AceInTheHoleSpec
 
         val multipleTurnDamageGameState = cdGameState
           .damageCharacter(
-            s.characters.p0.id,
-            Damage(DamageType.True, (s.characters.p0.state.maxHealthPoints * 0.3).toInt)
+            s.p(0)(0).character.id,
+            Damage(DamageType.True, (s.p(0)(0).character.state.maxHealthPoints * 0.3).toInt)
           )(random, gameState.id)
-          .passTurn(s.characters.p0.id)
-          .passTurn(s.characters.p1.id)
+          .passTurn(s.p(0)(0).character.id)
+          .passTurn(s.p(1)(0).character.id)
           .damageCharacter(
-            s.characters.p0.id,
-            Damage(DamageType.True, (s.characters.p0.state.maxHealthPoints * 0.3).toInt)
+            s.p(0)(0).character.id,
+            Damage(DamageType.True, (s.p(0)(0).character.state.maxHealthPoints * 0.3).toInt)
           )(random, gameState.id)
         assertCommandFailure {
           GameStateValidator()(multipleTurnDamageGameState)
-            .validateAbilityUseOnCharacter(s.characters.p0.owner.id, checkAbilityId, s.characters.p1.id)
+            .validateAbilityUseOnCharacter(s.p(0)(0).character.owner.id, checkAbilityId, s.p(1)(0).character.id)
         }
       }
     }
     "remember ability cooldown before using" in {
       val cdGameState = damagedGameState.putAbilityOnCooldown(checkAbilityId).decrementAbilityCooldown(checkAbilityId)
       val checkCd = cdGameState.abilityStates(checkAbilityId).cooldown
-      val checkUsedGameState = cdGameState.useAbilityOnCharacter(checkAbilityId, s.characters.p1.id)
+      val checkUsedGameState = cdGameState.useAbilityOnCharacter(checkAbilityId, s.p(1)(0).character.id)
       checkUsedGameState.abilityStates(checkAbilityId).cooldown should be (checkCd)
     }
   }

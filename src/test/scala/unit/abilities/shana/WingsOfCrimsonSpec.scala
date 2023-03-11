@@ -15,7 +15,7 @@ class WingsOfCrimsonSpec
   private val abilityMetadata = WingsOfCrimson.metadata
   private val characterMetadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
   private val s = scenarios.Simple1v1TestScenario(characterMetadata)
-  private val gameState: GameState = s.gameState.passTurn(s.characters.p0.id)
+  private val gameState: GameState = s.gameState.passTurn(s.p(0)(0).character.id)
 
   abilityMetadata.name must {
     "apply flying and speed buff effects on being basic attacked" in {

@@ -21,8 +21,8 @@ class ScissorBladeSpec
 
   abilityMetadata.name must {
     "decrease target physical defense" in {
-      val attackedGameState = gameState.basicAttack(s.characters.p0.id, s.characters.p1.id)
-      val statNerfEffects = attackedGameState.characterById(s.characters.p1.id).state.effects.ofType[StatNerf]
+      val attackedGameState = gameState.basicAttack(s.p(0)(0).character.id, s.p(1)(0).character.id)
+      val statNerfEffects = attackedGameState.characterById(s.p(1)(0).character.id).state.effects.ofType[StatNerf]
       statNerfEffects should not be empty
       statNerfEffects.head.statType should be (StatType.PhysicalDefense)
     }

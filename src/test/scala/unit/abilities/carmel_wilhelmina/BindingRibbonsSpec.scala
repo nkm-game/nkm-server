@@ -17,24 +17,20 @@ class BindingRibbonsSpec
   private val characterMetadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
   private val s = scenarios.Simple1v9LineTestScenario(characterMetadata)
   private implicit val gameState: GameState = s.gameState
-  private val abilityId = s.characters.p0.state.abilities.head.id
+  private val abilityId = s.p(0)(0).character.state.abilities.head.id
+
+  private val twoHitGameState: GameState = s.gameState.useAbilityOnCoordinates(abilityId, HexCoordinates(-1, 0))
+  private val threeHitGameState: GameState = s.gameState.useAbilityOnCoordinates(abilityId, s.p(0)(0).spawnCoordinates)
 
   abilityMetadata.name must {
-    "silence hit enemies" in {
-      val abilityUsedGameState: GameState = s.gameState.useAbilityOnCoordinates(abilityId, s.spawnCoordinates.p0)
-      abilityUsedGameState.characterById(s.characters.p1.head.id)
-        .state.effects.ofType[effects.Silence] should not be empty
+    "only silence hit enemies" in {
+      assertEffectExistsOfType[effects.Silence](s.p(1)(0).character.id)(twoHitGameState)
+      assertEffectDoesNotExistsOfType[effects.Snare](s.p(1)(0).character.id)(twoHitGameState)
     }
 
     "silence and snare hit enemies when enough of them are hit" in {
-      val twoHitGameState: GameState = s.gameState.useAbilityOnCoordinates(abilityId, HexCoordinates(-1, 0))
-      twoHitGameState.characterById(s.characters.p1.head.id)
-        .state.effects.ofType[effects.Snare] should be (empty)
-
-      val threeHitGameState: GameState = s.gameState.useAbilityOnCoordinates(abilityId, s.spawnCoordinates.p0)
-      val hitCharacterEffects = threeHitGameState.characterById(s.characters.p1.head.id).state.effects
-      hitCharacterEffects.ofType[effects.Silence] should not be empty
-      hitCharacterEffects.ofType[effects.Snare] should not be empty
+      assertEffectExistsOfType[effects.Silence](s.p(1)(0).character.id)(threeHitGameState)
+      assertEffectExistsOfType[effects.Snare](s.p(1)(0).character.id)(threeHitGameState)
     }
   }
 }

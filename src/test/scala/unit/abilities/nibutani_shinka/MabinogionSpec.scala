@@ -19,13 +19,13 @@ class MabinogionSpec
   private val characterMetadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
   private val s = scenarios.Simple1v9LineTestScenario(characterMetadata)
   private val gameState: GameState = s.gameState
-  private val abilityId = s.characters.p0.state.abilities.head.id
+  private val abilityId = s.p(0)(0).character.state.abilities.head.id
   private val abilityRange = abilityMetadata.variables("radius")
 
-  private val turnPassedGs = gameState.passTurn(s.characters.p0.id)
+  private val turnPassedGs = gameState.passTurn(s.p(0)(0).character.id)
   private val enchantedTurnPassedGs = gameState
-    .addEffect(s.characters.p0.id, effects.AbilityEnchant(randomUUID(), 1, AbilityType.Passive))
-    .passTurn(s.characters.p0.id)
+    .addEffect(s.p(0)(0).character.id, effects.AbilityEnchant(randomUUID(), 1, AbilityType.Passive))
+    .passTurn(s.p(0)(0).character.id)
 
   private val healEvents = turnPassedGs.gameLog.events
     .ofType[GameEvent.CharacterHealed]
@@ -69,18 +69,18 @@ class MabinogionSpec
     }
 
     "not add shield above treshold" in {
-      val enchantedShield = enchantedTurnPassedGs.characterById(s.characters.p0.id).state.shield
+      val enchantedShield = enchantedTurnPassedGs.characterById(s.p(0)(0).character.id).state.shield
 
-      val shieldSetGs = gameState.setShield(s.characters.p0.id, 2)
-
-      shieldSetGs
-        .passTurn(s.characters.p0.id)
-        .characterById(s.characters.p0.id).state.shield shouldBe 2
+      val shieldSetGs = gameState.setShield(s.p(0)(0).character.id, 2)
 
       shieldSetGs
-        .addEffect(s.characters.p0.id, effects.AbilityEnchant(randomUUID(), 1, AbilityType.Passive))
-        .passTurn(s.characters.p0.id)
-        .characterById(s.characters.p0.id).state.shield shouldBe enchantedShield
+        .passTurn(s.p(0)(0).character.id)
+        .characterById(s.p(0)(0).character.id).state.shield shouldBe 2
+
+      shieldSetGs
+        .addEffect(s.p(0)(0).character.id, effects.AbilityEnchant(randomUUID(), 1, AbilityType.Passive))
+        .passTurn(s.p(0)(0).character.id)
+        .characterById(s.p(0)(0).character.id).state.shield shouldBe enchantedShield
     }
   }
 }
