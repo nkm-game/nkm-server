@@ -8,7 +8,7 @@ import helpers.TestScenario
 case class FiberDecapicationTestScenario(metadata: CharacterMetadata)
   extends TestScenario
 {
-  val gameState: GameState = getTestGameState(
+  val gameState: GameState = getTestGameStateCustom(
     TestHexMapName.FiberDecapication, Seq(
       Seq(metadata.copy(name = "Empty1")),
       Seq(metadata.copy(name = "Empty2")),

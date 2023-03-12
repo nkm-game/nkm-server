@@ -32,7 +32,12 @@ trait TestUtils
 
   protected def bindPlayerData()(implicit gameState: GameState): Seq[Seq[TestCharacterData]] =
     gameState.players.map(_.id).map(pid => {
-      val spawnCoords = gameState.hexMap.getSpawnPointsFor(pid)(gameState).map(_.coordinates).toSeq
+      val spawnCoords = gameState
+        .hexMap
+        .getSpawnPointsFor(pid)(gameState)
+        .map(_.coordinates)
+        .toSeq
+        .sortBy(_.toTuple)
       bindCharacterData(spawnCoords)(gameState)
     })
 
@@ -95,7 +100,17 @@ trait TestUtils
   protected def characterOnPoint(hexCoordinates: HexCoordinates)(implicit gameState: GameState): NkmCharacter =
     gameState.characterById(characterIdOnPoint(hexCoordinates))
 
-  protected def getTestGameState(testHexMapName: TestHexMapName, characterMetadatass: Seq[Seq[CharacterMetadata]]): GameState = {
+  protected def getTestGameState(testHexMapName: TestHexMapName, metadata: CharacterMetadata): GameState = {
+    val hexMap = HexMapProvider().getTestHexMap(testHexMapName)
+    val characterMetadatass = hexMap.numberOfSpawnsPerPlayer
+      .map { case (playerIndex, numberOfSpawns) =>
+        (0 until numberOfSpawns).map(x => metadata.copy(name = s"p($playerIndex)($x)"))
+      }.toSeq
+
+    getTestGameStateCustom(testHexMapName, characterMetadatass)
+  }
+
+  protected def getTestGameStateCustom(testHexMapName: TestHexMapName, characterMetadatass: Seq[Seq[CharacterMetadata]]): GameState = {
     val playerIds: Seq[PlayerId] = characterMetadatass.indices map(p => s"p$p")
     val hexMap = HexMapProvider().getTestHexMap(testHexMapName)
 

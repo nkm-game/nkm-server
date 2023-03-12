@@ -8,7 +8,7 @@ import helpers.TestScenario
 case class Simple1v9LineTestScenario(metadata: CharacterMetadata)
   extends TestScenario
 {
-  val gameState: GameState = getTestGameState(
+  val gameState: GameState = getTestGameStateCustom(
     TestHexMapName.Simple1v9Line, Seq(
       Seq(metadata.copy(name = "Character")),
       (1 to 9).map(n => CharacterMetadata.empty(s"Enemy ($n)")),

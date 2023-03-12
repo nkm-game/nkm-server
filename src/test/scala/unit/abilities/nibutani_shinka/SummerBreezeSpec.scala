@@ -14,10 +14,9 @@ class SummerBreezeSpec
     with Matchers
     with TestUtils
 {
-
   private val abilityMetadata = SummerBreeze.metadata
-  private val metadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
-  private val s = scenarios.SummerBreezeTestScenario(metadata)
+  private val characterMetadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
+  private val s = scenarios.SummerBreezeTestScenario(characterMetadata)
   private val gameState: GameState = s.gameState
   private val abilityId = s.p(0)(0).character.state.abilities.head.id
 

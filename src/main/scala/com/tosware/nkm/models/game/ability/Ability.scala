@@ -104,8 +104,10 @@ abstract class Ability(val id: AbilityId, pid: CharacterId)
       }
     }
     object TargetCharacter {
-      def InRange(implicit target: CharacterId, useData: UseData, gameState: GameState): UseCheck =
-        targetsInRange.toCells.exists(_.characterId.contains(target)) -> "Target character is not in range."
+      def InRange(implicit target: CharacterId, useData: UseData, gameState: GameState): UseCheck = {
+        val targetCoords = gameState.hexMap.getCellOfCharacter(target).map(_.coordinates.toTuple).getOrElse("null")
+        targetsInRange.toCells.exists(_.characterId.contains(target)) -> s"Target character is not in range (target coords: $targetCoords)."
+      }
       def IsEnemy(implicit target: CharacterId, useData: UseData, gameState: GameState): UseCheck =
         gameState.characterById(target).isEnemyForC(parentCharacter.id) -> "Target character is not an enemy."
       def IsFriend(implicit target: CharacterId, useData: UseData, gameState: GameState): UseCheck =
@@ -116,7 +118,7 @@ abstract class Ability(val id: AbilityId, pid: CharacterId)
 
     object TargetCoordinates {
       def InRange(implicit target: HexCoordinates, useData: UseData, gameState: GameState): UseCheck =
-        Seq(target).toCells.nonEmpty -> "Target character is not in range."
+        Seq(target).toCells.nonEmpty -> "Target is not in range."
       def IsFreeToStand(implicit target: HexCoordinates, useData: UseData, gameState: GameState): UseCheck =
         Seq(target).toCells.headOption.fold(false)(_.isFreeToStand) -> "Target is not free to stand."
       def IsFriendlySpawn(implicit target: HexCoordinates, useData: UseData, gameState: GameState): UseCheck =

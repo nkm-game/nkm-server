@@ -176,7 +176,7 @@ class LobbyService(lobbiesManagerActor: ActorRef)(
     if (lobbyState.userIds.length < 2) return Failure("There are less than 2 players")
 
     val chosenHexMap: HexMap = nkmDataService.getHexMaps.find(_.name == lobbyState.chosenHexMapName.get).get.toHexMap
-    if(chosenHexMap.maxNumberOfCharacters < lobbyState.userIds.length) return Failure("There are more players than allowed for this map")
+    if(chosenHexMap.maxNumberOfPlayers < lobbyState.userIds.length) return Failure("There are more players than allowed for this map")
 
     if (gameState.gameStatus != GameStatus.NotStarted) return Failure("Game is already started")
 

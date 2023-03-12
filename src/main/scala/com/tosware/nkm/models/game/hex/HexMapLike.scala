@@ -9,14 +9,24 @@ trait HexMapLike[T <: HexCellLike] {
 
   def getCell(hexCoordinates: HexCoordinates): Option[T] = cells.find(_.coordinates == hexCoordinates)
 
-  def getSpawnPoints: Set[T] = cells.filter(c => c.cellType == HexCellType.SpawnPoint)
+  def getSpawnPoints: Set[T] =
+    cells.filter(c => c.cellType == HexCellType.SpawnPoint)
 
-  def getSpawnPointsByNumber(n: Int): Set[T] = getSpawnPoints.filter(_.spawnNumber.forall(_ == n))
+  def getSpawnPointsByNumber(n: Int): Set[T] =
+    getSpawnPoints.filter(_.spawnNumber.forall(_ == n))
 
   def getSpawnPointsFor(playerId: PlayerId)(implicit gameState: GameState): Set[T] =
     getSpawnPointsByNumber(gameState.playerNumber(playerId))
 
-  def maxNumberOfCharacters: Int = getSpawnPoints.map(_.spawnNumber.get).size
+  def maxNumberOfPlayers: Int =
+    getSpawnPoints.map(_.spawnNumber.get).size
+
+  def numberOfSpawnsPerPlayer: Map[Int, Int] =
+    getSpawnPoints
+      .groupBy(_.spawnNumber.get)
+      .view
+      .mapValues(_.size)
+      .toMap
 
   def getCellOfCharacter(id: CharacterId): Option[T] =
     cells.find(c => c.characterId.nonEmpty && c.characterId.get == id)

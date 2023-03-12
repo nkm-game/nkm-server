@@ -48,7 +48,7 @@ case class FinalBattleSecretTechnique(abilityId: AbilityId, parentCharacterId: C
     val hitGs = gameState.abilityHitCharacter(id, target)
     val targetCoordinates = gameState.characterById(target).parentCell.get.coordinates
     val targetDirection = parentCell.get.coordinates.getDirection(targetCoordinates).get
-    val lineCoords = targetCoordinates.getLine(targetDirection, metadata.variables("knockback"))
+    val lineCoords = targetCoordinates.getLine(targetDirection, metadata.variables("trueCrimsonKnockback"))
     val lineCells = lineCoords.toCells
 
     // TODO

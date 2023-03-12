@@ -8,7 +8,7 @@ import helpers.TestScenario
 case class FlyTestScenario(metadata: CharacterMetadata)
   extends TestScenario
 {
-  val gameState: GameState = getTestGameState(
+  val gameState: GameState = getTestGameStateCustom(
     TestHexMapName.Fly, Seq(
       Seq(metadata.copy(name = "Empty1")),
       Seq(metadata.copy(name = "Empty2")),

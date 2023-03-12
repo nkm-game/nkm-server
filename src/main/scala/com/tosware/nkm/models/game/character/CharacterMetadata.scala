@@ -5,6 +5,9 @@ import com.tosware.nkm._
 object CharacterMetadata {
   def empty(name: String = "Empty"): CharacterMetadata =
     CharacterMetadata(name, AttackType.Melee, 100, 10, 5, 5, 10, 10, Seq.empty)
+
+  def withAbility(abilityMetadataId: AbilityMetadataId): CharacterMetadata =
+    empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadataId))
 }
 
 
