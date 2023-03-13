@@ -3,6 +3,7 @@ package unit
 import com.tosware.nkm.Logging
 import com.tosware.nkm.{CoordinateSeq, CoordinateSet}
 import com.tosware.nkm.models.game.hex.{HexCoordinates, HexDirection}
+import org.scalatest.OptionValues
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
@@ -11,6 +12,7 @@ import scala.math._
 class HexCoordinatesSpec
   extends AnyWordSpecLike
     with Matchers
+    with OptionValues
     with Logging
 {
   "HexCoordinates" must {
@@ -22,9 +24,57 @@ class HexCoordinatesSpec
       HexCoordinates(0, 0).getNeighbour(HexDirection.SE) should be (HexCoordinates(1, -1))
       HexCoordinates(0, -3).getNeighbour(HexDirection.E) should be (HexCoordinates(1, -3))
     }
+
+    "calculate correct distance" in {
+      HexCoordinates(0, 0).getDistance(HexCoordinates(-1, 2)) should be (None)
+      HexCoordinates(0, 0).getDistance(HexCoordinates(0, 0)).value should be (0)
+      HexCoordinates(0, 0).getDistance(HexCoordinates(0, 3)).value should be (3)
+      HexCoordinates(3, 0).getDistance(HexCoordinates(0, 0)).value should be (3)
+      HexCoordinates(0, -3).getDistance(HexCoordinates(0, 3)).value should be (6)
+    }
+
     "calculate correct line" in {
       HexCoordinates(0, 0).getLine(HexDirection.E, 0) should be (Seq.empty)
       HexCoordinates(-2, 2).getLine(HexDirection.SE, 3) should be (CoordinateSeq((-1, 1), (0, 0), (1, -1)))
+    }
+
+    "calculate thick line" in {
+      HexCoordinates(0, 0).getThickLine(HexDirection.E, 0, 5) should be (Seq.empty)
+      HexCoordinates(0, 0).getThickLine(HexDirection.E, 5, 0) should be (Seq.empty)
+
+      HexCoordinates(0, 0).getThickLine(HexDirection.NE, 1, 2) should
+        be (HexCoordinates(0, 0).getLine(HexDirection.NE, 2))
+
+      HexCoordinates(0, 0).getThickLine(HexDirection.NE, 2, 3).toSet should
+        be (HexCoordinates(0, 2).getCircle(1))
+
+      HexCoordinates(0, 0).getThickLine(HexDirection.NE, 2, 3) should
+        be (
+          HexCoordinates(0, 0).getLine(HexDirection.NE, 3)
+          ++ HexCoordinates(-1, 1).getLine(HexDirection.NE, 2)
+          ++ HexCoordinates(1, 0).getLine(HexDirection.NE, 2)
+        )
+
+      HexCoordinates(0, 0).getThickLine(HexDirection.NE, 3, 3) should
+        be (
+          HexCoordinates(0, 0).getLine(HexDirection.NE, 3)
+            ++ HexCoordinates(-1, 1).getLine(HexDirection.NE, 2)
+            ++ HexCoordinates(1, 0).getLine(HexDirection.NE, 2)
+            ++ HexCoordinates(-2, 2).getLine(HexDirection.NE, 1)
+            ++ HexCoordinates(2, 0).getLine(HexDirection.NE, 1)
+        )
+
+      HexCoordinates(0, 0).getThickLine(HexDirection.NE, 100, 3) should
+        be (
+          HexCoordinates(0, 0).getLine(HexDirection.NE, 3)
+            ++ HexCoordinates(-1, 1).getLine(HexDirection.NE, 2)
+            ++ HexCoordinates(1, 0).getLine(HexDirection.NE, 2)
+            ++ HexCoordinates(-2, 2).getLine(HexDirection.NE, 1)
+            ++ HexCoordinates(2, 0).getLine(HexDirection.NE, 1)
+        )
+
+      HexCoordinates(0, 0).getThickLine(HexDirection.NE, 3, 3) should
+        be (HexCoordinates(0, 0).getThickLine(HexCoordinates(0, 3), 3))
     }
 
     "calculate correct lines" in {

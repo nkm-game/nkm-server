@@ -24,6 +24,7 @@ case class HexCoordinates(x: Int, z: Int) {
     None
   }
 
+  // TODO calculate with math
   def getInDirection(hexDirection: HexDirection, distance: Int): HexCoordinates = {
     if(distance <= 0) return this
     getNeighbour(hexDirection).getInDirection(hexDirection, distance - 1)
@@ -34,6 +35,38 @@ case class HexCoordinates(x: Int, z: Int) {
     val neighbour = getNeighbour(direction)
     if(size == 1) return Seq(neighbour)
     neighbour +: neighbour.getLine(direction, size - 1)
+  }
+
+  def getDistance(target: HexCoordinates): Option[Int] = {
+    if(this == target) Some(0)
+    else getDirection(target).map {
+      case HexDirection.NW | HexDirection.SE | HexDirection.W | HexDirection.E => math.abs(x - target.x)
+      case HexDirection.NE | HexDirection.SW => math.abs(z - target.z)
+    }
+  }
+
+
+  def getThickLine(target: HexCoordinates, width: Int): Seq[HexCoordinates] = (
+    for {
+      direction <- getDirection(target)
+      distance <- getDistance(target)
+    } yield getThickLine(direction, width, distance)
+    ).getOrElse(Seq.empty)
+
+  def getThickLine(direction: HexDirection, width: Int, length: Int): Seq[HexCoordinates] = {
+    if(width <= 0 || length <= 0) return Seq.empty
+
+    val leftLineLines: Seq[Seq[HexCoordinates]] = getLine(direction.lookLeft, width - 1)
+      .zipWithIndex
+      .map{case (d, i) => d.getLine(direction, length - 1 - i)}
+
+    val rightLineLines: Seq[Seq[HexCoordinates]] = getLine(direction.lookRight, width - 1)
+      .zipWithIndex
+      .map{case (d, i) => d.getLine(direction, length - 1 - i)}
+
+    val mainLine = getLine(direction, length)
+
+    mainLine ++ leftLineLines.zip(rightLineLines).flatMap {case (a, b) => Seq(a, b).flatten}
   }
 
   def getLines(directions: Set[HexDirection], size: Int): Set[HexCoordinates] =

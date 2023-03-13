@@ -155,6 +155,40 @@ package object nkm {
     def whereFreeToPass(forCharacterId: CharacterId): Seq[HexCell] =
       cells.filter(_.isFreeToPass(forCharacterId))
   }
+
+  implicit class HexDirectionUtils(direction: HexDirection) {
+    def lookRight: HexDirection =
+      direction match {
+        case HexDirection.NE =>
+          HexDirection.E
+        case HexDirection.E =>
+          HexDirection.SE
+        case HexDirection.SE =>
+          HexDirection.SW
+        case HexDirection.SW =>
+          HexDirection.W
+        case HexDirection.W =>
+          HexDirection.NW
+        case HexDirection.NW =>
+          HexDirection.NE
+      }
+    def lookLeft: HexDirection =
+      direction match {
+        case HexDirection.NE =>
+          HexDirection.NW
+        case HexDirection.E =>
+          HexDirection.NE
+        case HexDirection.SE =>
+          HexDirection.E
+        case HexDirection.SW =>
+          HexDirection.SE
+        case HexDirection.W =>
+          HexDirection.SW
+        case HexDirection.NW =>
+          HexDirection.W
+      }
+  }
+
   implicit class GameEventSeqUtils[T <: GameEvent](es: Seq[T]) {
     def inPhase(number: Int): Seq[T] =
       es.filter(_.phase.number == number)
