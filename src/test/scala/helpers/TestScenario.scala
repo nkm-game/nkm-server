@@ -25,4 +25,6 @@ trait TestScenario extends TestUtils {
     p(0)(0).character
   lazy val defaultAbilityId: AbilityId =
     defaultCharacter.state.abilities.head.id
+  lazy val ultGs: GameState =
+    gameState.incrementPhase(4)
 }

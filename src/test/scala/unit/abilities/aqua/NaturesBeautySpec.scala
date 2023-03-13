@@ -1,8 +1,8 @@
 package unit.abilities.aqua
 
 import com.tosware.nkm.models.game.abilities.aqua.NaturesBeauty
-import com.tosware.nkm.models.game.character.CharacterMetadata
-import helpers.{TestUtils, scenarios}
+import com.tosware.nkm.models.game.hex.TestHexMapName
+import helpers.{TestScenario, TestUtils}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
@@ -12,14 +12,13 @@ class NaturesBeautySpec
     with TestUtils
 {
   private val abilityMetadata = NaturesBeauty.metadata
-  private val metadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
-  private val s = scenarios.Simple2v2TestScenario(metadata)
+  private val s = TestScenario.generate(TestHexMapName.Simple2v2, abilityMetadata.id)
+
+  private val damagedGameState = s.gameState.setHp(s.p(0)(1).character.id, 30)(random, s.gameState.id)
+  private val healedGameState = damagedGameState.basicAttack(s.p(0)(0).character.id, s.p(0)(1).character.id)
 
   abilityMetadata.name must {
     "be able to heal friends via basic attacks" in {
-      val damagedGameState = s.gameState.setHp(s.p(0)(1).character.id, 30)(random, s.gameState.id)
-      val healedGameState = damagedGameState.basicAttack(s.p(0)(0).character.id, s.p(0)(1).character.id)
-
       healedGameState.characterById(s.p(0)(0).character.id)
         .isFriendForC(s.p(0)(1).character.id)(healedGameState) shouldBe true
 

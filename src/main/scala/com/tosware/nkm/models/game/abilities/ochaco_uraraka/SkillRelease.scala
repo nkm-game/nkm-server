@@ -25,5 +25,6 @@ case class SkillRelease(abilityId: AbilityId, parentCharacterId: CharacterId)
     with Usable {
   override val metadata: AbilityMetadata = SkillRelease.metadata
 
-  override def use(useData: UseData)(implicit random: Random, gameState: GameState): GameState = ???
+  override def use(useData: UseData)(implicit random: Random, gameState: GameState): GameState =
+    gameState
 }

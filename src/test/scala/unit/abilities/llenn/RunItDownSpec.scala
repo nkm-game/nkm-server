@@ -4,8 +4,8 @@ import com.tosware.nkm._
 import com.tosware.nkm.models.GameStateValidator
 import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.game.abilities.llenn.RunItDown
-import com.tosware.nkm.models.game.character.CharacterMetadata
-import helpers.{TestUtils, scenarios}
+import com.tosware.nkm.models.game.hex.TestHexMapName
+import helpers.{TestScenario, TestUtils}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
@@ -14,29 +14,31 @@ class RunItDownSpec
     with Matchers
     with TestUtils
 {
-  private val metadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(RunItDown.metadata.id))
-  private val s = scenarios.Simple2v2TestScenario(metadata)
-  private implicit val gameState: GameState = s.gameState.incrementPhase(4)
+  private val abilityMetadata = RunItDown.metadata
+  private val s = TestScenario.generate(TestHexMapName.Simple2v2, abilityMetadata.id)
+  private val gameState: GameState = s.gameState.incrementPhase(4)
   private val abilityId = s.p(0)(1).character.state.abilities.head.id
-  private val pid = gameState.players.head.id
+  private val aGs: GameState = gameState.useAbility(abilityId)
 
   RunItDown.metadata.name must {
     "be able to use" in {
-      val r = GameStateValidator().validateAbilityUse(s.p(0)(1).character.owner.id, abilityId)
-      assertCommandSuccess(r)
+      assertCommandSuccess {
+        GameStateValidator()(gameState)
+          .validateAbilityUse(s.owners(0), abilityId)
+      }
     }
 
     "be able to move and attack three times after using" in {
-      val abilityUsedGameState: GameState = gameState.useAbility(abilityId)
-
       def validateBasicAttack(gameState: GameState) =
-        GameStateValidator()(gameState).validateBasicAttackCharacter(pid,
-          s.p(0)(1).character.id,
-          s.p(1)(0).character.id,
-        )
+        GameStateValidator()(gameState)
+          .validateBasicAttackCharacter(
+            s.owners(0),
+            s.p(0)(1).character.id,
+            s.p(1)(0).character.id,
+          )
 
       def validateBasicMove(gameState: GameState, cs: Seq[(Int, Int)]) =
-        GameStateValidator()(gameState).validateBasicMoveCharacter(pid,
+        GameStateValidator()(gameState).validateBasicMoveCharacter(s.owners(0),
           CoordinateSeq(cs: _*),
           s.p(0)(1).character.id
         )
@@ -47,10 +49,10 @@ class RunItDownSpec
       def basicMove(gameState: GameState, cs: Seq[(Int, Int)]) =
         gameState.basicMoveCharacter(s.p(0)(1).character.id, CoordinateSeq(cs: _*))
 
-      assertCommandSuccess (validateBasicMove(abilityUsedGameState, Seq((0, 0), (1, 0))))
-      assertCommandSuccess (validateBasicAttack(abilityUsedGameState))
+      assertCommandSuccess (validateBasicMove(aGs, Seq((0, 0), (1, 0))))
+      assertCommandSuccess (validateBasicAttack(aGs))
 
-      val g1 = basicMove(abilityUsedGameState, Seq((0, 0), (1, 0)))
+      val g1 = basicMove(aGs, Seq((0, 0), (1, 0)))
       assertCommandSuccess (validateBasicMove(g1, Seq((1, 0), (0, 0))))
       assertCommandSuccess (validateBasicAttack(g1))
 

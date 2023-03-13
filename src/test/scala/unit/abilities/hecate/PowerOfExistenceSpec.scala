@@ -20,10 +20,12 @@ class PowerOfExistenceSpec
   private implicit val gameState: GameState = s.gameState.incrementPhase(4)
   private val abilityId = s.p(0)(0).character.state.abilities.head.id
   private val masterThroneAbilityId = s.p(0)(0).character.state.abilities.tail.head.id
-  private val aaGameState: GameState = gameState.basicAttack(s.p(0)(0).character.id, s.p(1)(0).character.id)
-    .endTurn()
-    .passTurn(s.p(1)(0).character.id)
-    .finishPhase()
+  private val aaGameState: GameState =
+    gameState
+      .basicAttack(s.p(0)(0).character.id, s.p(1)(0).character.id)
+      .endTurn()
+      .passTurn(s.p(1)(0).character.id)
+      .finishPhase()
 
   abilityMetadata.name must {
     "be able to use" in {

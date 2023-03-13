@@ -1,21 +1,19 @@
-package unit.abilities.nibutani_shinka
+package unit.abilities.ochaco_uraraka
 
 import com.tosware.nkm.models.GameStateValidator
 import com.tosware.nkm.models.game._
-import com.tosware.nkm.models.game.abilities.nibutani_shinka.FairyOfLove
-import com.tosware.nkm.models.game.ability.AbilityType
-import com.tosware.nkm.models.game.effects.AbilityEnchant
+import com.tosware.nkm.models.game.abilities.ochaco_uraraka.SkillRelease
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.{TestScenario, TestUtils}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
-class FairyOfLoveSpec
+class SkillReleaseSpec
   extends AnyWordSpecLike
     with Matchers
     with TestUtils
 {
-  private val abilityMetadata = FairyOfLove.metadata
+  private val abilityMetadata = SkillRelease.metadata
   private val s = TestScenario.generate(TestHexMapName.Simple2v2, abilityMetadata.id)
   private val aGs: GameState = s.ultGs.useAbility(s.defaultAbilityId)
 
@@ -30,16 +28,12 @@ class FairyOfLoveSpec
       }
     }
 
-    "enchant passive ability" in {
-      val enchantEffects =
-        aGs
-          .characterById(s.defaultCharacter.id)
-          .state
-          .effects
-          .ofType[AbilityEnchant]
+    "remove Zero Gravity effects" in {
+      fail()
+    }
 
-      enchantEffects should not be empty
-      enchantEffects.head.abilityType should be (AbilityType.Passive)
+    "stun enemies that had Zero Gravity" in {
+      fail()
     }
   }
 }
