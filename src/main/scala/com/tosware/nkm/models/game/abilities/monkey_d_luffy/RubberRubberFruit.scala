@@ -3,6 +3,7 @@ package com.tosware.nkm.models.game.abilities.monkey_d_luffy
 import com.tosware.nkm._
 import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.game.ability._
+import com.tosware.nkm.models.game.hex.HexCoordinates
 
 import scala.util.Random
 
@@ -44,9 +45,9 @@ object RubberRubberFruit {
 
 case class RubberRubberFruit(abilityId: AbilityId, parentCharacterId: CharacterId)
   extends Ability(abilityId, parentCharacterId)
-    with Usable {
+    with UsableOnCoordinates {
   override val metadata: AbilityMetadata = RubberRubberFruit.metadata
 
-  override def use(useData: UseData)(implicit random: Random, gameState: GameState): GameState =
+  override def use(target: HexCoordinates, useData: UseData)(implicit random: Random, gameState: GameState): GameState =
     gameState
 }

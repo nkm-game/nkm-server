@@ -16,4 +16,5 @@ object TestHexMapName extends Enum[TestHexMapName] {
   case object Fly extends TestHexMapName
   case object SummerBreeze extends TestHexMapName
   case object FinalBattleSecretTechnique extends TestHexMapName
+  case object RubberRubberFruit extends TestHexMapName
 }

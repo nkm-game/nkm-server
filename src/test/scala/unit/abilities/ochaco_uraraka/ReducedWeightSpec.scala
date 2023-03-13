@@ -17,7 +17,6 @@ class ReducedWeightSpec
 {
   private val abilityMetadata = ReducedWeight.metadata
   private val s = TestScenario.generate(TestHexMapName.Simple2v2, abilityMetadata.id)
-
   private val aGs: GameState = s.gameState.useAbilityOnCharacter(s.defaultAbilityId, s.defaultCharacter.id)
 
   abilityMetadata.name must {

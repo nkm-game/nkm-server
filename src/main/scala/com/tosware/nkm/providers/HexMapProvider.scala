@@ -46,6 +46,7 @@ case class HexMapProvider() extends NkmJsonProtocol {
       testmap.Simple2v2v2.hexMap,
       testmap.SummerBreeze.hexMap,
       testmap.FinalBattleSecretTechnique.hexMap,
+      testmap.RubberRubberFruit.hexMap,
     )
 
   def getTestHexMap(name: TestHexMapName): HexMap =

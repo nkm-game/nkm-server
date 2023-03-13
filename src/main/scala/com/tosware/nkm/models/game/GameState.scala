@@ -496,19 +496,19 @@ case class GameState
     }
   }
 
-  private def updatePlayer(playerId: PlayerId)(updateFunction: Player => Player): GameState =
+  def updatePlayer(playerId: PlayerId)(updateFunction: Player => Player): GameState =
     this.modify(_.players.each).using {
       case player if player.id == playerId => updateFunction(player)
       case player => player
     }
 
-  private def updateCharacter(characterId: CharacterId)(updateFunction: NkmCharacter => NkmCharacter): GameState =
+  def updateCharacter(characterId: CharacterId)(updateFunction: NkmCharacter => NkmCharacter): GameState =
     this.modify(_.characters.each).using {
       case character if character.id == characterId => updateFunction(character)
       case character => character
     }
 
-  private def updateHexCell(targetCoords: HexCoordinates)(updateFunction: HexCell => HexCell): GameState =
+  def updateHexCell(targetCoords: HexCoordinates)(updateFunction: HexCell => HexCell): GameState =
     this.modify(_.hexMap.cells.each).using {
       case cell if cell.coordinates == targetCoords => updateFunction(cell)
       case cell => cell

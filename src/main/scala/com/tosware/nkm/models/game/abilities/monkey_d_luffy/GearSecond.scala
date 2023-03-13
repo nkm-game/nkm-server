@@ -10,7 +10,7 @@ object GearSecond {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "Gear Second",
-      alternateName = "ギアセカンド",
+      alternateName = "ギアセカンド (Giru Sekando)",
       abilityType = AbilityType.Ultimate,
       description =
         """Character gains {bonusSpeed} speed and enchants their normal ability for {duration}t.
