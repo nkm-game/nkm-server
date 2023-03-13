@@ -45,36 +45,14 @@ case class FinalBattleSecretTechnique(abilityId: AbilityId, parentCharacterId: C
 
 
   override def use(target: CharacterId, useData: UseData)(implicit random: Random, gameState: GameState): GameState = {
-    val hitGs = gameState.abilityHitCharacter(id, target)
-    val targetCoordinates = gameState.characterById(target).parentCell.get.coordinates
-    val targetDirection = parentCell.get.coordinates.getDirection(targetCoordinates).get
-    val lineCoords = targetCoordinates.getLine(targetDirection, metadata.variables("trueCrimsonKnockback"))
-    val lineCells = lineCoords.toCells
+    val direction = gameState.getDirection(parentCharacterId, target).get
 
-    // TODO
-    hitGs
+    val (knockbackGs, _) =
+      gameState
+        .abilityHitCharacter(id, target)
+        .knockbackCharacter(target, direction, metadata.variables("trueCrimsonKnockback"))(random, id)
 
-//    if(lineCells.isEmpty)
-//      return stunAndDamage(target)(random, hitGs)
-//
-//    val firstBlockedCell = lineCells.find(!_.isFreeToStand)
-//
-//    if(firstBlockedCell.isEmpty) {
-//      val teleportGs =
-//      if(lineCells.size < lineCoords.size)
-//        return stunAndDamage(target)(random, teleportGs)
-//      else
-//        return teleportGs
-//    }
-//
-//    val cellToTeleportIndex = lineCells.indexOf(firstBlockedCell.get) - 1
-//    if(cellToTeleportIndex < 0)
-//      return stunAndDamage(target)(random, hitGs)
-//    else {
-//      val cellToTeleport = lineCells(cellToTeleportIndex)
-//      val teleportGs = hitGs.teleportCharacter(target, cellToTeleport.coordinates)(random, id)
-//      return stunAndDamage(target)(random, teleportGs)
-//    }
+    knockbackGs
   }
 
 }

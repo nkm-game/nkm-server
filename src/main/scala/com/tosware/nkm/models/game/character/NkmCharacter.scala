@@ -45,7 +45,11 @@ case class NkmCharacter
   private val basicAttackImpairmentCcNames = Seq(CharacterEffectName.Stun, CharacterEffectName.Disarm)
   private val abilityImpairmentCcNames = Seq(CharacterEffectName.Stun, CharacterEffectName.Silence)
 
-  def isDead: Boolean = state.healthPoints <= 0
+  def isDead: Boolean =
+    state.healthPoints <= 0
+
+  def isFlying: Boolean =
+    state.effects.ofType[effects.Fly].nonEmpty
 
   def usedBasicMoveThisTurn(implicit gameState: GameState): Boolean =
     gameState.gameLog.events

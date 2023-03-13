@@ -44,33 +44,18 @@ case class SummerBreeze(abilityId: AbilityId, parentCharacterId: CharacterId) ex
 
 
   override def use(target: CharacterId, useData: UseData)(implicit random: Random, gameState: GameState): GameState = {
-    val hitGs = gameState.abilityHitCharacter(id, target)
-    val targetCoordinates = gameState.characterById(target).parentCell.get.coordinates
-    val targetDirection = parentCell.get.coordinates.getDirection(targetCoordinates).get
-    val lineCoords = targetCoordinates.getLine(targetDirection, metadata.variables("knockback"))
-    val lineCells = lineCoords.toCells
+    val direction = gameState.getDirection(parentCharacterId, target).get
 
-    if(lineCells.isEmpty)
-      return stunAndDamage(target)(random, hitGs)
+    val (knockbackGs, knockbackResult) =
+      gameState
+        .abilityHitCharacter(id, target)
+        .knockbackCharacter(target, direction, metadata.variables("knockback"))(random, id)
 
-    val firstBlockedCell = lineCells.find(!_.isFreeToStand)
-
-    if(firstBlockedCell.isEmpty) {
-      val teleportGs = hitGs.teleportCharacter(target, lineCells.last.coordinates)(random, id)
-      if(lineCells.size < lineCoords.size)
-        return stunAndDamage(target)(random, teleportGs)
-      else
-        return teleportGs
-    }
-
-    val cellToTeleportIndex = lineCells.indexOf(firstBlockedCell.get) - 1
-    if(cellToTeleportIndex < 0)
-      return stunAndDamage(target)(random, hitGs)
-    else {
-      val cellToTeleport = lineCells(cellToTeleportIndex)
-      val teleportGs = hitGs.teleportCharacter(target, cellToTeleport.coordinates)(random, id)
-      return stunAndDamage(target)(random, teleportGs)
+    knockbackResult match {
+      case KnockbackResult.HitNothing =>
+        knockbackGs
+      case KnockbackResult.HitWall | KnockbackResult.HitEndOfMap | KnockbackResult.HitCharacter =>
+        stunAndDamage(target)(random, knockbackGs)
     }
   }
-
 }

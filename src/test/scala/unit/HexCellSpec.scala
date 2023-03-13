@@ -26,8 +26,8 @@ class HexCellSpec
       HexCoordinates(0, 0).toCell.getNeighbour(HexDirection.SE).get.coordinates should be (HexCoordinates(1, -1))
     }
     "calculate correct line" in {
-      HexCoordinates(0, 0).toCell.getLine(HexDirection.E, 0) should be (Set.empty)
-      HexCoordinates(-2, 2).toCell.getLine(HexDirection.SE, 3).toCoords should be (CoordinateSet((-1, 1), (0, 0), (1, -1)))
+      HexCoordinates(0, 0).toCell.getLine(HexDirection.E, 0) should be (Seq.empty)
+      HexCoordinates(-2, 2).toCell.getLine(HexDirection.SE, 3).toCoords should be (CoordinateSeq((-1, 1), (0, 0), (1, -1)))
     }
 
     "calculate correct lines" in {

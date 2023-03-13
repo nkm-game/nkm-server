@@ -27,7 +27,7 @@ class FinalBattleSecretTechniqueSpec
       }
     }
 
-    "knockback on use" in {
+    "knockback on use with shinku" in {
       s.p(1)(0).character.parentCell(abilityUsedGs).get
         .coordinates.toTuple shouldBe (7, 0)
     }

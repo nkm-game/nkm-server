@@ -185,6 +185,13 @@ case class GameState
       Some(abilityById(causedById).parentCharacter(this).id)
     else None
 
+  def getDirection(from: CharacterId, to: CharacterId)(implicit gameState: GameState): Option[HexDirection] =
+    for {
+      fromCoordinates: HexCoordinates <- characterById(from).parentCell.map(_.coordinates)
+      toCoordinates: HexCoordinates <- characterById(to).parentCell.map(_.coordinates)
+      direction: HexDirection <- fromCoordinates.getDirection(toCoordinates)
+    } yield direction
+
   def invisibleCharacterCoords(forPlayerOpt: Option[PlayerId])(implicit gameState: GameState): Set[HexCoordinates] =
     characters
       .filterNot(c => forPlayerOpt.contains(c.owner.id))
@@ -573,6 +580,44 @@ case class GameState
     }
     updateCharacter(characterId)(c => updateStat(c).setTo(amount))
       .logEvent(CharacterStatSet(randomUUID(), phase, turn, causedById, characterId, statType, amount))
+  }
+
+  def knockbackCharacter(
+    characterId: CharacterId,
+    direction: HexDirection,
+    knockback: Int,
+  )(implicit random: Random, causedById: String): (GameState, KnockbackResult) = {
+    val targetCellOpt = hexMap.getCellOfCharacter(characterId)
+    targetCellOpt.fold((this, KnockbackResult.HitNothing)) { targetCell =>
+      val lineCells: Seq[HexCell] = targetCell.getLine(direction, knockback)(this)
+      if(lineCells.isEmpty)
+        return (this, KnockbackResult.HitEndOfMap)
+
+      val firstBlockedCellOpt = lineCells.find(!_.isFreeToStand)
+
+      firstBlockedCellOpt.fold {
+        {
+          val teleportGs = teleportCharacter(characterId, lineCells.last.coordinates)(random, id)
+          if (lineCells.size < knockback)
+            return (teleportGs, KnockbackResult.HitEndOfMap)
+          else
+            return (teleportGs, KnockbackResult.HitNothing)
+        }
+      } { firstBlockedCell =>
+        val cellToTeleportIndex = lineCells.indexOf(firstBlockedCellOpt.get) - 1
+        val result = if(firstBlockedCell.isWall)
+          KnockbackResult.HitWall
+        else
+          KnockbackResult.HitCharacter
+        if(cellToTeleportIndex < 0) {
+          return (this, result)
+        } else {
+          val cellToTeleport = lineCells(cellToTeleportIndex)
+          val teleportGs = teleportCharacter(characterId, cellToTeleport.coordinates)(random, id)
+          return (teleportGs, result)
+        }
+      }
+    }
   }
 
   def checkIfCharacterDied(characterId: CharacterId)(implicit random: Random, causedById: String): GameState =

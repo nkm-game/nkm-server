@@ -135,6 +135,26 @@ package object nkm {
     def enemiesOf(playerId: PlayerId): Set[NkmCharacter] =
       characters.filter(_.isEnemyFor(playerId))
   }
+
+  implicit class HexCellSeqUtils(cells: Seq[HexCell])(implicit gameState: GameState) {
+    def toCoords: Seq[HexCoordinates] =
+      cells.map(_.coordinates)
+
+    def characterIds: Seq[CharacterId] =
+      cells.flatMap(_.characterId)
+
+    def whereCharacters: Seq[HexCell] =
+      cells.filter(_.characterId.isDefined)
+
+    def whereEmpty: Seq[HexCell] =
+      cells.filter(_.isEmpty)
+
+    def whereFreeToStand: Seq[HexCell] =
+      cells.filter(_.isFreeToStand)
+
+    def whereFreeToPass(forCharacterId: CharacterId): Seq[HexCell] =
+      cells.filter(_.isFreeToPass(forCharacterId))
+  }
   implicit class GameEventSeqUtils[T <: GameEvent](es: Seq[T]) {
     def inPhase(number: Int): Seq[T] =
       es.filter(_.phase.number == number)

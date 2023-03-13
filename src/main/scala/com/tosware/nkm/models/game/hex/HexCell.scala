@@ -41,11 +41,11 @@ case class HexCell
     direction: HexDirection,
     size: Int,
     stopPredicate: HexCell => Boolean = _ => false,
-  )(implicit gameState: GameState): Set[HexCell] = {
-    if(size <= 0) return Set.empty
+  )(implicit gameState: GameState): Seq[HexCell] = {
+    if(size <= 0) return Seq.empty
     val neighbour = getNeighbour(direction)
-    if(neighbour.fold(true)(c => stopPredicate(c))) return Set.empty
-    neighbour.get.getLine(direction, size - 1) + neighbour.get
+    if(neighbour.fold(true)(c => stopPredicate(c))) return Seq.empty
+    neighbour.get +: neighbour.get.getLine(direction, size - 1)
   }
 
   def firstCharacterInLine
