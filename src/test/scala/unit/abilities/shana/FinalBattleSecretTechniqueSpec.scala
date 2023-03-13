@@ -46,13 +46,13 @@ class FinalBattleSecretTechniqueSpec
         .count(_.damage.damageType == DamageType.True) shouldBe 1
     }
 
-    "deal two damage with shinpan and danzai" in {
+    "deal 10 damage with shinpan and danzai" in {
       abilityUsedGs.gameLog.events
         .ofType[GameEvent.CharacterDamaged]
         .causedBy(s.defaultAbilityId)
         .filter(_.damage.damageType == DamageType.True)
         .map(_.damage.amount)
-        .toSet should contain only 2
+        .toSet should contain only 10
     }
   }
 }

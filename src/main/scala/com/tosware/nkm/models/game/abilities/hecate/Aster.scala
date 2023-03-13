@@ -23,9 +23,9 @@ object Aster {
 }
 
 case class Aster(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId) with UsableOnCoordinates {
-  override val metadata = Aster.metadata
+  override val metadata: AbilityMetadata = Aster.metadata
 
-  override def rangeCellCoords(implicit gameState: GameState) =
+  override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =
     parentCell.get.coordinates.getCircle(metadata.variables("range")).whereExists
 
   override def use(target: HexCoordinates, useData: UseData)(implicit random: Random, gameState: GameState): GameState = {

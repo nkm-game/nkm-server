@@ -21,7 +21,7 @@ object FinalBattleSecretTechnique {
           |
           |Hien (飛焔, Blazing Flame):
           |Sends a blazing flame (width {blazingFlameWidth}) towards target.
-          |Flame deals {blazingFlameDamage} magical damage and ends on the target.
+          |Flame deals {blazingFlameDamage} magical damage to enemies and ends on the target.
           |
           |Shinpan (審判, Judgment) and Danzai (断罪, Condemnation):
           |Deals {judgementAndCondemnationDamagePerCharacter} true damage to target for every character (excluding themself) that is in range of {judgementAndCondemnationRange}.
@@ -52,7 +52,26 @@ case class FinalBattleSecretTechnique(abilityId: AbilityId, parentCharacterId: C
         .abilityHitCharacter(id, target)
         .knockbackCharacter(target, direction, metadata.variables("trueCrimsonKnockback"))(random, id)
 
-    knockbackGs
-  }
+    val flameGs = (for {
+      targetCoords: HexCoordinates <- knockbackGs.hexMap.getCellOfCharacter(target).map(_.coordinates)
+      parentCoords: HexCoordinates <- parentCell(knockbackGs).map(_.coordinates)
 
+      blazingFlameCoords: Seq[HexCoordinates] = parentCoords.getThickLine(targetCoords, metadata.variables("blazingFlameWidth"))
+      flameTargets = blazingFlameCoords.whereEnemiesOfC(parentCharacterId).characters.map(_.id)
+      damage = Damage(DamageType.Magical, metadata.variables("blazingFlameDamage"))
+      flameGs = flameTargets.foldLeft(knockbackGs)((acc, cid) => hitAndDamageCharacter(cid, damage)(random, acc))
+    } yield flameGs).getOrElse(knockbackGs)
+
+    val judgementRange = metadata.variables("judgementAndCondemnationRange")
+    val condemnationDamagePerCharacter = metadata.variables("judgementAndCondemnationDamagePerCharacter")
+
+    val condemnationGs = (for {
+      parentCoords: HexCoordinates <- parentCell(flameGs).map(_.coordinates)
+      judgementMultiplier = parentCoords.getCircle(judgementRange).whereCharacters.size - 1
+      damage = Damage(DamageType.True, condemnationDamagePerCharacter * judgementMultiplier)
+      condemnationGs = hitAndDamageCharacter(target, damage)(random, flameGs)
+    } yield condemnationGs) .getOrElse(flameGs)
+
+    condemnationGs
+  }
 }

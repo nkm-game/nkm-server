@@ -82,10 +82,39 @@ package object nkm {
   implicit class HexCoordinatesSeqUtils(coords: Seq[HexCoordinates])(implicit gameState: GameState) {
     def toCells: Seq[HexCell] =
       coords.flatMap(c => gameState.hexMap.getCell(c))
+
+    def characters: Seq[NkmCharacter] =
+      toCells.characters
+
+    def whereCharacters: Seq[HexCoordinates] =
+      toCells.whereCharacters.toCoords
+
+    def whereExists(implicit gameState: GameState): Seq[HexCoordinates] =
+      toCells.map(_.coordinates)
+
+    def whereEmpty: Seq[HexCoordinates] =
+      toCells.whereEmpty.map(_.coordinates)
+
+    def whereFreeToStand: Seq[HexCoordinates] =
+      toCells.whereFreeToStand.toCoords
+
+    def whereFreeToPass(forCharacterId: CharacterId): Seq[HexCoordinates] =
+      toCells.whereFreeToPass(forCharacterId).toCoords
+
+    def whereFriendsOfC(characterId: CharacterId): Seq[HexCoordinates] =
+      toCells.whereFriendsOfC(characterId).toCoords
+
+    def whereEnemiesOfC(characterId: CharacterId): Seq[HexCoordinates] =
+      toCells.whereEnemiesOfC(characterId).toCoords
   }
 
   implicit class CharacterIdSetUtils(ids: Set[CharacterId])(implicit gameState: GameState) {
     def toCharacters: Set[NkmCharacter] =
+      ids.flatMap(id => gameState.characters.find(_.id == id))
+  }
+
+  implicit class CharacterIdSeqUtils(ids: Seq[CharacterId])(implicit gameState: GameState) {
+    def toCharacters: Seq[NkmCharacter] =
       ids.flatMap(id => gameState.characters.find(_.id == id))
   }
 
@@ -140,6 +169,9 @@ package object nkm {
     def toCoords: Seq[HexCoordinates] =
       cells.map(_.coordinates)
 
+    def characters: Seq[NkmCharacter] =
+      characterIds.toCharacters
+
     def characterIds: Seq[CharacterId] =
       cells.flatMap(_.characterId)
 
@@ -154,6 +186,30 @@ package object nkm {
 
     def whereFreeToPass(forCharacterId: CharacterId): Seq[HexCell] =
       cells.filter(_.isFreeToPass(forCharacterId))
+
+    def whereFriendsOfC(characterId: CharacterId): Seq[HexCell] =
+      friendsOfC(characterId).map(_.parentCell.get)
+
+    def whereEnemiesOfC(characterId: CharacterId): Seq[HexCell] =
+      enemiesOfC(characterId).map(_.parentCell.get)
+
+    def friendsOfC(characterId: CharacterId): Seq[NkmCharacter] =
+      characters.filter(_.isFriendForC(characterId))
+
+    def enemiesOfC(characterId: CharacterId): Seq[NkmCharacter] =
+      characters.filter(_.isEnemyForC(characterId))
+
+    def whereFriendsOf(playerId: PlayerId): Seq[HexCell] =
+      friendsOf(playerId).map(_.parentCell.get)
+
+    def whereEnemiesOf(playerId: PlayerId): Seq[HexCell] =
+      enemiesOf(playerId).map(_.parentCell.get)
+
+    def friendsOf(playerId: PlayerId): Seq[NkmCharacter] =
+      characters.filter(_.isFriendFor(playerId))
+
+    def enemiesOf(playerId: PlayerId): Seq[NkmCharacter] =
+      characters.filter(_.isEnemyFor(playerId))
   }
 
   implicit class HexDirectionUtils(direction: HexDirection) {
