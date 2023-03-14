@@ -2,6 +2,7 @@ package com.tosware.nkm.models.game.abilities.ochaco_uraraka
 
 import com.tosware.nkm._
 import com.tosware.nkm.models.game._
+import com.tosware.nkm.models.game.abilities.ochaco_uraraka.ZeroGravity.applyZeroGravity
 import com.tosware.nkm.models.game.ability._
 import com.tosware.nkm.models.game.hex.HexCoordinates
 
@@ -18,6 +19,9 @@ object ZeroGravity {
           |Characters with Zero Gravity effect can fly.""".stripMargin,
       variables = NkmConf.extract("abilities.ochaco_uraraka.zeroGravity"),
     )
+
+  def applyZeroGravity(cid: CharacterId, gameState: GameState)(implicit random: Random, causedById: String): GameState =
+    gameState.addEffect(cid, effects.Fly(randomUUID(), metadata.variables("duration")))
 }
 
 case class ZeroGravity(abilityId: AbilityId, parentCharacterId: CharacterId)
@@ -35,7 +39,7 @@ case class ZeroGravity(abilityId: AbilityId, parentCharacterId: CharacterId)
     basicAttackCells.whereCharacters
   override def basicAttack(targetCharacterId: CharacterId)(implicit random: Random, gameState: GameState): GameState =
     if(gameState.characterById(targetCharacterId).isFriendForC(parentCharacterId))
-      gameState
+      applyZeroGravity(targetCharacterId, gameState)(random, id)
     else
       parentCharacter
         .defaultBasicAttack(targetCharacterId)
