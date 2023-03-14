@@ -3,6 +3,7 @@ package com.tosware.nkm.models.game.abilities.monkey_d_luffy
 import com.tosware.nkm._
 import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.game.ability._
+import com.tosware.nkm.models.game.character.StatType
 
 import scala.util.Random
 
@@ -28,7 +29,13 @@ case class GearSecond(abilityId: AbilityId, parentCharacterId: CharacterId)
     with Usable {
   override val metadata: AbilityMetadata = GearSecond.metadata
 
-  override def use(useData: UseData)(implicit random: Random, gameState: GameState): GameState = {
+  override def use(useData: UseData)(implicit random: Random, gameState: GameState): GameState =
     gameState
-  }
+      .addEffect(parentCharacterId, effects.AbilityEnchant(randomUUID(), metadata.variables("duration"), AbilityType.Normal))(random, id)
+      .addEffect(parentCharacterId, effects.StatBuff(
+        randomUUID(),
+        metadata.variables("duration"),
+        StatType.Speed,
+        metadata.variables("bonusSpeed"),
+      ))(random, id)
 }

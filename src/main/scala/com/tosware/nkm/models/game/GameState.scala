@@ -620,6 +620,19 @@ case class GameState
     }
   }
 
+  def jump(
+    characterId: CharacterId,
+    direction: HexDirection,
+    amount: Int,
+  )(implicit random: Random, causedById: String): GameState = {
+    val parentCellOpt = hexMap.getCellOfCharacter(characterId)
+    parentCellOpt.fold(this) { parentCell =>
+      val lineCells: Seq[HexCell] = parentCell +: parentCell.getLine(direction, amount)(this)
+      val cellToTeleport = lineCells.findLast(_.isFreeToStand).get
+      teleportCharacter(characterId, cellToTeleport.coordinates)(random, id)
+    }
+  }
+
   def checkIfCharacterDied(characterId: CharacterId)(implicit random: Random, causedById: String): GameState =
     if(characterById(characterId).isDead) {
       handleCharacterDeath(characterId)

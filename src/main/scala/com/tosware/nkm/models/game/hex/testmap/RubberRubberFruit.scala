@@ -24,7 +24,7 @@ object RubberRubberFruit {
       (8, 0, SpawnPoint, 1),
       (9, 0),
       (10, 0),
-      (11, 0),
+      (11, 0, Wall),
       (12, 0),
       (13, 0),
     ),
