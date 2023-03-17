@@ -816,19 +816,19 @@ case class GameState
       .logEvent(TurnStarted(randomUUID(), phase, turn, causedById))
   }
 
-  def skipTurnIfNoCharactersToTakeAction()(implicit random: Random, causedById: String = id): GameState =
+  protected def skipTurnIfNoCharactersToTakeAction()(implicit random: Random, causedById: String = id): GameState =
     if(currentPlayer.characterIds.intersect(charactersToTakeAction).isEmpty)
       incrementTurn()
     else this
 
-  def skipTurnIfPlayerKnockedOut()(implicit random: Random, causedById: String = id): GameState = {
+  protected def skipTurnIfPlayerKnockedOut()(implicit random: Random, causedById: String = id): GameState = {
     if(gameStatus != GameStatus.Running) return this // prevent infinite loop if no one is playing
     if(currentPlayer.victoryStatus != VictoryStatus.Pending)
       incrementTurn()
     else this
   }
 
-  def decrementEndTurnCooldowns()(implicit random: Random, causedById: String = id): GameState = {
+  protected def decrementEndTurnCooldowns()(implicit random: Random, causedById: String = id): GameState = {
     val currentCharacterAbilityIds = currentCharacterOpt.get.state.abilities.map(_.id)
     val currentCharacterEffectIds = currentCharacterOpt.get.state.effects.map(_.id)
 

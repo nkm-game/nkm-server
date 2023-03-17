@@ -28,15 +28,15 @@ object TiamatsIntervention {
 }
 
 case class TiamatsIntervention(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId) with UsableOnCharacter {
-  override val metadata = TiamatsIntervention.metadata
+  override val metadata: AbilityMetadata = TiamatsIntervention.metadata
 
-  override def rangeCellCoords(implicit gameState: GameState) =
-    parentCell.get.coordinates.getCircle(metadata.variables("range")).whereExists
+  override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =
+    parentCell.fold(Set.empty[HexCoordinates])(_.coordinates.getCircle(metadata.variables("range")).whereExists)
 
-  override def targetsInRange(implicit gameState: GameState) =
+  override def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] =
     rangeCellCoords.whereCharacters
 
-  override def use(target: CharacterId, useData: UseData)(implicit random: Random, gameState: GameState) = {
+  override def use(target: CharacterId, useData: UseData)(implicit random: Random, gameState: GameState): GameState = {
     val targetCoords = useData.data.parseJson.convertTo[HexCoordinates]
     val gs = gameState.teleportCharacter(target, targetCoords)(random, id)
     if(parentCharacter.isEnemyForC(target)) {
