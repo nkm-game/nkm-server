@@ -34,7 +34,7 @@ class DrainTouchSpec
         .gameLog
         .events
         .ofType[GameEvent.CharacterDamaged]
-        .map(_.causedById) should contain only s.defaultAbilityId
+        .map(_.causedById) should contain (s.defaultAbilityId)
     }
 
     "be able to heal" in {

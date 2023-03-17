@@ -3,6 +3,8 @@ package com.tosware.nkm.models.game.abilities.satou_kazuma
 import com.tosware.nkm._
 import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.game.ability._
+import com.tosware.nkm.models.game.event.GameEvent.CharacterDamaged
+import com.tosware.nkm.models.game.hex.{HexCoordinates, SearchFlag}
 
 import scala.util.Random
 
@@ -24,6 +26,26 @@ case class DrainTouch(abilityId: AbilityId, parentCharacterId: CharacterId)
     with UsableOnCharacter {
   override val metadata: AbilityMetadata = DrainTouch.metadata
 
-  override def use(target: CharacterId, useData: UseData)(implicit random: Random, gameState: GameState): GameState =
-    gameState
+  override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =
+    parentCell.fold(Set.empty[HexCoordinates])(
+      _.getArea(metadata.variables("range"), Set(SearchFlag.StraightLine)).toCoords
+    )
+
+  override def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] =
+    rangeCellCoords.whereEnemiesOfC(parentCharacterId)
+
+  override def use(target: CharacterId, useData: UseData)(implicit random: Random, gameState: GameState): GameState = {
+    val hitGs = hitAndDamageCharacter(target, Damage(DamageType.Magical, metadata.variables("damage")))
+    val amountToHealOpt =
+      hitGs
+        .gameLog
+        .events
+        .ofType[CharacterDamaged]
+        .causedBy(id)
+        .lastOption
+        .map(_.damage.amount)
+    amountToHealOpt.fold(hitGs) { amountToHeal =>
+      hitGs.heal(parentCharacterId, amountToHeal)(random, id)
+    }
+  }
 }
