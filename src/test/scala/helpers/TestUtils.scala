@@ -13,6 +13,7 @@ import org.scalatest.Assertion
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
+import scala.annotation.tailrec
 import scala.reflect.ClassTag
 import scala.util.Random
 
@@ -94,6 +95,14 @@ trait TestUtils
       .ofType[effects.StatBuff]
       .map(_.statType) should contain (statType)
 
+  protected def assertBuffDoesNotExist(statType: StatType, cid: CharacterId)(gameState: GameState): Assertion =
+    gameState
+      .characterById(cid)
+      .state
+      .effects
+      .ofType[effects.StatBuff]
+      .map(_.statType) should not contain (statType)
+
   protected def characterIdOnPoint(hexCoordinates: HexCoordinates)(implicit gameState: GameState): CharacterId =
     gameState.hexMap.getCell(hexCoordinates).get.characterId.get
 
@@ -141,5 +150,33 @@ trait TestUtils
         acc.placeCharacters(p.id, spawnsWithCharacters.toMap)
     }
     runningGameState
+  }
+
+  private def _passAllCharactersInNPhases(gs: GameState, n: Int): GameState =
+    Function.chain(List.fill(n)(_passAllCharactersInCurrentPhase))(gs)
+
+  private def _passAllCharactersInCurrentPhase(gs: GameState): GameState =
+    _passAllCharactersInPhase(gs, gs.phase.number)
+
+
+  @tailrec
+  private final def _passAllCharactersInPhase(gs: GameState, phaseNumber: Int): GameState =
+  {
+    val ngs = gs.characterTakingActionThisTurn.fold(gs)(_ => gs.endTurn())
+    if(ngs.phase.number != phaseNumber) return ngs
+
+    val charactersToPass = ngs.currentPlayer.characterIds.intersect(ngs.charactersToTakeAction)
+    _passAllCharactersInPhase(ngs.passTurn(charactersToPass.head), phaseNumber)
+  }
+
+  implicit class GameStateUtils(gs: GameState) {
+    def passAllCharactersInNPhases(n: Int): GameState =
+      _passAllCharactersInNPhases(gs, n)
+
+    def passAllCharactersInCurrentPhase(): GameState =
+      _passAllCharactersInCurrentPhase(gs)
+
+    final def passAllCharactersInPhase(phaseNumber: Int): GameState =
+      _passAllCharactersInPhase(gs, phaseNumber)
   }
 }

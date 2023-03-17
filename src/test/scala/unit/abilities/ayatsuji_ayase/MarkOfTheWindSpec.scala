@@ -26,29 +26,25 @@ class MarkOfTheWindSpec
   private val s = scenarios.Spacey1v1TestScenario(metadata)
   private val gameState: GameState = s.gameState
   private val markAbilityId =
-    s.p(0)(0).character.state.abilities(0).id
+    s.defaultAbilityId
   private val crackAbilityId =
-    s.p(0)(0).character.state.abilities(1).id
+    s.defaultCharacter.state.abilities(1).id
 
   private val markGs: GameState = gameState
     .useAbilityOnCoordinates(markAbilityId, HexCoordinates(0, 0))
-    .endTurn()
-    .passTurn(s.p(1)(0).character.id)
+    .passAllCharactersInCurrentPhase()
 
   private val crackGs: GameState = markGs
     .useAbility(crackAbilityId, UseData(CoordinateSeq((0, 0)).toJson.toString))
-    .endTurn()
-    .passTurn(s.p(1)(0).character.id)
+    .passAllCharactersInCurrentPhase()
 
   private val doubleMarkGs: GameState = markGs
     .useAbilityOnCoordinates(markAbilityId, HexCoordinates(1, 0))
-    .endTurn()
-    .passTurn(s.p(1)(0).character.id)
+    .passAllCharactersInCurrentPhase()
 
   private val doubleCrackGs: GameState = doubleMarkGs
     .useAbility(crackAbilityId, UseData(CoordinateSeq((0, 0), (1, 0)).toJson.toString))
-    .endTurn()
-    .passTurn(s.p(1)(0).character.id)
+    .passAllCharactersInCurrentPhase()
 
   private val fiveMarkGs: GameState = doubleMarkGs
     .useAbilityOnCoordinates(markAbilityId, HexCoordinates(2, 0)).endTurn().passTurn(s.p(1)(0).character.id)

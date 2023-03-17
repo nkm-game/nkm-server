@@ -22,9 +22,9 @@ object MjolnirHammer {
 
 case class MjolnirHammer(abilityId: AbilityId, parentCharacterId: CharacterId)
   extends Ability(abilityId, parentCharacterId)
-    with UsableOnCharacter {
+    with Usable {
   override val metadata: AbilityMetadata = MjolnirHammer.metadata
 
-  override def use(target: CharacterId, useData: UseData)(implicit random: Random, gameState: GameState): GameState =
+  override def use(useData: UseData)(implicit random: Random, gameState: GameState): GameState =
     gameState
 }
