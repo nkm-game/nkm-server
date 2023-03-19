@@ -155,6 +155,9 @@ case class GameState
   def hiddenEidsFor(forPlayerOpt: Option[PlayerId]): Seq[GameEventId] =
     hiddenEventsFor(forPlayerOpt).map(_.eid)
 
+  def newGameEventsSince(oldGs: GameState): Seq[GameEvent] =
+    gameLog.events.drop(oldGs.gameLog.events.size)
+
   def characterPickFinished: Boolean = {
     if(pickType == PickType.AllRandom) return true
     val draftPickFinished = draftPickState.fold(false)(_.pickPhase == DraftPickPhase.Finished)
