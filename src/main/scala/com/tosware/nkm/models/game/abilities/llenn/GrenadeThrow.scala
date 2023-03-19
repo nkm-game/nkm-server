@@ -22,10 +22,13 @@ object GrenadeThrow {
 }
 
 case class GrenadeThrow(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId) with UsableOnCoordinates {
-  override val metadata = GrenadeThrow.metadata
+  override val metadata: AbilityMetadata = GrenadeThrow.metadata
 
-  override def rangeCellCoords(implicit gameState: GameState) =
+  override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =
     parentCell.get.coordinates.getCircle(metadata.variables("range")).whereExists
+
+  override def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] =
+    rangeCellCoords
 
   override def use(target: HexCoordinates, useData: UseData)(implicit random: Random, gameState: GameState): GameState = {
     val targets = target.getCircle(metadata.variables("radius")).characters.map(_.id)

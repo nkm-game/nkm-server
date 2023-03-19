@@ -26,5 +26,6 @@ case class MjolnirDestinyImpulse(abilityId: AbilityId, parentCharacterId: Charac
     with UsableOnCoordinates {
   override val metadata: AbilityMetadata = MjolnirDestinyImpulse.metadata
 
-  override def use(target: HexCoordinates, useData: UseData)(implicit random: Random, gameState: GameState): GameState = ???
+  override def use(target: HexCoordinates, useData: UseData)(implicit random: Random, gameState: GameState): GameState =
+    gameState
 }

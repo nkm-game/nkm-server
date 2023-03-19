@@ -28,6 +28,9 @@ case class Aster(abilityId: AbilityId, parentCharacterId: CharacterId) extends A
   override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =
     parentCell.get.coordinates.getCircle(metadata.variables("range")).whereExists
 
+  override def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] =
+    rangeCellCoords
+
   override def use(target: HexCoordinates, useData: UseData)(implicit random: Random, gameState: GameState): GameState = {
     val targets = target.getCircle(metadata.variables("radius")).whereEnemiesOfC(parentCharacterId).characters.map(_.id)
     val damage = Damage(DamageType.Magical, metadata.variables("damage"))

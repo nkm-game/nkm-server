@@ -35,7 +35,7 @@ trait UsableOnTarget[T] { this: Ability =>
 
 trait UsableOnCoordinates extends UsableOnTarget[HexCoordinates] { this: Ability =>
   override def useChecks(implicit target: HexCoordinates, useData: UseData, gameState: GameState): Set[UseCheck] =
-    super.useChecks + UseCheck.TargetCoordinates.InRange
+    super.useChecks + UseCheck.TargetCoordinates.ExistsOnMap + UseCheck.TargetCoordinates.InRange
 }
 
 trait UsableOnCharacter extends UsableOnTarget[CharacterId] { this: Ability =>

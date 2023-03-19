@@ -3,10 +3,9 @@ package unit.abilities.llenn
 import com.tosware.nkm.models.GameStateValidator
 import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.game.abilities.llenn.GrenadeThrow
-import com.tosware.nkm.models.game.character.CharacterMetadata
 import com.tosware.nkm.models.game.event.GameEvent
-import com.tosware.nkm.models.game.hex.HexCoordinates
-import helpers.{TestUtils, scenarios}
+import com.tosware.nkm.models.game.hex.{HexCoordinates, TestHexMapName}
+import helpers.{TestScenario, TestUtils}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
@@ -15,27 +14,25 @@ class GrenadeThrowSpec
     with Matchers
     with TestUtils
 {
-  private val metadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(GrenadeThrow.metadata.id))
-  private val s = scenarios.Simple2v2TestScenario(metadata)
-  private implicit val gameState: GameState = s.gameState
-  private val abilityId = s.p(0)(0).character.state.abilities.head.id
+  private val abilityMetadata = GrenadeThrow.metadata
+  private val s = TestScenario.generate(TestHexMapName.Simple2v2, abilityMetadata.id)
+  private val aGs: GameState = s.gameState.useAbilityOnCoordinates(s.defaultAbilityId, HexCoordinates(2, 0))
 
-  GrenadeThrow.metadata.name must {
+  abilityMetadata.name must {
     "be able to use on all coords" in {
-      val validator = GameStateValidator()
-
-      val allCoords = gameState.hexMap.cells.toCoords
+      val validator = GameStateValidator()(s.gameState)
+      val allCoords = s.gameState.hexMap.cells.map(_.coordinates)
       allCoords.foreach { c =>
-        val r = validator.validateAbilityUseOnCoordinates(s.p(0)(0).character.owner.id, abilityId, c)
-        assertCommandSuccess(r)
+        assertCommandSuccess {
+          validator.validateAbilityUseOnCoordinates(s.owners(0), s.defaultAbilityId, c)
+        }
       }
     }
 
     "be able to damage characters" in {
-      val abilityUsedGameState: GameState = gameState.useAbilityOnCoordinates(abilityId, HexCoordinates(2, 0))
-      abilityUsedGameState.gameLog.events
+      aGs.gameLog.events
         .ofType[GameEvent.CharacterDamaged]
-        .causedBy(abilityId)
+        .causedBy(s.defaultAbilityId)
         .size should be (3)
     }
   }

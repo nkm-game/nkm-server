@@ -117,12 +117,14 @@ abstract class Ability(val id: AbilityId, pid: CharacterId)
     }
 
     object TargetCoordinates {
+      def ExistsOnMap(implicit target: HexCoordinates, useData: UseData, gameState: GameState): UseCheck =
+        Seq(target).toCells.nonEmpty -> s"Target does not exist on the map. ($target)"
       def InRange(implicit target: HexCoordinates, useData: UseData, gameState: GameState): UseCheck =
-        Seq(target).toCells.nonEmpty -> "Target is not in range."
+        targetsInRange.contains(target) -> s"Target is not in range. ($target)"
       def IsFreeToStand(implicit target: HexCoordinates, useData: UseData, gameState: GameState): UseCheck =
-        Seq(target).toCells.headOption.fold(false)(_.isFreeToStand) -> "Target is not free to stand."
+        Seq(target).toCells.headOption.fold(false)(_.isFreeToStand) -> s"Target is not free to stand. ($target)"
       def IsFriendlySpawn(implicit target: HexCoordinates, useData: UseData, gameState: GameState): UseCheck =
-        gameState.hexMap.getSpawnPointsFor(parentCharacter.owner.id).toCoords.contains(target) -> "Target is not a friendly spawn."
+        gameState.hexMap.getSpawnPointsFor(parentCharacter.owner.id).toCoords.contains(target) -> s"Target is not a friendly spawn. ($target)"
     }
   }
 }
