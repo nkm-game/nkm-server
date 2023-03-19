@@ -4,6 +4,7 @@ import com.tosware.nkm._
 import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.game.ability._
 import com.tosware.nkm.models.game.effects.{Disarm, HasToTakeAction}
+import com.tosware.nkm.models.game.hex.HexCoordinates
 
 import scala.util.Random
 
@@ -21,24 +22,23 @@ object Check {
 }
 
 case class Check(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId) with UsableOnCharacter {
-  override val metadata = Check.metadata
+  override val metadata: AbilityMetadata = Check.metadata
 
-  override def rangeCellCoords(implicit gameState: GameState) =
+  override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =
     gameState.hexMap.cells.toCoords
 
-  override def targetsInRange(implicit gameState: GameState) = {
+  override def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] = {
     rangeCellCoords
       .whereEnemiesOfC(parentCharacterId)
       .characters.filterNot(c => gameState.characterIdsThatTookActionThisPhase.contains(c.id))
       .flatMap(_.parentCell.map(_.coordinates))
   }
 
-  override def use(target: CharacterId, useData: UseData)(implicit random: Random, gameState: GameState) = {
+  override def use(target: CharacterId, useData: UseData)(implicit random: Random, gameState: GameState): GameState =
     gameState
       .abilityHitCharacter(id, target)
       .addEffect(target, effects.Disarm(randomUUID(), metadata.variables("disarmDuration")))(random, id)
       .addEffect(target, effects.HasToTakeAction(randomUUID(), 1))(random, id)
-  }
 
   override def useChecks(implicit target: CharacterId, useData: UseData, gameState: GameState): Set[UseCheck] = {
     super.useChecks ++ Seq(

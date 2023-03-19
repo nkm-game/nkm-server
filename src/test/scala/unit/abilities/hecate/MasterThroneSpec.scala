@@ -12,39 +12,43 @@ class MasterThroneSpec
     with Matchers
     with TestUtils
 {
+  private val abilityMetadata = MasterThrone.metadata
   private val metadata = CharacterMetadata.empty()
     .copy(initialAbilitiesMetadataIds = Seq(
-      MasterThrone.metadata.id,
+      abilityMetadata.id,
       Aster.metadata.id,
       PowerOfExistence.metadata.id,
     ))
   private val s = scenarios.Simple2v2TestScenario(metadata)
-  private implicit val gameState: GameState = s.gameState
-  private val abilityId =
-    s.p(0)(0).character.state.abilities(0).id
   private val asterAbilityId =
-    s.p(0)(0).character.state.abilities(1).id
+    s.defaultCharacter.state.abilities(1).id
   private val powerOfExistenceAbilityId =
-    s.p(0)(0).character.state.abilities(2).id
+    s.defaultCharacter.state.abilities(2).id
 
-  MasterThrone.metadata.name must {
+  private def collectedEnergy(gs: GameState): Int =
+    gs.abilityById(s.defaultAbilityId)
+      .asInstanceOf[MasterThrone]
+      .collectedEnergy(gs)
+
+  private val aaGs: GameState = s.gameState.basicAttack(s.p(0)(0).character.id, s.p(1)(0).character.id)
+  private val asterGs: GameState = s.gameState.useAbilityOnCoordinates(asterAbilityId, s.p(0)(1).spawnCoordinates)
+  private val poeGs: GameState = s.gameState.useAbility(powerOfExistenceAbilityId)
+
+  abilityMetadata.name must {
     "not be initialized with energy" in {
-      gameState.abilityById(abilityId).asInstanceOf[MasterThrone].collectedEnergy should be(0)
+      collectedEnergy(s.gameState) should be(0)
     }
 
     "be able to collect energy from basic attacks" in {
-      val newGameState: GameState = gameState.basicAttack(s.p(0)(0).character.id, s.p(1)(0).character.id)
-      newGameState.abilityById(abilityId).asInstanceOf[MasterThrone].collectedEnergy(newGameState) should be > 0
+      collectedEnergy(aaGs) should be > 0
     }
 
     "be able to collect energy from normal ability" in {
-      val newGameState: GameState = gameState.useAbilityOnCoordinates(asterAbilityId, s.p(0)(1).spawnCoordinates)
-      newGameState.abilityById(abilityId).asInstanceOf[MasterThrone].collectedEnergy(newGameState) should be > 0
+      collectedEnergy(asterGs) should be > 0
     }
 
     "not be able to collect energy from ultimate ability" in {
-      val newGameState: GameState = gameState.useAbility(powerOfExistenceAbilityId)
-      newGameState.abilityById(abilityId).asInstanceOf[MasterThrone].collectedEnergy(newGameState) should be (0)
+      collectedEnergy(poeGs) should be (0)
     }
   }
 }

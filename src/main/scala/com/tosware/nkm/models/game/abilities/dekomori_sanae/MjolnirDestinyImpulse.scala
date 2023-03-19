@@ -14,7 +14,7 @@ object MjolnirDestinyImpulse {
       abilityType = AbilityType.Ultimate,
       description =
         """Character hits with a hammer in a selected area, dealing {damage} physical damage to all enemies in radius {radius}.
-          |This ability can be used again this turn if it kills at least one enemy.
+          |This ability can be used again this turn every time it kills at least one enemy.
           |
           |Range: circular, {range}""".stripMargin,
       variables = NkmConf.extract("abilities.dekomori_sanae.mjolnirDestinyImpulse"),
