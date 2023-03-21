@@ -41,6 +41,12 @@ class MjolnirHammerSpec
     s.gameState
       .useAbility(s.defaultAbilityId, doubleUseData)
 
+  private val doubleInvalidUseData =
+    UseData(CoordinateSeq((-1, 0), (1, 0)).toJson.toString)
+
+  private val doubleSameInvalidUseData =
+    UseData(Seq(s.p(1)(0).spawnCoordinates, s.p(1)(0).spawnCoordinates).toJson.toString)
+
 
   abilityMetadata.name must {
     "not be able to use without target" in {
@@ -70,6 +76,20 @@ class MjolnirHammerSpec
       }
     }
 
+    "not be able to use on double invalid targets that exist on map" in {
+      assertCommandFailure {
+        GameStateValidator()(s.gameState)
+          .validateAbilityUse(s.owners(0), s.defaultAbilityId, doubleInvalidUseData)
+      }
+    }
+
+    "not be able to use on same target as double target" in {
+      assertCommandFailure {
+        GameStateValidator()(s.gameState)
+          .validateAbilityUse(s.owners(0), s.defaultAbilityId, doubleSameInvalidUseData)
+      }
+    }
+
     "apply half damage on second hit if used on the same target" in {
       val dmgAmounts =
         usedOnSingleGs
@@ -94,7 +114,7 @@ class MjolnirHammerSpec
           .map(_.damage.amount)
 
       dmgAmounts.size should be (2)
-      dmgAmounts(0) should be (dmgAmounts(1) * 2)
+      dmgAmounts(0) should be (dmgAmounts(1))
     }
   }
 }

@@ -77,7 +77,7 @@ case class CrackTheSky(abilityId: AbilityId, parentCharacterId: CharacterId)
       (targetCoords.toCells.size == targetCoords.size) ->
         "Not all selected coordinates exist.",
       targetCoords.toCells.forall(_.effects.ofType[hex_effects.MarkOfTheWind].nonEmpty) ->
-        "Not all selected coordinates have traps on them."
+        "Not all selected coordinates have traps on them.",
     )
   }
 
