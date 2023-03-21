@@ -3,9 +3,9 @@ package unit.abilities.ebisuzawa_kurumi
 import com.tosware.nkm.models.GameStateValidator
 import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.game.abilities.ebisuzawa_kurumi.FinalSolution
-import com.tosware.nkm.models.game.character.CharacterMetadata
 import com.tosware.nkm.models.game.event.GameEvent
-import helpers.{TestUtils, scenarios}
+import com.tosware.nkm.models.game.hex.TestHexMapName
+import helpers.{TestScenario, TestUtils}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
@@ -15,27 +15,35 @@ class FinalSolutionSpec
     with TestUtils
 {
   private val abilityMetadata = FinalSolution.metadata
-  private val metadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
-  private val s = scenarios.Simple2v2TestScenario(metadata)
-  private implicit val gameState: GameState = s.gameState.incrementPhase(4)
+  private val s = TestScenario.generate(TestHexMapName.Simple2v2, abilityMetadata.id)
   private val abilityId = s.p(0)(1).character.state.abilities.head.id
+
+  private val damagedGs: GameState =
+    s.ultGs
+      .damageCharacter(s.p(1)(0).character.id, Damage(DamageType.True, 20))
+
+  private val aGs: GameState =
+    damagedGs
+      .useAbilityOnCharacter(abilityId, s.p(1)(0).character.id)
 
   abilityMetadata.name must {
     "be able to use" in {
       assertCommandSuccess {
-        GameStateValidator()
-          .validateAbilityUseOnCharacter(s.p(0)(1).character.owner.id, abilityId, s.p(1)(0).character.id)
+        GameStateValidator()(damagedGs)
+          .validateAbilityUseOnCharacter(s.owners(0), abilityId, s.p(1)(0).character.id)
       }
     }
 
     "be able to deal damage" in {
-      val ngs: GameState = gameState.useAbilityOnCharacter(abilityId, s.p(1)(0).character.id)
-      ngs.gameLog.events.ofType[GameEvent.CharacterDamaged].exists(_.causedById == abilityId) should be (true)
+      aGs
+        .gameLog
+        .events
+        .ofType[GameEvent.CharacterDamaged]
+        .map(_.causedById) should contain (abilityId)
     }
 
     "apply bleeding effect" in {
-      val ngs: GameState = gameState.useAbilityOnCharacter(abilityId, s.p(1)(0).character.id)
-      ngs.characterById(s.p(1)(0).character.id).state.effects.ofType[effects.Poison] should not be empty
+      assertEffectExistsOfType[effects.Poison](s.p(1)(0).character.id)(aGs)
     }
   }
 }

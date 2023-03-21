@@ -68,6 +68,10 @@ object GameEvent {
   case class CharacterTeleported(id: GameEventId, phase: Phase, turn: Turn, causedById: String, characterId: CharacterId, target: HexCoordinates)
     extends GameEvent
       with ContainsCharacterId
+  case class DamagePrepared(id: GameEventId, phase: Phase, turn: Turn, causedById: String, characterId: CharacterId, damage: Damage)
+    extends GameEvent
+  case class DamageAmplified(id: GameEventId, phase: Phase, turn: Turn, causedById: String, damagePreparedId: GameEventId, additionalAmount: Int)
+    extends GameEvent
   case class CharacterDamaged(id: GameEventId, phase: Phase, turn: Turn, causedById: String, characterId: CharacterId, damage: Damage)
     extends GameEvent
       with ContainsCharacterId

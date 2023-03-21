@@ -70,6 +70,8 @@ trait NkmJsonProtocol
         case e: CharacterPreparedToAttack => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
         case e: CharacterBasicAttacked => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
         case e: CharacterTeleported => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
+        case e: DamagePrepared => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
+        case e: DamageAmplified => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
         case e: CharacterDamaged => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
         case e: HealPrepared => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
         case e: HealAmplified => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
@@ -121,6 +123,8 @@ trait NkmJsonProtocol
         case "CharacterPreparedToAttack" => ges.eventJson.parseJson.convertTo[CharacterPreparedToAttack]
         case "CharacterBasicAttacked" => ges.eventJson.parseJson.convertTo[CharacterBasicAttacked]
         case "CharacterTeleported" => ges.eventJson.parseJson.convertTo[CharacterTeleported]
+        case "DamagePrepared" => ges.eventJson.parseJson.convertTo[DamagePrepared]
+        case "DamageAmplified" => ges.eventJson.parseJson.convertTo[DamageAmplified]
         case "CharacterDamaged" => ges.eventJson.parseJson.convertTo[CharacterDamaged]
         case "HealPrepared" => ges.eventJson.parseJson.convertTo[HealPrepared]
         case "HealAmplified" => ges.eventJson.parseJson.convertTo[HealAmplified]

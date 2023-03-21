@@ -23,7 +23,7 @@ class RubberHumanSpec
       .updateCharacter(s.p(1)(0).character.id)(_.modify(_.state.attackType).setTo(AttackType.Ranged))
   private val meleeAttackerGs =
     s.gameState
-      .updateCharacter(s.p(1)(0).character.id)(_.modify(_.state.attackType).setTo(AttackType.Ranged))
+      .updateCharacter(s.p(1)(0).character.id)(_.modify(_.state.attackType).setTo(AttackType.Melee))
 
   def getDamageDealtByAttack(gs: GameState): Int =
     gs

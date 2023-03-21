@@ -529,35 +529,60 @@ case class GameState
   def damageCharacter(characterId: CharacterId, damage: Damage)(implicit random: Random, causedById: String): GameState = {
     if(characterById(characterId).isDead) {
       logger.error(s"Unable to damage character $characterId. Character dead.")
-      this
-    } else {
-      updateCharacter(characterId)(_.receiveDamage(damage))
-        .checkIfCharacterDied(characterId) // needs to be removed first in order to avoid infinite triggers
-        .logEvent(CharacterDamaged(randomUUID(), phase, turn, causedById, characterId, damage))
+      return this
     }
+    val damagePreparedId = randomUUID()
+    val damagePreparedGs = logEvent(DamagePrepared(damagePreparedId, phase, turn, causedById, characterId, damage))
+
+    val additionalDamage =
+      damagePreparedGs
+        .gameLog
+        .events
+        .ofType[DamageAmplified]
+        .filter(_.damagePreparedId == damagePreparedId)
+        .map(_.additionalAmount)
+        .sum
+
+    val resultDamage = damage.copy(amount = Math.max(0, damage.amount + additionalDamage))
+
+    if(resultDamage.amount <= 0)
+      return damagePreparedGs
+
+    damagePreparedGs
+      .updateCharacter(characterId)(_.receiveDamage(resultDamage))
+      .checkIfCharacterDied(characterId) // needs to be removed first in order to avoid infinite triggers
+      .logEvent(CharacterDamaged(randomUUID(), phase, turn, causedById, characterId, resultDamage))
   }
 
-  def heal(characterId: CharacterId, amount: Int)(implicit random: Random, causedById: String): GameState =
+  def amplifyDamage(damagePreparedId: GameEventId, additionalAmount: Int)(implicit random: Random, causedById: String): GameState =
+    if(additionalAmount == 0)
+      this
+    else
+      logEvent(DamageAmplified(randomUUID(), phase, turn, causedById, damagePreparedId, additionalAmount))
+
+  def heal(characterId: CharacterId, amount: Int)(implicit random: Random, causedById: String): GameState = {
     if(characterById(characterId).isDead) {
       logger.error(s"Unable to heal character $characterId. Character dead.")
-      this
-    } else {
-      val healPreparedId = randomUUID()
-      val healPreparedGs = logEvent(HealPrepared(healPreparedId, phase, turn, causedById, characterId, amount))
+      return this
+    }
+    val healPreparedId = randomUUID()
+    val healPreparedGs = logEvent(HealPrepared(healPreparedId, phase, turn, causedById, characterId, amount))
 
-      val additionalHealing = healPreparedGs.gameLog.events
-        .inTurn(turn.number)
+    val additionalHealing =
+      healPreparedGs
+        .gameLog
+        .events
         .ofType[HealAmplified]
         .filter(_.healPreparedId == healPreparedId)
         .map(_.additionalAmount)
         .sum
 
-      val resultHealing = amount + additionalHealing
+    val resultHealing = amount + additionalHealing
 
-      healPreparedGs
-        .updateCharacter(characterId)(_.heal(resultHealing))
-        .logEvent(CharacterHealed(randomUUID(), phase, turn, causedById, characterId, resultHealing))
-    }
+    healPreparedGs
+      .updateCharacter(characterId)(_.heal(resultHealing))
+      .logEvent(CharacterHealed(randomUUID(), phase, turn, causedById, characterId, resultHealing))
+  }
 
   def amplifyHeal(healPreparedId: GameEventId, additionalAmount: Int)(implicit random: Random, causedById: String): GameState =
     if(additionalAmount == 0)
