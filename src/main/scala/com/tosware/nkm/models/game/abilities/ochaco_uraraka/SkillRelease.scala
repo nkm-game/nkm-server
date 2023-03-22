@@ -4,6 +4,7 @@ import com.tosware.nkm._
 import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.game.ability._
 import com.tosware.nkm.models.game.character_effect.CharacterEffectName
+import com.tosware.nkm.models.game.hex.HexCoordinates
 
 import scala.util.Random
 
@@ -25,6 +26,14 @@ case class SkillRelease(abilityId: AbilityId, parentCharacterId: CharacterId)
   extends Ability(abilityId, parentCharacterId)
     with Usable {
   override val metadata: AbilityMetadata = SkillRelease.metadata
+  override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =
+    gameState.hexMap.cells.toCoords
+  override def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] =
+    gameState
+      .effects
+      .filter(_.state.name == CharacterEffectName.ZeroGravity)
+      .flatMap(_.parentCharacter.parentCell)
+      .map(_.coordinates)
 
   override def use(useData: UseData)(implicit random: Random, gameState: GameState): GameState = {
     val zeroGravityEffects =
