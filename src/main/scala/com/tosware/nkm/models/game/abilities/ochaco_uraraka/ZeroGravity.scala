@@ -21,7 +21,7 @@ object ZeroGravity {
     )
 
   def applyZeroGravity(cid: CharacterId, gameState: GameState)(implicit random: Random, causedById: String): GameState =
-    gameState.addEffect(cid, effects.Fly(randomUUID(), metadata.variables("duration")))
+    gameState.addEffect(cid, effects.Fly(randomUUID(), metadata.variables("duration"), effects.ZeroGravity.metadata))
 }
 
 case class ZeroGravity(abilityId: AbilityId, parentCharacterId: CharacterId)

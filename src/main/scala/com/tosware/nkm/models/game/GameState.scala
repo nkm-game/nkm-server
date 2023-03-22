@@ -683,7 +683,14 @@ case class GameState
 
   def addEffect(characterId: CharacterId, characterEffect: CharacterEffect)(implicit random: Random, causedById: String): GameState =
     updateCharacter(characterId)(_.addEffect(characterEffect))
-      .modify(_.characterEffectStates).using(ces => ces.updated(characterEffect.id, CharacterEffectState(characterEffect.initialCooldown)))
+      .modify(_.characterEffectStates)
+      .using(_.updated(
+        characterEffect.id,
+        CharacterEffectState(
+          characterEffect.metadata.name,
+          characterEffect.initialCooldown
+        )
+      ))
       .logEvent(EffectAddedToCharacter(randomUUID(), phase, turn, causedById, characterEffect.id, characterId))
 
   def removeEffects(characterEffectIds: Seq[CharacterEffectId])(implicit random: Random, causedById: String): GameState =

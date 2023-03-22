@@ -3,6 +3,7 @@ package com.tosware.nkm.models.game.abilities.ochaco_uraraka
 import com.tosware.nkm._
 import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.game.ability._
+import com.tosware.nkm.models.game.character_effect.CharacterEffectName
 
 import scala.util.Random
 
@@ -25,6 +26,27 @@ case class SkillRelease(abilityId: AbilityId, parentCharacterId: CharacterId)
     with Usable {
   override val metadata: AbilityMetadata = SkillRelease.metadata
 
-  override def use(useData: UseData)(implicit random: Random, gameState: GameState): GameState =
-    gameState
+  override def use(useData: UseData)(implicit random: Random, gameState: GameState): GameState = {
+    val zeroGravityEffects =
+      gameState
+        .effects
+        .filter(_.state.name == CharacterEffectName.ZeroGravity)
+
+    val eidsToRemove: Set[CharacterEffectId] = zeroGravityEffects.map(_.id)
+    val characterIdsToStun =
+      zeroGravityEffects
+        .map(_.parentCharacter)
+        .filter(_.isEnemyForC(parentCharacterId))
+        .map(_.id)
+        .toSeq
+
+    val effectsRemovedGs =
+      gameState
+        .removeEffects(eidsToRemove.toSeq)(random, id)
+
+    characterIdsToStun.foldLeft(effectsRemovedGs)((acc, cid) => {
+      val stunEffect = effects.Stun(randomUUID(), metadata.variables("stunDuration"))
+      acc.addEffect(cid,stunEffect)(random, id)
+    })
+  }
 }

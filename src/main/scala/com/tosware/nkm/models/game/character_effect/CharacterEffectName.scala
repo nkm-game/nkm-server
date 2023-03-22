@@ -1,8 +1,9 @@
 package com.tosware.nkm.models.game.character_effect
 
+import enumeratum.EnumEntry.CapitalWords
 import enumeratum._
 
-sealed trait CharacterEffectName extends EnumEntry
+sealed trait CharacterEffectName extends EnumEntry with CapitalWords
 object CharacterEffectName extends Enum[CharacterEffectName] {
   val values: IndexedSeq[CharacterEffectName] = findValues
 
@@ -27,5 +28,6 @@ object CharacterEffectName extends Enum[CharacterEffectName] {
   case object StatBuff extends CharacterEffectName
   case object StatNerf extends CharacterEffectName
   case object Stun extends CharacterEffectName
+  case object ZeroGravity extends CharacterEffectName
 }
 

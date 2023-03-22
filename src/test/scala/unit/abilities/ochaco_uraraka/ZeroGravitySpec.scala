@@ -1,6 +1,7 @@
 package unit.abilities.ochaco_uraraka
 
 import com.tosware.nkm.models.game.abilities.ochaco_uraraka.ZeroGravity
+import com.tosware.nkm.models.game.character_effect.CharacterEffectName
 import com.tosware.nkm.models.game.effects.Fly
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.{TestScenario, TestUtils}
@@ -24,6 +25,7 @@ class ZeroGravitySpec
         .isFriendForC(s.p(0)(1).character.id)(attackedGs) shouldBe true
 
       assertEffectExistsOfType[Fly](s.p(0)(1).character.id)(attackedGs)
+      assertEffectsExist(Seq(CharacterEffectName.ZeroGravity), s.p(0)(1).character.id)(attackedGs)
     }
   }
 }

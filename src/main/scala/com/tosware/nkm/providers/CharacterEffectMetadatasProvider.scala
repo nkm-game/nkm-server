@@ -27,5 +27,6 @@ case class CharacterEffectMetadatasProvider() extends NkmJsonProtocol {
     StatBuff.metadata,
     StatNerf.metadata,
     Stun.metadata,
+    ZeroGravity.metadata,
   )
 }

@@ -12,6 +12,15 @@ object Fly {
   )
 }
 
-case class Fly(effectId: CharacterEffectId, initialCooldown: Int) extends CharacterEffect(effectId) {
-  val metadata: CharacterEffectMetadata = Fly.metadata
+object ZeroGravity {
+  def metadata: CharacterEffectMetadata =
+    CharacterEffectMetadata(
+      name = CharacterEffectName.ZeroGravity,
+      initialEffectType = CharacterEffectType.Positive,
+      description =
+        s"""Zero Gravity.
+           |${Fly.metadata.description}""".stripMargin,
+    )
 }
+
+case class Fly(effectId: CharacterEffectId, initialCooldown: Int, metadata: CharacterEffectMetadata = Fly.metadata) extends CharacterEffect(effectId)
