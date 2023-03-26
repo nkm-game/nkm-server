@@ -9,5 +9,5 @@ case class CharacterEffectMetadata
   description: String,
   isCc: Boolean = false,
 ) {
-  def id: CharacterEffectMetadataId = name.toString
+  def id: CharacterEffectMetadataId = name.entryName
 }

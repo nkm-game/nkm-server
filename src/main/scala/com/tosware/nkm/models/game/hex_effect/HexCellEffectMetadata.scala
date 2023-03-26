@@ -8,5 +8,5 @@ case class HexCellEffectMetadata
   initialEffectType: HexCellEffectType,
   description: String,
 ) {
-  def id: HexCellEffectId = name.toString
+  def id: HexCellEffectId = name.entryName
 }
