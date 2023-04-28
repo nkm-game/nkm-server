@@ -1,12 +1,13 @@
 package com.tosware.nkm.actors.ws
 
 import akka.actor.{Actor, ActorLogging, ActorRef, PoisonPill, Props}
+import com.tosware.nkm.UserId
 import com.tosware.nkm.services.http.directives.JwtSecretKey
 import com.tosware.nkm.services.{GameService, LobbyService}
 
 object WebsocketUser {
   case object GetAuthStatus
-  case class AuthStatus(username: Option[String])
+  case class AuthStatus(userIdOpt: Option[UserId])
   case class Connected(outgoing: ActorRef)
   case class IncomingMessage(text: String)
   case class OutgoingMessage(text: String)
@@ -22,26 +23,26 @@ trait WebsocketUser
 {
   import WebsocketUser._
 
-  var username: Option[String] = None
+  var userId: Option[UserId] = None
 
-  def parseIncomingMessage(outgoing: ActorRef, username: Option[String], text: String): Unit
+  def parseIncomingMessage(outgoing: ActorRef, userId: Option[UserId], text: String): Unit
 
-  def receive = {
+  def receive: Receive = {
     case Connected(outgoing) =>
       context.become(connected(outgoing))
   }
 
-  def connected(outgoing: ActorRef): Receive = {
+  private def connected(outgoing: ActorRef): Receive = {
     log.info(s"Connected")
 
     {
       case GetAuthStatus =>
         log.info("get auth status")
-        sender() ! AuthStatus(username)
+        sender() ! AuthStatus(userId)
       case Authenticate(u) =>
-        username = Some(u)
+        userId = Some(u)
       case IncomingMessage(text) =>
-        parseIncomingMessage(outgoing, username, text)
+        parseIncomingMessage(outgoing, userId, text)
       case PoisonPill =>
         log.info(s"Disconnected")
     }

@@ -1,4 +1,4 @@
 package com.tosware.nkm.models
 
-final case class RegisterRequest(login: String, email: String, password: String)
+final case class RegisterRequest(email: String, password: String)
 

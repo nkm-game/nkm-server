@@ -71,7 +71,7 @@ trait GameWebsocketUserBehaviour extends WebsocketUserBehaviour {
         WebsocketGameResponse(GameResponseType.Observe, StatusCodes.OK.intValue)
       case GameRoute.GetState =>
         val lobbyId = request.requestJson.parseJson.convertTo[GetState].lobbyId
-        val gameStateView = aw(gameService.getGameStateView(lobbyId, authStatus.username))
+        val gameStateView = aw(gameService.getGameStateView(lobbyId, authStatus.userIdOpt))
         WebsocketGameResponse(GameResponseType.State, StatusCodes.OK.intValue, gameStateView.toJson.toString)
       case GameRoute.GetCurrentClock =>
         val lobbyId = request.requestJson.parseJson.convertTo[GetCurrentClock].lobbyId
@@ -80,92 +80,92 @@ trait GameWebsocketUserBehaviour extends WebsocketUserBehaviour {
       case GameRoute.Pause =>
         val lobbyId = request.requestJson.parseJson.convertTo[Pause].lobbyId
         implicit val responseType: GameResponseType = GameResponseType.Pause
-        if (authStatus.username.isEmpty) return unauthorized()
-        val username = authStatus.username.get
+        if (authStatus.userIdOpt.isEmpty) return unauthorized()
+        val username = authStatus.userIdOpt.get
         val response = aw(gameService.pause(username, lobbyId))
         resolveResponse(response)
       case GameRoute.Surrender =>
         val lobbyId = request.requestJson.parseJson.convertTo[Surrender].lobbyId
         implicit val responseType: GameResponseType = GameResponseType.Surrender
-        if (authStatus.username.isEmpty) return unauthorized()
-        val username = authStatus.username.get
+        if (authStatus.userIdOpt.isEmpty) return unauthorized()
+        val username = authStatus.userIdOpt.get
         val response = aw(gameService.surrender(username, lobbyId))
         resolveResponse(response)
       case GameRoute.BanCharacters =>
         val banCharactersRequest = request.requestJson.parseJson.convertTo[BanCharacters]
         implicit val responseType: GameResponseType = GameResponseType.BanCharacters
-        if (authStatus.username.isEmpty) return unauthorized()
-        val username = authStatus.username.get
+        if (authStatus.userIdOpt.isEmpty) return unauthorized()
+        val username = authStatus.userIdOpt.get
         val response = aw(gameService.banCharacters(username, banCharactersRequest))
         resolveResponse(response)
       case GameRoute.PickCharacter =>
         val pickCharacterRequest = request.requestJson.parseJson.convertTo[PickCharacter]
         implicit val responseType: GameResponseType = GameResponseType.PickCharacter
-        if (authStatus.username.isEmpty) return unauthorized()
-        val username = authStatus.username.get
+        if (authStatus.userIdOpt.isEmpty) return unauthorized()
+        val username = authStatus.userIdOpt.get
         val response = aw(gameService.pickCharacter(username, pickCharacterRequest))
         resolveResponse(response)
       case GameRoute.BlindPickCharacters =>
         val blindPickCharacterRequest = request.requestJson.parseJson.convertTo[BlindPickCharacters]
         implicit val responseType: GameResponseType = GameResponseType.BlindPickCharacters
-        if (authStatus.username.isEmpty) return unauthorized()
-        val username = authStatus.username.get
+        if (authStatus.userIdOpt.isEmpty) return unauthorized()
+        val username = authStatus.userIdOpt.get
         val response = aw(gameService.blindPickCharacter(username, blindPickCharacterRequest))
         resolveResponse(response)
       case GameRoute.PlaceCharacters =>
         val placeCharactersRequest = request.requestJson.parseJson.convertTo[PlaceCharacters]
         implicit val responseType: GameResponseType = GameResponseType.PlaceCharacters
-        if (authStatus.username.isEmpty) return unauthorized()
-        val username = authStatus.username.get
+        if (authStatus.userIdOpt.isEmpty) return unauthorized()
+        val username = authStatus.userIdOpt.get
         val response = aw(gameService.placeCharacters(username, placeCharactersRequest))
         resolveResponse(response)
       case GameRoute.EndTurn =>
         val endTurnRequest = request.requestJson.parseJson.convertTo[EndTurn]
         implicit val responseType: GameResponseType = GameResponseType.EndTurn
-        if (authStatus.username.isEmpty) return unauthorized()
-        val username = authStatus.username.get
+        if (authStatus.userIdOpt.isEmpty) return unauthorized()
+        val username = authStatus.userIdOpt.get
         val response = aw(gameService.endTurn(username, endTurnRequest))
         resolveResponse(response)
       case GameRoute.PassTurn =>
         val passTurnRequest = request.requestJson.parseJson.convertTo[PassTurn]
         implicit val responseType: GameResponseType = GameResponseType.PassTurn
-        if (authStatus.username.isEmpty) return unauthorized()
-        val username = authStatus.username.get
+        if (authStatus.userIdOpt.isEmpty) return unauthorized()
+        val username = authStatus.userIdOpt.get
         val response = aw(gameService.passTurn(username, passTurnRequest))
         resolveResponse(response)
       case GameRoute.Move =>
         val moveCharacterRequest = request.requestJson.parseJson.convertTo[Move]
         implicit val responseType: GameResponseType = GameResponseType.Move
-        if (authStatus.username.isEmpty) return unauthorized()
-        val username = authStatus.username.get
+        if (authStatus.userIdOpt.isEmpty) return unauthorized()
+        val username = authStatus.userIdOpt.get
         val response = aw(gameService.moveCharacter(username, moveCharacterRequest))
         resolveResponse(response)
       case GameRoute.BasicAttack =>
         val basicAttackCharacterRequest = request.requestJson.parseJson.convertTo[BasicAttack]
         implicit val responseType: GameResponseType = GameResponseType.BasicAttack
-        if (authStatus.username.isEmpty) return unauthorized()
-        val username = authStatus.username.get
+        if (authStatus.userIdOpt.isEmpty) return unauthorized()
+        val username = authStatus.userIdOpt.get
         val response = aw(gameService.basicAttackCharacter(username, basicAttackCharacterRequest))
         resolveResponse(response)
       case GameRoute.UseAbility =>
         val useAbilityRequest = request.requestJson.parseJson.convertTo[UseAbility]
         implicit val responseType: GameResponseType = GameResponseType.UseAbility
-        if (authStatus.username.isEmpty) return unauthorized()
-        val username = authStatus.username.get
+        if (authStatus.userIdOpt.isEmpty) return unauthorized()
+        val username = authStatus.userIdOpt.get
         val response = aw(gameService.useAbility(username, useAbilityRequest))
         resolveResponse(response)
       case GameRoute.UseAbilityOnCoordinates =>
         val useAbilityRequest = request.requestJson.parseJson.convertTo[UseAbilityOnCoordinates]
         implicit val responseType: GameResponseType = GameResponseType.UseAbility
-        if (authStatus.username.isEmpty) return unauthorized()
-        val username = authStatus.username.get
+        if (authStatus.userIdOpt.isEmpty) return unauthorized()
+        val username = authStatus.userIdOpt.get
         val response = aw(gameService.useAbilityOnCoordinates(username, useAbilityRequest))
         resolveResponse(response)
       case GameRoute.UseAbilityOnCharacter =>
         val useAbilityRequest = request.requestJson.parseJson.convertTo[UseAbilityOnCharacter]
         implicit val responseType: GameResponseType = GameResponseType.UseAbility
-        if (authStatus.username.isEmpty) return unauthorized()
-        val username = authStatus.username.get
+        if (authStatus.userIdOpt.isEmpty) return unauthorized()
+        val username = authStatus.userIdOpt.get
         val response = aw(gameService.useAbilityOnCharacter(username, useAbilityRequest))
         resolveResponse(response)
       case GameRoute.SendChatMessage => ???

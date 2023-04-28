@@ -47,9 +47,9 @@ object Lobby {
 
   case class CreateSuccess(id: GameId, name: String, hostUserId: UserId, creationDate: LocalDateTime) extends Event
 
-  case class UserJoined(id: GameId, userId: String) extends Event
+  case class UserJoined(id: GameId, userId: UserId) extends Event
 
-  case class UserLeft(id: GameId, userId: String) extends Event
+  case class UserLeft(id: GameId, userId: UserId) extends Event
 
   case class MapNameSet(id: GameId, hexMapName: String) extends Event
 

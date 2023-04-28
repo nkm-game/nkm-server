@@ -7,8 +7,8 @@ import com.tosware.nkm.models.{Credentials, RegisterRequest}
 
 trait UserApiTrait extends ApiTrait
   {
-    val usernames = (1 to 5).map(x => { s"test_user_$x" })
-    val registerRequests = usernames.map(u => RegisterRequest(u, s"test_user_$u@example.com", "password"))
+    val emails: Seq[String] = (1 to 5).map(x => { s"test_user_$x@example.com" })
+    val registerRequests: Seq[RegisterRequest] = emails.map(e => RegisterRequest(e, "password"))
     var tokens: Seq[String] = Seq()
 
     def getAuthHeader(token: String) = RawHeader("Authorization", s"Bearer $token")
@@ -22,7 +22,7 @@ trait UserApiTrait extends ApiTrait
     override def beforeEach(): Unit = {
       super.beforeEach()
       registerRequests.foreach(r => Post("/api/register", r) ~> routes)
-      registerRequests.foreach(r => Post("/api/login", Credentials(r.login, r.password)) ~> routes ~> check {
+      registerRequests.foreach(r => Post("/api/login", Credentials(r.email, r.password)) ~> routes ~> check {
         tokens = tokens :+ responseAs[String]
       })
     }

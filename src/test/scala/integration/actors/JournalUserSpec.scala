@@ -12,41 +12,41 @@ import helpers.NkmPersistenceTestKit
 class JournalUserSpec extends NkmPersistenceTestKit(ActorSystem("UserSpec2")) {
   private val readJournal: JdbcReadJournal = PersistenceQuery(system).readJournalFor[JdbcReadJournal](JdbcReadJournal.Identifier)
 
-  def createUser(username: String): Unit = {
-    val user: ActorRef = system.actorOf(User.props(username))
-    val registerFuture = user ? Register(s"$username@example.com", "password")
+  def createUser(email: String): Unit = {
+    val user: ActorRef = system.actorOf(User.props(email))
+    val registerFuture = user ? Register("password")
     val response = aw(registerFuture.mapTo[RegisterEvent])
     response shouldBe RegisterSuccess
   }
 
   "An User persistent query" must {
     "be able to read by persistence id" in {
-      val username = "test1"
-      createUser(username)
+      val email = "test1@example.com"
+      createUser(email)
 
       val result = readJournal.
-        currentEventsByPersistenceId(s"user-$username", 0, Long.MaxValue)
+        currentEventsByPersistenceId(s"user-$email", 0, Long.MaxValue)
         .map(_.event).runWith(Sink.seq[Any])
 
       val seq = aw(result)
       seq.length shouldBe 1
-      seq.head.asInstanceOf[RegisterSuccess].login shouldBe username
+      seq.head.asInstanceOf[RegisterSuccess].email shouldBe email
     }
 
     "be able to read by persistence tag" in {
-      val username1 = "test1"
-      val username2 = "test2"
-      createUser(username1)
-      createUser(username2)
+      val email1 = "test1@example.com"
+      val email2 = "test2@example.com"
+      createUser(email1)
+      createUser(email2)
 
       val result = readJournal.
-        currentEventsByTag("register", 0)
+        currentEventsByTag(User.registerTag, 0)
         .map(_.event).runWith(Sink.seq[Any])
 
       val seq = aw(result)
       seq.length shouldBe 2
-      seq.head.asInstanceOf[RegisterSuccess].login shouldBe username1
-      seq(1).asInstanceOf[RegisterSuccess].login shouldBe username2
+      seq.head.asInstanceOf[RegisterSuccess].email shouldBe email1
+      seq(1).asInstanceOf[RegisterSuccess].email shouldBe email2
     }
   }
 }

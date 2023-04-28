@@ -6,7 +6,7 @@ import akka.http.scaladsl.server.Directives._
 import com.tosware.nkm.actors.User.{RegisterFailure, RegisterSuccess}
 import com.tosware.nkm.models.{Credentials, RegisterRequest}
 import com.tosware.nkm.services.UserService
-import com.tosware.nkm.services.UserService.{InvalidCredentials, LoggedIn}
+import com.tosware.nkm.services.UserService._
 import com.tosware.nkm.services.http.directives.{JwtDirective, JwtSecretKey}
 import com.tosware.nkm.{Logging, NkmDependencies}
 
@@ -21,7 +21,7 @@ class AuthRoutes(deps: NkmDependencies)
   val authPostRoutes = concat(
     path("register") {
       entity(as[RegisterRequest]) { entity =>
-        logger.info(s"Received register request for ${entity.login}")
+        logger.info(s"Received register request for ${entity.email}")
         userService.register(entity) match {
           case RegisterSuccess => complete(StatusCodes.Created)
           case RegisterFailure => complete(StatusCodes.Conflict) // TODO - change status code based on failure
@@ -31,12 +31,24 @@ class AuthRoutes(deps: NkmDependencies)
     },
     path("login") {
       entity(as[Credentials]) { entity =>
-        logger.info(s"Logging in ${entity.login}")
+        logger.info(s"Logging in ${entity.email}")
         userService.authenticate(entity) match {
-          case LoggedIn(login) => complete(StatusCodes.OK, getToken(login))
+          case LoggedIn(userId) => complete(StatusCodes.OK, getToken(userId))
           case InvalidCredentials => complete(StatusCodes.Unauthorized, "invalid credentials")
+          case InternalError => complete(StatusCodes.InternalServerError)
+        }
+      }
+    },
+    path("oauth-google") {
+      entity(as[String]) { entity =>
+        logger.info(s"Google oauth request")
+        userService.authenticateOauthGoogle(entity) match {
+          case LoggedIn(userId) => complete(StatusCodes.OK, getToken(userId))
+          case InvalidCredentials => complete(StatusCodes.Unauthorized, "invalid credentials")
+          case InternalError => complete(StatusCodes.InternalServerError)
         }
       }
     }
+
   )
 }

@@ -232,8 +232,8 @@ class WSGameSpec extends WSTrait {
       }
 
       val observedEvents = aw(es)
-      observedEvents.ofType[GameEvent.PlayerBanned].count(_.causedById != usernames(observerTokenId)) should be (0)
-      observedEvents.ofType[GameEvent.PlayerBanned].count(_.causedById == usernames(observerTokenId)) should be (1)
+      observedEvents.ofType[GameEvent.PlayerBanned].count(_.causedById != emails(observerTokenId)) should be (0)
+      observedEvents.ofType[GameEvent.PlayerBanned].count(_.causedById == emails(observerTokenId)) should be (1)
 
       observedEvents.ofType[GameEvent.PlayerFinishedBanning].size should be (numberOfPlayers)
     }
@@ -302,7 +302,7 @@ class WSGameSpec extends WSTrait {
           val game = fetchAndParseGame(lobbyId)
           game.draftPickState.get.bannedCharacters shouldBe player0Bans
           game.draftPickState.get.bans shouldBe
-            Map(usernames(0) -> Some(player0Bans), usernames(1) -> None, usernames(2) -> None)
+            Map(emails(0) -> Some(player0Bans), emails(1) -> None, emails(2) -> None)
         }
 
         auth(1)
@@ -311,7 +311,7 @@ class WSGameSpec extends WSTrait {
           val game = fetchAndParseGame(lobbyId)
           game.draftPickState.get.bannedCharacters shouldBe player1Bans
           game.draftPickState.get.bans shouldBe
-            Map(usernames(0) -> None, usernames(1) -> Some(player1Bans), usernames(2) -> None)
+            Map(emails(0) -> None, emails(1) -> Some(player1Bans), emails(2) -> None)
         }
 
         auth(2)
@@ -320,14 +320,14 @@ class WSGameSpec extends WSTrait {
           val game = fetchAndParseGame(lobbyId)
           game.draftPickState.get.bannedCharacters shouldBe Set()
           game.draftPickState.get.bans shouldBe
-            Map(usernames(0) -> None, usernames(1) -> None, usernames(2) -> None)
+            Map(emails(0) -> None, emails(1) -> None, emails(2) -> None)
         }
 
         auth(2)
         ban(lobbyId, Set(availableCharacters.head)).statusCode shouldBe ok
 
         // check
-        val finalBans = Map(usernames(0) -> Some(player0Bans), usernames(1) -> Some(player1Bans), usernames(2) -> Some(player2Bans))
+        val finalBans = Map(emails(0) -> Some(player0Bans), emails(1) -> Some(player1Bans), emails(2) -> Some(player2Bans))
         val allFinalBans = player0Bans ++ player1Bans ++ player2Bans
         auth(0)
 
@@ -389,8 +389,8 @@ class WSGameSpec extends WSTrait {
       }
 
       val observedEvents = aw(es)
-      observedEvents.ofType[GameEvent.PlayerBlindPicked].count(_.playerId != usernames(observerTokenId)) should be (0)
-      observedEvents.ofType[GameEvent.PlayerBlindPicked].count(_.playerId == usernames(observerTokenId)) should be (1)
+      observedEvents.ofType[GameEvent.PlayerBlindPicked].count(_.playerId != emails(observerTokenId)) should be (0)
+      observedEvents.ofType[GameEvent.PlayerBlindPicked].count(_.playerId == emails(observerTokenId)) should be (1)
 
       observedEvents.ofType[GameEvent.PlayerFinishedBlindPicking].size should be (numberOfPlayers)
     }
@@ -417,22 +417,22 @@ class WSGameSpec extends WSTrait {
         // check
         auth(0)
         fetchAndParseGame(lobbyId).blindPickState.get.characterSelection shouldBe
-          Map(usernames(0) -> charactersToPick, usernames(1) -> Set(), usernames(2) -> Set())
+          Map(emails(0) -> charactersToPick, emails(1) -> Set(), emails(2) -> Set())
 
         auth(1)
         fetchAndParseGame(lobbyId).blindPickState.get.characterSelection shouldBe
-          Map(usernames(0) -> Set(), usernames(1) -> Set(), usernames(2) -> Set())
+          Map(emails(0) -> Set(), emails(1) -> Set(), emails(2) -> Set())
 
         auth(2)
         fetchAndParseGame(lobbyId).blindPickState.get.characterSelection shouldBe
-          Map(usernames(0) -> Set(), usernames(1) -> Set(), usernames(2) -> charactersToPick)
+          Map(emails(0) -> Set(), emails(1) -> Set(), emails(2) -> charactersToPick)
 
         // finish picking
         auth(1)
         blindPick(lobbyId, charactersToPick).statusCode shouldBe ok
 
         // check after picking
-        val finalMap = Map(usernames(0) -> charactersToPick, usernames(1) -> charactersToPick, usernames(2) -> charactersToPick)
+        val finalMap = Map(emails(0) -> charactersToPick, emails(1) -> charactersToPick, emails(2) -> charactersToPick)
         auth(0)
         fetchAndParseGame(lobbyId).blindPickState.get.characterSelection shouldBe finalMap
         auth(1)
@@ -513,10 +513,10 @@ class WSGameSpec extends WSTrait {
           val gameState = fetchAndParseGame(lobbyId)
           gameState.clock.isRunning shouldBe false
 
-          val playerTimes = (0 to 2).map(i => gameState.clock.playerTimes(usernames(i)))
+          val playerTimes = (0 to 2).map(i => gameState.clock.playerTimes(emails(i)))
           playerTimes.toSet should have size 1 // times elapsed should be the same for all players in blind pick
 
-          fetchAndParseGame(lobbyId).clock.playerTimes(usernames(0)) shouldBe playerTimes(0)
+          fetchAndParseGame(lobbyId).clock.playerTimes(emails(0)) shouldBe playerTimes(0)
         }
 
         pause(lobbyId)
@@ -524,7 +524,7 @@ class WSGameSpec extends WSTrait {
         {
           val gameState = fetchAndParseGame(lobbyId)
           gameState.clock.isRunning shouldBe true
-          val playerTimes = (0 to 2).map(i => gameState.clock.playerTimes(usernames(i)))
+          val playerTimes = (0 to 2).map(i => gameState.clock.playerTimes(emails(i)))
           playerTimes.toSet should have size 1 // times elapsed should be the same for all players in blind pick
         }
 
@@ -550,7 +550,7 @@ class WSGameSpec extends WSTrait {
           gameState.clock.isRunning shouldBe false
           gameState.gameStatus shouldBe GameStatus.CharacterPicked
 
-          val playerTimes = (0 to 2).map(i => gameState.clock.playerTimes(usernames(i)))
+          val playerTimes = (0 to 2).map(i => gameState.clock.playerTimes(emails(i)))
           playerTimes.toSet should have size 1 // times elapsed should be the same for all players after pick
         }
 
@@ -561,7 +561,7 @@ class WSGameSpec extends WSTrait {
           val gameState = fetchAndParseGame(lobbyId)
           gameState.clock.isRunning shouldBe true
           gameState.gameStatus shouldBe GameStatus.CharacterPlacing
-          val playerTimes = (0 to 2).map(i => gameState.clock.playerTimes(usernames(i)))
+          val playerTimes = (0 to 2).map(i => gameState.clock.playerTimes(emails(i)))
           playerTimes.toSet should have size 1 // times elapsed should be the same for all players in characterOpt placing
         }
       }
@@ -594,10 +594,10 @@ class WSGameSpec extends WSTrait {
           val clock = fetchAndParseClock(lobbyId)
           clock.isRunning shouldBe false
 
-          val playerTimes = (0 to 2).map(i => clock.playerTimes(usernames(i)))
+          val playerTimes = (0 to 2).map(i => clock.playerTimes(emails(i)))
           playerTimes.toSet should have size 1 // times elapsed should be the same for all players in ban phase
 
-          fetchAndParseClock(lobbyId).playerTimes(usernames(0)) shouldBe playerTimes(0)
+          fetchAndParseClock(lobbyId).playerTimes(emails(0)) shouldBe playerTimes(0)
         }
 
         pause(lobbyId)
@@ -613,10 +613,10 @@ class WSGameSpec extends WSTrait {
           val clock = fetchAndParseClock(lobbyId)
           clock.isRunning shouldBe false
 
-          val playerTimes = (0 to 2).map(i => clock.playerTimes(usernames(i)))
+          val playerTimes = (0 to 2).map(i => clock.playerTimes(emails(i)))
 
           playerTimes(0) should be < playerTimes(1) // each player pick time is individual
-          fetchAndParseClock(lobbyId).playerTimes(usernames(0)) shouldBe playerTimes(0)
+          fetchAndParseClock(lobbyId).playerTimes(emails(0)) shouldBe playerTimes(0)
         }
 
         pause(lobbyId)
@@ -711,8 +711,8 @@ class WSGameSpec extends WSTrait {
       }
 
       val observedEvents = aw(es)
-      observedEvents.ofType[GameEvent.CharacterPlaced].count(_.causedById != usernames(observerTokenId)) should be (0)
-      observedEvents.ofType[GameEvent.CharacterPlaced].count(_.causedById == usernames(observerTokenId)) should be (numberOfCharacters)
+      observedEvents.ofType[GameEvent.CharacterPlaced].count(_.causedById != emails(observerTokenId)) should be (0)
+      observedEvents.ofType[GameEvent.CharacterPlaced].count(_.causedById == emails(observerTokenId)) should be (numberOfCharacters)
     }
 
     "place all characters in all random pick" in {
@@ -1122,8 +1122,8 @@ class WSGameSpec extends WSTrait {
         Thread.sleep(50)
         val clock2 = fetchAndParseClock(lobbyId)
 
-        clock2.playerTimes(usernames(0)) should be < clock1.playerTimes(usernames(0))
-        clock2.playerTimes(usernames(1)) should be (clock1.playerTimes(usernames(1)))
+        clock2.playerTimes(emails(0)) should be < clock1.playerTimes(emails(0))
+        clock2.playerTimes(emails(1)) should be (clock1.playerTimes(emails(1)))
 
         passTurn(lobbyId, cids(0).head).statusCode shouldBe ok
 
@@ -1131,10 +1131,10 @@ class WSGameSpec extends WSTrait {
         Thread.sleep(50)
         val clock4 = fetchAndParseClock(lobbyId)
 
-        clock3.playerTimes(usernames(0)) should be < clock1.playerTimes(usernames(0))
+        clock3.playerTimes(emails(0)) should be < clock1.playerTimes(emails(0))
 
-        clock4.playerTimes(usernames(0)) should be (clock3.playerTimes(usernames(0)))
-        clock4.playerTimes(usernames(1)) should be < clock3.playerTimes(usernames(1))
+        clock4.playerTimes(emails(0)) should be (clock3.playerTimes(emails(0)))
+        clock4.playerTimes(emails(1)) should be < clock3.playerTimes(emails(1))
       }
     }
   }

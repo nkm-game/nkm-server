@@ -11,7 +11,7 @@ import scala.annotation.tailrec
 
 object Main extends App with Logging {
   val db: JdbcBackend.Database = Database.forConfig("slick.db")
-  val port = sys.env.getOrElse("PORT", "8080").toInt
+  val port = sys.env.getOrElse("PORT", "3737").toInt
 
   @tailrec
   def initDb(lastDelay: Int = 0): Unit = {

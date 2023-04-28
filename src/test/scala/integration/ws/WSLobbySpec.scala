@@ -88,12 +88,12 @@ class WSLobbySpec extends WSTrait
         auth(1)
         joinLobby(lobbyId).statusCode shouldBe ok
 
-        fetchAndParseLobby(lobbyId).userIds shouldEqual List(usernames(0), usernames(1))
+        fetchAndParseLobby(lobbyId).userIds shouldEqual List(emails(0), emails(1))
 
         leaveLobby(lobbyId).statusCode shouldBe ok
         leaveLobby(lobbyId).statusCode shouldBe nok
 
-        fetchAndParseLobby(lobbyId).userIds shouldEqual List(usernames(0))
+        fetchAndParseLobby(lobbyId).userIds shouldEqual List(emails(0))
 
         auth(0)
         leaveLobby(lobbyId).statusCode shouldBe ok

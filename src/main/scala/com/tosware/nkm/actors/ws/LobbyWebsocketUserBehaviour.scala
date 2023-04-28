@@ -81,71 +81,71 @@ trait LobbyWebsocketUserBehaviour extends WebsocketUserBehaviour {
       case LobbyRoute.CreateLobby =>
         implicit val responseType: LobbyResponseType = LobbyResponseType.CreateLobby
         val lobbyName = request.requestJson.parseJson.convertTo[LobbyCreation].name
-        if(authStatus.username.isEmpty) return unauthorized()
-        val username = authStatus.username.get
+        if(authStatus.userIdOpt.isEmpty) return unauthorized()
+        val username = authStatus.userIdOpt.get
         val response = lobbyService.createLobby(lobbyName, username)
         resolveResponse(response)
       case LobbyRoute.JoinLobby =>
         implicit val responseType: LobbyResponseType = LobbyResponseType.JoinLobby
         val entity = request.requestJson.parseJson.convertTo[LobbyJoin]
-        if(authStatus.username.isEmpty) return unauthorized()
-        val username = authStatus.username.get
+        if(authStatus.userIdOpt.isEmpty) return unauthorized()
+        val username = authStatus.userIdOpt.get
         val response = lobbyService.joinLobby(username, entity)
         resolveResponse(response)
       case LobbyRoute.LeaveLobby =>
         implicit val responseType: LobbyResponseType = LobbyResponseType.LeaveLobby
         val entity = request.requestJson.parseJson.convertTo[LobbyLeave]
-        if(authStatus.username.isEmpty) return unauthorized()
-        val username = authStatus.username.get
+        if(authStatus.userIdOpt.isEmpty) return unauthorized()
+        val username = authStatus.userIdOpt.get
         val response = lobbyService.leaveLobby(username, entity)
         resolveResponse(response)
       case LobbyRoute.SetHexMap =>
         implicit val responseType: LobbyResponseType = LobbyResponseType.SetHexMap
         val entity = request.requestJson.parseJson.convertTo[SetHexMapName]
-        if(authStatus.username.isEmpty) return unauthorized()
-        val username = authStatus.username.get
+        if(authStatus.userIdOpt.isEmpty) return unauthorized()
+        val username = authStatus.userIdOpt.get
         val response = lobbyService.setHexmapName(username, entity)
         resolveResponse(response)
       case LobbyRoute.SetPickType =>
         implicit val responseType: LobbyResponseType = LobbyResponseType.SetPickType
         val entity = request.requestJson.parseJson.convertTo[SetPickType]
-        if(authStatus.username.isEmpty) return unauthorized()
-        val username = authStatus.username.get
+        if(authStatus.userIdOpt.isEmpty) return unauthorized()
+        val username = authStatus.userIdOpt.get
         val response = lobbyService.setPickType(username, entity)
         resolveResponse(response)
       case LobbyRoute.SetNumberOfBans =>
         implicit val responseType: LobbyResponseType = LobbyResponseType.SetNumberOfBans
         val entity = request.requestJson.parseJson.convertTo[SetNumberOfBans]
-        if(authStatus.username.isEmpty) return unauthorized()
-        val username = authStatus.username.get
+        if(authStatus.userIdOpt.isEmpty) return unauthorized()
+        val username = authStatus.userIdOpt.get
         val response = lobbyService.setNumberOfBans(username, entity)
         resolveResponse(response)
       case LobbyRoute.SetNumberOfCharacters =>
         implicit val responseType: LobbyResponseType = LobbyResponseType.SetNumberOfCharacters
         val entity = request.requestJson.parseJson.convertTo[SetNumberOfCharactersPerPlayer]
-        if(authStatus.username.isEmpty) return unauthorized()
-        val username = authStatus.username.get
+        if(authStatus.userIdOpt.isEmpty) return unauthorized()
+        val username = authStatus.userIdOpt.get
         val response = lobbyService.setNumberOfCharactersPerPlayer(username, entity)
         resolveResponse(response)
       case LobbyRoute.SetLobbyName =>
         implicit val responseType: LobbyResponseType = LobbyResponseType.SetLobbyName
         val entity = request.requestJson.parseJson.convertTo[SetLobbyName]
-        if(authStatus.username.isEmpty) return unauthorized()
-        val username = authStatus.username.get
+        if(authStatus.userIdOpt.isEmpty) return unauthorized()
+        val username = authStatus.userIdOpt.get
         val response = lobbyService.setLobbyName(username, entity)
         resolveResponse(response)
       case LobbyRoute.SetClockConfig =>
         implicit val responseType: LobbyResponseType = LobbyResponseType.SetClockConfig
         val entity = request.requestJson.parseJson.convertTo[SetClockConfig]
-        if(authStatus.username.isEmpty) return unauthorized()
-        val username = authStatus.username.get
+        if(authStatus.userIdOpt.isEmpty) return unauthorized()
+        val username = authStatus.userIdOpt.get
         val response = lobbyService.setClockConfig(username, entity)
         resolveResponse(response)
       case LobbyRoute.StartGame =>
         implicit val responseType: LobbyResponseType = LobbyResponseType.StartGame
         val entity = request.requestJson.parseJson.convertTo[StartGame]
-        if(authStatus.username.isEmpty) return unauthorized()
-        val username = authStatus.username.get
+        if(authStatus.userIdOpt.isEmpty) return unauthorized()
+        val username = authStatus.userIdOpt.get
         val response = lobbyService.startGame(username, entity)
         resolveResponse(response)
     }
