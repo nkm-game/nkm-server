@@ -25,6 +25,9 @@ class NkmDataRoutes(deps: NkmDependencies) extends JwtDirective
     path("character_effects") {
       complete(nkmDataService.getCharacterEffectMetadatas)
     },
+    path("hex_cell_effects") {
+      complete(nkmDataService.getHexCellEffectMetadatas)
+    },
     path("version") {
       complete(nkmDataService.getCurrentVersion)
     },

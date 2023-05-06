@@ -5,6 +5,7 @@ import com.tosware.nkm.models.game.ability.AbilityMetadata
 import com.tosware.nkm.models.game.character.CharacterMetadata
 import com.tosware.nkm.models.game.character_effect.CharacterEffectMetadata
 import com.tosware.nkm.models.game.hex.HexMapTemplate
+import com.tosware.nkm.models.game.hex_effect.HexCellEffectMetadata
 import com.tosware.nkm.providers._
 
 class NkmDataService extends NkmTimeouts
@@ -17,6 +18,8 @@ class NkmDataService extends NkmTimeouts
   def getAbilityMetadatas: Seq[AbilityMetadata] = AbilityMetadatasProvider().getAbilityMetadatas
 
   def getCharacterEffectMetadatas: Seq[CharacterEffectMetadata] = CharacterEffectMetadatasProvider().getCharacterEffectMetadatas
+
+  def getHexCellEffectMetadatas: Seq[HexCellEffectMetadata] = HexCellEffectMetadatasProvider().getHexCellEffectMetadatas
 
   def getCurrentVersion: String = scala.io.Source.fromResource("version.txt").mkString.trim
 }
