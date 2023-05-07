@@ -30,7 +30,7 @@ case class AceInTheHole(abilityId: AbilityId, parentCharacterId: CharacterId)
       .inTurn(gameState.turn.number)
       .ofType[GameEvent.CharacterDamaged]
       .ofCharacter(parentCharacterId)
-      .map(_.damage.amount).sum
+      .map(_.damageAmount).sum
   }
 
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState = {

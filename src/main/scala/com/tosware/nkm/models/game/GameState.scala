@@ -222,11 +222,11 @@ case class GameState
     })
   }
 
-  private def logEvent(e: GameEvent)(implicit random: Random): GameState =
+  def logEvent(e: GameEvent)(implicit random: Random): GameState =
     copy(gameLog = gameLog.modify(_.events).using(es => es :+ e))
       .executeEventTriggers(e)
 
-  private def logEvents(es: Seq[GameEvent])(implicit random: Random): GameState =
+  def logEvents(es: Seq[GameEvent])(implicit random: Random): GameState =
     es.foldLeft(this){case (acc, event) => acc.logEvent(event)}
 
   def logAndHideEvent(e: GameEvent, showOnlyFor: Seq[PlayerId], revealCondition: RevealCondition)(implicit random: Random): GameState =
@@ -526,6 +526,33 @@ case class GameState
   def executeCharacter(characterId: CharacterId)(implicit random: Random, causedById: String): GameState =
     damageCharacter(characterId, Damage(DamageType.True, Int.MaxValue))
 
+  private def applyDamageToCharacter(characterId: CharacterId, damage: Damage)(implicit random: Random, causedById: String): GameState = {
+    val c = characterById(characterId)
+
+    val reduction = c.calculateReduction(damage)
+    val damageAfterReduction: Int = damage.amount - reduction
+    if (damageAfterReduction <= 0)
+      return this
+
+    if (c.state.shield >= damageAfterReduction) {
+      val newShield = c.state.shield - damageAfterReduction
+      updateCharacter(characterId)(_.modify(_.state.shield).setTo(newShield))
+        .logEvent(ShieldDamaged(randomUUID(), phase, turn, causedById, characterId, damageAfterReduction))
+    }
+    else {
+      val damageAfterShield = damageAfterReduction - c.state.shield
+      val newShield = 0
+      val newHp = c.state.healthPoints - damageAfterShield
+      updateCharacter(characterId)(_
+        .modify(_.state.shield).setTo(newShield)
+        .modify(_.state.healthPoints).setTo(newHp)
+      )
+        .logEvent(ShieldDamaged(randomUUID(), phase, turn, causedById, characterId, c.state.shield))
+        .checkIfCharacterDied(characterId) // needs to be removed from map before logging an event in order to avoid infinite triggers
+        .logEvent(CharacterDamaged(randomUUID(), phase, turn, causedById, characterId, damageAfterShield))
+    }
+  }
+
   def damageCharacter(characterId: CharacterId, damage: Damage)(implicit random: Random, causedById: String): GameState = {
     if(characterById(characterId).isDead) {
       logger.error(s"Unable to damage character $characterId. Character dead.")
@@ -549,9 +576,8 @@ case class GameState
       return damagePreparedGs
 
     damagePreparedGs
-      .updateCharacter(characterId)(_.receiveDamage(resultDamage))
-      .checkIfCharacterDied(characterId) // needs to be removed first in order to avoid infinite triggers
-      .logEvent(CharacterDamaged(randomUUID(), phase, turn, causedById, characterId, resultDamage))
+      .logEvent(DamageSent(randomUUID(), phase, turn, causedById, characterId, resultDamage))
+      .applyDamageToCharacter(characterId, resultDamage)
   }
 
   def amplifyDamage(damagePreparedId: GameEventId, additionalAmount: Int)(implicit random: Random, causedById: String): GameState =

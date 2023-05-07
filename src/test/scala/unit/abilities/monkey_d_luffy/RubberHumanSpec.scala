@@ -33,8 +33,7 @@ class RubberHumanSpec
       .events
       .ofType[CharacterDamaged]
       .head
-      .damage
-      .amount
+      .damageAmount
 
   def getDamageDealtByEffect(gs: GameState): Int =
     gs
@@ -47,8 +46,7 @@ class RubberHumanSpec
       .events
       .ofType[CharacterDamaged]
       .head
-      .damage
-      .amount
+      .damageAmount
 
   abilityMetadata.name must {
     "reduce ranged basic attack damage" in {

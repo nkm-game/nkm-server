@@ -25,7 +25,7 @@ class HighLuckSpec
       def generateAttackGs() = s.gameState.basicAttack(s.p(0)(0).character.id, s.p(1)(0).character.id)
       def damageAmount() = {
         generateAttackGs()
-          .gameLog.events.ofType[CharacterDamaged].head.damage.amount
+          .gameLog.events.ofType[CharacterDamaged].head.damageAmount
       }
       (0 to 50).map(_ => damageAmount()).toSet.size should be (2)
     }

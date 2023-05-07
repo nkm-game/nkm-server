@@ -72,7 +72,13 @@ object GameEvent {
     extends GameEvent
   case class DamageAmplified(id: GameEventId, phase: Phase, turn: Turn, causedById: String, damagePreparedId: GameEventId, additionalAmount: Int)
     extends GameEvent
-  case class CharacterDamaged(id: GameEventId, phase: Phase, turn: Turn, causedById: String, characterId: CharacterId, damage: Damage)
+  case class DamageSent(id: GameEventId, phase: Phase, turn: Turn, causedById: String, characterId: CharacterId, damage: Damage)
+    extends GameEvent
+      with ContainsCharacterId
+  case class ShieldDamaged(id: GameEventId, phase: Phase, turn: Turn, causedById: String, characterId: CharacterId, damageAmount: Int)
+    extends GameEvent
+      with ContainsCharacterId
+  case class CharacterDamaged(id: GameEventId, phase: Phase, turn: Turn, causedById: String, characterId: CharacterId, damageAmount: Int)
     extends GameEvent
       with ContainsCharacterId
   case class HealPrepared(id: GameEventId, phase: Phase, turn: Turn, causedById: String, characterId: CharacterId, amount: Int)

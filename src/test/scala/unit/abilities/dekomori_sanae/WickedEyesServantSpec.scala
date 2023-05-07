@@ -39,7 +39,7 @@ class WickedEyesServantSpec
       .events
       .ofType[CharacterDamaged]
       .causedBy(s.defaultAbilityId)
-      .map(_.damage.amount)
+      .map(_.damageAmount)
 
   abilityMetadata.name must {
     "not be active without a reason" in {

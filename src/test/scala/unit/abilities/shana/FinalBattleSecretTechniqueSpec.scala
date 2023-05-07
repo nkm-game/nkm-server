@@ -34,21 +34,21 @@ class FinalBattleSecretTechniqueSpec
 
     "damage 3 characters with hien" in {
       abilityUsedGs.gameLog.events
-        .ofType[GameEvent.CharacterDamaged]
+        .ofType[GameEvent.DamageSent]
         .causedBy(s.defaultAbilityId)
         .count(_.damage.damageType == DamageType.Magical) shouldBe 3
     }
 
     "damage one character with shinpan and danzai" in {
       abilityUsedGs.gameLog.events
-        .ofType[GameEvent.CharacterDamaged]
+        .ofType[GameEvent.DamageSent]
         .causedBy(s.defaultAbilityId)
         .count(_.damage.damageType == DamageType.True) shouldBe 1
     }
 
     "deal 10 damage with shinpan and danzai" in {
       abilityUsedGs.gameLog.events
-        .ofType[GameEvent.CharacterDamaged]
+        .ofType[GameEvent.DamageSent]
         .causedBy(s.defaultAbilityId)
         .filter(_.damage.damageType == DamageType.True)
         .map(_.damage.amount)

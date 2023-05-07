@@ -43,7 +43,7 @@ case class DrainTouch(abilityId: AbilityId, parentCharacterId: CharacterId)
         .ofType[CharacterDamaged]
         .causedBy(id)
         .lastOption
-        .map(_.damage.amount)
+        .map(_.damageAmount)
     amountToHealOpt.fold(hitGs) { amountToHeal =>
       hitGs.heal(parentCharacterId, amountToHeal)(random, id)
     }

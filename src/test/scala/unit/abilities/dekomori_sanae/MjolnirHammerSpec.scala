@@ -5,7 +5,7 @@ import com.tosware.nkm.models.GameStateValidator
 import com.tosware.nkm.models.game._
 import com.tosware.nkm.models.game.abilities.dekomori_sanae.MjolnirHammer
 import com.tosware.nkm.models.game.ability.UseData
-import com.tosware.nkm.models.game.event.GameEvent.CharacterDamaged
+import com.tosware.nkm.models.game.event.GameEvent.DamageSent
 import com.tosware.nkm.models.game.hex.{HexCoordinates, TestHexMapName}
 import helpers.{TestScenario, TestUtils}
 import org.scalatest.matchers.should.Matchers
@@ -90,12 +90,12 @@ class MjolnirHammerSpec
       }
     }
 
-    "apply half damage on second hit if used on the same target" in {
+    "send half damage on second hit if used on the same target" in {
       val dmgAmounts =
         usedOnSingleGs
           .gameLog
           .events
-          .ofType[CharacterDamaged]
+          .ofType[DamageSent]
           .causedBy(s.defaultAbilityId)
           .map(_.damage.amount)
 
@@ -104,12 +104,12 @@ class MjolnirHammerSpec
     }
 
 
-    "apply the same damage if used on two targets" in {
+    "send the same damage if used on two targets" in {
       val dmgAmounts =
         usedOnDoubleGs
           .gameLog
           .events
-          .ofType[CharacterDamaged]
+          .ofType[DamageSent]
           .causedBy(s.defaultAbilityId)
           .map(_.damage.amount)
 

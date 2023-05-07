@@ -219,25 +219,6 @@ case class NkmCharacter
     (damage.amount * defense / 100f).toInt
   }
 
-  def receiveDamage(damage: Damage): NkmCharacter = {
-    val reduction = calculateReduction(damage)
-    val damageAfterReduction: Int = damage.amount - reduction
-    if (damageAfterReduction <= 0) return this
-
-    if(state.shield >= damageAfterReduction) {
-      val newShield = state.shield - damageAfterReduction
-      this.modify(_.state.shield).setTo(newShield)
-    }
-    else {
-      val damageAfterShield = damageAfterReduction - state.shield
-      val newShield = 0
-      val newHp = state.healthPoints - damageAfterShield
-      this.modify(_.state.shield).setTo(newShield)
-        .modify(_.state.healthPoints).setTo(newHp)
-    }
-
-  }
-
   def addEffect(effect: CharacterEffect): NkmCharacter =
     this.modify(_.state.effects).using(_ :+ effect)
 
