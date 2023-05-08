@@ -2,7 +2,7 @@ name := "nkm-actor-server"
 
 version := "0.2"
 
-scalaVersion := "2.13.3"
+scalaVersion := "2.13.10"
 
 enablePlugins(JavaAppPackaging)
 
