@@ -1,8 +1,8 @@
 package helpers
 
-import com.tosware.nkm._
-import com.tosware.nkm.models.CommandResponse._
-import com.tosware.nkm.models.game._
+import com.tosware.nkm.*
+import com.tosware.nkm.models.CommandResponse.*
+import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.character.{CharacterMetadata, NkmCharacter, StatType}
 import com.tosware.nkm.models.game.character_effect.CharacterEffectName
 import com.tosware.nkm.models.game.hex.{HexCoordinates, TestHexMapName}
@@ -13,9 +13,12 @@ import org.scalatest.Assertion
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
+import java.io.File
 import scala.annotation.tailrec
+import scala.io.Source
 import scala.reflect.ClassTag
-import scala.util.Random
+import scala.util.matching.Regex
+import scala.util.{Random, Using}
 
 trait TestUtils
   extends AnyWordSpecLike
@@ -179,4 +182,38 @@ trait TestUtils
     final def passAllCharactersInPhase(phaseNumber: Int): GameState =
       _passAllCharactersInPhase(gs, phaseNumber)
   }
+
+  def getFileContents(sourcePath: String): String =
+    Using(Source.fromFile(sourcePath))(_.mkString).get
+
+  def listSubfiles(folderPath: String, subpackage: String = ""): Seq[String] = {
+    val folder = new File(folderPath)
+    if (!folder.exists || !folder.isDirectory) {
+      throw new IllegalArgumentException(s"$folderPath is not a valid directory path.")
+    }
+
+    folder.listFiles.toSeq
+      .flatMap { file =>
+        val filename = file.getName.stripSuffix(".scala")
+        val packagePath = if (subpackage.isEmpty) filename else s"$subpackage.$filename"
+        if (file.isDirectory) {
+          listSubfiles(file.getAbsolutePath, packagePath)
+        } else {
+          Seq(packagePath)
+        }
+      }
+  }
+
+  def readPackagesWithFiles(folderPath: String): Seq[String] = {
+    val sourceRoot = new File("").getAbsolutePath
+    val fullPath = s"$sourceRoot/$folderPath".stripPrefix("/")
+    listSubfiles(fullPath)
+  }
+
+  def readFileNames(folderPath: String): Seq[String] =
+    readPackagesWithFiles(folderPath).map(_.split('.').toSeq.last)
+
+  def findMatchingStrings(r: Regex, s: String): Set[String] =
+    r.findAllMatchIn(s).map(_.group(1)).toSet
+
 }
