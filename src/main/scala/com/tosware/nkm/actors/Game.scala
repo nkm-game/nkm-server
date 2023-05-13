@@ -2,9 +2,9 @@ package com.tosware.nkm.actors
 
 import akka.actor.{ActorLogging, Cancellable, Props}
 import akka.persistence.{PersistentActor, RecoveryCompleted}
-import com.tosware.nkm._
-import com.tosware.nkm.models.CommandResponse._
-import com.tosware.nkm.models.game._
+import com.tosware.nkm.*
+import com.tosware.nkm.models.CommandResponse.*
+import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.ability.UseData
 import com.tosware.nkm.models.game.hex.HexCoordinates
 import com.tosware.nkm.models.game.pick.PickType
@@ -13,7 +13,7 @@ import com.tosware.nkm.models.game.pick.draftpick.DraftPickPhase
 import com.tosware.nkm.models.{GameEventMapped, GameStateValidator}
 import com.tosware.nkm.services.NkmDataService
 
-import scala.concurrent.duration._
+import scala.concurrent.duration.*
 import scala.util.Random
 
 object Game {
@@ -119,7 +119,7 @@ object Game {
 }
 
 class Game(id: GameId)(implicit nkmDataService: NkmDataService) extends PersistentActor with ActorLogging {
-  import Game._
+  import Game.*
   import context.dispatcher
 
   override def persistenceId: String = s"game-$id"

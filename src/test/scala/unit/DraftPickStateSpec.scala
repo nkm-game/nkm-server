@@ -1,7 +1,7 @@
 package unit
 
-import com.tosware.nkm._
-import com.tosware.nkm.models.game.pick.draftpick._
+import com.tosware.nkm.*
+import com.tosware.nkm.models.game.pick.draftpick.*
 
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike

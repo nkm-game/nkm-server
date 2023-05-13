@@ -1,11 +1,11 @@
 package com.tosware.nkm.services.http
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
-import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.Directives.*
 import akka.http.scaladsl.server.Route
 import com.tosware.nkm.serializers.NkmJsonProtocol
-import com.tosware.nkm.services.http.directives._
-import com.tosware.nkm.services.http.routes._
+import com.tosware.nkm.services.http.directives.*
+import com.tosware.nkm.services.http.routes.*
 import com.tosware.nkm.{CORSHandler, NkmDependencies, NkmTimeouts}
 
 class HttpService(deps: NkmDependencies)

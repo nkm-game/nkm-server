@@ -1,7 +1,7 @@
 package unit.abilities.ochaco_uraraka
 
 import com.tosware.nkm.models.GameStateValidator
-import com.tosware.nkm.models.game._
+import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.ochaco_uraraka.ReducedWeight
 import com.tosware.nkm.models.game.character.StatType
 import com.tosware.nkm.models.game.character_effect.CharacterEffectName

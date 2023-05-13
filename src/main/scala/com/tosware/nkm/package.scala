@@ -2,8 +2,8 @@ package com.tosware
 
 import com.tosware.nkm.models.game.GameState
 import com.tosware.nkm.models.game.character.NkmCharacter
-import com.tosware.nkm.models.game.event.GameEvent._
-import com.tosware.nkm.models.game.hex._
+import com.tosware.nkm.models.game.event.GameEvent.*
+import com.tosware.nkm.models.game.hex.*
 
 import scala.math.abs
 import scala.reflect.ClassTag
@@ -48,7 +48,7 @@ package object nkm {
   }
 
   def CoordinateSeq(tuples: (Int, Int)*): Seq[HexCoordinates] = tuples.map{case (x, z) => HexCoordinates(x, z)}
-  def CoordinateSet(tuples: (Int, Int)*): Set[HexCoordinates] = CoordinateSeq(tuples: _*).toSet
+  def CoordinateSet(tuples: (Int, Int)*): Set[HexCoordinates] = CoordinateSeq(tuples *).toSet
 
   implicit class HexCoordinatesSetUtils(coords: Set[HexCoordinates])(implicit gameState: GameState) {
     def toCells: Set[HexCell] =
@@ -60,7 +60,7 @@ package object nkm {
     def whereCharacters: Set[HexCoordinates] =
       toCells.whereCharacters.toCoords
 
-    def whereExists(implicit gameState: GameState): Set[HexCoordinates] =
+    def whereExists: Set[HexCoordinates] =
       toCells.map(_.coordinates)
 
     def whereEmpty: Set[HexCoordinates] =
@@ -89,7 +89,7 @@ package object nkm {
     def whereCharacters: Seq[HexCoordinates] =
       toCells.whereCharacters.toCoords
 
-    def whereExists(implicit gameState: GameState): Seq[HexCoordinates] =
+    def whereExists: Seq[HexCoordinates] =
       toCells.map(_.coordinates)
 
     def whereEmpty: Seq[HexCoordinates] =
@@ -252,10 +252,10 @@ package object nkm {
       es.filter(_.turn.number == number)
     def causedBy(id: String): Seq[T] =
       es.filter(_.causedById == id)
-    def ofCharacter(id: CharacterId): Seq[T with ContainsCharacterId] =
-      es.ofType[T with ContainsCharacterId].filter(_.characterId == id)
-    def ofAbility(id: AbilityId): Seq[T with ContainsAbilityId] =
-      es.ofType[T with ContainsAbilityId].filter(_.abilityId == id)
+    def ofCharacter(id: CharacterId): Seq[T & ContainsCharacterId] =
+      es.ofType[T & ContainsCharacterId].filter(_.characterId == id)
+    def ofAbility(id: AbilityId): Seq[T & ContainsAbilityId] =
+      es.ofType[T & ContainsAbilityId].filter(_.abilityId == id)
   }
 
   implicit class SeqUtils[T](es: Seq[T]) {

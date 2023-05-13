@@ -6,7 +6,7 @@ import com.tosware.nkm.models.game.character.CharacterMetadata
 import com.tosware.nkm.models.game.character_effect.CharacterEffectMetadata
 import com.tosware.nkm.models.game.hex.HexMapTemplate
 import com.tosware.nkm.models.game.hex_effect.HexCellEffectMetadata
-import com.tosware.nkm.providers._
+import com.tosware.nkm.providers.*
 
 class NkmDataService extends NkmTimeouts
 {

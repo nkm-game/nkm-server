@@ -6,8 +6,8 @@ import akka.http.scaladsl.server.Directives.{complete, optionalHeaderValueByName
 import com.tosware.nkm.UserId
 import com.tosware.nkm.models.JwtContent
 import com.tosware.nkm.serializers.NkmJsonProtocol
-import pdi.jwt._
-import spray.json._
+import pdi.jwt.*
+import spray.json.*
 
 import java.time.Instant
 import scala.util.{Failure, Success}

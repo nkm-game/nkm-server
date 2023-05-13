@@ -1,8 +1,8 @@
 package unit.abilities.hecate
 
-import com.tosware.nkm._
+import com.tosware.nkm.*
 import com.tosware.nkm.models.GameStateValidator
-import com.tosware.nkm.models.game._
+import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.hecate.Aster
 import com.tosware.nkm.models.game.event.GameEvent
 import com.tosware.nkm.models.game.hex.TestHexMapName

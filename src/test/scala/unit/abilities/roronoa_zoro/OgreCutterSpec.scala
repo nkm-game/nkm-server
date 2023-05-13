@@ -1,7 +1,7 @@
 package unit.abilities.roronoa_zoro
 
 import com.tosware.nkm.models.GameStateValidator
-import com.tosware.nkm.models.game._
+import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.roronoa_zoro.OgreCutter
 import com.tosware.nkm.models.game.character.CharacterMetadata
 import com.tosware.nkm.models.game.event.GameEvent

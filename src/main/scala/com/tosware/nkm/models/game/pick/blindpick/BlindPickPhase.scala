@@ -1,6 +1,6 @@
 package com.tosware.nkm.models.game.pick.blindpick
 
-import enumeratum._
+import enumeratum.*
 
 sealed trait BlindPickPhase extends EnumEntry
 

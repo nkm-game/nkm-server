@@ -6,7 +6,7 @@ import akka.persistence.jdbc.query.scaladsl.JdbcReadJournal
 import akka.persistence.query.PersistenceQuery
 import akka.stream.scaladsl.Sink
 import com.tosware.nkm.actors.User
-import com.tosware.nkm.actors.User._
+import com.tosware.nkm.actors.User.*
 import helpers.NkmPersistenceTestKit
 
 class JournalUserSpec extends NkmPersistenceTestKit(ActorSystem("UserSpec2")) {

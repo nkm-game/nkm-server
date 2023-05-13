@@ -1,7 +1,7 @@
 package com.tosware.nkm.providers
 
-import com.tosware.nkm.models.game.character_effect._
-import com.tosware.nkm.models.game.effects._
+import com.tosware.nkm.models.game.character_effect.*
+import com.tosware.nkm.models.game.effects.*
 import com.tosware.nkm.serializers.NkmJsonProtocol
 
 case class CharacterEffectMetadatasProvider() extends NkmJsonProtocol {

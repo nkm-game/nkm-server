@@ -1,13 +1,13 @@
 package com.tosware.nkm.models.game.character
 
-import com.softwaremill.quicklens._
-import com.tosware.nkm._
-import com.tosware.nkm.models.game._
-import com.tosware.nkm.models.game.ability._
+import com.softwaremill.quicklens.*
+import com.tosware.nkm.*
+import com.tosware.nkm.models.game.*
+import com.tosware.nkm.models.game.ability.*
 import com.tosware.nkm.models.game.character_effect.{CharacterEffect, CharacterEffectName}
 import com.tosware.nkm.models.game.event.GameEvent
 import com.tosware.nkm.models.game.event.GameEvent.GameEvent
-import com.tosware.nkm.models.game.hex._
+import com.tosware.nkm.models.game.hex.*
 import com.tosware.nkm.providers.AbilityProvider
 
 import scala.reflect.ClassTag

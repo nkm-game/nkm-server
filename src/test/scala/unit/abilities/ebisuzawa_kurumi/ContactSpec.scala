@@ -1,8 +1,8 @@
 package unit.abilities.ebisuzawa_kurumi
 
-import com.tosware.nkm.models.game._
+import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.ebisuzawa_kurumi.Contact
-import com.tosware.nkm.models.game.abilities.hecate._
+import com.tosware.nkm.models.game.abilities.hecate.*
 import com.tosware.nkm.models.game.character.CharacterMetadata
 import com.tosware.nkm.models.game.event.GameEvent
 import helpers.{TestUtils, scenarios}

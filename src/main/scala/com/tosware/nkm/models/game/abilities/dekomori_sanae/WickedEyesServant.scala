@@ -1,9 +1,9 @@
 package com.tosware.nkm.models.game.abilities.dekomori_sanae
 
-import com.tosware.nkm._
-import com.tosware.nkm.models.game._
+import com.tosware.nkm.*
+import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.dekomori_sanae.WickedEyesServant.damageBonusKey
-import com.tosware.nkm.models.game.ability._
+import com.tosware.nkm.models.game.ability.*
 import com.tosware.nkm.models.game.event.{GameEvent, GameEventListener}
 
 import scala.util.Random

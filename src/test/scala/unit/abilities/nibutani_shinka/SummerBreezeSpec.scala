@@ -1,7 +1,7 @@
 package unit.abilities.nibutani_shinka
 
 import com.tosware.nkm.models.GameStateValidator
-import com.tosware.nkm.models.game._
+import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.nibutani_shinka.SummerBreeze
 import com.tosware.nkm.models.game.character.CharacterMetadata
 import com.tosware.nkm.models.game.event.GameEvent

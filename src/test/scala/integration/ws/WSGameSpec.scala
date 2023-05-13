@@ -1,14 +1,14 @@
 package integration.ws
 
 import akka.http.scaladsl.testkit.WSProbe
-import com.tosware.nkm._
-import com.tosware.nkm.models.game._
+import com.tosware.nkm.*
+import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.event.GameEvent
 import com.tosware.nkm.models.game.hex.{HexCellType, HexCoordinates}
 import com.tosware.nkm.models.game.pick.PickType
 import com.tosware.nkm.models.game.pick.blindpick.BlindPickPhase
 import com.tosware.nkm.models.game.pick.draftpick.DraftPickPhase
-import com.tosware.nkm.models.game.ws._
+import com.tosware.nkm.models.game.ws.*
 import helpers.WSTrait
 
 class WSGameSpec extends WSTrait {

@@ -1,7 +1,7 @@
 package unit.abilities.monkey_d_luffy
 
-import com.tosware.nkm._
-import com.tosware.nkm.models.game._
+import com.tosware.nkm.*
+import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.monkey_d_luffy.RubberRubberFruit
 import com.tosware.nkm.models.game.ability.AbilityType
 import com.tosware.nkm.models.game.event.GameEvent

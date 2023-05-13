@@ -4,9 +4,9 @@ import akka.actor.{ActorRef, Props}
 import akka.http.scaladsl.model.StatusCodes
 import com.tosware.nkm.models.GameEventMapped
 import com.tosware.nkm.models.game.event.GameEvent.GameEvent
-import com.tosware.nkm.models.game.ws._
-import com.tosware.nkm.services._
-import spray.json._
+import com.tosware.nkm.models.game.ws.*
+import com.tosware.nkm.services.*
+import spray.json.*
 
 
 object GameSessionActor {

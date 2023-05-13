@@ -1,8 +1,8 @@
 package unit.abilities.dekomori_sanae
 
-import com.softwaremill.quicklens._
-import com.tosware.nkm._
-import com.tosware.nkm.models.game._
+import com.softwaremill.quicklens.*
+import com.tosware.nkm.*
+import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.dekomori_sanae.WickedEyesServant
 import com.tosware.nkm.models.game.event.GameEvent.CharacterDamaged
 import com.tosware.nkm.models.game.hex.TestHexMapName

@@ -1,7 +1,7 @@
 package unit.abilities.kirito
 
 import com.tosware.nkm.models.GameStateValidator
-import com.tosware.nkm.models.game._
+import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.kirito.StarburstStream
 import com.tosware.nkm.models.game.character.CharacterMetadata
 import helpers.{TestUtils, scenarios}

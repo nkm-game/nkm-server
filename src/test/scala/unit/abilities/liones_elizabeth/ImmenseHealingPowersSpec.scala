@@ -1,8 +1,8 @@
 package unit.abilities.liones_elizabeth
 
-import com.tosware.nkm.models.game._
+import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.aqua.NaturesBeauty
-import com.tosware.nkm.models.game.abilities.liones_elizabeth._
+import com.tosware.nkm.models.game.abilities.liones_elizabeth.*
 import com.tosware.nkm.models.game.character.CharacterMetadata
 import com.tosware.nkm.models.game.event.GameEvent.{CharacterHealed, HealAmplified}
 import helpers.{TestUtils, scenarios}

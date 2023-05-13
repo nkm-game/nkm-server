@@ -1,7 +1,7 @@
 package helpers
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
-import com.tosware.nkm._
+import com.tosware.nkm.*
 import com.tosware.nkm.serializers.NkmJsonProtocol
 import com.typesafe.config.{Config, ConfigFactory}
 import org.scalatest.matchers.should.Matchers

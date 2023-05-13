@@ -1,10 +1,10 @@
 package com.tosware.nkm.models.game.character
 
-import com.tosware.nkm._
-import com.tosware.nkm.models.game._
+import com.tosware.nkm.*
+import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.ability.Ability
 import com.tosware.nkm.models.game.character_effect.CharacterEffect
-import com.tosware.nkm.models.game.effects._
+import com.tosware.nkm.models.game.effects.*
 
 case class NkmCharacterState
 (

@@ -1,8 +1,8 @@
 package com.tosware.nkm.providers
 
-import com.tosware.nkm.models.game.hex._
+import com.tosware.nkm.models.game.hex.*
 import com.tosware.nkm.serializers.NkmJsonProtocol
-import spray.json._
+import spray.json.*
 
 import java.io.File
 import java.util.jar.JarFile

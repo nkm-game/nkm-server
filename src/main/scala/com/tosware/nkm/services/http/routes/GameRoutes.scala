@@ -1,7 +1,7 @@
 package com.tosware.nkm.services.http.routes
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
-import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.Directives.*
 
 import com.tosware.nkm.NkmDependencies
 import com.tosware.nkm.services.GameService

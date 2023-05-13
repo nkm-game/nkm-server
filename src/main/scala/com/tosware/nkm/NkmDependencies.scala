@@ -4,7 +4,7 @@ import akka.actor.{ActorRef, ActorSystem}
 import com.tosware.nkm.actors.ws.{GameSessionActor, LobbySessionActor}
 import com.tosware.nkm.actors.{GamesManager, LobbiesManager}
 import com.tosware.nkm.services.http.directives.JwtSecretKey
-import com.tosware.nkm.services._
+import com.tosware.nkm.services.*
 import slick.jdbc.JdbcBackend
 
 import scala.util.Random

@@ -1,6 +1,6 @@
 package integration.api
 
-import akka.http.scaladsl.model.StatusCodes._
+import akka.http.scaladsl.model.StatusCodes.*
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.unmarshalling.FromResponseUnmarshaller
 import com.tosware.nkm.models.game.ability.AbilityMetadata
@@ -15,7 +15,7 @@ import scala.reflect.ClassTag
 class PublicDataSpec extends ApiTrait
 {
   "API" must {
-    def assertDataExists[B <: Iterable[_]: FromResponseUnmarshaller: ClassTag](route: String) = {
+    def assertDataExists[B <: Iterable[?]: FromResponseUnmarshaller: ClassTag](route: String) = {
       Get(route) ~> Route.seal(routes) ~> check {
         status shouldEqual OK
         val data = responseAs[B]

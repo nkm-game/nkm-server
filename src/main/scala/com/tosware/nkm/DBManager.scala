@@ -3,7 +3,7 @@ package com.tosware.nkm
 import com.typesafe.config.{Config, ConfigFactory}
 import slick.dbio.DBIO
 import slick.jdbc.JdbcBackend
-import slick.jdbc.MySQLProfile.api._
+import slick.jdbc.MySQLProfile.api.*
 
 import scala.concurrent.Await
 import scala.concurrent.duration.{DurationInt, FiniteDuration}

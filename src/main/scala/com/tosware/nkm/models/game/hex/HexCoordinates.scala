@@ -1,7 +1,7 @@
 package com.tosware.nkm.models.game.hex
 import com.tosware.nkm.models.game.GameState
 
-import scala.math._
+import scala.math.*
 
 case class HexCoordinates(x: Int, z: Int) {
   def y: Int = -x - z

@@ -21,7 +21,7 @@ trait WebsocketUser
   extends Actor
   with ActorLogging
 {
-  import WebsocketUser._
+  import WebsocketUser.*
 
   var userId: Option[UserId] = None
 

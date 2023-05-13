@@ -1,7 +1,7 @@
 package com.tosware.nkm.models.game.hex_effects
 
-import com.tosware.nkm._
-import com.tosware.nkm.models.game.hex_effect._
+import com.tosware.nkm.*
+import com.tosware.nkm.models.game.hex_effect.*
 
 object MarkOfTheWind {
   val metadata: HexCellEffectMetadata =

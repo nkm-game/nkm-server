@@ -1,11 +1,11 @@
 package com.tosware.nkm.serializers
 
 
-import com.tosware.nkm._
-import com.tosware.nkm.models.game.event.GameEvent._
+import com.tosware.nkm.*
+import com.tosware.nkm.models.game.event.GameEvent.*
 import com.tosware.nkm.models.game.hex.HexCoordinates
 import pl.iterators.kebs.json.{KebsEnumFormats, KebsSpray}
-import spray.json._
+import spray.json.*
 
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -38,7 +38,7 @@ trait NkmJsonProtocol
   implicit object CoordinatesCharacterMapFormat extends RootJsonFormat[Map[HexCoordinates, CharacterId]] {
     override def write(obj: Map[HexCoordinates, CharacterId]) = {
       val m: List[JsField] = obj.map{case (coordinates, characterId) => (coordinates.toJson.toString(), JsString(characterId))}.toList
-      JsObject(m:_*)
+      JsObject(m *)
     }
 
     override def read(json: JsValue) = json match {

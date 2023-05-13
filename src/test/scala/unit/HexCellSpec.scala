@@ -1,9 +1,9 @@
 package unit
 
-import com.tosware.nkm._
+import com.tosware.nkm.*
 import com.tosware.nkm.models.game.GameState
 import com.tosware.nkm.models.game.character.CharacterMetadata
-import com.tosware.nkm.models.game.hex._
+import com.tosware.nkm.models.game.hex.*
 import helpers.{TestUtils, scenarios}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike

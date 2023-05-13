@@ -1,14 +1,14 @@
 package integration.ws
 
 import akka.http.scaladsl.testkit.WSProbe
-import com.tosware.nkm.models.game._
+import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.pick.PickType
-import com.tosware.nkm.models.lobby.ws._
+import com.tosware.nkm.models.lobby.ws.*
 import helpers.WSTrait
 
 class WSLobbySpec extends WSTrait
 {
-  import spray.json._
+  import spray.json.*
 
   def sendRequest(request: WebsocketLobbyRequest)(implicit wsClient: WSProbe): Unit = sendRequestL(request)
   def fetchResponse()(implicit wsClient: WSProbe): WebsocketLobbyResponse = fetchResponseL()

@@ -6,11 +6,11 @@ import akka.persistence.jdbc.query.scaladsl.JdbcReadJournal
 import akka.persistence.query.PersistenceQuery
 import akka.stream.scaladsl.Sink
 import com.tosware.nkm.NkmTimeouts
-import com.tosware.nkm.actors._
-import com.tosware.nkm.models.game._
+import com.tosware.nkm.actors.*
+import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.hex.HexMap
-import com.tosware.nkm.models.lobby._
-import com.tosware.nkm.models.lobby.ws.LobbyRequest._
+import com.tosware.nkm.models.lobby.*
+import com.tosware.nkm.models.lobby.ws.LobbyRequest.*
 import slick.jdbc.JdbcBackend
 
 import scala.concurrent.Future
@@ -21,7 +21,7 @@ class LobbyService(lobbiesManagerActor: ActorRef)(
   nkmDataService: NkmDataService,
   gameService: GameService,
 ) extends NkmTimeouts {
-  import com.tosware.nkm.models.CommandResponse._
+  import com.tosware.nkm.models.CommandResponse.*
 
   def getLobbyActorOption(lobbyId: String): Option[ActorRef] = {
     import LobbiesManager.GetLobbyActorResponse

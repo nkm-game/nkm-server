@@ -1,6 +1,6 @@
 package com.tosware.nkm.models.game
 
-import com.tosware.nkm._
+import com.tosware.nkm.*
 import com.tosware.nkm.models.game.ability.AbilityView
 import com.tosware.nkm.models.game.character.{CharacterMetadata, NkmCharacterView}
 import com.tosware.nkm.models.game.character_effect.CharacterEffectView

@@ -1,6 +1,6 @@
 package com.tosware.nkm.models.game.character_effect
 
-import enumeratum._
+import enumeratum.*
 
 sealed trait CharacterEffectType extends EnumEntry
 object CharacterEffectType extends Enum[CharacterEffectType] {

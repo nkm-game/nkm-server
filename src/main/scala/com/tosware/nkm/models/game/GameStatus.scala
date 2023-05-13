@@ -1,6 +1,6 @@
 package com.tosware.nkm.models.game
 
-import enumeratum._
+import enumeratum.*
 
 sealed trait GameStatus extends EnumEntry
 object GameStatus extends Enum[GameStatus] {

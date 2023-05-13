@@ -1,10 +1,10 @@
 package com.tosware.nkm.models.game.abilities.roronoa_zoro
 
-import com.tosware.nkm._
-import com.tosware.nkm.models.game._
-import com.tosware.nkm.models.game.ability._
+import com.tosware.nkm.*
+import com.tosware.nkm.models.game.*
+import com.tosware.nkm.models.game.ability.*
 import com.tosware.nkm.models.game.hex.{HexCoordinates, HexMap}
-import spray.json._
+import spray.json.*
 
 import scala.annotation.tailrec
 import scala.util.Random
@@ -24,7 +24,7 @@ case class LackOfOrientation(abilityId: AbilityId, parentCharacterId: CharacterI
   extends Ability(abilityId, parentCharacterId)
     with BasicMoveOverride
 {
-  import LackOfOrientation._
+  import LackOfOrientation.*
   override val metadata = LackOfOrientation.metadata
 
   def timesMoved(implicit gameState: GameState): Int =

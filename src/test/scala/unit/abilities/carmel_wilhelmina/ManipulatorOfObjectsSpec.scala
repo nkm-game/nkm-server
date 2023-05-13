@@ -1,6 +1,6 @@
 package unit.abilities.carmel_wilhelmina
 
-import com.tosware.nkm.models.game._
+import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.carmel_wilhelmina.ManipulatorOfObjects
 import com.tosware.nkm.models.game.character.CharacterMetadata
 import com.tosware.nkm.models.game.effects.Snare

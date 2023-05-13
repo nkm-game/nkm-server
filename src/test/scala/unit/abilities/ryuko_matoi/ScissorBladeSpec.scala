@@ -1,6 +1,6 @@
 package unit.abilities.ryuko_matoi
 
-import com.tosware.nkm.models.game._
+import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.ryuko_matoi.ScissorBlade
 import com.tosware.nkm.models.game.character.{CharacterMetadata, StatType}
 import com.tosware.nkm.models.game.effects.StatNerf

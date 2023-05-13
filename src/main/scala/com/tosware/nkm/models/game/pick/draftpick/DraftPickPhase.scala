@@ -1,6 +1,6 @@
 package com.tosware.nkm.models.game.pick.draftpick
 
-import enumeratum._
+import enumeratum.*
 
 sealed trait DraftPickPhase extends EnumEntry
 object DraftPickPhase extends Enum[DraftPickPhase] {

@@ -3,18 +3,18 @@ package com.tosware.nkm.actors.ws
 import akka.actor.ActorRef
 import akka.event.Logging.{DebugLevel, WarningLevel}
 import akka.http.scaladsl.model.StatusCodes
-import com.tosware.nkm.models.CommandResponse._
-import com.tosware.nkm.models.game.ws._
+import com.tosware.nkm.models.CommandResponse.*
+import com.tosware.nkm.models.game.ws.*
 import com.tosware.nkm.services.GameService
 import com.tosware.nkm.services.http.directives.JwtSecretKey
-import spray.json._
+import spray.json.*
 
 trait GameWebsocketUserBehaviour extends WebsocketUserBehaviour {
   val session: ActorRef
   implicit val gameService: GameService
   implicit val jwtSecretKey: JwtSecretKey
 
-  import WebsocketUser._
+  import WebsocketUser.*
 
   override def parseIncomingMessage(outgoing: ActorRef, username: Option[String], text: String): Unit =
     try {
@@ -51,9 +51,9 @@ trait GameWebsocketUserBehaviour extends WebsocketUserBehaviour {
   }
 
   def parseWebsocketGameRequest(request: WebsocketGameRequest, outgoing: ActorRef, userActor: ActorRef, authStatus: AuthStatus): WebsocketGameResponse = {
-    import GameRequest.Action._
-    import GameRequest.CharacterSelect._
-    import GameRequest.General._
+    import GameRequest.Action.*
+    import GameRequest.CharacterSelect.*
+    import GameRequest.General.*
     request.requestPath match {
       case GameRoute.Auth =>
         val token = request.requestJson.parseJson.convertTo[Auth].token

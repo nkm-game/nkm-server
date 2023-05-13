@@ -5,7 +5,7 @@ import akka.testkit.{ImplicitSender, TestKit}
 import com.tosware.nkm.NkmDependencies
 import org.scalatest.wordspec.AnyWordSpecLike
 
-import scala.concurrent.duration._
+import scala.concurrent.duration.*
 import scala.language.postfixOps
 
 class NkmPersistenceTestKit(_system: ActorSystem) extends TestKit(_system)

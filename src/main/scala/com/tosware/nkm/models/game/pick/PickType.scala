@@ -1,6 +1,6 @@
 package com.tosware.nkm.models.game.pick
 
-import enumeratum._
+import enumeratum.*
 
 sealed trait PickType extends EnumEntry
 object PickType extends Enum[PickType] {

@@ -1,9 +1,9 @@
 package unit.abilities.akame
 
-import com.tosware.nkm.models.game._
+import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.akame.{Eliminate, Murasame}
 import com.tosware.nkm.models.game.character.CharacterMetadata
-import com.tosware.nkm.models.game.character_effect.CharacterEffectName._
+import com.tosware.nkm.models.game.character_effect.CharacterEffectName.*
 import com.tosware.nkm.models.game.event.GameEvent.CharacterDied
 import helpers.{TestUtils, scenarios}
 import org.scalatest.matchers.should.Matchers

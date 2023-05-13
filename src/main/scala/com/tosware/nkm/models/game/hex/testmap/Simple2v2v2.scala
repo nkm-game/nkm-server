@@ -1,7 +1,7 @@
 package com.tosware.nkm.models.game.hex.testmap
 
-import com.tosware.nkm.models.game.hex.HexCellType._
-import com.tosware.nkm.models.game.hex._
+import com.tosware.nkm.models.game.hex.HexCellType.*
+import com.tosware.nkm.models.game.hex.*
 
 object Simple2v2v2 {
   def hexMap: TestHexMap = TestHexMap(

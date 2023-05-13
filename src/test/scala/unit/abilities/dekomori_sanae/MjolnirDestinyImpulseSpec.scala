@@ -1,9 +1,9 @@
 package unit.abilities.dekomori_sanae
 
-import com.tosware.nkm._
-import com.softwaremill.quicklens._
+import com.tosware.nkm.*
+import com.softwaremill.quicklens.*
 import com.tosware.nkm.models.GameStateValidator
-import com.tosware.nkm.models.game._
+import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.dekomori_sanae.MjolnirDestinyImpulse
 import com.tosware.nkm.models.game.event.GameEvent
 import com.tosware.nkm.models.game.hex.TestHexMapName

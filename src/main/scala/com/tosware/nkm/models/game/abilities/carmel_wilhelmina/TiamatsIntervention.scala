@@ -1,11 +1,11 @@
 package com.tosware.nkm.models.game.abilities.carmel_wilhelmina
 
-import com.tosware.nkm._
-import com.tosware.nkm.models.game._
-import com.tosware.nkm.models.game.ability._
+import com.tosware.nkm.*
+import com.tosware.nkm.models.game.*
+import com.tosware.nkm.models.game.ability.*
 import com.tosware.nkm.models.game.effects.Stun
 import com.tosware.nkm.models.game.hex.HexCoordinates
-import spray.json._
+import spray.json.*
 
 import scala.util.Random
 

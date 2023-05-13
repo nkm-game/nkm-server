@@ -2,7 +2,7 @@ package com.tosware.nkm
 
 import akka.util.Timeout
 
-import scala.concurrent.duration._
+import scala.concurrent.duration.*
 import scala.concurrent.{Await, Future}
 
 trait NkmTimeouts {

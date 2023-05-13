@@ -1,6 +1,6 @@
 package unit.abilities.llenn
 
-import com.tosware.nkm.models.game._
+import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.llenn.PChan
 import com.tosware.nkm.models.game.character.CharacterMetadata
 import helpers.{TestUtils, scenarios}

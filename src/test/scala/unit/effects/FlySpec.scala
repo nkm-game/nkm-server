@@ -1,8 +1,8 @@
 package unit.effects
 
-import com.tosware.nkm._
+import com.tosware.nkm.*
 import com.tosware.nkm.models.GameStateValidator
-import com.tosware.nkm.models.game._
+import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.character.CharacterMetadata
 import com.tosware.nkm.models.game.effects.Fly
 import helpers.{TestUtils, scenarios}

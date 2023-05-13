@@ -7,7 +7,7 @@ import org.scalatest.OptionValues
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
-import scala.math._
+import scala.math.*
 
 class HexCoordinatesSpec
   extends AnyWordSpecLike

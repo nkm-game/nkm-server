@@ -1,7 +1,7 @@
 package unit.abilities.hecate
 
-import com.tosware.nkm.models.game._
-import com.tosware.nkm.models.game.abilities.hecate._
+import com.tosware.nkm.models.game.*
+import com.tosware.nkm.models.game.abilities.hecate.*
 import com.tosware.nkm.models.game.character.CharacterMetadata
 import helpers.{TestUtils, scenarios}
 import org.scalatest.matchers.should.Matchers

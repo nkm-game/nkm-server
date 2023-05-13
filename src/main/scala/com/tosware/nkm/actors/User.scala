@@ -3,9 +3,9 @@ package com.tosware.nkm.actors
 import akka.actor.{ActorLogging, Props}
 import akka.persistence.journal.Tagged
 import akka.persistence.{PersistentActor, RecoveryCompleted}
-import com.github.t3hnar.bcrypt._
+import com.github.t3hnar.bcrypt.*
 import com.tosware.nkm.NkmTimeouts
-import com.tosware.nkm.models._
+import com.tosware.nkm.models.*
 
 object User extends NkmTimeouts {
   sealed trait Query
@@ -45,7 +45,7 @@ object User extends NkmTimeouts {
 }
 
 class User(email: String) extends PersistentActor with ActorLogging {
-  import User._
+  import User.*
   override def persistenceId: String = s"user-$email"
 
   var userState: UserState = UserState(email)

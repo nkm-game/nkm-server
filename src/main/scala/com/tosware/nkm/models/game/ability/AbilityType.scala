@@ -1,6 +1,6 @@
 package com.tosware.nkm.models.game.ability
 
-import enumeratum._
+import enumeratum.*
 
 sealed trait AbilityType extends EnumEntry
 object AbilityType extends Enum[AbilityType] {

@@ -1,6 +1,6 @@
 package com.tosware.nkm.models
 
-import com.tosware.nkm._
+import com.tosware.nkm.*
 
 case class UserState(
   email: String,

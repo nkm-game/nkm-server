@@ -18,7 +18,7 @@ trait SessionActor
   with NkmTimeouts
   with NkmJsonProtocol
 {
-  import SessionActor._
+  import SessionActor.*
 
   // user can observe only one lobby at once
   private val lobbyIdByObserver = mutable.Map.empty[ActorRef, String]

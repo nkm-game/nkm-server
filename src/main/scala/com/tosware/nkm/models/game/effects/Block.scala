@@ -1,7 +1,7 @@
 package com.tosware.nkm.models.game.effects
 
-import com.tosware.nkm._
-import com.tosware.nkm.models.game.character_effect._
+import com.tosware.nkm.*
+import com.tosware.nkm.models.game.character_effect.*
 
 object Block {
   val metadata: CharacterEffectMetadata =

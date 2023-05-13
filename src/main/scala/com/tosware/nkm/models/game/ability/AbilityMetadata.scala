@@ -1,6 +1,6 @@
 package com.tosware.nkm.models.game.ability
 
-import com.tosware.nkm._
+import com.tosware.nkm.*
 
 case class AbilityMetadata
 (

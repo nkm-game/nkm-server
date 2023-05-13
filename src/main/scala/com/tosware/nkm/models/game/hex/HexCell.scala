@@ -1,7 +1,7 @@
 package com.tosware.nkm.models.game.hex
 
 import com.softwaremill.quicklens.ModifyPimp
-import com.tosware.nkm._
+import com.tosware.nkm.*
 import com.tosware.nkm.models.game.character.NkmCharacter
 import com.tosware.nkm.models.game.hex.HexCellType.Normal
 import com.tosware.nkm.models.game.hex_effect.HexCellEffect

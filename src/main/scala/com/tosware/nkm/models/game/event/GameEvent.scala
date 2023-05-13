@@ -1,7 +1,7 @@
 package com.tosware.nkm.models.game.event
 
-import com.tosware.nkm._
-import com.tosware.nkm.models.game._
+import com.tosware.nkm.*
+import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.character.StatType
 import com.tosware.nkm.models.game.hex.HexCoordinates
 

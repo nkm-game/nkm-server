@@ -1,9 +1,9 @@
 package com.tosware.nkm.models
 
-import com.tosware.nkm._
-import com.tosware.nkm.models.CommandResponse._
-import com.tosware.nkm.models.game._
-import com.tosware.nkm.models.game.ability._
+import com.tosware.nkm.*
+import com.tosware.nkm.models.CommandResponse.*
+import com.tosware.nkm.models.game.*
+import com.tosware.nkm.models.game.ability.*
 import com.tosware.nkm.models.game.hex.HexCoordinates
 
 case class GameStateValidator()(implicit gameState: GameState) {
@@ -188,7 +188,7 @@ case class GameStateValidator()(implicit gameState: GameState) {
     else if (!gameStatusIs(GameStatus.Running)) Failure(Message.gameNotRunning)
     else if (gameState.currentPlayer.id != playerId) Failure(Message.notYourTurn)
     else {
-      val ability = gameState.abilityById(abilityId).asInstanceOf[Ability with Usable]
+      val ability = gameState.abilityById(abilityId).asInstanceOf[Ability & Usable]
       val character = ability.parentCharacter
       if (!gameState.playerByIdOpt(playerId).get.characterIds.contains(character.id)) Failure("You do not own this character.")
       else if (gameState.characterTakingActionThisTurn.fold(false)(_ != character.id)) Failure("Other character already took action this turn.")
@@ -204,7 +204,7 @@ case class GameStateValidator()(implicit gameState: GameState) {
     else if (!gameStatusIs(GameStatus.Running)) Failure(Message.gameNotRunning)
     else if (gameState.currentPlayer.id != playerId) Failure(Message.notYourTurn)
     else {
-      val ability = gameState.abilityById(abilityId).asInstanceOf[Ability with UsableOnCharacter]
+      val ability = gameState.abilityById(abilityId).asInstanceOf[Ability & UsableOnCharacter]
       val character = ability.parentCharacter
       if (!gameState.playerByIdOpt(playerId).get.characterIds.contains(character.id)) Failure("You do not own this character.")
       else if (gameState.characterTakingActionThisTurn.fold(false)(_ != character.id)) Failure("Other character already took action this turn.")
@@ -220,7 +220,7 @@ case class GameStateValidator()(implicit gameState: GameState) {
     else if (!gameStatusIs(GameStatus.Running)) Failure(Message.gameNotRunning)
     else if (gameState.currentPlayer.id != playerId) Failure(Message.notYourTurn)
     else {
-      val ability = gameState.abilityById(abilityId).asInstanceOf[Ability with UsableOnCoordinates]
+      val ability = gameState.abilityById(abilityId).asInstanceOf[Ability & UsableOnCoordinates]
       val character = ability.parentCharacter
       if (!gameState.playerByIdOpt(playerId).get.characterIds.contains(character.id)) Failure("You do not own this character.")
       else if (gameState.characterTakingActionThisTurn.fold(false)(_ != character.id)) Failure("Other character already took action this turn.")

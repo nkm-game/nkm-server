@@ -1,7 +1,7 @@
 package unit.abilities.liones_elizabeth
 
 import com.tosware.nkm.models.GameStateValidator
-import com.tosware.nkm.models.game._
+import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.liones_elizabeth.Invigorate
 import com.tosware.nkm.models.game.effects.HealOverTime
 import com.tosware.nkm.models.game.hex.TestHexMapName

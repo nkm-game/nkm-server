@@ -1,7 +1,7 @@
 package com.tosware.nkm.models.game.hex_effect
 
 import enumeratum.EnumEntry.CapitalWords
-import enumeratum._
+import enumeratum.*
 
 sealed trait HexCellEffectType extends EnumEntry with CapitalWords
 object HexCellEffectType extends Enum[HexCellEffectType] {

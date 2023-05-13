@@ -1,8 +1,8 @@
 package unit.abilities.llenn
 
-import com.tosware.nkm._
+import com.tosware.nkm.*
 import com.tosware.nkm.models.GameStateValidator
-import com.tosware.nkm.models.game._
+import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.llenn.RunItDown
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.{TestScenario, TestUtils}
@@ -39,7 +39,7 @@ class RunItDownSpec
 
       def validateBasicMove(gameState: GameState, cs: Seq[(Int, Int)]) =
         GameStateValidator()(gameState).validateBasicMoveCharacter(s.owners(0),
-          CoordinateSeq(cs: _*),
+          CoordinateSeq(cs *),
           s.p(0)(1).character.id
         )
 
@@ -47,7 +47,7 @@ class RunItDownSpec
         gameState.basicAttack(s.p(0)(1).character.id, s.p(1)(0).character.id)
 
       def basicMove(gameState: GameState, cs: Seq[(Int, Int)]) =
-        gameState.basicMoveCharacter(s.p(0)(1).character.id, CoordinateSeq(cs: _*))
+        gameState.basicMoveCharacter(s.p(0)(1).character.id, CoordinateSeq(cs *))
 
       assertCommandSuccess (validateBasicMove(aGs, Seq((0, 0), (1, 0))))
       assertCommandSuccess (validateBasicAttack(aGs))

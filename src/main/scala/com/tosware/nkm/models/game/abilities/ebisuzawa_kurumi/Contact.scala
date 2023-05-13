@@ -1,10 +1,10 @@
 package com.tosware.nkm.models.game.abilities.ebisuzawa_kurumi
 
-import com.tosware.nkm._
-import com.tosware.nkm.models.game._
-import com.tosware.nkm.models.game.ability._
+import com.tosware.nkm.*
+import com.tosware.nkm.models.game.*
+import com.tosware.nkm.models.game.ability.*
 import com.tosware.nkm.models.game.event.{GameEvent, GameEventListener}
-import spray.json._
+import spray.json.*
 
 import scala.util.Random
 
@@ -27,7 +27,7 @@ case class Contact
   abilityId: AbilityId,
   parentCharacterId: CharacterId,
 ) extends Ability(abilityId, parentCharacterId) with GameEventListener {
-  import Contact._
+  import Contact.*
   override val metadata = Contact.metadata
 
   def hitCharacterIds(implicit gameState: GameState): Set[CharacterId] =

@@ -1,9 +1,9 @@
 package com.tosware.nkm
 
-import akka.http.scaladsl.model.HttpMethods._
-import akka.http.scaladsl.model._
-import akka.http.scaladsl.model.headers._
-import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.model.HttpMethods.*
+import akka.http.scaladsl.model.*
+import akka.http.scaladsl.model.headers.*
+import akka.http.scaladsl.server.Directives.*
 import akka.http.scaladsl.server.{Directive0, Route}
 
 trait CORSHandler {

@@ -1,8 +1,8 @@
 package com.tosware.nkm.models.game.abilities.roronoa_zoro
 
-import com.tosware.nkm._
-import com.tosware.nkm.models.game._
-import com.tosware.nkm.models.game.ability._
+import com.tosware.nkm.*
+import com.tosware.nkm.models.game.*
+import com.tosware.nkm.models.game.ability.*
 import com.tosware.nkm.models.game.character.NkmCharacter
 import com.tosware.nkm.models.game.hex.{HexCell, SearchFlag}
 

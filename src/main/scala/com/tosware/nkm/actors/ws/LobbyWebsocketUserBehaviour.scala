@@ -2,11 +2,11 @@ package com.tosware.nkm.actors.ws
 
 import akka.actor.ActorRef
 import akka.http.scaladsl.model.StatusCodes
-import com.tosware.nkm.models.CommandResponse._
-import com.tosware.nkm.models.lobby.ws._
+import com.tosware.nkm.models.CommandResponse.*
+import com.tosware.nkm.models.lobby.ws.*
 import com.tosware.nkm.services.LobbyService
 import com.tosware.nkm.services.http.directives.JwtSecretKey
-import spray.json._
+import spray.json.*
 
 import scala.concurrent.Await
 import scala.concurrent.duration.DurationInt
@@ -16,7 +16,7 @@ trait LobbyWebsocketUserBehaviour extends WebsocketUserBehaviour {
   implicit val lobbyService: LobbyService
   implicit val jwtSecretKey: JwtSecretKey
 
-  import WebsocketUser._
+  import WebsocketUser.*
 
   override def parseIncomingMessage(outgoing: ActorRef, username: Option[String], text: String): Unit =
     try {
@@ -51,7 +51,7 @@ trait LobbyWebsocketUserBehaviour extends WebsocketUserBehaviour {
     }
 
   def parseWebsocketLobbyRequest(request: WebsocketLobbyRequest, outgoing: ActorRef, userActor: ActorRef, authStatus: AuthStatus): WebsocketLobbyResponse = {
-    import LobbyRequest._
+    import LobbyRequest.*
 
     request.requestPath match {
       case LobbyRoute.Auth =>

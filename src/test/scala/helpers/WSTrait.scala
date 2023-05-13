@@ -2,19 +2,19 @@ package helpers
 
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.testkit.WSProbe
-import com.tosware.nkm._
+import com.tosware.nkm.*
 import com.tosware.nkm.models.game.ability.UseData
 import com.tosware.nkm.models.game.event.GameEvent.GameEvent
 import com.tosware.nkm.models.game.hex.HexCoordinates
 import com.tosware.nkm.models.game.pick.PickType
-import com.tosware.nkm.models.game.ws.GameRequest.Action._
-import com.tosware.nkm.models.game.ws.GameRequest.CharacterSelect._
-import com.tosware.nkm.models.game.ws.GameRequest.General._
-import com.tosware.nkm.models.game.ws._
-import com.tosware.nkm.models.game._
+import com.tosware.nkm.models.game.ws.GameRequest.Action.*
+import com.tosware.nkm.models.game.ws.GameRequest.CharacterSelect.*
+import com.tosware.nkm.models.game.ws.GameRequest.General.*
+import com.tosware.nkm.models.game.ws.*
+import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.lobby.LobbyState
-import com.tosware.nkm.models.lobby.ws._
-import spray.json._
+import com.tosware.nkm.models.lobby.ws.*
+import spray.json.*
 
 import scala.concurrent.Future
 

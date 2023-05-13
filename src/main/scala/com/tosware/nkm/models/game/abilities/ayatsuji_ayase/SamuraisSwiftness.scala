@@ -1,11 +1,11 @@
 package com.tosware.nkm.models.game.abilities.ayatsuji_ayase
 
-import com.tosware.nkm._
-import com.tosware.nkm.models.game._
-import com.tosware.nkm.models.game.ability._
+import com.tosware.nkm.*
+import com.tosware.nkm.models.game.*
+import com.tosware.nkm.models.game.ability.*
 import com.tosware.nkm.models.game.character.StatType
 import com.tosware.nkm.models.game.effects.StatBuff
-import com.tosware.nkm.models.game.event.GameEvent._
+import com.tosware.nkm.models.game.event.GameEvent.*
 import com.tosware.nkm.models.game.event.{GameEvent, GameEventListener}
 
 import scala.util.Random

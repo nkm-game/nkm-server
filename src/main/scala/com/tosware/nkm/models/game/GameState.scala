@@ -1,18 +1,18 @@
 package com.tosware.nkm.models.game
 
-import com.softwaremill.quicklens._
-import com.tosware.nkm._
-import com.tosware.nkm.models.game.ability._
-import com.tosware.nkm.models.game.character._
+import com.softwaremill.quicklens.*
+import com.tosware.nkm.*
+import com.tosware.nkm.models.game.ability.*
+import com.tosware.nkm.models.game.character.*
 import com.tosware.nkm.models.game.character_effect.{CharacterEffect, CharacterEffectState}
-import com.tosware.nkm.models.game.effects._
-import com.tosware.nkm.models.game.event.GameEvent._
-import com.tosware.nkm.models.game.event._
-import com.tosware.nkm.models.game.hex._
+import com.tosware.nkm.models.game.effects.*
+import com.tosware.nkm.models.game.event.GameEvent.*
+import com.tosware.nkm.models.game.event.*
+import com.tosware.nkm.models.game.hex.*
 import com.tosware.nkm.models.game.hex_effect.{HexCellEffect, HexCellEffectState}
 import com.tosware.nkm.models.game.pick.PickType
-import com.tosware.nkm.models.game.pick.blindpick._
-import com.tosware.nkm.models.game.pick.draftpick._
+import com.tosware.nkm.models.game.pick.blindpick.*
+import com.tosware.nkm.models.game.pick.draftpick.*
 
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -83,7 +83,7 @@ case class GameState
   hiddenEvents: Seq[EventHideData],
 )
 {
-  import GameState._
+  import GameState.*
   private implicit val p: Phase = phase
   private implicit val t: Turn = turn
 
@@ -134,9 +134,9 @@ case class GameState
 
   def hexCellEffects: Set[HexCellEffect] = hexMap.cells.flatMap(_.effects)
 
-  def triggerAbilities: Set[Ability with GameEventListener] = abilities.collect {case a: GameEventListener => a}
+  def triggerAbilities: Set[Ability & GameEventListener] = abilities.collect {case a: GameEventListener => a}
 
-  def triggerEffects: Set[CharacterEffect with GameEventListener] = effects.collect {case e: GameEventListener => e}
+  def triggerEffects: Set[CharacterEffect & GameEventListener] = effects.collect {case e: GameEventListener => e}
 
   def characterById(characterId: CharacterId): NkmCharacter = characters.find(_.id == characterId).get
 
@@ -427,7 +427,7 @@ case class GameState
       .checkIfCharacterPickFinished()
 
   def blindPickTimeout()(implicit random: Random, causedById: String): GameState =
-    surrender(blindPickState.get.pickingPlayers: _*)
+    surrender(blindPickState.get.pickingPlayers *)
 
   def placingCharactersTimeout()(implicit random: Random, causedById: String): GameState = {
     val pidsThatDidNotPlace: Set[PlayerId] = players.map(_.id).toSet -- playerIdsThatPlacedCharacters
@@ -837,7 +837,7 @@ case class GameState
 
   def useAbility(abilityId: AbilityId, useData: UseData = UseData())(implicit random: Random): GameState = {
     implicit val causedById: String = abilityId
-    val ability = abilityById(abilityId).asInstanceOf[Ability with Usable]
+    val ability = abilityById(abilityId).asInstanceOf[Ability & Usable]
     val parentCharacter = ability.parentCharacter(this)
 
     val newGameState = takeActionWithCharacter(parentCharacter.id)
@@ -848,7 +848,7 @@ case class GameState
 
   def useAbilityOnCoordinates(abilityId: AbilityId, target: HexCoordinates, useData: UseData = UseData())(implicit random: Random): GameState = {
     implicit val causedById: String = abilityId
-    val ability = abilityById(abilityId).asInstanceOf[Ability with UsableOnCoordinates]
+    val ability = abilityById(abilityId).asInstanceOf[Ability & UsableOnCoordinates]
     val parentCharacter = ability.parentCharacter(this)
 
     val newGameState = takeActionWithCharacter(parentCharacter.id)
@@ -859,7 +859,7 @@ case class GameState
 
   def useAbilityOnCharacter(abilityId: AbilityId, target: CharacterId, useData: UseData = UseData())(implicit random: Random): GameState = {
     implicit val causedById: String = abilityId
-    val ability = abilityById(abilityId).asInstanceOf[Ability with UsableOnCharacter]
+    val ability = abilityById(abilityId).asInstanceOf[Ability & UsableOnCharacter]
     val parentCharacter = ability.parentCharacter(this)
 
     val newGameState = takeActionWithCharacter(parentCharacter.id)

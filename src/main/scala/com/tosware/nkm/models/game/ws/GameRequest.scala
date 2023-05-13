@@ -1,6 +1,6 @@
 package com.tosware.nkm.models.game.ws
 
-import com.tosware.nkm._
+import com.tosware.nkm.*
 import com.tosware.nkm.models.game.ability.UseData
 import com.tosware.nkm.models.game.hex.HexCoordinates
 

@@ -1,7 +1,7 @@
 package com.tosware.nkm.models.game.character_effect
 
 import enumeratum.EnumEntry.CapitalWords
-import enumeratum._
+import enumeratum.*
 
 sealed trait CharacterEffectName extends EnumEntry with CapitalWords
 object CharacterEffectName extends Enum[CharacterEffectName] {

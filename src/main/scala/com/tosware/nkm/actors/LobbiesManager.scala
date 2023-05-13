@@ -7,7 +7,7 @@ import com.tosware.nkm.NkmTimeouts
 import com.tosware.nkm.actors.LobbiesManager.Event.LobbyCreated
 import com.tosware.nkm.actors.LobbiesManager.GetLobbyActorResponse
 import com.tosware.nkm.actors.LobbiesManager.Query.GetLobbyActor
-import com.tosware.nkm.models.CommandResponse._
+import com.tosware.nkm.models.CommandResponse.*
 import com.tosware.nkm.services.NkmDataService
 
 object LobbiesManager {

@@ -1,8 +1,8 @@
 package com.tosware.nkm.models.game.abilities.nibutani_shinka
 
-import com.tosware.nkm._
-import com.tosware.nkm.models.game._
-import com.tosware.nkm.models.game.ability._
+import com.tosware.nkm.*
+import com.tosware.nkm.models.game.*
+import com.tosware.nkm.models.game.ability.*
 import com.tosware.nkm.models.game.effects.AbilityEnchant
 
 import scala.util.Random

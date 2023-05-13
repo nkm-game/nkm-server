@@ -3,7 +3,7 @@ package integration.actors
 import akka.actor.{ActorRef, ActorSystem}
 import akka.pattern.ask
 import com.tosware.nkm.actors.User
-import com.tosware.nkm.actors.User._
+import com.tosware.nkm.actors.User.*
 import com.tosware.nkm.models.UserState
 import helpers.NkmPersistenceTestKit
 

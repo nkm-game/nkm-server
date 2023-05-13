@@ -1,8 +1,8 @@
 package com.tosware.nkm.models.game.effects
 
-import com.tosware.nkm._
-import com.tosware.nkm.models.game._
-import com.tosware.nkm.models.game.character_effect._
+import com.tosware.nkm.*
+import com.tosware.nkm.models.game.*
+import com.tosware.nkm.models.game.character_effect.*
 import com.tosware.nkm.models.game.effects.HealOverTime.healKey
 import com.tosware.nkm.models.game.event.GameEvent.TurnFinished
 import com.tosware.nkm.models.game.event.{GameEvent, GameEventListener}

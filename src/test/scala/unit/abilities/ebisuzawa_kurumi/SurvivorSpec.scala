@@ -1,6 +1,6 @@
 package unit.abilities.ebisuzawa_kurumi
 
-import com.tosware.nkm.models.game._
+import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.ebisuzawa_kurumi.Survivor
 import com.tosware.nkm.models.game.character.CharacterMetadata
 import com.tosware.nkm.models.game.effects.NextBasicAttackBuff

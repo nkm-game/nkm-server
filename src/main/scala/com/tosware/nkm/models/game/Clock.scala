@@ -1,6 +1,6 @@
 package com.tosware.nkm.models.game
 
-import com.tosware.nkm._
+import com.tosware.nkm.*
 
 object Clock {
   def fromConfig(config: ClockConfig, playerOrder: Seq[PlayerId]): Clock =

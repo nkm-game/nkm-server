@@ -1,6 +1,6 @@
 package com.tosware.nkm.models.game.pick.blindpick
 
-import com.tosware.nkm._
+import com.tosware.nkm.*
 
 case class BlindPickStateView(
   config: BlindPickConfig,

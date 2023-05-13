@@ -1,11 +1,11 @@
 package integration.api
 
-import akka.http.scaladsl.model.StatusCodes._
+import akka.http.scaladsl.model.StatusCodes.*
 import akka.http.scaladsl.server.Route
-import com.tosware.nkm.models._
+import com.tosware.nkm.models.*
 import helpers.ApiTrait
 import pdi.jwt.{JwtAlgorithm, JwtSprayJson}
-import spray.json._
+import spray.json.*
 
 import scala.util.Success
 

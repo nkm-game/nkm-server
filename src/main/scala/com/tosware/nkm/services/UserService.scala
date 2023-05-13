@@ -10,14 +10,14 @@ import akka.persistence.query.PersistenceQuery
 import akka.stream.scaladsl.Sink
 import com.tosware.nkm.{NkmTimeouts, UserId}
 import com.tosware.nkm.actors.User
-import com.tosware.nkm.actors.User._
+import com.tosware.nkm.actors.User.*
 import com.tosware.nkm.models.{Credentials, RegisterRequest}
 import slick.jdbc.JdbcBackend
 import akka.util.ByteString
 import com.tosware.nkm.serializers.NkmJsonProtocol
 
 import scala.concurrent.{ExecutionContextExecutor, Future}
-import spray.json._
+import spray.json.*
 
 object UserService {
   sealed trait Event
@@ -31,7 +31,7 @@ class UserService(implicit db: JdbcBackend.Database, system: ActorSystem)
   extends NkmTimeouts
     with NkmJsonProtocol
 {
-  import UserService._
+  import UserService.*
 
   def authenticate(creds: Credentials): Event = {
     val userActor: ActorRef = system.actorOf(User.props(creds.email))

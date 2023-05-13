@@ -1,6 +1,6 @@
 package helpers.scenarios
 
-import com.tosware.nkm.models.game._
+import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.character.CharacterMetadata
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.TestScenario

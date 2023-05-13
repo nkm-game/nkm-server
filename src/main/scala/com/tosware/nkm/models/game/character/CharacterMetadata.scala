@@ -1,6 +1,6 @@
 package com.tosware.nkm.models.game.character
 
-import com.tosware.nkm._
+import com.tosware.nkm.*
 
 object CharacterMetadata {
   def empty(name: String = "Empty"): CharacterMetadata =

@@ -1,8 +1,8 @@
 package unit.abilities.ayatsuji_ayase
 
-import com.tosware.nkm._
+import com.tosware.nkm.*
 import com.tosware.nkm.models.GameStateValidator
-import com.tosware.nkm.models.game._
+import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.ayatsuji_ayase.{CrackTheSky, MarkOfTheWind}
 import com.tosware.nkm.models.game.ability.UseData
 import com.tosware.nkm.models.game.character.CharacterMetadata
@@ -11,7 +11,7 @@ import com.tosware.nkm.models.game.hex.HexCoordinates
 import helpers.{TestUtils, scenarios}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
-import spray.json._
+import spray.json.*
 
 class MarkOfTheWindSpec
   extends AnyWordSpecLike

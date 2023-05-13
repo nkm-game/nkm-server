@@ -1,8 +1,8 @@
 package com.tosware.nkm.models.game.abilities.akame
 
-import com.tosware.nkm._
-import com.tosware.nkm.models.game._
-import com.tosware.nkm.models.game.ability._
+import com.tosware.nkm.*
+import com.tosware.nkm.models.game.*
+import com.tosware.nkm.models.game.ability.*
 
 import scala.util.Random
 

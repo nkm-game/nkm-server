@@ -1,6 +1,6 @@
 package unit.abilities.roronoa_zoro
 
-import com.tosware.nkm._
+import com.tosware.nkm.*
 import com.tosware.nkm.models.game.abilities.roronoa_zoro.LackOfOrientation
 import com.tosware.nkm.models.game.character.CharacterMetadata
 import helpers.{TestUtils, scenarios}

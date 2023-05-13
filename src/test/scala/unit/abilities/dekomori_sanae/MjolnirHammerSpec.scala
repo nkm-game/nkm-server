@@ -1,8 +1,8 @@
 package unit.abilities.dekomori_sanae
 
-import com.tosware.nkm._
+import com.tosware.nkm.*
 import com.tosware.nkm.models.GameStateValidator
-import com.tosware.nkm.models.game._
+import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.dekomori_sanae.MjolnirHammer
 import com.tosware.nkm.models.game.ability.UseData
 import com.tosware.nkm.models.game.event.GameEvent.DamageSent
@@ -10,7 +10,7 @@ import com.tosware.nkm.models.game.hex.{HexCoordinates, TestHexMapName}
 import helpers.{TestScenario, TestUtils}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
-import spray.json._
+import spray.json.*
 
 class MjolnirHammerSpec
   extends AnyWordSpecLike

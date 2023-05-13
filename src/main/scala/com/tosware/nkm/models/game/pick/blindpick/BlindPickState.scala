@@ -1,6 +1,6 @@
 package com.tosware.nkm.models.game.pick.blindpick
 
-import com.tosware.nkm._
+import com.tosware.nkm.*
 
 object BlindPickState {
   def empty(config: BlindPickConfig): BlindPickState = BlindPickState(
