@@ -129,7 +129,7 @@ trait TestUtils
     logger.info(hexMap.toTextUi)
 
     val gameStateDeps = GameStartDependencies(
-      players = playerIds.map(n => Player(n)),
+      players = playerIds.map(n => Player(n, isHost = n == playerIds.head)),
       hexMap = hexMap,
       pickType = BlindPick,
       numberOfBansPerPlayer = 0,

@@ -4,6 +4,7 @@ import com.tosware.nkm._
 
 sealed trait RevealCondition
 object RevealCondition {
+  final case object Never extends RevealCondition
   final case object BanningPhaseFinished extends RevealCondition
   final case object CharacterPlacingFinished extends RevealCondition
   final case object BlindPickFinished extends RevealCondition

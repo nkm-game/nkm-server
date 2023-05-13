@@ -464,7 +464,10 @@ case class GameState
       .logEvent(CharacterBasicMoved(randomUUID(), phase, turn, causedById, characterId, path))
   }
 
-  def teleportCharacter(characterId: CharacterId, targetCellCoordinates: HexCoordinates)(implicit random: Random, causedById: String): GameState = {
+  def basicMoveOneCell(characterId: CharacterId, targetCellCoordinates: HexCoordinates)(implicit random: Random, causedById: String): GameState =
+    teleportCharacter(characterId, targetCellCoordinates, hideEvent = true)
+
+  def teleportCharacter(characterId: CharacterId, targetCellCoordinates: HexCoordinates, hideEvent: Boolean = false)(implicit random: Random, causedById: String): GameState = {
     val parentCellOpt = characterById(characterId).parentCell(this)
 
     val removedFromParentCellState = parentCellOpt.fold(this)(c => updateHexCell(c.coordinates)(_.copy(characterId = None)))
@@ -479,7 +482,12 @@ case class GameState
       // probably just passing by a friendly characterOpt
       removedFromParentCellState.removeCharacterFromMap(characterId)
     }
-    ngs.logEvent(CharacterTeleported(randomUUID(), phase, turn, causedById, characterId, targetCellCoordinates))
+    val tpEvent = CharacterTeleported(randomUUID(), phase, turn, causedById, characterId, targetCellCoordinates)
+    if(hideEvent) {
+      ngs.logAndHideEvent(tpEvent, Seq(), RevealCondition.Never)
+    } else {
+      ngs.logEvent(tpEvent)
+    }
   }
 
 
@@ -947,7 +955,7 @@ case class GameState
       gameLog = gameLog.toView(forPlayerOpt)(this),
 
       currentPlayerId = currentPlayer.id,
-      hostId = hostId ,
+      hostId = hostId,
       isBlindPickingPhase = isBlindPickingPhase,
       isDraftBanningPhase = isDraftBanningPhase,
       isInCharacterSelect = isInCharacterSelect,

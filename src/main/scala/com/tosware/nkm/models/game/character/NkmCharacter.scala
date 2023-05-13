@@ -171,7 +171,7 @@ case class NkmCharacter
     state.abilities.ofType[BasicMoveOverride].headOption
 
   def defaultBasicMove(path: Seq[HexCoordinates])(implicit random: Random, gameState: GameState): GameState =
-    path.tail.foldLeft(gameState)((acc, coordinate) => acc.teleportCharacter(id, coordinate)(random, id))
+    path.tail.foldLeft(gameState)((acc, coordinate) => acc.basicMoveOneCell(id, coordinate)(random, id))
 
   // case if characterOpt dies on the way? make a test of this and create a new functions with while(onMap)
   def basicMove(path: Seq[HexCoordinates])(implicit random: Random, gameState: GameState): GameState =

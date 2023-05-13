@@ -1,10 +1,13 @@
 package unit
 
-import com.tosware.nkm.models.game._
+import com.tosware.nkm.CoordinateSeq
+import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.akame.LittleWarHorn
 import com.tosware.nkm.models.game.abilities.sinon.TacticalEscape
 import com.tosware.nkm.models.game.character.CharacterMetadata
-import helpers.{TestUtils, scenarios}
+import com.tosware.nkm.models.game.event.GameEvent
+import com.tosware.nkm.models.game.hex.TestHexMapName
+import helpers.{TestScenario, TestUtils, scenarios}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
@@ -136,6 +139,28 @@ class GameStateSpec
 
       p0CharacterKilledGameState.clock.isRunning should be (false)
       p1CharacterKilledGameState.clock.isRunning should be (false)
+    }
+
+    "hide teleport events for a basic move" in {
+      val bigS = TestScenario.generate(TestHexMapName.Spacey1v1, CharacterMetadata.empty())
+      val basicMoveGs = bigS.gameState.basicMoveCharacter(
+        bigS.defaultCharacter.id,
+        CoordinateSeq((0, 0), (-1, 0), (-2, 0), (-3, 0))
+      )
+
+      basicMoveGs
+        .toView(Some(s.owners(0)))
+        .gameLog
+        .events
+        .ofType[GameEvent.CharacterTeleported]
+        .size should be(0)
+
+      basicMoveGs
+        .toView(None)
+        .gameLog
+        .events
+        .ofType[GameEvent.CharacterTeleported]
+        .size should be(0)
     }
   }
 }
