@@ -10,6 +10,7 @@ import com.tosware.nkm.models.game.pick.blindpick.BlindPickPhase
 import com.tosware.nkm.models.game.pick.draftpick.DraftPickPhase
 import com.tosware.nkm.models.game.ws.*
 import helpers.WSTrait
+import helpers.WSTrait.*
 
 class WSGameSpec extends WSTrait {
   def sendRequest(request: WebsocketGameRequest)(implicit wsClient: WSProbe): Unit = sendRequestG(request)
@@ -210,8 +211,7 @@ class WSGameSpec extends WSTrait {
         numberOfCharacters = 2,
       )
 
-      val observerTokenId = 2
-      val es = fetchAndParseEventsAsync(lobbyId, observerTokenId, 4)(WSProbe())
+      observeEvents(lobbyId)
 
       withGameWS { implicit wsClient: WSProbe =>
         auth(0)
@@ -231,11 +231,18 @@ class WSGameSpec extends WSTrait {
         fetchAndParseGame(lobbyId).draftPickState.get.pickPhase shouldBe DraftPickPhase.Picking
       }
 
-      val observedEvents = aw(es)
-      observedEvents.ofType[GameEvent.PlayerBanned].count(_.causedById != emails(observerTokenId)) should be (0)
-      observedEvents.ofType[GameEvent.PlayerBanned].count(_.causedById == emails(observerTokenId)) should be (1)
+      val observedEvents = collectObservedEvents().take(numberOfPlayers)
 
-      observedEvents.ofType[GameEvent.PlayerFinishedBanning].size should be (numberOfPlayers)
+      val seenPlayerBannedEvents = observedEvents
+        .map(_.ofType[GameEvent.PlayerBanned]
+          .map(_.playerId))
+
+      seenPlayerBannedEvents.zipWithIndex.foreach { case (seenPlayerBans, tokenId) =>
+        // you can see only your details of ban (could be also last player that banned)
+        seenPlayerBans should (be(Seq(emails(tokenId))) or be(Seq(emails(tokenId), emails(2))))
+      }
+
+      observedEvents.map(_.ofType[GameEvent.PlayerFinishedBanning]).foreach(e => e.size should be (numberOfPlayers))
     }
 
     "allow picking during draft pick" in {
@@ -276,12 +283,15 @@ class WSGameSpec extends WSTrait {
     }
 
     "hide draft pick information during ban phase" in {
+      val numberOfPlayers = 3
       val lobbyId = createLobbyForGame(
         pickType = PickType.DraftPick,
-        numberOfPlayers = 3,
+        numberOfPlayers = numberOfPlayers,
         numberOfBans = 2,
         numberOfCharacters = 2,
       )
+
+      observeEvents(lobbyId)
 
       withGameWS { implicit wsClient: WSProbe =>
         val availableCharacters = fetchAndParseGame(lobbyId).draftPickState.get.config.availableCharacters
@@ -354,6 +364,17 @@ class WSGameSpec extends WSTrait {
         }
 
       }
+
+      val observedEvents = collectObservedEvents().take(numberOfPlayers)
+
+      val seenBanEvents = observedEvents
+        .map(_.ofType[GameEvent.PlayerBanned]
+          .map(_.playerId))
+
+      seenBanEvents.zipWithIndex.foreach { case (seenBans, tokenId) =>
+        // you can see only your details of ban pick (could be also last player that banned)
+        seenBans should (be(Seq(emails(tokenId))) or be(Seq(emails(tokenId), emails(1))))
+      }
     }
 
     "allow picking during blind pick" in {
@@ -366,8 +387,7 @@ class WSGameSpec extends WSTrait {
         numberOfCharacters = numberOfCharacters,
       )
 
-      val observerTokenId = 1
-      val es = fetchAndParseEventsAsync(lobbyId, observerTokenId, 5)(WSProbe())
+      observeEvents(lobbyId)
 
       withGameWS { implicit wsClient: WSProbe =>
         auth(0)
@@ -388,11 +408,23 @@ class WSGameSpec extends WSTrait {
         gameState.gameStatus shouldBe GameStatus.CharacterPicked
       }
 
-      val observedEvents = aw(es)
-      observedEvents.ofType[GameEvent.PlayerBlindPicked].count(_.playerId != emails(observerTokenId)) should be (0)
-      observedEvents.ofType[GameEvent.PlayerBlindPicked].count(_.playerId == emails(observerTokenId)) should be (1)
+      val observedEvents = collectObservedEvents().take(numberOfPlayers)
 
-      observedEvents.ofType[GameEvent.PlayerFinishedBlindPicking].size should be (numberOfPlayers)
+      val seenBlindPickedEvents = observedEvents
+        .map(_.ofType[GameEvent.PlayerBlindPicked]
+          .map(_.playerId))
+
+      seenBlindPickedEvents.zipWithIndex.foreach { case(seenPlayerPicks, tokenId) =>
+        // you can see only your details of blind pick (could be also last player that picked)
+        seenPlayerPicks should (be (Seq(emails(tokenId))) or be (Seq(emails(tokenId), emails(1))))
+      }
+
+      // you can see that other player finished blind picking, but without details of pick
+      observedEvents
+        .map(_.ofType[GameEvent.PlayerFinishedBlindPicking].size)
+        .foreach { size =>
+          size should be (numberOfPlayers)
+        }
     }
 
     "hide blind pick information of other players picks during picking" in {
@@ -655,9 +687,7 @@ class WSGameSpec extends WSTrait {
         clockConfigOpt = Some(ClockConfig.defaultForPickType(PickType.BlindPick).copy(timeAfterPickMillis = 1)),
       )
 
-      val observerTokenId = 2
-
-      val es = fetchAndParseEventsAsync(lobbyId, observerTokenId, 15)(WSProbe())
+      observeEvents(lobbyId)
 
       withGameWS { implicit wsClient: WSProbe =>
         auth(0)
@@ -710,9 +740,10 @@ class WSGameSpec extends WSTrait {
         }
       }
 
-      val observedEvents = aw(es)
-      observedEvents.ofType[GameEvent.CharacterPlaced].count(_.causedById != emails(observerTokenId)) should be (0)
-      observedEvents.ofType[GameEvent.CharacterPlaced].count(_.causedById == emails(observerTokenId)) should be (numberOfCharacters)
+      val observedEvents = collectObservedEvents().take(numberOfPlayers)
+
+      observedEvents(2).ofType[GameEvent.CharacterPlaced].count(_.causedById != emails(2)) should be (0)
+      observedEvents(2).ofType[GameEvent.CharacterPlaced].count(_.causedById == emails(2)) should be (numberOfCharacters)
     }
 
     "place all characters in all random pick" in {

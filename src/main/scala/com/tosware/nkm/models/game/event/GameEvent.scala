@@ -117,12 +117,16 @@ object GameEvent {
     extends GameEvent
   case class PlayerSurrendered(id: GameEventId, phase: Phase, turn: Turn, causedById: String, playerId: PlayerId)
     extends GameEvent
+
+  // hidden for other players during ban phase
   case class PlayerBanned(id: GameEventId, phase: Phase, turn: Turn, causedById: String, playerId: PlayerId, characterIds: Set[CharacterMetadataId])
     extends GameEvent
   case class PlayerFinishedBanning(id: GameEventId, phase: Phase, turn: Turn, causedById: String, playerId: PlayerId)
     extends GameEvent
   case class PlayerPicked(id: GameEventId, phase: Phase, turn: Turn, causedById: String, playerId: PlayerId, characterId: CharacterMetadataId)
     extends GameEvent
+
+  // hidden for other players during blind pick
   case class PlayerBlindPicked(id: GameEventId, phase: Phase, turn: Turn, causedById: String, playerId: PlayerId, characterIds: Set[CharacterMetadataId])
     extends GameEvent
   case class PlayerFinishedBlindPicking(id: GameEventId, phase: Phase, turn: Turn, causedById: String, playerId: PlayerId)

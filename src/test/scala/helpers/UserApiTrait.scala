@@ -7,7 +7,8 @@ import com.tosware.nkm.models.{Credentials, RegisterRequest}
 
 trait UserApiTrait extends ApiTrait
   {
-    val emails: Seq[String] = (1 to 5).map(x => { s"test_user_$x@example.com" })
+    val numberOfUsers = 5
+    val emails: Seq[String] = (0 until numberOfUsers).map(x => { s"test_user_$x@example.com" })
     val registerRequests: Seq[RegisterRequest] = emails.map(e => RegisterRequest(e, "password"))
     var tokens: Seq[String] = Seq()
 

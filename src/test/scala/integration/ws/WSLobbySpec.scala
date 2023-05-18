@@ -5,6 +5,7 @@ import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.pick.PickType
 import com.tosware.nkm.models.lobby.ws.*
 import helpers.WSTrait
+import helpers.WSTrait.*
 
 class WSLobbySpec extends WSTrait
 {

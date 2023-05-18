@@ -3,22 +3,20 @@ package helpers
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.testkit.WSProbe
 import com.tosware.nkm.*
+import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.ability.UseData
 import com.tosware.nkm.models.game.event.GameEvent.GameEvent
 import com.tosware.nkm.models.game.hex.HexCoordinates
 import com.tosware.nkm.models.game.pick.PickType
+import com.tosware.nkm.models.game.ws.*
 import com.tosware.nkm.models.game.ws.GameRequest.Action.*
 import com.tosware.nkm.models.game.ws.GameRequest.CharacterSelect.*
 import com.tosware.nkm.models.game.ws.GameRequest.General.*
-import com.tosware.nkm.models.game.ws.*
-import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.lobby.LobbyState
 import com.tosware.nkm.models.lobby.ws.*
 import spray.json.*
 
-import scala.concurrent.Future
-
-trait WSTrait extends UserApiTrait {
+object WSTrait {
   val wsPrefix = "/ws"
   val wsLobbyUri = s"$wsPrefix/lobby"
   val wsGameUri = s"$wsPrefix/game"
@@ -26,6 +24,24 @@ trait WSTrait extends UserApiTrait {
   val ok = StatusCodes.OK.intValue
   val nok = StatusCodes.InternalServerError.intValue
   val unauthorized = StatusCodes.Unauthorized.intValue
+}
+
+trait WSTrait extends UserApiTrait {
+  import WSTrait.*
+
+  private var eventObservers: Seq[GameEventObserver] = Seq.empty
+
+  def observeEvents(gameId: GameId): Unit = {
+    eventObservers = (0 until numberOfUsers).map(tokenId => {
+      new GameEventObserver(gameId, tokenId)(this)
+    })
+    eventObservers.foreach(_.start())
+  }
+
+  def collectObservedEvents(): Seq[Seq[GameEvent]] = {
+    eventObservers.foreach(_.stop())
+    eventObservers.map(_.observedEvents())
+  }
 
   def withWS[T](wsUri: String, body: WSProbe => T): T = {
     val wsClient: WSProbe = WSProbe()
@@ -123,24 +139,6 @@ trait WSTrait extends UserApiTrait {
     lobbyResponse.statusCode shouldBe StatusCodes.OK.intValue
     lobbyResponse.body.parseJson.convertTo[LobbyState]
   }
-
-  // TODO: take indefinite numberOfEvents and collect when needed
-  def fetchAndParseEventsAsync(lobbyId: String, tokenId: Int, numberOfEvents: Int)(implicit wsClient: WSProbe): Future[Seq[GameEvent]] =
-    Future {
-      withGameWS { implicit wsClient: WSProbe =>
-        authG(tokenId)
-        observeG(lobbyId).statusCode shouldBe ok
-
-        (0 until numberOfEvents).map { i =>
-          val observedResponse = fetchResponseG()
-          observedResponse.statusCode shouldBe ok
-          observedResponse.gameResponseType shouldBe GameResponseType.Event
-          val event = observedResponse.body.parseJson.convertTo[GameEvent]
-          logger.info(s"[$i] Received event: $event")
-          event
-        }
-      }
-    }
 
   def pause(lobbyId: String)(implicit wsClient: WSProbe): WebsocketGameResponse =
     sendWSRequestG(GameRoute.Pause, Pause(lobbyId).toJson.toString)
