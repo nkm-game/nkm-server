@@ -151,18 +151,18 @@ class MarkOfTheWindSpec
     "hide the traps from other players" in {
       HexCoordinates(0, 0)
         .toCell(markGs)
-        .toView(Some(s.p(0)(0).character.id))(markGs)
+        .toView(Some(s.owners(0)))(markGs)
         .effects.size should be (1)
 
       HexCoordinates(0, 0)
         .toCell(markGs)
-        .toView(Some(s.p(1)(0).character.id))(markGs)
+        .toView(Some(s.owners(1)))(markGs)
         .effects.size should be (0)
 
-      markGs.gameLog.toView(Some(s.p(0)(0).character.id))(markGs)
+      markGs.gameLog.toView(Some(s.owners(0)))(markGs)
         .events.ofType[GameEvent.EffectAddedToCell].size should be (1)
 
-      markGs.gameLog.toView(Some(s.p(1)(0).character.id))(markGs)
+      markGs.gameLog.toView(Some(s.owners(1)))(markGs)
         .events.ofType[GameEvent.EffectAddedToCell].size should be (0)
     }
   }

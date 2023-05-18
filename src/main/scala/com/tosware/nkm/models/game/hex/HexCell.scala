@@ -3,6 +3,7 @@ package com.tosware.nkm.models.game.hex
 import com.softwaremill.quicklens.ModifyPimp
 import com.tosware.nkm.*
 import com.tosware.nkm.models.game.character.NkmCharacter
+import com.tosware.nkm.models.game.event.RevealCondition
 import com.tosware.nkm.models.game.hex.HexCellType.Normal
 import com.tosware.nkm.models.game.hex_effect.HexCellEffect
 import com.tosware.nkm.models.game.{GameState, GameStatus}
@@ -132,11 +133,22 @@ case class HexCell
         None
       else characterId
 
+    val hiddenTrapIds =
+      gameState
+        .hiddenEvents
+        .filterNot(he => forPlayerOpt.exists(forPlayerId => he.showOnlyFor.contains(forPlayerId)))
+        .map(_.revealCondition)
+        .ofType[RevealCondition.RelatedTrapRevealed]
+        .map(_.effectId)
+
+    val effectsFiltered =
+      effects.filterNot(e => hiddenTrapIds.contains(e.id))
+
     HexCellView(
       coordinates = coordinates,
       cellType = cellType,
       characterId = characterIdOpt,
-      effects = effects.map(_.toView),
+      effects = effectsFiltered.map(_.toView),
       spawnNumber = spawnNumber,
     )
   }

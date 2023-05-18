@@ -9,7 +9,7 @@ import com.tosware.nkm.models.game.effects.*
 import com.tosware.nkm.models.game.event.GameEvent.*
 import com.tosware.nkm.models.game.event.*
 import com.tosware.nkm.models.game.hex.*
-import com.tosware.nkm.models.game.hex_effect.{HexCellEffect, HexCellEffectState}
+import com.tosware.nkm.models.game.hex_effect.{HexCellEffect, HexCellEffectName, HexCellEffectState}
 import com.tosware.nkm.models.game.pick.PickType
 import com.tosware.nkm.models.game.pick.blindpick.*
 import com.tosware.nkm.models.game.pick.draftpick.*
@@ -178,6 +178,11 @@ case class GameState
     case GameStatus.CharacterPlacing | GameStatus.Running | GameStatus.Finished =>
       turn.number
   }
+
+  def backtrackCauseToPlayerId(causedById: String)(implicit gameState: GameState): Option[PlayerId] =
+    backtrackCauseToCharacterId(causedById)
+      .map(characterById)
+      .map(_.owner.id)
 
   def backtrackCauseToCharacterId(causedById: String): Option[CharacterId] =
     if(characters.map(_.id).contains(causedById))
@@ -737,10 +742,23 @@ case class GameState
       .logEvent(EffectRemovedFromCharacter(randomUUID(), phase, turn, causedById, characterEffectId))
   }
 
-  def addHexCellEffect(coordinates: HexCoordinates, hexCellEffect: HexCellEffect)(implicit random: Random, causedById: String): GameState =
-    updateHexCell(coordinates)(_.addEffect(hexCellEffect))
-      .modify(_.hexCellEffectStates).using(hes => hes.updated(hexCellEffect.id, HexCellEffectState(hexCellEffect.initialCooldown)))
-      .logEvent(EffectAddedToCell(randomUUID(), phase, turn, causedById, hexCellEffect.id, coordinates))
+  def addHexCellEffect(coordinates: HexCoordinates, hexCellEffect: HexCellEffect)(implicit random: Random, causedById: String): GameState = {
+    val ngs = updateHexCell(coordinates)(_.addEffect(hexCellEffect))
+      .modify(_.hexCellEffectStates)
+      .using(hes => hes.updated(hexCellEffect.id, HexCellEffectState(hexCellEffect.initialCooldown)))
+
+    val causedByPlayer = backtrackCauseToPlayerId(causedById)(ngs)
+
+    if (causedByPlayer.isDefined && hexCellEffect.metadata.name == HexCellEffectName.MarkOfTheWind) {
+      ngs.logAndHideEvent(
+        EffectAddedToCell(randomUUID(), phase, turn, causedById, hexCellEffect.id, coordinates),
+        Seq(causedByPlayer.get),
+        RevealCondition.RelatedTrapRevealed(hexCellEffect.id)
+      )
+    } else {
+      ngs.logEvent(EffectAddedToCell(randomUUID(), phase, turn, causedById, hexCellEffect.id, coordinates))
+    }
+  }
 
   def removeHexCellEffects(heids: Seq[HexCellEffectId])(implicit random: Random, causedById: String): GameState =
     heids.foldLeft(this){case (acc, eid) => acc.removeHexCellEffect(eid)}

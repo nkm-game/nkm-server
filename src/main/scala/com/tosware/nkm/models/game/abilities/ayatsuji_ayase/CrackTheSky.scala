@@ -60,7 +60,10 @@ case class CrackTheSky(abilityId: AbilityId, parentCharacterId: CharacterId)
         .whereEnemiesOfC(parentCharacterId).characters.map(_.id)
       )
 
-    val markAbility = gameState.abilityById(markAbilityId).asInstanceOf[abilities.ayatsuji_ayase.MarkOfTheWind]
+    val markAbility =
+      gameState
+        .abilityById(markAbilityId)
+        .asInstanceOf[abilities.ayatsuji_ayase.MarkOfTheWind]
 
     targets.foldLeft(gameState)((acc, cid) => hitAndDamageCharacter(cid, damage)(random, acc))
       .removeHexCellEffects(trapEffectIds)(random, id)
