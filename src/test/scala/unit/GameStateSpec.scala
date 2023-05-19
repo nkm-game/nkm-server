@@ -1,20 +1,18 @@
 package unit
 
-import com.tosware.nkm.CoordinateSeq
 import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.akame.LittleWarHorn
 import com.tosware.nkm.models.game.abilities.sinon.TacticalEscape
-import com.tosware.nkm.models.game.character.CharacterMetadata
+import com.tosware.nkm.models.game.character.{CharacterMetadata, StatType}
 import com.tosware.nkm.models.game.event.GameEvent
 import com.tosware.nkm.models.game.hex.TestHexMapName
-import helpers.{TestScenario, TestUtils, scenarios}
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpecLike
+import com.tosware.nkm.{CoordinateSeq, randomUUID}
+import helpers.*
+import org.scalatest.Assertion
 
-class GameStateSpec
-  extends AnyWordSpecLike
-    with Matchers
-    with TestUtils
+import scala.reflect.ClassTag
+
+class GameStateSpec extends TestUtils
 {
   private val metadata = CharacterMetadata.empty()
     .copy(
@@ -28,7 +26,7 @@ class GameStateSpec
   private val littleWarHornAbilityId = s.p(0)(0).character.state.abilities(0).id
   private val tacticalEscapeAbilityId = s.p(0)(0).character.state.abilities(1).id
 
-  "GameState" must {
+  "GameState" should {
     "start abilities with cooldown 0" in {
       gameState.abilityStates.values.map(_.cooldown).toSet should be (Set(0))
     }
@@ -161,6 +159,105 @@ class GameStateSpec
         .events
         .ofType[GameEvent.CharacterTeleported]
         .size should be(0)
+    }
+
+    "hide character related events for invisible characters" in {
+      val bigS = TestScenario.generate(TestHexMapName.Spacey1v1, CharacterMetadata.empty())
+
+      def sizeOfEventsOfType[T: ClassTag](gs: GameState, playerNumber: Int): Int =
+        gs
+          .toView(Some(bigS.owners(playerNumber)))
+          .gameLog
+          .events
+          .ofType[T]
+          .size
+
+      def assertEventHiddenOfType[T: ClassTag](gs: GameState): Assertion = {
+        val s0 = sizeOfEventsOfType[T](gs, 0)
+        val s1 = sizeOfEventsOfType[T](gs, 1)
+
+        s1 should be(s0 - 1)
+      }
+
+      def assertEventNotHiddenOfType[T: ClassTag](gs: GameState): Assertion = {
+        val s0 = sizeOfEventsOfType[T](gs, 0)
+        val s1 = sizeOfEventsOfType[T](gs, 1)
+
+        s1 should be(s0)
+      }
+
+      val invisibleGs = bigS.gameState.addEffect(
+        bigS.defaultCharacter.id,
+        effects.Invisibility(randomUUID(), 999)
+      )
+
+      val effectUuid = randomUUID()
+      val effectAddedGs = invisibleGs.addEffect(
+        bigS.defaultCharacter.id,
+        effects.HealOverTime(effectUuid, 5, 5)
+      )
+
+      assertEventHiddenOfType[GameEvent.EffectAddedToCharacter](effectAddedGs)
+      assertEventHiddenOfType[GameEvent.EffectVariableSet](effectAddedGs)
+
+      val effectRemovedGs = effectAddedGs.removeEffect(effectUuid)
+
+      assertEventHiddenOfType[GameEvent.EffectRemovedFromCharacter](effectRemovedGs)
+
+      val basicMoveGs = invisibleGs.basicMoveCharacter(
+        bigS.defaultCharacter.id,
+        CoordinateSeq((0, 0), (-1, 0), (-2, 0), (-3, 0)),
+      )
+
+      assertEventHiddenOfType[GameEvent.CharacterBasicMoved](basicMoveGs)
+
+      val basicAttackGs = invisibleGs.basicAttack(
+        bigS.defaultCharacter.id,
+        bigS.p(1)(0).character.id,
+      )
+
+      assertEventHiddenOfType[GameEvent.CharacterPreparedToAttack](basicAttackGs)
+      assertEventHiddenOfType[GameEvent.CharacterBasicAttacked](basicAttackGs)
+
+      assertEventNotHiddenOfType[GameEvent.DamageSent](basicAttackGs)
+      assertEventNotHiddenOfType[GameEvent.ShieldDamaged](basicAttackGs)
+      assertEventNotHiddenOfType[GameEvent.CharacterDamaged](basicAttackGs)
+
+      val damagedGs = invisibleGs.damageCharacter(
+        bigS.defaultCharacter.id,
+        Damage(DamageType.True, 10),
+      )
+      assertEventHiddenOfType[GameEvent.CharacterDamaged](damagedGs)
+
+      val healGs = damagedGs.heal(
+        bigS.defaultCharacter.id,
+        10,
+      )
+      assertEventHiddenOfType[GameEvent.CharacterHealed](healGs)
+
+      val hpSetGs = invisibleGs.setHp(
+        bigS.defaultCharacter.id,
+        10,
+      )
+      assertEventHiddenOfType[GameEvent.CharacterHpSet](hpSetGs)
+
+      val shieldSetGs = invisibleGs.setShield(
+        bigS.defaultCharacter.id,
+        10,
+      )
+      assertEventHiddenOfType[GameEvent.CharacterShieldSet](shieldSetGs)
+
+      val statSetGs = invisibleGs.setStat(
+        bigS.defaultCharacter.id,
+        StatType.Speed,
+        100,
+      )
+      assertEventHiddenOfType[GameEvent.CharacterStatSet](statSetGs)
+
+      val removedFromMapGs = invisibleGs.removeCharacterFromMap(bigS.defaultCharacter.id)
+      assertEventHiddenOfType[GameEvent.CharacterRemovedFromMap](removedFromMapGs)
+
+      // TODO: test for BasicAttackRefreshed and BasicMoveRefreshed
     }
   }
 }

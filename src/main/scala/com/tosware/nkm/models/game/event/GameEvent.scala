@@ -34,7 +34,7 @@ object GameEvent {
     extends GameEvent
   case class EffectAddedToCharacter(id: GameEventId, phase: Phase, turn: Turn, causedById: String, effectId: CharacterEffectId, characterId: CharacterId)
     extends GameEvent
-  case class EffectRemovedFromCharacter(id: GameEventId, phase: Phase, turn: Turn, causedById: String, effectId: CharacterEffectId)
+  case class EffectRemovedFromCharacter(id: GameEventId, phase: Phase, turn: Turn, causedById: String, effectId: CharacterEffectId, characterId: CharacterId)
     extends GameEvent
   case class EffectVariableSet(id: GameEventId, phase: Phase, turn: Turn, causedById: String, effectId: CharacterEffectId, key: String, value: String)
     extends GameEvent

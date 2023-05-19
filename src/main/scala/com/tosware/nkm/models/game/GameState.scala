@@ -4,12 +4,12 @@ import com.softwaremill.quicklens.*
 import com.tosware.nkm.*
 import com.tosware.nkm.models.game.ability.*
 import com.tosware.nkm.models.game.character.*
-import com.tosware.nkm.models.game.character_effect.{CharacterEffect, CharacterEffectState}
+import com.tosware.nkm.models.game.character_effect.*
 import com.tosware.nkm.models.game.effects.*
-import com.tosware.nkm.models.game.event.GameEvent.*
 import com.tosware.nkm.models.game.event.*
+import com.tosware.nkm.models.game.event.GameEvent.*
 import com.tosware.nkm.models.game.hex.*
-import com.tosware.nkm.models.game.hex_effect.{HexCellEffect, HexCellEffectName, HexCellEffectState}
+import com.tosware.nkm.models.game.hex_effect.*
 import com.tosware.nkm.models.game.pick.PickType
 import com.tosware.nkm.models.game.pick.blindpick.*
 import com.tosware.nkm.models.game.pick.draftpick.*
@@ -84,9 +84,6 @@ case class GameState
 )
 {
   import GameState.*
-  private implicit val p: Phase = phase
-  private implicit val t: Turn = turn
-
   def hostId: PlayerId = players.find(_.isHost).get.id
 
   def currentPlayerNumber: Int = turn.number % players.size
@@ -203,7 +200,7 @@ case class GameState
   def invisibleCharacterCoords(forPlayerOpt: Option[PlayerId])(implicit gameState: GameState): Set[HexCoordinates] =
     characters
       .filterNot(c => forPlayerOpt.contains(c.owner.id))
-      .filter(_.state.effects.ofType[Invisibility].nonEmpty)
+      .filter(_.isInvisible)
       .flatMap(_.parentCell.map(_.coordinates))
 
   private def handleTrigger(event: GameEvent, trigger: GameEventListener)(implicit random: Random, gameState: GameState): GameState = {
@@ -227,20 +224,87 @@ case class GameState
     })
   }
 
-  def logEvent(e: GameEvent)(implicit random: Random): GameState =
+  private def _logEventWithoutChecks(e: GameEvent)(implicit random: Random) =
     copy(gameLog = gameLog.modify(_.events).using(es => es :+ e))
       .executeEventTriggers(e)
+
+  def logEvent(e: GameEvent)(implicit random: Random): GameState = {
+    val targetCharacter = e match {
+      case EffectAddedToCharacter(_, _, _, _, _, characterId) =>
+        characterById(characterId)
+      case EffectRemovedFromCharacter(_, _, _, _, _, characterId) =>
+        characterById(characterId)
+      case EffectVariableSet(_, _, _, _, effectId, _, _) =>
+        effectById(effectId).parentCharacter(this)
+      case AbilityHitCharacter(_, _, _, _, _, targetCharacterId) =>
+        characterById(targetCharacterId)
+      case AbilityUsed(_, _, _, _, abilityId) =>
+        abilityById(abilityId).parentCharacter(this)
+      case AbilityUsedOnCoordinates(_, _, _, _, abilityId, _) =>
+        abilityById(abilityId).parentCharacter(this)
+      case AbilityUsedOnCharacter(_, _, _, _, abilityId, _) =>
+        abilityById(abilityId).parentCharacter(this)
+      case AbilityUseFinished(_, _, _, _, abilityId) =>
+        abilityById(abilityId).parentCharacter(this)
+      case AbilityVariableSet(_, _, _, _, abilityId, _, _) =>
+        abilityById(abilityId).parentCharacter(this)
+      case CharacterBasicMoved(_, _, _, _, characterId, _) =>
+        characterById(characterId)
+      case CharacterPreparedToAttack(_, _, _, _, characterId, _) =>
+        characterById(characterId)
+      case CharacterBasicAttacked(_, _, _, _, characterId, _) =>
+        characterById(characterId)
+      case CharacterTeleported(_, _, _, _, characterId, _) =>
+        characterById(characterId)
+      case ShieldDamaged(_, _, _, _, characterId, _) =>
+        characterById(characterId)
+      case CharacterDamaged(_, _, _, _, characterId, _) =>
+        characterById(characterId)
+      case CharacterHealed(_, _, _, _, characterId, _) =>
+        characterById(characterId)
+      case CharacterHpSet(_, _, _, _, characterId, _) =>
+        characterById(characterId)
+      case CharacterShieldSet(_, _, _, _, characterId, _) =>
+        characterById(characterId)
+      case CharacterStatSet(_, _, _, _, characterId, _, _) =>
+        characterById(characterId)
+      case CharacterRemovedFromMap(_, _, _, _, characterId) =>
+        characterById(characterId)
+      case BasicAttackRefreshed(_, _, _, _, characterId) =>
+        characterById(characterId)
+      case BasicMoveRefreshed(_, _, _, _, characterId) =>
+        characterById(characterId)
+      case _ =>
+        null
+    }
+
+    val isAddInvisibilityEvent = e match {
+      case EffectAddedToCharacter(_, _, _, _, effectId, _) =>
+        effectById(effectId).state(this).name == CharacterEffectName.Invisibility
+      case _ => false
+    }
+
+    if(targetCharacter != null && targetCharacter.isInvisible && !isAddInvisibilityEvent) {
+      logAndHideEvent(
+        e,
+        Seq(targetCharacter.owner(this).id),
+        RevealCondition.RelatedCharacterRevealed(targetCharacter.id)
+      )
+    } else {
+      _logEventWithoutChecks(e)
+    }
+  }
 
   def logEvents(es: Seq[GameEvent])(implicit random: Random): GameState =
     es.foldLeft(this){case (acc, event) => acc.logEvent(event)}
 
   def logAndHideEvent(e: GameEvent, showOnlyFor: Seq[PlayerId], revealCondition: RevealCondition)(implicit random: Random): GameState =
     copy(hiddenEvents = hiddenEvents :+ event.EventHideData(e.id, showOnlyFor, revealCondition))
-      .logEvent(e)
+      ._logEventWithoutChecks(e)
 
   def reveal(revealCondition: RevealCondition)(implicit random: Random): GameState =
     copy(hiddenEvents = hiddenEvents.filterNot(_.revealCondition == revealCondition))
-      .logEvent(EventsRevealed(randomUUID(), phase, turn, id, hiddenEvents.filter(_.revealCondition == revealCondition).map(_.eid)))
+      ._logEventWithoutChecks(EventsRevealed(randomUUID(), phase, turn, id, hiddenEvents.filter(_.revealCondition == revealCondition).map(_.eid)))
 
   private def updateClock(newClock: Clock)(implicit random: Random, causedById: String): GameState =
     updateTimestamp()
@@ -739,7 +803,7 @@ case class GameState
     val character = effectById(characterEffectId).parentCharacter(this)
     updateCharacter(character.id)(_.removeEffect(characterEffectId))
       .modify(_.characterEffectStates).using(ces => ces.removed(characterEffectId))
-      .logEvent(EffectRemovedFromCharacter(randomUUID(), phase, turn, causedById, characterEffectId))
+      .logEvent(EffectRemovedFromCharacter(randomUUID(), phase, turn, causedById, characterEffectId, character.id))
   }
 
   def addHexCellEffect(coordinates: HexCoordinates, hexCellEffect: HexCellEffect)(implicit random: Random, causedById: String): GameState = {

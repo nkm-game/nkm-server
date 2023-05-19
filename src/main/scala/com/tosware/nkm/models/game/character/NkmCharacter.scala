@@ -51,6 +51,9 @@ case class NkmCharacter
   def isFlying: Boolean =
     state.effects.ofType[effects.Fly].nonEmpty
 
+  def isInvisible: Boolean =
+    state.effects.ofType[effects.Invisibility].nonEmpty
+
   def usedBasicMoveThisTurn(implicit gameState: GameState): Boolean =
     gameState.gameLog.events
       .inTurn(gameState.turn.number)
