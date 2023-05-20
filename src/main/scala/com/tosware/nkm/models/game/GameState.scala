@@ -805,8 +805,13 @@ case class GameState
     characterEffectIds.foldLeft(this){case (acc, eid) => acc.removeEffect(eid)}
 
   def removeEffect(characterEffectId: CharacterEffectId)(implicit random: Random, causedById: String): GameState = {
-    val character = effectById(characterEffectId).parentCharacter(this)
-    updateCharacter(character.id)(_.removeEffect(characterEffectId))
+    val effect = effectById(characterEffectId)
+    val character = effect.parentCharacter(this)
+    val ngs = if(effect.state(this).name == CharacterEffectName.Invisibility) {
+      reveal(RevealCondition.RelatedCharacterRevealed(character.id))
+    } else this
+
+    ngs.updateCharacter(character.id)(_.removeEffect(characterEffectId))
       .modify(_.characterEffectStates).using(ces => ces.removed(characterEffectId))
       .logEvent(EffectRemovedFromCharacter(randomUUID(), phase, turn, causedById, characterEffectId, character.id))
   }
@@ -833,8 +838,13 @@ case class GameState
     heids.foldLeft(this){case (acc, eid) => acc.removeHexCellEffect(eid)}
 
   def removeHexCellEffect(heid: HexCellEffectId)(implicit random: Random, causedById: String): GameState = {
-    val coordinates = hexCellEffectById(heid).parentCell(this).get.coordinates
-    updateHexCell(coordinates)(_.removeEffect(heid))
+    val hexCellEffect = hexCellEffectById(heid)
+    val coordinates = hexCellEffect.parentCell(this).get.coordinates
+
+    val ngs = if (hexCellEffect.metadata.name == HexCellEffectName.MarkOfTheWind) {
+      reveal(RevealCondition.RelatedTrapRevealed(heid))
+    } else this
+    ngs.updateHexCell(coordinates)(_.removeEffect(heid))
       .modify(_.hexCellEffectStates).using(hes => hes.removed(heid))
       .logEvent(EffectRemovedFromCell(randomUUID(), phase, turn, causedById, heid))
   }

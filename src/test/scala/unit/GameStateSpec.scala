@@ -186,9 +186,11 @@ class GameStateSpec extends TestUtils
         s1 should be(s0)
       }
 
+      val invisibilityEffectUuid = randomUUID()
+
       val invisibleGs = bigS.gameState.addEffect(
         bigS.defaultCharacter.id,
-        effects.Invisibility(randomUUID(), 999)
+        effects.Invisibility(invisibilityEffectUuid, 999)
       )
 
       val effectUuid = randomUUID()
@@ -256,6 +258,9 @@ class GameStateSpec extends TestUtils
 
       val removedFromMapGs = invisibleGs.removeCharacterFromMap(bigS.defaultCharacter.id)
       assertEventHiddenOfType[GameEvent.CharacterRemovedFromMap](removedFromMapGs)
+
+      val revealedGs = removedFromMapGs.removeEffect(invisibilityEffectUuid)
+      assertEventNotHiddenOfType[GameEvent.CharacterRemovedFromMap](revealedGs)
 
       // TODO: test for BasicAttackRefreshed and BasicMoveRefreshed
     }
