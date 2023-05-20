@@ -112,14 +112,18 @@ case class GameState
 
   def millisSinceLastClockUpdate(): Long = ChronoUnit.MILLIS.between(lastTimestamp, Instant.now())
 
-  def getCurrentClock(): Clock = {
+  def currentClock(): Clock = {
     if(!clock.isRunning) return clock;
     val timeToDecrease: Long = millisSinceLastClockUpdate()
 
     if(isSharedTime)
-      clock.decreaseSharedTime(timeToDecrease)
+      clock
+        .setIsSharedTime(true)
+        .decreaseSharedTime(timeToDecrease)
     else
-      clock.decreaseTime(currentPlayer.id, timeToDecrease)
+      clock
+        .setIsSharedTime(false)
+        .decreaseTime(currentPlayer.id, timeToDecrease)
   }
 
 
@@ -434,10 +438,11 @@ case class GameState
       .pickAndPlaceCharactersRandomlyIfAllRandom()
 
   def decreaseSharedTime(timeMillis: Long)(implicit random: Random): GameState =
-    updateClock(clock.decreaseSharedTime(timeMillis))(random, id)
+    updateClock(clock.setIsSharedTime(true).decreaseSharedTime(timeMillis))(random, id)
+
 
   def decreaseTime(playerId: PlayerId, timeMillis: Long)(implicit random: Random): GameState =
-    updateClock(clock.decreaseTime(playerId, timeMillis))(random, playerId)
+    updateClock(clock.setIsSharedTime(false).decreaseTime(playerId, timeMillis))(random, playerId)
 
   def increaseTime(playerId: PlayerId, timeMillis: Long)(implicit random: Random): GameState =
     updateClock(clock.increaseTime(playerId, timeMillis))(random, playerId)
@@ -1033,7 +1038,7 @@ case class GameState
       abilities = abilities.map(_.toView(this)),
       effects = effects.map(_.toView(this)),
       clockConfig = clockConfig,
-      clock = getCurrentClock(),
+      clock = currentClock(),
       gameLog = gameLog.toView(forPlayerOpt)(this),
 
       currentPlayerId = currentPlayer.id,
@@ -1041,7 +1046,6 @@ case class GameState
       isBlindPickingPhase = isBlindPickingPhase,
       isDraftBanningPhase = isDraftBanningPhase,
       isInCharacterSelect = isInCharacterSelect,
-      isSharedTime = isSharedTime,
       currentPlayerTime = currentPlayerTime,
       charactersToTakeAction = charactersToTakeAction,
     )

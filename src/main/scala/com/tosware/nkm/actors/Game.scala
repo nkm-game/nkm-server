@@ -366,7 +366,7 @@ class Game(id: GameId)(implicit nkmDataService: NkmDataService) extends Persiste
     case GetState =>
       sender() ! gameState
     case GetCurrentClock =>
-      sender() ! gameState.getCurrentClock()
+      sender() ! gameState.currentClock()
     case GetStateView(forPlayer) =>
       sender() ! gameState.toView(forPlayer)
     case StartGame(gameStartDependencies) =>

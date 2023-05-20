@@ -39,7 +39,6 @@ case class GameStateView(
   isBlindPickingPhase: Boolean,
   isDraftBanningPhase: Boolean,
   isInCharacterSelect: Boolean,
-  isSharedTime: Boolean,
   currentPlayerTime: Long,
   charactersToTakeAction: Set[CharacterId],
 )
