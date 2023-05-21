@@ -84,20 +84,17 @@ class User(email: String) extends PersistentActor with ActorLogging {
         else LoginFailure
       }
     case OauthLogin() =>
-      log.info(s"Oauth email check request for: $email")
-      sender () ! {
-        if(userState.registered) LoginSuccess
-        else {
-          val e = OauthRegisterSuccess(email)
-          val taggedE = Tagged(e, Set(oauthRegisterTag))
-          persist(taggedE) { _ =>
-            context.system.eventStream.publish(e)
-            oauthRegister(email)
-            log.info(s"Persisted user: $email")
-            sender() ! RegisterSuccess
-          }
+      log.info(s"Oauth login request for: $email")
+      if(!userState.registered) {
+        val e = OauthRegisterSuccess(email)
+        val taggedE = Tagged(e, Set(oauthRegisterTag))
+        persist(taggedE) { _ =>
+          context.system.eventStream.publish(e)
+          oauthRegister(email)
+          log.info(s"Persisted user: $email")
         }
       }
+      sender () ! LoginSuccess
     case e => log.warning(s"Unknown message: $e")
   }
 
