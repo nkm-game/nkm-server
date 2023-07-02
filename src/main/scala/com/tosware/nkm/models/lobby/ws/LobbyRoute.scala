@@ -6,6 +6,7 @@ sealed abstract class LobbyRoute(val value: String) extends StringEnumEntry
 
 object LobbyRoute extends StringEnum[LobbyRoute] {
   val values = findValues
+  case object Ping extends LobbyRoute("ping")
   case object Auth extends LobbyRoute("auth")
   case object Observe extends LobbyRoute("observe")
   case object Lobbies extends LobbyRoute("lobbies")

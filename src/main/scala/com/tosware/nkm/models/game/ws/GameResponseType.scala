@@ -8,6 +8,7 @@ object GameResponseType extends StringEnum[GameResponseType] {
   val values = findValues
 
   // General
+  case object Ping extends GameResponseType("ping")
   case object Auth extends GameResponseType("auth")
   case object Observe extends GameResponseType("observe")
   case object State extends GameResponseType("state")

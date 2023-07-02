@@ -21,10 +21,14 @@ trait LobbyWebsocketUserBehaviour extends WebsocketUserBehaviour {
   override def parseIncomingMessage(outgoing: ActorRef, username: Option[String], text: String): Unit =
     try {
       val request = text.parseJson.convertTo[WebsocketLobbyRequest]
-      log.info(s"[${username.getOrElse("")}] ${request.requestPath}")
+      if(request.requestPath != LobbyRoute.Ping) {
+        log.info(s"[${username.getOrElse("")}] ${request.requestPath}")
+      }
       log.debug(s"Request: $request")
       val response = parseWebsocketLobbyRequest(request, outgoing, self, AuthStatus(username))
-      log.info(s"[${username.getOrElse("")}] ${response.lobbyResponseType}(${response.statusCode})")
+      if (response.lobbyResponseType != LobbyResponseType.Ping) {
+        log.info(s"[${username.getOrElse("")}] ${response.lobbyResponseType}(${response.statusCode})")
+      }
       log.debug(s"Response: $response")
       outgoing ! OutgoingMessage(response.toJson.toString)
     }
@@ -54,6 +58,9 @@ trait LobbyWebsocketUserBehaviour extends WebsocketUserBehaviour {
     import LobbyRequest.*
 
     request.requestPath match {
+      case LobbyRoute.Ping =>
+        implicit val responseType: LobbyResponseType = LobbyResponseType.Ping
+        ok("pong")
       case LobbyRoute.Auth =>
         implicit val responseType: LobbyResponseType = LobbyResponseType.Auth
         val token = request.requestJson.parseJson.convertTo[Auth].token

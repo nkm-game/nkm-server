@@ -8,6 +8,7 @@ object GameRoute extends StringEnum[GameRoute] {
   val values = findValues
 
   // General
+  case object Ping extends GameRoute("ping")
   case object Auth extends GameRoute("auth")
   case object Observe extends GameRoute("observe")
   case object GetState extends GameRoute("state")
