@@ -15,6 +15,7 @@ object User extends NkmTimeouts {
   case class Register(password: String) extends Command
   case class CheckLogin(password: String) extends Command
   case class OauthLogin() extends Command
+  case object GrantAdmin extends Command
 
   sealed trait Event
   sealed trait RegisterEvent extends Event
@@ -27,6 +28,8 @@ object User extends NkmTimeouts {
 
   case object LoginSuccess extends LoginEvent
   case object LoginFailure extends LoginEvent
+
+  case class AdminGranted(email: String) extends Event
 
   def props(email: String): Props = Props(new User(email))
 
@@ -51,11 +54,15 @@ class User(email: String) extends PersistentActor with ActorLogging {
   var userState: UserState = UserState(email)
 
   def register(email: String, passwordHash: String): Unit = {
-    userState = userState.copy(passwordHash = Some(passwordHash), userId = Some(email), registered = true)
+    userState = userState.copy(passwordHash = Some(passwordHash), userId = Some(email), isRegistered = true)
   }
 
   def oauthRegister(email: String): Unit = {
-    userState = userState.copy(userId = Some(email), registered = true)
+    userState = userState.copy(userId = Some(email), isRegistered = true)
+  }
+
+  def grantAdmin(): Unit = {
+    userState = userState.copy(isAdmin = true)
   }
 
   override def receive: Receive = {
@@ -64,7 +71,7 @@ class User(email: String) extends PersistentActor with ActorLogging {
       sender() ! userState
     case Register(password) =>
       log.info(s"Register request for: $email")
-      if (userState.registered || !isEmailValid(email)) {
+      if (userState.isRegistered || !isEmailValid(email)) {
         sender() ! RegisterFailure
       } else {
         val passwordHash = password.boundedBcrypt
@@ -80,12 +87,12 @@ class User(email: String) extends PersistentActor with ActorLogging {
     case CheckLogin(password) =>
       log.info(s"Login check request for: $email")
       sender () ! {
-        if(userState.registered && userState.passwordHash.isDefined && password.isBcryptedBounded(userState.passwordHash.get)) LoginSuccess
+        if(userState.isRegistered && userState.passwordHash.isDefined && password.isBcryptedBounded(userState.passwordHash.get)) LoginSuccess
         else LoginFailure
       }
     case OauthLogin() =>
       log.info(s"Oauth login request for: $email")
-      if(!userState.registered) {
+      if(!userState.isRegistered) {
         val e = OauthRegisterSuccess(email)
         val taggedE = Tagged(e, Set(oauthRegisterTag))
         persist(taggedE) { _ =>
@@ -94,7 +101,16 @@ class User(email: String) extends PersistentActor with ActorLogging {
           log.info(s"Persisted user: $email")
         }
       }
-      sender () ! LoginSuccess
+      sender() ! LoginSuccess
+    case GrantAdmin =>
+      log.info(s"Granting admin to: $email")
+      val e = AdminGranted(email)
+      persist(e) { _ =>
+        context.system.eventStream.publish(e)
+        grantAdmin()
+        log.info(s"Granted admin for: $email")
+      }
+      sender() ! CommandResponse.Success()
     case e => log.warning(s"Unknown message: $e")
   }
 
@@ -105,6 +121,9 @@ class User(email: String) extends PersistentActor with ActorLogging {
     case OauthRegisterSuccess(email) =>
       oauthRegister(email)
       log.debug(s"Recovered oauth register of $email")
+    case GrantAdmin =>
+      grantAdmin()
+      log.debug(s"Recovered grant admin")
     case RecoveryCompleted =>
     case e => log.warning(s"Unknown message: $e")
   }

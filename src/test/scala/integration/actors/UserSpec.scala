@@ -18,7 +18,7 @@ class UserSpec extends NkmPersistenceTestKit(ActorSystem("UserSpec"))
         val future = user ? GetState
         val state: UserState = aw(future.mapTo[UserState])
         state.email shouldEqual email
-        state.registered shouldEqual false
+        state.isRegistered shouldEqual false
       }
     }
     "be able to register" in {
@@ -33,7 +33,7 @@ class UserSpec extends NkmPersistenceTestKit(ActorSystem("UserSpec"))
         val state: UserState = aw(future.mapTo[UserState])
 
         state.email shouldEqual "test@example.com"
-        state.registered shouldEqual true
+        state.isRegistered shouldEqual true
       }
     }
 
@@ -86,6 +86,26 @@ class UserSpec extends NkmPersistenceTestKit(ActorSystem("UserSpec"))
         val loginCheckFuture = user ? CheckLogin("password")
         val loginCheckResponse = aw(loginCheckFuture.mapTo[LoginEvent])
         loginCheckResponse shouldBe LoginFailure
+      }
+    }
+
+    "not be admin initially" in {
+      val email = "test@example.com"
+      val user: ActorRef = system.actorOf(User.props(email))
+      within2000 {
+        val future = user ? GetState
+        val state: UserState = aw(future.mapTo[UserState])
+        state.isAdmin shouldEqual false
+      }
+    }
+
+    "be admin after granting it" in {
+      val email = "test@example.com"
+      val user: ActorRef = system.actorOf(User.props(email))
+      within2000 {
+        user ! GrantAdmin
+        val state: UserState = aw((user ? GetState).mapTo[UserState])
+        state.isAdmin shouldEqual true
       }
     }
   }
