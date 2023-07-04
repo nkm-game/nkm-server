@@ -1,7 +1,8 @@
 package com.tosware.nkm
 
-import akka.actor.ActorSystem
+import akka.actor.{ActorRef, ActorSystem}
 import akka.http.scaladsl.Http
+import com.tosware.nkm.actors.User
 import com.tosware.nkm.services.http.HttpService
 import com.typesafe.config.{Config, ConfigFactory}
 import slick.jdbc.JdbcBackend
@@ -12,6 +13,8 @@ import scala.annotation.tailrec
 object Main extends App with Logging {
   val db: JdbcBackend.Database = Database.forConfig("slick.db")
   val port = sys.env.getOrElse("PORT", "3737").toInt
+
+  implicit val system: ActorSystem = ActorSystem("nkm-actor-system")
 
   @tailrec
   def initDb(lastDelay: Int = 0): Unit = {
@@ -32,9 +35,22 @@ object Main extends App with Logging {
     }
   }
 
-  initDb()
+  // TODO: check if users are not already initialized
+  def initUsers(): Unit = {
+    val tojatosActor: ActorRef = system.actorOf(User.props("tojatos@gmail.com"))
+    tojatosActor ! User.RegisterHash("$2a$10$PXY3u4hPEic7sbKMoVqhn.qoSRJFah36E1XiujvJnfZgyqxBm44zS")
+    tojatosActor ! User.GrantAdmin
 
-  implicit val system: ActorSystem = ActorSystem("nkm-actor-system")
+    val testUserActor1: ActorRef = system.actorOf(User.props("test1@example.com"))
+    val testUserActor2: ActorRef = system.actorOf(User.props("test2@example.com"))
+
+    testUserActor1 ! User.Register("test")
+    testUserActor2 ! User.Register("test")
+  }
+
+  initDb()
+  initUsers()
+
   val deps = new NkmDependencies(system, db)
   val httpService = new HttpService(deps)
 

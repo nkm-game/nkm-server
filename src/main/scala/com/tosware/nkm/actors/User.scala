@@ -13,6 +13,7 @@ object User extends NkmTimeouts {
 
   sealed trait Command
   case class Register(password: String) extends Command
+  case class RegisterHash(passwordHash: String) extends Command
   case class CheckLogin(password: String) extends Command
   case class OauthLogin() extends Command
   case object GrantAdmin extends Command
@@ -65,25 +66,31 @@ class User(email: String) extends PersistentActor with ActorLogging {
     userState = userState.copy(isAdmin = true)
   }
 
+  def registerHash(passwordHash: String) = {
+    if (userState.isRegistered || !isEmailValid(email)) {
+      sender() ! RegisterFailure
+    } else {
+      val e = RegisterSuccess(email, passwordHash)
+      val taggedE = Tagged(e, Set(registerTag))
+      persist(taggedE) { _ =>
+        context.system.eventStream.publish(e)
+        register(email, passwordHash)
+        log.info(s"Persisted user: $email")
+        sender() ! RegisterSuccess
+      }
+    }
+  }
+
   override def receive: Receive = {
     case GetState =>
       log.info("Received state request")
       sender() ! userState
     case Register(password) =>
       log.info(s"Register request for: $email")
-      if (userState.isRegistered || !isEmailValid(email)) {
-        sender() ! RegisterFailure
-      } else {
-        val passwordHash = password.boundedBcrypt
-        val e = RegisterSuccess(email, passwordHash)
-        val taggedE = Tagged(e, Set(registerTag))
-        persist(taggedE) { _ =>
-          context.system.eventStream.publish(e)
-          register(email, passwordHash)
-          log.info(s"Persisted user: $email")
-          sender() ! RegisterSuccess
-        }
-      }
+      registerHash(password.boundedBcrypt)
+    case RegisterHash(passwordHash) =>
+      log.debug(s"Register via hash request for: $email")
+      registerHash(passwordHash)
     case CheckLogin(password) =>
       log.info(s"Login check request for: $email")
       sender () ! {
