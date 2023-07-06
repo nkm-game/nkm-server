@@ -5,6 +5,7 @@ import akka.pattern.ask
 import com.tosware.nkm.actors.User
 import com.tosware.nkm.actors.User.*
 import com.tosware.nkm.models.UserState
+import com.tosware.nkm.models.UserStateView
 import helpers.NkmPersistenceTestKit
 
 
@@ -15,8 +16,7 @@ class UserSpec extends NkmPersistenceTestKit(ActorSystem("UserSpec"))
       val email = "test@example.com"
       val user: ActorRef = system.actorOf(User.props(email))
       within2000 {
-        val future = user ? GetState
-        val state: UserState = aw(future.mapTo[UserState])
+        val state: UserState = aw(user ? GetState).asInstanceOf[UserState]
         state.email shouldEqual email
         state.isRegistered shouldEqual false
       }
@@ -61,7 +61,7 @@ class UserSpec extends NkmPersistenceTestKit(ActorSystem("UserSpec"))
 
         val loginCheckFuture = user ? CheckLogin("password")
         val loginCheckResponse = aw(loginCheckFuture.mapTo[LoginEvent])
-        loginCheckResponse shouldBe LoginSuccess
+        loginCheckResponse shouldBe LoginSuccess(UserStateView("test3@example.com", Some("test3@example.com"), isAdmin = false))
       }
     }
 
@@ -75,7 +75,7 @@ class UserSpec extends NkmPersistenceTestKit(ActorSystem("UserSpec"))
 
         val loginCheckFuture = user ? CheckLogin("password1")
         val loginCheckResponse = aw(loginCheckFuture.mapTo[LoginEvent])
-        loginCheckResponse shouldBe LoginFailure
+        loginCheckResponse shouldBe LoginFailure("Invalid credentials.")
       }
     }
 
@@ -85,7 +85,7 @@ class UserSpec extends NkmPersistenceTestKit(ActorSystem("UserSpec"))
       within2000 {
         val loginCheckFuture = user ? CheckLogin("password")
         val loginCheckResponse = aw(loginCheckFuture.mapTo[LoginEvent])
-        loginCheckResponse shouldBe LoginFailure
+        loginCheckResponse shouldBe LoginFailure("User does not exist.")
       }
     }
 

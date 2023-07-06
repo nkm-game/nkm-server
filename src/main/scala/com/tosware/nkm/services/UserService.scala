@@ -8,40 +8,27 @@ import akka.pattern.ask
 import akka.persistence.jdbc.query.scaladsl.JdbcReadJournal
 import akka.persistence.query.PersistenceQuery
 import akka.stream.scaladsl.Sink
-import com.tosware.nkm.{NkmTimeouts, UserId}
+import akka.util.ByteString
+import com.tosware.nkm.NkmTimeouts
 import com.tosware.nkm.actors.User
 import com.tosware.nkm.actors.User.*
 import com.tosware.nkm.models.{Credentials, RegisterRequest}
-import slick.jdbc.JdbcBackend
-import akka.util.ByteString
 import com.tosware.nkm.serializers.NkmJsonProtocol
-
-import scala.concurrent.{ExecutionContextExecutor, Future}
+import slick.jdbc.JdbcBackend
 import spray.json.*
 
-object UserService {
-  sealed trait Event
-  case class LoggedIn(userId: UserId) extends Event
-  case object InvalidCredentials extends Event
-  case object InternalError extends Event
-}
-
+import scala.concurrent.{ExecutionContextExecutor, Future}
 
 class UserService(implicit db: JdbcBackend.Database, system: ActorSystem)
   extends NkmTimeouts
     with NkmJsonProtocol
 {
-  import UserService.*
-
-  def authenticate(creds: Credentials): Event = {
+  def authenticate(creds: Credentials): LoginEvent = {
     val userActor: ActorRef = system.actorOf(User.props(creds.email))
-    aw(userActor ? CheckLogin(creds.password)) match {
-      case LoginSuccess => LoggedIn(creds.email)
-      case LoginFailure => InvalidCredentials
-    }
+    aw(userActor ? CheckLogin(creds.password)).asInstanceOf[LoginEvent]
   }
 
-  def authenticateOauthGoogle(googleCredential: String): Event = {
+  def authenticateOauthGoogle(googleCredential: String): LoginEvent = {
     val uri = s"https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=$googleCredential"
     val request = HttpRequest(uri = uri)
     val responseFuture: Future[HttpResponse] = Http().singleRequest(request)
@@ -53,14 +40,11 @@ class UserService(implicit db: JdbcBackend.Database, system: ActorSystem)
       }
     }
 
-    val result: Future[Event] = jwtTokenFuture.map { jwtToken =>
+    val result: Future[LoginEvent] = jwtTokenFuture.map { jwtToken =>
       val userActor: ActorRef = system.actorOf(User.props(jwtToken.email))
-      aw(userActor ? OauthLogin()) match {
-        case LoginSuccess => LoggedIn(jwtToken.email)
-        case LoginFailure => InternalError
-      }
+      aw(userActor ? OauthLogin()).asInstanceOf[LoginEvent]
     }.recover {
-      case _: Throwable => InternalError
+      case _: Throwable => User.LoginFailure("Internal error.")
     }
 
     aw(result)

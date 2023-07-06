@@ -27,8 +27,8 @@ object User extends NkmTimeouts {
   case object RegisterSuccess extends RegisterEvent
   case object RegisterFailure extends RegisterEvent
 
-  case object LoginSuccess extends LoginEvent
-  case object LoginFailure extends LoginEvent
+  case class LoginSuccess(userStateView: UserStateView) extends LoginEvent
+  case class LoginFailure(reason: String) extends LoginEvent
 
   case class AdminGranted(email: String) extends Event
 
@@ -55,7 +55,7 @@ class User(email: String) extends PersistentActor with ActorLogging {
   var userState: UserState = UserState(email)
 
   def register(email: String, passwordHash: String): Unit = {
-    userState = userState.copy(passwordHash = Some(passwordHash), userId = Some(email), isRegistered = true)
+    userState = userState.copy(passwordHashOpt = Some(passwordHash), userId = Some(email), isRegistered = true)
   }
 
   def oauthRegister(email: String): Unit = {
@@ -81,6 +81,16 @@ class User(email: String) extends PersistentActor with ActorLogging {
     }
   }
 
+  def checkLogin(password: String): LoginEvent = {
+    if (!userState.isRegistered)
+      return LoginFailure("User does not exist.")
+
+    if (!userState.passwordHashOpt.exists(password.isBcryptedBounded))
+      return LoginFailure("Invalid credentials.")
+
+    LoginSuccess(userState.toView)
+  }
+
   override def receive: Receive = {
     case GetState =>
       log.info("Received state request")
@@ -93,10 +103,7 @@ class User(email: String) extends PersistentActor with ActorLogging {
       registerHash(passwordHash)
     case CheckLogin(password) =>
       log.info(s"Login check request for: $email")
-      sender () ! {
-        if(userState.isRegistered && userState.passwordHash.isDefined && password.isBcryptedBounded(userState.passwordHash.get)) LoginSuccess
-        else LoginFailure
-      }
+      sender () ! checkLogin(password)
     case OauthLogin() =>
       log.info(s"Oauth login request for: $email")
       if(!userState.isRegistered) {
@@ -108,7 +115,7 @@ class User(email: String) extends PersistentActor with ActorLogging {
           log.info(s"Persisted user: $email")
         }
       }
-      sender() ! LoginSuccess
+      sender() ! LoginSuccess(userState.toView)
     case GrantAdmin =>
       log.info(s"Granting admin to: $email")
       val e = AdminGranted(email)
