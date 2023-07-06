@@ -32,13 +32,16 @@ class AuthSpec extends ApiTrait
         status shouldEqual Created
       }
     }
-    "return token when valid credentials are provided" in {
+    "return user state and token when valid credentials are provided" in {
       Post("/api/register", RegisterRequest("test@example.com", "password")) ~> routes
       Post("/api/login", Credentials("test@example.com", "password")) ~> routes ~> check {
         status shouldBe OK
 
-        val token = responseAs[String]
-        JwtSprayJson.decode(token, deps.jwtSecretKey.value, Seq(JwtAlgorithm.HS256)) match {
+        val authResponse = responseAs[AuthResponse]
+
+        authResponse.userState shouldEqual UserStateView("test@example.com", Some("test@example.com"), isAdmin = false)
+
+        JwtSprayJson.decode(authResponse.token, deps.jwtSecretKey.value, Seq(JwtAlgorithm.HS256)) match {
           case Success(claim) => claim.content.parseJson.convertTo[JwtContent] shouldEqual JwtContent("test@example.com")
           case _ => fail()
         }

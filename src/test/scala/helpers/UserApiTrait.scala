@@ -3,7 +3,7 @@ package helpers
 import akka.http.scaladsl.marshalling.ToEntityMarshaller
 import akka.http.scaladsl.model.StatusCode
 import akka.http.scaladsl.model.headers.RawHeader
-import com.tosware.nkm.models.{Credentials, RegisterRequest}
+import com.tosware.nkm.models.{AuthResponse, Credentials, RegisterRequest}
 
 trait UserApiTrait extends ApiTrait
   {
@@ -24,7 +24,7 @@ trait UserApiTrait extends ApiTrait
       super.beforeEach()
       registerRequests.foreach(r => Post("/api/register", r) ~> routes)
       registerRequests.foreach(r => Post("/api/login", Credentials(r.email, r.password)) ~> routes ~> check {
-        tokens = tokens :+ responseAs[String]
+        tokens = tokens :+ responseAs[AuthResponse].token
       })
     }
   }
