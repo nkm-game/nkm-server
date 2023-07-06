@@ -4,7 +4,7 @@ services:
   nkm-actor-server:
     restart: always
     build: .
-    image: tojatos/nkm-actor-server
+    image: tojatos/nkm-actor-server:stable
     networks:
       - web
       - default

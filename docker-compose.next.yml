@@ -1,0 +1,47 @@
+version: "3.8"
+
+services:
+  nkm-actor-server-next:
+    restart: always
+    build: .
+    image: tojatos/nkm-actor-server:latest
+    networks:
+      - web
+      - default
+    environment:
+      - PORT=80
+      - MYSQL_HOST=db-next
+      - MYSQL_DB=nkm_db
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=nkm_db_pass
+      - MYSQL_PORT=3306
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.middlewares.nkm-actor-server-next-stripprefix.stripPrefix.prefixes=/nkm-next"
+      - "traefik.http.routers.nkm-actor-server-next.rule=((Host(`krzysztofruczkowski.pl`) || Host(`www.krzysztofruczkowski.pl`)) && PathPrefix(`/nkm-next/`))"
+      - "traefik.http.routers.nkm-actor-server-next.middlewares=nkm-actor-server-next-stripprefix"
+      - "traefik.http.routers.nkm-actor-server-next.tls=true"
+      - "traefik.http.routers.nkm-actor-server-next.tls.certresolver=myresolver"
+      - "traefik.http.services.nkm-actor-server-next.loadbalancer.server.port=80"
+      - "traefik.docker.network=traefik_default"
+    depends_on:
+      - db-next
+  db-next:
+    restart: always
+    image: mysql
+    volumes:
+      - mysql_data_next:/var/lib/mysql
+    environment:
+      - MYSQL_DATABASE=nkm_db
+      - MYSQL_ROOT_PASSWORD=nkm_db_pass
+    expose:
+      - 3306
+
+networks:
+  web:
+    name: traefik_default
+    external: true
+
+volumes:
+  mysql_data_next:
+
