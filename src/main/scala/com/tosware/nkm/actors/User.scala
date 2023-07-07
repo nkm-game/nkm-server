@@ -129,13 +129,13 @@ class User(email: String) extends PersistentActor with ActorLogging {
   }
 
   override def receiveRecover: Receive = {
-    case RegisterSuccess(email, passwordHash) =>
+    case RegisterSuccess(_, passwordHash) =>
       register(email, passwordHash)
       log.debug(s"Recovered register of $email")
-    case OauthRegisterSuccess(email) =>
+    case OauthRegisterSuccess(_) =>
       oauthRegister(email)
       log.debug(s"Recovered oauth register of $email")
-    case GrantAdmin =>
+    case AdminGranted(_) =>
       grantAdmin()
       log.debug(s"Recovered grant admin")
     case RecoveryCompleted =>
