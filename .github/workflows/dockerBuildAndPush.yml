@@ -14,6 +14,6 @@ jobs:
       - name: Run post-commit git hook
         run: ./hooks/post-commit
       - name: Build
-        run: docker-compose build
+        run: docker-compose -f docker-compose.next.yml build
       - name: Push
-        run: docker-compose push
+        run: docker-compose -f docker-compose.next.yml push
