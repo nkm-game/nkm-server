@@ -180,20 +180,22 @@ case class NkmCharacter
   def basicMove(path: Seq[HexCoordinates])(implicit random: Random, gameState: GameState): GameState =
     basicMoveOverride.fold(defaultBasicMove(path))(_.basicMove(path))
 
-  def defaultMeleeBasicAttackCells(implicit gameState: GameState): Set[HexCoordinates] = {
-    if(parentCell.isEmpty) return Set.empty
-    val range = state.basicAttackRange
-    parentCell.get.getArea(
-      range,
-      Set(SearchFlag.StopAtWalls, SearchFlag.StopAfterEnemies, SearchFlag.StopAfterFriends, SearchFlag.StraightLine),
-      friendlyPlayerIdOpt = Some(owner.id),
-    ).toCoords
-  }
-  def defaultRangedBasicAttackCells(implicit gameState: GameState): Set[HexCoordinates] = {
-    if(parentCell.isEmpty) return Set.empty
-    val range = state.basicAttackRange
-    parentCell.get.getArea(range, Set(SearchFlag.StraightLine)).toCoords
-  }
+  def defaultMeleeBasicAttackCells(implicit gameState: GameState): Set[HexCoordinates] =
+    parentCell.map { c =>
+      c.getArea(
+        state.basicAttackRange,
+        Set(SearchFlag.StopAtWalls, SearchFlag.StopAfterEnemies, SearchFlag.StopAfterFriends, SearchFlag.StraightLine),
+        friendlyPlayerIdOpt = Some(owner.id),
+      ).toCoords - c.coordinates
+    }
+      .getOrElse(Set.empty)
+  def defaultRangedBasicAttackCells(implicit gameState: GameState): Set[HexCoordinates] =
+    parentCell.map { c =>
+      c.getArea(
+        state.basicAttackRange,
+        Set(SearchFlag.StraightLine),
+      ).toCoords - c.coordinates
+    }.getOrElse(Set.empty)
 
   def defaultBasicAttackCells(implicit gameState: GameState): Set[HexCoordinates] = {
     state.attackType match {

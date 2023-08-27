@@ -175,8 +175,7 @@ case class GameStateValidator()(implicit gameState: GameState) {
       else if (!character.canBasicAttack) Failure("This character is unable to basic attack.")
       else if (gameState.characterIdsOutsideMap.contains(characterId)) Failure("Character outside map.")
       else if (gameState.characterIdsOutsideMap.contains(targetCharacterId)) Failure("Target character outside map.")
-      else if (!character.basicAttackCellCoords.contains(targetParentCell.get.coordinates)) Failure("Target character not in range.")
-      else if (character.owner == targetCharacter.owner) Failure("This character cannot attack friendly characters.")
+      else if (!character.basicAttackCellCoords.contains(targetParentCell.get.coordinates)) Failure("Target character not in range or not a valid target.")
       else Success()
     }
   }
