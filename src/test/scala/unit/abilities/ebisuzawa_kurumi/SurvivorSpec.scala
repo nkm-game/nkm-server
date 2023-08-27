@@ -23,8 +23,9 @@ class SurvivorSpec
     "apply basic attack buffs" in {
       val ngs: GameState = gameState.useAbility(abilityId)
       ngs.characterById(s.p(0)(0).character.id).state.effects.ofType[NextBasicAttackBuff] should not be empty
-      ngs.basicAttack(s.p(0)(0).character.id, s.p(1)(0).character.id)
-        .characterById(s.p(1)(0).character.id).state.effects.ofType[effects.Stun].size should be > 0
+      val attackGs = ngs.basicAttack(s.p(0)(0).character.id, s.p(1)(0).character.id)
+      attackGs.characterById(s.p(1)(0).character.id).state.effects.ofType[effects.Stun].size should be > 0
+      attackGs.characterById(s.p(1)(0).character.id).isDead shouldBe false
     }
 
     "become invisible" in {
