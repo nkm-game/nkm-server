@@ -30,6 +30,9 @@ case class BindingRibbons(abilityId: AbilityId, parentCharacterId: CharacterId) 
   override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =
     parentCell.get.coordinates.getCircle(metadata.variables("range")).whereExists
 
+  override def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] =
+    rangeCellCoords
+
   private def hitCharacter(target: CharacterId, targetsHit: Int)(implicit random: Random, gameState: GameState): GameState = {
     val silencedGameState =
       gameState
