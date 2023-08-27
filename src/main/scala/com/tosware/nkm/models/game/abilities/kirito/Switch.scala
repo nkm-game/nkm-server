@@ -28,7 +28,7 @@ case class Switch(abilityId: AbilityId, parentCharacterId: CharacterId) extends 
 
   override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] = {
     if(parentCell.isEmpty) return Set.empty
-    val rangeCoords = parentCell.get.coordinates.getCircle(metadata.variables("range"))
+    val rangeCoords = parentCell.get.coordinates.getCircle(metadata.variables("range")) - parentCell.get.coordinates
     val enemiesAaCoords = gameState
       .players.filterNot(_.name == parentCharacter.owner.id)
       .flatMap(_.characterIds)

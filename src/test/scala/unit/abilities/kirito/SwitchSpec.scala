@@ -104,6 +104,21 @@ class SwitchSpec
       }
     }
 
+    "not be able to use switch with himself" in {
+      val ngs = gameState.teleportCharacter(s.defaultCharacter.id, HexCoordinates(2, 0))
+
+      ngs.abilityById(abilityId).targetsInRange(ngs) should not contain s.defaultCharacter.parentCell(ngs).get.coordinates
+
+      assertCommandFailure {
+        GameStateValidator()(ngs)
+          .validateAbilityUseOnCharacter(
+            s.owners(0),
+            abilityId,
+            s.defaultCharacter.id,
+          )
+      }
+    }
+
     "not be able to use switch on character outside map" in {
         val ngs = gameState
           .teleportCharacter(s.p(0)(0).character.id, HexCoordinates(2, 0))
