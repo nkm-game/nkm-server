@@ -265,4 +265,25 @@ class GameStateSpec extends TestUtils
       // TODO: test for BasicAttackRefreshed and BasicMoveRefreshed
     }
   }
+  "not send shield damaged event if there is no shield" in {
+    val damagedGs = gameState.damageCharacter(s.defaultCharacter.id, Damage(DamageType.True, 1))
+    damagedGs.gameLog.events.ofType[GameEvent.ShieldDamaged] should be (empty)
+    damagedGs.gameLog.events.ofType[GameEvent.CharacterDamaged].head.damageAmount should be (1)
+  }
+  "send shield damaged event if there is shield" in {
+    val damagedGs = gameState
+      .setShield(s.defaultCharacter.id, 1)
+      .damageCharacter(s.defaultCharacter.id, Damage(DamageType.True, 1))
+
+    damagedGs.gameLog.events.ofType[GameEvent.ShieldDamaged].head.damageAmount should be (1)
+    damagedGs.gameLog.events.ofType[GameEvent.CharacterDamaged] should be (empty)
+  }
+  "send shield damaged event and not character damaged event if damage exceeds non-zero shield" in {
+    val damagedGs = gameState
+      .setShield(s.defaultCharacter.id, 1)
+      .damageCharacter(s.defaultCharacter.id, Damage(DamageType.True, 2))
+
+    damagedGs.gameLog.events.ofType[GameEvent.ShieldDamaged].head.damageAmount should be (1)
+    damagedGs.gameLog.events.ofType[GameEvent.CharacterDamaged].head.damageAmount should be (1)
+  }
 }

@@ -625,11 +625,17 @@ case class GameState
       val damageAfterShield = damageAfterReduction - c.state.shield
       val newShield = 0
       val newHp = c.state.healthPoints - damageAfterShield
-      updateCharacter(characterId)(_
+      val stateChangedGs = updateCharacter(characterId)(_
         .modify(_.state.shield).setTo(newShield)
         .modify(_.state.healthPoints).setTo(newHp)
       )
-        .logEvent(ShieldDamaged(randomUUID(), phase, turn, causedById, characterId, c.state.shield))
+      val shieldDamagedEventGs =
+        if(c.state.shield > 0)
+          stateChangedGs
+            .logEvent(ShieldDamaged(randomUUID(), phase, turn, causedById, characterId, c.state.shield))
+        else stateChangedGs
+
+      shieldDamagedEventGs
         .checkIfCharacterDied(characterId) // needs to be removed from map before logging an event in order to avoid infinite triggers
         .logEvent(CharacterDamaged(randomUUID(), phase, turn, causedById, characterId, damageAfterShield))
     }
