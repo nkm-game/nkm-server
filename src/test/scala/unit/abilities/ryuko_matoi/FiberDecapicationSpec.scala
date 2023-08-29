@@ -1,9 +1,10 @@
 package unit.abilities.ryuko_matoi
 
 import com.tosware.nkm.models.GameStateValidator
-import com.tosware.nkm.models.game.*
-import com.tosware.nkm.models.game.abilities.ryuko_matoi.FiberDecapitation
+import com.tosware.nkm.models.game.GameState
+import com.tosware.nkm.models.game.abilities.ryuko_matoi.{FiberDecapitation, ScissorBlade}
 import com.tosware.nkm.models.game.character.CharacterMetadata
+import com.tosware.nkm.models.game.effects.StatNerf
 import com.tosware.nkm.models.game.event.GameEvent
 import com.tosware.nkm.models.game.hex.HexCoordinates
 import helpers.{TestUtils, scenarios}
@@ -16,7 +17,7 @@ class FiberDecapicationSpec
     with TestUtils
 {
   private val abilityMetadata = FiberDecapitation.metadata
-  private val characterMetadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
+  private val characterMetadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id, ScissorBlade.metadata.id))
   private val s = scenarios.FiberDecapicationTestScenario(characterMetadata)
   private implicit val gameState: GameState = s.gameState
   private val abilityId = s.p(0)(0).character.state.abilities.head.id
@@ -52,12 +53,16 @@ class FiberDecapicationSpec
 
       newGameState
         .gameLog.events
-        .causedBy(s.p(0)(0).character.id)
+        .causedBy(abilityId)
         .ofType[GameEvent.CharacterDamaged] should not be empty
 
       newGameState.hexMap
         .getCellOfCharacter(s.p(0)(0).character.id).get
         .coordinates.toTuple shouldBe (6, 0)
+    }
+    "not apply basic attack effects" in {
+      val abilityUsedGs: GameState = gameState.useAbilityOnCharacter(abilityId, s.p(1)(0).character.id)
+      assertEffectDoesNotExistsOfType[StatNerf](s.p(1)(0).character.id)(abilityUsedGs)
     }
   }
 }

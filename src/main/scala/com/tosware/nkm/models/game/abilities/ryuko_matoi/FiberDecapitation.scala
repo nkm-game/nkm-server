@@ -42,7 +42,7 @@ case class FiberDecapitation(abilityId: AbilityId, parentCharacterId: CharacterI
     gameState
       .abilityHitCharacter(id, target)
       .setStat(target, StatType.PhysicalDefense, targetCharacter.state.purePhysicalDefense - metadata.variables("physicalDefenseDecrease"))(random, id)
-      .basicAttack(parentCharacterId, target)
+      .damageCharacter(target, Damage(DamageType.Physical, metadata.variables("damage")))(random, id)
       .teleportCharacter(parentCharacterId, teleportCoordinates)(random, id)
   }
 
