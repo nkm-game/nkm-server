@@ -2,10 +2,12 @@ package com.tosware.nkm.models.game.abilities.kirito
 
 import com.tosware.nkm.*
 import com.tosware.nkm.models.game.*
+import com.tosware.nkm.models.game.abilities.kirito.StarburstStream.doubleAttackEnabledKey
 import com.tosware.nkm.models.game.ability.*
-import com.tosware.nkm.models.game.event.GameEvent.{AbilityUsedOnCharacter, CharacterBasicAttacked}
+import com.tosware.nkm.models.game.event.GameEvent.CharacterBasicAttacked
 import com.tosware.nkm.models.game.event.{GameEvent, GameEventListener}
 import com.tosware.nkm.models.game.hex.{HexCoordinates, SearchFlag}
+import spray.json.*
 
 import scala.util.Random
 
@@ -22,6 +24,8 @@ object StarburstStream {
           |Range: linear, {range}""".stripMargin,
       variables = NkmConf.extract("abilities.kirito.starburstStream"),
     )
+
+  val doubleAttackEnabledKey = "doubleAttackEnabled"
 }
 
 case class StarburstStream(abilityId: AbilityId, parentCharacterId: CharacterId)
@@ -31,6 +35,14 @@ case class StarburstStream(abilityId: AbilityId, parentCharacterId: CharacterId)
 {
   override val metadata = StarburstStream.metadata
 
+  def doubleAttackEnabled(implicit gameState: GameState): Boolean =
+    state.variables.get(doubleAttackEnabledKey)
+      .map(_.parseJson.convertTo[Boolean])
+      .getOrElse(false)
+
+  private def setDoubleAttackEnabled()(implicit random: Random, gameState: GameState): GameState =
+    gameState.setAbilityVariable(id, doubleAttackEnabledKey, true.toJson.toString)
+
   override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =
     parentCell.get.getArea(metadata.variables("range"), Set(SearchFlag.StraightLine)).toCoords
 
@@ -38,8 +50,10 @@ case class StarburstStream(abilityId: AbilityId, parentCharacterId: CharacterId)
     rangeCellCoords.whereEnemiesOfC(parentCharacterId)
 
   override def use(target: CharacterId, useData: UseData)(implicit random: Random, gameState: GameState): GameState = {
+    val enabledGs = setDoubleAttackEnabled()
+
     val times = metadata.variables("attackTimes")
-    (0 to times).foldLeft(gameState)((acc, _) => {
+    (0 to times).foldLeft(enabledGs)((acc, _) => {
       hitAndDamageCharacter(target, Damage(DamageType.True, metadata.variables("damage")))(random, acc)
     })
   }
@@ -48,8 +62,7 @@ case class StarburstStream(abilityId: AbilityId, parentCharacterId: CharacterId)
     e match {
       case CharacterBasicAttacked(_, _, _, _, characterId, _) =>
         if(characterId != parentCharacterId) return gameState
-        val abilityWasUsed = gameState.gameLog.events.ofType[AbilityUsedOnCharacter].ofAbility(id).nonEmpty
-        if(!abilityWasUsed) return gameState
+        if(!doubleAttackEnabled) return gameState
         val timesCharacterAttackedThisTurn = gameState.gameLog.events
           .inTurn(gameState.turn.number)
           .ofType[GameEvent.CharacterBasicAttacked]
