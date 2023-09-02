@@ -28,6 +28,8 @@ package object nkm {
 
   type HexCellEffectMetadataId = String
   type HexCellEffectId = String
+
+  type BugReportId = String
     def randomUUID()(implicit random: Random): String =
     java.util.UUID.nameUUIDFromBytes(random.nextBytes(16)).toString
 
