@@ -1,4 +1,4 @@
-package com.tosware.nkm.models
+package com.tosware.nkm.models.bugreport
 
 import com.tosware.nkm.{BugReportId, GameId, UserId}
 

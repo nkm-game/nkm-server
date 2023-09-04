@@ -65,9 +65,9 @@ trait LobbyWebsocketUserBehaviour extends WebsocketUserBehaviour {
         implicit val responseType: LobbyResponseType = LobbyResponseType.Auth
         val token = request.requestJson.parseJson.convertTo[Auth].token
         authenticateToken(token) match {
-          case Some(username) =>
-            userActor ! WebsocketUser.Authenticate(username)
-            ok(username)
+          case Some(userStateView) =>
+            userActor ! WebsocketUser.Authenticate(userStateView.email)
+            ok(userStateView.email)
           case None =>
             unauthorized("Invalid token.")
         }

@@ -10,6 +10,7 @@ import com.tosware.nkm.models.{AuthResponse, Credentials, RegisterRequest}
 import com.tosware.nkm.services.UserService
 import com.tosware.nkm.services.http.directives.{JwtDirective, JwtSecretKey}
 import com.tosware.nkm.{Logging, NkmDependencies}
+import spray.json.*
 
 class AuthRoutes(deps: NkmDependencies)
   extends JwtDirective
@@ -20,7 +21,7 @@ class AuthRoutes(deps: NkmDependencies)
   val userService: UserService = deps.userService
 
   def handleLoginEvent(event: User.LoginEvent): StandardRoute = event match {
-    case User.LoginSuccess(userStateView) => complete(StatusCodes.OK, AuthResponse(getToken(userStateView.email), userStateView))
+    case User.LoginSuccess(userStateView) => complete(StatusCodes.OK, AuthResponse(getToken(userStateView.toJson.toString), userStateView))
     case User.LoginFailure(reason) => complete(StatusCodes.Unauthorized, reason)
   }
 

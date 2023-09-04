@@ -38,11 +38,12 @@ class AuthSpec extends ApiTrait
         status shouldBe OK
 
         val authResponse = responseAs[AuthResponse]
+        val expectedUserState = UserStateView("test@example.com", Some("test@example.com"), isAdmin = false)
 
-        authResponse.userState shouldEqual UserStateView("test@example.com", Some("test@example.com"), isAdmin = false)
+        authResponse.userState shouldEqual expectedUserState
 
         JwtSprayJson.decode(authResponse.token, deps.jwtSecretKey.value, Seq(JwtAlgorithm.HS256)) match {
-          case Success(claim) => claim.content.parseJson.convertTo[JwtContent] shouldEqual JwtContent("test@example.com")
+          case Success(claim) => claim.content.parseJson.convertTo[JwtContent] shouldEqual JwtContent(expectedUserState.toJson.toString)
           case _ => fail()
         }
       }

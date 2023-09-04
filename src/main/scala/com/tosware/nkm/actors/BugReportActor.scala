@@ -4,8 +4,8 @@ import akka.actor.{ActorLogging, Props}
 import akka.event.LoggingAdapter
 import akka.persistence.{PersistentActor, RecoveryCompleted}
 import com.tosware.nkm.*
-import com.tosware.nkm.models.BugReport
 import com.tosware.nkm.models.CommandResponse.*
+import com.tosware.nkm.models.bugreport.BugReport
 
 import java.time.ZonedDateTime
 import scala.util.Random

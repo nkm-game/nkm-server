@@ -4,8 +4,8 @@ import akka.actor.{ActorRef, ActorSystem}
 import akka.pattern.ask
 import com.tosware.nkm.actors.BugReportActor
 import com.tosware.nkm.actors.BugReportActor.*
-import com.tosware.nkm.models.BugReport
 import com.tosware.nkm.models.CommandResponse.*
+import com.tosware.nkm.models.bugreport.BugReport
 import helpers.NkmPersistenceTestKit
 
 class BugReportSpec extends NkmPersistenceTestKit(ActorSystem("BugReportSpec"))

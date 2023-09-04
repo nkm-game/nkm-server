@@ -20,6 +20,7 @@ class HttpService(deps: NkmDependencies)
   val gameRoutes = new GameRoutes(deps)
   val nkmDataRoutes = new NkmDataRoutes(deps)
   val websocketRoutes = new WebsocketRoutes(deps)
+  val bugReportRoutes = new BugReportRoutes(deps)
 
   val routes: Route = {
     logRequestResponse {
@@ -34,11 +35,13 @@ class HttpService(deps: NkmDependencies)
                 lobbyRoutes.lobbyGetRoutes,
                 gameRoutes.gameGetRoutes,
                 nkmDataRoutes.nkmDataGetRoutes,
+                bugReportRoutes.bugReportGetRoutes,
               )
             } ~
               post {
                 concat(
                   authRoutes.authPostRoutes,
+                  bugReportRoutes.bugReportPostRoutes,
                 )
               }
           }
