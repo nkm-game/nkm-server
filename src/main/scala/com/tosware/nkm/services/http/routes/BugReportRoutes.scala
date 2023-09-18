@@ -50,8 +50,6 @@ class BugReportRoutes(deps: NkmDependencies) extends JwtDirective
           }
         },
         path("set_resolved") {
-//          authenticated { userStateView =>
-//            authorize(userStateView.isAdmin) {
           requireAdmin {
               entity(as[BugReportRequest.SetResolved]) { entity =>
                 val creationResponseFuture = bugReportService.setResolved(entity.id, entity.resolved)
@@ -60,7 +58,6 @@ class BugReportRoutes(deps: NkmDependencies) extends JwtDirective
                   case CommandResponse.Failure(msg) => complete(StatusCodes.InternalServerError -> msg)
                 }
               }
-//            }
           }
         }
       )
