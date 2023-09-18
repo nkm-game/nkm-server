@@ -22,7 +22,7 @@ class AceInTheHoleSpec
       Castling.metadata.id,
     ))
   private val s = scenarios.Simple1v1TestScenario(characterMetadata)
-  private implicit val gameState: GameState = s.gameState.incrementPhase(4)
+  private implicit val gameState: GameState = s.gameState
   private val damagedGameState = gameState.damageCharacter(
     s.p(0)(0).character.id,
     Damage(DamageType.True, (s.p(0)(0).character.state.maxHealthPoints * 0.5).toInt)

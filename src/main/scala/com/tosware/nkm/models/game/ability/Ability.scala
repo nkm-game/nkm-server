@@ -95,7 +95,7 @@ abstract class Ability(val id: AbilityId, pid: CharacterId)
       def ParentCharacterOnMap(implicit gameState: GameState): UseCheck =
         parentCharacter.isOnMap -> "Parent character is not on map."
       def PhaseIsGreaterThan(i: Int)(implicit gameState: GameState): UseCheck =
-        (gameState.phase.number > i) -> s"Phase is not greater than $i."
+        (gameState.phase.number > i || parentCharacter.state.effects.ofType[FreeAbility].nonEmpty) -> s"Phase is not greater than $i."
       def CanBeUsedByParent(implicit gameState: GameState): UseCheck = {
         (
           parentCharacter.canUseAbilityOfType(metadata.abilityType) ||
