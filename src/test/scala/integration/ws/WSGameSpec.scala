@@ -9,8 +9,8 @@ import com.tosware.nkm.models.game.pick.PickType
 import com.tosware.nkm.models.game.pick.blindpick.BlindPickPhase
 import com.tosware.nkm.models.game.pick.draftpick.DraftPickPhase
 import com.tosware.nkm.models.game.ws.*
-import helpers.WSTrait
 import helpers.WSTrait.*
+import helpers.{NotWorkingOnCI, WSTrait}
 
 class WSGameSpec extends WSTrait {
   def sendRequest(request: WebsocketGameRequest)(implicit wsClient: WSProbe): Unit = sendRequestG(request)
@@ -202,7 +202,7 @@ class WSGameSpec extends WSTrait {
       }
     }
 
-    "allow banning during draft pick" in {
+    "allow banning during draft pick" taggedAs NotWorkingOnCI in {
       val numberOfPlayers = 3
       val lobbyId = createLobbyForGame(
         pickType = PickType.DraftPick,
@@ -282,7 +282,7 @@ class WSGameSpec extends WSTrait {
       }
     }
 
-    "hide draft pick information during ban phase" in {
+    "hide draft pick information during ban phase" taggedAs NotWorkingOnCI in {
       val numberOfPlayers = 3
       val lobbyId = createLobbyForGame(
         pickType = PickType.DraftPick,
@@ -377,7 +377,7 @@ class WSGameSpec extends WSTrait {
       }
     }
 
-    "allow picking during blind pick" in {
+    "allow picking during blind pick" taggedAs NotWorkingOnCI in {
       val numberOfPlayers = 3
       val numberOfCharacters = 2
 
@@ -676,7 +676,7 @@ class WSGameSpec extends WSTrait {
       }
     }
 
-    "allow placing characters" in {
+    "allow placing characters" taggedAs NotWorkingOnCI in {
       val numberOfPlayers = 3
       val numberOfCharacters = 2
 

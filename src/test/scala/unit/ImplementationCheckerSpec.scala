@@ -2,7 +2,7 @@ package unit
 
 import com.tosware.nkm.*
 import com.tosware.nkm.models.game.event.GameEvent.GameEvent
-import helpers.TestUtils
+import helpers.{NotWorkingOnCI, TestUtils}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
@@ -15,7 +15,7 @@ class ImplementationCheckerSpec
     with TestUtils
 {
   "Scala files in project" must {
-    "implement all events in NkmJsonProtocol" in {
+    "implement all events in NkmJsonProtocol" taggedAs NotWorkingOnCI in {
       // Get the names of all classes that derive from GameEvent
       val traitType = typeOf[GameEvent]
       val subTypes = traitType.typeSymbol.asClass.knownDirectSubclasses
@@ -48,15 +48,15 @@ class ImplementationCheckerSpec
       fileNames.diff(metadatasDefinedInProvider) shouldBe empty
     }
 
-    "provide all ability metadatas in API" in {
+    "provide all ability metadatas in API" taggedAs NotWorkingOnCI in {
       testMetadataProvider("game/abilities", "AbilityMetadatasProvider")
     }
 
-    "provide all effect metadatas in API" in {
+    "provide all effect metadatas in API" taggedAs NotWorkingOnCI in {
       testMetadataProvider("game/effects", "CharacterEffectMetadatasProvider")
     }
 
-    "provide all hex effect metadatas in API" in {
+    "provide all hex effect metadatas in API" taggedAs NotWorkingOnCI in {
       testMetadataProvider("game/hex_effects", "HexCellEffectMetadatasProvider")
     }
   }

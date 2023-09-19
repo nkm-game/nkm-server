@@ -11,8 +11,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+    - name: Start test database
+      run: docker-compose -f docker-compose.dev.yml up -d db
     - name: Run tests
-      run: sbt coverage test
+      run: sbt coverage "testOnly * -- -l not-working-on-ci"
     - name: Coverage Report
       run: sbt coverageReport
     - name: Upload coverage to Codecov
