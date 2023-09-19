@@ -9,5 +9,6 @@ target
 !/.idea/vcs.xml
 out
 
+null
 .bsp
 src/main/resources/version.txt
