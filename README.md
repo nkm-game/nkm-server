@@ -1,4 +1,8 @@
-# NKM Actor Server
+<img src=".\docs\img\NKM.png" alt="NKM" width="200"/>
+
+---
+
+[![codecov](https://codecov.io/gh/nkm-game/nkm-server/graph/badge.svg?token=3BK0XQ2MZ3)](https://codecov.io/gh/nkm-game/nkm-server)
 ## About
 This is a backend for a turn-based multiplayer game played on a hexagonal board.
 
