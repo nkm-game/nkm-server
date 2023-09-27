@@ -532,10 +532,8 @@ case class GameState
   }
 
   def basicMoveCharacter(characterId: CharacterId, path: Seq[HexCoordinates])(implicit random: Random): GameState = {
-    implicit val causedById: CharacterId = characterId
     val newGameState = takeActionWithCharacter(characterId)
     characterById(characterId).basicMove(path)(random, newGameState)
-      .logEvent(CharacterBasicMoved(randomUUID(), phase, turn, causedById, characterId, path))
   }
 
   def basicMoveOneCell(characterId: CharacterId, targetCellCoordinates: HexCoordinates)(implicit random: Random, causedById: String): GameState =

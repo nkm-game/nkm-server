@@ -3,7 +3,7 @@ package com.tosware.nkm.models.game.abilities.roronoa_zoro
 import com.tosware.nkm.*
 import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.ability.*
-import com.tosware.nkm.models.game.hex.{HexCoordinates, HexMap}
+import com.tosware.nkm.models.game.hex.HexCoordinates
 import spray.json.*
 
 import scala.annotation.tailrec
@@ -44,8 +44,6 @@ case class LackOfOrientation(abilityId: AbilityId, parentCharacterId: CharacterI
     gameState.setAbilityVariable(id, timesLostKey, value.toJson.toString)
 
   override def basicMove(path: Seq[HexCoordinates])(implicit random: Random, gameState: GameState): GameState = {
-    implicit val hexMap: HexMap = gameState.hexMap
-
     @tailrec
     def generateLostPath(acc: Seq[HexCoordinates], coordsLeft: Int): Seq[HexCoordinates] = {
       if(acc.isEmpty) return Seq.empty

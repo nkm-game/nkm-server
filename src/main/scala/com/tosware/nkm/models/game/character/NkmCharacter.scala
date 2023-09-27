@@ -6,7 +6,7 @@ import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.ability.*
 import com.tosware.nkm.models.game.character_effect.{CharacterEffect, CharacterEffectName}
 import com.tosware.nkm.models.game.event.GameEvent
-import com.tosware.nkm.models.game.event.GameEvent.GameEvent
+import com.tosware.nkm.models.game.event.GameEvent.{CharacterBasicMoved, GameEvent}
 import com.tosware.nkm.models.game.hex.*
 import com.tosware.nkm.providers.AbilityProvider
 
@@ -173,8 +173,12 @@ case class NkmCharacter
   def basicMoveOverride: Option[BasicMoveOverride] =
     state.abilities.ofType[BasicMoveOverride].headOption
 
-  def defaultBasicMove(path: Seq[HexCoordinates])(implicit random: Random, gameState: GameState): GameState =
+  def defaultBasicMove(path: Seq[HexCoordinates])(implicit random: Random, gameState: GameState): GameState = {
+    implicit val causedById: CharacterId = id
+
     path.tail.foldLeft(gameState)((acc, coordinate) => acc.basicMoveOneCell(id, coordinate)(random, id))
+      .logEvent(CharacterBasicMoved(randomUUID(), gameState.phase, gameState.turn, causedById, id, path))
+  }
 
   // case if characterOpt dies on the way? make a test of this and create a new functions with while(onMap)
   def basicMove(path: Seq[HexCoordinates])(implicit random: Random, gameState: GameState): GameState =
