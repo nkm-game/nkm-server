@@ -767,8 +767,8 @@ case class GameState
   )(implicit random: Random, causedById: String): GameState = {
     val parentCellOpt = hexMap.getCellOfCharacter(characterId)
     parentCellOpt.fold(this) { parentCell =>
-      val lineCells: Seq[HexCell] = parentCell +: parentCell.getLine(direction, amount)(this)
-      val cellToTeleport = lineCells.findLast(_.isFreeToStand).get
+      val lineCells: Seq[HexCell] = parentCell.getLine(direction, amount)(this)
+      val cellToTeleport = lineCells.findLast(_.isFreeToStand).getOrElse(parentCell)
       teleportCharacter(characterId, cellToTeleport.coordinates)(random, id)
     }
   }

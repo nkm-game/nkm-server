@@ -60,5 +60,10 @@ class RubberRubberFruitSpec
       assertOneDamaged(jetBazookaGs)
       assertOneDamaged(jetPistolGs)
     }
+
+    "not crash when there is no space to move" in {
+      val closeToWallGs = s.gameState.teleportCharacter(s.defaultCharacter.id, HexCoordinates(0, 100))
+      closeToWallGs.useAbilityOnCoordinates(s.defaultAbilityId, HexCoordinates(1, 100))
+    }
   }
 }
