@@ -8,16 +8,17 @@ import com.tosware.nkm.models.game.event.{GameEvent, GameEventListener}
 
 import scala.util.Random
 
-object AceInTheHole {
-  val metadata: AbilityMetadata =
+
+object AceInTheHole extends NkmConf.AutoExtract {
+  val metadata: AbilityMetadata = {
     AbilityMetadata(
       name = "Ace In The Hole",
       abilityType = AbilityType.Passive,
       description = """If Character takes damage equal to more than {maxHpPercent}% of their maximum HP during the turn of one character, they will be able to use one of their abilities on their next move, regardless of its CD.
                       |It does not affect the actual ability CD count.""".stripMargin,
-      variables = NkmConf.extract("abilities.blank.aceInTheHole"),
       relatedEffectIds = Seq(FreeAbility.metadata.id),
     )
+  }
 }
 
 case class AceInTheHole(abilityId: AbilityId, parentCharacterId: CharacterId)

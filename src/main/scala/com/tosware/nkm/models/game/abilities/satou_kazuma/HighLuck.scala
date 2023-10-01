@@ -7,7 +7,7 @@ import com.tosware.nkm.models.game.event.{GameEvent, GameEventListener}
 
 import scala.util.Random
 
-object HighLuck {
+object HighLuck extends NkmConf.AutoExtract {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "High Luck",
@@ -16,7 +16,7 @@ object HighLuck {
         """Character has a {criticalStrikePercent}% chance to strike critically when dealing damage.
           |Critical strike deals double damage.
           |""".stripMargin,
-      variables = NkmConf.extract("abilities.satou_kazuma.highLuck"),
+
     )
 }
 

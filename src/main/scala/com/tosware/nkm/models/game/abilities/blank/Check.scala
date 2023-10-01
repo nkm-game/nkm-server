@@ -8,7 +8,7 @@ import com.tosware.nkm.models.game.hex.HexCoordinates
 
 import scala.util.Random
 
-object Check {
+object Check extends NkmConf.AutoExtract {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "Check",
@@ -16,7 +16,7 @@ object Check {
       description =
         """Character forces selected enemy character to take action.
           |It cannot use a basic attack this turn.""".stripMargin,
-      variables = NkmConf.extract("abilities.blank.check"),
+
       relatedEffectIds = Seq(HasToTakeAction.metadata.id, Disarm.metadata.id),
     )
 }

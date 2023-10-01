@@ -8,7 +8,7 @@ import spray.json.*
 
 import scala.util.Random
 
-object MasterThrone {
+object MasterThrone extends NkmConf.AutoExtract {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "Master Throne",
@@ -18,7 +18,7 @@ object MasterThrone {
         """Character can gather Life Energy using base attacks or Normal abilities, collecting {healthPercent}% of target's max HP.
           |Life Energy can be collected only once per character.
           |""".stripMargin,
-      variables = NkmConf.extract("abilities.hecate.masterThrone"),
+
     )
   val collectedCharacterIdsKey: String = "collectedCharacterIds"
   val collectedEnergyKey: String = "collectedEnergy"

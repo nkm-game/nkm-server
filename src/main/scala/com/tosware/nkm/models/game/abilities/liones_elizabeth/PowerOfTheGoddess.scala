@@ -7,13 +7,13 @@ import com.tosware.nkm.models.game.hex.HexCoordinates
 
 import scala.util.Random
 
-object PowerOfTheGoddess {
+object PowerOfTheGoddess extends NkmConf.AutoExtract {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "Power Of The Goddess",
       abilityType = AbilityType.Ultimate,
       description = "Character heals all friendly characters on the map for {heal} HP.",
-      variables = NkmConf.extract("abilities.liones_elizabeth.powerOfTheGoddess"),
+
     )
 }
 

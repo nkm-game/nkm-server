@@ -8,7 +8,7 @@ import com.tosware.nkm.models.game.hex.HexCoordinates
 
 import scala.util.Random
 
-object BindingRibbons {
+object BindingRibbons extends NkmConf.AutoExtract {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "Binding Ribbons",
@@ -19,7 +19,7 @@ object BindingRibbons {
           |
           |Range: circular, {range}
           |Radius: circular, {radius}""".stripMargin,
-      variables = NkmConf.extract("abilities.carmelWilhelmina.bindingRibbons"),
+
       relatedEffectIds = Seq(Silence.metadata.id, Snare.metadata.id),
     )
 }

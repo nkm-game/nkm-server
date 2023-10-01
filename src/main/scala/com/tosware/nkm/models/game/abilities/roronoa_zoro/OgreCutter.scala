@@ -8,7 +8,7 @@ import com.tosware.nkm.models.game.hex.*
 
 import scala.util.Random
 
-object OgreCutter {
+object OgreCutter extends NkmConf.AutoExtract {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "Ogre Cutter",
@@ -18,7 +18,7 @@ object OgreCutter {
         """Character basic attacks selected target in range and teleports {targetCellOffset} tiles behind it.
           |
           |Range: linear, stops at walls and enemies, {range}""".stripMargin,
-      variables = NkmConf.extract("abilities.roronoa_zoro.ogreCutter"),
+
     )
 }
 

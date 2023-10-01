@@ -8,7 +8,7 @@ import com.tosware.nkm.models.game.event.{GameEvent, GameEventListener}
 
 import scala.util.Random
 
-object RubberHuman {
+object RubberHuman extends NkmConf.AutoExtract {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "Rubber Human",
@@ -16,7 +16,7 @@ object RubberHuman {
       abilityType = AbilityType.Passive,
       description =
         "Character reduces {rangedDamageReductionPercent}% damage from basic attacks coming from ranged characters.",
-      variables = NkmConf.extract("abilities.monkey_d_luffy.rubberHuman"),
+
     )
 }
 

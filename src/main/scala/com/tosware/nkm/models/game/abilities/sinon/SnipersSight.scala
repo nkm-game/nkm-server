@@ -8,7 +8,7 @@ import com.tosware.nkm.models.game.hex.{HexCoordinates, SearchFlag}
 
 import scala.util.Random
 
-object SnipersSight {
+object SnipersSight extends NkmConf.AutoExtract {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "Sniper's Sight",

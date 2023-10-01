@@ -8,7 +8,7 @@ import com.tosware.nkm.models.game.character_effect.CharacterEffectType
 
 import scala.util.Random
 
-object Purification {
+object Purification extends NkmConf.AutoExtract {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "Purification",
@@ -17,7 +17,7 @@ object Purification {
         """Character removes all negative effects from target.
           |
           |Range: circular, {range}""".stripMargin,
-      variables = NkmConf.extract("abilities.aqua.purification"),
+
     )
 }
 

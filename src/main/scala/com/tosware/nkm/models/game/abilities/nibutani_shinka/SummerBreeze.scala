@@ -7,7 +7,7 @@ import com.tosware.nkm.models.game.hex.*
 
 import scala.util.Random
 
-object SummerBreeze {
+object SummerBreeze extends NkmConf.AutoExtract {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "Summer Breeze",
@@ -19,7 +19,7 @@ object SummerBreeze {
           |
           |Range: linear, {range}
           |""".stripMargin,
-      variables = NkmConf.extract("abilities.nibutani_shinka.summerBreeze"),
+
       relatedEffectIds = Seq(effects.Stun.metadata.id),
     )
 }

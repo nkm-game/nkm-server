@@ -7,7 +7,7 @@ import com.tosware.nkm.models.game.hex.HexCoordinates
 
 import scala.util.Random
 
-object PowerOfExistence {
+object PowerOfExistence extends NkmConf.AutoExtract {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "Power Of Existence",
@@ -17,7 +17,7 @@ object PowerOfExistence {
         """Character releases collected Life Energy, dealing magic damage to every enemy character on the map.
           |Damage equals to collected Life Energy divided by number of enemies.
           |""".stripMargin,
-      variables = NkmConf.extract("abilities.hecate.powerOfExistence"),
+
     )
 }
 

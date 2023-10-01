@@ -7,7 +7,7 @@ import com.tosware.nkm.models.game.hex.HexCoordinates
 
 import scala.util.Random
 
-object Invigorate {
+object Invigorate extends NkmConf.AutoExtract {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "Invigorate",
@@ -16,7 +16,7 @@ object Invigorate {
         """Character casts a spell on a friendly character that heals {heal} HP for {duration}t.
           |
           |Range: circular, {range}""".stripMargin,
-      variables = NkmConf.extract("abilities.liones_elizabeth.invigorate"),
+
       relatedEffectIds = Seq(effects.HealOverTime.metadata.id),
     )
 }

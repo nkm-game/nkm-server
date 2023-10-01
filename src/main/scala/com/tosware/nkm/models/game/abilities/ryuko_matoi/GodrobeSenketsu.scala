@@ -11,7 +11,7 @@ import spray.json.*
 
 import scala.util.Random
 
-object GodrobeSenketsu {
+object GodrobeSenketsu extends NkmConf.AutoExtract {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "Godrobe Senketsu",
@@ -24,7 +24,7 @@ object GodrobeSenketsu {
           |
           |This ability can be disabled.
           |When disabled, you lose all bonus AD from this ability, stop receiving damage and the ability goes on cooldown.""".stripMargin,
-      variables = NkmConf.extract("abilities.ryuko_matoi.godrobeSenketsu"),
+
     )
 
   val bonusDamageKey: String = "bonusDamage"

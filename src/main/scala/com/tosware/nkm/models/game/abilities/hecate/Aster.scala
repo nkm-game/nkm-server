@@ -7,7 +7,7 @@ import com.tosware.nkm.models.game.hex.HexCoordinates
 
 import scala.util.Random
 
-object Aster {
+object Aster extends NkmConf.AutoExtract {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "Aster",
@@ -18,7 +18,7 @@ object Aster {
           |
           |Range: circular, {range}
           |Radius: circular, {radius}""".stripMargin,
-      variables = NkmConf.extract("abilities.hecate.aster"),
+
     )
 }
 

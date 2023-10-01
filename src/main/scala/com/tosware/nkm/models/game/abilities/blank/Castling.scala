@@ -6,13 +6,13 @@ import com.tosware.nkm.models.game.ability.*
 
 import scala.util.Random
 
-object Castling {
+object Castling extends NkmConf.AutoExtract {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "Castling",
       abilityType = AbilityType.Ultimate,
       description = "Character swaps the positions of 2 characters on the map.",
-      variables = NkmConf.extract("abilities.blank.castling"),
+
     )
 }
 

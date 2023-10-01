@@ -7,7 +7,7 @@ import com.tosware.nkm.models.game.hex.HexCoordinates
 
 import scala.util.Random
 
-object Switch {
+object Switch extends NkmConf.AutoExtract {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "Switch",
@@ -18,7 +18,7 @@ object Switch {
           |You can use basic attack or other ability just after using this ability.
           |
           |Range: circular, {range}""".stripMargin,
-      variables = NkmConf.extract("abilities.kirito.switch"),
+
       relatedEffectIds = Seq(effects.AbilityUnlock.metadata.id),
     )
 }

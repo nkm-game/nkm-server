@@ -8,7 +8,7 @@ import com.tosware.nkm.models.game.event.{GameEvent, GameEventListener}
 
 import scala.util.Random
 
-object WickedEyesServant {
+object WickedEyesServant extends NkmConf.AutoExtract {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "Wicked Eyes Servant",
@@ -17,7 +17,7 @@ object WickedEyesServant {
         """Character deals <span style="color: deepskyblue;">{baseDamageBonus}</span> true damage on every attack and ability, if there is a character on map that has more AD or Rikka Takanashi.
           |If character kills an enemy, gain permanently 1 bonus true damage on this ability.
           |""".stripMargin,
-      variables = NkmConf.extract("abilities.dekomori_sanae.wickedEyesServant"),
+
     )
   val damageBonusKey = "damageBonus"
 }

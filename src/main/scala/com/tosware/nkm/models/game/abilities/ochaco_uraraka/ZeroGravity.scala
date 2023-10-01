@@ -8,7 +8,7 @@ import com.tosware.nkm.models.game.hex.HexCoordinates
 
 import scala.util.Random
 
-object ZeroGravity {
+object ZeroGravity extends NkmConf.AutoExtract {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "Zero Gravity",
@@ -17,7 +17,7 @@ object ZeroGravity {
       description =
         """Character can attack friendly characters, but instead of dealing damage applies Zero Gravity effect on them for {duration}t.
           |Characters with Zero Gravity effect can fly.""".stripMargin,
-      variables = NkmConf.extract("abilities.ochaco_uraraka.zeroGravity"),
+
     )
 
   def applyZeroGravity(cid: CharacterId, gameState: GameState)(implicit random: Random, causedById: String): GameState =

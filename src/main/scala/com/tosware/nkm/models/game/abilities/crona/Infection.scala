@@ -6,7 +6,7 @@ import com.tosware.nkm.models.game.ability.*
 
 import scala.util.Random
 
-object Infection {
+object Infection extends NkmConf.AutoExtract {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "Infection",
@@ -16,7 +16,7 @@ object Infection {
           |Infected enemy also receives damage from Black Blood detonation.
           |
           |Range: circular, {range}""".stripMargin,
-      variables = NkmConf.extract("abilities.crona.infection"),
+
       relatedEffectIds = Seq(effects.BlackBlood.metadata.id),
     )
 }

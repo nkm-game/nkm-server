@@ -7,7 +7,7 @@ import com.tosware.nkm.models.game.hex.HexCoordinates
 
 import scala.util.Random
 
-object GrenadeThrow {
+object GrenadeThrow extends NkmConf.AutoExtract {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "Grenade Throw",
@@ -17,7 +17,7 @@ object GrenadeThrow {
           |
           |Range: circular, {range}
           |Radius: circular, {radius}""".stripMargin,
-      variables = NkmConf.extract("abilities.llenn.grenadeThrow"),
+
     )
 }
 

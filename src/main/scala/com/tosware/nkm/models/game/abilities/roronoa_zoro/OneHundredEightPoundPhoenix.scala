@@ -7,7 +7,7 @@ import com.tosware.nkm.models.game.hex.*
 
 import scala.util.Random
 
-object OneHundredEightPoundPhoenix {
+object OneHundredEightPoundPhoenix extends NkmConf.AutoExtract {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "108 Pound Phoenix",
@@ -18,7 +18,7 @@ object OneHundredEightPoundPhoenix {
           |
           |Range: linear, stops at walls and enemies, {range}
           |""".stripMargin,
-      variables = NkmConf.extract("abilities.roronoa_zoro.oneHundredEightPoundPhoenix"),
+
     )
 }
 

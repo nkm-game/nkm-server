@@ -408,16 +408,21 @@ case class GameState
       })
     val playersWithAssignedCharacters = playersWithCharacters.map{case (p, cs) => p.copy(characterIds = cs.map(_.id))}
     val characters = playersWithCharacters.flatMap(_._2).toSet
-    val abilitiesByCharacter = characters.map(c => (c.id, c.state.abilities))
-    val abilityStatesMap: Map[AbilityId, AbilityState] = abilitiesByCharacter.collect
-    {
-      case (_: CharacterId, as: Seq[Ability]) => as.map(a => a.id -> AbilityState())
-    }.flatten.toMap
 
     copy(
       players = playersWithAssignedCharacters,
       characters = characters,
       characterIdsOutsideMap = characters.map(c => c.id),
+    ).initAbilityState()
+  }
+
+  def initAbilityState(): GameState = {
+    val abilitiesByCharacter = characters.map(c => (c.id, c.state.abilities))
+    val abilityStatesMap: Map[AbilityId, AbilityState] = abilitiesByCharacter.collect {
+      case (_: CharacterId, as: Seq[Ability]) => as.map(a => a.id -> AbilityState(variables = a.metadata.variables.map { case (s, i) => (s, i.toString) }))
+    }.flatten.toMap
+
+    copy(
       abilityStates = abilityStates.concat(abilityStatesMap)
     )
   }

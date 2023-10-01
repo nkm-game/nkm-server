@@ -7,7 +7,7 @@ import com.tosware.nkm.models.game.hex.{HexCoordinates, SearchFlag}
 
 import scala.util.Random
 
-object RubberRubberFruit {
+object RubberRubberFruit extends NkmConf.AutoExtract {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "Rubber Rubber Fruit",
@@ -40,7 +40,7 @@ object RubberRubberFruit {
           |
           |Range: linear, {range}
           |Bazooka cooldown: {bazookaCooldown}""".stripMargin,
-      variables = NkmConf.extract("abilities.monkey_d_luffy.rubberRubberFruit"),
+
     )
 }
 

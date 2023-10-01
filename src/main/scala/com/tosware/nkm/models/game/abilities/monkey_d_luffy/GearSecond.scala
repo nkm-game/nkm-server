@@ -7,7 +7,7 @@ import com.tosware.nkm.models.game.character.StatType
 
 import scala.util.Random
 
-object GearSecond {
+object GearSecond extends NkmConf.AutoExtract {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "Gear Second",
@@ -16,7 +16,7 @@ object GearSecond {
       description =
         """Character gains {bonusSpeed} speed and enchants their normal ability for {duration}t.
           |""".stripMargin,
-      variables = NkmConf.extract("abilities.monkey_d_luffy.gearSecond"),
+
       relatedEffectIds = Seq(
         effects.StatBuff.metadata.id,
         effects.AbilityEnchant.metadata.id,

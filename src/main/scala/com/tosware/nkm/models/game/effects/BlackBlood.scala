@@ -1,7 +1,6 @@
 package com.tosware.nkm.models.game.effects
 
 import com.tosware.nkm.*
-import com.tosware.nkm.NkmConf
 import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.character_effect.*
 import com.tosware.nkm.models.game.effects.BlackBlood.{sourceAbilityIdKey, sourceCharacterIdKey}
@@ -31,8 +30,8 @@ case class BlackBlood(effectId: CharacterEffectId, initialCooldown: Int, sourceC
     if(parentCharacter.isFriendForC(sourceCharacterId)) CharacterEffectType.Positive
     else CharacterEffectType.Negative
 
-  val radius = NkmConf.int("abilities.crona.blackBlood.radius")
-  val damage = NkmConf.int("abilities.crona.blackBlood.damage")
+  val radius: Int = abilities.crona.BlackBlood.metadata.variables("radius")
+  val damage: Int = abilities.crona.BlackBlood.metadata.variables("damage")
 
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
     e match {

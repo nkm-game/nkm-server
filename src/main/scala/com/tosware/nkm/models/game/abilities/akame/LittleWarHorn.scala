@@ -11,7 +11,7 @@ import com.tosware.nkm.models.game.event.{GameEvent, GameEventListener}
 
 import scala.util.Random
 
-object LittleWarHorn {
+object LittleWarHorn extends NkmConf.AutoExtract {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "Little War Horn",
@@ -19,7 +19,6 @@ object LittleWarHorn {
       description =
         """Character gains {attackPoints} AD and {speedIncrease} speed for {duration}t.
           |When this effect is finished, set this character's base speed to {finalSpeed}.""".stripMargin,
-      variables = NkmConf.extract("abilities.akame.littleWarHorn"),
       relatedEffectIds = Seq(StatBuff.metadata.id),
     )
 }

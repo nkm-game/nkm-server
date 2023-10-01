@@ -11,7 +11,7 @@ import spray.json.*
 
 import scala.util.Random
 
-object StarburstStream {
+object StarburstStream extends NkmConf.AutoExtract {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "Starburst Stream",
@@ -22,7 +22,7 @@ object StarburstStream {
           |After using this ability, you can permanently basic attack {basicAttacksPerTurn} times per turn.
           |
           |Range: linear, {range}""".stripMargin,
-      variables = NkmConf.extract("abilities.kirito.starburstStream"),
+
     )
 
   val doubleAttackEnabledKey = "doubleAttackEnabled"

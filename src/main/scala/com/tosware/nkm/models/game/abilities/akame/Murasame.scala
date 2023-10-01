@@ -10,7 +10,7 @@ import com.tosware.nkm.models.game.event.{GameEvent, GameEventListener}
 
 import scala.util.Random
 
-object Murasame {
+object Murasame extends NkmConf.AutoExtract {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "Murasame",
@@ -20,7 +20,7 @@ object Murasame {
           |This effect can stack and is permanent.
           |Each stack deals {poisonDamage} true damage at the end of turn.
           |After applying {poisonStacksToDie} stacks target dies immediately.""".stripMargin,
-      variables = NkmConf.extract("abilities.akame.murasame"),
+
       relatedEffectIds = Seq(MurasamePoison.metadata.id),
     )
 }

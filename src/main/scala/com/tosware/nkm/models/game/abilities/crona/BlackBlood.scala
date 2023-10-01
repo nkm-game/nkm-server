@@ -7,7 +7,7 @@ import com.tosware.nkm.models.game.event.{GameEvent, GameEventListener}
 
 import scala.util.Random
 
-object BlackBlood {
+object BlackBlood extends NkmConf.AutoExtract {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "Black Blood",
@@ -16,7 +16,7 @@ object BlackBlood {
         """After receiving damage, character deals {damage} magical damage to surrounding enemies.
           |
           |Radius: circular, {radius}""".stripMargin,
-      variables = NkmConf.extract("abilities.crona.blackBlood"),
+
       relatedEffectIds = Seq(effects.BlackBlood.metadata.id),
     )
 }

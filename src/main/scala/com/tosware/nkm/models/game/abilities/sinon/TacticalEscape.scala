@@ -8,13 +8,13 @@ import com.tosware.nkm.models.game.effects.StatBuff
 
 import scala.util.Random
 
-object TacticalEscape {
+object TacticalEscape extends NkmConf.AutoExtract {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "Tactical Escape",
       abilityType = AbilityType.Normal,
       description = "Character gains {speedIncrease} speed for {duration}t.",
-      variables = NkmConf.extract("abilities.sinon.tacticalEscape"),
+
       relatedEffectIds = Seq(effects.StatBuff.metadata.id),
     )
 }

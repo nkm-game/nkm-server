@@ -9,7 +9,7 @@ import com.tosware.nkm.models.game.hex.HexCoordinates
 
 import scala.util.Random
 
-object Resurrection {
+object Resurrection extends NkmConf.AutoExtract {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "Resurrection",
@@ -17,7 +17,7 @@ object Resurrection {
       description =
         """Character resurrects allied character, that died max. one phase before.
           |Resurrected character respawns with half base HP on selected spawn point.""".stripMargin,
-      variables = NkmConf.extract("abilities.aqua.resurrection"),
+
     )
 }
 

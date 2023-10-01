@@ -11,7 +11,7 @@ import com.tosware.nkm.models.game.hex.HexCoordinates
 import scala.util.Random
 import spray.json.*
 
-object Steal {
+object Steal extends NkmConf.AutoExtract {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "Steal",
@@ -21,7 +21,7 @@ object Steal {
           |zeroing their physical and magical defense and adding them to themself.
           |
           |Range: circular, {range}""".stripMargin,
-      variables = NkmConf.extract("abilities.satou_kazuma.steal"),
+
     )
   def stolenDatasKey: String = "stolenDatas"
 }

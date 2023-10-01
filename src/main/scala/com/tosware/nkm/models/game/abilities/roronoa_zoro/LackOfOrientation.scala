@@ -9,7 +9,7 @@ import spray.json.*
 import scala.annotation.tailrec
 import scala.util.Random
 
-object LackOfOrientation {
+object LackOfOrientation extends NkmConf.AutoExtract {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "Lack of orientation",

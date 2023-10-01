@@ -7,7 +7,7 @@ import com.tosware.nkm.models.game.hex.*
 
 import scala.util.Random
 
-object FinalBattleSecretTechnique {
+object FinalBattleSecretTechnique extends NkmConf.AutoExtract {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "Final Battle Secret Technique",
@@ -28,7 +28,7 @@ object FinalBattleSecretTechnique {
           |
           |Range: linear, stops at walls, {range}
           |""".stripMargin,
-      variables = NkmConf.extract("abilities.shana.finalBattleSecretTechnique"),
+
     )
 }
 

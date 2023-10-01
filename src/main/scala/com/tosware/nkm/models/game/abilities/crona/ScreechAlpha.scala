@@ -8,7 +8,7 @@ import com.tosware.nkm.models.game.effects.Stun
 
 import scala.util.Random
 
-object ScreechAlpha {
+object ScreechAlpha extends NkmConf.AutoExtract {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "Screech Alpha",
@@ -17,7 +17,7 @@ object ScreechAlpha {
         """Character stuns nearby enemies for {stunDuration}t and slow them by {slowAmount} for {slowDuration}t.
           |
           |Radius: {radius}""".stripMargin,
-      variables = NkmConf.extract("abilities.crona.screechAlpha"),
+
       relatedEffectIds = Seq(Stun.metadata.id),
     )
 }

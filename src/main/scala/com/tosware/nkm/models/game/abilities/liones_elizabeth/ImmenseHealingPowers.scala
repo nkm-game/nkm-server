@@ -7,7 +7,7 @@ import com.tosware.nkm.models.game.event.{GameEvent, GameEventListener}
 
 import scala.util.Random
 
-object ImmenseHealingPowers {
+object ImmenseHealingPowers extends NkmConf.AutoExtract {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "Immense Healing Powers",
@@ -17,7 +17,7 @@ object ImmenseHealingPowers {
           |above {firstTreshold}%  missing HP - {firstTresholdHealing}% stronger healing
           |above {secondTreshold}% missing HP - {secondTresholdHealing}% stronger healing
           |""".stripMargin,
-      variables = NkmConf.extract("abilities.liones_elizabeth.immenseHealingPowers"),
+
     )
 }
 

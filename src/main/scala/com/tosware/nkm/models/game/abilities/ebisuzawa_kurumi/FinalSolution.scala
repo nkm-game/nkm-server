@@ -7,7 +7,7 @@ import com.tosware.nkm.models.game.hex.{HexCoordinates, SearchFlag}
 
 import scala.util.Random
 
-object FinalSolution {
+object FinalSolution extends NkmConf.AutoExtract {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "Final Solution",
@@ -17,7 +17,7 @@ object FinalSolution {
           |
           |Range: linear, {range}
           |""".stripMargin,
-      variables = NkmConf.extract("abilities.ebisuzawa_kurumi.finalSolution"),
+
     )
 }
 

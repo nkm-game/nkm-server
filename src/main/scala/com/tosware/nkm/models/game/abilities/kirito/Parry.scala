@@ -8,13 +8,13 @@ import com.tosware.nkm.models.game.event.{GameEvent, GameEventListener}
 
 import scala.util.Random
 
-object Parry {
+object Parry extends NkmConf.AutoExtract {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "Parry",
       abilityType = AbilityType.Passive,
       description = "Character has a {dodgeChancePercent}% chance to block basic attack of an enemy",
-      variables = NkmConf.extract("abilities.kirito.parry"),
+
       relatedEffectIds = Seq(effects.Block.metadata.id),
     )
 }

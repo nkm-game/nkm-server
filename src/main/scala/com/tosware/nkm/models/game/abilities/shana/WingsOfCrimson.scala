@@ -8,7 +8,7 @@ import com.tosware.nkm.models.game.event.{GameEvent, GameEventListener}
 
 import scala.util.Random
 
-object WingsOfCrimson {
+object WingsOfCrimson extends NkmConf.AutoExtract {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "Wings of Crimson",
@@ -18,7 +18,7 @@ object WingsOfCrimson {
         """After receiving damage, character unfolds their wings,
            gaining {bonusSpeed} speed and gaining the ability to fly for {duration}t.
           """.stripMargin,
-      variables = NkmConf.extract("abilities.shana.wingsOfCrimson"),
+
       relatedEffectIds = Seq(
         effects.Fly.metadata.id,
         effects.StatBuff.metadata.id,

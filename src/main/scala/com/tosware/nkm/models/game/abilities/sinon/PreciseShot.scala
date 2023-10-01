@@ -7,7 +7,7 @@ import com.tosware.nkm.models.game.hex.HexCoordinates
 
 import scala.util.Random
 
-object PreciseShot {
+object PreciseShot extends NkmConf.AutoExtract {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "Precise Shot",
@@ -17,7 +17,7 @@ object PreciseShot {
           |
           |Range: circular, {range}
           |""".stripMargin,
-      variables = NkmConf.extract("abilities.sinon.preciseShot"),
+
     )
 }
 

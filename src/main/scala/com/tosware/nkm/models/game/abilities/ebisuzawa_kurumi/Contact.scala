@@ -8,7 +8,7 @@ import spray.json.*
 
 import scala.util.Random
 
-object Contact {
+object Contact extends NkmConf.AutoExtract {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "Contact",
@@ -17,7 +17,7 @@ object Contact {
         """Character's attack or ability that hits an enemy deals bonus {damage} physical damage.
           |This effect can be applied only once per character.
           |""".stripMargin,
-      variables = NkmConf.extract("abilities.ebisuzawa_kurumi.contact"),
+
     )
   val hitCharacterIdsKey: String = "hitCharacterIds"
 }

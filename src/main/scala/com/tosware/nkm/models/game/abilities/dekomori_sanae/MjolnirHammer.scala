@@ -8,7 +8,7 @@ import spray.json.*
 
 import scala.util.Random
 
-object MjolnirHammer {
+object MjolnirHammer extends NkmConf.AutoExtract {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "Mjolnir Hammer",
@@ -18,7 +18,7 @@ object MjolnirHammer {
           |If both attacks target the same character, it will receive half damage from second hit.
           |
           |Range: circular, {range}""".stripMargin,
-      variables = NkmConf.extract("abilities.dekomori_sanae.mjolnirHammer"),
+
     )
 }
 

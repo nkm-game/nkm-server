@@ -8,7 +8,7 @@ import com.tosware.nkm.models.game.event.{GameEvent, GameEventListener}
 
 import scala.util.Random
 
-object ScissorBlade {
+object ScissorBlade extends NkmConf.AutoExtract {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "ScissorBlade",
@@ -16,7 +16,7 @@ object ScissorBlade {
       description =
         """This character's basic attacks decrease physical defense of enemies by {physicalDefenseDecrease} for {duration}t.
           |This effect is applied before attack and can stack.""".stripMargin,
-      variables = NkmConf.extract("abilities.ryuko_matoi.scissorBlade"),
+
       relatedEffectIds = Seq(effects.StatNerf.metadata.id)
     )
 }

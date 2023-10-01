@@ -6,7 +6,7 @@ import com.tosware.nkm.models.game.ability.*
 
 import scala.util.Random
 
-object Survivor {
+object Survivor extends NkmConf.AutoExtract {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "Survivor",
@@ -15,7 +15,7 @@ object Survivor {
         """Character becomes invisible for {invisibilityDuration}t or to first basic attack.
           |This character's next basic attack will deal {bonusDamagePercent}% damage and will stun the target for {stunDuration}t.
           |""".stripMargin,
-      variables = NkmConf.extract("abilities.ebisuzawa_kurumi.survivor"),
+
       relatedEffectIds = Seq(
         effects.Invisibility.metadata.id,
         effects.NextBasicAttackBuff.metadata.id,

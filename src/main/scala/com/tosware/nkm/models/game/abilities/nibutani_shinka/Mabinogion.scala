@@ -9,7 +9,7 @@ import com.tosware.nkm.models.game.hex.HexCoordinates
 
 import scala.util.Random
 
-object Mabinogion {
+object Mabinogion extends NkmConf.AutoExtract {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "Mabinogion",
@@ -24,7 +24,7 @@ object Mabinogion {
           |- shield is tripled
           |- all friends in range gain {enchantedSpeed} speed for one phase
           |""".stripMargin,
-      variables = NkmConf.extract("abilities.nibutani_shinka.mabinogion"),
+
     )
 }
 

@@ -6,7 +6,7 @@ import com.tosware.nkm.models.game.ability.*
 
 import scala.util.Random
 
-object Eliminate {
+object Eliminate extends NkmConf.AutoExtract {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "Eliminate",
@@ -15,7 +15,6 @@ object Eliminate {
         """Character hits critically, dealing double AD damage to target.
           |
           |Range: circular, {range}""".stripMargin,
-      variables = NkmConf.extract("abilities.akame.eliminate"),
     )
 }
 

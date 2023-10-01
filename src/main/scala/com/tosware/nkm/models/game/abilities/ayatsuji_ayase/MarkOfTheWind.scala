@@ -10,7 +10,7 @@ import spray.json.*
 
 import scala.util.Random
 
-object MarkOfTheWind {
+object MarkOfTheWind extends NkmConf.AutoExtract {
   val metadata: AbilityMetadata = {
     AbilityMetadata(
       name = "Mark of the Wind",
@@ -20,7 +20,7 @@ object MarkOfTheWind {
           |
           |Range: circular, {range}
           |Max. number of traps: {trapLimit}""".stripMargin,
-      variables = NkmConf.extract("abilities.ayatsuji_ayase.markOfTheWind"),
+
     )
   }
   val trapLocationsKey = "trapLocations"

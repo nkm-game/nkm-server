@@ -8,7 +8,7 @@ import com.tosware.nkm.models.game.hex.{HexCell, HexCoordinates, HexDirection, S
 
 import scala.util.Random
 
-object FiberDecapitation {
+object FiberDecapitation extends NkmConf.AutoExtract {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "Fiber Decapitation",
@@ -17,7 +17,7 @@ object FiberDecapitation {
         """Character cuts through selected enemy, decreasing his physical defense by {physicalDefenseDecrease},
           |dealing {damage} physical damage and landing {targetCellOffset} tiles behind him.
           |Range: linear, stops at walls and enemies, {range}""".stripMargin,
-      variables = NkmConf.extract("abilities.ryuko_matoi.fiberDecapitation"),
+
     )
 }
 

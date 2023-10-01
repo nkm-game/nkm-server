@@ -8,7 +8,7 @@ import com.tosware.nkm.models.game.hex.{HexCoordinates, SearchFlag}
 
 import scala.util.Random
 
-object DrainTouch {
+object DrainTouch extends NkmConf.AutoExtract {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "Drain Touch",
@@ -17,7 +17,7 @@ object DrainTouch {
         """Character drains {damage} HP from target enemy, dealing magical damage and restoring HP equal to damage dealt to target.
           |
           |Range: linear, {range}""".stripMargin,
-      variables = NkmConf.extract("abilities.satou_kazuma.drainTouch"),
+
     )
 }
 

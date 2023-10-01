@@ -9,7 +9,7 @@ import com.tosware.nkm.models.game.event.{GameEvent, GameEventListener}
 
 import scala.util.Random
 
-object ManipulatorOfObjects {
+object ManipulatorOfObjects extends NkmConf.AutoExtract {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "Manipulator of Objects",
@@ -17,7 +17,6 @@ object ManipulatorOfObjects {
       abilityType = AbilityType.Passive,
       description = """This character's basic attacks snare enemies for {duration}t.
       |This effect cannot be added on the same enemy for {effectTimeout}t.""".stripMargin,
-      variables = NkmConf.extract("abilities.carmelWilhelmina.manipulatorOfObjects"),
       relatedEffectIds = Seq(Snare.metadata.id, ManipulatorOfObjectsImmunity.metadata.id),
     )
 }

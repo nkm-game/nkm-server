@@ -7,13 +7,13 @@ import com.tosware.nkm.models.game.effects.AbilityEnchant
 
 import scala.util.Random
 
-object FairyOfLove {
+object FairyOfLove extends NkmConf.AutoExtract {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "Fairy Of Love",
       abilityType = AbilityType.Ultimate,
       description = "Character enchants the passive ability for {duration}t.",
-      variables = NkmConf.extract("abilities.nibutani_shinka.fairyOfLove"),
+
       relatedEffectIds = Seq(effects.AbilityEnchant.metadata.id),
     )
 }

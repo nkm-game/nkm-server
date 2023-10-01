@@ -9,7 +9,7 @@ import spray.json.*
 
 import scala.util.Random
 
-object RunItDown {
+object RunItDown extends NkmConf.AutoExtract {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "Run It Down",
@@ -17,7 +17,7 @@ object RunItDown {
       description =
         """Character can move three times this turn.
           |After each move they can use basic attack.""".stripMargin,
-      variables = NkmConf.extract("abilities.llenn.runItDown"),
+
     )
   val movesLeftKey: String = "movesLeft"
 }

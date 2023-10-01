@@ -8,7 +8,7 @@ import com.tosware.nkm.models.game.*
 
 import scala.util.Random
 
-object MjolnirDestinyImpulse {
+object MjolnirDestinyImpulse extends NkmConf.AutoExtract {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "Mjolnir Destiny Impulse",
@@ -18,7 +18,7 @@ object MjolnirDestinyImpulse {
           |This ability can be used again this turn every time it caused to kill at least one enemy.
           |
           |Range: circular, {range}""".stripMargin,
-      variables = NkmConf.extract("abilities.dekomori_sanae.mjolnirDestinyImpulse"),
+
     )
 }
 

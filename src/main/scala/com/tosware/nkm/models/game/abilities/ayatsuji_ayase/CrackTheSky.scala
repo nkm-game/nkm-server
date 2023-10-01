@@ -11,7 +11,7 @@ import spray.json.*
 
 import scala.util.Random
 
-object CrackTheSky {
+object CrackTheSky extends NkmConf.AutoExtract {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "Crack the Sky",
@@ -20,7 +20,7 @@ object CrackTheSky {
         """Character detonates selected traps, dealing {damage}+B physical damage to all hit enemies.
           |
           |Trap detonation radius: circular, {radius}""".stripMargin,
-      variables = NkmConf.extract("abilities.ayatsuji_ayase.crackTheSky"),
+
     )
 
   val markOfTheWindAbilityIdKey = "markOfTheWindAbilityId"

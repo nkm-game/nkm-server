@@ -9,7 +9,7 @@ import com.tosware.nkm.models.game.hex.HexCoordinates
 
 import scala.util.Random
 
-object ReducedWeight {
+object ReducedWeight extends NkmConf.AutoExtract {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "Reduced Weight",
@@ -19,7 +19,7 @@ object ReducedWeight {
           |Additionally, doubles speed of target for {speedBuffDuration}t.
           |
           |Range: basic attack range""".stripMargin,
-      variables = NkmConf.extract("abilities.ochaco_uraraka.reducedWeight"),
+
     )
 }
 

@@ -10,14 +10,14 @@ import com.tosware.nkm.models.game.event.{GameEvent, GameEventListener}
 
 import scala.util.Random
 
-object SamuraisSwiftness {
+object SamuraisSwiftness extends NkmConf.AutoExtract {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "Samurai's Swiftness",
       abilityType = AbilityType.Passive,
       description =
         "Dealing damage by this character gives a {speedPercent}% speed buff in their next turn.",
-      variables = NkmConf.extract("abilities.ayatsuji_ayase.samuraisSwiftness"),
+
       relatedEffectIds = Seq(StatBuff.metadata.id),
     )
 }

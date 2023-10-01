@@ -9,7 +9,7 @@ import spray.json.*
 
 import scala.util.Random
 
-object TiamatsIntervention {
+object TiamatsIntervention extends NkmConf.AutoExtract {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "Tiamat's Intervention",
@@ -22,7 +22,7 @@ object TiamatsIntervention {
           |Range: circular, {range}
           |Nearby position range: circular, {moveTargetRange}
           |""".stripMargin,
-      variables = NkmConf.extract("abilities.carmelWilhelmina.tiamatsIntervention"),
+
       relatedEffectIds = Seq(Stun.metadata.id),
     )
 }

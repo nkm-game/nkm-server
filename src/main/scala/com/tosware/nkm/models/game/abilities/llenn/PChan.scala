@@ -8,13 +8,13 @@ import com.tosware.nkm.models.game.event.{GameEvent, GameEventListener}
 
 import scala.util.Random
 
-object PChan {
+object PChan extends NkmConf.AutoExtract {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "P-Chan",
       abilityType = AbilityType.Passive,
       description = "Character permanently gains {speedIncrease} speed with every death of a friendly character.",
-      variables = NkmConf.extract("abilities.llenn.pChan"),
+
     )
 }
 

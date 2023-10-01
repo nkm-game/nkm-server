@@ -8,14 +8,14 @@ import com.tosware.nkm.models.game.effects.StatBuff
 
 import scala.util.Random
 
-object GreatBladeOfCrimson {
+object GreatBladeOfCrimson extends NkmConf.AutoExtract {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "Great Blade of Crimson",
       alternateName = "紅蓮の大太刀 (Guren no Ōdachi)",
       abilityType = AbilityType.Normal,
       description = "Character gains {bonusAD} AD and {bonusRange} range for {duration}t.",
-      variables = NkmConf.extract("abilities.shana.greatBladeOfCrimson"),
+
       relatedEffectIds = Seq(effects.StatBuff.metadata.id),
     )
 }

@@ -8,7 +8,7 @@ import com.tosware.nkm.models.game.hex.HexCoordinates
 
 import scala.util.Random
 
-object SkillRelease {
+object SkillRelease extends NkmConf.AutoExtract {
   val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "Skill Release",
@@ -18,7 +18,7 @@ object SkillRelease {
         """Character releases their ability, and all characters lose Zero Gravity effect.
           |Enemies that lost Zero Gravity are stunned for {stunDuration}t.
           |""".stripMargin,
-      variables = NkmConf.extract("abilities.ochaco_uraraka.skillRelease"),
+
     )
 }
 
