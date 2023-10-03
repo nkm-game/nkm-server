@@ -32,9 +32,9 @@ trait WSTrait extends UserApiTrait {
   private var eventObservers: Seq[GameEventObserver] = Seq.empty
 
   def observeEvents(gameId: GameId): Unit = {
-    eventObservers = (0 until numberOfUsers).map(tokenId => {
+    eventObservers = (0 until numberOfUsers).map { tokenId =>
       new GameEventObserver(gameId, tokenId)(this)
-    })
+    }
     eventObservers.foreach(_.start())
   }
 
@@ -65,15 +65,15 @@ trait WSTrait extends UserApiTrait {
   def fetchResponseL()(implicit wsClient: WSProbe): WebsocketLobbyResponse =
     wsClient.expectMessage().asTextMessage.getStrictText.parseJson.convertTo[WebsocketLobbyResponse]
 
-  def fetchResponseG()(implicit wsClient: WSProbe): WebsocketGameResponse = {
+  def fetchResponseG()(implicit wsClient: WSProbe): WebsocketGameResponse =
     wsClient.expectMessage().asTextMessage.getStrictText.parseJson.convertTo[WebsocketGameResponse]
-  }
 
-  def sendWSRequestL(route: LobbyRoute, requestJson: String = "")(implicit wsClient: WSProbe): WebsocketLobbyResponse = {
+  def sendWSRequestL(route: LobbyRoute, requestJson: String = "")(implicit
+      wsClient: WSProbe
+  ): WebsocketLobbyResponse = {
     sendRequestL(WebsocketLobbyRequest(route, requestJson))
     fetchResponseL()
   }
-
 
   def sendWSRequestG(route: GameRoute, requestJson: String = "")(implicit wsClient: WSProbe): WebsocketGameResponse = {
     sendRequestG(WebsocketGameRequest(route, requestJson))
@@ -122,8 +122,13 @@ trait WSTrait extends UserApiTrait {
   def setNumberOfBans(lobbyId: String, numberOfBans: Int)(implicit wsClient: WSProbe): WebsocketLobbyResponse =
     sendWSRequestL(LobbyRoute.SetNumberOfBans, LobbyRequest.SetNumberOfBans(lobbyId, numberOfBans).toJson.toString)
 
-  def setNumberOfCharacters(lobbyId: String, numberOfCharacters: Int)(implicit wsClient: WSProbe): WebsocketLobbyResponse =
-    sendWSRequestL(LobbyRoute.SetNumberOfCharacters, LobbyRequest.SetNumberOfCharactersPerPlayer(lobbyId, numberOfCharacters).toJson.toString)
+  def setNumberOfCharacters(lobbyId: String, numberOfCharacters: Int)(implicit
+      wsClient: WSProbe
+  ): WebsocketLobbyResponse =
+    sendWSRequestL(
+      LobbyRoute.SetNumberOfCharacters,
+      LobbyRequest.SetNumberOfCharactersPerPlayer(lobbyId, numberOfCharacters).toJson.toString,
+    )
 
   def setLobbyName(lobbyId: String, newName: String)(implicit wsClient: WSProbe): WebsocketLobbyResponse =
     sendWSRequestL(LobbyRoute.SetLobbyName, LobbyRequest.SetLobbyName(lobbyId, newName).toJson.toString)
@@ -152,20 +157,36 @@ trait WSTrait extends UserApiTrait {
   def pick(lobbyId: String, characterId: CharacterMetadataId)(implicit wsClient: WSProbe): WebsocketGameResponse =
     sendWSRequestG(GameRoute.PickCharacter, PickCharacter(lobbyId, characterId).toJson.toString)
 
-  def blindPick(lobbyId: String, characterIds: Set[CharacterMetadataId])(implicit wsClient: WSProbe): WebsocketGameResponse =
+  def blindPick(lobbyId: String, characterIds: Set[CharacterMetadataId])(implicit
+      wsClient: WSProbe
+  ): WebsocketGameResponse =
     sendWSRequestG(GameRoute.BlindPickCharacters, BlindPickCharacters(lobbyId, characterIds).toJson.toString)
 
-  def placeCharacters(lobbyId: String, coordinatesToCharacterIdMap: Map[HexCoordinates, CharacterId])(implicit wsClient: WSProbe): WebsocketGameResponse =
+  def placeCharacters(lobbyId: String, coordinatesToCharacterIdMap: Map[HexCoordinates, CharacterId])(implicit
+      wsClient: WSProbe
+  ): WebsocketGameResponse =
     sendWSRequestG(GameRoute.PlaceCharacters, PlaceCharacters(lobbyId, coordinatesToCharacterIdMap).toJson.toString)
 
-  def moveCharacter(lobbyId: String, path: Seq[HexCoordinates], characterId: CharacterId)(implicit wsClient: WSProbe): WebsocketGameResponse =
+  def moveCharacter(lobbyId: String, path: Seq[HexCoordinates], characterId: CharacterId)(implicit
+      wsClient: WSProbe
+  ): WebsocketGameResponse =
     sendWSRequestG(GameRoute.Move, Move(lobbyId, path, characterId).toJson.toString)
 
-  def basicAttackCharacter(lobbyId: String, attackingCharacterId: CharacterId, targetCharacterId: CharacterId)(implicit wsClient: WSProbe): WebsocketGameResponse =
+  def basicAttackCharacter(lobbyId: String, attackingCharacterId: CharacterId, targetCharacterId: CharacterId)(implicit
+      wsClient: WSProbe
+  ): WebsocketGameResponse =
     sendWSRequestG(GameRoute.BasicAttack, BasicAttack(lobbyId, attackingCharacterId, targetCharacterId).toJson.toString)
 
-  def useAbilityOnCharacter(lobbyId: String, abilityId: AbilityId, target: CharacterId, useData: UseData = UseData())(implicit wsClient: WSProbe): WebsocketGameResponse =
-    sendWSRequestG(GameRoute.UseAbilityOnCharacter, UseAbilityOnCharacter(lobbyId, abilityId, target, useData).toJson.toString)
+  def useAbilityOnCharacter(
+      lobbyId: String,
+      abilityId: AbilityId,
+      target: CharacterId,
+      useData: UseData = UseData(),
+  )(implicit wsClient: WSProbe): WebsocketGameResponse =
+    sendWSRequestG(
+      GameRoute.UseAbilityOnCharacter,
+      UseAbilityOnCharacter(lobbyId, abilityId, target, useData).toJson.toString,
+    )
 
   def endTurn(lobbyId: String)(implicit wsClient: WSProbe): WebsocketGameResponse =
     sendWSRequestG(GameRoute.EndTurn, EndTurn(lobbyId).toJson.toString)

@@ -27,7 +27,6 @@ object RubberRubberFruit {
       (11, 0, Wall),
       (12, 0),
       (13, 0),
-
       (0, 100),
       (1, 100, Wall),
       (2, 100, Wall),

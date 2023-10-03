@@ -20,9 +20,8 @@ import spray.json.*
 import scala.concurrent.{ExecutionContextExecutor, Future}
 
 class UserService(implicit db: JdbcBackend.Database, system: ActorSystem)
-  extends NkmTimeouts
-    with NkmJsonProtocol
-{
+    extends NkmTimeouts
+    with NkmJsonProtocol {
   def authenticate(creds: Credentials): LoginEvent = {
     val userActor: ActorRef = system.actorOf(User.props(creds.email))
     aw(userActor ? CheckLogin(creds.password)).asInstanceOf[LoginEvent]
@@ -51,16 +50,15 @@ class UserService(implicit db: JdbcBackend.Database, system: ActorSystem)
   }
 
   def register(request: RegisterRequest): RegisterEvent = {
-    val readJournal: JdbcReadJournal = PersistenceQuery(system).readJournalFor[JdbcReadJournal](JdbcReadJournal.Identifier)
+    val readJournal: JdbcReadJournal =
+      PersistenceQuery(system).readJournalFor[JdbcReadJournal](JdbcReadJournal.Identifier)
     val userActor: ActorRef = system.actorOf(User.props(request.email))
 
-    val registerEmailsFuture = readJournal.
-      currentEventsByTag(User.registerTag, 0)
+    val registerEmailsFuture = readJournal.currentEventsByTag(User.registerTag, 0)
       .map(_.event.asInstanceOf[RegisterSuccess].email)
       .runWith(Sink.seq[String])
 
-    val oauthEmailsFuture = readJournal.
-      currentEventsByTag(User.oauthRegisterTag, 0)
+    val oauthEmailsFuture = readJournal.currentEventsByTag(User.oauthRegisterTag, 0)
       .map(_.event.asInstanceOf[OauthRegisterSuccess].email)
       .runWith(Sink.seq[String])
 
@@ -74,7 +72,7 @@ class UserService(implicit db: JdbcBackend.Database, system: ActorSystem)
     val allEmails = aw(allEmailsFuture)
     val emailExists = allEmails.contains(request.email)
 
-    if(emailExists) RegisterFailure
+    if (emailExists) RegisterFailure
     else aw(userActor ? Register(request.password)).asInstanceOf[RegisterEvent]
   }
 }

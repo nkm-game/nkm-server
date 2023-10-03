@@ -10,10 +10,9 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
 class GrenadeThrowSpec
-  extends AnyWordSpecLike
+    extends AnyWordSpecLike
     with Matchers
-    with TestUtils
-{
+    with TestUtils {
   private val abilityMetadata = GrenadeThrow.metadata
   private val s = TestScenario.generate(TestHexMapName.Simple2v2, abilityMetadata.id)
   private val aGs: GameState = s.gameState.useAbilityOnCoordinates(s.defaultAbilityId, HexCoordinates(2, 0))
@@ -33,7 +32,7 @@ class GrenadeThrowSpec
       aGs.gameLog.events
         .ofType[GameEvent.CharacterDamaged]
         .causedBy(s.defaultAbilityId)
-        .size should be (3)
+        .size should be(3)
     }
   }
 }

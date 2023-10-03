@@ -17,7 +17,7 @@ object Main extends App with Logging {
   implicit val system: ActorSystem = ActorSystem("nkm-actor-system")
 
   @tailrec
-  def initDb(lastDelay: Int = 0): Unit = {
+  def initDb(lastDelay: Int = 0): Unit =
     try {
       val config: Config = ConfigFactory.load()
       val dbName = config.getString("slick.db.dbName")
@@ -25,7 +25,7 @@ object Main extends App with Logging {
       DBManager.createNeededTables(db)
     } catch {
       case e: Throwable =>
-        if(lastDelay > 60) {
+        if (lastDelay > 60) {
           e.printStackTrace()
           System.exit(1)
         }
@@ -33,7 +33,6 @@ object Main extends App with Logging {
         Thread.sleep((lastDelay + 1) * 1000)
         initDb(lastDelay + 1)
     }
-  }
 
   // TODO: check if users are not already initialized
   def initUsers(): Unit = {

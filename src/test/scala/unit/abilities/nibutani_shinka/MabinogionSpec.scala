@@ -11,10 +11,9 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
 class MabinogionSpec
-  extends AnyWordSpecLike
+    extends AnyWordSpecLike
     with Matchers
-    with TestUtils
-{
+    with TestUtils {
   private val abilityMetadata = Mabinogion.metadata
   private val characterMetadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
   private val s = scenarios.Simple1v9LineTestScenario(characterMetadata)

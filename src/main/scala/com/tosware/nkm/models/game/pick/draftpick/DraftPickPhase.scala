@@ -10,7 +10,3 @@ object DraftPickPhase extends Enum[DraftPickPhase] {
   case object Picking extends DraftPickPhase
   case object Finished extends DraftPickPhase
 }
-
-
-
-

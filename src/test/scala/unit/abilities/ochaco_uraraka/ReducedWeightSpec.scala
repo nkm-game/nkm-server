@@ -12,10 +12,9 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
 class ReducedWeightSpec
-  extends AnyWordSpecLike
+    extends AnyWordSpecLike
     with Matchers
-    with TestUtils
-{
+    with TestUtils {
   private val abilityMetadata = ReducedWeight.metadata
   private val s = TestScenario.generate(TestHexMapName.Simple2v2, abilityMetadata.id)
   private val aGs: GameState = s.gameState.useAbilityOnCharacter(s.defaultAbilityId, s.defaultCharacter.id)
@@ -37,7 +36,7 @@ class ReducedWeightSpec
     }
 
     "buff speed" in {
-      assertBuffExists(StatType.Speed,  s.defaultCharacter.id)(aGs)
+      assertBuffExists(StatType.Speed, s.defaultCharacter.id)(aGs)
     }
   }
 }

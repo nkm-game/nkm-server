@@ -16,9 +16,9 @@ object BugReportRequest {
 }
 
 class BugReportRoutes(deps: NkmDependencies) extends JwtDirective
-  with SprayJsonSupport
-  with Logging
-  with NkmJsonProtocol {
+    with SprayJsonSupport
+    with Logging
+    with NkmJsonProtocol {
   val jwtSecretKey: JwtSecretKey = deps.jwtSecretKey
   val bugReportService: BugReportService = deps.bugReportService
 
@@ -34,16 +34,16 @@ class BugReportRoutes(deps: NkmDependencies) extends JwtDirective
     }
   )
 
-
   val bugReportPostRoutes = concat(
     pathPrefix(bugReportPrefix) {
       concat(
         path("create") {
           authenticatedOpt { userStateViewOpt =>
             entity(as[BugReportRequest.Create]) { entity =>
-              val creationResponseFuture = bugReportService.create(userStateViewOpt.flatMap(_.userId), entity.description, entity.gameId)
+              val creationResponseFuture =
+                bugReportService.create(userStateViewOpt.flatMap(_.userId), entity.description, entity.gameId)
               onSuccess(creationResponseFuture) {
-                case CommandResponse.Success(_) => complete(StatusCodes.Created)
+                case CommandResponse.Success(_)   => complete(StatusCodes.Created)
                 case CommandResponse.Failure(msg) => complete(StatusCodes.InternalServerError -> msg)
               }
             }
@@ -51,15 +51,15 @@ class BugReportRoutes(deps: NkmDependencies) extends JwtDirective
         },
         path("set_resolved") {
           requireAdmin {
-              entity(as[BugReportRequest.SetResolved]) { entity =>
-                val creationResponseFuture = bugReportService.setResolved(entity.id, entity.resolved)
-                onSuccess(creationResponseFuture) {
-                  case CommandResponse.Success(_) => complete(StatusCodes.OK)
-                  case CommandResponse.Failure(msg) => complete(StatusCodes.InternalServerError -> msg)
-                }
+            entity(as[BugReportRequest.SetResolved]) { entity =>
+              val creationResponseFuture = bugReportService.setResolved(entity.id, entity.resolved)
+              onSuccess(creationResponseFuture) {
+                case CommandResponse.Success(_)   => complete(StatusCodes.OK)
+                case CommandResponse.Failure(msg) => complete(StatusCodes.InternalServerError -> msg)
               }
+            }
           }
-        }
+        },
       )
     }
   )

@@ -8,10 +8,9 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
 class SamuraisSwiftnessSpec
-  extends AnyWordSpecLike
+    extends AnyWordSpecLike
     with Matchers
-    with TestUtils
-{
+    with TestUtils {
   private val abilityMetadata = SamuraisSwiftness.metadata
   private val s = TestScenario.generate(TestHexMapName.Simple1v1, abilityMetadata.id)
 

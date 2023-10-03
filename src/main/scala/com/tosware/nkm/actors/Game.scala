@@ -39,7 +39,8 @@ object Game {
 
   case class BlindPickCharacters(playerId: PlayerId, characterId: Set[CharacterMetadataId]) extends Command
 
-  case class PlaceCharacters(playerId: PlayerId, coordinatesToCharacterIdMap: Map[HexCoordinates, CharacterId]) extends Command
+  case class PlaceCharacters(playerId: PlayerId, coordinatesToCharacterIdMap: Map[HexCoordinates, CharacterId])
+      extends Command
 
   case class EndTurn(playerId: PlayerId) extends Command
 
@@ -47,13 +48,16 @@ object Game {
 
   case class MoveCharacter(playerId: PlayerId, path: Seq[HexCoordinates], characterId: CharacterId) extends Command
 
-  case class BasicAttackCharacter(playerId: PlayerId, attackingCharacterId: CharacterId, targetCharacterId: CharacterId) extends Command
+  case class BasicAttackCharacter(playerId: PlayerId, attackingCharacterId: CharacterId, targetCharacterId: CharacterId)
+      extends Command
 
   case class UseAbility(playerId: PlayerId, abilityId: AbilityId, useData: UseData) extends Command
 
-  case class UseAbilityOnCoordinates(playerId: PlayerId, abilityId: AbilityId, target: HexCoordinates, useData: UseData) extends Command
+  case class UseAbilityOnCoordinates(playerId: PlayerId, abilityId: AbilityId, target: HexCoordinates, useData: UseData)
+      extends Command
 
-  case class UseAbilityOnCharacter(playerId: PlayerId, abilityId: AbilityId, target: CharacterId, useData: UseData) extends Command
+  case class UseAbilityOnCharacter(playerId: PlayerId, abilityId: AbilityId, target: CharacterId, useData: UseData)
+      extends Command
 
   // sent only by self /////////
   //
@@ -81,7 +85,11 @@ object Game {
 
   case class PlacingCharactersStarted(id: GameId) extends Event
 
-  case class CharactersPlaced(id: GameId, playerId: PlayerId, coordinatesToCharacterIdMap: Map[HexCoordinates, CharacterId]) extends Event
+  case class CharactersPlaced(
+      id: GameId,
+      playerId: PlayerId,
+      coordinatesToCharacterIdMap: Map[HexCoordinates, CharacterId],
+  ) extends Event
 
   case class CharactersBlindPicked(id: GameId, playerId: PlayerId, characterId: Set[CharacterMetadataId]) extends Event
 
@@ -89,15 +97,33 @@ object Game {
 
   case class TurnPassed(id: GameId, playerId: PlayerId, characterId: CharacterId) extends Event
 
-  case class CharacterMoved(id: GameId, playerId: PlayerId, path: Seq[HexCoordinates], characterId: CharacterId) extends Event
+  case class CharacterMoved(id: GameId, playerId: PlayerId, path: Seq[HexCoordinates], characterId: CharacterId)
+      extends Event
 
-  case class CharacterBasicAttacked(id: GameId, playerId: PlayerId, attackingCharacterId: CharacterId, targetCharacterId: CharacterId) extends Event
+  case class CharacterBasicAttacked(
+      id: GameId,
+      playerId: PlayerId,
+      attackingCharacterId: CharacterId,
+      targetCharacterId: CharacterId,
+  ) extends Event
 
   case class AbilityUsed(id: GameId, playerId: PlayerId, abilityId: AbilityId, useData: UseData) extends Event
 
-  case class AbilityUsedOnCoordinates(id: GameId, playerId: PlayerId, abilityId: AbilityId, target: HexCoordinates, useData: UseData) extends Event
+  case class AbilityUsedOnCoordinates(
+      id: GameId,
+      playerId: PlayerId,
+      abilityId: AbilityId,
+      target: HexCoordinates,
+      useData: UseData,
+  ) extends Event
 
-  case class AbilityUsedOnCharacter(id: GameId, playerId: PlayerId, abilityId: AbilityId, target: CharacterId, useData: UseData) extends Event
+  case class AbilityUsedOnCharacter(
+      id: GameId,
+      playerId: PlayerId,
+      abilityId: AbilityId,
+      target: CharacterId,
+      useData: UseData,
+  ) extends Event
 
   // CLOCK TIMEOUTS /////////////////////
   //
@@ -113,7 +139,6 @@ object Game {
 
   case class TurnTimedOut(id: GameId) extends Event
   //////////////////////////////
-
 
   def props(id: GameId)(implicit nkmDataService: NkmDataService): Props = Props(new Game(id))
 }
@@ -158,10 +183,10 @@ class Game(id: GameId)(implicit nkmDataService: NkmDataService) extends Persiste
   }
 
   def scheduleDefault(): Unit = {
-    if(Seq(GameStatus.NotStarted, GameStatus.Finished).contains(gameState.gameStatus))
+    if (Seq(GameStatus.NotStarted, GameStatus.Finished).contains(gameState.gameStatus))
       return
 
-    val timeout = if(gameState.isSharedTime)
+    val timeout = if (gameState.isSharedTime)
       gameState.clock.sharedTime.millis
     else
       gameState.currentPlayerTime.millis
@@ -179,7 +204,6 @@ class Game(id: GameId)(implicit nkmDataService: NkmDataService) extends Persiste
     scheduledTimeout = context.system.scheduler.scheduleOnce(timeout)(self ! timeoutToSchedule)
   }
 
-
   def handleCharacterSelectTimeout(pickNumber: Int)(implicit random: Random, causedById: String): Unit = {
     def startPlacingCharactersAfterTimeout(): Unit =
       persistAndPublishAll(Seq(
@@ -188,7 +212,9 @@ class Game(id: GameId)(implicit nkmDataService: NkmDataService) extends Persiste
       ))(_ => updateGameStateAndScheduleDefault(gameState.startPlacingCharacters()))
 
     def banningPhaseTimeout(): Unit =
-      persistAndPublish(BanningPhaseTimedOut(id))(_ => updateGameStateAndScheduleDefault(gameState.finishBanningPhase()))
+      persistAndPublish(BanningPhaseTimedOut(id))(_ =>
+        updateGameStateAndScheduleDefault(gameState.finishBanningPhase())
+      )
 
     def draftPickTimeout(): Unit =
       persistAndPublish(DraftPickTimedOut(id))(_ => updateGameStateAndScheduleDefault(gameState.draftPickTimeout()))
@@ -231,20 +257,18 @@ class Game(id: GameId)(implicit nkmDataService: NkmDataService) extends Persiste
       sender() ! Success()
     }
 
-
   def unpauseGame(): Unit =
     persistAndPublish(GameUnpaused(id)) { _ =>
       updateGameStateAndScheduleDefault(gameState.unpause())
       sender() ! Success()
     }
 
-  def validate(response: CommandResponse)(onSuccess: () => Unit): Unit = {
+  def validate(response: CommandResponse)(onSuccess: () => Unit): Unit =
     response match {
       case failure @ Failure(_) => sender() ! failure
       case Success(_) =>
         onSuccess()
     }
-  }
 
   def startGame(gameStartDependencies: GameStartDependencies): Unit = {
     val e = GameStarted(id, gameStartDependencies)
@@ -254,7 +278,6 @@ class Game(id: GameId)(implicit nkmDataService: NkmDataService) extends Persiste
     }
   }
 
-
   def surrender(playerId: PlayerId)(implicit random: Random, causedById: String): Unit = {
     val e = Surrendered(id, playerId)
     persistAndPublish(e) { _ =>
@@ -263,18 +286,20 @@ class Game(id: GameId)(implicit nkmDataService: NkmDataService) extends Persiste
     }
   }
 
-  def banCharacters(playerId: PlayerId, characterIds: Set[CharacterMetadataId]): Unit =
-  {
+  def banCharacters(playerId: PlayerId, characterIds: Set[CharacterMetadataId]): Unit = {
     val e = CharactersBanned(id, playerId, characterIds)
     persistAndPublish(e) { _ =>
       updateGameState(gameState.ban(playerId, characterIds))
-      if(!gameState.isDraftBanningPhase)
+      if (!gameState.isDraftBanningPhase)
         scheduleDefault()
       sender() ! Success()
     }
   }
 
-  def pickCharacter(playerId: PlayerId, characterId: CharacterMetadataId)(implicit random: Random, causedById: String): Unit = {
+  def pickCharacter(playerId: PlayerId, characterId: CharacterMetadataId)(implicit
+      random: Random,
+      causedById: String,
+  ): Unit = {
     val e = CharacterPicked(id, playerId, characterId)
     persistAndPublish(e) { _ =>
       updateGameStateAndScheduleDefault(gameState.pick(playerId, characterId))
@@ -282,28 +307,31 @@ class Game(id: GameId)(implicit nkmDataService: NkmDataService) extends Persiste
     }
   }
 
-  def blindPickCharacters(playerId: PlayerId, characterIds: Set[CharacterMetadataId])(implicit random: Random, causedById: String): Unit = {
+  def blindPickCharacters(playerId: PlayerId, characterIds: Set[CharacterMetadataId])(implicit
+      random: Random,
+      causedById: String,
+  ): Unit = {
     val e = CharactersBlindPicked(id, playerId, characterIds)
     persistAndPublish(e) { _ =>
       updateGameState(gameState.blindPick(playerId, characterIds))
       sender() ! Success()
-      if(gameState.characterPickFinished)
+      if (gameState.characterPickFinished)
         scheduleDefault()
     }
   }
 
-
-  def placeCharacters(playerId: PlayerId, coordinatesToCharacterIdMap: Map[HexCoordinates, CharacterId])(implicit random: Random, causedById: String): Unit =
-  {
+  def placeCharacters(playerId: PlayerId, coordinatesToCharacterIdMap: Map[HexCoordinates, CharacterId])(implicit
+      random: Random,
+      causedById: String,
+  ): Unit = {
     val e = CharactersPlaced(id, playerId, coordinatesToCharacterIdMap)
     persistAndPublish(e) { _ =>
       updateGameState(gameState.placeCharacters(playerId, coordinatesToCharacterIdMap))
       sender() ! Success()
-      if(gameState.placingCharactersFinished)
+      if (gameState.placingCharactersFinished)
         scheduleDefault()
     }
   }
-
 
   def endTurn(playerId: PlayerId): Unit = {
     val e = TurnEnded(id, playerId)
@@ -329,8 +357,11 @@ class Game(id: GameId)(implicit nkmDataService: NkmDataService) extends Persiste
     }
   }
 
-
-  def basicAttackCharacter(playerId: PlayerId, attackingCharacterId: CharacterId, targetCharacterId: CharacterId): Unit = {
+  def basicAttackCharacter(
+      playerId: PlayerId,
+      attackingCharacterId: CharacterId,
+      targetCharacterId: CharacterId,
+  ): Unit = {
     val e = CharacterBasicAttacked(id, playerId, attackingCharacterId, targetCharacterId)
     persistAndPublish(e) { _ =>
       updateGameState(gameState.basicAttack(attackingCharacterId, targetCharacterId))
@@ -346,7 +377,12 @@ class Game(id: GameId)(implicit nkmDataService: NkmDataService) extends Persiste
     }
   }
 
-  def useAbilityOnCoordinates(playerId: PlayerId, abilityId: AbilityId, target: HexCoordinates, useData: UseData): Unit = {
+  def useAbilityOnCoordinates(
+      playerId: PlayerId,
+      abilityId: AbilityId,
+      target: HexCoordinates,
+      useData: UseData,
+  ): Unit = {
     val e = AbilityUsedOnCoordinates(id, playerId, abilityId, target, useData)
     persistAndPublish(e) { _ =>
       updateGameState(gameState.useAbilityOnCoordinates(abilityId, target, useData))
@@ -372,12 +408,12 @@ class Game(id: GameId)(implicit nkmDataService: NkmDataService) extends Persiste
     case StartGame(gameStartDependencies) =>
       validate(v().validateStartGame())(() => startGame(gameStartDependencies))
     case Pause(playerId) =>
-      validate(v().validatePause(playerId))(() => {
+      validate(v().validatePause(playerId)) { () =>
         if (gameState.clock.isRunning)
           pauseGame()
         else
           unpauseGame()
-      })
+      }
     case Surrender(playerId) =>
       validate(v().validateSurrender(playerId))(() =>
         surrender(playerId)(random, playerId)
@@ -427,17 +463,17 @@ class Game(id: GameId)(implicit nkmDataService: NkmDataService) extends Persiste
         useAbilityOnCharacter(playerId, abilityId, target, useData)
       )
     case CharacterSelectTimeout(pickNumber) =>
-      if(gameState.isInCharacterSelect) {
+      if (gameState.isInCharacterSelect) {
         handleCharacterSelectTimeout(pickNumber)(random, id)
       }
     case CharacterPlacingTimeout() =>
-      if(gameState.gameStatus == GameStatus.CharacterPlacing) {
-        persistAndPublish(CharacterPlacingTimedOut(id))(_ => {
+      if (gameState.gameStatus == GameStatus.CharacterPlacing) {
+        persistAndPublish(CharacterPlacingTimedOut(id)) { _ =>
           updateGameStateAndScheduleDefault(gameState.placingCharactersTimeout()(random, id))
-        })
+        }
       }
     case TurnTimeout(turnNumber) =>
-      if(gameState.turn.number == turnNumber) {
+      if (gameState.turn.number == turnNumber) {
         persistAndPublish(TurnTimedOut(id))(_ =>
           updateGameStateAndScheduleDefault(gameState.surrender(gameState.currentPlayer.id)(random, id))
         )

@@ -17,11 +17,11 @@ object PowerOfExistence extends NkmConf.AutoExtract {
         """Character releases collected Life Energy, dealing magic damage to every enemy character on the map.
           |Damage equals to collected Life Energy divided by number of enemies.
           |""".stripMargin,
-
     )
 }
 
-case class PowerOfExistence(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId) with Usable {
+case class PowerOfExistence(abilityId: AbilityId, parentCharacterId: CharacterId)
+    extends Ability(abilityId, parentCharacterId) with Usable {
   override val metadata: AbilityMetadata = PowerOfExistence.metadata
   override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =
     gameState.hexMap.cells.toCoords
@@ -31,11 +31,11 @@ case class PowerOfExistence(abilityId: AbilityId, parentCharacterId: CharacterId
   override def use(useData: UseData)(implicit random: Random, gameState: GameState): GameState = {
     val targets = targetsInRange.characters.map(_.id)
     val masterThroneOpt = parentCharacter.state.abilities.collectFirst { case a: MasterThrone => a }
-    if(masterThroneOpt.isEmpty) return gameState
+    if (masterThroneOpt.isEmpty) return gameState
     val masterThrone = masterThroneOpt.get
     val damage = Damage(DamageType.Magical, masterThrone.collectedEnergy / targets.size)
-    targets.foldLeft(gameState)((acc, cid) => {
+    targets.foldLeft(gameState) { (acc, cid) =>
       hitAndDamageCharacter(cid, damage)(random, acc)
-    })
+    }
   }
 }

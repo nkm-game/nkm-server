@@ -9,7 +9,7 @@ import org.scalatest.wordspec.AnyWordSpecLike
 import scala.annotation.tailrec
 
 class DraftPickStateSpec
-  extends AnyWordSpecLike
+    extends AnyWordSpecLike
     with Matchers {
   "Draft Pick" must {
 //    "validate bans" in {
@@ -36,7 +36,6 @@ class DraftPickStateSpec
           state.validatePick(playerId, character) shouldBe true
           state = state.pick(playerId, character)
         }
-
 
         @tailrec
         def pickUntilEnd(pickOrder: Range): Unit = {

@@ -10,4 +10,3 @@ object PickType extends Enum[PickType] {
   case object DraftPick extends PickType
   case object BlindPick extends PickType
 }
-

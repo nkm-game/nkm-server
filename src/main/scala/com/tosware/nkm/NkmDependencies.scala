@@ -21,10 +21,13 @@ class NkmDependencies(_system: ActorSystem, _db: JdbcBackend.Database) {
   implicit val gameService: GameService = new GameService(gamesManagerActor)
   implicit val lobbyService: LobbyService = new LobbyService(lobbiesManagerActor)
   implicit val bugReportService: BugReportService = new BugReportService(bugReportActor)
-  implicit val jwtSecretKey: JwtSecretKey = JwtSecretKey(sys.env.getOrElse("JWT_SECRET_KEY", "tmp_jwt_secret_key^*(^(*$#&(*"))
+  implicit val jwtSecretKey: JwtSecretKey =
+    JwtSecretKey(sys.env.getOrElse("JWT_SECRET_KEY", "tmp_jwt_secret_key^*(^(*$#&(*"))
 
-  implicit val lobbySessionActor: ActorRef = system.actorOf(LobbySessionActor.props(), s"lobby_session_${randomUUID()(new Random())}")
-  implicit val gameSessionActor: ActorRef = system.actorOf(GameSessionActor.props(), s"game_session_${randomUUID()(new Random())}")
+  implicit val lobbySessionActor: ActorRef =
+    system.actorOf(LobbySessionActor.props(), s"lobby_session_${randomUUID()(new Random())}")
+  implicit val gameSessionActor: ActorRef =
+    system.actorOf(GameSessionActor.props(), s"game_session_${randomUUID()(new Random())}")
 
   def cleanup(): Unit = {
     system.stop(gamesManagerActor)

@@ -9,11 +9,10 @@ import org.scalatest.wordspec.AnyWordSpecLike
 import scala.reflect.runtime.universe.*
 
 class ImplementationCheckerSpec
-  extends AnyWordSpecLike
+    extends AnyWordSpecLike
     with Matchers
     with Logging
-    with TestUtils
-{
+    with TestUtils {
   "Scala files in project" must {
     "implement all events in NkmJsonProtocol" taggedAs NotWorkingOnCI in {
       // Get the names of all classes that derive from GameEvent
@@ -25,10 +24,13 @@ class ImplementationCheckerSpec
         getFileContents("""src\main\scala\com\tosware\nkm\serializers\NkmJsonProtocol.scala""")
 
       val writeClassNames =
-        findMatchingStrings("""case e: (.*) => GameEventSerialized\(e\.getClass\.getSimpleName""".r, nkmJsonProtocolFileContents)
+        findMatchingStrings(
+          """case e: (\w+).* => GameEventSerialized\(e\.getClass\.getSimpleName""".r,
+          nkmJsonProtocolFileContents,
+        )
 
       val readClassNames =
-        findMatchingStrings("""case "(.*)" => ges.eventJson""".r, nkmJsonProtocolFileContents)
+        findMatchingStrings("""case "(\w+)".* => ges.eventJson""".r, nkmJsonProtocolFileContents)
 
       subTypeNames.diff(writeClassNames) shouldBe empty
       subTypeNames.diff(readClassNames) shouldBe empty

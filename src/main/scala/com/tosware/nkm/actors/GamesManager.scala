@@ -26,7 +26,7 @@ object GamesManager {
 }
 
 class GamesManager(nkmDataService: NkmDataService)
-  extends PersistentActor
+    extends PersistentActor
     with ActorLogging
     with NkmTimeouts {
 
@@ -67,7 +67,7 @@ class GamesManager(nkmDataService: NkmDataService)
       setGame(lobbyId)
       log.debug(s"Recovered create of $lobbyId")
     case RecoveryCompleted =>
-    case e => log.warning(s"Unknown message: $e")
+    case e                 => log.warning(s"Unknown message: $e")
   }
 
   override def receiveCommand: Receive = {

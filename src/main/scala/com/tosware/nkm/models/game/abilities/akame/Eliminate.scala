@@ -18,7 +18,8 @@ object Eliminate extends NkmConf.AutoExtract {
     )
 }
 
-case class Eliminate(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId) with UsableOnCharacter {
+case class Eliminate(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId)
+    with UsableOnCharacter {
   override val metadata = Eliminate.metadata
 
   override def rangeCellCoords(implicit gameState: GameState) =
@@ -32,9 +33,8 @@ case class Eliminate(abilityId: AbilityId, parentCharacterId: CharacterId) exten
       .abilityHitCharacter(id, target)
       .damageCharacter(target, Damage(DamageType.Physical, parentCharacter.state.attackPoints * 2))(random, id)
 
-  override def useChecks(implicit target: CharacterId, useData: UseData, gameState: GameState): Set[UseCheck] = {
+  override def useChecks(implicit target: CharacterId, useData: UseData, gameState: GameState): Set[UseCheck] =
     super.useChecks ++ Seq(
-      UseCheck.TargetCharacter.IsEnemy,
+      UseCheck.TargetCharacter.IsEnemy
     )
-  }
 }

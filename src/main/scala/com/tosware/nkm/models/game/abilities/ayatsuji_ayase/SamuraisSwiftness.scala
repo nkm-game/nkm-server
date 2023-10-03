@@ -17,28 +17,36 @@ object SamuraisSwiftness extends NkmConf.AutoExtract {
       abilityType = AbilityType.Passive,
       description =
         "Dealing damage by this character gives a {speedPercent}% speed buff in their next turn.",
-
       relatedEffectIds = Seq(StatBuff.metadata.id),
     )
 }
 
-case class SamuraisSwiftness(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId) with GameEventListener {
+case class SamuraisSwiftness(abilityId: AbilityId, parentCharacterId: CharacterId)
+    extends Ability(abilityId, parentCharacterId) with GameEventListener {
   override val metadata: AbilityMetadata = SamuraisSwiftness.metadata
 
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
     e match {
       case CharacterDamaged(_, _, _, causedById, _, _) =>
         val causedByCharacterIdOpt = gameState.backtrackCauseToCharacterId(causedById)
-        if(causedByCharacterIdOpt.isEmpty) return gameState
+        if (causedByCharacterIdOpt.isEmpty) return gameState
         val causedByCharacterId = causedByCharacterIdOpt.get
-        if(causedByCharacterId == parentCharacterId)
+        if (causedByCharacterId == parentCharacterId)
           gameState.setAbilityEnabled(abilityId, newEnabled = true)
         else
           gameState
       case TurnStarted(_, _, _, _) =>
-        if(state.isEnabled) {
+        if (state.isEnabled) {
           gameState
-            .addEffect(parentCharacterId, StatBuff(randomUUID(), 1, StatType.Speed, (metadata.variables("speedPercent") * parentCharacter.state.speed) / 100))(random, id)
+            .addEffect(
+              parentCharacterId,
+              StatBuff(
+                randomUUID(),
+                1,
+                StatType.Speed,
+                (metadata.variables("speedPercent") * parentCharacter.state.speed) / 100,
+              ),
+            )(random, id)
             .setAbilityEnabled(abilityId, newEnabled = false)
         } else gameState
       case _ => gameState

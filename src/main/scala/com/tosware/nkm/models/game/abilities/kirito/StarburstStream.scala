@@ -22,17 +22,15 @@ object StarburstStream extends NkmConf.AutoExtract {
           |After using this ability, you can permanently basic attack {basicAttacksPerTurn} times per turn.
           |
           |Range: linear, {range}""".stripMargin,
-
     )
 
   val doubleAttackEnabledKey = "doubleAttackEnabled"
 }
 
 case class StarburstStream(abilityId: AbilityId, parentCharacterId: CharacterId)
-  extends Ability(abilityId, parentCharacterId)
+    extends Ability(abilityId, parentCharacterId)
     with UsableOnCharacter
-    with GameEventListener
-{
+    with GameEventListener {
   override val metadata = StarburstStream.metadata
 
   def doubleAttackEnabled(implicit gameState: GameState): Boolean =
@@ -53,22 +51,22 @@ case class StarburstStream(abilityId: AbilityId, parentCharacterId: CharacterId)
     val enabledGs = setDoubleAttackEnabled()
 
     val times = metadata.variables("attackTimes")
-    (0 to times).foldLeft(enabledGs)((acc, _) => {
+    (0 to times).foldLeft(enabledGs) { (acc, _) =>
       hitAndDamageCharacter(target, Damage(DamageType.True, metadata.variables("damage")))(random, acc)
-    })
+    }
   }
 
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
     e match {
       case CharacterBasicAttacked(_, _, _, _, characterId, _) =>
-        if(characterId != parentCharacterId) return gameState
-        if(!doubleAttackEnabled) return gameState
+        if (characterId != parentCharacterId) return gameState
+        if (!doubleAttackEnabled) return gameState
         val timesCharacterAttackedThisTurn = gameState.gameLog.events
           .inTurn(gameState.turn.number)
           .ofType[GameEvent.CharacterBasicAttacked]
           .ofCharacter(parentCharacterId)
           .size
-        if(timesCharacterAttackedThisTurn >= metadata.variables("basicAttacksPerTurn")) return gameState
+        if (timesCharacterAttackedThisTurn >= metadata.variables("basicAttacksPerTurn")) return gameState
         gameState.refreshBasicAttack(parentCharacterId)(random, id)
       case _ => gameState
     }

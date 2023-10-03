@@ -8,8 +8,7 @@ import com.tosware.nkm.models.game.hex.HexMapTemplate
 import com.tosware.nkm.models.game.hex_effect.HexCellEffectMetadata
 import com.tosware.nkm.providers.*
 
-class NkmDataService extends NkmTimeouts
-{
+class NkmDataService extends NkmTimeouts {
   def getHexMaps: Seq[HexMapTemplate] = HexMapProvider().getHexMaps
 
   def getCharacterMetadatas: Seq[CharacterMetadata] = CharacterMetadatasProvider().getCharacterMetadatas
@@ -17,7 +16,8 @@ class NkmDataService extends NkmTimeouts
 
   def getAbilityMetadatas: Seq[AbilityMetadata] = AbilityMetadatasProvider().getAbilityMetadatas
 
-  def getCharacterEffectMetadatas: Seq[CharacterEffectMetadata] = CharacterEffectMetadatasProvider().getCharacterEffectMetadatas
+  def getCharacterEffectMetadatas: Seq[CharacterEffectMetadata] =
+    CharacterEffectMetadatasProvider().getCharacterEffectMetadatas
 
   def getHexCellEffectMetadatas: Seq[HexCellEffectMetadata] = HexCellEffectMetadatasProvider().getHexCellEffectMetadatas
 

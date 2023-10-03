@@ -13,5 +13,3 @@ object GameStatus extends Enum[GameStatus] {
   case object Running extends GameStatus
   case object Finished extends GameStatus
 }
-
-

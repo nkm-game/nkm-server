@@ -17,15 +17,13 @@ object Contact extends NkmConf.AutoExtract {
         """Character's attack or ability that hits an enemy deals bonus {damage} physical damage.
           |This effect can be applied only once per character.
           |""".stripMargin,
-
     )
   val hitCharacterIdsKey: String = "hitCharacterIds"
 }
 
-case class Contact
-(
-  abilityId: AbilityId,
-  parentCharacterId: CharacterId,
+case class Contact(
+    abilityId: AbilityId,
+    parentCharacterId: CharacterId,
 ) extends Ability(abilityId, parentCharacterId) with GameEventListener {
   import Contact.*
   override val metadata = Contact.metadata
@@ -44,18 +42,17 @@ case class Contact
     hitAndDamageCharacter(characterId, damage)(random, ngs)
   }
 
-  override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState = {
+  override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
     e match {
       case GameEvent.CharacterBasicAttacked(_, _, _, _, characterId, targetCharacterId) =>
-        if(characterId != parentCharacterId) return gameState
-        if(hitCharacterIds.contains(targetCharacterId)) return gameState
+        if (characterId != parentCharacterId) return gameState
+        if (hitCharacterIds.contains(targetCharacterId)) return gameState
         hitCharacter(targetCharacterId)
       case GameEvent.AbilityHitCharacter(_, _, _, _, abilityId, targetCharacterId) =>
-        if(hitCharacterIds.contains(targetCharacterId)) return gameState
+        if (hitCharacterIds.contains(targetCharacterId)) return gameState
         val ability = gameState.abilityById(abilityId)
-        if(ability.parentCharacter.id != parentCharacterId) return gameState
+        if (ability.parentCharacter.id != parentCharacterId) return gameState
         hitCharacter(targetCharacterId)
       case _ => gameState
     }
-  }
 }

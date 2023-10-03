@@ -8,8 +8,7 @@ import com.tosware.nkm.models.game.hex.HexCell
 import com.tosware.nkm.serializers.NkmJsonProtocol
 
 abstract class CharacterEffect(val id: CharacterEffectId)
-  extends NkmJsonProtocol
-{
+    extends NkmJsonProtocol {
   val metadata: CharacterEffectMetadata
   val initialCooldown: Int
 

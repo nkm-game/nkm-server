@@ -11,4 +11,3 @@ object RevealCondition {
   final case class RelatedCharacterRevealed(characterId: CharacterId) extends RevealCondition
   final case class RelatedTrapRevealed(effectId: String) extends RevealCondition
 }
-

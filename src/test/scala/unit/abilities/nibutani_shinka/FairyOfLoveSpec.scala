@@ -11,10 +11,9 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
 class FairyOfLoveSpec
-  extends AnyWordSpecLike
+    extends AnyWordSpecLike
     with Matchers
-    with TestUtils
-{
+    with TestUtils {
   private val abilityMetadata = FairyOfLove.metadata
   private val s = TestScenario.generate(TestHexMapName.Simple2v2, abilityMetadata.id)
   private val aGs: GameState = s.ultGs.useAbility(s.defaultAbilityId)
@@ -39,7 +38,7 @@ class FairyOfLoveSpec
           .ofType[AbilityEnchant]
 
       enchantEffects should not be empty
-      enchantEffects.head.abilityType should be (AbilityType.Passive)
+      enchantEffects.head.abilityType should be(AbilityType.Passive)
     }
   }
 }

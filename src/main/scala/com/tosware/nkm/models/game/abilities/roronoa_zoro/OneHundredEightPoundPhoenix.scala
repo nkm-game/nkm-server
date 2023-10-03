@@ -18,11 +18,11 @@ object OneHundredEightPoundPhoenix extends NkmConf.AutoExtract {
           |
           |Range: linear, stops at walls and enemies, {range}
           |""".stripMargin,
-
     )
 }
 
-case class OneHundredEightPoundPhoenix(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId) with UsableOnCharacter {
+case class OneHundredEightPoundPhoenix(abilityId: AbilityId, parentCharacterId: CharacterId)
+    extends Ability(abilityId, parentCharacterId) with UsableOnCharacter {
   override val metadata = OneHundredEightPoundPhoenix.metadata
 
   override def rangeCellCoords(implicit gameState: GameState) =
@@ -36,8 +36,11 @@ case class OneHundredEightPoundPhoenix(abilityId: AbilityId, parentCharacterId: 
     rangeCellCoords.whereEnemiesOfC(parentCharacterId)
 
   private def sendShockwave(direction: HexDirection)(implicit random: Random, gameState: GameState): GameState = {
-    val targetOpt = parentCell.get.firstCharacterInLine(direction, metadata.variables("range"), c => c.isEnemyForC(parentCharacterId))
-    targetOpt.fold(gameState)(c => gameState.damageCharacter(c.id, Damage(DamageType.Physical, metadata.variables("damage")))(random, id))
+    val targetOpt =
+      parentCell.get.firstCharacterInLine(direction, metadata.variables("range"), c => c.isEnemyForC(parentCharacterId))
+    targetOpt.fold(gameState)(c =>
+      gameState.damageCharacter(c.id, Damage(DamageType.Physical, metadata.variables("damage")))(random, id)
+    )
   }
 
   override def use(target: CharacterId, useData: UseData)(implicit random: Random, gameState: GameState): GameState = {

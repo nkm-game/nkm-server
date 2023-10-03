@@ -18,14 +18,13 @@ object NkmConf extends Logging {
     )
   }
 
-
   val config: Config = ConfigFactory.load("nkm.conf")
   def int(path: String): Int = config.getInt(path)
   def string(path: String): String = config.getString(path)
-  def extract(path: String): Map[String, Int] = {
-    try {
+  def extract(path: String): Map[String, Int] =
+    try
       config.getObject(path).unwrapped().asScala.view.mapValues(_.toString.toInt).toMap
-    } catch {
+    catch {
       case e: ConfigException if e.getClass.getSimpleName == "Missing" =>
         logger.warn(s"Config missing at path [$path]")
         Map.empty
@@ -33,5 +32,4 @@ object NkmConf extends Logging {
         e.printStackTrace()
         Map.empty
     }
-  }
 }

@@ -12,9 +12,8 @@ import slick.jdbc.JdbcBackend
 
 import scala.concurrent.Future
 
-class GameService(gamesManagerActor: ActorRef)
-                 (implicit db: JdbcBackend.Database, nkmDataService: NkmDataService)
-  extends NkmTimeouts {
+class GameService(gamesManagerActor: ActorRef)(implicit db: JdbcBackend.Database, nkmDataService: NkmDataService)
+    extends NkmTimeouts {
 
   import CommandResponse.*
 
@@ -62,7 +61,6 @@ class GameService(gamesManagerActor: ActorRef)
     Future.successful(aw(f).asInstanceOf[CommandResponse])
   }
 
-
   def placeCharacters(username: String, request: Action.PlaceCharacters): Future[CommandResponse] = {
     val gameActor: ActorRef = getGameActor(request.lobbyId)
 
@@ -70,14 +68,14 @@ class GameService(gamesManagerActor: ActorRef)
     Future.successful(aw(f).asInstanceOf[CommandResponse])
   }
 
-  def endTurn(username: String, request: Action.EndTurn):  Future[CommandResponse] = {
+  def endTurn(username: String, request: Action.EndTurn): Future[CommandResponse] = {
     val gameActor: ActorRef = getGameActor(request.lobbyId)
 
     val f = gameActor ? Game.EndTurn(username)
     Future.successful(aw(f).asInstanceOf[CommandResponse])
   }
 
-  def passTurn(username: String, request: Action.PassTurn):  Future[CommandResponse] = {
+  def passTurn(username: String, request: Action.PassTurn): Future[CommandResponse] = {
     val gameActor: ActorRef = getGameActor(request.lobbyId)
 
     val f = gameActor ? Game.PassTurn(username, request.characterId)

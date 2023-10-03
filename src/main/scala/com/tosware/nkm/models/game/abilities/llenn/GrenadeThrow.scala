@@ -17,11 +17,11 @@ object GrenadeThrow extends NkmConf.AutoExtract {
           |
           |Range: circular, {range}
           |Radius: circular, {radius}""".stripMargin,
-
     )
 }
 
-case class GrenadeThrow(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId) with UsableOnCoordinates {
+case class GrenadeThrow(abilityId: AbilityId, parentCharacterId: CharacterId)
+    extends Ability(abilityId, parentCharacterId) with UsableOnCoordinates {
   override val metadata: AbilityMetadata = GrenadeThrow.metadata
 
   override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =
@@ -30,13 +30,19 @@ case class GrenadeThrow(abilityId: AbilityId, parentCharacterId: CharacterId) ex
   override def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] =
     rangeCellCoords
 
-  override def use(target: HexCoordinates, useData: UseData)(implicit random: Random, gameState: GameState): GameState = {
+  override def use(target: HexCoordinates, useData: UseData)(implicit
+      random: Random,
+      gameState: GameState,
+  ): GameState = {
     val targets = target.getCircle(metadata.variables("radius")).characters.map(_.id)
     val damage = Damage(DamageType.Physical, metadata.variables("damage"))
     targets.foldLeft(gameState)((acc, cid) => blastCharacter(cid, damage)(random, acc))
   }
 
-  private def blastCharacter(target: CharacterId, damage: Damage)(implicit random: Random, gameState: GameState): GameState =
+  private def blastCharacter(target: CharacterId, damage: Damage)(implicit
+      random: Random,
+      gameState: GameState,
+  ): GameState =
     gameState
       .abilityHitCharacter(id, target)
       .damageCharacter(target, damage)(random, id)

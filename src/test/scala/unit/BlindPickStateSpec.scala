@@ -6,7 +6,7 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
 class BlindPickStateSpec
-  extends AnyWordSpecLike
+    extends AnyWordSpecLike
     with Matchers {
   "Blind Pick" must {
     "work" in {
@@ -22,7 +22,6 @@ class BlindPickStateSpec
         var state = BlindPickState.empty(config)
         state.pickPhase shouldBe BlindPickPhase.Picking
 
-
         def validateAndPick(playerId: PlayerId, characters: Set[CharacterMetadataId]): Unit = {
           state.validatePick(playerId, config.availableCharacters) shouldBe false
           state.validatePick(playerId, Set()) shouldBe false
@@ -31,9 +30,8 @@ class BlindPickStateSpec
           state = state.pick(playerId, characters)
         }
 
-        for (i <- 0 until numberOfPlayers) {
+        for (i <- 0 until numberOfPlayers)
           validateAndPick(config.playersPicking(i), state.config.availableCharacters.take(numberOfCharactersPerPlayer))
-        }
 
         state.pickPhase shouldBe BlindPickPhase.Finished
 

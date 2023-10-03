@@ -21,13 +21,17 @@ object BlackBlood {
   val sourceAbilityIdKey: String = "sourceAbilityId"
 }
 
-case class BlackBlood(effectId: CharacterEffectId, initialCooldown: Int, sourceCharacterId: CharacterId, sourceAbilityId: AbilityId)
-  extends CharacterEffect(effectId)
+case class BlackBlood(
+    effectId: CharacterEffectId,
+    initialCooldown: Int,
+    sourceCharacterId: CharacterId,
+    sourceAbilityId: AbilityId,
+) extends CharacterEffect(effectId)
     with GameEventListener {
   val metadata: CharacterEffectMetadata = BlackBlood.metadata
 
   override def effectType(implicit gameState: GameState): CharacterEffectType =
-    if(parentCharacter.isFriendForC(sourceCharacterId)) CharacterEffectType.Positive
+    if (parentCharacter.isFriendForC(sourceCharacterId)) CharacterEffectType.Positive
     else CharacterEffectType.Negative
 
   val radius: Int = abilities.crona.BlackBlood.metadata.variables("radius")
@@ -36,15 +40,15 @@ case class BlackBlood(effectId: CharacterEffectId, initialCooldown: Int, sourceC
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
     e match {
       case GameEvent.EffectAddedToCharacter(_, _, _, _, eid, _) =>
-        if(effectId == eid)
+        if (effectId == eid)
           return gameState
             .setEffectVariable(id, sourceCharacterIdKey, sourceCharacterId)
             .setEffectVariable(id, sourceAbilityIdKey, sourceAbilityId)
         gameState
       case e @ GameEvent.CharacterDamaged(_, _, _, _, characterId, _) =>
-        if(e.causedById == sourceAbilityId) return gameState // activate only once, prevents infinite loop
-        if(characterId != parentCharacter.id) return gameState
-        if(!parentCharacter.isOnMap) return gameState
+        if (e.causedById == sourceAbilityId) return gameState // activate only once, prevents infinite loop
+        if (characterId != parentCharacter.id) return gameState
+        if (!parentCharacter.isOnMap) return gameState
 
         val enemiesInRange =
           parentCell.get.coordinates
@@ -58,12 +62,11 @@ case class BlackBlood(effectId: CharacterEffectId, initialCooldown: Int, sourceC
 
       case _ => gameState
     }
-  def hitCharacter(target: CharacterId, damage: Damage)(implicit random: Random, gameState: GameState): GameState = {
-    if(gameState.characterById(target).isDead)
+  def hitCharacter(target: CharacterId, damage: Damage)(implicit random: Random, gameState: GameState): GameState =
+    if (gameState.characterById(target).isDead)
       gameState
     else
       gameState
         .abilityHitCharacter(sourceAbilityId, target)
         .damageCharacter(target, damage)(random, sourceAbilityId)
-  }
 }

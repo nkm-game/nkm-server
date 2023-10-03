@@ -10,15 +10,14 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
 class EliminateSpec
-  extends AnyWordSpecLike
+    extends AnyWordSpecLike
     with Matchers
-    with TestUtils
-{
+    with TestUtils {
   private val abilityMetadata = Eliminate.metadata
   private val characterMetadata = CharacterMetadata.empty()
     .copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
   private val s = scenarios.Simple1v1TestScenario(characterMetadata)
-  private implicit val gameState: GameState = s.gameState
+  implicit private val gameState: GameState = s.gameState
   private val abilityId = s.p(0)(0).character.state.abilities.head.id
 
   abilityMetadata.name must {
@@ -30,7 +29,7 @@ class EliminateSpec
     "deal damage" in {
       val newGameState: GameState = gameState.useAbilityOnCharacter(
         abilityId,
-        s.p(1)(0).character.id
+        s.p(1)(0).character.id,
       )
 
       newGameState

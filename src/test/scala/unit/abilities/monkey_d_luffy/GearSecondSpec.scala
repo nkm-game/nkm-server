@@ -12,10 +12,9 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
 class GearSecondSpec
-  extends AnyWordSpecLike
+    extends AnyWordSpecLike
     with Matchers
-    with TestUtils
-{
+    with TestUtils {
   private val abilityMetadata = GearSecond.metadata
   private val s = TestScenario.generate(TestHexMapName.Simple1v1, abilityMetadata.id)
   private val aGs: GameState = s.ultGs.useAbility(s.defaultAbilityId)
@@ -40,7 +39,7 @@ class GearSecondSpec
           .ofType[AbilityEnchant]
 
       enchantEffects should not be empty
-      enchantEffects.head.abilityType should be (AbilityType.Normal)
+      enchantEffects.head.abilityType should be(AbilityType.Normal)
     }
 
     "apply speed buff" in {

@@ -9,14 +9,13 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
 class SurvivorSpec
-  extends AnyWordSpecLike
+    extends AnyWordSpecLike
     with Matchers
-    with TestUtils
-{
+    with TestUtils {
   private val abilityMetadata = Survivor.metadata
   private val characterMetadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
   private val s = scenarios.Simple2v2TestScenario(characterMetadata)
-  private implicit val gameState: GameState = s.gameState
+  implicit private val gameState: GameState = s.gameState
   private val abilityId = s.p(0)(0).character.state.abilities.head.id
 
   abilityMetadata.name must {
@@ -36,13 +35,13 @@ class SurvivorSpec
       val p1CharacterView = character.toView(Some(s.p(1)(0).character.owner.id))(ngs)
 
       p0CharacterView.state should not be None
-      p1CharacterView.state should be (None)
+      p1CharacterView.state should be(None)
 
       val p0MapView = ngs.hexMap.toView(Some(s.p(0)(0).character.owner.id))(ngs)
       val p1MapView = ngs.hexMap.toView(Some(s.p(1)(0).character.owner.id))(ngs)
 
       p0MapView.getCellOfCharacter(s.p(0)(0).character.id) should not be None
-      p1MapView.getCellOfCharacter(s.p(0)(0).character.id) should be (None)
+      p1MapView.getCellOfCharacter(s.p(0)(0).character.id) should be(None)
     }
   }
 }

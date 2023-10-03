@@ -6,12 +6,12 @@ import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.TestScenario
 
 case class SummerBreezeTestScenario(metadata: CharacterMetadata)
-  extends TestScenario
-{
+    extends TestScenario {
   val gameState: GameState = getTestGameStateCustom(
-    TestHexMapName.SummerBreeze, Seq(
+    TestHexMapName.SummerBreeze,
+    Seq(
       Seq(metadata.copy(name = "Empty1")),
       Seq(metadata.copy(name = "Empty2"), metadata.copy(name = "Empty3")),
-    )
+    ),
   )
 }

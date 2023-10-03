@@ -9,10 +9,9 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
 class BlackBloodSpec
-  extends AnyWordSpecLike
+    extends AnyWordSpecLike
     with Matchers
-    with TestUtils
-{
+    with TestUtils {
   private val abilityMetadata = BlackBlood.metadata
   private val characterMetadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
   private val s = scenarios.Simple1v9LineTestScenario(characterMetadata)
@@ -34,10 +33,10 @@ class BlackBloodSpec
         val state = newGameState.characterById(c.id).state
         val hp = state.healthPoints
         val maxHp = state.maxHealthPoints
-        if(coordsInRange.contains(c.parentCell(newGameState).get.coordinates)) {
+        if (coordsInRange.contains(c.parentCell(newGameState).get.coordinates)) {
           hp should be < maxHp
         } else {
-          hp should be (maxHp)
+          hp should be(maxHp)
         }
       }
     }

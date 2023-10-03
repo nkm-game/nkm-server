@@ -10,9 +10,10 @@ import com.tosware.nkm.serializers.NkmJsonProtocol
 
 trait LoggingDirective extends NkmJsonProtocol {
   def akkaResponseTimeLoggingFunction(
-                                       loggingAdapter: LoggingAdapter,
-                                       requestTimestamp: Long,
-                                       level: LogLevel = Logging.InfoLevel)(req: HttpRequest)(res: RouteResult): Unit = {
+      loggingAdapter: LoggingAdapter,
+      requestTimestamp: Long,
+      level: LogLevel = Logging.InfoLevel,
+  )(req: HttpRequest)(res: RouteResult): Unit = {
     val entry = res match {
       case RouteResult.Complete(res) =>
         val responseTimestamp = System.nanoTime

@@ -18,12 +18,11 @@ object MjolnirHammer extends NkmConf.AutoExtract {
           |If both attacks target the same character, it will receive half damage from second hit.
           |
           |Range: circular, {range}""".stripMargin,
-
     )
 }
 
 case class MjolnirHammer(abilityId: AbilityId, parentCharacterId: CharacterId)
-  extends Ability(abilityId, parentCharacterId)
+    extends Ability(abilityId, parentCharacterId)
     with Usable {
   override val metadata: AbilityMetadata = MjolnirHammer.metadata
 
@@ -60,16 +59,16 @@ case class MjolnirHammer(abilityId: AbilityId, parentCharacterId: CharacterId)
       (targetCoords.size == targetCoords.toSet.size) ->
         "You should send a single coordinate only if you are trying to target one character.",
     ) ++
-    targetCoords.flatMap(implicit coords => {
-      Seq(
-        UseCheck.TargetCoordinates.ExistsOnMap,
-        UseCheck.TargetCoordinates.InRange,
-      )
-    }) ++
-    targetCoords.toCells.flatMap(_.characterId).flatMap(implicit cid => {
-      Seq(
-        UseCheck.TargetCharacter.IsEnemy,
-      )
-    })
+      targetCoords.flatMap { implicit coords =>
+        Seq(
+          UseCheck.TargetCoordinates.ExistsOnMap,
+          UseCheck.TargetCoordinates.InRange,
+        )
+      } ++
+      targetCoords.toCells.flatMap(_.characterId).flatMap { implicit cid =>
+        Seq(
+          UseCheck.TargetCharacter.IsEnemy
+        )
+      }
   }
 }

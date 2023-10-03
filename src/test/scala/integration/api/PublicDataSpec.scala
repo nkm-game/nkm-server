@@ -12,16 +12,14 @@ import helpers.{ApiTrait, NotWorkingOnCI}
 
 import scala.reflect.ClassTag
 
-class PublicDataSpec extends ApiTrait
-{
+class PublicDataSpec extends ApiTrait {
   "API" must {
-    def assertDataExists[B <: Iterable[?]: FromResponseUnmarshaller: ClassTag](route: String) = {
+    def assertDataExists[B <: Iterable[?]: FromResponseUnmarshaller: ClassTag](route: String) =
       Get(route) ~> Route.seal(routes) ~> check {
         status shouldEqual OK
         val data = responseAs[B]
         data.size should be > 0
       }
-    }
 
     "return hexmaps" in
       assertDataExists[Seq[HexMapTemplate]]("/api/maps")

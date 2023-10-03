@@ -10,7 +10,8 @@ import com.tosware.nkm.actors.User.*
 import helpers.NkmPersistenceTestKit
 
 class JournalUserSpec extends NkmPersistenceTestKit(ActorSystem("UserSpec2")) {
-  private val readJournal: JdbcReadJournal = PersistenceQuery(system).readJournalFor[JdbcReadJournal](JdbcReadJournal.Identifier)
+  private val readJournal: JdbcReadJournal =
+    PersistenceQuery(system).readJournalFor[JdbcReadJournal](JdbcReadJournal.Identifier)
 
   def createUser(email: String): Unit = {
     val user: ActorRef = system.actorOf(User.props(email))
@@ -24,8 +25,7 @@ class JournalUserSpec extends NkmPersistenceTestKit(ActorSystem("UserSpec2")) {
       val email = "test1@example.com"
       createUser(email)
 
-      val result = readJournal.
-        currentEventsByPersistenceId(s"user-$email", 0, Long.MaxValue)
+      val result = readJournal.currentEventsByPersistenceId(s"user-$email", 0, Long.MaxValue)
         .map(_.event).runWith(Sink.seq[Any])
 
       val seq = aw(result)
@@ -39,8 +39,7 @@ class JournalUserSpec extends NkmPersistenceTestKit(ActorSystem("UserSpec2")) {
       createUser(email1)
       createUser(email2)
 
-      val result = readJournal.
-        currentEventsByTag(User.registerTag, 0)
+      val result = readJournal.currentEventsByTag(User.registerTag, 0)
         .map(_.event).runWith(Sink.seq[Any])
 
       val seq = aw(result)

@@ -16,28 +16,27 @@ object RubberHuman extends NkmConf.AutoExtract {
       abilityType = AbilityType.Passive,
       description =
         "Character reduces {rangedDamageReductionPercent}% damage from basic attacks coming from ranged characters.",
-
     )
 }
 
 case class RubberHuman(abilityId: AbilityId, parentCharacterId: CharacterId)
-  extends Ability(abilityId, parentCharacterId)
+    extends Ability(abilityId, parentCharacterId)
     with GameEventListener {
   override val metadata: AbilityMetadata = RubberHuman.metadata
 
-  override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState = {
+  override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
     e match {
       case GameEvent.DamagePrepared(id, _, _, _, _, damage) =>
         val eventIndex = gameState.gameLog.events.indexWhere(_.id == id)
-        if(eventIndex == 0)
+        if (eventIndex == 0)
           return gameState
 
         val lastEvent = gameState.gameLog.events(eventIndex - 1)
         lastEvent match {
           case GameEvent.CharacterPreparedToAttack(_, _, _, _, characterId, targetCharacterId) =>
-            if(targetCharacterId != parentCharacter.id) return gameState
+            if (targetCharacterId != parentCharacter.id) return gameState
             val incomingAttackType = gameState.characterById(characterId).state.attackType
-            if(incomingAttackType != AttackType.Ranged)
+            if (incomingAttackType != AttackType.Ranged)
               return gameState
 
             val damageAmountReduction = damage.amount * metadata.variables("rangedDamageReductionPercent") / 100
@@ -48,5 +47,4 @@ case class RubberHuman(abilityId: AbilityId, parentCharacterId: CharacterId)
       case _ =>
         gameState
     }
-  }
 }

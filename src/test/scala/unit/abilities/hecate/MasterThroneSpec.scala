@@ -8,17 +8,18 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
 class MasterThroneSpec
-  extends AnyWordSpecLike
+    extends AnyWordSpecLike
     with Matchers
-    with TestUtils
-{
+    with TestUtils {
   private val abilityMetadata = MasterThrone.metadata
   private val metadata = CharacterMetadata.empty()
-    .copy(initialAbilitiesMetadataIds = Seq(
-      abilityMetadata.id,
-      Aster.metadata.id,
-      PowerOfExistence.metadata.id,
-    ))
+    .copy(initialAbilitiesMetadataIds =
+      Seq(
+        abilityMetadata.id,
+        Aster.metadata.id,
+        PowerOfExistence.metadata.id,
+      )
+    )
   private val s = scenarios.Simple2v2TestScenario(metadata)
   private val asterAbilityId =
     s.defaultCharacter.state.abilities(1).id
@@ -48,7 +49,7 @@ class MasterThroneSpec
     }
 
     "not be able to collect energy from ultimate ability" in {
-      collectedEnergy(poeGs) should be (0)
+      collectedEnergy(poeGs) should be(0)
     }
   }
 }

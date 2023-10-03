@@ -11,38 +11,32 @@ trait CORSHandler {
   private def corsResponseHeaders(origin: Option[Origin]) = List(
     origin match {
       case Some(origin) => `Access-Control-Allow-Origin`(origin.origins.head)
-      case None => `Access-Control-Allow-Origin`.*
+      case None         => `Access-Control-Allow-Origin`.*
     },
-
     `Access-Control-Allow-Credentials`(true),
-
-    `Access-Control-Allow-Headers`("Authorization",
-
-      "Content-Type", "X-Requested-With")
-
+    `Access-Control-Allow-Headers`("Authorization", "Content-Type", "X-Requested-With"),
   )
 
-  //this directive adds access control headers to normal responses
+  // this directive adds access control headers to normal responses
 
-  private def addAccessControlHeaders(origin: Option[Origin]): Directive0 = respondWithHeaders(corsResponseHeaders(origin))
+  private def addAccessControlHeaders(origin: Option[Origin]): Directive0 =
+    respondWithHeaders(corsResponseHeaders(origin))
 
-  //this handles preflight OPTIONS requests.
+  // this handles preflight OPTIONS requests.
 
   private def preflightRequestHandler = options {
 
-    complete(HttpResponse(StatusCodes.OK).
-
-      withHeaders(`Access-Control-Allow-Methods`(OPTIONS, POST, PUT, GET, DELETE)))
+    complete(HttpResponse(StatusCodes.OK).withHeaders(`Access-Control-Allow-Methods`(OPTIONS, POST, PUT, GET, DELETE)))
 
   }
 
   // Wrap the Route with this method to enable adding of CORS headers
 
   def corsHandler(r: Route): Route = extractRequest { request =>
-      addAccessControlHeaders(request.header[Origin]) {
-        preflightRequestHandler ~ r
-      }
+    addAccessControlHeaders(request.header[Origin]) {
+      preflightRequestHandler ~ r
     }
+  }
 
   // Helper method to add CORS headers to HttpResponse
 

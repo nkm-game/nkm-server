@@ -17,38 +17,36 @@ object ImmenseHealingPowers extends NkmConf.AutoExtract {
           |above {firstTreshold}%  missing HP - {firstTresholdHealing}% stronger healing
           |above {secondTreshold}% missing HP - {secondTresholdHealing}% stronger healing
           |""".stripMargin,
-
     )
 }
 
 case class ImmenseHealingPowers(abilityId: AbilityId, parentCharacterId: CharacterId)
-  extends Ability(abilityId, parentCharacterId)
-  with GameEventListener
-  {
+    extends Ability(abilityId, parentCharacterId)
+    with GameEventListener {
   override val metadata = ImmenseHealingPowers.metadata
 
-    override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState = e match {
-      case GameEvent.HealPrepared(healPreparedId, _, _, causedById, targetCharacterId, amount) =>
-        val causedByCharacterOpt = gameState.backtrackCauseToCharacterId(causedById)
+  override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState = e match {
+    case GameEvent.HealPrepared(healPreparedId, _, _, causedById, targetCharacterId, amount) =>
+      val causedByCharacterOpt = gameState.backtrackCauseToCharacterId(causedById)
 
-        if(causedByCharacterOpt.isEmpty) return gameState
+      if (causedByCharacterOpt.isEmpty) return gameState
 
-        val causedByCharacter: CharacterId = causedByCharacterOpt.get
-        if(causedByCharacter != parentCharacterId) return gameState
+      val causedByCharacter: CharacterId = causedByCharacterOpt.get
+      if (causedByCharacter != parentCharacterId) return gameState
 
-        val targetCharacter = gameState.characterById(targetCharacterId)
-        val targetMissingHpPercent = targetCharacter.state.missingHpPercent
+      val targetCharacter = gameState.characterById(targetCharacterId)
+      val targetMissingHpPercent = targetCharacter.state.missingHpPercent
 
-        val additionalHealing = targetMissingHpPercent match {
-          case x if x > metadata.variables("secondTreshold") =>
-            amount * metadata.variables("secondTresholdHealing") - amount
-          case x if x > metadata.variables("firstTreshold") =>
-            amount * metadata.variables("firstTresholdHealing") - amount
-          case _ => 0
-        }
+      val additionalHealing = targetMissingHpPercent match {
+        case x if x > metadata.variables("secondTreshold") =>
+          amount * metadata.variables("secondTresholdHealing") - amount
+        case x if x > metadata.variables("firstTreshold") =>
+          amount * metadata.variables("firstTresholdHealing") - amount
+        case _ => 0
+      }
 
-        gameState.amplifyHeal(healPreparedId, additionalHealing)(random, id)
+      gameState.amplifyHeal(healPreparedId, additionalHealing)(random, id)
 
-      case _ => gameState
-    }
+    case _ => gameState
   }
+}

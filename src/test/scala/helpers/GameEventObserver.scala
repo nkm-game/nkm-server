@@ -13,9 +13,8 @@ import scala.concurrent.Future
 import scala.util.*
 
 class GameEventObserver(gameId: GameId, tokenId: Int)(wsTrait: WSTrait)
-  extends NkmJsonProtocol
-    with Matchers
-{
+    extends NkmJsonProtocol
+    with Matchers {
   import WSTrait.*
   private var isFutureRunning = true
   private var _observedEvents: Seq[GameEvent] = Seq()
@@ -23,7 +22,7 @@ class GameEventObserver(gameId: GameId, tokenId: Int)(wsTrait: WSTrait)
   def observedEvents(): Seq[GameEvent] =
     _observedEvents
 
-  def start(): Unit = {
+  def start(): Unit =
     wsTrait.withGameWS { implicit wsClient: WSProbe =>
       wsTrait.authG(tokenId)
       wsTrait.observeG(gameId).statusCode shouldBe ok
@@ -34,7 +33,7 @@ class GameEventObserver(gameId: GameId, tokenId: Int)(wsTrait: WSTrait)
             wsTrait.fetchResponseG()
           } match {
             case Success(value) => Some(value)
-            case Failure(_) => None
+            case Failure(_)     => None
           }
           observedResponseOpt.foreach { observedResponse =>
             observedResponse.statusCode shouldBe ok
@@ -45,10 +44,8 @@ class GameEventObserver(gameId: GameId, tokenId: Int)(wsTrait: WSTrait)
         }
       }
     }
-  }
 
-  def stop(): Unit = {
+  def stop(): Unit =
     isFutureRunning = false
-  }
 
 }

@@ -12,25 +12,23 @@ import com.tosware.nkm.serializers.NkmJsonProtocol
 import scala.util.{Random, Try}
 
 abstract class Ability(val id: AbilityId, pid: CharacterId)
-  extends NkmJsonProtocol
-{
+    extends NkmJsonProtocol {
   val metadata: AbilityMetadata
 
   def _canBeUsed(useChecks: Set[UseCheck])(implicit gameState: GameState): CommandResponse = {
     val failures = useChecks.filter(_._1 == false)
-    if(failures.isEmpty) Success()
+    if (failures.isEmpty) Success()
     else Failure(failures.map(_._2).mkString("\n"))
   }
 
-  def baseUseChecks(implicit gameState: GameState): Set[UseCheck] = {
+  def baseUseChecks(implicit gameState: GameState): Set[UseCheck] =
     Set(
       UseCheck.Base.IsNotPassive,
       UseCheck.Base.IsNotOnCooldown,
       UseCheck.Base.ParentCharacterOnMap,
       UseCheck.Base.CanBeUsedByParent,
     ) ++
-    Option.when(metadata.abilityType == AbilityType.Ultimate)(UseCheck.Base.PhaseIsGreaterThan(3)).toSet
-  }
+      Option.when(metadata.abilityType == AbilityType.Ultimate)(UseCheck.Base.PhaseIsGreaterThan(3)).toSet
 
   def state(implicit gameState: GameState): AbilityState =
     gameState.abilityStates(id)
@@ -58,7 +56,10 @@ abstract class Ability(val id: AbilityId, pid: CharacterId)
   def getVariablesChangedState(key: String, value: String)(implicit gameState: GameState): AbilityState =
     state.modify(_.variables).using(_.updated(key, value))
 
-  def hitAndDamageCharacter(target: CharacterId, damage: Damage)(implicit random: Random, gameState: GameState): GameState =
+  def hitAndDamageCharacter(target: CharacterId, damage: Damage)(implicit
+      random: Random,
+      gameState: GameState,
+  ): GameState =
     gameState
       .abilityHitCharacter(id, target)
       .damageCharacter(target, damage)(random, id)
@@ -70,7 +71,7 @@ abstract class Ability(val id: AbilityId, pid: CharacterId)
       case Failure(_) => false
     }
     val canBeUsedFailureMessage = canBeUsedResponse match {
-      case Success(_) => None
+      case Success(_)   => None
       case Failure(msg) => Some(msg)
     }
 
@@ -95,18 +96,21 @@ abstract class Ability(val id: AbilityId, pid: CharacterId)
       def ParentCharacterOnMap(implicit gameState: GameState): UseCheck =
         parentCharacter.isOnMap -> "Parent character is not on map."
       def PhaseIsGreaterThan(i: Int)(implicit gameState: GameState): UseCheck =
-        (gameState.phase.number > i || parentCharacter.state.effects.ofType[FreeAbility].nonEmpty) -> s"Phase is not greater than $i."
-      def CanBeUsedByParent(implicit gameState: GameState): UseCheck = {
+        (gameState.phase.number > i || parentCharacter.state.effects.ofType[
+          FreeAbility
+        ].nonEmpty) -> s"Phase is not greater than $i."
+      def CanBeUsedByParent(implicit gameState: GameState): UseCheck =
         (
           parentCharacter.canUseAbilityOfType(metadata.abilityType) ||
             parentCharacter.state.effects.ofType[effects.AbilityUnlock].nonEmpty
-          ) -> s"Ability cannot be used by parent character."
-      }
+        ) -> s"Ability cannot be used by parent character."
     }
     object TargetCharacter {
       def InRange(implicit target: CharacterId, useData: UseData, gameState: GameState): UseCheck = {
         val targetCoords = gameState.hexMap.getCellOfCharacter(target).map(_.coordinates.toTuple).getOrElse("null")
-        targetsInRange.toCells.exists(_.characterId.contains(target)) -> s"Target character is not in range (target coords: $targetCoords)."
+        targetsInRange.toCells.exists(
+          _.characterId.contains(target)
+        ) -> s"Target character is not in range (target coords: $targetCoords)."
       }
       def IsEnemy(implicit target: CharacterId, useData: UseData, gameState: GameState): UseCheck =
         gameState.characterById(target).isEnemyForC(parentCharacter.id) -> "Target character is not an enemy."
@@ -124,8 +128,9 @@ abstract class Ability(val id: AbilityId, pid: CharacterId)
       def IsFreeToStand(implicit target: HexCoordinates, useData: UseData, gameState: GameState): UseCheck =
         Seq(target).toCells.headOption.fold(false)(_.isFreeToStand) -> s"Target is not free to stand. ($target)"
       def IsFriendlySpawn(implicit target: HexCoordinates, useData: UseData, gameState: GameState): UseCheck =
-        gameState.hexMap.getSpawnPointsFor(parentCharacter.owner.id).toCoords.contains(target) -> s"Target is not a friendly spawn. ($target)"
+        gameState.hexMap.getSpawnPointsFor(parentCharacter.owner.id).toCoords.contains(
+          target
+        ) -> s"Target is not a friendly spawn. ($target)"
     }
   }
 }
-

@@ -17,11 +17,11 @@ object PreciseShot extends NkmConf.AutoExtract {
           |
           |Range: circular, {range}
           |""".stripMargin,
-
     )
 }
 
-case class PreciseShot(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId) with UsableOnCharacter {
+case class PreciseShot(abilityId: AbilityId, parentCharacterId: CharacterId)
+    extends Ability(abilityId, parentCharacterId) with UsableOnCharacter {
   override val metadata = PreciseShot.metadata
 
   override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =

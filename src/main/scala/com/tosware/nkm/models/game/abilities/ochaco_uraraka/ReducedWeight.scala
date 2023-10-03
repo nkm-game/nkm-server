@@ -19,12 +19,11 @@ object ReducedWeight extends NkmConf.AutoExtract {
           |Additionally, doubles speed of target for {speedBuffDuration}t.
           |
           |Range: basic attack range""".stripMargin,
-
     )
 }
 
 case class ReducedWeight(abilityId: AbilityId, parentCharacterId: CharacterId)
-  extends Ability(abilityId, parentCharacterId)
+    extends Ability(abilityId, parentCharacterId)
     with UsableOnCharacter {
   override val metadata: AbilityMetadata = ReducedWeight.metadata
 
@@ -38,6 +37,9 @@ case class ReducedWeight(abilityId: AbilityId, parentCharacterId: CharacterId)
     val speedIncrease = gameState.characterById(target).state.speed
 
     applyZeroGravity(target, gameState)(random, id)
-      .addEffect(target, effects.StatBuff(randomUUID(), metadata.variables("speedBuffDuration"), StatType.Speed, speedIncrease))(random, id)
+      .addEffect(
+        target,
+        effects.StatBuff(randomUUID(), metadata.variables("speedBuffDuration"), StatType.Speed, speedIncrease),
+      )(random, id)
   }
 }

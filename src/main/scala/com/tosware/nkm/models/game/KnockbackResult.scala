@@ -11,4 +11,3 @@ object KnockbackResult extends Enum[KnockbackResult] {
   case object HitEndOfMap extends KnockbackResult
   case object HitCharacter extends KnockbackResult
 }
-

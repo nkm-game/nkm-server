@@ -11,15 +11,14 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
 class OgreCutterSpec
-  extends AnyWordSpecLike
+    extends AnyWordSpecLike
     with Matchers
-    with TestUtils
-{
+    with TestUtils {
 
   private val abilityMetadata = OgreCutter.metadata
   private val metadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
   private val s = scenarios.OgreCutterTestScenario(metadata)
-  private implicit val gameState: GameState = s.gameState
+  implicit private val gameState: GameState = s.gameState
   private val abilityId = s.p(0)(0).character.state.abilities.head.id
 
   abilityMetadata.name must {

@@ -7,10 +7,8 @@ import com.tosware.nkm.models.lobby.ws.*
 import com.tosware.nkm.services.LobbyService
 import com.tosware.nkm.services.http.directives.{JwtDirective, JwtSecretKey}
 
-
 class LobbyRoutes(deps: NkmDependencies) extends JwtDirective
-  with SprayJsonSupport
-{
+    with SprayJsonSupport {
   val jwtSecretKey: JwtSecretKey = deps.jwtSecretKey
   val lobbyService: LobbyService = deps.lobbyService
 

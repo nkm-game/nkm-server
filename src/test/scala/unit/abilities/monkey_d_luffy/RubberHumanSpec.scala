@@ -13,7 +13,7 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
 class RubberHumanSpec
-  extends AnyWordSpecLike
+    extends AnyWordSpecLike
     with Matchers
     with TestUtils {
   private val abilityMetadata = RubberHuman.metadata
@@ -39,7 +39,7 @@ class RubberHumanSpec
     gs
       .addEffect(
         s.defaultCharacter.id,
-        Poison(randomUUID(), 2, Damage(DamageType.Physical, 30))
+        Poison(randomUUID(), 2, Damage(DamageType.Physical, 30)),
       )(random, s.p(1)(0).character.id)
       .passTurn(s.defaultCharacter.id)
       .gameLog
@@ -54,7 +54,7 @@ class RubberHumanSpec
     }
 
     "not reduce ranged non basic attack damage" in {
-      getDamageDealtByEffect(rangedAttackerGs) should be (getDamageDealtByEffect(meleeAttackerGs))
+      getDamageDealtByEffect(rangedAttackerGs) should be(getDamageDealtByEffect(meleeAttackerGs))
     }
   }
 }

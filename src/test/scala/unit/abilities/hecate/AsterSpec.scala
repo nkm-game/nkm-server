@@ -11,10 +11,9 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
 class AsterSpec
-  extends AnyWordSpecLike
+    extends AnyWordSpecLike
     with Matchers
-    with TestUtils
-{
+    with TestUtils {
   private val abilityMetadata = Aster.metadata
   private val s = TestScenario.generate(TestHexMapName.Simple2v2, abilityMetadata.id)
 
@@ -31,11 +30,12 @@ class AsterSpec
     }
 
     "be able to damage characters" in {
-      val abilityUsedGameState: GameState = s.gameState.useAbilityOnCoordinates(s.defaultAbilityId, s.p(0)(1).spawnCoordinates)
+      val abilityUsedGameState: GameState =
+        s.gameState.useAbilityOnCoordinates(s.defaultAbilityId, s.p(0)(1).spawnCoordinates)
       abilityUsedGameState.gameLog.events
         .ofType[GameEvent.CharacterDamaged]
         .causedBy(s.defaultAbilityId)
-        .size should be (2)
+        .size should be(2)
     }
   }
 }

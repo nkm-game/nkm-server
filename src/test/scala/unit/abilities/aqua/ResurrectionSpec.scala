@@ -10,10 +10,9 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
 class ResurrectionSpec
-  extends AnyWordSpecLike
+    extends AnyWordSpecLike
     with Matchers
-    with TestUtils
-{
+    with TestUtils {
   private val abilityMetadata = Resurrection.metadata
   private val metadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
   private val s = scenarios.Simple2v2TestScenario(metadata)
@@ -22,7 +21,8 @@ class ResurrectionSpec
 
   abilityMetadata.name must {
     "be able to use on characters that died in the same phase" in {
-      val deadGameState = gameState.damageCharacter(s.p(0)(1).character.id, Damage(DamageType.True, 99999))(random, gameState.id)
+      val deadGameState =
+        gameState.damageCharacter(s.p(0)(1).character.id, Damage(DamageType.True, 99999))(random, gameState.id)
 
       val r = GameStateValidator()(deadGameState)
         .validateAbilityUseOnCoordinates(
@@ -34,7 +34,8 @@ class ResurrectionSpec
       assertCommandSuccess(r)
     }
     "be able to resurrect characters that died in the same phase" in {
-      val deadGameState = gameState.damageCharacter(s.p(0)(1).character.id, Damage(DamageType.True, 99999))(random, gameState.id)
+      val deadGameState =
+        gameState.damageCharacter(s.p(0)(1).character.id, Damage(DamageType.True, 99999))(random, gameState.id)
 
       val resurrectedGameState: GameState = deadGameState.useAbilityOnCoordinates(
         abilityId,
@@ -42,8 +43,8 @@ class ResurrectionSpec
         UseData(s.p(0)(1).character.id),
       )
       val resurrectedCharacter = resurrectedGameState.characterById(s.p(0)(1).character.id)
-      resurrectedCharacter.state.healthPoints should be (resurrectedCharacter.state.maxHealthPoints / 2)
-      resurrectedCharacter.parentCell(gameState).map(_.coordinates) should be (Some(s.p(0)(1).spawnCoordinates))
+      resurrectedCharacter.state.healthPoints should be(resurrectedCharacter.state.maxHealthPoints / 2)
+      resurrectedCharacter.parentCell(gameState).map(_.coordinates) should be(Some(s.p(0)(1).spawnCoordinates))
     }
 
     "be able to resurrect characters that died in phase before" in {

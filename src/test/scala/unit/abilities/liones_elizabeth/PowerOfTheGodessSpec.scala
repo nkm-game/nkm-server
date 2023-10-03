@@ -10,10 +10,9 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
 class PowerOfTheGodessSpec
-  extends AnyWordSpecLike
+    extends AnyWordSpecLike
     with Matchers
-    with TestUtils
-{
+    with TestUtils {
   private val abilityMetadata = PowerOfTheGoddess.metadata
   private val metadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
   private val s = scenarios.Simple2v2TestScenario(metadata)
@@ -34,7 +33,7 @@ class PowerOfTheGodessSpec
       ags.gameLog.events
         .ofType[GameEvent.CharacterHealed]
         .causedBy(abilityId)
-        .size should be (2)
+        .size should be(2)
     }
   }
 }

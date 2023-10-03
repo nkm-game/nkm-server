@@ -42,4 +42,3 @@ trait UsableOnCharacter extends UsableOnTarget[CharacterId] { this: Ability =>
   override def useChecks(implicit target: CharacterId, useData: UseData, gameState: GameState): Set[UseCheck] =
     super.useChecks + UseCheck.TargetCharacter.InRange
 }
-

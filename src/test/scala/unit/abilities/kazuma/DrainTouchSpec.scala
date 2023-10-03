@@ -10,10 +10,9 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
 class DrainTouchSpec
-  extends AnyWordSpecLike
+    extends AnyWordSpecLike
     with Matchers
-    with TestUtils
-{
+    with TestUtils {
   private val abilityMetadata = DrainTouch.metadata
   private val s = TestScenario.generate(TestHexMapName.Simple1v1, abilityMetadata.id)
   private val aGs: GameState =
@@ -34,7 +33,7 @@ class DrainTouchSpec
         .gameLog
         .events
         .ofType[GameEvent.CharacterDamaged]
-        .map(_.causedById) should contain (s.defaultAbilityId)
+        .map(_.causedById) should contain(s.defaultAbilityId)
     }
 
     "be able to heal" in {

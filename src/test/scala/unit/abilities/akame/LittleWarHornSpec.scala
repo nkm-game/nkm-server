@@ -12,18 +12,17 @@ import org.scalatest.wordspec.AnyWordSpecLike
 import scala.annotation.tailrec
 
 class LittleWarHornSpec
-  extends AnyWordSpecLike
+    extends AnyWordSpecLike
     with Matchers
-    with TestUtils
-{
+    with TestUtils {
   private val abilityMetadata = LittleWarHorn.metadata
   private val characterMetadata = CharacterMetadata.empty()
     .copy(
       initialAbilitiesMetadataIds = Seq(abilityMetadata.id),
-      initialSpeed = 7
+      initialSpeed = 7,
     )
   private val s = scenarios.Simple1v1TestScenario(characterMetadata)
-  private implicit val gameState: GameState = s.gameState.incrementPhase(4)
+  implicit private val gameState: GameState = s.gameState.incrementPhase(4)
   private val abilityId = s.p(0)(0).character.state.abilities.head.id
 
   abilityMetadata.name must {
@@ -42,8 +41,8 @@ class LittleWarHornSpec
         .state
         .effects
         .ofType[StatBuff]
-      statBuffs.count(b => b.statType == StatType.AttackPoints) should be (1)
-      statBuffs.count(b => b.statType == StatType.Speed) should be (1)
+      statBuffs.count(b => b.statType == StatType.AttackPoints) should be(1)
+      statBuffs.count(b => b.statType == StatType.Speed) should be(1)
     }
 
     def skipPhase(gameState: GameState): GameState =
@@ -53,8 +52,8 @@ class LittleWarHornSpec
 
     @tailrec
     def skipPhaseN(n: Int)(gameState: GameState): GameState =
-      if(n <= 0) gameState
-      else skipPhaseN(n-1)(skipPhase(gameState))
+      if (n <= 0) gameState
+      else skipPhaseN(n - 1)(skipPhase(gameState))
 
     "set characters base speed after duration time" in {
       val duration = abilityMetadata.variables("duration")
@@ -63,7 +62,7 @@ class LittleWarHornSpec
       val abilityUseGameState: GameState = gameState.useAbility(abilityId)
       abilityUseGameState
         .characterById(s.p(0)(0).character.id)
-        .state.pureSpeed should be (initialSpeed)
+        .state.pureSpeed should be(initialSpeed)
 
       val afterDurationGameState = skipPhaseN(duration)(abilityUseGameState)
       afterDurationGameState

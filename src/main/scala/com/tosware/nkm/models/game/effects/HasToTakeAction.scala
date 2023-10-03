@@ -19,19 +19,17 @@ object HasToTakeAction {
 }
 
 case class HasToTakeAction(effectId: CharacterEffectId, initialCooldown: Int)
-  extends CharacterEffect(effectId)
-  with GameEventListener
-  {
+    extends CharacterEffect(effectId)
+    with GameEventListener {
   val metadata: CharacterEffectMetadata = HasToTakeAction.metadata
 
-    override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState = {
-      e match {
-        case TurnStarted(_, _, _, _) =>
-          if(gameState.currentPlayer.id == parentCharacter.owner.id) {
-            gameState.takeActionWithCharacter(parentCharacter.id)
-          } else gameState
-        case _ => gameState
-      }
+  override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
+    e match {
+      case TurnStarted(_, _, _, _) =>
+        if (gameState.currentPlayer.id == parentCharacter.owner.id) {
+          gameState.takeActionWithCharacter(parentCharacter.id)
+        } else gameState
+      case _ => gameState
     }
 
-  }
+}

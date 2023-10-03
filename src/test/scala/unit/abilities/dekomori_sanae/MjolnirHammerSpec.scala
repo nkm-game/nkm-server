@@ -13,10 +13,9 @@ import org.scalatest.wordspec.AnyWordSpecLike
 import spray.json.*
 
 class MjolnirHammerSpec
-  extends AnyWordSpecLike
+    extends AnyWordSpecLike
     with Matchers
-    with TestUtils
-{
+    with TestUtils {
 
   private val abilityMetadata = MjolnirHammer.metadata
   private val s = TestScenario.generate(TestHexMapName.Simple1v9Line, abilityMetadata.id)
@@ -46,7 +45,6 @@ class MjolnirHammerSpec
 
   private val doubleSameInvalidUseData =
     UseData(Seq(s.p(1)(0).spawnCoordinates, s.p(1)(0).spawnCoordinates).toJson.toString)
-
 
   abilityMetadata.name must {
     "not be able to use without target" in {
@@ -99,10 +97,9 @@ class MjolnirHammerSpec
           .causedBy(s.defaultAbilityId)
           .map(_.damage.amount)
 
-      dmgAmounts.size should be (2)
-      dmgAmounts(0) should be (dmgAmounts(1) * 2)
+      dmgAmounts.size should be(2)
+      dmgAmounts(0) should be(dmgAmounts(1) * 2)
     }
-
 
     "send the same damage if used on two targets" in {
       val dmgAmounts =
@@ -113,8 +110,8 @@ class MjolnirHammerSpec
           .causedBy(s.defaultAbilityId)
           .map(_.damage.amount)
 
-      dmgAmounts.size should be (2)
-      dmgAmounts(0) should be (dmgAmounts(1))
+      dmgAmounts.size should be(2)
+      dmgAmounts(0) should be(dmgAmounts(1))
     }
   }
 }

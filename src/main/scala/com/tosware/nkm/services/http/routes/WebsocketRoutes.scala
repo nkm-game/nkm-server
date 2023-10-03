@@ -11,8 +11,7 @@ import com.tosware.nkm.services.http.directives.{JwtDirective, JwtSecretKey}
 import com.tosware.nkm.services.{GameService, LobbyService}
 import com.tosware.nkm.{Logging, NkmDependencies}
 
-class WebsocketRoutes(deps: NkmDependencies) extends JwtDirective with Logging
-{
+class WebsocketRoutes(deps: NkmDependencies) extends JwtDirective with Logging {
   implicit val jwtSecretKey: JwtSecretKey = deps.jwtSecretKey
   implicit val system: ActorSystem = deps.system
   implicit val lobbyService: LobbyService = deps.lobbyService
@@ -42,20 +41,17 @@ class WebsocketRoutes(deps: NkmDependencies) extends JwtDirective with Logging
       // never fail the stream because of a message
       failureMatcher = PartialFunction.empty,
       bufferSize = 100,
-      overflowStrategy = OverflowStrategy.dropHead
+      overflowStrategy = OverflowStrategy.dropHead,
     ).mapMaterializedValue { outActor =>
       userActor ! WebsocketUser.Connected(outActor)
       NotUsed
-    }.map(
-      (outMsg: WebsocketUser.OutgoingMessage) => TextMessage(outMsg.text))
-
+    }.map((outMsg: WebsocketUser.OutgoingMessage) => TextMessage(outMsg.text))
 
     // then combine both to a flow
     Flow.fromSinkAndSource(incomingMessages, outgoingMessages)
   }
 
-
-  val websocketRoutes = concat (
+  val websocketRoutes = concat(
     path("lobby") {
       // new connection - new user actor
       handleWebSocketMessages(newUser(system.actorOf(WebsocketUser.lobbyProps(deps.lobbySessionActor))))

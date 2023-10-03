@@ -21,18 +21,22 @@ object Steal extends NkmConf.AutoExtract {
           |zeroing their physical and magical defense and adding them to themself.
           |
           |Range: circular, {range}""".stripMargin,
-
     )
   def stolenDatasKey: String = "stolenDatas"
 }
 
-final case class StolenData(id: String, stolenFrom: CharacterId, willBeRestoredAtPhase: Int, stolenPhysicalDefense: Int, stolenMagicalDefense: Int)
+final case class StolenData(
+    id: String,
+    stolenFrom: CharacterId,
+    willBeRestoredAtPhase: Int,
+    stolenPhysicalDefense: Int,
+    stolenMagicalDefense: Int,
+)
 
 case class Steal(abilityId: AbilityId, parentCharacterId: CharacterId)
-  extends Ability(abilityId, parentCharacterId)
+    extends Ability(abilityId, parentCharacterId)
     with UsableOnCharacter
-    with GameEventListener
-{
+    with GameEventListener {
   override val metadata: AbilityMetadata = Steal.metadata
 
   override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =
@@ -51,7 +55,7 @@ case class Steal(abilityId: AbilityId, parentCharacterId: CharacterId)
       target,
       gameState.phase.number + metadata.variables("duration"),
       targetCharacter.state.purePhysicalDefense,
-      targetCharacter.state.pureMagicalDefense
+      targetCharacter.state.pureMagicalDefense,
     )
 
     gameState
@@ -59,16 +63,14 @@ case class Steal(abilityId: AbilityId, parentCharacterId: CharacterId)
       .setAbilityVariable(id, stolenDatasKey, (getStolenDatas() + stolenData).toJson.toString)
       .updateCharacter(parentCharacterId)(_
         .modify(_.state.purePhysicalDefense).using(_ + stolenData.stolenPhysicalDefense)
-        .modify(_.state.pureMagicalDefense).using(_ + stolenData.stolenMagicalDefense)
-      ).updateCharacter(target)(_
-      .modify(_.state.purePhysicalDefense).setTo(0)
-      .modify(_.state.pureMagicalDefense).setTo(0)
-    )
+        .modify(_.state.pureMagicalDefense).using(_ + stolenData.stolenMagicalDefense)).updateCharacter(target)(_
+        .modify(_.state.purePhysicalDefense).setTo(0)
+        .modify(_.state.pureMagicalDefense).setTo(0))
   }
 
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState = e match {
     case GameEvent.PhaseFinished(_, phase, _, _) =>
-      getStolenDatas().filter(_.willBeRestoredAtPhase == phase.number + 1).foldLeft(gameState)((acc, stolenData) => {
+      getStolenDatas().filter(_.willBeRestoredAtPhase == phase.number + 1).foldLeft(gameState) { (acc, stolenData) =>
         val newStolenDatas = getStolenDatas() - stolenData
 
         acc
@@ -76,13 +78,11 @@ case class Steal(abilityId: AbilityId, parentCharacterId: CharacterId)
           .setAbilityEnabled(abilityId, newEnabled = newStolenDatas.nonEmpty)
           .updateCharacter(parentCharacterId)(_
             .modify(_.state.purePhysicalDefense).using(_ - stolenData.stolenPhysicalDefense)
-            .modify(_.state.pureMagicalDefense).using(_ - stolenData.stolenMagicalDefense)
-          )
+            .modify(_.state.pureMagicalDefense).using(_ - stolenData.stolenMagicalDefense))
           .updateCharacter(stolenData.stolenFrom)(_
             .modify(_.state.purePhysicalDefense).using(_ + stolenData.stolenPhysicalDefense)
-            .modify(_.state.pureMagicalDefense).using(_ + stolenData.stolenPhysicalDefense)
-          )
-      })
+            .modify(_.state.pureMagicalDefense).using(_ + stolenData.stolenPhysicalDefense))
+      }
     case _ => gameState
   }
 }

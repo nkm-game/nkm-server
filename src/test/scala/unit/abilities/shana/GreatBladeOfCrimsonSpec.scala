@@ -9,10 +9,9 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
 class GreatBladeOfCrimsonSpec
-  extends AnyWordSpecLike
+    extends AnyWordSpecLike
     with Matchers
-    with TestUtils
-{
+    with TestUtils {
   private val abilityMetadata = GreatBladeOfCrimson.metadata
   private val metadata = CharacterMetadata.empty()
     .copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))

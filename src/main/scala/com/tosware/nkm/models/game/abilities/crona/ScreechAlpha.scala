@@ -17,13 +17,12 @@ object ScreechAlpha extends NkmConf.AutoExtract {
         """Character stuns nearby enemies for {stunDuration}t and slow them by {slowAmount} for {slowDuration}t.
           |
           |Radius: {radius}""".stripMargin,
-
       relatedEffectIds = Seq(Stun.metadata.id),
     )
 }
 
 case class ScreechAlpha(abilityId: AbilityId, parentCharacterId: CharacterId)
-  extends Ability(abilityId, parentCharacterId)
+    extends Ability(abilityId, parentCharacterId)
     with Usable {
   override val metadata = ScreechAlpha.metadata
 
@@ -36,13 +35,13 @@ case class ScreechAlpha(abilityId: AbilityId, parentCharacterId: CharacterId)
   private def addEffects(target: CharacterId)(implicit random: Random, gameState: GameState) = {
     val silenceEffect = effects.Stun(
       randomUUID(),
-      metadata.variables("stunDuration")
+      metadata.variables("stunDuration"),
     )
     val slowEffect = effects.StatNerf(
       randomUUID(),
       metadata.variables("slowDuration"),
       StatType.Speed,
-      metadata.variables("slowAmount")
+      metadata.variables("slowAmount"),
     )
     gameState
       .addEffect(target, silenceEffect)(random, abilityId)
@@ -50,7 +49,7 @@ case class ScreechAlpha(abilityId: AbilityId, parentCharacterId: CharacterId)
   }
   override def use(useData: UseData)(implicit random: Random, gameState: GameState): GameState =
     targetsInRange.characters.map(_.id)
-      .foldLeft(gameState)((acc, cid) => {
+      .foldLeft(gameState) { (acc, cid) =>
         addEffects(cid)(random, acc)
-      })
+      }
 }

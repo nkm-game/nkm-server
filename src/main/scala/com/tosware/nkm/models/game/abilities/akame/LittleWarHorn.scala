@@ -24,10 +24,9 @@ object LittleWarHorn extends NkmConf.AutoExtract {
 }
 
 case class LittleWarHorn(abilityId: AbilityId, parentCharacterId: CharacterId, effectIdToListen: CharacterEffectId = "")
-  extends Ability(abilityId, parentCharacterId)
+    extends Ability(abilityId, parentCharacterId)
     with Usable
-    with GameEventListener
-{
+    with GameEventListener {
   override val metadata = LittleWarHorn.metadata
 
   private val duration = metadata.variables("duration")
@@ -44,13 +43,12 @@ case class LittleWarHorn(abilityId: AbilityId, parentCharacterId: CharacterId, e
       .updateAbility(id, updateEffectToListen(speedEffect.effectId))
   }
 
-  override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState = {
+  override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
     e match {
       case EffectRemovedFromCharacter(_, _, _, _, effectId, _) =>
-        if(effectIdToListen == effectId) {
+        if (effectIdToListen == effectId) {
           gameState.setStat(parentCharacterId, StatType.Speed, metadata.variables("finalSpeed"))(random, id)
         } else gameState
       case _ => gameState
     }
-  }
 }

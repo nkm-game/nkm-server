@@ -9,6 +9,3 @@ object AttackType extends Enum[AttackType] {
   case object Melee extends AttackType
   case object Ranged extends AttackType
 }
-
-
-

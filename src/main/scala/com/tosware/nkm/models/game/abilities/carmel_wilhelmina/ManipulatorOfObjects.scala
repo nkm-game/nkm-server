@@ -16,16 +16,17 @@ object ManipulatorOfObjects extends NkmConf.AutoExtract {
       alternateName = "万条の仕手 (Banjō no Shite)",
       abilityType = AbilityType.Passive,
       description = """This character's basic attacks snare enemies for {duration}t.
-      |This effect cannot be added on the same enemy for {effectTimeout}t.""".stripMargin,
+                      |This effect cannot be added on the same enemy for {effectTimeout}t.""".stripMargin,
       relatedEffectIds = Seq(Snare.metadata.id, ManipulatorOfObjectsImmunity.metadata.id),
     )
 }
 
-case class ManipulatorOfObjects(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId) with GameEventListener {
+case class ManipulatorOfObjects(abilityId: AbilityId, parentCharacterId: CharacterId)
+    extends Ability(abilityId, parentCharacterId) with GameEventListener {
   override val metadata = ManipulatorOfObjects.metadata
 
-  private def tryToSnare(targetCharacterId: CharacterId)(implicit random: Random, gameState: GameState): GameState = {
-    if(gameState.characterById(targetCharacterId).state.effects.ofType[effects.ManipulatorOfObjectsImmunity].nonEmpty)
+  private def tryToSnare(targetCharacterId: CharacterId)(implicit random: Random, gameState: GameState): GameState =
+    if (gameState.characterById(targetCharacterId).state.effects.ofType[effects.ManipulatorOfObjectsImmunity].nonEmpty)
       gameState
     else {
       val snareEffect = effects.Snare(
@@ -40,12 +41,11 @@ case class ManipulatorOfObjects(abilityId: AbilityId, parentCharacterId: Charact
         .addEffect(targetCharacterId, snareEffect)(random, id)
         .addEffect(targetCharacterId, immunityEffect)(random, id)
     }
-  }
 
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
     e match {
       case CharacterBasicAttacked(_, _, _, _, characterId, targetCharacterId) =>
-        if(parentCharacterId == characterId) {
+        if (parentCharacterId == characterId) {
           tryToSnare(targetCharacterId)
         } else gameState
       case _ => gameState

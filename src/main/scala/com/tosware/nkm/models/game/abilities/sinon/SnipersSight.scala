@@ -17,16 +17,14 @@ object SnipersSight extends NkmConf.AutoExtract {
     )
 }
 
-case class SnipersSight
-(
-  abilityId: AbilityId,
-  parentCharacterId: CharacterId,
+case class SnipersSight(
+    abilityId: AbilityId,
+    parentCharacterId: CharacterId,
 ) extends Ability(abilityId, parentCharacterId) with BasicAttackOverride {
   override val metadata = SnipersSight.metadata
 
-
   override def basicAttackCells(implicit gameState: GameState): Set[HexCoordinates] = {
-    if(parentCell.isEmpty) return Set.empty
+    if (parentCell.isEmpty) return Set.empty
     parentCharacter.state.attackType match {
       case AttackType.Melee =>
         parentCell.get.getArea(

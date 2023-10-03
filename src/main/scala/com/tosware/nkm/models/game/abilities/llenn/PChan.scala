@@ -14,25 +14,25 @@ object PChan extends NkmConf.AutoExtract {
       name = "P-Chan",
       abilityType = AbilityType.Passive,
       description = "Character permanently gains {speedIncrease} speed with every death of a friendly character.",
-
     )
 }
 
-case class PChan
-(
-  abilityId: AbilityId,
-  parentCharacterId: CharacterId,
+case class PChan(
+    abilityId: AbilityId,
+    parentCharacterId: CharacterId,
 ) extends Ability(abilityId, parentCharacterId) with GameEventListener {
   override val metadata = PChan.metadata
 
-  override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState = {
+  override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
     e match {
       case GameEvent.CharacterDied(_, _, _, _, characterId) =>
-        if(parentCharacter.isFriendForC(characterId)) {
-          gameState.setStat(parentCharacterId, StatType.Speed, parentCharacter.state.pureSpeed + metadata.variables("speedIncrease"))(random, id)
-        }
-        else gameState
+        if (parentCharacter.isFriendForC(characterId)) {
+          gameState.setStat(
+            parentCharacterId,
+            StatType.Speed,
+            parentCharacter.state.pureSpeed + metadata.variables("speedIncrease"),
+          )(random, id)
+        } else gameState
       case _ => gameState
     }
-  }
 }

@@ -13,4 +13,3 @@ object SearchFlag extends Enum[SearchFlag] {
   case object StopAfterFriends extends SearchFlag
   case object StraightLine extends SearchFlag
 }
-

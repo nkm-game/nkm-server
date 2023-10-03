@@ -25,10 +25,10 @@ object ClockConfig {
 }
 
 case class ClockConfig(
-  initialTimeMillis: Long,
-  incrementMillis: Long,
-  maxBanTimeMillis: Long,
-  maxPickTimeMillis: Long,
-  timeAfterPickMillis: Long,
-  timeForCharacterPlacing: Long,
+    initialTimeMillis: Long,
+    incrementMillis: Long,
+    maxBanTimeMillis: Long,
+    maxPickTimeMillis: Long,
+    timeAfterPickMillis: Long,
+    timeForCharacterPlacing: Long,
 )

@@ -16,13 +16,12 @@ object BlackBlood extends NkmConf.AutoExtract {
         """After receiving damage, character deals {damage} magical damage to surrounding enemies.
           |
           |Radius: circular, {radius}""".stripMargin,
-
       relatedEffectIds = Seq(effects.BlackBlood.metadata.id),
     )
 }
 
 case class BlackBlood(abilityId: AbilityId, parentCharacterId: CharacterId)
-  extends Ability(abilityId, parentCharacterId)
+    extends Ability(abilityId, parentCharacterId)
     with GameEventListener {
   override val metadata = BlackBlood.metadata
 

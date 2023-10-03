@@ -16,13 +16,12 @@ object Infection extends NkmConf.AutoExtract {
           |Infected enemy also receives damage from Black Blood detonation.
           |
           |Range: circular, {range}""".stripMargin,
-
       relatedEffectIds = Seq(effects.BlackBlood.metadata.id),
     )
 }
 
 case class Infection(abilityId: AbilityId, parentCharacterId: CharacterId)
-  extends Ability(abilityId, parentCharacterId)
+    extends Ability(abilityId, parentCharacterId)
     with UsableOnCharacter {
   override val metadata = Infection.metadata
 

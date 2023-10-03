@@ -35,5 +35,3 @@ object GameRoute extends StringEnum[GameRoute] {
   case object SendChatMessage extends GameRoute("send_chat_msg")
   case object ExecuteCommand extends GameRoute("exec")
 }
-
-

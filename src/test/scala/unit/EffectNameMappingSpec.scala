@@ -8,14 +8,13 @@ import org.scalatest.wordspec.AnyWordSpecLike
 import spray.json.*
 
 class EffectNameMappingSpec
-  extends AnyWordSpecLike
+    extends AnyWordSpecLike
     with Matchers
     with Logging
-    with NkmJsonProtocol
-{
+    with NkmJsonProtocol {
   "Effect names" must {
     "map" in {
-      BlackBlood.metadata.id.toJson should be (BlackBlood.metadata.name.toJson)
+      BlackBlood.metadata.id.toJson should be(BlackBlood.metadata.name.toJson)
     }
   }
 }

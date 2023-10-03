@@ -13,15 +13,17 @@ object FairyOfLove extends NkmConf.AutoExtract {
       name = "Fairy Of Love",
       abilityType = AbilityType.Ultimate,
       description = "Character enchants the passive ability for {duration}t.",
-
       relatedEffectIds = Seq(effects.AbilityEnchant.metadata.id),
     )
 }
 
-case class FairyOfLove(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId) with Usable {
+case class FairyOfLove(abilityId: AbilityId, parentCharacterId: CharacterId)
+    extends Ability(abilityId, parentCharacterId) with Usable {
   override val metadata = FairyOfLove.metadata
 
   override def use(useData: UseData)(implicit random: Random, gameState: GameState): GameState =
-    gameState.
-      addEffect(parentCharacterId, AbilityEnchant(randomUUID(), metadata.variables("duration"), AbilityType.Passive))(random, id)
+    gameState.addEffect(
+      parentCharacterId,
+      AbilityEnchant(randomUUID(), metadata.variables("duration"), AbilityType.Passive),
+    )(random, id)
 }

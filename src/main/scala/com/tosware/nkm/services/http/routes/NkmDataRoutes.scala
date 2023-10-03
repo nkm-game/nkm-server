@@ -7,8 +7,7 @@ import com.tosware.nkm.services.NkmDataService
 import com.tosware.nkm.services.http.directives.{JwtDirective, JwtSecretKey}
 
 class NkmDataRoutes(deps: NkmDependencies) extends JwtDirective
-  with SprayJsonSupport
-{
+    with SprayJsonSupport {
   val jwtSecretKey: JwtSecretKey = deps.jwtSecretKey
   val nkmDataService: NkmDataService = deps.nkmDataService
 

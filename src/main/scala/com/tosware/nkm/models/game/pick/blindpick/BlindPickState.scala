@@ -10,10 +10,11 @@ object BlindPickState {
 }
 
 case class BlindPickState(
-                           config: BlindPickConfig,
-                           characterSelection: Map[PlayerId, Set[CharacterMetadataId]],
-                         ) {
-  def pickingPlayers: Seq[PlayerId] = characterSelection.filter(_._2.size != config.numberOfCharactersPerPlayer).keys.toSeq
+    config: BlindPickConfig,
+    characterSelection: Map[PlayerId, Set[CharacterMetadataId]],
+) {
+  def pickingPlayers: Seq[PlayerId] =
+    characterSelection.filter(_._2.size != config.numberOfCharactersPerPlayer).keys.toSeq
 
   def pickPhase: BlindPickPhase =
     if (characterSelection.values.exists(_.isEmpty)) {
@@ -21,7 +22,7 @@ case class BlindPickState(
     } else BlindPickPhase.Finished
 
   def pickNumber: Int = pickPhase match {
-    case BlindPickPhase.Picking => 0
+    case BlindPickPhase.Picking  => 0
     case BlindPickPhase.Finished => 1
   }
 
@@ -32,15 +33,14 @@ case class BlindPickState(
     true
   }
 
-  def pick(playerId: PlayerId, characters: Set[CharacterMetadataId]): BlindPickState = {
+  def pick(playerId: PlayerId, characters: Set[CharacterMetadataId]): BlindPickState =
     copy(characterSelection = characterSelection.updated(playerId, characters))
-  }
 
   def toView(forPlayerOpt: Option[PlayerId]): BlindPickStateView = {
     val filteredCharacterSelection =
-      if(pickPhase == BlindPickPhase.Finished)
+      if (pickPhase == BlindPickPhase.Finished)
         characterSelection
-      else if(forPlayerOpt.isEmpty)
+      else if (forPlayerOpt.isEmpty)
         Map.empty[PlayerId, Set[CharacterMetadataId]]
       else // show only characters from player watching
         config.playersPicking.map(x => x -> Set[CharacterMetadataId]()).toMap

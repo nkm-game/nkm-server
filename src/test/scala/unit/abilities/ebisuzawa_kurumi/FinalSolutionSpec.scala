@@ -10,10 +10,9 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
 class FinalSolutionSpec
-  extends AnyWordSpecLike
+    extends AnyWordSpecLike
     with Matchers
-    with TestUtils
-{
+    with TestUtils {
   private val abilityMetadata = FinalSolution.metadata
   private val s = TestScenario.generate(TestHexMapName.Simple2v2, abilityMetadata.id)
   private val abilityId = s.p(0)(1).character.state.abilities.head.id
@@ -39,7 +38,7 @@ class FinalSolutionSpec
         .gameLog
         .events
         .ofType[GameEvent.CharacterDamaged]
-        .map(_.causedById) should contain (abilityId)
+        .map(_.causedById) should contain(abilityId)
     }
 
     "apply bleeding effect" in {

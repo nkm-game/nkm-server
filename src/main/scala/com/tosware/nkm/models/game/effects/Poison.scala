@@ -29,24 +29,28 @@ object MurasamePoison {
       name = CharacterEffectName.MurasamePoison,
       initialEffectType = CharacterEffectType.Negative,
       description =
-      """Poison.
-        |Deals damage at the end of turn.
-        |Character will be killed when fully stacked.""".stripMargin,
+        """Poison.
+          |Deals damage at the end of turn.
+          |Character will be killed when fully stacked.""".stripMargin,
     )
 }
 
-case class Poison(effectId: CharacterEffectId, initialCooldown: Int, damage: Damage, metadata: CharacterEffectMetadata = Poison.metadata)
-  extends CharacterEffect(effectId)
+case class Poison(
+    effectId: CharacterEffectId,
+    initialCooldown: Int,
+    damage: Damage,
+    metadata: CharacterEffectMetadata = Poison.metadata,
+) extends CharacterEffect(effectId)
     with GameEventListener {
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
     e match {
       case GameEvent.EffectAddedToCharacter(_, _, _, _, eid, _) =>
-        if(effectId == eid)
+        if (effectId == eid)
           return gameState.setEffectVariable(id, damageKey, damage.toJson.toString)
         gameState
       case TurnFinished(_, _, _, _) =>
         val characterIdThatTookAction = gameState.gameLog.characterThatTookActionInTurn(e.turn.number).get
-        if(characterIdThatTookAction == parentCharacter.id) {
+        if (characterIdThatTookAction == parentCharacter.id) {
           gameState.damageCharacter(parentCharacter.id, damage)(random, id)
         } else gameState
       case _ => gameState

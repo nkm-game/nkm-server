@@ -13,7 +13,6 @@ object MarkOfTheWind {
 }
 
 case class MarkOfTheWind(effectId: HexCellEffectId, initialCooldown: Int)
-  extends HexCellEffect(effectId)
-{
+    extends HexCellEffect(effectId) {
   val metadata: HexCellEffectMetadata = MarkOfTheWind.metadata
 }

@@ -21,15 +21,14 @@ object AbilityEnchant {
 }
 
 case class AbilityEnchant(effectId: CharacterEffectId, initialCooldown: Int, abilityType: AbilityType)
-  extends CharacterEffect(effectId)
-    with GameEventListener
-{
+    extends CharacterEffect(effectId)
+    with GameEventListener {
   val metadata: CharacterEffectMetadata = AbilityEnchant.metadata
 
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
     e match {
       case GameEvent.EffectAddedToCharacter(_, _, _, _, eid, _) =>
-        if(effectId == eid)
+        if (effectId == eid)
           return gameState
             .setEffectVariable(id, abilityTypeKey, abilityType.toString)
         gameState

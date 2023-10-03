@@ -11,10 +11,9 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
 class WickedEyesServantSpec
-  extends AnyWordSpecLike
+    extends AnyWordSpecLike
     with Matchers
-    with TestUtils
-{
+    with TestUtils {
 
   private val abilityMetadata = WickedEyesServant.metadata
   private val s = TestScenario.generate(TestHexMapName.Simple2v2, abilityMetadata.id)
@@ -44,20 +43,20 @@ class WickedEyesServantSpec
   abilityMetadata.name must {
     "not be active without a reason" in {
       damageAmountsCausedByAbility(damagedGs(s.gameState))
-        .size should be (0)
+        .size should be(0)
     }
     "be active when someone has more AD on the map" in {
       damageAmountsCausedByAbility(damagedGs(moreAdGs))
-        .size should be (1)
+        .size should be(1)
     }
     "be active when Rikka Takanashi is on the map" in {
       damageAmountsCausedByAbility(damagedGs(takanashiGs))
-        .size should be (1)
+        .size should be(1)
     }
     "add one dmg on kill" in {
       val defaultDamage = damageAmountsCausedByAbility(damagedGs(moreAdGs)).head
       val damageAfterKill = damageAmountsCausedByAbility(damagedGs(killGs(moreAdGs))).head
-      damageAfterKill should be (defaultDamage + 1)
+      damageAfterKill should be(defaultDamage + 1)
     }
   }
 }

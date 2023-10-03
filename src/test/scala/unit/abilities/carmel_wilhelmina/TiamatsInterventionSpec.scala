@@ -13,14 +13,13 @@ import org.scalatest.wordspec.AnyWordSpecLike
 import spray.json.*
 
 class TiamatsInterventionSpec
-  extends AnyWordSpecLike
+    extends AnyWordSpecLike
     with Matchers
-    with TestUtils
-{
+    with TestUtils {
   private val abilityMetadata = TiamatsIntervention.metadata
   private val characterMetadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
   private val s = scenarios.Simple2v2TestScenario(characterMetadata)
-  private implicit val gameState: GameState = s.gameState.incrementPhase(4)
+  implicit private val gameState: GameState = s.gameState.incrementPhase(4)
   private val abilityId = s.p(0)(0).character.state.abilities.head.id
 
   abilityMetadata.name must {
@@ -69,9 +68,9 @@ class TiamatsInterventionSpec
         UseData(HexCoordinates(1, 0).toJson.toString),
       )
       val targetCharacter = newGameState.characterById(s.p(0)(1).character.id)
-      targetCharacter.parentCell(newGameState).get.coordinates should be (HexCoordinates(1, 0))
+      targetCharacter.parentCell(newGameState).get.coordinates should be(HexCoordinates(1, 0))
       targetCharacter.state.shield should be > 0
-      targetCharacter.state.effects.ofType[effects.Stun].size should be (0)
+      targetCharacter.state.effects.ofType[effects.Stun].size should be(0)
     }
     "be able to pull enemies and stun them" in {
       assertCommandSuccess {
@@ -90,8 +89,8 @@ class TiamatsInterventionSpec
         UseData(HexCoordinates(1, 0).toJson.toString),
       )
       val targetCharacter = newGameState.characterById(s.p(1)(0).character.id)
-      targetCharacter.parentCell(newGameState).get.coordinates should be (HexCoordinates(1, 0))
-      targetCharacter.state.shield should be (0)
+      targetCharacter.parentCell(newGameState).get.coordinates should be(HexCoordinates(1, 0))
+      targetCharacter.state.shield should be(0)
       targetCharacter.state.effects.ofType[effects.Stun].size should be > 0
     }
   }

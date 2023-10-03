@@ -11,13 +11,11 @@ object SessionActor {
   case class Authenticate(username: String, websocketUserOutputActor: ActorRef)
 }
 
-
 trait SessionActor
-  extends Actor
-  with ActorLogging
-  with NkmTimeouts
-  with NkmJsonProtocol
-{
+    extends Actor
+    with ActorLogging
+    with NkmTimeouts
+    with NkmJsonProtocol {
   import SessionActor.*
 
   // user can observe only one lobby at once

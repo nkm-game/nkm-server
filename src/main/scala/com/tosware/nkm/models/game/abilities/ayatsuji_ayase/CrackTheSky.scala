@@ -20,17 +20,15 @@ object CrackTheSky extends NkmConf.AutoExtract {
         """Character detonates selected traps, dealing {damage}+B physical damage to all hit enemies.
           |
           |Trap detonation radius: circular, {radius}""".stripMargin,
-
     )
 
   val markOfTheWindAbilityIdKey = "markOfTheWindAbilityId"
 }
 
 case class CrackTheSky(abilityId: AbilityId, parentCharacterId: CharacterId)
-  extends Ability(abilityId, parentCharacterId)
+    extends Ability(abilityId, parentCharacterId)
     with Usable
-    with GameEventListener
-{
+    with GameEventListener {
   override val metadata: AbilityMetadata = CrackTheSky.metadata
 
   override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =
@@ -55,10 +53,9 @@ case class CrackTheSky(abilityId: AbilityId, parentCharacterId: CharacterId)
 
     val targets: Seq[CharacterId] =
       targetCoords
-      .flatMap(_
-        .getCircle(metadata.variables("radius"))
-        .whereEnemiesOfC(parentCharacterId).characters.map(_.id)
-      )
+        .flatMap(_
+          .getCircle(metadata.variables("radius"))
+          .whereEnemiesOfC(parentCharacterId).characters.map(_.id))
 
     val markAbility =
       gameState
@@ -70,8 +67,8 @@ case class CrackTheSky(abilityId: AbilityId, parentCharacterId: CharacterId)
       .setAbilityVariable(
         markAbilityId,
         MarkOfTheWind.trapLocationsKey,
-        markAbility.trapLocations.filterNot(location => targetCoords.contains(location)).toJson.toString
-    )
+        markAbility.trapLocations.filterNot(location => targetCoords.contains(location)).toJson.toString,
+      )
   }
 
   override def useChecks(implicit useData: UseData, gameState: GameState): Set[UseCheck] = {
@@ -87,9 +84,10 @@ case class CrackTheSky(abilityId: AbilityId, parentCharacterId: CharacterId)
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
     e match {
       case GameEvent.GameStatusUpdated(_, _, _, _, GameStatus.Running) =>
-        val markAbilityId = parentCharacter.state.abilities.ofType[abilities.ayatsuji_ayase.MarkOfTheWind].head.abilityId
+        val markAbilityId =
+          parentCharacter.state.abilities.ofType[abilities.ayatsuji_ayase.MarkOfTheWind].head.abilityId
         gameState
-            .setAbilityVariable(id, markOfTheWindAbilityIdKey, markAbilityId.toJson.toString)
+          .setAbilityVariable(id, markOfTheWindAbilityIdKey, markAbilityId.toJson.toString)
       case _ => gameState
     }
 

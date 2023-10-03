@@ -30,27 +30,25 @@ package object nkm {
   type HexCellEffectId = String
 
   type BugReportId = String
-    def randomUUID()(implicit random: Random): String =
+  def randomUUID()(implicit random: Random): String =
     java.util.UUID.nameUUIDFromBytes(random.nextBytes(16)).toString
 
-  def hexCellParamsToCells(params: Set[Any]): Set[HexCell] = {
+  def hexCellParamsToCells(params: Set[Any]): Set[HexCell] =
     params.map {
-      case (x: Int, y: Int) => HexCell.empty(HexCoordinates(x, y))
-      case (x: Int, y: Int, t: HexCellType) => HexCell.empty(HexCoordinates(x, y), t)
+      case (x: Int, y: Int)                         => HexCell.empty(HexCoordinates(x, y))
+      case (x: Int, y: Int, t: HexCellType)         => HexCell.empty(HexCoordinates(x, y), t)
       case (x: Int, y: Int, t: HexCellType, i: Int) => HexCell.empty(HexCoordinates(x, y), t, Some(i))
     }
-  }
 
-  def getAdjacentCells[T <: HexCellLike](cells: Set[T], targetCellCoordinates: HexCoordinates): Set[T] = {
+  def getAdjacentCells[T <: HexCellLike](cells: Set[T], targetCellCoordinates: HexCoordinates): Set[T] =
     cells.filter(c =>
       abs(c.coordinates.x - targetCellCoordinates.x) <= 1
         && abs(c.coordinates.y - targetCellCoordinates.y) <= 1
         && abs(c.coordinates.z - targetCellCoordinates.z) <= 1
     ).filter(c => c.coordinates != targetCellCoordinates)
-  }
 
-  def CoordinateSeq(tuples: (Int, Int)*): Seq[HexCoordinates] = tuples.map{case (x, z) => HexCoordinates(x, z)}
-  def CoordinateSet(tuples: (Int, Int)*): Set[HexCoordinates] = CoordinateSeq(tuples *).toSet
+  def CoordinateSeq(tuples: (Int, Int)*): Seq[HexCoordinates] = tuples.map { case (x, z) => HexCoordinates(x, z) }
+  def CoordinateSet(tuples: (Int, Int)*): Set[HexCoordinates] = CoordinateSeq(tuples*).toSet
 
   implicit class HexCoordinatesSetUtils(coords: Set[HexCoordinates])(implicit gameState: GameState) {
     def toCells: Set[HexCell] =
@@ -262,6 +260,6 @@ package object nkm {
 
   implicit class SeqUtils[T](es: Seq[T]) {
     def ofType[A: ClassTag]: Seq[A] =
-      es.collect {case e: A => e}
+      es.collect { case e: A => e }
   }
 }

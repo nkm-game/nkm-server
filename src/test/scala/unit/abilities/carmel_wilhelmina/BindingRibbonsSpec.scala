@@ -9,14 +9,13 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
 class BindingRibbonsSpec
-  extends AnyWordSpecLike
+    extends AnyWordSpecLike
     with Matchers
-    with TestUtils
-{
+    with TestUtils {
   private val abilityMetadata = BindingRibbons.metadata
   private val characterMetadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
   private val s = scenarios.Simple1v9LineTestScenario(characterMetadata)
-  private implicit val gameState: GameState = s.gameState
+  implicit private val gameState: GameState = s.gameState
   private val abilityId = s.p(0)(0).character.state.abilities.head.id
 
   private val twoHitGameState: GameState = s.gameState.useAbilityOnCoordinates(abilityId, HexCoordinates(-1, 0))

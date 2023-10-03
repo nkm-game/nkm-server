@@ -8,10 +8,9 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
 class NaturesBeautySpec
-  extends AnyWordSpecLike
+    extends AnyWordSpecLike
     with Matchers
-    with TestUtils
-{
+    with TestUtils {
   private val abilityMetadata = NaturesBeauty.metadata
   private val s = TestScenario.generate(TestHexMapName.Simple2v2, abilityMetadata.id)
 
@@ -34,7 +33,9 @@ class NaturesBeautySpec
     }
     "not show parent character as basic attack target" in {
       val parentCharacter = damagedGameState.characterById(s.defaultCharacter.id)
-      parentCharacter.basicAttackTargets(damagedGameState) should not contain s.defaultCharacter.parentCell(damagedGameState).get.coordinates
+      parentCharacter.basicAttackTargets(damagedGameState) should not contain s.defaultCharacter.parentCell(
+        damagedGameState
+      ).get.coordinates
     }
   }
 }

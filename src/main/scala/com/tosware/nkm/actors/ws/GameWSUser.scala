@@ -5,5 +5,5 @@ import com.tosware.nkm.services.GameService
 import com.tosware.nkm.services.http.directives.JwtSecretKey
 
 class GameWSUser(val session: ActorRef)(implicit val gameService: GameService, implicit val jwtSecretKey: JwtSecretKey)
-  extends WebsocketUser
+    extends WebsocketUser
     with GameWebsocketUserBehaviour

@@ -5,11 +5,11 @@ import com.tosware.nkm.models.game.character_effect.*
 
 object Fly {
   val metadata: CharacterEffectMetadata =
-  CharacterEffectMetadata(
-    name = CharacterEffectName.Fly,
-    initialEffectType = CharacterEffectType.Positive,
-    description = "This character can fly, allowing them to pass walls and enemy characters.",
-  )
+    CharacterEffectMetadata(
+      name = CharacterEffectName.Fly,
+      initialEffectType = CharacterEffectType.Positive,
+      description = "This character can fly, allowing them to pass walls and enemy characters.",
+    )
 }
 
 object ZeroGravity {
@@ -23,4 +23,5 @@ object ZeroGravity {
     )
 }
 
-case class Fly(effectId: CharacterEffectId, initialCooldown: Int, metadata: CharacterEffectMetadata = Fly.metadata) extends CharacterEffect(effectId)
+case class Fly(effectId: CharacterEffectId, initialCooldown: Int, metadata: CharacterEffectMetadata = Fly.metadata)
+    extends CharacterEffect(effectId)

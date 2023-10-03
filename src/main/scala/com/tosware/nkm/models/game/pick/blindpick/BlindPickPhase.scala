@@ -10,8 +10,3 @@ object BlindPickPhase extends Enum[BlindPickPhase] {
   case object Picking extends BlindPickPhase
   case object Finished extends BlindPickPhase
 }
-
-
-
-
-

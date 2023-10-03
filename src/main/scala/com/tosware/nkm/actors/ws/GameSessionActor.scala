@@ -8,14 +8,12 @@ import com.tosware.nkm.models.game.ws.*
 import com.tosware.nkm.services.*
 import spray.json.*
 
-
 object GameSessionActor {
   def props()(implicit gameService: GameService): Props = Props(new GameSessionActor())
 }
 
 class GameSessionActor(implicit gameService: GameService)
-  extends SessionActor
-{
+    extends SessionActor {
   override def preStart(): Unit = {
     log.info("GameSessionActor started")
     context.system.eventStream.subscribe(self, classOf[GameEventMapped])
@@ -26,13 +24,13 @@ class GameSessionActor(implicit gameService: GameService)
     observer ! WebsocketUser.OutgoingMessage(response.toJson.toString)
   }
 
-  override def receive: Receive = super.receive.orElse[Any, Unit]{
+  override def receive: Receive = super.receive.orElse[Any, Unit] {
     case e: GameEventMapped =>
       // TODO: use async proprely
       getObservers(e.gameId).foreach { ob =>
         val authStatus = getAuthStatus(ob)
         val sendEvent = e.hideData.isEmpty || authStatus.nonEmpty && e.hideData.get.showOnlyFor.contains(authStatus.get)
-        if(sendEvent) {
+        if (sendEvent) {
           sendGameEvent(ob, e.event)
         }
       }

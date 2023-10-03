@@ -17,16 +17,14 @@ object RunItDown extends NkmConf.AutoExtract {
       description =
         """Character can move three times this turn.
           |After each move they can use basic attack.""".stripMargin,
-
     )
   val movesLeftKey: String = "movesLeft"
 }
 
 case class RunItDown(abilityId: AbilityId, parentCharacterId: CharacterId)
-  extends Ability(abilityId, parentCharacterId)
+    extends Ability(abilityId, parentCharacterId)
     with Usable
-    with GameEventListener
-{
+    with GameEventListener {
   override val metadata = RunItDown.metadata
 
   def movesLeft(implicit gameState: GameState): Int =
@@ -37,17 +35,16 @@ case class RunItDown(abilityId: AbilityId, parentCharacterId: CharacterId)
   private def setMovesLeft(value: Int)(implicit random: Random, gameState: GameState): GameState =
     gameState.setAbilityVariable(id, movesLeftKey, value.toJson.toString)
 
-
   override def use(useData: UseData)(implicit random: Random, gameState: GameState): GameState =
     setMovesLeft(3)
-    .refreshBasicMove(parentCharacterId)(random, id)
-    .refreshBasicAttack(parentCharacterId)(random, id)
+      .refreshBasicMove(parentCharacterId)(random, id)
+      .refreshBasicAttack(parentCharacterId)(random, id)
 
-  override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState = {
+  override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
     e match {
       case GameEvent.CharacterBasicMoved(_, _, _, _, characterId, _) =>
-        if(characterId != parentCharacterId) return gameState
-        if(movesLeft <= 0) return gameState
+        if (characterId != parentCharacterId) return gameState
+        if (movesLeft <= 0) return gameState
 
         val ngs = setMovesLeft(movesLeft - 1)
           .refreshBasicAttack(parentCharacterId)(random, id)
@@ -59,10 +56,9 @@ case class RunItDown(abilityId: AbilityId, parentCharacterId: CharacterId)
       case GameEvent.TurnFinished(_, _, _, _) =>
         val characterIdThatTookAction = gameState.gameLog.characterThatTookActionInTurn(e.turn.number).get
         if (characterIdThatTookAction != parentCharacterId) return gameState
-        if(movesLeft <= 0) return gameState
+        if (movesLeft <= 0) return gameState
         setMovesLeft(0)
       case _ => gameState
     }
 
-  }
 }

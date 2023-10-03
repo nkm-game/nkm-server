@@ -43,19 +43,19 @@ trait HexMapLike[T <: HexCellLike] {
 
     val nullCell = "  "
 
-    for(z <- minZ to maxZ) {
+    for (z <- minZ to maxZ) {
       canvas += "\n"
       canvas += nullCell * offsetSize
       offsetSize += 1
 
-      for(x <- minX to maxX) {
+      for (x <- minX to maxX) {
         val cellString = cells.find(_.coordinates == HexCoordinates(x, z)) match {
           case Some(cell) =>
             cell.cellType match {
               case HexCellType.Transparent => nullCell
-              case HexCellType.Normal => "░░"
-              case HexCellType.Wall => "██"
-              case HexCellType.SpawnPoint => "S" + cell.spawnNumber.get
+              case HexCellType.Normal      => "░░"
+              case HexCellType.Wall        => "██"
+              case HexCellType.SpawnPoint  => "S" + cell.spawnNumber.get
             }
           case None => nullCell
         }

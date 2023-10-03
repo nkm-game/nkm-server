@@ -13,11 +13,11 @@ object PowerOfTheGoddess extends NkmConf.AutoExtract {
       name = "Power Of The Goddess",
       abilityType = AbilityType.Ultimate,
       description = "Character heals all friendly characters on the map for {heal} HP.",
-
     )
 }
 
-case class PowerOfTheGoddess(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId) with Usable {
+case class PowerOfTheGoddess(abilityId: AbilityId, parentCharacterId: CharacterId)
+    extends Ability(abilityId, parentCharacterId) with Usable {
   override val metadata: AbilityMetadata = PowerOfTheGoddess.metadata
   override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =
     gameState.hexMap.cells.toCoords
@@ -26,8 +26,8 @@ case class PowerOfTheGoddess(abilityId: AbilityId, parentCharacterId: CharacterI
 
   override def use(useData: UseData)(implicit random: Random, gameState: GameState): GameState = {
     val targets = targetsInRange.characters.map(_.id)
-    targets.foldLeft(gameState)((acc, cid) => {
+    targets.foldLeft(gameState) { (acc, cid) =>
       acc.heal(cid, metadata.variables("heal"))(random, id)
-    })
+    }
   }
 }

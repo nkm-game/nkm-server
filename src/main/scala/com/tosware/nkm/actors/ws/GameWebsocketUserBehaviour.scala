@@ -20,7 +20,7 @@ trait GameWebsocketUserBehaviour extends WebsocketUserBehaviour {
     try {
       val request = text.parseJson.convertTo[WebsocketGameRequest]
 
-      if(request.requestPath != GameRoute.Ping) {
+      if (request.requestPath != GameRoute.Ping) {
         log.info(s"[${username.getOrElse("")}] ${request.requestPath}")
       }
       log.debug(s"Request: $request")
@@ -29,14 +29,17 @@ trait GameWebsocketUserBehaviour extends WebsocketUserBehaviour {
       if (response.gameResponseType != GameResponseType.Ping) {
         log.info(s"[${username.getOrElse("")}] ${response.gameResponseType}(${response.statusCode})")
       }
-      val responseLogLevel = if(response.statusCode == StatusCodes.OK.intValue) DebugLevel else WarningLevel
+      val responseLogLevel = if (response.statusCode == StatusCodes.OK.intValue) DebugLevel else WarningLevel
       log.log(responseLogLevel, s"Response: $response")
       outgoing ! OutgoingMessage(response.toJson.toString)
-    }
-    catch {
+    } catch {
       case e: Exception =>
         log.error(e.toString)
-        val response = WebsocketGameResponse(GameResponseType.Error, StatusCodes.InternalServerError.intValue, "Error with request parsing.")
+        val response = WebsocketGameResponse(
+          GameResponseType.Error,
+          StatusCodes.InternalServerError.intValue,
+          "Error with request parsing.",
+        )
         outgoing ! OutgoingMessage(response.toJson.toString)
     }
 
@@ -49,14 +52,20 @@ trait GameWebsocketUserBehaviour extends WebsocketUserBehaviour {
   def unauthorized(msg: String = "")(implicit responseType: GameResponseType): WebsocketGameResponse =
     WebsocketGameResponse(responseType, StatusCodes.Unauthorized.intValue, msg)
 
-  def resolveResponse(commandResponse: CommandResponse)(implicit responseType: GameResponseType): WebsocketGameResponse = {
+  def resolveResponse(commandResponse: CommandResponse)(implicit
+      responseType: GameResponseType
+  ): WebsocketGameResponse =
     commandResponse match {
       case Success(msg) => ok(msg)
       case Failure(msg) => nok(msg)
     }
-  }
 
-  def parseWebsocketGameRequest(request: WebsocketGameRequest, outgoing: ActorRef, userActor: ActorRef, authStatus: AuthStatus): WebsocketGameResponse = {
+  def parseWebsocketGameRequest(
+      request: WebsocketGameRequest,
+      outgoing: ActorRef,
+      userActor: ActorRef,
+      authStatus: AuthStatus,
+  ): WebsocketGameResponse = {
     import GameRequest.Action.*
     import GameRequest.CharacterSelect.*
     import GameRequest.General.*
@@ -178,7 +187,7 @@ trait GameWebsocketUserBehaviour extends WebsocketUserBehaviour {
         val response = aw(gameService.useAbilityOnCharacter(username, useAbilityRequest))
         resolveResponse(response)
       case GameRoute.SendChatMessage => ???
-      case GameRoute.ExecuteCommand => ???
+      case GameRoute.ExecuteCommand  => ???
     }
   }
 

@@ -9,19 +9,17 @@ import scala.concurrent.duration.*
 import scala.language.postfixOps
 
 class NkmPersistenceTestKit(_system: ActorSystem) extends TestKit(_system)
-  with NkmIntegrationTestTrait
-  with ImplicitSender
-  with AnyWordSpecLike
-{
+    with NkmIntegrationTestTrait
+    with ImplicitSender
+    with AnyWordSpecLike {
 
   private var _depsOption: Option[NkmDependencies] = None
   def deps = _depsOption.get
 
   def within2000[T](f: => T): T = within(2000 millis)(f)
 
-  override def beforeAll(): Unit = {
+  override def beforeAll(): Unit =
     super.beforeAll()
-  }
 
   override def beforeEach(): Unit = {
     super.beforeEach()

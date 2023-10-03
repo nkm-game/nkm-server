@@ -11,10 +11,10 @@ object Clock {
 }
 
 case class Clock(
-  playerTimes: Map[PlayerId, Long],
-  sharedTime: Long = 0,
-  isRunning: Boolean = true,
-  isSharedTime: Boolean = true,
+    playerTimes: Map[PlayerId, Long],
+    sharedTime: Long = 0,
+    isRunning: Boolean = true,
+    isSharedTime: Boolean = true,
 ) {
   def setIsSharedTime(isSharedTime: Boolean): Clock =
     copy(isSharedTime = isSharedTime)
@@ -38,11 +38,8 @@ case class Clock(
     copy(playerTimes = playerTimes.updated(playerId, newTime))
   }
 
-  def pause(): Clock = {
+  def pause(): Clock =
     copy(isRunning = false)
-  }
-  def unpause(): Clock = {
+  def unpause(): Clock =
     copy(isRunning = true)
-  }
 }
-

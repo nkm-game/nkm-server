@@ -26,7 +26,9 @@ import com.tosware.nkm.models.game.ability.Ability
 import scala.util.Random
 
 object AbilityProvider {
-  def instantiateAbilities(characterId: CharacterId, metadataIds: Seq[AbilityMetadataId])(implicit random: Random): Seq[Ability] = {
+  def instantiateAbilities(characterId: CharacterId, metadataIds: Seq[AbilityMetadataId])(implicit
+      random: Random
+  ): Seq[Ability] = {
     metadataIds.map {
       case Murasame.metadata.id =>
         Murasame(randomUUID(), characterId)

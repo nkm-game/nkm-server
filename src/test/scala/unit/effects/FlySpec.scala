@@ -10,14 +10,13 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
 class FlySpec
-  extends AnyWordSpecLike
+    extends AnyWordSpecLike
     with Matchers
-    with TestUtils
-{
+    with TestUtils {
   private val effectMetadata = Fly.metadata
   private val metadata = CharacterMetadata.empty()
   private val s = scenarios.FlyTestScenario(metadata)
-  private implicit val gameState: GameState = s.gameState.addEffect(s.p(0)(0).character.id, Fly("test_id", 2))
+  implicit private val gameState: GameState = s.gameState.addEffect(s.p(0)(0).character.id, Fly("test_id", 2))
 
   effectMetadata.name.toString must {
     "allow flying over walls" in {

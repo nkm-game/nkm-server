@@ -12,14 +12,14 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
 class FiberDecapicationSpec
-  extends AnyWordSpecLike
+    extends AnyWordSpecLike
     with Matchers
-    with TestUtils
-{
+    with TestUtils {
   private val abilityMetadata = FiberDecapitation.metadata
-  private val characterMetadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id, ScissorBlade.metadata.id))
+  private val characterMetadata =
+    CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id, ScissorBlade.metadata.id))
   private val s = scenarios.FiberDecapicationTestScenario(characterMetadata)
-  private implicit val gameState: GameState = s.gameState
+  implicit private val gameState: GameState = s.gameState
   private val abilityId = s.p(0)(0).character.state.abilities.head.id
 
   abilityMetadata.name must {

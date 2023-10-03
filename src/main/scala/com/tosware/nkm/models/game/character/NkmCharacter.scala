@@ -14,7 +14,7 @@ import scala.reflect.ClassTag
 import scala.util.Random
 
 object NkmCharacter {
-  def fromMetadata(characterId: CharacterId, metadata: CharacterMetadata)(implicit random: Random): NkmCharacter = {
+  def fromMetadata(characterId: CharacterId, metadata: CharacterMetadata)(implicit random: Random): NkmCharacter =
     NkmCharacter(
       id = characterId,
       metadataId = metadata.id,
@@ -29,19 +29,17 @@ object NkmCharacter {
         purePhysicalDefense = metadata.initialPhysicalDefense,
         pureMagicalDefense = metadata.initialMagicalDefense,
         abilities = AbilityProvider.instantiateAbilities(characterId, metadata.initialAbilitiesMetadataIds),
-      )
+      ),
     )
-  }
 }
 
-case class NkmCharacter
-(
-  id: CharacterId,
-  metadataId: CharacterMetadataId,
-  state: NkmCharacterState,
-)
-{
-  private val basicMoveImpairmentCcNames = Seq(CharacterEffectName.Stun, CharacterEffectName.Ground, CharacterEffectName.Snare)
+case class NkmCharacter(
+    id: CharacterId,
+    metadataId: CharacterMetadataId,
+    state: NkmCharacterState,
+) {
+  private val basicMoveImpairmentCcNames =
+    Seq(CharacterEffectName.Stun, CharacterEffectName.Ground, CharacterEffectName.Snare)
   private val basicAttackImpairmentCcNames = Seq(CharacterEffectName.Stun, CharacterEffectName.Disarm)
   private val abilityImpairmentCcNames = Seq(CharacterEffectName.Stun, CharacterEffectName.Silence)
 
@@ -68,35 +66,35 @@ case class NkmCharacter
       .ofCharacter(id)
       .nonEmpty
 
-  private def getUsedAbilitiesThisPhase(implicit gameState: GameState): Seq[Ability] = {
+  private def getUsedAbilitiesThisPhase(implicit gameState: GameState): Seq[Ability] =
     (
-    gameState.gameLog.events
-      .inPhase(gameState.phase.number)
-      .ofType[GameEvent.AbilityUsed]
-    ++
-    gameState.gameLog.events
-      .inPhase(gameState.phase.number)
-      .ofType[GameEvent.AbilityUsedOnCoordinates]
-    ++
-    gameState.gameLog.events
-      .inPhase(gameState.phase.number)
-      .ofType[GameEvent.AbilityUsedOnCharacter]
+      gameState.gameLog.events
+        .inPhase(gameState.phase.number)
+        .ofType[GameEvent.AbilityUsed]
+        ++
+          gameState.gameLog.events
+            .inPhase(gameState.phase.number)
+            .ofType[GameEvent.AbilityUsedOnCoordinates]
+          ++
+          gameState.gameLog.events
+            .inPhase(gameState.phase.number)
+            .ofType[GameEvent.AbilityUsedOnCharacter]
     )
       .map(_.abilityId)
       .map(gameState.abilityById)
       .filter(a => a.parentCharacter.id == id)
-  }
 
   def usedAbilityThisPhase(implicit gameState: GameState): Boolean =
     getUsedAbilitiesThisPhase.nonEmpty
 
-  def usedUltimatumAbilityThisPhase(implicit gameState: GameState): Boolean = {
+  def usedUltimatumAbilityThisPhase(implicit gameState: GameState): Boolean =
     getUsedAbilitiesThisPhase
       .map(_.metadata.abilityType)
       .contains(AbilityType.Ultimate)
-  }
 
-  private def hasRefreshed[RefreshEvent <: GameEvent: ClassTag, ActionEvent <: GameEvent: ClassTag](implicit gameState: GameState): Boolean = {
+  private def hasRefreshed[RefreshEvent <: GameEvent: ClassTag, ActionEvent <: GameEvent: ClassTag](implicit
+      gameState: GameState
+  ): Boolean = {
     val lastRefreshIndex = gameState.gameLog.events
       .ofType[RefreshEvent]
       .inTurn(gameState.turn.number)
@@ -121,10 +119,9 @@ case class NkmCharacter
   def hasRefreshedBasicAttack(implicit gameState: GameState): Boolean =
     hasRefreshed[GameEvent.BasicAttackRefreshed, GameEvent.CharacterBasicAttacked]
 
-  def canBasicMove(implicit gameState: GameState): Boolean = {
+  def canBasicMove(implicit gameState: GameState): Boolean =
     (hasRefreshedBasicMove || !usedBasicMoveThisTurn && !usedUltimatumAbilityThisPhase) &&
       !state.effects.exists(e => basicMoveImpairmentCcNames.contains(e.metadata.name))
-  }
 
   def canBasicAttack(implicit gameState: GameState): Boolean =
     (hasRefreshedBasicAttack || !usedBasicAttackThisTurn && !usedAbilityThisPhase) &&
@@ -132,8 +129,8 @@ case class NkmCharacter
 
   def canUseAbilityOfType(abilityType: AbilityType)(implicit gameState: GameState): Boolean =
     (abilityType match {
-      case AbilityType.Passive => true
-      case AbilityType.Normal => !usedAbilityThisPhase && !usedBasicAttackThisTurn
+      case AbilityType.Passive  => true
+      case AbilityType.Normal   => !usedAbilityThisPhase && !usedBasicAttackThisTurn
       case AbilityType.Ultimate => !usedAbilityThisPhase && !usedBasicAttackThisTurn && !usedBasicMoveThisTurn
     }) && !state.effects.exists(e => abilityImpairmentCcNames.contains(e.metadata.name))
 
@@ -201,14 +198,13 @@ case class NkmCharacter
       ).toCoords - c.coordinates
     }.getOrElse(Set.empty)
 
-  def defaultBasicAttackCells(implicit gameState: GameState): Set[HexCoordinates] = {
+  def defaultBasicAttackCells(implicit gameState: GameState): Set[HexCoordinates] =
     state.attackType match {
       case AttackType.Melee =>
         defaultMeleeBasicAttackCells
       case AttackType.Ranged =>
         defaultRangedBasicAttackCells
     }
-  }
 
   def defaultBasicAttackTargets(implicit gameState: GameState): Set[HexCoordinates] =
     basicAttackCellCoords.whereEnemiesOfC(id)
@@ -222,8 +218,8 @@ case class NkmCharacter
   def calculateReduction(damage: Damage): Int = {
     val defense = damage.damageType match {
       case DamageType.Physical => state.physicalDefense
-      case DamageType.Magical => state.magicalDefense
-      case DamageType.True => 0
+      case DamageType.Magical  => state.magicalDefense
+      case DamageType.True     => 0
     }
     (damage.amount * defense / 100f).toInt
   }

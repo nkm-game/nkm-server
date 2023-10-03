@@ -9,15 +9,14 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
 class ManipulatorOfObjectsSpec
-  extends AnyWordSpecLike
+    extends AnyWordSpecLike
     with Matchers
-    with TestUtils
-{
+    with TestUtils {
 
   private val abilityMetadata = ManipulatorOfObjects.metadata
   private val characterMetadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
   private val s = scenarios.Simple1v1TestScenario(characterMetadata)
-  private implicit val gameState: GameState = s.gameState
+  implicit private val gameState: GameState = s.gameState
 
   abilityMetadata.name must {
     "root enemies" in {
@@ -31,7 +30,7 @@ class ManipulatorOfObjectsSpec
         .passTurn(s.p(1)(0).character.id)
         .basicAttack(s.p(0)(0).character.id, s.p(1)(0).character.id)
 
-      attackedSecondTimeGameState.characterById(s.p(1)(0).character.id).state.effects.ofType[Snare] should be (empty)
+      attackedSecondTimeGameState.characterById(s.p(1)(0).character.id).state.effects.ofType[Snare] should be(empty)
     }
   }
 }

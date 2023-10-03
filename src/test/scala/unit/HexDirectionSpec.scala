@@ -6,10 +6,9 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
 class HexDirectionSpec
-  extends AnyWordSpecLike
+    extends AnyWordSpecLike
     with Matchers
-    with Logging
-{
+    with Logging {
   "HexDirection" must {
     "match right and left looks" in {
       HexDirection.values.map(_.lookLeft.lookRight) should be(HexDirection.values)

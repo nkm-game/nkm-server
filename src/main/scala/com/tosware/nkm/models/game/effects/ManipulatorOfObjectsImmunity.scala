@@ -13,6 +13,7 @@ object ManipulatorOfObjectsImmunity {
     )
 }
 
-case class ManipulatorOfObjectsImmunity(effectId: CharacterEffectId, initialCooldown: Int) extends CharacterEffect(effectId) {
+case class ManipulatorOfObjectsImmunity(effectId: CharacterEffectId, initialCooldown: Int)
+    extends CharacterEffect(effectId) {
   val metadata: CharacterEffectMetadata = ManipulatorOfObjectsImmunity.metadata
 }

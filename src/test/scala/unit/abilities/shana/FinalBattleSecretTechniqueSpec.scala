@@ -10,10 +10,9 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
 class FinalBattleSecretTechniqueSpec
-  extends AnyWordSpecLike
+    extends AnyWordSpecLike
     with Matchers
-    with TestUtils
-{
+    with TestUtils {
   private val abilityMetadata = FinalBattleSecretTechnique.metadata
   private val s = TestScenario.generate(TestHexMapName.FinalBattleSecretTechnique, abilityMetadata.id)
   private val gameState = s.gameState.incrementPhase(4)

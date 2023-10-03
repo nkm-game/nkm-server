@@ -10,10 +10,9 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
 class ContactSpec
-  extends AnyWordSpecLike
+    extends AnyWordSpecLike
     with Matchers
-    with TestUtils
-{
+    with TestUtils {
   private val abilityMetadata = Contact.metadata
   private val characterMetadata = CharacterMetadata.empty()
     .copy(
@@ -24,7 +23,7 @@ class ContactSpec
       ),
     )
   private val s = scenarios.Simple2v2TestScenario(characterMetadata)
-  private implicit val gameState: GameState = s.gameState
+  implicit private val gameState: GameState = s.gameState
   private val abilityId =
     s.p(0)(0).character.state.abilities(0).id
   private val asterAbilityId =
@@ -36,7 +35,7 @@ class ContactSpec
       newGameState.gameLog.events
         .ofType[GameEvent.AbilityHitCharacter]
         .ofAbility(abilityId)
-        .size should be (1)
+        .size should be(1)
     }
 
     "be able to deal bonus damage from an ability" in {
@@ -44,7 +43,7 @@ class ContactSpec
       newGameState.gameLog.events
         .ofType[GameEvent.AbilityHitCharacter]
         .ofAbility(abilityId)
-        .size should be (2)
+        .size should be(2)
     }
 
     "not be able to deal bonus damage more than one time per character" in {
@@ -62,7 +61,7 @@ class ContactSpec
       newGameState.gameLog.events
         .ofType[GameEvent.AbilityHitCharacter]
         .ofAbility(abilityId)
-        .size should be (1)
+        .size should be(1)
     }
   }
 }

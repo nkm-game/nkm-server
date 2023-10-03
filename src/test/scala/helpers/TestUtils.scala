@@ -21,11 +21,10 @@ import scala.util.matching.Regex
 import scala.util.{Random, Using}
 
 trait TestUtils
-  extends AnyWordSpecLike
+    extends AnyWordSpecLike
     with Matchers
     with Logging
-    with NkmJsonProtocol
-{
+    with NkmJsonProtocol {
   implicit val random: Random = new Random()
   implicit val causedById: String = "test"
 
@@ -35,7 +34,7 @@ trait TestUtils
   }
 
   protected def bindPlayerData()(implicit gameState: GameState): Seq[Seq[TestCharacterData]] =
-    gameState.players.map(_.id).map(pid => {
+    gameState.players.map(_.id).map { pid =>
       val spawnCoords = gameState
         .hexMap
         .getSpawnPointsFor(pid)(gameState)
@@ -43,7 +42,7 @@ trait TestUtils
         .toSeq
         .sortBy(_.toTuple)
       bindCharacterData(spawnCoords)(gameState)
-    })
+    }
 
   protected def bindCharacterData(cs: Seq[HexCoordinates])(implicit gameState: GameState): Seq[TestCharacterData] =
     cs.map(c => TestCharacterData(c))
@@ -68,14 +67,20 @@ trait TestUtils
       .ofType[A]
       .size should be > 0
 
-  protected def assertEffectsExist(effectNames: Seq[CharacterEffectName], cid: CharacterId)(gameState: GameState): Assertion =
+  protected def assertEffectsExist(
+      effectNames: Seq[CharacterEffectName],
+      cid: CharacterId,
+  )(gameState: GameState): Assertion =
     gameState
       .characterById(cid)
       .state
       .effects
       .map(_.metadata.name) should contain allElementsOf effectNames
 
-  protected def assertEffectsDoNotExist(effectNames: Seq[CharacterEffectName], cid: CharacterId)(gameState: GameState): Assertion =
+  protected def assertEffectsDoNotExist(
+      effectNames: Seq[CharacterEffectName],
+      cid: CharacterId,
+  )(gameState: GameState): Assertion =
     gameState
       .characterById(cid)
       .state
@@ -88,7 +93,7 @@ trait TestUtils
       .state
       .effects
       .ofType[A]
-      .size should be (0)
+      .size should be(0)
 
   protected def assertBuffExists(statType: StatType, cid: CharacterId)(gameState: GameState): Assertion =
     gameState
@@ -96,7 +101,7 @@ trait TestUtils
       .state
       .effects
       .ofType[effects.StatBuff]
-      .map(_.statType) should contain (statType)
+      .map(_.statType) should contain(statType)
 
   protected def assertBuffDoesNotExist(statType: StatType, cid: CharacterId)(gameState: GameState): Assertion =
     gameState
@@ -122,8 +127,11 @@ trait TestUtils
     getTestGameStateCustom(testHexMapName, characterMetadatass)
   }
 
-  protected def getTestGameStateCustom(testHexMapName: TestHexMapName, characterMetadatass: Seq[Seq[CharacterMetadata]]): GameState = {
-    val playerIds: Seq[PlayerId] = characterMetadatass.indices map(p => s"p$p")
+  protected def getTestGameStateCustom(
+      testHexMapName: TestHexMapName,
+      characterMetadatass: Seq[Seq[CharacterMetadata]],
+  ): GameState = {
+    val playerIds: Seq[PlayerId] = characterMetadatass.indices map (p => s"p$p")
     val hexMap = HexMapProvider().getTestHexMap(testHexMapName)
 
     logger.info(hexMap.toTextUi)
@@ -135,18 +143,18 @@ trait TestUtils
       numberOfBansPerPlayer = 0,
       numberOfCharactersPerPlayer = characterMetadatass.head.size,
       charactersMetadata = characterMetadatass.flatten.toSet,
-      clockConfig = ClockConfig.empty()
+      clockConfig = ClockConfig.empty(),
     )
     val playersWithMetadatas = (playerIds zip characterMetadatass).toMap
 
     val startedGameState: GameState = GameState.empty("test").startGame(gameStateDeps)
-    val placingGameState: GameState = playersWithMetadatas.foldLeft(startedGameState){
+    val placingGameState: GameState = playersWithMetadatas.foldLeft(startedGameState) {
       case (acc, (playerId, characterMetadatas)) => acc.blindPick(playerId, characterMetadatas.map(_.id).toSet)
     }.startPlacingCharacters()
 
     val playersWithCharacters = placingGameState.players
 
-    val runningGameState = playersWithCharacters.foldLeft(placingGameState){
+    val runningGameState = playersWithCharacters.foldLeft(placingGameState) {
       case (acc, p) =>
         val spawnPoints = placingGameState.hexMap.getSpawnPointsFor(p.id)(placingGameState)
         val spawnsWithCharacters = spawnPoints.map(_.coordinates) zip p.characterIds
@@ -161,12 +169,10 @@ trait TestUtils
   private def _passAllCharactersInCurrentPhase(gs: GameState): GameState =
     _passAllCharactersInPhase(gs, gs.phase.number)
 
-
   @tailrec
-  private final def _passAllCharactersInPhase(gs: GameState, phaseNumber: Int): GameState =
-  {
+  final private def _passAllCharactersInPhase(gs: GameState, phaseNumber: Int): GameState = {
     val ngs = gs.characterTakingActionThisTurn.fold(gs)(_ => gs.endTurn())
-    if(ngs.phase.number != phaseNumber) return ngs
+    if (ngs.phase.number != phaseNumber) return ngs
 
     val charactersToPass = ngs.currentPlayer.characterIds.intersect(ngs.charactersToTakeAction)
     _passAllCharactersInPhase(ngs.passTurn(charactersToPass.head), phaseNumber)

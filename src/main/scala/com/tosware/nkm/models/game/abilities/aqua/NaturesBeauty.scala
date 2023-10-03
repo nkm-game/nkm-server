@@ -17,7 +17,7 @@ object NaturesBeauty extends NkmConf.AutoExtract {
 }
 
 case class NaturesBeauty(abilityId: AbilityId, parentCharacterId: CharacterId)
-  extends Ability(abilityId, parentCharacterId)
+    extends Ability(abilityId, parentCharacterId)
     with BasicAttackOverride {
   override val metadata: AbilityMetadata = NaturesBeauty.metadata
 
@@ -30,7 +30,7 @@ case class NaturesBeauty(abilityId: AbilityId, parentCharacterId: CharacterId)
   override def basicAttackTargets(implicit gameState: GameState): Set[HexCoordinates] =
     basicAttackCells.whereCharacters
   override def basicAttack(targetCharacterId: CharacterId)(implicit random: Random, gameState: GameState): GameState =
-    if(gameState.characterById(targetCharacterId).isFriendForC(parentCharacterId))
+    if (gameState.characterById(targetCharacterId).isFriendForC(parentCharacterId))
       gameState
         .heal(targetCharacterId, parentCharacter.state.attackPoints)(random, id)
     else

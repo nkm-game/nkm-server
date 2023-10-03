@@ -39,7 +39,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
         AceInTheHole.metadata.id,
         Check.metadata.id,
         Castling.metadata.id,
-      )
+      ),
     ),
     CharacterMetadata(
       name = "Akame",
@@ -54,7 +54,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
         Murasame.metadata.id,
         Eliminate.metadata.id,
         LittleWarHorn.metadata.id,
-      )
+      ),
     ),
     CharacterMetadata(
       name = "Asuna",
@@ -65,7 +65,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       initialSpeed = 6,
       initialPhysicalDefense = 20,
       initialMagicalDefense = 10,
-      initialAbilitiesMetadataIds = Seq.empty
+      initialAbilitiesMetadataIds = Seq.empty,
     ),
     CharacterMetadata(
       name = "Aqua",
@@ -80,7 +80,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
         NaturesBeauty.metadata.id,
         Purification.metadata.id,
         Resurrection.metadata.id,
-      )
+      ),
     ),
     CharacterMetadata(
       name = "Ayatsuji Ayase",
@@ -95,7 +95,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
         SamuraisSwiftness.metadata.id,
         MarkOfTheWind.metadata.id,
         CrackTheSky.metadata.id,
-      )
+      ),
     ),
     CharacterMetadata(
       name = "Carmel Wilhelmina",
@@ -110,7 +110,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
         ManipulatorOfObjects.metadata.id,
         BindingRibbons.metadata.id,
         TiamatsIntervention.metadata.id,
-      )
+      ),
     ),
     CharacterMetadata(
       name = "Crona",
@@ -125,7 +125,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
         BlackBlood.metadata.id,
         ScreechAlpha.metadata.id,
         Infection.metadata.id,
-      )
+      ),
     ),
     CharacterMetadata(
       name = "Dekomori Sanae",
@@ -140,7 +140,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
         WickedEyesServant.metadata.id,
         MjolnirHammer.metadata.id,
         MjolnirDestinyImpulse.metadata.id,
-      )
+      ),
     ),
     CharacterMetadata(
       name = "Ebisuzawa Kurumi",
@@ -155,7 +155,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
         Contact.metadata.id,
         Survivor.metadata.id,
         FinalSolution.metadata.id,
-      )
+      ),
     ),
     CharacterMetadata(
       name = "Hecate",
@@ -170,7 +170,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
         MasterThrone.metadata.id,
         Aster.metadata.id,
         PowerOfExistence.metadata.id,
-      )
+      ),
     ),
     CharacterMetadata(
       name = "Kirito",
@@ -185,7 +185,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
         Parry.metadata.id,
         Switch.metadata.id,
         StarburstStream.metadata.id,
-      )
+      ),
     ),
     CharacterMetadata(
       name = "Liones Elizabeth",
@@ -200,7 +200,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
         ImmenseHealingPowers.metadata.id,
         Invigorate.metadata.id,
         PowerOfTheGoddess.metadata.id,
-      )
+      ),
     ),
     CharacterMetadata(
       name = "Llenn",
@@ -215,7 +215,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
         PChan.metadata.id,
         GrenadeThrow.metadata.id,
         RunItDown.metadata.id,
-      )
+      ),
     ),
     CharacterMetadata(
       name = "Monkey D. Luffy",
@@ -230,7 +230,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
         RubberHuman.metadata.id,
         RubberRubberFruit.metadata.id,
         GearSecond.metadata.id,
-      )
+      ),
     ),
     CharacterMetadata(
       name = "Nibutani Shinka",
@@ -245,7 +245,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
         Mabinogion.metadata.id,
         SummerBreeze.metadata.id,
         FairyOfLove.metadata.id,
-      )
+      ),
     ),
     CharacterMetadata(
       name = "Ochaco Uraraka",
@@ -260,7 +260,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
         ZeroGravity.metadata.id,
         ReducedWeight.metadata.id,
         SkillRelease.metadata.id,
-      )
+      ),
     ),
     CharacterMetadata(
       name = "Roronoa Zoro",
@@ -275,7 +275,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
         LackOfOrientation.metadata.id,
         OgreCutter.metadata.id,
         OneHundredEightPoundPhoenix.metadata.id,
-      )
+      ),
     ),
     CharacterMetadata(
       name = "Ryuko Matoi",
@@ -290,7 +290,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
         ScissorBlade.metadata.id,
         FiberDecapitation.metadata.id,
         GodrobeSenketsu.metadata.id,
-      )
+      ),
     ),
     CharacterMetadata(
       name = "Satou Kazuma",
@@ -305,7 +305,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
         HighLuck.metadata.id,
         DrainTouch.metadata.id,
         Steal.metadata.id,
-      )
+      ),
     ),
     CharacterMetadata(
       name = "Shana",
@@ -320,7 +320,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
         WingsOfCrimson.metadata.id,
         GreatBladeOfCrimson.metadata.id,
         FinalBattleSecretTechnique.metadata.id,
-      )
+      ),
     ),
     CharacterMetadata(
       name = "Sinon",
@@ -335,7 +335,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
         SnipersSight.metadata.id,
         TacticalEscape.metadata.id,
         PreciseShot.metadata.id,
-      )
+      ),
     ),
     CharacterMetadata(
       name = "Derieri",
@@ -346,7 +346,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       initialSpeed = 6,
       initialPhysicalDefense = 25,
       initialMagicalDefense = 25,
-      initialAbilitiesMetadataIds = Seq.empty
+      initialAbilitiesMetadataIds = Seq.empty,
     ),
     CharacterMetadata(
       name = "Levi",
@@ -357,7 +357,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       initialSpeed = 7,
       initialPhysicalDefense = 10,
       initialMagicalDefense = 10,
-      initialAbilitiesMetadataIds = Seq.empty
+      initialAbilitiesMetadataIds = Seq.empty,
     ),
     CharacterMetadata(
       name = "Ononoki Yotsugi",
@@ -368,7 +368,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       initialSpeed = 6,
       initialPhysicalDefense = 10,
       initialMagicalDefense = 25,
-      initialAbilitiesMetadataIds = Seq.empty
+      initialAbilitiesMetadataIds = Seq.empty,
     ),
     CharacterMetadata(
       name = "Sabrac",
@@ -379,7 +379,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       initialSpeed = 5,
       initialPhysicalDefense = 15,
       initialMagicalDefense = 25,
-      initialAbilitiesMetadataIds = Seq.empty
+      initialAbilitiesMetadataIds = Seq.empty,
     ),
     CharacterMetadata(
       name = "Yoshino",
@@ -390,7 +390,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       initialSpeed = 5,
       initialPhysicalDefense = 30,
       initialMagicalDefense = 45,
-      initialAbilitiesMetadataIds = Seq.empty
+      initialAbilitiesMetadataIds = Seq.empty,
     ),
     CharacterMetadata(
       name = "Kurogane Ikki",
@@ -401,7 +401,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       initialSpeed = 6,
       initialPhysicalDefense = 20,
       initialMagicalDefense = 20,
-      initialAbilitiesMetadataIds = Seq.empty
+      initialAbilitiesMetadataIds = Seq.empty,
     ),
     CharacterMetadata(
       name = "Gilgamesh",
@@ -412,7 +412,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       initialSpeed = 5,
       initialPhysicalDefense = 15,
       initialMagicalDefense = 15,
-      initialAbilitiesMetadataIds = Seq.empty
+      initialAbilitiesMetadataIds = Seq.empty,
     ),
     CharacterMetadata(
       name = "Hanekawa Tsubasa",
@@ -423,7 +423,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       initialSpeed = 7,
       initialPhysicalDefense = 15,
       initialMagicalDefense = 15,
-      initialAbilitiesMetadataIds = Seq.empty
+      initialAbilitiesMetadataIds = Seq.empty,
     ),
     CharacterMetadata(
       name = "Rem",
@@ -434,7 +434,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       initialSpeed = 5,
       initialPhysicalDefense = 10,
       initialMagicalDefense = 15,
-      initialAbilitiesMetadataIds = Seq.empty
+      initialAbilitiesMetadataIds = Seq.empty,
     ),
     CharacterMetadata(
       name = "Sakai Yuuji",
@@ -445,7 +445,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       initialSpeed = 5,
       initialPhysicalDefense = 15,
       initialMagicalDefense = 20,
-      initialAbilitiesMetadataIds = Seq.empty
+      initialAbilitiesMetadataIds = Seq.empty,
     ),
     CharacterMetadata(
       name = "Yasaka Mahiro",
@@ -456,7 +456,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       initialSpeed = 6,
       initialPhysicalDefense = 15,
       initialMagicalDefense = 15,
-      initialAbilitiesMetadataIds = Seq.empty
+      initialAbilitiesMetadataIds = Seq.empty,
     ),
     CharacterMetadata(
       name = "Itsuka Kotori",
@@ -467,11 +467,11 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       initialSpeed = 5,
       initialPhysicalDefense = 15,
       initialMagicalDefense = 25,
-      initialAbilitiesMetadataIds = Seq.empty
+      initialAbilitiesMetadataIds = Seq.empty,
     ),
   )
 
-  def getBotMetadatas: Seq[CharacterMetadata] = 1 to 30 map (i => {
+  def getBotMetadatas: Seq[CharacterMetadata] = 1 to 30 map (i =>
     CharacterMetadata(
       name = s"Bot$i",
       AttackType.Melee,
@@ -483,5 +483,5 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
       initialMagicalDefense = 10,
       Seq.empty,
     )
-  })
+  )
 }

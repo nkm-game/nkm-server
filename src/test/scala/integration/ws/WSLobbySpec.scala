@@ -7,13 +7,13 @@ import com.tosware.nkm.models.lobby.ws.*
 import helpers.WSTrait
 import helpers.WSTrait.*
 
-class WSLobbySpec extends WSTrait
-{
+class WSLobbySpec extends WSTrait {
   import spray.json.*
 
   def sendRequest(request: WebsocketLobbyRequest)(implicit wsClient: WSProbe): Unit = sendRequestL(request)
   def fetchResponse()(implicit wsClient: WSProbe): WebsocketLobbyResponse = fetchResponseL()
-  def sendWSRequest(route: LobbyRoute, requestJson: String = "")(implicit wsClient: WSProbe): WebsocketLobbyResponse = sendWSRequestL(route, requestJson)
+  def sendWSRequest(route: LobbyRoute, requestJson: String = "")(implicit wsClient: WSProbe): WebsocketLobbyResponse =
+    sendWSRequestL(route, requestJson)
   def auth(tokenId: Int)(implicit wsClient: WSProbe): WebsocketLobbyResponse = authL(tokenId)
   def observe(lobbyId: String)(implicit wsClient: WSProbe): WebsocketLobbyResponse = observeL(lobbyId)
 
@@ -166,7 +166,7 @@ class WSLobbySpec extends WSTrait
     }
 
     "allow setting number of bans in a lobby for a host" in {
-      val numberOfBansList = List(5,3,2,1,0,3)
+      val numberOfBansList = List(5, 3, 2, 1, 0, 3)
       withLobbyWS { implicit wsClient: WSProbe =>
         auth(0)
         val lobbyId = createLobby(lobbyName).body
@@ -191,7 +191,7 @@ class WSLobbySpec extends WSTrait
     }
 
     "allow setting number of characters in a lobby for a host" in {
-      val numberOfCharactersList = List(5,3,2,3,8)
+      val numberOfCharactersList = List(5, 3, 2, 3, 8)
       withLobbyWS { implicit wsClient: WSProbe =>
         auth(0)
         val lobbyId = createLobby(lobbyName).body

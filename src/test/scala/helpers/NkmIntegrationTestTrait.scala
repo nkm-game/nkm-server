@@ -11,15 +11,14 @@ import slick.jdbc.JdbcBackend
 import slick.jdbc.JdbcBackend.Database
 
 trait NkmIntegrationTestTrait
-  extends AnyWordSpecLike
+    extends AnyWordSpecLike
     with Matchers
     with BeforeAndAfterAll
     with BeforeAndAfterEach
     with NkmJsonProtocol
     with NkmTimeouts
     with SprayJsonSupport
-    with Logging
-{
+    with Logging {
   implicit val db: JdbcBackend.Database = Database.forConfig("slick.db")
 
   override def beforeAll(): Unit = {

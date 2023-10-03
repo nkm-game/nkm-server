@@ -10,14 +10,13 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
 class CheckSpec
-  extends AnyWordSpecLike
+    extends AnyWordSpecLike
     with Matchers
-    with TestUtils
-{
+    with TestUtils {
   private val abilityMetadata = Check.metadata
   private val characterMetadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
   private val s = scenarios.Simple2v2TestScenario(characterMetadata)
-  private implicit val gameState: GameState = s.gameState
+  implicit private val gameState: GameState = s.gameState
   private val abilityId = s.p(0)(0).character.state.abilities.head.id
 
   abilityMetadata.name must {
@@ -32,7 +31,7 @@ class CheckSpec
         .useAbilityOnCharacter(abilityId, s.p(1)(0).character.id)
         .endTurn()
 
-      abilityGameState.characterTakingActionThisTurn should be (Some(s.p(1)(0).character.id))
+      abilityGameState.characterTakingActionThisTurn should be(Some(s.p(1)(0).character.id))
     }
 
     "apply disarm" in {

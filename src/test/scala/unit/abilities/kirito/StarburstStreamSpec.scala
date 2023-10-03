@@ -9,18 +9,18 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
 class StarburstStreamSpec
-  extends AnyWordSpecLike
+    extends AnyWordSpecLike
     with Matchers
-    with TestUtils
-{
+    with TestUtils {
   private val initialHp = 10000
   private val abilityMetadata = StarburstStream.metadata
   private val characterMetadata = CharacterMetadata.empty()
     .copy(
       initialHealthPoints = initialHp,
-      initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
+      initialAbilitiesMetadataIds = Seq(abilityMetadata.id),
+    )
   private val s = scenarios.Simple1v1TestScenario(characterMetadata)
-  private implicit val gameState: GameState = s.gameState.incrementPhase(4)
+  implicit private val gameState: GameState = s.gameState.incrementPhase(4)
   private val abilityId = s.p(0)(0).character.state.abilities.head.id
 
   abilityMetadata.name must {

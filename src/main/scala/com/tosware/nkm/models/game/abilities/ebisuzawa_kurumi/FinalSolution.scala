@@ -17,12 +17,11 @@ object FinalSolution extends NkmConf.AutoExtract {
           |
           |Range: linear, {range}
           |""".stripMargin,
-
     )
 }
 
 case class FinalSolution(abilityId: AbilityId, parentCharacterId: CharacterId)
-  extends Ability(abilityId, parentCharacterId)
+    extends Ability(abilityId, parentCharacterId)
     with UsableOnCharacter {
   override val metadata = FinalSolution.metadata
 

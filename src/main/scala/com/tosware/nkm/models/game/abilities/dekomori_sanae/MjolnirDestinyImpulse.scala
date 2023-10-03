@@ -18,15 +18,13 @@ object MjolnirDestinyImpulse extends NkmConf.AutoExtract {
           |This ability can be used again this turn every time it caused to kill at least one enemy.
           |
           |Range: circular, {range}""".stripMargin,
-
     )
 }
 
 case class MjolnirDestinyImpulse(abilityId: AbilityId, parentCharacterId: CharacterId)
-  extends Ability(abilityId, parentCharacterId)
+    extends Ability(abilityId, parentCharacterId)
     with UsableOnCoordinates
-    with GameEventListener
-{
+    with GameEventListener {
   override val metadata: AbilityMetadata = MjolnirDestinyImpulse.metadata
 
   override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =
@@ -35,7 +33,10 @@ case class MjolnirDestinyImpulse(abilityId: AbilityId, parentCharacterId: Charac
   override def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] =
     rangeCellCoords
 
-  override def use(target: HexCoordinates, useData: UseData)(implicit random: Random, gameState: GameState): GameState = {
+  override def use(target: HexCoordinates, useData: UseData)(implicit
+      random: Random,
+      gameState: GameState,
+  ): GameState = {
     val targets = target.getCircle(metadata.variables("radius")).whereEnemiesOfC(parentCharacterId).characters.map(_.id)
     val damage = Damage(DamageType.Physical, metadata.variables("damage"))
     val ngs = targets.foldLeft(gameState)((acc, cid) => hitAndDamageCharacter(cid, damage)(random, acc))
@@ -50,7 +51,7 @@ case class MjolnirDestinyImpulse(abilityId: AbilityId, parentCharacterId: Charac
   }
 
   override def useChecks(implicit target: HexCoordinates, useData: UseData, gameState: GameState): Set[UseCheck] =
-    if(state.isEnabled)
+    if (state.isEnabled)
       super.useChecks - UseCheck.Base.IsNotOnCooldown - UseCheck.Base.CanBeUsedByParent
     else
       super.useChecks

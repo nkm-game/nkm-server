@@ -11,10 +11,9 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
 class RubberRubberFruitSpec
-  extends AnyWordSpecLike
+    extends AnyWordSpecLike
     with Matchers
-    with TestUtils
-{
+    with TestUtils {
   private val abilityMetadata = RubberRubberFruit.metadata
   private val s = TestScenario.generate(TestHexMapName.RubberRubberFruit, abilityMetadata.id)
 
@@ -53,7 +52,7 @@ class RubberRubberFruitSpec
         gs.gameLog.events
           .ofType[GameEvent.CharacterDamaged]
           .causedBy(s.defaultAbilityId)
-          .size should be (1)
+          .size should be(1)
 
       assertOneDamaged(bazookaGs)
       assertOneDamaged(pistolGs)

@@ -22,12 +22,12 @@ object TiamatsIntervention extends NkmConf.AutoExtract {
           |Range: circular, {range}
           |Nearby position range: circular, {moveTargetRange}
           |""".stripMargin,
-
       relatedEffectIds = Seq(Stun.metadata.id),
     )
 }
 
-case class TiamatsIntervention(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId) with UsableOnCharacter {
+case class TiamatsIntervention(abilityId: AbilityId, parentCharacterId: CharacterId)
+    extends Ability(abilityId, parentCharacterId) with UsableOnCharacter {
   override val metadata: AbilityMetadata = TiamatsIntervention.metadata
 
   override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =
@@ -39,8 +39,8 @@ case class TiamatsIntervention(abilityId: AbilityId, parentCharacterId: Characte
   override def use(target: CharacterId, useData: UseData)(implicit random: Random, gameState: GameState): GameState = {
     val targetCoords = useData.data.parseJson.convertTo[HexCoordinates]
     val gs = gameState.teleportCharacter(target, targetCoords)(random, id)
-    if(parentCharacter.isEnemyForC(target)) {
-      val stunEffect =  effects.Stun(randomUUID(), metadata.variables("stunDuration"))
+    if (parentCharacter.isEnemyForC(target)) {
+      val stunEffect = effects.Stun(randomUUID(), metadata.variables("stunDuration"))
       gs.addEffect(target, stunEffect)(random, id)
     } else {
       gs.setShield(target, gs.characterById(target).state.shield + metadata.variables("shield"))(random, id)

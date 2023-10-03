@@ -10,19 +10,16 @@ object CharacterMetadata {
     empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadataId))
 }
 
-
-case class CharacterMetadata
-(
-  name: String,
-  attackType: AttackType,
-  initialHealthPoints: Int,
-  initialAttackPoints: Int,
-  initialBasicAttackRange: Int,
-  initialSpeed: Int,
-  initialPhysicalDefense: Int,
-  initialMagicalDefense: Int,
-  initialAbilitiesMetadataIds: Seq[AbilityMetadataId],
+case class CharacterMetadata(
+    name: String,
+    attackType: AttackType,
+    initialHealthPoints: Int,
+    initialAttackPoints: Int,
+    initialBasicAttackRange: Int,
+    initialSpeed: Int,
+    initialPhysicalDefense: Int,
+    initialMagicalDefense: Int,
+    initialAbilitiesMetadataIds: Seq[AbilityMetadataId],
 ) {
   val id: CharacterMetadataId = name
 }
-

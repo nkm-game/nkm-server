@@ -10,4 +10,3 @@ object DamageType extends Enum[DamageType] {
   case object Magical extends DamageType
   case object True extends DamageType
 }
-

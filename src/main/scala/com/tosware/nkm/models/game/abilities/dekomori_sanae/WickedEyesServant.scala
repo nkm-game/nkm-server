@@ -17,13 +17,12 @@ object WickedEyesServant extends NkmConf.AutoExtract {
         """Character deals <span style="color: deepskyblue;">{baseDamageBonus}</span> true damage on every attack and ability, if there is a character on map that has more AD or Rikka Takanashi.
           |If character kills an enemy, gain permanently 1 bonus true damage on this ability.
           |""".stripMargin,
-
     )
   val damageBonusKey = "damageBonus"
 }
 
 case class WickedEyesServant(abilityId: AbilityId, parentCharacterId: CharacterId)
-  extends Ability(abilityId, parentCharacterId)
+    extends Ability(abilityId, parentCharacterId)
     with GameEventListener {
   override val metadata: AbilityMetadata = WickedEyesServant.metadata
 
@@ -38,28 +37,28 @@ case class WickedEyesServant(abilityId: AbilityId, parentCharacterId: CharacterI
       .filterNot(_.id == parentCharacterId)
       .exists(c => c.state.name == "Rikka Takanashi" || c.state.attackPoints > parentCharacter.state.attackPoints)
 
-  override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState = {
+  override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
     e match {
       case GameEvent.CharacterDied(_, _, _, causedById, characterId) =>
-        if(parentCharacter.isFriendForC(characterId))
+        if (parentCharacter.isFriendForC(characterId))
           return gameState
 
         val causedByCharacterOpt = gameState.backtrackCauseToCharacterId(causedById)
-        if(!causedByCharacterOpt.contains(parentCharacter.id))
+        if (!causedByCharacterOpt.contains(parentCharacter.id))
           return gameState
 
         gameState
           .setAbilityVariable(id, damageBonusKey, (damageBonus + 1).toString)
 
       case GameEvent.CharacterDamaged(_, _, _, causedById, characterId, _) =>
-        if(!isActive)
+        if (!isActive)
           return gameState
 
-        if(causedById == id)
+        if (causedById == id)
           return gameState
 
         val causedByCharacterOpt = gameState.backtrackCauseToCharacterId(causedById)
-        if(!causedByCharacterOpt.contains(parentCharacter.id))
+        if (!causedByCharacterOpt.contains(parentCharacter.id))
           return gameState
 
         gameState
@@ -67,5 +66,4 @@ case class WickedEyesServant(abilityId: AbilityId, parentCharacterId: CharacterI
       case _ =>
         gameState
     }
-  }
 }

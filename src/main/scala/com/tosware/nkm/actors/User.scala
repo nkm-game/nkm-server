@@ -35,12 +35,13 @@ object User extends NkmTimeouts {
   def props(email: String): Props = Props(new User(email))
 
   def isEmailValid(email: String): Boolean = {
-    val emailRegex = """^[a-zA-Z0-9\.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$""".r
+    val emailRegex =
+      """^[a-zA-Z0-9\.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$""".r
     email match {
-      case null => false
-      case e if e.trim.isEmpty => false
+      case null                                          => false
+      case e if e.trim.isEmpty                           => false
       case e if emailRegex.findFirstMatchIn(e).isDefined => true
-      case _ => false
+      case _                                             => false
     }
   }
 
@@ -54,19 +55,16 @@ class User(email: String) extends PersistentActor with ActorLogging {
 
   var userState: UserState = UserState(email)
 
-  def register(email: String, passwordHash: String): Unit = {
+  def register(email: String, passwordHash: String): Unit =
     userState = userState.copy(passwordHashOpt = Some(passwordHash), userId = Some(email), isRegistered = true)
-  }
 
-  def oauthRegister(email: String): Unit = {
+  def oauthRegister(email: String): Unit =
     userState = userState.copy(userId = Some(email), isRegistered = true)
-  }
 
-  def grantAdmin(): Unit = {
+  def grantAdmin(): Unit =
     userState = userState.copy(isAdmin = true)
-  }
 
-  def registerHash(passwordHash: String) = {
+  def registerHash(passwordHash: String) =
     if (userState.isRegistered || !isEmailValid(email)) {
       sender() ! RegisterFailure
     } else {
@@ -79,7 +77,6 @@ class User(email: String) extends PersistentActor with ActorLogging {
         sender() ! RegisterSuccess
       }
     }
-  }
 
   def checkLogin(password: String): LoginEvent = {
     if (!userState.isRegistered)
@@ -103,10 +100,10 @@ class User(email: String) extends PersistentActor with ActorLogging {
       registerHash(passwordHash)
     case CheckLogin(password) =>
       log.info(s"Login check request for: $email")
-      sender () ! checkLogin(password)
+      sender() ! checkLogin(password)
     case OauthLogin() =>
       log.info(s"Oauth login request for: $email")
-      if(!userState.isRegistered) {
+      if (!userState.isRegistered) {
         val e = OauthRegisterSuccess(email)
         val taggedE = Tagged(e, Set(oauthRegisterTag))
         persist(taggedE) { _ =>
@@ -139,7 +136,7 @@ class User(email: String) extends PersistentActor with ActorLogging {
       grantAdmin()
       log.debug(s"Recovered grant admin")
     case RecoveryCompleted =>
-    case e => log.warning(s"Unknown message: $e")
+    case e                 => log.warning(s"Unknown message: $e")
   }
 
   override def receiveCommand: Receive = {

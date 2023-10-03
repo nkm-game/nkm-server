@@ -12,11 +12,11 @@ object Castling extends NkmConf.AutoExtract {
       name = "Castling",
       abilityType = AbilityType.Ultimate,
       description = "Character swaps the positions of 2 characters on the map.",
-
     )
 }
 
-case class Castling(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId) with UsableOnCharacter {
+case class Castling(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId)
+    with UsableOnCharacter {
   override val metadata = Castling.metadata
 
   override def rangeCellCoords(implicit gameState: GameState) =

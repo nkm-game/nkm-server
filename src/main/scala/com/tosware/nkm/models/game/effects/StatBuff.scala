@@ -22,15 +22,14 @@ object StatBuff {
 }
 
 case class StatBuff(effectId: CharacterEffectId, initialCooldown: Int, statType: StatType, value: Int)
-  extends CharacterEffect(effectId)
-    with GameEventListener
-{
+    extends CharacterEffect(effectId)
+    with GameEventListener {
   val metadata: CharacterEffectMetadata = StatBuff.metadata
 
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
     e match {
       case GameEvent.EffectAddedToCharacter(_, _, _, _, eid, _) =>
-        if(effectId == eid)
+        if (effectId == eid)
           return gameState
             .setEffectVariable(id, statTypeKey, statType.toString)
             .setEffectVariable(id, statValueKey, value.toString)

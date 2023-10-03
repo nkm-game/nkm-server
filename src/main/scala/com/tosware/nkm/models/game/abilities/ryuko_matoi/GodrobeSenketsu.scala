@@ -24,7 +24,6 @@ object GodrobeSenketsu extends NkmConf.AutoExtract {
           |
           |This ability can be disabled.
           |When disabled, you lose all bonus AD from this ability, stop receiving damage and the ability goes on cooldown.""".stripMargin,
-
     )
 
   val bonusDamageKey: String = "bonusDamage"
@@ -32,8 +31,8 @@ object GodrobeSenketsu extends NkmConf.AutoExtract {
 }
 
 case class GodrobeSenketsu(
-  abilityId: AbilityId,
-  parentCharacterId: CharacterId,
+    abilityId: AbilityId,
+    parentCharacterId: CharacterId,
 ) extends Ability(abilityId, parentCharacterId) with Usable with GameEventListener {
   override val metadata = GodrobeSenketsu.metadata
 
@@ -46,7 +45,10 @@ case class GodrobeSenketsu(
   private def changeDamageBonus(newAdBonus: Int)(implicit random: Random, gameState: GameState): GameState =
     gameState.setAbilityVariable(id, bonusDamageKey, newAdBonus.toString)
 
-  private def changeAbilityEffects(aes: Set[CharacterEffectId])(implicit random: Random, gameState: GameState): GameState =
+  private def changeAbilityEffects(aes: Set[CharacterEffectId])(implicit
+      random: Random,
+      gameState: GameState,
+  ): GameState =
     gameState.setAbilityVariable(id, abilityEffectIdsKey, aes.toJson.toString)
 
   private def applyAbilityEffects()(implicit random: Random, gameState: GameState): GameState = {
@@ -59,8 +61,8 @@ case class GodrobeSenketsu(
       .addEffect(parentCharacterId, e2)(random, id)
   }
 
-  override def use(useData: UseData)(implicit random: Random, gameState: GameState): GameState = {
-    if(state.isEnabled) {
+  override def use(useData: UseData)(implicit random: Random, gameState: GameState): GameState =
+    if (state.isEnabled) {
       changeDamageBonus(0)
         .removeEffects(abilityEffects().toSeq)(random, id)
         .setAbilityEnabled(abilityId, false)
@@ -71,15 +73,14 @@ case class GodrobeSenketsu(
         .refreshBasicMove(parentCharacterId)(random, id)
         .setAbilityEnabled(abilityId, true)
     }
-  }
 
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState = {
-    if(!state.isEnabled) return gameState
+    if (!state.isEnabled) return gameState
 
     e match {
       case TurnFinished(_, _, _, _) =>
         val characterIdThatTookAction = gameState.gameLog.characterThatTookActionInTurn(e.turn.number).get
-        if(characterIdThatTookAction != parentCharacter.id) return gameState
+        if (characterIdThatTookAction != parentCharacter.id) return gameState
         val bonusAdPerTurn = metadata.variables("bonusAttackDamagePerTurn")
         val newAdBonus = damageBonus + bonusAdPerTurn
         val ngs = changeDamageBonus(newAdBonus)

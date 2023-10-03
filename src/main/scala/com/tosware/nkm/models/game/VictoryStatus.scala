@@ -11,6 +11,3 @@ object VictoryStatus extends Enum[VictoryStatus] {
   case object Won extends VictoryStatus
   case object Drawn extends VictoryStatus
 }
-
-
-

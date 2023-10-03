@@ -8,9 +8,7 @@ import com.tosware.nkm.models.UserState
 import com.tosware.nkm.models.UserStateView
 import helpers.NkmPersistenceTestKit
 
-
-class UserSpec extends NkmPersistenceTestKit(ActorSystem("UserSpec"))
-{
+class UserSpec extends NkmPersistenceTestKit(ActorSystem("UserSpec")) {
   "An User actor" must {
     "not be registered initially" in {
       val email = "test@example.com"
@@ -61,14 +59,18 @@ class UserSpec extends NkmPersistenceTestKit(ActorSystem("UserSpec"))
 
         val loginCheckFuture = user ? CheckLogin("password")
         val loginCheckResponse = aw(loginCheckFuture.mapTo[LoginEvent])
-        loginCheckResponse shouldBe LoginSuccess(UserStateView("test3@example.com", Some("test3@example.com"), isAdmin = false))
+        loginCheckResponse shouldBe LoginSuccess(UserStateView(
+          "test3@example.com",
+          Some("test3@example.com"),
+          isAdmin = false,
+        ))
       }
     }
 
     "not be able to email with incorrect credentials" in {
       val email = "test4@example.com"
       val user: ActorRef = system.actorOf(User.props(email))
-        within2000 {
+      within2000 {
         val registerFuture = user ? Register("password")
         val response = aw(registerFuture.mapTo[RegisterEvent])
         response shouldBe RegisterSuccess

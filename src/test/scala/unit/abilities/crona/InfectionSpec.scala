@@ -10,14 +10,13 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
 class InfectionSpec
-  extends AnyWordSpecLike
+    extends AnyWordSpecLike
     with Matchers
-    with TestUtils
-{
+    with TestUtils {
   private val abilityMetadata = Infection.metadata
   private val characterMetadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
   private val s = scenarios.Simple2v2TestScenario(characterMetadata)
-  private implicit val gameState: GameState = s.gameState.incrementPhase(4)
+  implicit private val gameState: GameState = s.gameState.incrementPhase(4)
   private val abilityId = s.p(0)(0).character.state.abilities.head.id
   private val abilityId2 = s.p(0)(1).character.state.abilities.head.id
 

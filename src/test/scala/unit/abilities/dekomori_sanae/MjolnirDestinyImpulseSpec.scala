@@ -12,10 +12,9 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
 class MjolnirDestinyImpulseSpec
-  extends AnyWordSpecLike
+    extends AnyWordSpecLike
     with Matchers
-    with TestUtils
-{
+    with TestUtils {
   private val abilityMetadata = MjolnirDestinyImpulse.metadata
   private val s = TestScenario.generate(TestHexMapName.Simple2v2v2, abilityMetadata.id)
 
@@ -56,7 +55,7 @@ class MjolnirDestinyImpulseSpec
       aGsNoRefresh0.gameLog.events
         .ofType[GameEvent.CharacterDamaged]
         .causedBy(s.defaultAbilityId)
-        .size should be (3)
+        .size should be(3)
     }
 
     "not be able to use again if no enemies were killed" in {

@@ -28,11 +28,11 @@ object FinalBattleSecretTechnique extends NkmConf.AutoExtract {
           |
           |Range: linear, stops at walls, {range}
           |""".stripMargin,
-
     )
 }
 
-case class FinalBattleSecretTechnique(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId) with UsableOnCharacter {
+case class FinalBattleSecretTechnique(abilityId: AbilityId, parentCharacterId: CharacterId)
+    extends Ability(abilityId, parentCharacterId) with UsableOnCharacter {
   override val metadata: AbilityMetadata = FinalBattleSecretTechnique.metadata
 
   override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =
@@ -42,7 +42,6 @@ case class FinalBattleSecretTechnique(abilityId: AbilityId, parentCharacterId: C
 
   override def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] =
     rangeCellCoords.whereEnemiesOfC(parentCharacterId)
-
 
   override def use(target: CharacterId, useData: UseData)(implicit random: Random, gameState: GameState): GameState = {
     val direction = gameState.getDirection(parentCharacterId, target).get
@@ -56,7 +55,8 @@ case class FinalBattleSecretTechnique(abilityId: AbilityId, parentCharacterId: C
       targetCoords: HexCoordinates <- knockbackGs.hexMap.getCellOfCharacter(target).map(_.coordinates)
       parentCoords: HexCoordinates <- parentCell(knockbackGs).map(_.coordinates)
 
-      blazingFlameCoords: Seq[HexCoordinates] = parentCoords.getThickLine(targetCoords, metadata.variables("blazingFlameWidth"))
+      blazingFlameCoords: Seq[HexCoordinates] =
+        parentCoords.getThickLine(targetCoords, metadata.variables("blazingFlameWidth"))
       flameTargets = blazingFlameCoords.whereEnemiesOfC(parentCharacterId).characters.map(_.id)
       damage = Damage(DamageType.Magical, metadata.variables("blazingFlameDamage"))
       flameGs = flameTargets.foldLeft(knockbackGs)((acc, cid) => hitAndDamageCharacter(cid, damage)(random, acc))
@@ -70,7 +70,7 @@ case class FinalBattleSecretTechnique(abilityId: AbilityId, parentCharacterId: C
       judgementMultiplier = parentCoords.getCircle(judgementRange).whereCharacters.size - 1
       damage = Damage(DamageType.True, condemnationDamagePerCharacter * judgementMultiplier)
       condemnationGs = hitAndDamageCharacter(target, damage)(random, flameGs)
-    } yield condemnationGs) .getOrElse(flameGs)
+    } yield condemnationGs).getOrElse(flameGs)
 
     condemnationGs
   }

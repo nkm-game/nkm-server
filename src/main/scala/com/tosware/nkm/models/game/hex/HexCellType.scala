@@ -11,4 +11,3 @@ object HexCellType extends Enum[HexCellType] {
   case object Wall extends HexCellType
   case object SpawnPoint extends HexCellType
 }
-

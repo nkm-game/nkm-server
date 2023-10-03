@@ -9,4 +9,3 @@ object HexCellEffectType extends Enum[HexCellEffectType] {
 
   case object Trap extends HexCellEffectType
 }
-

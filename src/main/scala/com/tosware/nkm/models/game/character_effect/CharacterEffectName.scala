@@ -30,4 +30,3 @@ object CharacterEffectName extends Enum[CharacterEffectName] {
   case object Stun extends CharacterEffectName
   case object ZeroGravity extends CharacterEffectName
 }
-

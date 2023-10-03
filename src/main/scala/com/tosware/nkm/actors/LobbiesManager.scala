@@ -29,7 +29,7 @@ object LobbiesManager {
 }
 
 class LobbiesManager(nkmDataService: NkmDataService)
-  extends PersistentActor
+    extends PersistentActor
     with ActorLogging
     with NkmTimeouts {
 
@@ -70,8 +70,8 @@ class LobbiesManager(nkmDataService: NkmDataService)
       setLobby(lobbyId, lobbyActor)
       log.debug(s"Recovered create of $lobbyId")
     case RecoveryCompleted =>
-    case Success(_) =>
-    case e => log.warning(s"Unknown message: $e")
+    case Success(_)        =>
+    case e                 => log.warning(s"Unknown message: $e")
   }
 
   override def receiveCommand: Receive = {

@@ -8,4 +8,3 @@ case class HexMapTemplate(name: String, cellTemplates: Set[HexCellTemplate]) {
   def toHexMap: HexMap =
     HexMap(name, cellTemplates.map(_.toCell))
 }
-

@@ -16,12 +16,12 @@ object Invigorate extends NkmConf.AutoExtract {
         """Character casts a spell on a friendly character that heals {heal} HP for {duration}t.
           |
           |Range: circular, {range}""".stripMargin,
-
       relatedEffectIds = Seq(effects.HealOverTime.metadata.id),
     )
 }
 
-case class Invigorate(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId) with UsableOnCharacter {
+case class Invigorate(abilityId: AbilityId, parentCharacterId: CharacterId)
+    extends Ability(abilityId, parentCharacterId) with UsableOnCharacter {
   override val metadata = Invigorate.metadata
 
   override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =
@@ -30,14 +30,15 @@ case class Invigorate(abilityId: AbilityId, parentCharacterId: CharacterId) exte
   override def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] =
     rangeCellCoords.whereFriendsOfC(parentCharacterId)
 
-  override def use(target: CharacterId, useData: UseData)(implicit random: Random, gameState: GameState): GameState = {
+  override def use(target: CharacterId, useData: UseData)(implicit random: Random, gameState: GameState): GameState =
     gameState
-      .addEffect(target, effects.HealOverTime(randomUUID(), metadata.variables("duration"), metadata.variables("heal")))(random, id)
-  }
+      .addEffect(
+        target,
+        effects.HealOverTime(randomUUID(), metadata.variables("duration"), metadata.variables("heal")),
+      )(random, id)
 
-  override def useChecks(implicit target: CharacterId, useData: UseData, gameState: GameState): Set[UseCheck] = {
+  override def useChecks(implicit target: CharacterId, useData: UseData, gameState: GameState): Set[UseCheck] =
     super.useChecks ++ Seq(
-      UseCheck.TargetCharacter.IsFriend,
+      UseCheck.TargetCharacter.IsFriend
     )
-  }
 }

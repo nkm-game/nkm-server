@@ -25,7 +25,13 @@ object BugReportActor {
     val id: BugReportId
   }
 
-  case class Created(id: BugReportId, creatorIdOpt: Option[UserId], description: String, gameId: Option[GameId], creationDate: ZonedDateTime) extends Event
+  case class Created(
+      id: BugReportId,
+      creatorIdOpt: Option[UserId],
+      description: String,
+      gameId: Option[GameId],
+      creationDate: ZonedDateTime,
+  ) extends Event
 
   case class ResolvedSet(id: BugReportId, resolved: Boolean) extends Event
 
@@ -33,7 +39,7 @@ object BugReportActor {
 }
 
 class BugReportActor
-  extends PersistentActor
+    extends PersistentActor
     with ActorLogging
     with NkmTimeouts {
 
@@ -41,25 +47,29 @@ class BugReportActor
 
   override def persistenceId: String = s"bug-report"
 
-  override def log: LoggingAdapter = {
+  override def log: LoggingAdapter =
     akka.event.Logging(context.system, s"${this.getClass}($persistenceId)")
-  }
 
   implicit val random: Random = new Random(persistenceId.hashCode)
 
   private var bugReports: Seq[BugReport] = Seq.empty
 
-  def create(id: BugReportId, creatorIdOpt: Option[UserId], description: String, gameId: Option[GameId], creationDate: ZonedDateTime): Unit = {
+  def create(
+      id: BugReportId,
+      creatorIdOpt: Option[UserId],
+      description: String,
+      gameId: Option[GameId],
+      creationDate: ZonedDateTime,
+  ): Unit = {
     val newReport = BugReport(id, creatorIdOpt, description, gameId, creationDate)
     bugReports = bugReports.appended(newReport)
   }
 
-  def setResolved(id: BugReportId, resolved: Boolean) = {
+  def setResolved(id: BugReportId, resolved: Boolean) =
     bugReports = bugReports.collect {
       case bugReport if bugReport.id == id => bugReport.copy(resolved = resolved)
-      case bugReport => bugReport
+      case bugReport                       => bugReport
     }
-  }
 
   override def receive: Receive = {
     case GetBugReports =>
@@ -91,7 +101,7 @@ class BugReportActor
       setResolved(id, resolved)
       log.debug(s"Recovered resolved set")
     case RecoveryCompleted =>
-    case e => log.warning(s"Unknown message: $e")
+    case e                 => log.warning(s"Unknown message: $e")
   }
 
   override def receiveCommand: Receive = {

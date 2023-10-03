@@ -8,13 +8,13 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
 class AquaCronaSpec
-  extends AnyWordSpecLike
+    extends AnyWordSpecLike
     with Matchers
-    with TestUtils
-{
+    with TestUtils {
   private val characters = CharacterMetadatasProvider().getCharacterMetadatas
-  private val s = scenarios.Simple1v1TestScenario(characters.find(_.name == "Crona").get, characters.find(_.name == "Aqua"))
-  private implicit val gameState: GameState = s.gameState.incrementPhase(4)
+  private val s =
+    scenarios.Simple1v1TestScenario(characters.find(_.name == "Crona").get, characters.find(_.name == "Aqua"))
+  implicit private val gameState: GameState = s.gameState.incrementPhase(4)
   private val blackBloodId = s.p(0)(0).character.state.abilities(2).id
   private val purificationId = s.p(1)(0).character.state.abilities(1).id
 
@@ -27,7 +27,7 @@ class AquaCronaSpec
 
       }
       val purifiedGameState = bbGameState.useAbilityOnCharacter(purificationId, s.p(1)(0).character.id)
-      purifiedGameState.characterById(s.p(1)(0).character.id).state.effects.size should be (0)
+      purifiedGameState.characterById(s.p(1)(0).character.id).state.effects.size should be(0)
     }
   }
 }

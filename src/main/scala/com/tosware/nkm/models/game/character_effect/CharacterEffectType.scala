@@ -11,4 +11,3 @@ object CharacterEffectType extends Enum[CharacterEffectType] {
   case object Negative extends CharacterEffectType
   case object Mixed extends CharacterEffectType
 }
-

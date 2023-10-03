@@ -17,12 +17,11 @@ object DrainTouch extends NkmConf.AutoExtract {
         """Character drains {damage} HP from target enemy, dealing magical damage and restoring HP equal to damage dealt to target.
           |
           |Range: linear, {range}""".stripMargin,
-
     )
 }
 
 case class DrainTouch(abilityId: AbilityId, parentCharacterId: CharacterId)
-  extends Ability(abilityId, parentCharacterId)
+    extends Ability(abilityId, parentCharacterId)
     with UsableOnCharacter {
   override val metadata: AbilityMetadata = DrainTouch.metadata
 

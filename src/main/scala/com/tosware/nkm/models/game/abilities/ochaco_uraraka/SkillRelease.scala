@@ -18,12 +18,11 @@ object SkillRelease extends NkmConf.AutoExtract {
         """Character releases their ability, and all characters lose Zero Gravity effect.
           |Enemies that lost Zero Gravity are stunned for {stunDuration}t.
           |""".stripMargin,
-
     )
 }
 
 case class SkillRelease(abilityId: AbilityId, parentCharacterId: CharacterId)
-  extends Ability(abilityId, parentCharacterId)
+    extends Ability(abilityId, parentCharacterId)
     with Usable {
   override val metadata: AbilityMetadata = SkillRelease.metadata
   override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =
@@ -53,9 +52,9 @@ case class SkillRelease(abilityId: AbilityId, parentCharacterId: CharacterId)
       gameState
         .removeEffects(eidsToRemove.toSeq)(random, id)
 
-    characterIdsToStun.foldLeft(effectsRemovedGs)((acc, cid) => {
+    characterIdsToStun.foldLeft(effectsRemovedGs) { (acc, cid) =>
       val stunEffect = effects.Stun(randomUUID(), metadata.variables("stunDuration"))
-      acc.addEffect(cid,stunEffect)(random, id)
-    })
+      acc.addEffect(cid, stunEffect)(random, id)
+    }
   }
 }

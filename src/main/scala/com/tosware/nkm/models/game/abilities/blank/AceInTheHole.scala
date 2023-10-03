@@ -8,40 +8,37 @@ import com.tosware.nkm.models.game.event.{GameEvent, GameEventListener}
 
 import scala.util.Random
 
-
 object AceInTheHole extends NkmConf.AutoExtract {
-  val metadata: AbilityMetadata = {
+  val metadata: AbilityMetadata =
     AbilityMetadata(
       name = "Ace In The Hole",
       abilityType = AbilityType.Passive,
-      description = """If Character takes damage equal to more than {maxHpPercent}% of their maximum HP during the turn of one character, they will be able to use one of their abilities on their next move, regardless of its CD.
-                      |It does not affect the actual ability CD count.""".stripMargin,
+      description =
+        """If Character takes damage equal to more than {maxHpPercent}% of their maximum HP during the turn of one character, they will be able to use one of their abilities on their next move, regardless of its CD.
+          |It does not affect the actual ability CD count.""".stripMargin,
       relatedEffectIds = Seq(FreeAbility.metadata.id),
     )
-  }
 }
 
 case class AceInTheHole(abilityId: AbilityId, parentCharacterId: CharacterId)
-  extends Ability(abilityId, parentCharacterId)
+    extends Ability(abilityId, parentCharacterId)
     with GameEventListener {
   override val metadata = AceInTheHole.metadata
 
-  private def getDamageThisTurn()(implicit gameState: GameState): Int = {
+  private def getDamageThisTurn()(implicit gameState: GameState): Int =
     gameState.gameLog.events
       .inTurn(gameState.turn.number)
       .ofType[GameEvent.CharacterDamaged]
       .ofCharacter(parentCharacterId)
       .map(_.damageAmount).sum
-  }
 
-  override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState = {
+  override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
     e match {
       case GameEvent.CharacterDamaged(_, _, _, _, characterId, _) =>
-        if(characterId != parentCharacterId) return gameState
-        if(getDamageThisTurn() < parentCharacter.state.maxHealthPoints * metadata.variables("maxHpPercent") / 100)
+        if (characterId != parentCharacterId) return gameState
+        if (getDamageThisTurn() < parentCharacter.state.maxHealthPoints * metadata.variables("maxHpPercent") / 100)
           gameState
         else gameState.addEffect(parentCharacterId, FreeAbility(parentCharacterId, 1))(random, id)
       case _ => gameState
     }
-  }
 }

@@ -69,7 +69,7 @@ object Lobby {
 }
 
 class Lobby(id: GameId)(implicit nkmDataService: NkmDataService)
-  extends PersistentActor
+    extends PersistentActor
     with ActorLogging
     with NkmTimeouts {
 
@@ -77,9 +77,8 @@ class Lobby(id: GameId)(implicit nkmDataService: NkmDataService)
 
   override def persistenceId: String = s"lobby-$id"
 
-  override def log: LoggingAdapter = {
+  override def log: LoggingAdapter =
     akka.event.Logging(context.system, s"${this.getClass}($persistenceId)")
-  }
 
   var lobbyState: LobbyState = LobbyState(id)
 
@@ -87,7 +86,12 @@ class Lobby(id: GameId)(implicit nkmDataService: NkmDataService)
     lobbyState.chosenHexMapName.nonEmpty && lobbyState.userIds.length > 1
 
   def create(name: String, hostUserId: UserId, creationDate: LocalDateTime): Unit =
-    lobbyState = lobbyState.copy(name = Some(name), creationDate = Some(creationDate), hostUserId = Some(hostUserId), userIds = List(hostUserId))
+    lobbyState = lobbyState.copy(
+      name = Some(name),
+      creationDate = Some(creationDate),
+      hostUserId = Some(hostUserId),
+      userIds = List(hostUserId),
+    )
 
   def joinLobby(userId: UserId): Unit =
     lobbyState = lobbyState.copy(userIds = lobbyState.userIds :+ userId)
@@ -249,7 +253,7 @@ class Lobby(id: GameId)(implicit nkmDataService: NkmDataService)
           val hostUserId = lobbyState.hostUserId.get
           val players: List[Player] = lobbyState.userIds.map(i => Player(i)).map {
             case p: Player if p.name == hostUserId => p.copy(isHost = true)
-            case p: Player => p
+            case p: Player                         => p
           }
           val clockConfig: ClockConfig =
             if (lobbyState.clockConfig == ClockConfig.empty())
@@ -305,7 +309,7 @@ class Lobby(id: GameId)(implicit nkmDataService: NkmDataService)
       setGameStarted()
       log.debug(s"Recovered starting game")
     case RecoveryCompleted =>
-    case e => log.warning(s"Unknown message: $e")
+    case e                 => log.warning(s"Unknown message: $e")
   }
 
   override def receiveCommand: Receive = {

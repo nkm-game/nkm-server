@@ -9,12 +9,11 @@ import com.tosware.nkm.services.http.routes.*
 import com.tosware.nkm.{CORSHandler, NkmDependencies, NkmTimeouts}
 
 class HttpService(deps: NkmDependencies)
-  extends CORSHandler
+    extends CORSHandler
     with SprayJsonSupport
     with NkmJsonProtocol
     with NkmTimeouts
-    with LoggingDirective
-{
+    with LoggingDirective {
   val authRoutes = new AuthRoutes(deps)
   val lobbyRoutes = new LobbyRoutes(deps)
   val gameRoutes = new GameRoutes(deps)
@@ -22,7 +21,7 @@ class HttpService(deps: NkmDependencies)
   val websocketRoutes = new WebsocketRoutes(deps)
   val bugReportRoutes = new BugReportRoutes(deps)
 
-  val routes: Route = {
+  val routes: Route =
     logRequestResponse {
       corsHandler {
         concat(
@@ -44,9 +43,8 @@ class HttpService(deps: NkmDependencies)
                   bugReportRoutes.bugReportPostRoutes,
                 )
               }
-          }
+          },
         )
       }
     }
-  }
 }

@@ -19,12 +19,12 @@ object SummerBreeze extends NkmConf.AutoExtract {
           |
           |Range: linear, {range}
           |""".stripMargin,
-
       relatedEffectIds = Seq(effects.Stun.metadata.id),
     )
 }
 
-case class SummerBreeze(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId) with UsableOnCharacter {
+case class SummerBreeze(abilityId: AbilityId, parentCharacterId: CharacterId)
+    extends Ability(abilityId, parentCharacterId) with UsableOnCharacter {
   override val metadata: AbilityMetadata = SummerBreeze.metadata
 
   override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =
@@ -35,13 +35,10 @@ case class SummerBreeze(abilityId: AbilityId, parentCharacterId: CharacterId) ex
   override def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] =
     rangeCellCoords.whereEnemiesOfC(parentCharacterId)
 
-
-  private def stunAndDamage(target: CharacterId)(implicit random: Random, gameState: GameState): GameState = {
+  private def stunAndDamage(target: CharacterId)(implicit random: Random, gameState: GameState): GameState =
     gameState
       .addEffect(target, effects.Stun(randomUUID(), metadata.variables("stunDuration")))(random, id)
       .damageCharacter(target, Damage(DamageType.Magical, metadata.variables("damage")))(random, id)
-  }
-
 
   override def use(target: CharacterId, useData: UseData)(implicit random: Random, gameState: GameState): GameState = {
     val direction = gameState.getDirection(parentCharacterId, target).get

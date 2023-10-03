@@ -21,19 +21,18 @@ object ApplyEffectOnBasicAttack {
 }
 
 case class ApplyEffectOnBasicAttack(effectId: CharacterEffectId, initialCooldown: Int, effectToApply: CharacterEffect)
-  extends CharacterEffect(effectId)
-    with GameEventListener
-{
+    extends CharacterEffect(effectId)
+    with GameEventListener {
   val metadata: CharacterEffectMetadata = ApplyEffectOnBasicAttack.metadata
 
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
     e match {
       case GameEvent.EffectAddedToCharacter(_, _, _, _, eid, _) =>
-        if(effectId == eid)
+        if (effectId == eid)
           return gameState.setEffectVariable(id, effectToApplyKey, effectToApply.metadata.id)
         gameState
       case GameEvent.CharacterBasicAttacked(_, _, _, _, characterId, targetCharacterId) =>
-        if(characterId != parentCharacter.id) return gameState
+        if (characterId != parentCharacter.id) return gameState
         gameState
           .addEffect(targetCharacterId, effectToApply)(random, id)
           .removeEffect(id)(random, id)

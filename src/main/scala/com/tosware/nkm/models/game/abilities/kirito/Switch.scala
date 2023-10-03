@@ -18,16 +18,16 @@ object Switch extends NkmConf.AutoExtract {
           |You can use basic attack or other ability just after using this ability.
           |
           |Range: circular, {range}""".stripMargin,
-
       relatedEffectIds = Seq(effects.AbilityUnlock.metadata.id),
     )
 }
 
-case class Switch(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId) with UsableOnCharacter {
+case class Switch(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId)
+    with UsableOnCharacter {
   override val metadata = Switch.metadata
 
   override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] = {
-    if(parentCell.isEmpty) return Set.empty
+    if (parentCell.isEmpty) return Set.empty
     val rangeCoords = parentCell.get.coordinates.getCircle(metadata.variables("range")) - parentCell.get.coordinates
     val enemiesAaCoords = gameState
       .players.filterNot(_.name == parentCharacter.owner.id)
@@ -36,7 +36,7 @@ case class Switch(abilityId: AbilityId, parentCharacterId: CharacterId) extends 
       .flatMap(_.basicAttackCellCoords)
       .toSet
 
-    if(enemiesAaCoords.contains(parentCell.get.coordinates)) rangeCoords
+    if (enemiesAaCoords.contains(parentCell.get.coordinates)) rangeCoords
     else rangeCoords.intersect(enemiesAaCoords)
   }
 

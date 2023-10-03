@@ -41,7 +41,7 @@ object DBManager {
       PRIMARY KEY(persistence_id, sequence_number),
       INDEX(ordering)
     )
-    """,
+    """
     )
 
     def createSnapshotIfNotExists = DBIO.seq(
@@ -53,7 +53,7 @@ object DBManager {
           snapshot BLOB NOT NULL,
           PRIMARY KEY (persistence_id, sequence_number)
         )
-      """,
+      """
     )
 
     val setupAction: DBIO[Unit] = DBIO.seq(

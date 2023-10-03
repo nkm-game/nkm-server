@@ -11,19 +11,18 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
 class SwitchSpec
-  extends AnyWordSpecLike
+    extends AnyWordSpecLike
     with Matchers
-    with TestUtils
-{
+    with TestUtils {
   private val abilityMetadata = Switch.metadata
   private val ultimateAbilityMetadata = PowerOfExistence.metadata
   private val characterMetadata = CharacterMetadata.empty()
     .copy(
       initialBasicAttackRange = 1,
-      initialAbilitiesMetadataIds = Seq(abilityMetadata.id, ultimateAbilityMetadata.id)
+      initialAbilitiesMetadataIds = Seq(abilityMetadata.id, ultimateAbilityMetadata.id),
     )
   private val s = scenarios.Simple2v2TestScenario(characterMetadata)
-  private implicit val gameState: GameState = s.gameState.incrementPhase(4)
+  implicit private val gameState: GameState = s.gameState.incrementPhase(4)
   private val abilityId = s.p(0)(0).character.state.abilities.head.id
   private val ultimateAbilityId = s.p(0)(0).character.state.abilities.tail.head.id
 
@@ -107,7 +106,9 @@ class SwitchSpec
     "not be able to use switch with himself" in {
       val ngs = gameState.teleportCharacter(s.defaultCharacter.id, HexCoordinates(2, 0))
 
-      ngs.abilityById(abilityId).targetsInRange(ngs) should not contain s.defaultCharacter.parentCell(ngs).get.coordinates
+      ngs.abilityById(abilityId).targetsInRange(ngs) should not contain s.defaultCharacter.parentCell(
+        ngs
+      ).get.coordinates
 
       assertCommandFailure {
         GameStateValidator()(ngs)
@@ -120,18 +121,18 @@ class SwitchSpec
     }
 
     "not be able to use switch on character outside map" in {
-        val ngs = gameState
-          .teleportCharacter(s.p(0)(0).character.id, HexCoordinates(2, 0))
-          .removeCharacterFromMap(s.p(0)(1).character.id)
+      val ngs = gameState
+        .teleportCharacter(s.p(0)(0).character.id, HexCoordinates(2, 0))
+        .removeCharacterFromMap(s.p(0)(1).character.id)
 
-        assertCommandFailure {
-          GameStateValidator()(ngs)
-            .validateAbilityUseOnCharacter(
-              s.p(0)(0).character.owner.id,
-              abilityId,
-              s.p(0)(1).character.id,
-            )
-        }
+      assertCommandFailure {
+        GameStateValidator()(ngs)
+          .validateAbilityUseOnCharacter(
+            s.p(0)(0).character.owner.id,
+            abilityId,
+            s.p(0)(1).character.id,
+          )
+      }
     }
   }
 }

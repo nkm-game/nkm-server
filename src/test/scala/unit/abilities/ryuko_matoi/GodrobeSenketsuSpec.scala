@@ -9,10 +9,9 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
 class GodrobeSenketsuSpec
-  extends AnyWordSpecLike
+    extends AnyWordSpecLike
     with Matchers
-    with TestUtils
-{
+    with TestUtils {
   private val abilityMetadata = GodrobeSenketsu.metadata
   private val metadata = CharacterMetadata.empty()
     .copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
@@ -41,7 +40,7 @@ class GodrobeSenketsuSpec
       val newHP1 = abilityUsedGameState.characterById(s.p(0)(0).character.id).state.healthPoints
 
       oldAD should be < newAD1
-      oldHP should be (newHP1)
+      oldHP should be(newHP1)
 
       val oneTurnPassedGameState: GameState = abilityUsedGameState
         .endTurn()
@@ -66,8 +65,8 @@ class GodrobeSenketsuSpec
       val oldAD = s.p(0)(0).character.state.attackPoints
       val abilityUsedGameState: GameState = gameState.useAbility(abilityId)
 
-      abilityUsedGameState.abilityStates(abilityId).isEnabled should be (true)
-      abilityUsedGameState.abilityStates(abilityId).cooldown should be (0)
+      abilityUsedGameState.abilityStates(abilityId).isEnabled should be(true)
+      abilityUsedGameState.abilityStates(abilityId).cooldown should be(0)
 
       assertCommandFailure {
         GameStateValidator()(abilityUsedGameState).validateAbilityUse(s.p(0)(0).ownerId, abilityId)
@@ -84,12 +83,12 @@ class GodrobeSenketsuSpec
         .passTurn(s.p(1)(0).character.id)
         .useAbility(abilityId)
 
-      abilityDisabledGameState.characterById(s.p(0)(0).character.id).state.effects.ofType[effects.Fly].size should be (0)
+      abilityDisabledGameState.characterById(s.p(0)(0).character.id).state.effects.ofType[effects.Fly].size should be(0)
 
       val newAD = abilityDisabledGameState.characterById(s.p(0)(0).character.id).state.attackPoints
-      oldAD should be (newAD)
-      abilityDisabledGameState.abilityStates(abilityId).isEnabled should be (false)
-      abilityDisabledGameState.abilityStates(abilityId).cooldown should be (abilityMetadata.variables("cooldown"))
+      oldAD should be(newAD)
+      abilityDisabledGameState.abilityStates(abilityId).isEnabled should be(false)
+      abilityDisabledGameState.abilityStates(abilityId).cooldown should be(abilityMetadata.variables("cooldown"))
     }
   }
 }

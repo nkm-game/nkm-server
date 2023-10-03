@@ -10,12 +10,12 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
 class PowerOfExistenceSpec
-  extends AnyWordSpecLike
+    extends AnyWordSpecLike
     with Matchers
-    with TestUtils
-{
+    with TestUtils {
   private val abilityMetadata = PowerOfExistence.metadata
-  private val metadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id, MasterThrone.metadata.id))
+  private val metadata =
+    CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id, MasterThrone.metadata.id))
   private val s = scenarios.Simple2v2TestScenario(metadata)
   private val masterThroneAbilityId = s.defaultCharacter.state.abilities.tail.head.id
   private val aaGameState: GameState =
@@ -40,11 +40,11 @@ class PowerOfExistenceSpec
 
     "be able to damage characters" in {
       collectedEnergy(aaGameState) should be > 0
-      collectedEnergy(aGs) should be (0)
+      collectedEnergy(aGs) should be(0)
       aGs.gameLog.events
         .ofType[GameEvent.CharacterDamaged]
         .causedBy(s.defaultAbilityId)
-        .size should be (2)
+        .size should be(2)
     }
   }
 }

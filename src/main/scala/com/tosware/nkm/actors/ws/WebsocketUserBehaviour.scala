@@ -7,7 +7,7 @@ import com.tosware.nkm.serializers.NkmJsonProtocol
 import com.tosware.nkm.services.http.directives.JwtHelper
 
 trait WebsocketUserBehaviour
-  extends Actor
+    extends Actor
     with ActorLogging
     with SprayJsonSupport
     with NkmJsonProtocol

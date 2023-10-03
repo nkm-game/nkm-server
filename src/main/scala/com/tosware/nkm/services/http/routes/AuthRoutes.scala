@@ -13,15 +13,15 @@ import com.tosware.nkm.{Logging, NkmDependencies}
 import spray.json.*
 
 class AuthRoutes(deps: NkmDependencies)
-  extends JwtDirective
+    extends JwtDirective
     with SprayJsonSupport
-    with Logging
-{
+    with Logging {
   val jwtSecretKey: JwtSecretKey = deps.jwtSecretKey
   val userService: UserService = deps.userService
 
   def handleLoginEvent(event: User.LoginEvent): StandardRoute = event match {
-    case User.LoginSuccess(userStateView) => complete(StatusCodes.OK, AuthResponse(getToken(userStateView.toJson.toString), userStateView))
+    case User.LoginSuccess(userStateView) =>
+      complete(StatusCodes.OK, AuthResponse(getToken(userStateView.toJson.toString), userStateView))
     case User.LoginFailure(reason) => complete(StatusCodes.Unauthorized, reason)
   }
 
@@ -32,7 +32,7 @@ class AuthRoutes(deps: NkmDependencies)
         userService.register(entity) match {
           case RegisterSuccess => complete(StatusCodes.Created)
           case RegisterFailure => complete(StatusCodes.Conflict) // TODO - change status code based on failure
-          case _ => complete(StatusCodes.InternalServerError)
+          case _               => complete(StatusCodes.InternalServerError)
         }
       }
     },
@@ -47,7 +47,6 @@ class AuthRoutes(deps: NkmDependencies)
         logger.info(s"Google oauth request")
         handleLoginEvent(userService.authenticateOauthGoogle(entity))
       }
-    }
-
+    },
   )
 }

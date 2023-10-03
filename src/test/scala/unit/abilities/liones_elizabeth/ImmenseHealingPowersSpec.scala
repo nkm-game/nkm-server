@@ -10,17 +10,18 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
 class ImmenseHealingPowersSpec
-  extends AnyWordSpecLike
+    extends AnyWordSpecLike
     with Matchers
-    with TestUtils
-{
+    with TestUtils {
   private val abilityMetadata = ImmenseHealingPowers.metadata
-  private val metadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(
-    abilityMetadata.id,
-    NaturesBeauty.metadata.id,
-    Invigorate.metadata.id,
-    PowerOfTheGoddess.metadata.id,
-  ))
+  private val metadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds =
+    Seq(
+      abilityMetadata.id,
+      NaturesBeauty.metadata.id,
+      Invigorate.metadata.id,
+      PowerOfTheGoddess.metadata.id,
+    )
+  )
   private val s = scenarios.Simple2v2TestScenario(metadata)
 
   private val invigorateAbilityId =
@@ -52,7 +53,7 @@ class ImmenseHealingPowersSpec
     "apply heal amplifying effect" in {
       val ngs = invigorateAppliedGs(dmgGs95)
       val events = ngs.gameLog.events
-      events.ofType[HealAmplified].size should be (1)
+      events.ofType[HealAmplified].size should be(1)
     }
 
     "heal stronger based on missing HP (invigorate)" in {
@@ -65,12 +66,18 @@ class ImmenseHealingPowersSpec
     }
 
     "heal stronger based on missing HP (potg)" in {
-        val heal1 = potgUsedGs(dmgGs10).gameLog.events.ofType[CharacterHealed].find(_.characterId == s.p(0)(1).character.id).head.amount
-        val heal2 = potgUsedGs(dmgGs60).gameLog.events.ofType[CharacterHealed].find(_.characterId == s.p(0)(1).character.id).head.amount
-        val heal3 = potgUsedGs(dmgGs95).gameLog.events.ofType[CharacterHealed].find(_.characterId == s.p(0)(1).character.id).head.amount
+      val heal1 = potgUsedGs(dmgGs10).gameLog.events.ofType[CharacterHealed].find(
+        _.characterId == s.p(0)(1).character.id
+      ).head.amount
+      val heal2 = potgUsedGs(dmgGs60).gameLog.events.ofType[CharacterHealed].find(
+        _.characterId == s.p(0)(1).character.id
+      ).head.amount
+      val heal3 = potgUsedGs(dmgGs95).gameLog.events.ofType[CharacterHealed].find(
+        _.characterId == s.p(0)(1).character.id
+      ).head.amount
 
-        heal1 should be < heal2
-        heal2 should be < heal3
+      heal1 should be < heal2
+      heal2 should be < heal3
     }
 
     "heal stronger based on missing HP (natures beauty)" in {
@@ -87,8 +94,8 @@ class ImmenseHealingPowersSpec
       val heal2 = dmgGs60.heal(s.p(0)(1).character.id, 10).gameLog.events.ofType[CharacterHealed].head.amount
       val heal3 = dmgGs95.heal(s.p(0)(1).character.id, 10).gameLog.events.ofType[CharacterHealed].head.amount
 
-      heal1 should be (heal2)
-      heal2 should be (heal3)
+      heal1 should be(heal2)
+      heal2 should be(heal3)
     }
   }
 }

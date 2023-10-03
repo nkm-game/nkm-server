@@ -15,16 +15,27 @@ object GreatBladeOfCrimson extends NkmConf.AutoExtract {
       alternateName = "紅蓮の大太刀 (Guren no Ōdachi)",
       abilityType = AbilityType.Normal,
       description = "Character gains {bonusAD} AD and {bonusRange} range for {duration}t.",
-
       relatedEffectIds = Seq(effects.StatBuff.metadata.id),
     )
 }
 
-case class GreatBladeOfCrimson(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId) with Usable {
+case class GreatBladeOfCrimson(abilityId: AbilityId, parentCharacterId: CharacterId)
+    extends Ability(abilityId, parentCharacterId) with Usable {
   override val metadata: AbilityMetadata = GreatBladeOfCrimson.metadata
 
   override def use(useData: UseData)(implicit random: Random, gameState: GameState): GameState =
     gameState
-      .addEffect(parentCharacterId, StatBuff(randomUUID(), metadata.variables("duration"), StatType.AttackPoints, metadata.variables("bonusAD")))(random, id)
-      .addEffect(parentCharacterId, StatBuff(randomUUID(), metadata.variables("duration"), StatType.BasicAttackRange, metadata.variables("bonusRange")))(random, id)
+      .addEffect(
+        parentCharacterId,
+        StatBuff(randomUUID(), metadata.variables("duration"), StatType.AttackPoints, metadata.variables("bonusAD")),
+      )(random, id)
+      .addEffect(
+        parentCharacterId,
+        StatBuff(
+          randomUUID(),
+          metadata.variables("duration"),
+          StatType.BasicAttackRange,
+          metadata.variables("bonusRange"),
+        ),
+      )(random, id)
 }

@@ -9,10 +9,9 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
 class LackOfOrientationSpec
-  extends AnyWordSpecLike
+    extends AnyWordSpecLike
     with Matchers
-    with TestUtils
-{
+    with TestUtils {
   // TODO: override seed
   //  val lostSeed = 1337
   //  override implicit val random = new Random(lostSeed)
@@ -23,13 +22,14 @@ class LackOfOrientationSpec
 
   abilityMetadata.name must {
     "make parent character get lost sometimes" in {
-      def move() = s.gameState.basicMoveCharacter(s.p(0)(0).character.id, CoordinateSeq((0, 0), (1, 0), (2, 0), (2, 1), (1, 1)))
+      def move() =
+        s.gameState.basicMoveCharacter(s.p(0)(0).character.id, CoordinateSeq((0, 0), (1, 0), (2, 0), (2, 1), (1, 1)))
       def moveAndGetParentCoords() = {
         val moveGameState = move()
         val targetCoords = moveGameState.characterById(s.p(0)(0).character.id).parentCell(moveGameState).get.coordinates
 
         // verify if CharacterBasicMoved event was changed
-        if(targetCoords.toTuple != (1, 1)) {
+        if (targetCoords.toTuple != (1, 1)) {
           moveGameState
             .gameLog.events
             .ofType[GameEvent.CharacterBasicMoved].last

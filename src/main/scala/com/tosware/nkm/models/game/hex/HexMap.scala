@@ -14,4 +14,3 @@ case class HexMap(name: String, cells: Set[HexCell]) extends HexMapLike[HexCell]
   def toView(forPlayerOpt: Option[PlayerId])(implicit gameState: GameState): HexMapView =
     HexMapView(name, cells.map(_.toView(forPlayerOpt)))
 }
-

@@ -12,13 +12,12 @@ import org.scalatest.Assertion
 
 import scala.reflect.ClassTag
 
-class GameStateSpec extends TestUtils
-{
+class GameStateSpec extends TestUtils {
   private val metadata = CharacterMetadata.empty()
     .copy(
       initialSpeed = 3,
       initialBasicAttackRange = 2,
-      initialAbilitiesMetadataIds = Seq(LittleWarHorn.metadata.id, TacticalEscape.metadata.id)
+      initialAbilitiesMetadataIds = Seq(LittleWarHorn.metadata.id, TacticalEscape.metadata.id),
     )
 
   private val s = scenarios.Simple1v1TestScenario(metadata)
@@ -28,7 +27,7 @@ class GameStateSpec extends TestUtils
 
   "GameState" should {
     "start abilities with cooldown 0" in {
-      gameState.abilityStates.values.map(_.cooldown).toSet should be (Set(0))
+      gameState.abilityStates.values.map(_.cooldown).toSet should be(Set(0))
     }
 
     "put used ability on cooldown" in {
@@ -44,7 +43,7 @@ class GameStateSpec extends TestUtils
 
       val oldCooldown = abilityUsedGameState.abilityStates(abilityId).cooldown
       val newCooldown = endTurnGameState.abilityStates(abilityId).cooldown
-      oldCooldown should be (newCooldown + 1)
+      oldCooldown should be(newCooldown + 1)
     }
 
     "decrement effect cooldowns at end of characters turn" in {
@@ -54,7 +53,7 @@ class GameStateSpec extends TestUtils
 
       val oldCooldown = abilityUsedGameState.characterEffectStates.values.head.cooldown
       val newCooldown = endTurnGameState.characterEffectStates.values.head.cooldown
-      oldCooldown should be (newCooldown + 1)
+      oldCooldown should be(newCooldown + 1)
     }
 
     "remove effects from characters with expired cooldowns" in {
@@ -62,19 +61,19 @@ class GameStateSpec extends TestUtils
       val abilityUsedGameState = gameState.useAbility(abilityId)
       val endTurnGameState = abilityUsedGameState.endTurn()
 
-      abilityUsedGameState.effects.size should be (1)
-      endTurnGameState.effects.size should be (0)
+      abilityUsedGameState.effects.size should be(1)
+      endTurnGameState.effects.size should be(0)
     }
 
     "end the game when all players are knocked out" in {
       val p0CharacterKilledGameState = gameState.executeCharacter(s.p(0)(0).character.id)(random, "test")
       val p1CharacterKilledGameState = gameState.executeCharacter(s.p(1)(0).character.id)(random, "test")
 
-      p0CharacterKilledGameState.gameStatus should be (GameStatus.Finished)
-      p1CharacterKilledGameState.gameStatus should be (GameStatus.Finished)
+      p0CharacterKilledGameState.gameStatus should be(GameStatus.Finished)
+      p1CharacterKilledGameState.gameStatus should be(GameStatus.Finished)
 
-      p0CharacterKilledGameState.players(1).victoryStatus should be (VictoryStatus.Won)
-      p1CharacterKilledGameState.players(0).victoryStatus should be (VictoryStatus.Won)
+      p0CharacterKilledGameState.players(1).victoryStatus should be(VictoryStatus.Won)
+      p1CharacterKilledGameState.players(0).victoryStatus should be(VictoryStatus.Won)
     }
 
     "skip player turn when he has no characters to take action" in {
@@ -83,7 +82,7 @@ class GameStateSpec extends TestUtils
         .executeCharacter(simple2v2Scenario.p(0)(1).character.id)(random, "test")
         .passTurn(simple2v2Scenario.p(0)(0).character.id)
         .passTurn(simple2v2Scenario.p(1)(0).character.id)
-      gs.currentPlayer.id should be (simple2v2Scenario.p(1)(0).ownerId)
+      gs.currentPlayer.id should be(simple2v2Scenario.p(1)(0).ownerId)
     }
 
     "finish the phase when there are no characters to take action" in {
@@ -93,8 +92,8 @@ class GameStateSpec extends TestUtils
         .passTurn(simple2v2Scenario.p(0)(0).character.id)
         .passTurn(simple2v2Scenario.p(1)(0).character.id)
         .passTurn(simple2v2Scenario.p(0)(1).character.id)
-      gs.characterIdsThatTookActionThisPhase should be (Set.empty)
-      gs.phase.number should be (1)
+      gs.characterIdsThatTookActionThisPhase should be(Set.empty)
+      gs.phase.number should be(1)
     }
 
     "handle knocking out one player correctly" in {
@@ -103,14 +102,14 @@ class GameStateSpec extends TestUtils
         .executeCharacter(s.p(0)(0).character.id)
         .executeCharacter(s.p(0)(1).character.id)
 
-      gs.currentPlayer.id should be (s.p(1)(0).ownerId)
+      gs.currentPlayer.id should be(s.p(1)(0).ownerId)
 
       val gs2 = s.gameState
         .executeCharacter(s.p(1)(0).character.id)
         .executeCharacter(s.p(1)(1).character.id)
 
-      gs2.currentPlayer.id should be (s.p(0)(0).ownerId)
-      gs2.passTurn(s.p(0)(0).character.id).currentPlayer.id should be (s.p(2)(0).ownerId)
+      gs2.currentPlayer.id should be(s.p(0)(0).ownerId)
+      gs2.passTurn(s.p(0)(0).character.id).currentPlayer.id should be(s.p(2)(0).ownerId)
     }
 
     "handle surrender of one player correctly" in {
@@ -118,32 +117,32 @@ class GameStateSpec extends TestUtils
       val gs = s.gameState
         .surrender(s.p(0)(0).ownerId)
 
-      gs.currentPlayer.id should be (s.p(1)(0).ownerId)
+      gs.currentPlayer.id should be(s.p(1)(0).ownerId)
 //      gs.characterIdsOutsideMap should contain (s.p(0)(0).character.id)
 //      gs.characterIdsOutsideMap should contain (s.p(0)(1).character.id)
 
       val gs2 = s.gameState
         .surrender(s.p(1)(0).ownerId)
 
-      gs2.currentPlayer.id should be (s.p(0)(0).ownerId)
+      gs2.currentPlayer.id should be(s.p(0)(0).ownerId)
 //      gs.characterIdsOutsideMap should contain (s.p(1)(0).character.id)
 //      gs.characterIdsOutsideMap should contain (s.p(1)(1).character.id)
-      gs2.passTurn(s.p(0)(0).character.id).currentPlayer.id should be (s.p(2)(0).ownerId)
+      gs2.passTurn(s.p(0)(0).character.id).currentPlayer.id should be(s.p(2)(0).ownerId)
     }
 
     "pause the clock on game end" in {
       val p0CharacterKilledGameState = gameState.executeCharacter(s.p(0)(0).character.id)(random, "test")
       val p1CharacterKilledGameState = gameState.executeCharacter(s.p(1)(0).character.id)(random, "test")
 
-      p0CharacterKilledGameState.clock.isRunning should be (false)
-      p1CharacterKilledGameState.clock.isRunning should be (false)
+      p0CharacterKilledGameState.clock.isRunning should be(false)
+      p1CharacterKilledGameState.clock.isRunning should be(false)
     }
 
     "hide teleport events for a basic move" in {
       val bigS = TestScenario.generate(TestHexMapName.Spacey1v1, CharacterMetadata.empty())
       val basicMoveGs = bigS.gameState.basicMoveCharacter(
         bigS.defaultCharacter.id,
-        CoordinateSeq((0, 0), (-1, 0), (-2, 0), (-3, 0))
+        CoordinateSeq((0, 0), (-1, 0), (-2, 0), (-3, 0)),
       )
 
       basicMoveGs
@@ -190,13 +189,13 @@ class GameStateSpec extends TestUtils
 
       val invisibleGs = bigS.gameState.addEffect(
         bigS.defaultCharacter.id,
-        effects.Invisibility(invisibilityEffectUuid, 999)
+        effects.Invisibility(invisibilityEffectUuid, 999),
       )
 
       val effectUuid = randomUUID()
       val effectAddedGs = invisibleGs.addEffect(
         bigS.defaultCharacter.id,
-        effects.HealOverTime(effectUuid, 5, 5)
+        effects.HealOverTime(effectUuid, 5, 5),
       )
 
       assertEventHiddenOfType[GameEvent.EffectAddedToCharacter](effectAddedGs)
@@ -267,23 +266,23 @@ class GameStateSpec extends TestUtils
   }
   "not send shield damaged event if there is no shield" in {
     val damagedGs = gameState.damageCharacter(s.defaultCharacter.id, Damage(DamageType.True, 1))
-    damagedGs.gameLog.events.ofType[GameEvent.ShieldDamaged] should be (empty)
-    damagedGs.gameLog.events.ofType[GameEvent.CharacterDamaged].head.damageAmount should be (1)
+    damagedGs.gameLog.events.ofType[GameEvent.ShieldDamaged] should be(empty)
+    damagedGs.gameLog.events.ofType[GameEvent.CharacterDamaged].head.damageAmount should be(1)
   }
   "send shield damaged event if there is shield" in {
     val damagedGs = gameState
       .setShield(s.defaultCharacter.id, 1)
       .damageCharacter(s.defaultCharacter.id, Damage(DamageType.True, 1))
 
-    damagedGs.gameLog.events.ofType[GameEvent.ShieldDamaged].head.damageAmount should be (1)
-    damagedGs.gameLog.events.ofType[GameEvent.CharacterDamaged] should be (empty)
+    damagedGs.gameLog.events.ofType[GameEvent.ShieldDamaged].head.damageAmount should be(1)
+    damagedGs.gameLog.events.ofType[GameEvent.CharacterDamaged] should be(empty)
   }
   "send shield damaged event and not character damaged event if damage exceeds non-zero shield" in {
     val damagedGs = gameState
       .setShield(s.defaultCharacter.id, 1)
       .damageCharacter(s.defaultCharacter.id, Damage(DamageType.True, 2))
 
-    damagedGs.gameLog.events.ofType[GameEvent.ShieldDamaged].head.damageAmount should be (1)
-    damagedGs.gameLog.events.ofType[GameEvent.CharacterDamaged].head.damageAmount should be (1)
+    damagedGs.gameLog.events.ofType[GameEvent.ShieldDamaged].head.damageAmount should be(1)
+    damagedGs.gameLog.events.ofType[GameEvent.CharacterDamaged].head.damageAmount should be(1)
   }
 }

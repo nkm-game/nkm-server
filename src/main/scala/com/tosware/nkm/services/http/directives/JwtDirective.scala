@@ -17,7 +17,7 @@ trait JwtHelper extends NkmJsonProtocol {
   implicit val jwtSecretKey: JwtSecretKey
 
   /** returns Some(userStateView) when authenticated, otherwise None */
-  def authenticateToken(token: String): Option[UserStateView] = {
+  def authenticateToken(token: String): Option[UserStateView] =
     JwtSprayJson.decode(token, jwtSecretKey.value, Seq(JwtAlgorithm.HS256)) match {
       case Success(jwtClaim) =>
         val userStateView = jwtClaim.content
@@ -26,7 +26,6 @@ trait JwtHelper extends NkmJsonProtocol {
         Some(userStateView)
       case Failure(_) => None
     }
-  }
 
   /** returns Some(userStateView) when authenticated, otherwise None */
   def authenticateBearerToken(bearerToken: String): Option[UserStateView] = {
@@ -39,7 +38,7 @@ trait JwtHelper extends NkmJsonProtocol {
     val claim: JwtClaim = JwtClaim(
       content = JwtContent(userStateView).toJson.toString,
       expiration = Some(Instant.now.plusSeconds(157784760).getEpochSecond),
-      issuedAt = Some(Instant.now.getEpochSecond)
+      issuedAt = Some(Instant.now.getEpochSecond),
     )
     val token = Jwt.encode(claim, jwtSecretKey.value, JwtAlgorithm.HS256)
     token
@@ -55,7 +54,7 @@ trait JwtDirective extends JwtHelper {
       case Some(bearerToken) =>
         authenticateBearerToken(bearerToken) match {
           case Some(userStateView) => provide(userStateView)
-          case None => complete(StatusCodes.Unauthorized)
+          case None                => complete(StatusCodes.Unauthorized)
         }
       case _ => complete(StatusCodes.Unauthorized)
     }
@@ -65,7 +64,7 @@ trait JwtDirective extends JwtHelper {
       case Some(bearerToken) =>
         authenticateBearerToken(bearerToken) match {
           case Some(userStateView) => provide(Some(userStateView))
-          case None => complete(StatusCodes.Unauthorized)
+          case None                => complete(StatusCodes.Unauthorized)
         }
       case _ => provide(None)
     }

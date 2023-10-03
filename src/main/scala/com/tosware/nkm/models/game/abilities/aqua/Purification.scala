@@ -17,11 +17,11 @@ object Purification extends NkmConf.AutoExtract {
         """Character removes all negative effects from target.
           |
           |Range: circular, {range}""".stripMargin,
-
     )
 }
 
-case class Purification(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId) with UsableOnCharacter {
+case class Purification(abilityId: AbilityId, parentCharacterId: CharacterId)
+    extends Ability(abilityId, parentCharacterId) with UsableOnCharacter {
   override val metadata = Purification.metadata
 
   override def rangeCellCoords(implicit gameState: GameState) =

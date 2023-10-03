@@ -10,15 +10,17 @@ object DraftPickState {
   )
 }
 
-case class DraftPickState(config: DraftPickConfig,
-                          bans: Map[PlayerId, Option[Set[CharacterMetadataId]]],
-                          characterSelection: Map[PlayerId, Seq[CharacterMetadataId]],
-                         ) {
+case class DraftPickState(
+    config: DraftPickConfig,
+    bans: Map[PlayerId, Option[Set[CharacterMetadataId]]],
+    characterSelection: Map[PlayerId, Seq[CharacterMetadataId]],
+) {
   def bannedCharacters: Set[CharacterMetadataId] = bans.values.flatten.flatten.toSet
 
   def pickedCharacters: Set[CharacterMetadataId] = characterSelection.values.flatten.toSet
 
-  def charactersAvailableToPick: Set[CharacterMetadataId] = config.availableCharacters -- bannedCharacters -- pickedCharacters
+  def charactersAvailableToPick: Set[CharacterMetadataId] =
+    config.availableCharacters -- bannedCharacters -- pickedCharacters
 
   def currentPlayerPicking: Option[PlayerId] = {
     if (pickPhase != DraftPickPhase.Picking) return None
@@ -44,8 +46,8 @@ case class DraftPickState(config: DraftPickConfig,
   } else DraftPickPhase.Finished
 
   def pickNumber: Int = pickPhase match {
-    case DraftPickPhase.Banning => 0
-    case DraftPickPhase.Picking => 1 + pickedCharacters.size
+    case DraftPickPhase.Banning  => 0
+    case DraftPickPhase.Picking  => 1 + pickedCharacters.size
     case DraftPickPhase.Finished => 1 + pickedCharacters.size + 1
   }
 
@@ -56,9 +58,8 @@ case class DraftPickState(config: DraftPickConfig,
     true
   }
 
-  def ban(playerId: PlayerId, characters: Set[CharacterMetadataId]): DraftPickState = {
+  def ban(playerId: PlayerId, characters: Set[CharacterMetadataId]): DraftPickState =
     copy(bans = bans.updated(playerId, Some(characters)))
-  }
 
   def validatePick(playerId: PlayerId, character: CharacterMetadataId): Boolean = {
     if (!charactersAvailableToPick.contains(character)) return false
@@ -66,21 +67,19 @@ case class DraftPickState(config: DraftPickConfig,
     true
   }
 
-  def pick(playerId: PlayerId, character: CharacterMetadataId): DraftPickState = {
+  def pick(playerId: PlayerId, character: CharacterMetadataId): DraftPickState =
     copy(characterSelection = characterSelection.updated(playerId, characterSelection(playerId) :+ character))
-  }
 
-  def finishBanning(): DraftPickState = {
+  def finishBanning(): DraftPickState =
     copy(bans = bans.map {
       case (playerId, None) => playerId -> Some(Set())
-      case x => x
+      case x                => x
     })
-  }
 
   def toView(forPlayerOpt: Option[PlayerId]): DraftPickStateView = {
     val bansFiltered =
-      if(pickPhase == DraftPickPhase.Banning)
-        if(forPlayerOpt.isEmpty)
+      if (pickPhase == DraftPickPhase.Banning)
+        if (forPlayerOpt.isEmpty)
           Map.empty[PlayerId, Option[Set[CharacterMetadataId]]]
         else // show only bans from player watching
           config.playersPicking.map(x => x -> None).toMap
@@ -90,6 +89,15 @@ case class DraftPickState(config: DraftPickConfig,
 
     val bannedCharactersFiltered = bansFiltered.values.flatten.flatten.toSet
 
-    DraftPickStateView(config, bansFiltered, characterSelection, bannedCharactersFiltered, pickedCharacters, charactersAvailableToPick, currentPlayerPicking, pickPhase)
+    DraftPickStateView(
+      config,
+      bansFiltered,
+      characterSelection,
+      bannedCharactersFiltered,
+      pickedCharacters,
+      charactersAvailableToPick,
+      currentPlayerPicking,
+      pickPhase,
+    )
   }
 }

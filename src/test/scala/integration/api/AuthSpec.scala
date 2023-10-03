@@ -9,8 +9,7 @@ import spray.json.*
 
 import scala.util.Success
 
-class AuthSpec extends ApiTrait
-{
+class AuthSpec extends ApiTrait {
   "API" must {
     "refuse incorrect register attempt" in {
       Post("/api/register") ~> Route.seal(routes) ~> check {
@@ -43,7 +42,8 @@ class AuthSpec extends ApiTrait
         authResponse.userState shouldEqual expectedUserState
 
         JwtSprayJson.decode(authResponse.token, deps.jwtSecretKey.value, Seq(JwtAlgorithm.HS256)) match {
-          case Success(claim) => claim.content.parseJson.convertTo[JwtContent] shouldEqual JwtContent(expectedUserState.toJson.toString)
+          case Success(claim) =>
+            claim.content.parseJson.convertTo[JwtContent] shouldEqual JwtContent(expectedUserState.toJson.toString)
           case _ => fail()
         }
       }
