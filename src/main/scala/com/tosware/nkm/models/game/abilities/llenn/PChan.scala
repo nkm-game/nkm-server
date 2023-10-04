@@ -27,11 +27,17 @@ case class PChan(
     e match {
       case GameEvent.CharacterDied(_, _, _, _, characterId) =>
         if (parentCharacter.isFriendForC(characterId)) {
-          gameState.setStat(
-            parentCharacterId,
-            StatType.Speed,
-            parentCharacter.state.pureSpeed + metadata.variables("speedIncrease"),
-          )(random, id)
+          gameState
+            .setAbilityVariable(
+              id,
+              "currentSpeedBonus",
+              (state.variables("currentSpeedBonus").toInt + metadata.variables("speedIncrease")).toString,
+            )
+            .setStat(
+              parentCharacterId,
+              StatType.Speed,
+              parentCharacter.state.pureSpeed + metadata.variables("speedIncrease"),
+            )(random, id)
         } else gameState
       case _ => gameState
     }
