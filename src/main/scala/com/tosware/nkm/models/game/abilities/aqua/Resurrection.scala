@@ -15,7 +15,7 @@ object Resurrection extends NkmConf.AutoExtract {
       name = "Resurrection",
       abilityType = AbilityType.Ultimate,
       description =
-        """Character resurrects allied character, that died max. one phase before.
+        """Character resurrects allied character, that died in the last {diedMaxInLastNPhases} phases.
           |Resurrected character respawns with half base HP on selected spawn point.""".stripMargin,
     )
 }
@@ -53,7 +53,7 @@ case class Resurrection(abilityId: AbilityId, parentCharacterId: CharacterId)
       gameState.gameLog.events.ofType[GameEvent.CharacterDied]
         .ofCharacter(targetCharacter.id)
         .exists(e =>
-          gameState.phase.number - e.phase.number < 2
+          gameState.phase.number - e.phase.number < metadata.variables("diedMaxInLastNPhases")
         ) -> "Target character has not died in the last 2 phases.",
     )
   }
