@@ -15,7 +15,7 @@ object ZeroGravity extends NkmConf.AutoExtract {
       alternateName = "無重力 (Zero Gurabiti)",
       abilityType = AbilityType.Passive,
       description =
-        """Character can attack friendly characters, but instead of dealing damage applies Zero Gravity effect on them for {duration}t.
+        """Character applies Zero Gravity effect on basic attacks for {duration}t.
           |Characters with Zero Gravity effect can fly.""".stripMargin,
     )
 
@@ -36,11 +36,12 @@ case class ZeroGravity(abilityId: AbilityId, parentCharacterId: CharacterId)
     parentCharacter.defaultBasicAttackCells
   override def basicAttackTargets(implicit gameState: GameState): Set[HexCoordinates] =
     basicAttackCells.whereCharacters
-  override def basicAttack(targetCharacterId: CharacterId)(implicit random: Random, gameState: GameState): GameState =
-    if (gameState.characterById(targetCharacterId).isFriendForC(parentCharacterId))
-      applyZeroGravity(targetCharacterId, gameState)(random, id)
-    else
-      parentCharacter
-        .defaultBasicAttack(targetCharacterId)
+  override def basicAttack(targetCharacterId: CharacterId)(implicit random: Random, gameState: GameState): GameState = {
+    val zeroGravityAppliedGs = applyZeroGravity(targetCharacterId, gameState)(random, id)
 
+    if (gameState.characterById(targetCharacterId).isFriendForC(parentCharacterId))
+      zeroGravityAppliedGs
+    else
+      parentCharacter.defaultBasicAttack(targetCharacterId)(random, zeroGravityAppliedGs)
+  }
 }
