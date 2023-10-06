@@ -967,6 +967,9 @@ case class GameState(
     ))
   }
 
+  def refreshAnything(targetCharacter: CharacterId)(implicit random: Random, causedById: String): GameState =
+    logEvent(AnythingRefreshed(randomUUID(), phase, turn, causedById, targetCharacter))
+
   def refreshBasicMove(targetCharacter: CharacterId)(implicit random: Random, causedById: String): GameState =
     logEvent(BasicMoveRefreshed(randomUUID(), phase, turn, causedById, targetCharacter))
 

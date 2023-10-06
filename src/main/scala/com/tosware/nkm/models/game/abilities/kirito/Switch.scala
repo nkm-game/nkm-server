@@ -53,7 +53,6 @@ case class Switch(abilityId: AbilityId, parentCharacterId: CharacterId) extends 
       .removeCharacterFromMap(target2.id)
       .placeCharacter(target2.parentCell.get.coordinates, target1.id)
       .placeCharacter(target1.parentCell.get.coordinates, target2.id)
-      .refreshBasicAttack(parentCharacterId)
-      .addEffect(parentCharacterId, effects.AbilityUnlock(randomUUID(), 1))
+      .refreshAnything(parentCharacterId)
   }
 }

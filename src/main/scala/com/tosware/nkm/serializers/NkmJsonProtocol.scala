@@ -70,6 +70,7 @@ trait NkmJsonProtocol
         case e: CharacterTookAction        => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
         case e: BasicAttackRefreshed       => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
         case e: BasicMoveRefreshed         => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
+        case e: AnythingRefreshed          => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
         case e: CharactersPicked           => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
         case e: PlayerLost                 => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
         case e: PlayerSurrendered          => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
@@ -124,6 +125,7 @@ trait NkmJsonProtocol
         case "CharacterTookAction"        => ges.eventJson.parseJson.convertTo[CharacterTookAction]
         case "BasicAttackRefreshed"       => ges.eventJson.parseJson.convertTo[BasicAttackRefreshed]
         case "BasicMoveRefreshed"         => ges.eventJson.parseJson.convertTo[BasicMoveRefreshed]
+        case "AnythingRefreshed"          => ges.eventJson.parseJson.convertTo[AnythingRefreshed]
         case "CharactersPicked"           => ges.eventJson.parseJson.convertTo[CharactersPicked]
         case "PlayerLost"                 => ges.eventJson.parseJson.convertTo[PlayerLost]
         case "PlayerSurrendered"          => ges.eventJson.parseJson.convertTo[PlayerSurrendered]

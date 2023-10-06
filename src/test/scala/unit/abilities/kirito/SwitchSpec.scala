@@ -81,6 +81,21 @@ class SwitchSpec
       }
     }
 
+    "not be able to attack and use ultimate ability after using switch" in {
+      val ngs = gameState
+        .teleportCharacter(s.p(0)(1).character.id, HexCoordinates(2, 0))
+        .useAbilityOnCharacter(abilityId, s.p(0)(1).character.id)
+        .basicAttack(s.defaultCharacter.id, s.p(1)(0).character.id)
+
+      assertCommandFailure {
+        GameStateValidator()(ngs)
+          .validateAbilityUse(
+            s.p(0)(0).character.owner.id,
+            ultimateAbilityId,
+          )
+      }
+    }
+
     "not be able switch when character and friend are not in range of an enemy" in {
       assertCommandFailure {
         GameStateValidator()(gameState)

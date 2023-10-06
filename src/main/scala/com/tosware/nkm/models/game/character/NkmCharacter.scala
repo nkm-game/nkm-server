@@ -6,7 +6,7 @@ import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.ability.*
 import com.tosware.nkm.models.game.character_effect.{CharacterEffect, CharacterEffectName}
 import com.tosware.nkm.models.game.event.GameEvent
-import com.tosware.nkm.models.game.event.GameEvent.{CharacterBasicMoved, GameEvent}
+import com.tosware.nkm.models.game.event.GameEvent.*
 import com.tosware.nkm.models.game.hex.*
 import com.tosware.nkm.providers.AbilityProvider
 
@@ -92,9 +92,12 @@ case class NkmCharacter(
       .map(_.metadata.abilityType)
       .contains(AbilityType.Ultimate)
 
-  private def hasRefreshed[RefreshEvent <: GameEvent: ClassTag, ActionEvent <: GameEvent: ClassTag](implicit
-      gameState: GameState
-  ): Boolean = {
+  private def hasRefreshed[
+      RefreshEvent <: GameEvent & ContainsCharacterId: ClassTag,
+      ActionEvent <: GameEvent: ClassTag,
+  ](implicit gameState: GameState): Boolean = {
+    if (!gameState.characterTakingActionThisTurn.contains(id)) return false
+
     val lastRefreshIndex = gameState.gameLog.events
       .ofType[RefreshEvent]
       .inTurn(gameState.turn.number)
@@ -105,19 +108,24 @@ case class NkmCharacter(
     val lastActionIndex = gameState.gameLog.events
       .ofType[ActionEvent]
       .inTurn(gameState.turn.number)
-      .ofCharacter(id)
       .map(_.index)
       .lastOption
 
     lastRefreshIndex.isDefined && (lastActionIndex.isEmpty || lastRefreshIndex.get > lastActionIndex.get)
-
   }
 
+  def hasRefreshedAnything(implicit gameState: GameState): Boolean =
+    hasRefreshed[GameEvent.AnythingRefreshed, GameEvent.CharacterBasicAttacked] &&
+      hasRefreshed[GameEvent.AnythingRefreshed, GameEvent.CharacterBasicMoved] &&
+      hasRefreshed[GameEvent.AnythingRefreshed, GameEvent.AbilityUsed] &&
+      hasRefreshed[GameEvent.AnythingRefreshed, GameEvent.AbilityUsedOnCharacter] &&
+      hasRefreshed[GameEvent.AnythingRefreshed, GameEvent.AbilityUsedOnCoordinates]
+
   def hasRefreshedBasicMove(implicit gameState: GameState): Boolean =
-    hasRefreshed[GameEvent.BasicMoveRefreshed, GameEvent.CharacterBasicMoved]
+    hasRefreshed[GameEvent.BasicMoveRefreshed, GameEvent.CharacterBasicMoved] || hasRefreshedAnything
 
   def hasRefreshedBasicAttack(implicit gameState: GameState): Boolean =
-    hasRefreshed[GameEvent.BasicAttackRefreshed, GameEvent.CharacterBasicAttacked]
+    hasRefreshed[GameEvent.BasicAttackRefreshed, GameEvent.CharacterBasicAttacked] || hasRefreshedAnything
 
   def canBasicMove(implicit gameState: GameState): Boolean =
     (hasRefreshedBasicMove || !usedBasicMoveThisTurn && !usedUltimatumAbilityThisPhase) &&
@@ -128,7 +136,7 @@ case class NkmCharacter(
       !state.effects.exists(e => basicAttackImpairmentCcNames.contains(e.metadata.name))
 
   def canUseAbilityOfType(abilityType: AbilityType)(implicit gameState: GameState): Boolean =
-    (abilityType match {
+    hasRefreshedAnything || (abilityType match {
       case AbilityType.Passive  => true
       case AbilityType.Normal   => !usedAbilityThisPhase && !usedBasicAttackThisTurn
       case AbilityType.Ultimate => !usedAbilityThisPhase && !usedBasicAttackThisTurn && !usedBasicMoveThisTurn
