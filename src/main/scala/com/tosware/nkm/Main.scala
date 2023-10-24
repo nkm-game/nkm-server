@@ -40,6 +40,10 @@ object Main extends App with Logging {
     tojatosActor ! User.RegisterHash("$2a$10$PXY3u4hPEic7sbKMoVqhn.qoSRJFah36E1XiujvJnfZgyqxBm44zS")
     tojatosActor ! User.GrantAdmin
 
+    val bigRedActor: ActorRef = system.actorOf(User.props("bigredchick01@gmail.com"))
+    bigRedActor ! User.RegisterHash("$2a$10$Pi5AqJzxUez3Pmst5ilr2.8xw.QTftY121pofuitFpUUpwicAkF.y")
+    bigRedActor ! User.GrantAdmin
+
     val testUserActor1: ActorRef = system.actorOf(User.props("test1@example.com"))
     val testUserActor2: ActorRef = system.actorOf(User.props("test2@example.com"))
 
