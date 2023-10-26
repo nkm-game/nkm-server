@@ -17,8 +17,8 @@ object LittleWarHorn extends NkmConf.AutoExtract {
       name = "Little War Horn",
       abilityType = AbilityType.Ultimate,
       description =
-        """Character gains {attackPoints} AD and {speedIncrease} speed for {duration}t.
-          |When this effect is finished, set this character's base speed to {finalSpeed}.""".stripMargin,
+        """Gain {attackPoints} AD and {speedIncrease} Speed for {duration}t.
+          |When the effect is finished, permanently set base Speed to {finalSpeed}.""".stripMargin,
       relatedEffectIds = Seq(StatBuff.metadata.id),
     )
 }

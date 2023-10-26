@@ -14,7 +14,7 @@ object Aster extends NkmConf.AutoExtract {
       alternateName = "星 (Asuteru)",
       abilityType = AbilityType.Normal,
       description =
-        """Character shoots rays of energy from Aster, dealing {damage} magical damage in a sphere to enemies.
+        """Shoot rays of energy, dealing {damage} magical damage to hit enemies.
           |
           |Range: circular, {range}
           |Radius: circular, {radius}""".stripMargin,

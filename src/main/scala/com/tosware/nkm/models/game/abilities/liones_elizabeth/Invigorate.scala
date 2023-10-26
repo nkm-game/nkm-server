@@ -13,7 +13,7 @@ object Invigorate extends NkmConf.AutoExtract {
       name = "Invigorate",
       abilityType = AbilityType.Normal,
       description =
-        """Character casts a spell on a friendly character that heals {heal} HP for {duration}t.
+        """Cast a spell on an ally that heals {heal} HP each turn for {duration}t.
           |
           |Range: circular, {range}""".stripMargin,
       relatedEffectIds = Seq(effects.HealOverTime.metadata.id),

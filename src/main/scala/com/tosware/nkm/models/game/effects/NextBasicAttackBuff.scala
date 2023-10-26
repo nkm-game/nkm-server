@@ -14,7 +14,7 @@ object NextBasicAttackBuff {
     CharacterEffectMetadata(
       name = CharacterEffectName.NextBasicAttackBuff,
       initialEffectType = CharacterEffectType.Positive,
-      description = "Buffs next basic attack.",
+      description = "Next basic attack is buffed.",
       isCc = true,
     )
 

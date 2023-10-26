@@ -14,8 +14,8 @@ object AceInTheHole extends NkmConf.AutoExtract {
       name = "Ace In The Hole",
       abilityType = AbilityType.Passive,
       description =
-        """If Character takes damage equal to more than {maxHpPercent}% of their maximum HP during the turn of one character, they will be able to use one of their abilities on their next move, regardless of its CD.
-          |It does not affect the actual ability CD count.""".stripMargin,
+        """After taking damage higher than {maxHpPercent}% of your max HP during the turn of one character, you will be able to use one ability for free in your next turn.
+          |Actual cooldown of used ability is not affected.""".stripMargin,
       relatedEffectIds = Seq(FreeAbility.metadata.id),
     )
 }

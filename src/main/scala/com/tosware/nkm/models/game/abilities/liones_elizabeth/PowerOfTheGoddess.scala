@@ -12,7 +12,7 @@ object PowerOfTheGoddess extends NkmConf.AutoExtract {
     AbilityMetadata(
       name = "Power Of The Goddess",
       abilityType = AbilityType.Ultimate,
-      description = "Character heals all friendly characters on the map for {heal} HP.",
+      description = "Heal all allied characters on the map for {heal} HP.",
     )
 }
 

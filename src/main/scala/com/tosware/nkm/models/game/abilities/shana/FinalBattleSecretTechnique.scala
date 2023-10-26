@@ -14,20 +14,19 @@ object FinalBattleSecretTechnique extends NkmConf.AutoExtract {
       alternateName = "決戦奥儀 (Kessen Ōgi)",
       abilityType = AbilityType.Ultimate,
       description =
-        """Character uses abilities below on enemy in order:
+        """Use abilities on an enemy:
           |
           |Shinku (真紅, True Crimson):
-          |Knocks back an enemy by {trueCrimsonKnockback}
+          |Knock back an enemy by {trueCrimsonKnockback}
           |
           |Hien (飛焔, Blazing Flame):
-          |Sends a blazing flame (width {blazingFlameWidth}) towards target.
-          |Flame deals {blazingFlameDamage} magical damage to enemies and ends on the target.
+          |Send a blazing flame ({blazingFlameWidth} width) towards the target.
+          |Flame deals {blazingFlameDamage} magical damage to enemies hit and ends on the target.
           |
           |Shinpan (審判, Judgment) and Danzai (断罪, Condemnation):
-          |Deals {judgementAndCondemnationDamagePerCharacter} true damage to target for every character (excluding themself) that is in range of {judgementAndCondemnationRange}.
+          |Deal {judgementAndCondemnationDamagePerCharacter} true damage to target for every character (excluding themself) that is in range of {judgementAndCondemnationRange}.
           |
-          |Range: linear, stops at walls, {range}
-          |""".stripMargin,
+          |Range: linear, stops at walls, {range}""".stripMargin,
     )
 }
 

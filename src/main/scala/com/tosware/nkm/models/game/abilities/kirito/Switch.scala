@@ -13,9 +13,9 @@ object Switch extends NkmConf.AutoExtract {
       name = "Switch",
       abilityType = AbilityType.Normal,
       description =
-        """Switch places with selected friend.
-          |You or your friend have to be in a basic attack range of an enemy.
-          |You can use basic attack or other ability just after using this ability.
+        """Switch places with selected ally.
+          |You or your ally have to be in a basic attack range of an enemy.
+          |You can use basic attack or another ability just after switching.
           |
           |Range: circular, {range}""".stripMargin,
       relatedEffectIds = Seq(effects.AbilityUnlock.metadata.id),

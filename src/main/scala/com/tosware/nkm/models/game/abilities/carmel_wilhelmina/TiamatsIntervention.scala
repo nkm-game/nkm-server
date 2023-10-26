@@ -15,13 +15,12 @@ object TiamatsIntervention extends NkmConf.AutoExtract {
       name = "Tiamat's Intervention",
       abilityType = AbilityType.Ultimate,
       description =
-        """Character pulls another character in range to a nearby position.
-          |If it is an ally, it will gain {shield} shield.
-          |If it is an enemy, it will be stunned for {stunDuration}t.
+        """Pull a character to a nearby position.
+          |If it is an ally, give them {shield} Shield.
+          |If it is an enemy, Stun them for {stunDuration}t.
           |
           |Range: circular, {range}
-          |Nearby position range: circular, {moveTargetRange}
-          |""".stripMargin,
+          |Nearby position range: circular, {moveTargetRange}""".stripMargin,
       relatedEffectIds = Seq(Stun.metadata.id),
     )
 }

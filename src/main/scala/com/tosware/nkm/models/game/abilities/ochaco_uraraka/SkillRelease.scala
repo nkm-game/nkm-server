@@ -15,9 +15,9 @@ object SkillRelease extends NkmConf.AutoExtract {
       alternateName = "解除 (Kaijo)",
       abilityType = AbilityType.Ultimate,
       description =
-        """Character releases their ability, and all characters lose Zero Gravity effect.
-          |Enemies that lost Zero Gravity are stunned for {stunDuration}t.
-          |""".stripMargin,
+        """Release Zero Gravity:
+          | - all characters lose Zero Gravity effect.
+          | - enemies that lost Zero Gravity are Stunned for {stunDuration}t.""".stripMargin,
     )
 }
 

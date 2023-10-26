@@ -8,7 +8,7 @@ object FreeAbility {
     CharacterEffectMetadata(
       name = CharacterEffectName.FreeAbility,
       initialEffectType = CharacterEffectType.Positive,
-      description = "This character can use one of his abilities for free.",
+      description = "You can use one of your abilities for free.",
     )
 }
 

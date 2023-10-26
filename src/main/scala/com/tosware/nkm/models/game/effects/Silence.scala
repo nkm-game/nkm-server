@@ -8,7 +8,7 @@ object Silence {
     CharacterEffectMetadata(
       name = CharacterEffectName.Silence,
       initialEffectType = CharacterEffectType.Negative,
-      description = "This character cannot use abilities.",
+      description = "Cannot use abilities.",
       isCc = true,
     )
 }

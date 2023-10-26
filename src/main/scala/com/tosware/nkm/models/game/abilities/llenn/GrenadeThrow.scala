@@ -13,7 +13,7 @@ object GrenadeThrow extends NkmConf.AutoExtract {
       name = "Grenade Throw",
       abilityType = AbilityType.Normal,
       description =
-        """Character throws a grenade, dealing {damage} physical damage in a sphere to all characters.
+        """Throw a grenade that deals {damage} physical damage to everyone hit.
           |
           |Range: circular, {range}
           |Radius: circular, {radius}""".stripMargin,

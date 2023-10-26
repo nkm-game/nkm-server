@@ -16,7 +16,7 @@ object MarkOfTheWind extends NkmConf.AutoExtract {
       name = "Mark of the Wind",
       abilityType = AbilityType.Normal,
       description =
-        """Character sets up an invisible trap on a selected area.
+        """Set up an invisible trap.
           |
           |Range: circular, {range}
           |Max. number of traps: {trapLimit}""".stripMargin,

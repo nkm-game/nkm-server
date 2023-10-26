@@ -12,7 +12,7 @@ object Infection extends NkmConf.AutoExtract {
       name = "Infection",
       abilityType = AbilityType.Ultimate,
       description =
-        """Character infects enemy with Black Blood for {duration}t.
+        """Infect an enemy with Black Blood for {duration}t.
           |Infected enemy also receives damage from Black Blood detonation.
           |
           |Range: circular, {range}""".stripMargin,

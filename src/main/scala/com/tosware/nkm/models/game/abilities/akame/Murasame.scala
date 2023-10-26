@@ -16,10 +16,10 @@ object Murasame extends NkmConf.AutoExtract {
       name = "Murasame",
       abilityType = AbilityType.Passive,
       description =
-        """Character applies Poison effect on basic attack or ability hit.
-          |This effect can stack and is permanent.
-          |Each stack deals {poisonDamage} true damage at the end of turn.
-          |After applying {poisonStacksToDie} stacks target dies immediately.""".stripMargin,
+        """Apply Poison on basic attack or ability hit.
+          |This Poison stacks and is permanent.
+          |Deal {poisonDamage} true damage per stack at the end of the target's turn.
+          |After applying {poisonStacksToDie} stacks, the target dies immediately.""".stripMargin,
       relatedEffectIds = Seq(MurasamePoison.metadata.id),
     )
 }

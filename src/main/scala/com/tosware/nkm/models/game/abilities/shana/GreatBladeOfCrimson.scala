@@ -14,7 +14,7 @@ object GreatBladeOfCrimson extends NkmConf.AutoExtract {
       name = "Great Blade of Crimson",
       alternateName = "紅蓮の大太刀 (Guren no Ōdachi)",
       abilityType = AbilityType.Normal,
-      description = "Character gains {bonusAD} AD and {bonusRange} range for {duration}t.",
+      description = "Gain {bonusAD} AD and {bonusRange} range for {duration}t.",
       relatedEffectIds = Seq(effects.StatBuff.metadata.id),
     )
 }

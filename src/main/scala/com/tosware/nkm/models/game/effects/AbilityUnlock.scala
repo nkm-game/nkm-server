@@ -8,7 +8,7 @@ object AbilityUnlock {
     CharacterEffectMetadata(
       name = CharacterEffectName.AbilityUnlock,
       initialEffectType = CharacterEffectType.Positive,
-      description = "This character can use one of his abilities that is not on cooldown regardless of their state.",
+      description = "You can use one of your abilities that is not on cooldown regardless of their state.",
     )
 }
 

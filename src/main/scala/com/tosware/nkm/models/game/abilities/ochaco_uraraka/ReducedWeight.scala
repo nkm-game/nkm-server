@@ -15,8 +15,8 @@ object ReducedWeight extends NkmConf.AutoExtract {
       name = "Reduced Weight",
       abilityType = AbilityType.Normal,
       description =
-        """Character applies Zero Gravity effect on a friendly character.
-          |Additionally, doubles speed of target for {speedBuffDuration}t.
+        """Apply Zero Gravity effect on an ally.
+          |Additionally, double target's Speed for {speedBuffDuration}t.
           |
           |Range: basic attack range""".stripMargin,
     )

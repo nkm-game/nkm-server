@@ -14,20 +14,20 @@ object RubberRubberFruit extends NkmConf.AutoExtract {
       alternateName = "ゴムゴムの実 (Gomu Gomu no Mi)",
       abilityType = AbilityType.Normal,
       description =
-        """Character uses Devil Fruit power:
+        """Use Devil Fruit power:
           |
           |<i>Enemy in range {bazookaRange}</i>
           |<b>Bazooka</b>
-          |Character deals {bazookaDamage} physical damage and knocks back the enemy by {bazookaKnockback} tiles.
+          |Deal {bazookaDamage} physical damage and knock back the target by {bazookaKnockback} tiles.
           |Knocked back enemies will fly over walls and other characters.
           |
           |<i>Enemy in further range</i>
           |<b>Pistol</b>
-          |Character deals {pistolDamage} physical damage.
+          |Deal {pistolDamage} physical damage.
           |
           |<i>Wall</i>
           |<b>Rocket</b>
-          |Character grabs a wall, jumping behind it as many squares as it has to the wall.
+          |Grab a wall and throw yourself behind it as many squares as it has to the wall.
           |
           |This ability can be enchanted:
           |

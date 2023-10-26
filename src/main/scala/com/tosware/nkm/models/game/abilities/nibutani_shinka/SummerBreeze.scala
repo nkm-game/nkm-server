@@ -13,12 +13,10 @@ object SummerBreeze extends NkmConf.AutoExtract {
       name = "Summer Breeze",
       abilityType = AbilityType.Normal,
       description =
-        """Character summons Summer Breeze that knocks back selected enemy by {knockback}.
-          |If the enemy will be knocked back into a wall or another character,
-          |they will be stunned for {stunDuration}t and receive {damage} magical damage.
+        """Summon Summer Breeze that knocks back an enemy by {knockback}.
+          |If the enemy will be knocked back into a wall or another character, Stun them for {stunDuration}t and deal {damage} magical damage.
           |
-          |Range: linear, {range}
-          |""".stripMargin,
+          |Range: linear, {range}""".stripMargin,
       relatedEffectIds = Seq(effects.Stun.metadata.id),
     )
 }

@@ -17,7 +17,8 @@ object CrackTheSky extends NkmConf.AutoExtract {
       name = "Crack the Sky",
       abilityType = AbilityType.Normal,
       description =
-        """Character detonates selected traps, dealing {damage}+B physical damage to all hit enemies.
+        """Detonate selected traps.
+          |Deal {damage}+B physical damage to all hit enemies.
           |
           |Trap detonation radius: circular, {radius}""".stripMargin,
     )

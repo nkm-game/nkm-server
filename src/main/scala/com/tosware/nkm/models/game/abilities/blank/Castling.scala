@@ -11,7 +11,7 @@ object Castling extends NkmConf.AutoExtract {
     AbilityMetadata(
       name = "Castling",
       abilityType = AbilityType.Ultimate,
-      description = "Character swaps the positions of 2 characters on the map.",
+      description = "Swap the positions of 2 characters on the map.",
     )
 }
 

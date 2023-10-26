@@ -14,8 +14,7 @@ object HealOverTime {
     CharacterEffectMetadata(
       name = CharacterEffectName.HealOverTime,
       initialEffectType = CharacterEffectType.Positive,
-      description =
-        """Heals at the end of turn.""".stripMargin,
+      description = "Heal at the end of the turn.",
     )
 
   val healKey: String = "heal"

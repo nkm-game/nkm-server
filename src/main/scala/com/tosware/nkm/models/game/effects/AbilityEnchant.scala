@@ -14,7 +14,7 @@ object AbilityEnchant {
     CharacterEffectMetadata(
       name = CharacterEffectName.AbilityEnchant,
       initialEffectType = CharacterEffectType.Positive,
-      description = "Buffs abilities of a certain type.",
+      description = "Buff abilities of a certain type.",
     )
 
   val abilityTypeKey: String = "abilityType"

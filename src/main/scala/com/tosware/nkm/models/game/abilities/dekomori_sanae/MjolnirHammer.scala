@@ -14,8 +14,8 @@ object MjolnirHammer extends NkmConf.AutoExtract {
       name = "Mjolnir Hammer",
       abilityType = AbilityType.Normal,
       description =
-        """Character hits twice, dealing {damage} physical damage on each hit.
-          |If both attacks target the same character, it will receive half damage from second hit.
+        """Hit twice, dealing {damage} physical damage on each hit.
+          |If both attacks target the same character, second hit will deal half of the damage.
           |
           |Range: circular, {range}""".stripMargin,
     )

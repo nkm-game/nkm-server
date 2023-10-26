@@ -15,7 +15,7 @@ object RubberHuman extends NkmConf.AutoExtract {
       alternateName = "ゴム人間 (Gomu Ningen)",
       abilityType = AbilityType.Passive,
       description =
-        "Character reduces {rangedDamageReductionPercent}% damage from basic attacks coming from ranged characters.",
+        "Reduce {rangedDamageReductionPercent}% damage from basic attacks coming from ranged characters.",
     )
 }
 

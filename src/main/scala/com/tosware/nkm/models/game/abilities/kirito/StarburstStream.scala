@@ -17,8 +17,8 @@ object StarburstStream extends NkmConf.AutoExtract {
       name = "Starburst Stream",
       abilityType = AbilityType.Ultimate,
       description =
-        """Attack the enemy {attackTimes} times.
-          |Every hit deals {damage} true damage.
+        """Attack an enemy {attackTimes} times.
+          |Each hit deals {damage} true damage.
           |After using this ability, you can permanently basic attack {basicAttacksPerTurn} times per turn.
           |
           |Range: linear, {range}""".stripMargin,

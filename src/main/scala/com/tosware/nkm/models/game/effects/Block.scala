@@ -8,7 +8,7 @@ object Block {
     CharacterEffectMetadata(
       name = CharacterEffectName.Block,
       initialEffectType = CharacterEffectType.Positive,
-      description = "This character blocks next basic attack.",
+      description = "Block next basic attack.",
       isCc = true,
     )
 }

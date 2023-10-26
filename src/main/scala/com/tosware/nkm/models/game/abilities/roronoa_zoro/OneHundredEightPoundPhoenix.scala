@@ -14,7 +14,8 @@ object OneHundredEightPoundPhoenix extends NkmConf.AutoExtract {
       alternateName = "百八煩悩鳳 (Hyakuhachi Pound Hō)",
       abilityType = AbilityType.Ultimate,
       description =
-        """Character sends 3 shockwaves towards the target enemy, each dealing {damage} physical damage.
+        """Send 3 shockwaves towards an enemy.
+          |Each shockwave deals {damage} physical damage.
           |
           |Range: linear, stops at walls and enemies, {range}
           |""".stripMargin,

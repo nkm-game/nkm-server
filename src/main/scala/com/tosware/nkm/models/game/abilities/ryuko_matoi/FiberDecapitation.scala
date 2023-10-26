@@ -14,8 +14,11 @@ object FiberDecapitation extends NkmConf.AutoExtract {
       name = "Fiber Decapitation",
       abilityType = AbilityType.Normal,
       description =
-        """Character cuts through selected enemy, decreasing his physical defense by {physicalDefenseDecrease},
-          |dealing {damage} physical damage and landing {targetCellOffset} tiles behind him.
+        """Cut through an enemy:
+          | - decrease their physical defense by {physicalDefenseDecrease}
+          | - deal {damage} physical damage
+          | - land {targetCellOffset} tiles behind them
+          |
           |Range: linear, stops at walls and enemies, {range}""".stripMargin,
     )
 }

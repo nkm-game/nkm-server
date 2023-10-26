@@ -8,7 +8,7 @@ object Ground {
     CharacterEffectMetadata(
       name = CharacterEffectName.Ground,
       initialEffectType = CharacterEffectType.Negative,
-      description = "This character is grounded and cannot move.",
+      description = "Cannot move.",
       isCc = true,
     )
 }

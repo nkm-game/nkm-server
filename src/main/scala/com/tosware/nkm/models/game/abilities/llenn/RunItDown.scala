@@ -15,8 +15,8 @@ object RunItDown extends NkmConf.AutoExtract {
       name = "Run It Down",
       abilityType = AbilityType.Ultimate,
       description =
-        """Character can move three times this turn.
-          |After each move they can use basic attack.""".stripMargin,
+        """Move up to three times this turn.
+          |After each move you can use a basic attack.""".stripMargin,
     )
   val movesLeftKey: String = "movesLeft"
 }

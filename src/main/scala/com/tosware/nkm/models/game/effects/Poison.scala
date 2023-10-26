@@ -15,9 +15,7 @@ object Poison {
     CharacterEffectMetadata(
       name = CharacterEffectName.Poison,
       initialEffectType = CharacterEffectType.Negative,
-      description =
-        """Poison.
-          |Deals damage at the end of turn.""".stripMargin,
+      description = "Receive damage at the end of the turn.",
     )
 
   val damageKey: String = "damage"
@@ -29,9 +27,9 @@ object MurasamePoison {
       name = CharacterEffectName.MurasamePoison,
       initialEffectType = CharacterEffectType.Negative,
       description =
-        """Poison.
-          |Deals damage at the end of turn.
-          |Character will be killed when fully stacked.""".stripMargin,
+        s"""${Poison.metadata.description}
+           |
+           |Murasame Poison: executes when fully stacked.""".stripMargin,
     )
 }
 

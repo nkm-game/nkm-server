@@ -15,8 +15,8 @@ object Resurrection extends NkmConf.AutoExtract {
       name = "Resurrection",
       abilityType = AbilityType.Ultimate,
       description =
-        """Character resurrects allied character, that died in the last {diedMaxInLastNPhases} phases.
-          |Resurrected character respawns with half base HP on selected spawn point.""".stripMargin,
+        """Resurrect an ally that died in the last {diedMaxInLastNPhases} phases (current phase counts).
+          |Resurrected character respawns with half of base HP on selected spawn point.""".stripMargin,
     )
 }
 

@@ -13,9 +13,7 @@ object Check extends NkmConf.AutoExtract {
     AbilityMetadata(
       name = "Check",
       abilityType = AbilityType.Normal,
-      description =
-        """Character forces selected enemy character to take action.
-          |It cannot use a basic attack this turn.""".stripMargin,
+      description = "Disarm enemy character for 1t and force them to take action in the next turn of their owner.",
       relatedEffectIds = Seq(HasToTakeAction.metadata.id, Disarm.metadata.id),
     )
 }

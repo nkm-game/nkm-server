@@ -13,7 +13,7 @@ object PChan extends NkmConf.AutoExtract {
     AbilityMetadata(
       name = "P-Chan",
       abilityType = AbilityType.Passive,
-      description = "Character permanently gains {speedIncrease} speed with every death of a friendly character.",
+      description = "Permanently gain {speedIncrease} speed for every death of an ally.",
     )
 }
 

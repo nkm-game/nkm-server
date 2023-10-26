@@ -8,7 +8,7 @@ object ManipulatorOfObjectsImmunity {
     CharacterEffectMetadata(
       name = CharacterEffectName.ManipulatorOfObjectsImmunity,
       initialEffectType = CharacterEffectType.Positive,
-      description = "This character is immune to Manipulator of Objects.",
+      description = "Immune to Manipulator of Objects.",
       isCc = true,
     )
 }

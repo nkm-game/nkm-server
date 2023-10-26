@@ -14,7 +14,7 @@ object LackOfOrientation extends NkmConf.AutoExtract {
     AbilityMetadata(
       name = "Lack of orientation",
       abilityType = AbilityType.Passive,
-      description = "Character has a 50% chance to go get lost during basic move.",
+      description = "50% chance to get lost during basic move.",
     )
   val timesMovedKey = "timesMoved"
   val timesLostKey = "timesLost"

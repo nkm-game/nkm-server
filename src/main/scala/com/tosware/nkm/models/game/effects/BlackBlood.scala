@@ -13,7 +13,10 @@ object BlackBlood {
     CharacterEffectMetadata(
       name = CharacterEffectName.BlackBlood,
       initialEffectType = CharacterEffectType.Mixed,
-      description = "Black Blood",
+      description =
+        """After receiving damage deal {damage} magical damage to surrounding enemies of this effect's caster.
+          |
+          |Radius: circular, {radius}""".stripMargin,
       isCc = true,
     )
 

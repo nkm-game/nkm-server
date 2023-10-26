@@ -14,7 +14,7 @@ object GearSecond extends NkmConf.AutoExtract {
       alternateName = "ギアセカンド (Giru Sekando)",
       abilityType = AbilityType.Ultimate,
       description =
-        """Character gains {bonusSpeed} speed and enchants their normal ability for {duration}t.
+        """Gain {bonusSpeed} speed and enchant your Normal ability for {duration}t.
           |""".stripMargin,
       relatedEffectIds = Seq(
         effects.StatBuff.metadata.id,

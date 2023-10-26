@@ -14,7 +14,7 @@ object ScreechAlpha extends NkmConf.AutoExtract {
       name = "Screech Alpha",
       abilityType = AbilityType.Normal,
       description =
-        """Character stuns nearby enemies for {stunDuration}t and slow them by {slowAmount} for {slowDuration}t.
+        """Stun nearby enemies for {stunDuration}t and slow them by {slowAmount} for {slowDuration}t.
           |
           |Radius: {radius}""".stripMargin,
       relatedEffectIds = Seq(Stun.metadata.id),

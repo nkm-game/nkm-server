@@ -14,8 +14,8 @@ object ScissorBlade extends NkmConf.AutoExtract {
       name = "ScissorBlade",
       abilityType = AbilityType.Passive,
       description =
-        """This character's basic attacks decrease physical defense of enemies by {physicalDefenseDecrease} for {duration}t.
-          |This effect is applied before attack and can stack.""".stripMargin,
+        """Basic attacks decrease physical defense of target by {physicalDefenseDecrease} for {duration}t.
+          |This effect is applied before basic attack and can stack.""".stripMargin,
       relatedEffectIds = Seq(effects.StatNerf.metadata.id),
     )
 }

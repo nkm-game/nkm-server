@@ -14,7 +14,7 @@ object Contact extends NkmConf.AutoExtract {
       name = "Contact",
       abilityType = AbilityType.Passive,
       description =
-        """Character's attack or ability that hits an enemy deals bonus {damage} physical damage.
+        """Deal {damage} physical damage after you hit a character with a basic attack or an ability.
           |This effect can be applied only once per character.
           |""".stripMargin,
     )

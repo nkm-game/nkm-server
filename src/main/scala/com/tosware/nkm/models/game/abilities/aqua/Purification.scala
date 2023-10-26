@@ -14,7 +14,7 @@ object Purification extends NkmConf.AutoExtract {
       name = "Purification",
       abilityType = AbilityType.Normal,
       description =
-        """Character removes all negative effects from target.
+        """Remove all negative effects from the target.
           |
           |Range: circular, {range}""".stripMargin,
     )

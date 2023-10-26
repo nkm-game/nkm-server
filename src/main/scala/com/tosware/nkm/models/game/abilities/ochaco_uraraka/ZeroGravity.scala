@@ -15,8 +15,9 @@ object ZeroGravity extends NkmConf.AutoExtract {
       alternateName = "無重力 (Zero Gurabiti)",
       abilityType = AbilityType.Passive,
       description =
-        """Character applies Zero Gravity effect on basic attacks for {duration}t.
+        """Basic attacks apply Zero Gravity effect for {duration}t.
           |Characters with Zero Gravity effect can fly.""".stripMargin,
+      relatedEffectIds = Seq(effects.Fly.metadata.id),
     )
 
   def applyZeroGravity(cid: CharacterId, gameState: GameState)(implicit random: Random, causedById: String): GameState =

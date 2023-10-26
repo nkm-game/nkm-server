@@ -12,8 +12,8 @@ object Survivor extends NkmConf.AutoExtract {
       name = "Survivor",
       abilityType = AbilityType.Normal,
       description =
-        """Character becomes invisible for {invisibilityDuration}t or to first basic attack.
-          |This character's next basic attack will deal {bonusDamagePercent}% damage and will stun the target for {stunDuration}t.
+        """Become invisible for {invisibilityDuration}t.
+          |Next basic attack will deal {bonusDamagePercent}% damage and Stun the target for {stunDuration}t.
           |""".stripMargin,
       relatedEffectIds = Seq(
         effects.Invisibility.metadata.id,

@@ -9,10 +9,8 @@ object Invisibility {
       name = CharacterEffectName.Invisibility,
       initialEffectType = CharacterEffectType.Positive,
       description =
-        """This character is invisible.
-          |State and position on the map are hidden.
-          |Walking into this character by chance breaks invisibility.
-          |""".stripMargin,
+        """State and position on the map are hidden.
+          |Accidentally walking into this character breaks invisibility.""".stripMargin,
     )
 }
 

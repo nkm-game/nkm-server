@@ -14,10 +14,7 @@ object WingsOfCrimson extends NkmConf.AutoExtract {
       name = "Wings of Crimson",
       alternateName = "紅蓮の双翼 (Guren no Sōyoku)",
       abilityType = AbilityType.Passive,
-      description =
-        """After receiving damage, character unfolds their wings,
-           gaining {bonusSpeed} speed and gaining the ability to fly for {duration}t.
-          """.stripMargin,
+      description = "After receiving damage, you unfold wings, gaining {bonusSpeed} Speed and Flying for {duration}t. ",
       relatedEffectIds = Seq(
         effects.Fly.metadata.id,
         effects.StatBuff.metadata.id,

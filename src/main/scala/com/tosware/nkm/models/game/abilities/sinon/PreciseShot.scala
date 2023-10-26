@@ -13,10 +13,9 @@ object PreciseShot extends NkmConf.AutoExtract {
       name = "Precise Shot",
       abilityType = AbilityType.Ultimate,
       description =
-        """Character shoots enemy dealing {damage} physical damage.
+        """Shoot an enemy dealing {damage} physical damage.
           |
-          |Range: circular, {range}
-          |""".stripMargin,
+          |Range: circular, {range}""".stripMargin,
     )
 }
 

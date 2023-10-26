@@ -12,7 +12,7 @@ object FairyOfLove extends NkmConf.AutoExtract {
     AbilityMetadata(
       name = "Fairy Of Love",
       abilityType = AbilityType.Ultimate,
-      description = "Character enchants the passive ability for {duration}t.",
+      description = "Enchant the passive ability for {duration}t.",
       relatedEffectIds = Seq(effects.AbilityEnchant.metadata.id),
     )
 }

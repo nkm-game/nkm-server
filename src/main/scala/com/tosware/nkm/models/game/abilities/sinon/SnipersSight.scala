@@ -13,7 +13,7 @@ object SnipersSight extends NkmConf.AutoExtract {
     AbilityMetadata(
       name = "Sniper's Sight",
       abilityType = AbilityType.Passive,
-      description = "This character's basic attack range is round.",
+      description = "Basic attack range is round.",
     )
 }
 

@@ -13,7 +13,8 @@ object FinalSolution extends NkmConf.AutoExtract {
       name = "Final Solution",
       abilityType = AbilityType.Ultimate,
       description =
-        """Character brutally finishes the enemy, dealing {missingHpBonusDamagePercent}% missing HP physical damage and applying bleeding effect dealing {bleedDamage} true damage over {bleedDuration}t.
+        """Brutally finish an enemy.
+          |Deal {missingHpBonusDamagePercent}% missing HP physical damage and apply Bleeding effect which deals {bleedDamage} true damage over {bleedDuration}t.
           |
           |Range: linear, {range}
           |""".stripMargin,

@@ -15,7 +15,7 @@ object OgreCutter extends NkmConf.AutoExtract {
       alternateName = "鬼斬り (Oni Giri)",
       abilityType = AbilityType.Normal,
       description =
-        """Character basic attacks selected target in range and teleports {targetCellOffset} tiles behind it.
+        """Basic attack an enemy and teleport {targetCellOffset} tiles behind them.
           |
           |Range: linear, stops at walls and enemies, {range}""".stripMargin,
     )

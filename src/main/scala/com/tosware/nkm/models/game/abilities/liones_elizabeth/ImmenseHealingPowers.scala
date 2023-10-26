@@ -13,10 +13,9 @@ object ImmenseHealingPowers extends NkmConf.AutoExtract {
       name = "Immense Healing Powers",
       abilityType = AbilityType.Passive,
       description =
-        """Healing of this character is stronger based on target missing HP:
-          |above {firstTreshold}%  missing HP - {firstTresholdHealing}% stronger healing
-          |above {secondTreshold}% missing HP - {secondTresholdHealing}% stronger healing
-          |""".stripMargin,
+        """Healing is stronger based on the target's missing HP.
+          |Above {firstTreshold}%  missing HP - {firstTresholdHealing}% stronger healing
+          |Above {secondTreshold}% missing HP - {secondTresholdHealing}% stronger healing""".stripMargin,
     )
 }
 

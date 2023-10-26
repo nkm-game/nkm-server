@@ -15,15 +15,16 @@ object Mabinogion extends NkmConf.AutoExtract {
       name = "Mabinogion",
       abilityType = AbilityType.Passive,
       description =
-        """At the end of this character's turn, heal all nearby characters in radius {radius} for {heal} HP.
-          |Additionally, friendly characters gain up to {shield} shield.
+        """At the end of your turn heal all nearby characters for {heal} HP.
+          |Additionally allies gain up to {shield} shield.
           |
           |This ability can be enchanted:
-          |- heal only friendly characters
+          |- heal only allies
           |- heal is tripled
           |- shield is tripled
-          |- all friends in range gain {enchantedSpeed} speed for one phase
-          |""".stripMargin,
+          |- all friends in range gain {enchantedSpeed} Speed for 1t
+          |
+          |Radius: circular, {radius}""".stripMargin,
     )
 }
 

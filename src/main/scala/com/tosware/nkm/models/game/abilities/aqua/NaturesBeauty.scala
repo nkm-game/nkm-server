@@ -12,7 +12,7 @@ object NaturesBeauty extends NkmConf.AutoExtract {
     AbilityMetadata(
       name = "Nature's Beauty",
       abilityType = AbilityType.Passive,
-      description = "Character can use basic attacks on allies, healing them instead of dealing damage.",
+      description = "Basic attacks can be used on allies, healing them instead of dealing damage.",
     )
 }
 

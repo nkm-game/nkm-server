@@ -13,7 +13,7 @@ object Parry extends NkmConf.AutoExtract {
     AbilityMetadata(
       name = "Parry",
       abilityType = AbilityType.Passive,
-      description = "Character has a {dodgeChancePercent}% chance to block basic attack of an enemy",
+      description = "{dodgeChancePercent}% chance to block a basic attack",
       relatedEffectIds = Seq(effects.Block.metadata.id),
     )
 }
@@ -26,7 +26,7 @@ case class Parry(abilityId: AbilityId, parentCharacterId: CharacterId) extends A
     e match {
       case CharacterPreparedToAttack(_, _, _, _, _, targetCharacterId) =>
         if (targetCharacterId != parentCharacterId) return gameState
-        val dodged: Boolean = random.between(0f, 100f) < (metadata.variables("dodgeChancePercent"))
+        val dodged: Boolean = random.between(0f, 100f) < metadata.variables("dodgeChancePercent")
         if (!dodged) return gameState
         gameState.addEffect(parentCharacterId, effects.Block(randomUUID(), 1))(random, id)
       case _ => gameState

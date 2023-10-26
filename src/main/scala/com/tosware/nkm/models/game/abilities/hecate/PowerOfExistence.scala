@@ -14,9 +14,8 @@ object PowerOfExistence extends NkmConf.AutoExtract {
       alternateName = "存在の力 (Sonzai no Chikara)",
       abilityType = AbilityType.Ultimate,
       description =
-        """Character releases collected Life Energy, dealing magic damage to every enemy character on the map.
-          |Damage equals to collected Life Energy divided by number of enemies.
-          |""".stripMargin,
+        """Release collected Life Energy, dealing magic damage to every enemy character on the map.
+          |Damage equals to collected Life Energy divided by number of enemies.""".stripMargin,
     )
 }
 

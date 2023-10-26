@@ -14,10 +14,11 @@ object MjolnirDestinyImpulse extends NkmConf.AutoExtract {
       name = "Mjolnir Destiny Impulse",
       abilityType = AbilityType.Ultimate,
       description =
-        """Character hits with a hammer in a selected area, dealing {damage} physical damage to all enemies in radius {radius}.
+        """Hit with a hammer, dealing {damage} physical damage to hit enemies.
           |This ability can be used again this turn every time it caused to kill at least one enemy.
           |
-          |Range: circular, {range}""".stripMargin,
+          |Range: circular, {range}
+          |Radius: circular, {radius}""".stripMargin,
     )
 }
 

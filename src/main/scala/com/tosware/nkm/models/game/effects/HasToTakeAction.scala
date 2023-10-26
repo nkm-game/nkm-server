@@ -13,7 +13,7 @@ object HasToTakeAction {
     CharacterEffectMetadata(
       name = CharacterEffectName.HasToTakeAction,
       initialEffectType = CharacterEffectType.Negative,
-      description = "This character has to take action next turn.",
+      description = "Has to take action next turn.",
       isCc = true,
     )
 }

@@ -14,8 +14,8 @@ object BindingRibbons extends NkmConf.AutoExtract {
       name = "Binding Ribbons",
       abilityType = AbilityType.Normal,
       description =
-        """Character casts a spell that silents all hit enemies for {silenceDuration}t.
-          |If it hits at least {enemiesToHitToActivateSnare} enemies, they will be snared for {rootDuration}t.
+        """Cast a spell that Silences hit enemies for {silenceDuration}t.
+          |If this ability hits at least {enemiesToHitToActivateSnare} enemies, they will be Snared for {snareDuration}t.
           |
           |Range: circular, {range}
           |Radius: circular, {radius}""".stripMargin,
@@ -44,7 +44,7 @@ case class BindingRibbons(abilityId: AbilityId, parentCharacterId: CharacterId)
 
     if (targetsHit >= metadata.variables("enemiesToHitToActivateSnare")) {
       silencedGameState
-        .addEffect(target, effects.Snare(randomUUID(), metadata.variables("rootDuration")))(random, id)
+        .addEffect(target, effects.Snare(randomUUID(), metadata.variables("snareDuration")))(random, id)
     } else silencedGameState
   }
 

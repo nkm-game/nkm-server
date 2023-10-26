@@ -13,7 +13,7 @@ object TacticalEscape extends NkmConf.AutoExtract {
     AbilityMetadata(
       name = "Tactical Escape",
       abilityType = AbilityType.Normal,
-      description = "Character gains {speedIncrease} speed for {duration}t.",
+      description = "Gain {speedIncrease} Speed for {duration}t.",
       relatedEffectIds = Seq(effects.StatBuff.metadata.id),
     )
 }

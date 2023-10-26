@@ -16,7 +16,8 @@ object SamuraisSwiftness extends NkmConf.AutoExtract {
       name = "Samurai's Swiftness",
       abilityType = AbilityType.Passive,
       description =
-        "Dealing damage by this character gives a {speedPercent}% speed buff in their next turn.",
+        """After dealing damage, gain {speedPercent}% Speed buff for 1t.
+          |This effect does not stack.""".stripMargin,
       relatedEffectIds = Seq(StatBuff.metadata.id),
     )
 }

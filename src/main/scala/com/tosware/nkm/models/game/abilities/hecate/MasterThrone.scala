@@ -15,9 +15,9 @@ object MasterThrone extends NkmConf.AutoExtract {
       alternateName = "頂の座 (Itadaki no Kura)",
       abilityType = AbilityType.Passive,
       description =
-        """Character can gather Life Energy using base attacks or Normal abilities, collecting {healthPercent}% of target's max HP.
-          |Life Energy can be collected only once per character.
-          |""".stripMargin,
+        """Collect Life Energy using basic attacks or Normal abilities.
+          |Life Energy stack contains {healthPercent}% of target's max HP.
+          |Life Energy can be collected only once per character.""".stripMargin,
     )
   val collectedCharacterIdsKey: String = "collectedCharacterIds"
   val collectedEnergyKey: String = "collectedEnergy"

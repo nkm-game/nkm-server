@@ -14,7 +14,7 @@ object StatBuff {
     CharacterEffectMetadata(
       name = CharacterEffectName.StatBuff,
       initialEffectType = CharacterEffectType.Positive,
-      description = "Buffs a certain stat in character.",
+      description = "A certain stat is buffed.",
     )
 
   val statTypeKey: String = "statType"

@@ -12,10 +12,7 @@ object BlackBlood extends NkmConf.AutoExtract {
     AbilityMetadata(
       name = "Black Blood",
       abilityType = AbilityType.Passive,
-      description =
-        """After receiving damage, character deals {damage} magical damage to surrounding enemies.
-          |
-          |Radius: circular, {radius}""".stripMargin,
+      description = "You have permanent Black Blood effect.",
       relatedEffectIds = Seq(effects.BlackBlood.metadata.id),
     )
 }

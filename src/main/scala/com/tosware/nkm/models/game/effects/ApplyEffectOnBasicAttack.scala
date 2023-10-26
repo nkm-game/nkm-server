@@ -13,7 +13,7 @@ object ApplyEffectOnBasicAttack {
     CharacterEffectMetadata(
       name = CharacterEffectName.ApplyEffectOnBasicAttack,
       initialEffectType = CharacterEffectType.Positive,
-      description = "Applies an effect on next basic attack's target.",
+      description = "Apply an effect on next basic attack's target.",
       isCc = true,
     )
 

@@ -17,8 +17,7 @@ object Steal extends NkmConf.AutoExtract {
       name = "Steal",
       abilityType = AbilityType.Ultimate,
       description =
-        """Character steals armor from target enemy for {duration}t,
-          |zeroing their physical and magical defense and adding them to themself.
+        """Steal pants from an enemy for {duration}t, zeroing their physical and magical defense and adding them to themself.
           |
           |Range: circular, {range}""".stripMargin,
     )

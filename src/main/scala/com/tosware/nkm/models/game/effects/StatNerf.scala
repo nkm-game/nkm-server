@@ -14,7 +14,7 @@ object StatNerf {
     CharacterEffectMetadata(
       name = CharacterEffectName.StatNerf,
       initialEffectType = CharacterEffectType.Negative,
-      description = "Nerfs a certain stat in character.",
+      description = "A certain stat is nerfed.",
     )
 
   val statTypeKey: String = "statType"

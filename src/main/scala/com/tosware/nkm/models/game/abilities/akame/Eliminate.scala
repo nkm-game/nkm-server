@@ -12,7 +12,7 @@ object Eliminate extends NkmConf.AutoExtract {
       name = "Eliminate",
       abilityType = AbilityType.Normal,
       description =
-        """Character hits critically, dealing double AD damage to target.
+        """Hit critically, dealing double AD damage to target.
           |
           |Range: circular, {range}""".stripMargin,
     )

@@ -13,9 +13,8 @@ object HighLuck extends NkmConf.AutoExtract {
       name = "High Luck",
       abilityType = AbilityType.Passive,
       description =
-        """Character has a {criticalStrikePercent}% chance to strike critically when dealing damage.
-          |Critical strike deals double damage.
-          |""".stripMargin,
+        """{criticalStrikePercent}% chance for a critical strike when dealing damage.
+          |Critical strike deals double damage.""".stripMargin,
     )
 }
 

@@ -8,7 +8,7 @@ object MarkOfTheWind {
     HexCellEffectMetadata(
       name = HexCellEffectName.MarkOfTheWind,
       initialEffectType = HexCellEffectType.Trap,
-      description = "Invisible. Deals damage when triggered by Crack the Sky ability.",
+      description = "Invisible. Deal damage when triggered by `Crack the Sky`.",
     )
 }
 
