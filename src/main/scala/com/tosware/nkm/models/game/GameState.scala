@@ -110,7 +110,7 @@ case class GameState(
   def millisSinceLastClockUpdate(): Long = ChronoUnit.MILLIS.between(lastTimestamp, Instant.now())
 
   def currentClock(): Clock = {
-    if (!clock.isRunning) return clock;
+    if (!clock.isRunning) return clock
     val timeToDecrease: Long = millisSinceLastClockUpdate()
 
     if (isSharedTime)
@@ -540,6 +540,7 @@ case class GameState(
       logEvent(PlacingCharactersFinished(randomUUID(), phase, turn, id))
         .reveal(RevealCondition.CharacterPlacingFinished)
         .updateGameStatus(GameStatus.Running)
+        .updateTimestamp() // timestamp needs to be updated when we change from shared to normal clock
     else this
 
   def placeCharacters(playerId: PlayerId, coordinatesToCharacterIdMap: Map[HexCoordinates, CharacterId])(implicit

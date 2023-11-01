@@ -1185,5 +1185,55 @@ class WSGameSpec extends WSTrait {
         clock4.playerTimes(emails(1)) should be < clock3.playerTimes(emails(1))
       }
     }
+
+    "not take first player's time after all characters are placed" in {
+      val numberOfPlayers = 2
+      val numberOfCharacters = 2
+
+      val lobbyId = createLobbyForGame(
+        pickType = PickType.BlindPick,
+        numberOfPlayers = numberOfPlayers,
+        numberOfCharacters = numberOfCharacters,
+        clockConfigOpt = Some(ClockConfig.defaultForPickType(PickType.BlindPick).copy(timeAfterPickMillis = 1)),
+      )
+
+      withGameWS { implicit wsClient: WSProbe =>
+        auth(0)
+        val availableCharacters = fetchAndParseGame(lobbyId).blindPickState.get.config.availableCharacters.toSeq
+        val charactersToPick = availableCharacters.take(numberOfCharacters).toSet
+
+        blindPick(lobbyId, charactersToPick).statusCode shouldBe ok
+
+        auth(1)
+        blindPick(lobbyId, charactersToPick).statusCode shouldBe ok
+
+        Thread.sleep(150)
+
+        val (hexMap, players) = {
+          val gameState = fetchAndParseGame(lobbyId)
+          gameState.gameStatus shouldBe GameStatus.CharacterPlacing
+          (gameState.hexMap, gameState.players)
+        }
+
+        (0 until numberOfPlayers) foreach { i =>
+          auth(i)
+          val spawnPoints = hexMap.getSpawnPointsByNumber(i)
+          val characterIds = players(i).characterIds
+          val coordinatesToCharacterIdMap = spawnPoints.map(_.coordinates).zip(characterIds).toMap
+          Thread.sleep(150) // fake delay
+          placeCharacters(lobbyId, coordinatesToCharacterIdMap).statusCode shouldBe ok
+        }
+
+        {
+          val gameState = fetchAndParseGame(lobbyId)
+          gameState.gameStatus shouldBe GameStatus.Running
+
+          val clock = gameState.clock
+          val clockDiff = Math.abs(clock.playerTimes(emails(1)) - clock.playerTimes(emails(0)))
+          clockDiff.toInt should be < 350
+        }
+      }
+    }
+
   }
 }
