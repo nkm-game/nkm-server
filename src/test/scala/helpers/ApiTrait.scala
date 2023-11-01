@@ -23,7 +23,7 @@ trait ApiTrait
 
   override def beforeEach(): Unit = {
     super.beforeEach()
-    _depsOption = Some(new NkmDependencies(system, db))
+    _depsOption = Some(new NkmDependencies(system))
     _httpServiceOption = Some(new HttpService(deps))
   }
 

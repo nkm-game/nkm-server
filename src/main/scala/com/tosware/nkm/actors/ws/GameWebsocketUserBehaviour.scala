@@ -89,12 +89,22 @@ trait GameWebsocketUserBehaviour extends WebsocketUserBehaviour {
         WebsocketGameResponse(GameResponseType.Observe, StatusCodes.OK.intValue)
       case GameRoute.GetState =>
         val lobbyId = request.requestJson.parseJson.convertTo[GetState].lobbyId
-        val gameStateView = aw(gameService.getGameStateView(lobbyId, authStatus.userIdOpt))
-        WebsocketGameResponse(GameResponseType.State, StatusCodes.OK.intValue, gameStateView.toJson.toString)
+        gameService.getGameStateViewOpt(lobbyId, authStatus.userIdOpt) match {
+          case Some(gameStateViewFuture) =>
+            val gameStateView = aw(gameStateViewFuture)
+            WebsocketGameResponse(GameResponseType.State, StatusCodes.OK.intValue, gameStateView.toJson.toString)
+          case None =>
+            WebsocketGameResponse(GameResponseType.Error, StatusCodes.NotFound.intValue)
+        }
       case GameRoute.GetCurrentClock =>
         val lobbyId = request.requestJson.parseJson.convertTo[GetCurrentClock].lobbyId
-        val clock = aw(gameService.getCurrentClock(lobbyId))
-        WebsocketGameResponse(GameResponseType.GetCurrentClock, StatusCodes.OK.intValue, clock.toJson.toString)
+        gameService.getCurrentClockOpt(lobbyId) match {
+          case Some(clockFuture) =>
+            val clock = aw(clockFuture)
+            WebsocketGameResponse(GameResponseType.GetCurrentClock, StatusCodes.OK.intValue, clock.toJson.toString)
+          case None =>
+            WebsocketGameResponse(GameResponseType.Error, StatusCodes.NotFound.intValue)
+        }
       case GameRoute.Pause =>
         val lobbyId = request.requestJson.parseJson.convertTo[Pause].lobbyId
         implicit val responseType: GameResponseType = GameResponseType.Pause

@@ -7,55 +7,52 @@ import akka.persistence.query.PersistenceQuery
 import akka.stream.scaladsl.Sink
 import com.tosware.nkm.NkmTimeouts
 import com.tosware.nkm.actors.*
+import com.tosware.nkm.actors.GameIdTrackerActor.Response
+import com.tosware.nkm.models.CommandResponse
 import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.hex.HexMap
 import com.tosware.nkm.models.lobby.*
 import com.tosware.nkm.models.lobby.ws.LobbyRequest.*
-import slick.jdbc.JdbcBackend
 
 import scala.concurrent.Future
 
-class LobbyService(lobbiesManagerActor: ActorRef)(
+class LobbyService(gameIdTrackerActor: ActorRef)(
     implicit
-    db: JdbcBackend.Database,
     system: ActorSystem,
     nkmDataService: NkmDataService,
     gameService: GameService,
 ) extends NkmTimeouts {
   import com.tosware.nkm.models.CommandResponse.*
 
-  def getLobbyActorOption(lobbyId: String): Option[ActorRef] = {
-    import LobbiesManager.GetLobbyActorResponse
-    import LobbiesManager.Query.GetLobbyActor
+  private def failGameIdDoesNotExist: Failure =
+    CommandResponse.Failure("Game ID does not exist.")
 
-    aw(lobbiesManagerActor ? GetLobbyActor(lobbyId))
-      .asInstanceOf[GetLobbyActorResponse]
-      .lobbyActor
-  }
-
-  def getLobbyActor(lobbyId: String): ActorRef =
-    getLobbyActorOption(lobbyId).get
+  def getLobbyActorOpt(lobbyId: String): Option[ActorRef] =
+    aw(gameIdTrackerActor ? GameIdTrackerActor.Query.GetLobbyActor(lobbyId))
+      .asInstanceOf[GameIdTrackerActor.Response] match {
+      case Response.GetLobbyActorResponse(lobbyActor) => Some(lobbyActor)
+      case Response.GameIdDoesNotExist                => None
+      case _                                          => None
+    }
 
   def getLobbyState(lobbyActor: ActorRef): Future[LobbyState] =
     (lobbyActor ? Lobby.GetState).mapTo[LobbyState]
 
-  def getLobbyState(lobbyId: String): Future[LobbyState] =
-    getLobbyState(getLobbyActor(lobbyId))
+  def getLobbyStateOpt(lobbyId: String): Option[Future[LobbyState]] =
+    getLobbyActorOpt(lobbyId).map(getLobbyState)
 
-  def getGameState(lobbyId: String): Future[GameState] =
+  def getGameState(lobbyId: String): Option[Future[GameState]] =
     gameService.getGameState(lobbyId)
 
-  def createLobby(name: String, hostUserId: String): CommandResponse =
-    aw(lobbiesManagerActor ? Lobby.Create(name, hostUserId)).asInstanceOf[CommandResponse]
+  def createLobby(name: String, hostUserId: String): Future[CommandResponse] =
+    (gameIdTrackerActor ? Lobby.Create(name, hostUserId)).mapTo[CommandResponse]
 
   def isLobbyCreated(lobbyId: String): Boolean =
-    getLobbyActorOption(lobbyId).isDefined
+    getLobbyActorOpt(lobbyId).isDefined
 
   def joinLobby(userId: String, request: LobbyJoin): CommandResponse = {
-    if (!isLobbyCreated(request.lobbyId)) return Failure("Lobby is not created at this id")
-
-    val lobbyActor = getLobbyActor(request.lobbyId)
-    val gameState = aw(getGameState(request.lobbyId))
+    val lobbyActor = getLobbyActorOpt(request.lobbyId).getOrElse(return failGameIdDoesNotExist)
+    val gameState = aw(getGameState(request.lobbyId).getOrElse(return failGameIdDoesNotExist))
 
     if (gameState.gameStatus != GameStatus.NotStarted) return Failure("Game is already started")
 
@@ -63,10 +60,8 @@ class LobbyService(lobbiesManagerActor: ActorRef)(
   }
 
   def leaveLobby(userId: String, request: LobbyLeave): CommandResponse = {
-    if (!isLobbyCreated(request.lobbyId)) return Failure("Lobby is not created at this id")
-
-    val lobbyActor = getLobbyActor(request.lobbyId)
-    val gameState = aw(getGameState(request.lobbyId))
+    val lobbyActor = getLobbyActorOpt(request.lobbyId).getOrElse(return failGameIdDoesNotExist)
+    val gameState = aw(getGameState(request.lobbyId).getOrElse(return failGameIdDoesNotExist))
 
     if (gameState.gameStatus != GameStatus.NotStarted) return Failure("Game is already started")
 
@@ -74,11 +69,9 @@ class LobbyService(lobbiesManagerActor: ActorRef)(
   }
 
   def setHexmapName(username: String, request: SetHexMapName): CommandResponse = {
-    if (!isLobbyCreated(request.lobbyId)) return Failure("Lobby is not created at this id")
-
-    val lobbyActor = getLobbyActor(request.lobbyId)
+    val lobbyActor = getLobbyActorOpt(request.lobbyId).getOrElse(return failGameIdDoesNotExist)
     val lobbyState = aw(getLobbyState(lobbyActor))
-    val gameState = aw(getGameState(request.lobbyId))
+    val gameState = aw(getGameState(request.lobbyId).getOrElse(return failGameIdDoesNotExist))
     val hexMaps = nkmDataService.getHexMaps
 
     if (gameState.gameStatus != GameStatus.NotStarted) return Failure("Game is already started")
@@ -91,11 +84,9 @@ class LobbyService(lobbiesManagerActor: ActorRef)(
   }
 
   def setNumberOfCharactersPerPlayer(username: String, request: SetNumberOfCharactersPerPlayer): CommandResponse = {
-    if (!isLobbyCreated(request.lobbyId)) return Failure("Lobby is not created at this id")
-
-    val lobbyActor = getLobbyActor(request.lobbyId)
+    val lobbyActor = getLobbyActorOpt(request.lobbyId).getOrElse(return failGameIdDoesNotExist)
     val lobbyState = aw(getLobbyState(lobbyActor))
-    val gameState = aw(getGameState(request.lobbyId))
+    val gameState = aw(getGameState(request.lobbyId).getOrElse(return failGameIdDoesNotExist))
 
     if (request.charactersPerPlayer < 1) return Failure("Number of characters has to be more than 0")
 
@@ -106,11 +97,9 @@ class LobbyService(lobbiesManagerActor: ActorRef)(
   }
 
   def setNumberOfBans(username: String, request: SetNumberOfBans): CommandResponse = {
-    if (!isLobbyCreated(request.lobbyId)) return Failure("Lobby is not created at this id")
-
-    val lobbyActor = getLobbyActor(request.lobbyId)
+    val lobbyActor = getLobbyActorOpt(request.lobbyId).getOrElse(return failGameIdDoesNotExist)
+    val gameState = aw(getGameState(request.lobbyId).getOrElse(return failGameIdDoesNotExist))
     val lobbyState = aw(getLobbyState(lobbyActor))
-    val gameState = aw(getGameState(request.lobbyId))
 
     if (request.numberOfBans < 0) return Failure("Number of bans has to be more or equal 0")
 
@@ -122,11 +111,9 @@ class LobbyService(lobbiesManagerActor: ActorRef)(
   }
 
   def setPickType(username: String, request: SetPickType): CommandResponse = {
-    if (!isLobbyCreated(request.lobbyId)) return Failure("Lobby is not created at this id")
-
-    val lobbyActor = getLobbyActor(request.lobbyId)
+    val lobbyActor = getLobbyActorOpt(request.lobbyId).getOrElse(return failGameIdDoesNotExist)
+    val gameState = aw(getGameState(request.lobbyId).getOrElse(return failGameIdDoesNotExist))
     val lobbyState = aw(getLobbyState(lobbyActor))
-    val gameState = aw(getGameState(request.lobbyId))
 
     if (gameState.gameStatus != GameStatus.NotStarted) return Failure("Game is already started")
 
@@ -136,11 +123,9 @@ class LobbyService(lobbiesManagerActor: ActorRef)(
   }
 
   def setLobbyName(username: String, request: SetLobbyName): CommandResponse = {
-    if (!isLobbyCreated(request.lobbyId)) return Failure("Lobby is not created at this id")
-
-    val lobbyActor = getLobbyActor(request.lobbyId)
+    val lobbyActor = getLobbyActorOpt(request.lobbyId).getOrElse(return failGameIdDoesNotExist)
+    val gameState = aw(getGameState(request.lobbyId).getOrElse(return failGameIdDoesNotExist))
     val lobbyState = aw(getLobbyState(lobbyActor))
-    val gameState = aw(getGameState(request.lobbyId))
 
     if (gameState.gameStatus != GameStatus.NotStarted) return Failure("Game is already started")
 
@@ -150,11 +135,9 @@ class LobbyService(lobbiesManagerActor: ActorRef)(
   }
 
   def setClockConfig(username: String, request: SetClockConfig): CommandResponse = {
-    if (!isLobbyCreated(request.lobbyId)) return Failure("Lobby is not created at this id")
-
-    val lobbyActor = getLobbyActor(request.lobbyId)
+    val lobbyActor = getLobbyActorOpt(request.lobbyId).getOrElse(return failGameIdDoesNotExist)
+    val gameState = aw(getGameState(request.lobbyId).getOrElse(return failGameIdDoesNotExist))
     val lobbyState = aw(getLobbyState(lobbyActor))
-    val gameState = aw(getGameState(request.lobbyId))
 
     if (gameState.gameStatus != GameStatus.NotStarted) return Failure("Game is already started")
 
@@ -164,11 +147,9 @@ class LobbyService(lobbiesManagerActor: ActorRef)(
   }
 
   def startGame(username: String, request: StartGame): CommandResponse = {
-    if (!isLobbyCreated(request.lobbyId)) return Failure("Lobby is not created at this id")
-
-    val lobbyActor = getLobbyActor(request.lobbyId)
+    val lobbyActor = getLobbyActorOpt(request.lobbyId).getOrElse(return failGameIdDoesNotExist)
+    val gameState = aw(getGameState(request.lobbyId).getOrElse(return failGameIdDoesNotExist))
     val lobbyState = aw(getLobbyState(lobbyActor))
-    val gameState = aw(getGameState(request.lobbyId))
 
     if (!lobbyState.hostUserId.contains(username)) return Failure("You are not the host")
     if (lobbyState.chosenHexMapName.isEmpty) return Failure("Chosen hex map name is empty")
@@ -180,11 +161,11 @@ class LobbyService(lobbiesManagerActor: ActorRef)(
 
     if (gameState.gameStatus != GameStatus.NotStarted) return Failure("Game is already started")
 
-    aw(lobbyActor ? Lobby.StartGame(gameService.getGameActor(request.lobbyId))).asInstanceOf[CommandResponse]
+    aw(lobbyActor ? Lobby.StartGame(gameService.getGameActorOpt(request.lobbyId).get)).asInstanceOf[CommandResponse]
   }
 
   def getAllLobbies(): Future[Seq[LobbyState]] = {
-    // TODO: use lobbies manager
+    // TODO: use game id tracker
     val readJournal = PersistenceQuery(system).readJournalFor[JdbcReadJournal](JdbcReadJournal.Identifier)
     val lobbyIdsFuture = readJournal.currentEventsByTag("lobby", 0)
       .map(_.event.asInstanceOf[Lobby.CreateSuccess])

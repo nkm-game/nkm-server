@@ -23,7 +23,7 @@ class NkmPersistenceTestKit(_system: ActorSystem) extends TestKit(_system)
 
   override def beforeEach(): Unit = {
     super.beforeEach()
-    _depsOption = Some(new NkmDependencies(system, db))
+    _depsOption = Some(new NkmDependencies(system))
   }
 
   override def afterEach(): Unit = {

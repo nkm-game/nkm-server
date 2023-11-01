@@ -54,7 +54,7 @@ object Main extends App with Logging {
   initDb()
   initUsers()
 
-  val deps = new NkmDependencies(system, db)
+  val deps = new NkmDependencies(system)
   val httpService = new HttpService(deps)
 
   try {

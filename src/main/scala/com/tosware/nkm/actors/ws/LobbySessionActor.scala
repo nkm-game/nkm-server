@@ -21,7 +21,7 @@ class LobbySessionActor(implicit val lobbyService: LobbyService)
   override def receive: Receive = super.receive.orElse[Any, Unit] {
     case e: Lobby.Event =>
       val lobbyId = e.id
-      val lobbyState = aw(lobbyService.getLobbyState(lobbyId))
+      val lobbyState = aw(lobbyService.getLobbyStateOpt(lobbyId).get)
       val response =
         WebsocketLobbyResponse(LobbyResponseType.Lobby, StatusCodes.OK.intValue, lobbyState.toJson.toString)
       getObservers(lobbyId).foreach(_ ! WebsocketUser.OutgoingMessage(response.toJson.toString))

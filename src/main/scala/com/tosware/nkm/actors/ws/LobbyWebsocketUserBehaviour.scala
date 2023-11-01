@@ -51,6 +51,9 @@ trait LobbyWebsocketUserBehaviour extends WebsocketUserBehaviour {
   def unauthorized(msg: String = "")(implicit responseType: LobbyResponseType): WebsocketLobbyResponse =
     WebsocketLobbyResponse(responseType, StatusCodes.Unauthorized.intValue, msg)
 
+  def notFound(msg: String = "")(implicit responseType: LobbyResponseType): WebsocketLobbyResponse =
+    WebsocketLobbyResponse(responseType, StatusCodes.NotFound.intValue, msg)
+
   def resolveResponse(commandResponse: CommandResponse)(implicit
       responseType: LobbyResponseType
   ): WebsocketLobbyResponse =
@@ -93,14 +96,19 @@ trait LobbyWebsocketUserBehaviour extends WebsocketUserBehaviour {
       case LobbyRoute.Lobby =>
         implicit val responseType: LobbyResponseType = LobbyResponseType.Lobby
         val lobbyId = request.requestJson.parseJson.convertTo[GetLobby].lobbyId
-        val lobby = aw(lobbyService.getLobbyState(lobbyId))
-        ok(lobby.toJson.toString)
+        lobbyService.getLobbyStateOpt(lobbyId) match {
+          case Some(lobbyFuture) =>
+            val lobby = aw(lobbyFuture)
+            ok(lobby.toJson.toString)
+          case None =>
+            notFound()
+        }
       case LobbyRoute.CreateLobby =>
         implicit val responseType: LobbyResponseType = LobbyResponseType.CreateLobby
         val lobbyName = request.requestJson.parseJson.convertTo[LobbyCreation].name
         if (authStatus.userIdOpt.isEmpty) return unauthorized()
         val username = authStatus.userIdOpt.get
-        val response = lobbyService.createLobby(lobbyName, username)
+        val response = aw(lobbyService.createLobby(lobbyName, username))
         resolveResponse(response)
       case LobbyRoute.JoinLobby =>
         implicit val responseType: LobbyResponseType = LobbyResponseType.JoinLobby

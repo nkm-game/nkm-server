@@ -14,12 +14,11 @@ import com.tosware.nkm.actors.User
 import com.tosware.nkm.actors.User.*
 import com.tosware.nkm.models.{Credentials, RegisterRequest}
 import com.tosware.nkm.serializers.NkmJsonProtocol
-import slick.jdbc.JdbcBackend
 import spray.json.*
 
 import scala.concurrent.{ExecutionContextExecutor, Future}
 
-class UserService(implicit db: JdbcBackend.Database, system: ActorSystem)
+class UserService(implicit system: ActorSystem)
     extends NkmTimeouts
     with NkmJsonProtocol {
   def authenticate(creds: Credentials): LoginEvent = {

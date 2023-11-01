@@ -19,7 +19,7 @@ trait NkmIntegrationTestTrait
     with NkmTimeouts
     with SprayJsonSupport
     with Logging {
-  implicit val db: JdbcBackend.Database = Database.forConfig("slick.db")
+  val db: JdbcBackend.Database = Database.forConfig("slick.db")
 
   override def beforeAll(): Unit = {
     val config: Config = ConfigFactory.load()
