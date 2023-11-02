@@ -15,6 +15,7 @@ object Eliminate extends NkmConf.AutoExtract {
         """Hit critically, dealing double AD damage to target.
           |
           |Range: circular, {range}""".stripMargin,
+      traits = Seq(AbilityTrait.ContactEnemy),
     )
 }
 

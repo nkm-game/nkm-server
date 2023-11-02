@@ -22,6 +22,7 @@ object StarburstStream extends NkmConf.AutoExtract {
           |After using this ability, you can permanently basic attack {basicAttacksPerTurn} times per turn.
           |
           |Range: linear, {range}""".stripMargin,
+      traits = Seq(AbilityTrait.ContactEnemy),
     )
 
   val doubleAttackEnabledKey = "doubleAttackEnabled"

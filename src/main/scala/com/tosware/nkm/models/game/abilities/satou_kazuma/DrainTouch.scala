@@ -17,6 +17,7 @@ object DrainTouch extends NkmConf.AutoExtract {
         """Drain HP from target enemy, dealing {damage} magical damage and restoring HP equal to damage dealt to target.
           |
           |Range: linear, {range}""".stripMargin,
+      traits = Seq(AbilityTrait.ContactEnemy),
     )
 }
 

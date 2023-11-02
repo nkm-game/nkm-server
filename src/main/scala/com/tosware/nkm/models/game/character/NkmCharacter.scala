@@ -49,6 +49,9 @@ case class NkmCharacter(
   def isFlying: Boolean =
     state.effects.ofType[effects.Fly].nonEmpty
 
+  def isGrounded: Boolean =
+    state.effects.ofType[effects.Ground].nonEmpty
+
   def isInvisible: Boolean =
     state.effects.ofType[effects.Invisibility].nonEmpty
 

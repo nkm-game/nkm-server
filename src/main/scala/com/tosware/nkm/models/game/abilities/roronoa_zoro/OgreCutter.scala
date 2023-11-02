@@ -18,6 +18,7 @@ object OgreCutter extends NkmConf.AutoExtract {
         """Basic attack an enemy and teleport {targetCellOffset} tiles behind them.
           |
           |Range: linear, stops at walls and enemies, {range}""".stripMargin,
+      traits = Seq(AbilityTrait.Move, AbilityTrait.ContactEnemy),
     )
 }
 

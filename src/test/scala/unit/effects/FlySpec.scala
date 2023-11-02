@@ -3,39 +3,38 @@ package unit.effects
 import com.tosware.nkm.*
 import com.tosware.nkm.models.GameStateValidator
 import com.tosware.nkm.models.game.*
-import com.tosware.nkm.models.game.character.CharacterMetadata
 import com.tosware.nkm.models.game.effects.Fly
-import helpers.{TestUtils, scenarios}
-import org.scalatest.matchers.should.Matchers
+import com.tosware.nkm.models.game.hex.TestHexMapName
+import helpers.{TestScenario, TestUtils}
 import org.scalatest.wordspec.AnyWordSpecLike
 
 class FlySpec
     extends AnyWordSpecLike
-    with Matchers
     with TestUtils {
   private val effectMetadata = Fly.metadata
-  private val metadata = CharacterMetadata.empty()
-  private val s = scenarios.FlyTestScenario(metadata)
-  implicit private val gameState: GameState = s.gameState.addEffect(s.p(0)(0).character.id, Fly("test_id", 2))
+  private val s = TestScenario.generate(TestHexMapName.Fly)
+  private val eGs: GameState = s.gameState.addEffect(s.defaultCharacter.id, Fly(randomUUID(), 2))
 
   effectMetadata.name.toString must {
     "allow flying over walls" in {
-      val r = GameStateValidator()
-        .validateBasicMoveCharacter(
-          s.p(0)(0).character.owner.id,
+      val validator = GameStateValidator()(eGs)
+      assertCommandSuccess {
+        validator.validateBasicMoveCharacter(
+          s.owners(0),
           CoordinateSeq((0, 0), (1, 0), (2, 0)),
-          s.p(0)(0).character.id,
+          s.defaultCharacter.id,
         )
-      assertCommandSuccess(r)
+      }
     }
     "allow flying over enemy characters" in {
-      val r = GameStateValidator()
-        .validateBasicMoveCharacter(
-          s.p(0)(0).character.owner.id,
+      val validator = GameStateValidator()(eGs)
+      assertCommandSuccess {
+        validator.validateBasicMoveCharacter(
+          s.owners(0),
           CoordinateSeq((0, 0), (1, 0), (2, 0), (3, 0), (4, 0)),
-          s.p(0)(0).character.id,
+          s.defaultCharacter.id,
         )
-      assertCommandSuccess(r)
+      }
     }
   }
 }

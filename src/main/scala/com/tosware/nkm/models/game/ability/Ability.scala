@@ -26,6 +26,7 @@ abstract class Ability(val id: AbilityId, pid: CharacterId)
       UseCheck.Base.IsNotPassive,
       UseCheck.Base.IsNotOnCooldown,
       UseCheck.Base.ParentCharacterOnMap,
+      UseCheck.Base.ParentCharacterNotGroundedIfHasMoveTrait,
       UseCheck.Base.CanBeUsedByParent,
     ) ++
       Option.when(metadata.abilityType == AbilityType.Ultimate)(UseCheck.Base.PhaseIsGreaterThan(3)).toSet
@@ -95,6 +96,8 @@ abstract class Ability(val id: AbilityId, pid: CharacterId)
         (state.cooldown <= 0 || parentCharacter.state.effects.ofType[FreeAbility].nonEmpty) -> "Ability is on cooldown."
       def ParentCharacterOnMap(implicit gameState: GameState): UseCheck =
         parentCharacter.isOnMap -> "Parent character is not on map."
+      def ParentCharacterNotGroundedIfHasMoveTrait(implicit gameState: GameState): UseCheck =
+        !(metadata.traits.contains(AbilityTrait.Move) && parentCharacter.isGrounded) -> "Parent character is grounded."
       def PhaseIsGreaterThan(i: Int)(implicit gameState: GameState): UseCheck =
         (gameState.phase.number > i || parentCharacter.state.effects.ofType[
           FreeAbility

@@ -18,6 +18,7 @@ object FinalSolution extends NkmConf.AutoExtract {
           |
           |Range: linear, {range}
           |""".stripMargin,
+      traits = Seq(AbilityTrait.ContactEnemy),
     )
 }
 

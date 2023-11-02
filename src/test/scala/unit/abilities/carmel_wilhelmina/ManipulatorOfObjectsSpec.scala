@@ -19,11 +19,11 @@ class ManipulatorOfObjectsSpec
   implicit private val gameState: GameState = s.gameState
 
   abilityMetadata.name must {
-    "root enemies" in {
+    "snare enemies" in {
       val attackedGameState = gameState.basicAttack(s.p(0)(0).character.id, s.p(1)(0).character.id)
       attackedGameState.characterById(s.p(1)(0).character.id).state.effects.ofType[Snare] should not be empty
     }
-    "disallow rooting enemies in another phase" in {
+    "disallow snaring enemies in another phase" in {
       val attackedSecondTimeGameState = gameState
         .basicAttack(s.p(0)(0).character.id, s.p(1)(0).character.id)
         .endTurn()

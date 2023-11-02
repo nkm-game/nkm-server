@@ -6,7 +6,7 @@ import com.tosware.nkm.models.game.character.{CharacterMetadata, NkmCharacter}
 import com.tosware.nkm.models.game.hex.TestHexMapName
 
 object TestScenario extends TestUtils {
-  def generate(testHexMapName: TestHexMapName, metadata: CharacterMetadata): TestScenario =
+  def generate(testHexMapName: TestHexMapName, metadata: CharacterMetadata = CharacterMetadata.empty()): TestScenario =
     new TestScenario {
       val gameState: GameState = getTestGameState(testHexMapName, metadata)
     }

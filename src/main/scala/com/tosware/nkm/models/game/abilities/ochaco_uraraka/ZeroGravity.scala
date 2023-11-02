@@ -18,6 +18,7 @@ object ZeroGravity extends NkmConf.AutoExtract {
         """Basic attacks apply Zero Gravity effect for {duration}t.
           |Characters with Zero Gravity effect can fly.""".stripMargin,
       relatedEffectIds = Seq(effects.Fly.metadata.id),
+      traits = Seq(AbilityTrait.ContactFriend),
     )
 
   def applyZeroGravity(cid: CharacterId, gameState: GameState)(implicit random: Random, causedById: String): GameState =
