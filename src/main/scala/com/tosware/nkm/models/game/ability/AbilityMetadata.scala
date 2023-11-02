@@ -8,6 +8,7 @@ object AbilityMetadata {
       description: String,
       alternateName: String = "",
       relatedEffectIds: Seq[CharacterEffectId] = Seq.empty,
+      traits: Seq[AbilityTrait] = Seq.empty,
   )(implicit path: NkmConf.AutoExtract.Path): AbilityMetadata =
     AbilityMetadata(
       name,
@@ -15,6 +16,7 @@ object AbilityMetadata {
       description,
       alternateName,
       relatedEffectIds,
+      traits,
       NkmConf.extract(path.value),
     )
 }
@@ -25,6 +27,7 @@ case class AbilityMetadata(
     description: String,
     alternateName: String,
     relatedEffectIds: Seq[CharacterEffectId],
+    traits: Seq[AbilityTrait],
     variables: Map[String, Int],
 ) {
   val id: AbilityMetadataId = name

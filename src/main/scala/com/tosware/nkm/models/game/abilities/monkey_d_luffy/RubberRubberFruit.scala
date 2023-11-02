@@ -40,6 +40,7 @@ object RubberRubberFruit extends NkmConf.AutoExtract {
           |
           |Range: linear, {range}
           |Bazooka cooldown: {bazookaCooldown}""".stripMargin,
+      traits = Seq(AbilityTrait.Move),
     )
 }
 

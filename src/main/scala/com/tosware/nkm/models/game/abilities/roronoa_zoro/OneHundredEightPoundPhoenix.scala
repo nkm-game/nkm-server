@@ -19,6 +19,7 @@ object OneHundredEightPoundPhoenix extends NkmConf.AutoExtract {
           |
           |Range: linear, stops at walls and enemies, {range}
           |""".stripMargin,
+      traits = Seq(AbilityTrait.ContactEnemy),
     )
 }
 

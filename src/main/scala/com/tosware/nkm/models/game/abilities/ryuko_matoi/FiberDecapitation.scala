@@ -20,6 +20,7 @@ object FiberDecapitation extends NkmConf.AutoExtract {
           | - land {targetCellOffset} tiles behind them
           |
           |Range: linear, stops at walls and enemies, {range}""".stripMargin,
+      traits = Seq(AbilityTrait.Move, AbilityTrait.ContactEnemy),
     )
 }
 

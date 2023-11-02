@@ -18,6 +18,7 @@ object ScreechAlpha extends NkmConf.AutoExtract {
           |
           |Radius: {radius}""".stripMargin,
       relatedEffectIds = Seq(Stun.metadata.id),
+      traits = Seq(AbilityTrait.ContactEnemy),
     )
 }
 

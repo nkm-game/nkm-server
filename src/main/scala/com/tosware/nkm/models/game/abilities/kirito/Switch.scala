@@ -19,6 +19,7 @@ object Switch extends NkmConf.AutoExtract {
           |
           |Range: circular, {range}""".stripMargin,
       relatedEffectIds = Seq(effects.AbilityUnlock.metadata.id),
+      traits = Seq(AbilityTrait.Move),
     )
 }
 

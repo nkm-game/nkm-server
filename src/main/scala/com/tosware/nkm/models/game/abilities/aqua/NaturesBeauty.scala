@@ -13,6 +13,7 @@ object NaturesBeauty extends NkmConf.AutoExtract {
       name = "Nature's Beauty",
       abilityType = AbilityType.Passive,
       description = "Basic attacks can be used on allies, healing them instead of dealing damage.",
+      traits = Seq(AbilityTrait.ContactFriend),
     )
 }
 

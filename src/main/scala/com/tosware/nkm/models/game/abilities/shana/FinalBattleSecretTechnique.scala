@@ -27,6 +27,7 @@ object FinalBattleSecretTechnique extends NkmConf.AutoExtract {
           |Deal {judgementAndCondemnationDamagePerCharacter} true damage to target for every character (excluding themself) that is in range of {judgementAndCondemnationRange}.
           |
           |Range: linear, stops at walls, {range}""".stripMargin,
+      traits = Seq(AbilityTrait.ContactEnemy),
     )
 }
 
