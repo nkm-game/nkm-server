@@ -139,7 +139,7 @@ class GameStateSpec extends TestUtils {
     }
 
     "hide teleport events for a basic move" in {
-      val bigS = TestScenario.generate(TestHexMapName.Spacey1v1, CharacterMetadata.empty())
+      val bigS = TestScenario.generate(TestHexMapName.Spacey1v1)
       val basicMoveGs = bigS.gameState.basicMoveCharacter(
         bigS.defaultCharacter.id,
         CoordinateSeq((0, 0), (-1, 0), (-2, 0), (-3, 0)),
@@ -161,7 +161,7 @@ class GameStateSpec extends TestUtils {
     }
 
     "hide character related events for invisible characters" in {
-      val bigS = TestScenario.generate(TestHexMapName.Spacey1v1, CharacterMetadata.empty())
+      val bigS = TestScenario.generate(TestHexMapName.Spacey1v1)
 
       def sizeOfEventsOfType[T: ClassTag](gs: GameState, playerNumber: Int): Int =
         gs

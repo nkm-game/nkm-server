@@ -55,7 +55,7 @@ trait TestUtils
   }
 
   protected def assertCommandFailure(c: CommandResponse): Unit = c match {
-    case Success(_) => fail()
+    case Success(_) => fail("Command failure expected, but success encountered.")
     case Failure(m) => logger.info(m)
   }
 
@@ -134,7 +134,7 @@ trait TestUtils
     val playerIds: Seq[PlayerId] = characterMetadatass.indices map (p => s"p$p")
     val hexMap = HexMapProvider().getTestHexMap(testHexMapName)
 
-    logger.info(hexMap.toTextUi)
+//    logger.info(hexMap.toTextUi)
 
     val gameStateDeps = GameStartDependencies(
       players = playerIds.map(n => Player(n, isHost = n == playerIds.head)),
