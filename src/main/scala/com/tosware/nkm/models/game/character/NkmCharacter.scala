@@ -43,17 +43,10 @@ case class NkmCharacter(
   private val basicAttackImpairmentCcNames = Seq(CharacterEffectName.Stun, CharacterEffectName.Disarm)
   private val abilityImpairmentCcNames = Seq(CharacterEffectName.Stun, CharacterEffectName.Silence)
 
-  def isDead: Boolean =
-    state.healthPoints <= 0
-
-  def isFlying: Boolean =
-    state.effects.ofType[effects.Fly].nonEmpty
-
-  def isGrounded: Boolean =
-    state.effects.ofType[effects.Ground].nonEmpty
-
-  def isInvisible: Boolean =
-    state.effects.ofType[effects.Invisibility].nonEmpty
+  def isDead: Boolean = state.isDead
+  def isFlying: Boolean = state.isFlying
+  def isGrounded: Boolean = state.isGrounded
+  def isInvisible: Boolean = state.isInvisible
 
   def usedBasicMoveThisTurn(implicit gameState: GameState): Boolean =
     gameState.gameLog.events
@@ -160,11 +153,17 @@ case class NkmCharacter(
   def isFriendForC(characterId: CharacterId)(implicit gameState: GameState): Boolean =
     isFriendFor(gameState.characterById(characterId).owner.id)
 
+  def isSeenByC(characterId: CharacterId)(implicit gameState: GameState): Boolean =
+    !(isInvisible && isEnemyForC(characterId))
+
   def isEnemyFor(playerId: PlayerId)(implicit gameState: GameState): Boolean =
     playerId != owner.id
 
   def isFriendFor(playerId: PlayerId)(implicit gameState: GameState): Boolean =
     playerId == owner.id
+
+  def isSeenBy(playerId: PlayerId)(implicit gameState: GameState): Boolean =
+    !(isInvisible && isEnemyFor(playerId))
 
   def basicAttackOverride: Option[BasicAttackOverride] =
     state.abilities.ofType[BasicAttackOverride].headOption
@@ -250,7 +249,7 @@ case class NkmCharacter(
     canBasicMove = canBasicMove,
     canBasicAttack = canBasicAttack,
     isOnMap = isOnMap,
-    basicAttackCellCoords = basicAttackCellCoords,
-    basicAttackTargets = basicAttackTargets,
+    basicAttackCellCoords = if (forPlayer.exists(isSeenBy)) basicAttackCellCoords else Set.empty,
+    basicAttackTargets = if (forPlayer.exists(isSeenBy)) basicAttackTargets else Set.empty,
   )
 }
