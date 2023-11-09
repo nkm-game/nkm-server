@@ -31,7 +31,7 @@ case class FinalSolution(abilityId: AbilityId, parentCharacterId: CharacterId)
     parentCell.get.getArea(metadata.variables("range"), Set(SearchFlag.StraightLine)).toCoords
 
   override def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] =
-    rangeCellCoords.whereEnemiesOfC(parentCharacterId)
+    rangeCellCoords.whereSeenEnemiesOfC(parentCharacterId)
 
   override def use(target: CharacterId, useData: UseData)(implicit random: Random, gameState: GameState): GameState = {
     val targetMissingHp = gameState.characterById(target).state.missingHp

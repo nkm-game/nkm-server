@@ -41,7 +41,7 @@ case class FinalBattleSecretTechnique(abilityId: AbilityId, parentCharacterId: C
     )
 
   override def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] =
-    rangeCellCoords.whereEnemiesOfC(parentCharacterId)
+    rangeCellCoords.whereSeenEnemiesOfC(parentCharacterId)
 
   override def use(target: CharacterId, useData: UseData)(implicit random: Random, gameState: GameState): GameState = {
     val direction = gameState.getDirection(parentCharacterId, target).get

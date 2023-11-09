@@ -32,7 +32,7 @@ case class DrainTouch(abilityId: AbilityId, parentCharacterId: CharacterId)
     )
 
   override def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] =
-    rangeCellCoords.whereEnemiesOfC(parentCharacterId)
+    rangeCellCoords.whereSeenEnemiesOfC(parentCharacterId)
 
   override def use(target: CharacterId, useData: UseData)(implicit random: Random, gameState: GameState): GameState = {
     val hitGs = hitAndDamageCharacter(target, Damage(DamageType.Magical, metadata.variables("damage")))

@@ -35,7 +35,7 @@ case class OneHundredEightPoundPhoenix(abilityId: AbilityId, parentCharacterId: 
     )).toCoords
 
   override def targetsInRange(implicit gameState: GameState) =
-    rangeCellCoords.whereEnemiesOfC(parentCharacterId)
+    rangeCellCoords.whereSeenEnemiesOfC(parentCharacterId)
 
   private def sendShockwave(direction: HexDirection)(implicit random: Random, gameState: GameState): GameState = {
     val targetOpt =

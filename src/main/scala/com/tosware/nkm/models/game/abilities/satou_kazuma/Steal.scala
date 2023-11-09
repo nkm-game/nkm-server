@@ -42,7 +42,7 @@ case class Steal(abilityId: AbilityId, parentCharacterId: CharacterId)
     parentCell.fold(Set.empty[HexCoordinates])(_.coordinates.getCircle(metadata.variables("range")).whereExists)
 
   override def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] =
-    rangeCellCoords.whereEnemiesOfC(parentCharacterId)
+    rangeCellCoords.whereSeenEnemiesOfC(parentCharacterId)
 
   private def getStolenDatas()(implicit random: Random, gameState: GameState) =
     state.variables.get(stolenDatasKey).map(_.parseJson.convertTo[Set[StolenData]]).getOrElse(Set.empty)

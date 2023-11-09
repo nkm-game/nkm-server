@@ -52,7 +52,7 @@ case class BindingRibbons(abilityId: AbilityId, parentCharacterId: CharacterId)
       random: Random,
       gameState: GameState,
   ): GameState = {
-    val targets = target.getCircle(metadata.variables("radius")).whereEnemiesOfC(parentCharacterId).characters.map(_.id)
+    val targets = target.getCircle(metadata.variables("radius")).whereSeenEnemiesOfC(parentCharacterId).characters.map(_.id)
     targets.foldLeft(gameState)((acc, cid) => hitCharacter(cid, targets.size)(random, acc))
   }
 }

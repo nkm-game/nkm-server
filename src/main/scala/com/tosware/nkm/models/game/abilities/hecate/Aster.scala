@@ -35,7 +35,7 @@ case class Aster(abilityId: AbilityId, parentCharacterId: CharacterId) extends A
       random: Random,
       gameState: GameState,
   ): GameState = {
-    val targets = target.getCircle(metadata.variables("radius")).whereEnemiesOfC(parentCharacterId).characters.map(_.id)
+    val targets = target.getCircle(metadata.variables("radius")).whereSeenEnemiesOfC(parentCharacterId).characters.map(_.id)
     val damage = Damage(DamageType.Magical, metadata.variables("damage"))
     targets.foldLeft(gameState)((acc, cid) => hitAndDamageCharacter(cid, damage)(random, acc))
   }

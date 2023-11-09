@@ -31,7 +31,7 @@ case class SummerBreeze(abilityId: AbilityId, parentCharacterId: CharacterId)
     )
 
   override def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] =
-    rangeCellCoords.whereEnemiesOfC(parentCharacterId)
+    rangeCellCoords.whereSeenEnemiesOfC(parentCharacterId)
 
   private def stunAndDamage(target: CharacterId)(implicit random: Random, gameState: GameState): GameState =
     gameState

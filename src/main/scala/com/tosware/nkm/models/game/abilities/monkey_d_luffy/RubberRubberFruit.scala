@@ -55,7 +55,7 @@ case class RubberRubberFruit(abilityId: AbilityId, parentCharacterId: CharacterI
     )
 
   override def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] =
-    rangeCellCoords.whereEnemiesOfC(parentCharacterId) ++ rangeCellCoords.filter(_.toCell.isWall)
+    rangeCellCoords.whereSeenEnemiesOfC(parentCharacterId) ++ rangeCellCoords.filter(_.toCell.isWall)
 
   private def rocket(target: HexCoordinates, distance: Int)(implicit
       random: Random,

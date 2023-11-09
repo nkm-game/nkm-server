@@ -38,7 +38,7 @@ case class MjolnirDestinyImpulse(abilityId: AbilityId, parentCharacterId: Charac
       random: Random,
       gameState: GameState,
   ): GameState = {
-    val targets = target.getCircle(metadata.variables("radius")).whereEnemiesOfC(parentCharacterId).characters.map(_.id)
+    val targets = target.getCircle(metadata.variables("radius")).whereSeenEnemiesOfC(parentCharacterId).characters.map(_.id)
     val damage = Damage(DamageType.Physical, metadata.variables("damage"))
     val ngs = targets.foldLeft(gameState)((acc, cid) => hitAndDamageCharacter(cid, damage)(random, acc))
 

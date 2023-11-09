@@ -31,7 +31,7 @@ case class ScreechAlpha(abilityId: AbilityId, parentCharacterId: CharacterId)
     parentCell.get.coordinates.getCircle(metadata.variables("radius")).whereExists
 
   override def targetsInRange(implicit gameState: GameState) =
-    rangeCellCoords.whereEnemiesOfC(parentCharacterId)
+    rangeCellCoords.whereSeenEnemiesOfC(parentCharacterId)
 
   private def addEffects(target: CharacterId)(implicit random: Random, gameState: GameState) = {
     val silenceEffect = effects.Stun(

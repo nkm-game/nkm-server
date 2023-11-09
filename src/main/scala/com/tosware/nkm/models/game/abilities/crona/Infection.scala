@@ -29,7 +29,7 @@ case class Infection(abilityId: AbilityId, parentCharacterId: CharacterId)
     parentCell.get.coordinates.getCircle(metadata.variables("range")).whereExists
 
   override def targetsInRange(implicit gameState: GameState) =
-    rangeCellCoords.whereEnemiesOfC(parentCharacterId)
+    rangeCellCoords.whereSeenEnemiesOfC(parentCharacterId)
 
   override def use(target: CharacterId, useData: UseData)(implicit random: Random, gameState: GameState) = {
     val effect = effects.BlackBlood(randomUUID(), metadata.variables("duration"), parentCharacterId, abilityId)

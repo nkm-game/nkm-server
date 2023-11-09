@@ -39,7 +39,7 @@ case class OgreCutter(abilityId: AbilityId, parentCharacterId: CharacterId)
     ).toCoords
 
   override def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] =
-    rangeCellCoords.whereEnemiesOfC(parentCharacterId).filter(targetCoordinates =>
+    rangeCellCoords.whereSeenEnemiesOfC(parentCharacterId).filter(targetCoordinates =>
       {
         for {
           pCell <- parentCell

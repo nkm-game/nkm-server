@@ -155,7 +155,7 @@ case class GameStateValidator()(implicit gameState: GameState) {
       val parentCell = character.parentCell
       val pathCells = path.toCells
       if (pathCells.size != path.size) Failure("Not all cells exist on the map.")
-      else if (pathCells.exists(c => !c.isFreeToPass(characterId)))
+      else if (pathCells.exists(c => !c.looksFreeToPass(characterId)))
         Failure("Some of the cells in the path are not free to move.")
       else if (!gameState.playerByIdOpt(playerId).get.characterIds.contains(characterId))
         Failure("You do not own this character.")
@@ -188,6 +188,8 @@ case class GameStateValidator()(implicit gameState: GameState) {
       val targetParentCell = targetCharacter.parentCell
       if (!gameState.playerByIdOpt(playerId).get.characterIds.contains(characterId))
         Failure("You do not own this character.")
+      else if (targetCharacter.isInvisible)
+        Failure("Target character is invisible.")
       else if (gameState.characterTakingActionThisTurn.fold(false)(_ != characterId))
         Failure("Other character already took action this turn.")
       else if (gameState.characterIdsThatTookActionThisPhase.contains(characterId))
