@@ -56,7 +56,7 @@ case class CrackTheSky(abilityId: AbilityId, parentCharacterId: CharacterId)
       targetCoords
         .flatMap(_
           .getCircle(metadata.variables("radius"))
-          .whereEnemiesOfC(parentCharacterId).characters.map(_.id))
+          .whereSeenEnemiesOfC(parentCharacterId).characters.map(_.id))
 
     val markAbility =
       gameState

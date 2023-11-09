@@ -77,6 +77,9 @@ package object nkm {
 
     def whereEnemiesOfC(characterId: CharacterId): Set[HexCoordinates] =
       toCells.whereEnemiesOfC(characterId).toCoords
+
+    def whereSeenEnemiesOfC(characterId: CharacterId): Set[HexCoordinates] =
+      toCells.whereSeenEnemiesOfC(characterId).toCoords
   }
 
   implicit class HexCoordinatesSeqUtils(coords: Seq[HexCoordinates])(implicit gameState: GameState) {
@@ -145,6 +148,9 @@ package object nkm {
 
     def whereEnemiesOfC(characterId: CharacterId): Set[HexCell] =
       enemiesOfC(characterId).map(_.parentCell.get)
+
+    def whereSeenEnemiesOfC(characterId: CharacterId): Set[HexCell] =
+      enemiesOfC(characterId).filterNot(_.isInvisible).map(_.parentCell.get)
 
     def friendsOfC(characterId: CharacterId): Set[NkmCharacter] =
       characters.filter(_.isFriendForC(characterId))

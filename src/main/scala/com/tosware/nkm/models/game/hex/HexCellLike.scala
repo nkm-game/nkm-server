@@ -22,4 +22,17 @@ trait HexCellLike {
     isFreeToStand || isFriendStanding(forCharacterId) || gameState.characterById(forCharacterId).isFlying
   def characterOpt(implicit gameState: GameState): Option[NkmCharacter] =
     characterId.map(cid => gameState.characterById(cid))
+
+  def looksEmpty(forCharacterId: CharacterId)(implicit gameState: GameState): Boolean =
+    isEmpty || {
+      val character = gameState.characterById(characterId.get)
+      character.isInvisible && character.isEnemyForC(forCharacterId)
+    }
+  def looksFreeToStand(forCharacterId: CharacterId)(implicit gameState: GameState): Boolean =
+    looksEmpty(forCharacterId) && !isWall
+  def looksFreeToPass(forCharacterId: CharacterId)(implicit gameState: GameState): Boolean =
+    looksFreeToStand(forCharacterId)
+      || isFriendStanding(forCharacterId)
+      || gameState.characterById(forCharacterId).isFlying
+
 }

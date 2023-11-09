@@ -27,7 +27,7 @@ case class Check(abilityId: AbilityId, parentCharacterId: CharacterId) extends A
 
   override def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] =
     rangeCellCoords
-      .whereEnemiesOfC(parentCharacterId)
+      .whereSeenEnemiesOfC(parentCharacterId)
       .characters.filterNot(c => gameState.characterIdsThatTookActionThisPhase.contains(c.id))
       .flatMap(_.parentCell.map(_.coordinates))
 

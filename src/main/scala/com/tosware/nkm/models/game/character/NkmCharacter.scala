@@ -218,7 +218,7 @@ case class NkmCharacter(
     }
 
   def defaultBasicAttackTargets(implicit gameState: GameState): Set[HexCoordinates] =
-    basicAttackCellCoords.whereEnemiesOfC(id)
+    basicAttackCellCoords.whereSeenEnemiesOfC(id)
 
   def defaultBasicAttack(targetCharacterId: CharacterId)(implicit random: Random, gameState: GameState): GameState =
     gameState.damageCharacter(targetCharacterId, Damage(DamageType.Physical, state.attackPoints))(random, id)

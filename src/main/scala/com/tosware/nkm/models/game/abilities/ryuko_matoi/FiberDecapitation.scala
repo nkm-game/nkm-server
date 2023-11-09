@@ -41,7 +41,7 @@ case class FiberDecapitation(abilityId: AbilityId, parentCharacterId: CharacterI
     ).toCoords
 
   override def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] =
-    rangeCellCoords.whereEnemiesOfC(parentCharacterId).filter(targetCoordinates =>
+    rangeCellCoords.whereSeenEnemiesOfC(parentCharacterId).filter(targetCoordinates =>
       {
         for {
           pCell <- parentCell

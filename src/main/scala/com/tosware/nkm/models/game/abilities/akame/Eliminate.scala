@@ -27,7 +27,7 @@ case class Eliminate(abilityId: AbilityId, parentCharacterId: CharacterId) exten
     parentCell.get.coordinates.getCircle(metadata.variables("range"))
 
   override def targetsInRange(implicit gameState: GameState) =
-    rangeCellCoords.whereEnemiesOfC(parentCharacterId)
+    rangeCellCoords.whereSeenEnemiesOfC(parentCharacterId)
 
   override def use(target: CharacterId, useData: UseData)(implicit random: Random, gameState: GameState) =
     gameState
