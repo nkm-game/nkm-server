@@ -65,28 +65,31 @@ abstract class Ability(val id: AbilityId, pid: CharacterId)
       .abilityHitCharacter(id, target)
       .damageCharacter(target, damage)(random, id)
 
-  def toView(implicit gameState: GameState): AbilityView = {
-    val canBeUsedResponse = _canBeUsed(baseUseChecks)
-    val canBeUsed = canBeUsedResponse match {
-      case Success(_) => true
-      case Failure(_) => false
-    }
-    val canBeUsedFailureMessage = canBeUsedResponse match {
-      case Success(_)   => None
-      case Failure(msg) => Some(msg)
-    }
+  def toView(forPlayer: Option[PlayerId])(implicit gameState: GameState): Option[AbilityView] =
+    if (!forPlayer.exists(parentCharacter.isSeenBy)) None
+    else {
 
-    AbilityView(
-      id = id,
-      metadataId = metadata.id,
-      parentCharacterId = parentCharacter.id,
-      state = state,
-      rangeCellCoords = Try(rangeCellCoords).getOrElse(Set.empty),
-      targetsInRange = Try(targetsInRange).getOrElse(Set.empty),
-      canBeUsed = canBeUsed,
-      canBeUsedFailureMessage = canBeUsedFailureMessage,
-    )
-  }
+      val canBeUsedResponse = _canBeUsed(baseUseChecks)
+      val canBeUsed = canBeUsedResponse match {
+        case Success(_) => true
+        case Failure(_) => false
+      }
+      val canBeUsedFailureMessage = canBeUsedResponse match {
+        case Success(_)   => None
+        case Failure(msg) => Some(msg)
+      }
+
+      Some(AbilityView(
+        id = id,
+        metadataId = metadata.id,
+        parentCharacterId = parentCharacter.id,
+        state = state,
+        rangeCellCoords = Try(rangeCellCoords).getOrElse(Set.empty),
+        targetsInRange = Try(targetsInRange).getOrElse(Set.empty),
+        canBeUsed = canBeUsed,
+        canBeUsedFailureMessage = canBeUsedFailureMessage,
+      ))
+    }
 
   object UseCheck {
     object Base {

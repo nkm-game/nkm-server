@@ -37,8 +37,16 @@ case class NkmCharacterState(
   def currentHpPercent: Int = healthPoints * 100 / maxHealthPoints
   def missingHpPercent: Int = missingHp * 100 / maxHealthPoints
 
+  def isDead: Boolean = healthPoints <= 0
+  def isFlying: Boolean =
+    effects.ofType[Fly].nonEmpty
+  def isGrounded: Boolean =
+    effects.ofType[Ground].nonEmpty
+  def isInvisible: Boolean =
+    effects.ofType[Invisibility].nonEmpty
+
   def toView(forPlayer: Option[PlayerId], ownerId: PlayerId): Option[NkmCharacterStateView] =
-    if (effects.ofType[Invisibility].nonEmpty && !forPlayer.contains(ownerId)) None
+    if (isInvisible && !forPlayer.contains(ownerId)) None
     else Some(
       character.NkmCharacterStateView(
         name = name,
