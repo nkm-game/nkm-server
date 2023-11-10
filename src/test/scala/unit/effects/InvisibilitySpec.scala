@@ -4,7 +4,7 @@ import com.tosware.nkm.*
 import com.tosware.nkm.models.GameStateValidator
 import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.hecate.Aster
-import com.tosware.nkm.models.game.abilities.roronoa_zoro.OgreCutter
+import com.tosware.nkm.models.game.abilities.ryuko_matoi.FiberDecapitation
 import com.tosware.nkm.models.game.character.{AttackType, CharacterMetadata}
 import com.tosware.nkm.models.game.effects.Invisibility
 import com.tosware.nkm.models.game.event.GameEvent
@@ -20,7 +20,7 @@ class InvisibilitySpec
     CharacterMetadata
       .empty()
       .copy(
-        initialAbilitiesMetadataIds = Seq(OgreCutter.metadata.id, Aster.metadata.id),
+        initialAbilitiesMetadataIds = Seq(FiberDecapitation.metadata.id, Aster.metadata.id),
         attackType = AttackType.Melee,
       )
   private val s = TestScenario.generate(TestHexMapName.Spacey2v2, characterMetadata)
@@ -36,11 +36,10 @@ class InvisibilitySpec
   private val friendView = enemyTurnGs.toView(Some(s.owners(0)))
   private val enemyView = enemyTurnGs.toView(Some(s.owners(1)))
 
-  private val defaultCharacterOgreCutterId: AbilityId = s.defaultCharacter.state.abilities(0).id
+  private val defaultCharacterContactAbilityId: AbilityId = s.defaultCharacter.state.abilities(0).id
   private val defaultCharacterAsterId: AbilityId = s.defaultCharacter.state.abilities(1).id
 
-  private val defaultEnemyOgreCutterId: AbilityId = s.defaultEnemy.state.abilities(0).id
-  private val defaultEnemyAsterId: AbilityId = s.defaultEnemy.state.abilities(1).id
+  private val defaultEnemyContactAbilityId: AbilityId = s.defaultEnemy.state.abilities(0).id
 
   effectMetadata.name.toString must {
     "hide parent in enemy basic movement validator" in {
@@ -64,20 +63,20 @@ class InvisibilitySpec
     }
     "hide parent in enemy ability range" in {
       implicit val gameState: GameState = enemyTurnGs
-      gameState.abilityById(defaultEnemyOgreCutterId).targetsInRange should not contain s.defaultCoordinates
+      gameState.abilityById(defaultEnemyContactAbilityId).targetsInRange should not contain s.defaultCoordinates
     }
 
     "hide parent in enemy ability validator" in {
       implicit val gameState: GameState = enemyTurnGs
       assertCommandFailure {
         GameStateValidator()
-          .validateAbilityUseOnCharacter(s.owners(1), defaultEnemyOgreCutterId, s.defaultCharacter.id)
+          .validateAbilityUseOnCharacter(s.owners(1), defaultEnemyContactAbilityId, s.defaultCharacter.id)
       }
       assertCommandSuccess {
         GameStateValidator()
-          .validateAbilityUseOnCharacter(s.owners(1), defaultEnemyOgreCutterId, s.p(0)(1).character.id)
+          .validateAbilityUseOnCharacter(s.owners(1), defaultEnemyContactAbilityId, s.p(0)(1).character.id)
       }
-      gameState.abilityById(defaultEnemyOgreCutterId).targetsInRange should not contain s.defaultCoordinates
+      gameState.abilityById(defaultEnemyContactAbilityId).targetsInRange should not contain s.defaultCoordinates
     }
     "hide parent identifying state" in {
       val friendCharacterView = friendView.characters.find(_.id == s.defaultCharacter.id).get
@@ -111,7 +110,7 @@ class InvisibilitySpec
       s.defaultEnemy.parentCell(interruptGs).get.coordinates should be(-1, 0)
     }
     "interrupt enemy move ability when they would be in range instead of target and enemy steps on them" in {
-      val aInterruptGs = enemyTurnSpaceyGs.useAbilityOnCharacter(defaultEnemyOgreCutterId, s.p(0)(1).character.id)
+      val aInterruptGs = enemyTurnSpaceyGs.useAbilityOnCharacter(defaultEnemyContactAbilityId, s.p(0)(1).character.id)
       // TODO: in case of teleporting on an invisible unit, randomly push and reveal it.
       // TODO: in case of using abilities like Ogre Cutter, add something like onCollision and abort ability usage with it (in case of Ogre Cutter deal damage to invisible unit)
       fail()
@@ -152,7 +151,7 @@ class InvisibilitySpec
       assertEffectDoesNotExistsOfType[effects.Invisibility](s.defaultCharacter.id)(basicAttackGs)
     }
     "reveal parent on parent contact ability use" in {
-      val aGs = eGs.useAbilityOnCharacter(defaultCharacterOgreCutterId, s.defaultEnemy.id)
+      val aGs = eGs.useAbilityOnCharacter(defaultCharacterContactAbilityId, s.defaultEnemy.id)
       assertEffectDoesNotExistsOfType[effects.Invisibility](s.defaultCharacter.id)(aGs)
     }
     "not reveal parent on parent non-contact ability use" in {
