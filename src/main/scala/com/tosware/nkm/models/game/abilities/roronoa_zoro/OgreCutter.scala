@@ -52,7 +52,7 @@ case class OgreCutter(abilityId: AbilityId, parentCharacterId: CharacterId)
     )
 
   override def use(target: CharacterId, useData: UseData)(implicit random: Random, gameState: GameState): GameState = {
-    val targetCoordinates = gameState.characterById(target).parentCell.get.coordinates
+    val targetCoordinates = gameState.characterById(target).parentCellOpt.get.coordinates
     val targetDirection = parentCell.get.coordinates.getDirection(targetCoordinates).get
     val tpCoords = teleportCoordinates(targetCoordinates, targetDirection)
 
@@ -66,7 +66,7 @@ case class OgreCutter(abilityId: AbilityId, parentCharacterId: CharacterId)
     def cellToTeleportIsFreeToStand(): Boolean = {
       for {
         targetCharacter: NkmCharacter <- Some(gameState.characterById(target))
-        targetCoordinates: HexCoordinates <- targetCharacter.parentCell.map(_.coordinates)
+        targetCoordinates: HexCoordinates <- targetCharacter.parentCellOpt.map(_.coordinates)
         targetDirection: HexDirection <- parentCell.get.coordinates.getDirection(targetCoordinates)
         tpCoords: HexCoordinates <- Some(teleportCoordinates(targetCoordinates, targetDirection))
         tpCell: HexCell <- tpCoords.toCellOpt(gameState)

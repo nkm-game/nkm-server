@@ -32,7 +32,7 @@ class OgreCutterSpec
     "not be able to use if teleport cell is not free to stand" in {
       val newGameState = gameState.teleportCharacter(s.p(1)(0).character.id, HexCoordinates(4, 0))
       val targetsInRange = newGameState.abilityById(abilityId).targetsInRange(newGameState)
-      val targetCoordinates = s.p(1)(0).character.parentCell(newGameState).get.coordinates
+      val targetCoordinates = s.p(1)(0).character.parentCellOpt(newGameState).get.coordinates
 
       targetsInRange should not contain targetCoordinates
 

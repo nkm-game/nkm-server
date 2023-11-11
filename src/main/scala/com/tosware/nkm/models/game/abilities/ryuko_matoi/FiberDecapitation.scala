@@ -55,7 +55,7 @@ case class FiberDecapitation(abilityId: AbilityId, parentCharacterId: CharacterI
 
   override def use(target: CharacterId, useData: UseData)(implicit random: Random, gameState: GameState): GameState = {
     val targetCharacter = gameState.characterById(target)
-    val targetCoordinates = targetCharacter.parentCell.get.coordinates
+    val targetCoordinates = targetCharacter.parentCellOpt.get.coordinates
     val targetDirection = parentCell.get.coordinates.getDirection(targetCoordinates).get
     val tpCoords = teleportCoordinates(targetCoordinates, targetDirection)
 
@@ -74,7 +74,7 @@ case class FiberDecapitation(abilityId: AbilityId, parentCharacterId: CharacterI
     def cellToTeleportIsFreeToStand(): Boolean = {
       for {
         targetCharacter: NkmCharacter <- Some(gameState.characterById(target))
-        targetCoordinates: HexCoordinates <- targetCharacter.parentCell.map(_.coordinates)
+        targetCoordinates: HexCoordinates <- targetCharacter.parentCellOpt.map(_.coordinates)
         targetDirection: HexDirection <- parentCell.get.coordinates.getDirection(targetCoordinates)
         tpCoords: HexCoordinates <- Some(teleportCoordinates(targetCoordinates, targetDirection))
         tpCell: HexCell <- tpCoords.toCellOpt(gameState)

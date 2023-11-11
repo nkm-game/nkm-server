@@ -44,7 +44,7 @@ class ResurrectionSpec
       )
       val resurrectedCharacter = resurrectedGameState.characterById(s.p(0)(1).character.id)
       resurrectedCharacter.state.healthPoints should be(resurrectedCharacter.state.maxHealthPoints / 2)
-      resurrectedCharacter.parentCell(gameState).map(_.coordinates) should be(Some(s.p(0)(1).spawnCoordinates))
+      resurrectedCharacter.parentCellOpt(gameState).map(_.coordinates) should be(Some(s.p(0)(1).spawnCoordinates))
     }
 
     "be able to resurrect characters that died in phase before" in {

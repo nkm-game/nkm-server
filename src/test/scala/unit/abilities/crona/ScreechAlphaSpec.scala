@@ -34,10 +34,10 @@ class ScreechAlphaSpec
         .ofType[GameEvent.EffectAddedToCharacter]
         .causedBy(abilityId).size shouldBe abilityRadius * 2
 
-      val coordsInRange = s.p(0)(0).character.parentCell.get.coordinates.getCircle(abilityRadius)
+      val coordsInRange = s.p(0)(0).character.parentCellOpt.get.coordinates.getCircle(abilityRadius)
 
       s.p(1).map(_.character).foreach { c =>
-        if (coordsInRange.contains(c.parentCell.get.coordinates)) {
+        if (coordsInRange.contains(c.parentCellOpt.get.coordinates)) {
           assertEffectsExist(Seq(Stun, StatNerf), c.id)(newGameState)
         } else {
           assertEffectsDoNotExist(Seq(Stun, StatNerf), c.id)(newGameState)

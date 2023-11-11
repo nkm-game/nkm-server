@@ -26,7 +26,7 @@ class LackOfOrientationSpec
         s.gameState.basicMoveCharacter(s.p(0)(0).character.id, CoordinateSeq((0, 0), (1, 0), (2, 0), (2, 1), (1, 1)))
       def moveAndGetParentCoords() = {
         val moveGameState = move()
-        val targetCoords = moveGameState.characterById(s.p(0)(0).character.id).parentCell(moveGameState).get.coordinates
+        val targetCoords = moveGameState.characterById(s.p(0)(0).character.id).parentCellOpt(moveGameState).get.coordinates
 
         // verify if CharacterBasicMoved event was changed
         if (targetCoords.toTuple != (1, 1)) {

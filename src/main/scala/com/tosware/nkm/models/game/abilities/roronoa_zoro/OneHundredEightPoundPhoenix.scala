@@ -46,7 +46,7 @@ case class OneHundredEightPoundPhoenix(abilityId: AbilityId, parentCharacterId: 
   }
 
   override def use(target: CharacterId, useData: UseData)(implicit random: Random, gameState: GameState): GameState = {
-    val targetCoordinates = gameState.characterById(target).parentCell.get.coordinates
+    val targetCoordinates = gameState.characterById(target).parentCellOpt.get.coordinates
     val targetDirection = parentCell.get.coordinates.getDirection(targetCoordinates).get
 
     val g1 = sendShockwave(targetDirection)

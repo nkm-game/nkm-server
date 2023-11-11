@@ -105,7 +105,7 @@ class InvisibilitySpec
       val interruptGs =
         enemyTurnCollisionGs.basicMoveCharacter(s.defaultEnemy.id, CoordinateSeq((0, 0), (-1, 0), (-2, 0), (-3, 0)))
 
-      s.defaultEnemy.parentCell(interruptGs).get.coordinates should be(-1, 0)
+      s.defaultEnemy.parentCellOpt(interruptGs).get.coordinates should be(-1, 0)
     }
     "reveal parent when enemy steps on them" in {
       val interruptGs =
@@ -113,8 +113,8 @@ class InvisibilitySpec
 
       assertEffectDoesNotExistsOfType[effects.Invisibility](s.defaultCharacter.id)(interruptGs)
 
-      s.defaultEnemy.parentCell(interruptGs).map(_.coordinates) should be(Some(HexCoordinates(-1, 0)))
-      s.defaultCharacter.parentCell(interruptGs).map(_.coordinates) should be(Some(HexCoordinates(-2, 0)))
+      s.defaultEnemy.parentCellOpt(interruptGs).map(_.coordinates) should be(Some(HexCoordinates(-1, 0)))
+      s.defaultCharacter.parentCellOpt(interruptGs).map(_.coordinates) should be(Some(HexCoordinates(-2, 0)))
     }
     "reveal and push parent when enemy teleports on them" in {
       val setupTpGs = enemyTurnGs
@@ -123,8 +123,8 @@ class InvisibilitySpec
       val tpGs = setupTpGs.useAbilityOnCharacter(defaultEnemyContactAbilityId, s.p(0)(1).character.id)
 
       assertEffectDoesNotExistsOfType[effects.Invisibility](s.defaultCharacter.id)(tpGs)
-      s.defaultEnemy.parentCell(tpGs).map(_.coordinates) should be(Some(HexCoordinates(-4, 0)))
-      s.defaultCharacter.parentCell(tpGs).map(_.coordinates) should not be Some(HexCoordinates(-4, 0))
+      s.defaultEnemy.parentCellOpt(tpGs).map(_.coordinates) should be(Some(HexCoordinates(-4, 0)))
+      s.defaultCharacter.parentCellOpt(tpGs).map(_.coordinates) should not be Some(HexCoordinates(-4, 0))
     }
     // not sure if it should work this way, commented for now
 //    "reveal parent and hit it on collision with enemy move ability" in {

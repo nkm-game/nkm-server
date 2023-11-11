@@ -29,7 +29,7 @@ case class Check(abilityId: AbilityId, parentCharacterId: CharacterId) extends A
     rangeCellCoords
       .whereSeenEnemiesOfC(parentCharacterId)
       .characters.filterNot(c => gameState.characterIdsThatTookActionThisPhase.contains(c.id))
-      .flatMap(_.parentCell.map(_.coordinates))
+      .flatMap(_.parentCellOpt.map(_.coordinates))
 
   override def use(target: CharacterId, useData: UseData)(implicit random: Random, gameState: GameState): GameState =
     gameState

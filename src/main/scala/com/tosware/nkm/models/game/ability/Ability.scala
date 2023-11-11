@@ -40,7 +40,7 @@ abstract class Ability(val id: AbilityId, pid: CharacterId)
     gameState.characters.find(_.state.abilities.map(_.id).contains(id)).get
 
   def parentCell(implicit gameState: GameState): Option[HexCell] =
-    parentCharacter.parentCell
+    parentCharacter.parentCellOpt
 
   def isEnchanted(implicit gameState: GameState): Boolean =
     parentCharacter.state.effects.ofType[AbilityEnchant].exists(_.abilityType == metadata.abilityType)

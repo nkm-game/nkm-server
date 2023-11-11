@@ -152,7 +152,7 @@ case class GameStateValidator()(implicit gameState: GameState) {
     else if (path.size < 2) Failure("Empty moves are disallowed.")
     else {
       val character = gameState.characterById(characterId)
-      val parentCell = character.parentCell
+      val parentCell = character.parentCellOpt
       val pathCells = path.toCells
       if (pathCells.size != path.size) Failure("Not all cells exist on the map.")
       else if (pathCells.exists(c => !c.looksFreeToPass(characterId)))
@@ -185,7 +185,7 @@ case class GameStateValidator()(implicit gameState: GameState) {
     else {
       val character = gameState.characterById(characterId)
       val targetCharacter = gameState.characterById(targetCharacterId)
-      val targetParentCell = targetCharacter.parentCell
+      val targetParentCell = targetCharacter.parentCellOpt
       if (!gameState.playerByIdOpt(playerId).get.characterIds.contains(characterId))
         Failure("You do not own this character.")
       else if (targetCharacter.isInvisible)
