@@ -51,6 +51,7 @@ trait NkmJsonProtocol
         case e: AbilityUseFinished         => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
         case e: AbilityVariableSet         => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
         case e: CharacterBasicMoved        => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
+        case e: BasicMoveInterrupted       => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
         case e: CharacterPreparedToAttack  => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
         case e: CharacterBasicAttacked     => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
         case e: CharacterTeleported        => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
@@ -107,6 +108,7 @@ trait NkmJsonProtocol
         case "AbilityUseFinished"         => ges.eventJson.parseJson.convertTo[AbilityUseFinished]
         case "AbilityVariableSet"         => ges.eventJson.parseJson.convertTo[AbilityVariableSet]
         case "CharacterBasicMoved"        => ges.eventJson.parseJson.convertTo[CharacterBasicMoved]
+        case "BasicMoveInterrupted"       => ges.eventJson.parseJson.convertTo[BasicMoveInterrupted]
         case "CharacterPreparedToAttack"  => ges.eventJson.parseJson.convertTo[CharacterPreparedToAttack]
         case "CharacterBasicAttacked"     => ges.eventJson.parseJson.convertTo[CharacterBasicAttacked]
         case "CharacterTeleported"        => ges.eventJson.parseJson.convertTo[CharacterTeleported]

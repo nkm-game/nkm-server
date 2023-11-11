@@ -216,11 +216,31 @@ case class NkmCharacter(
   def basicMoveOverride: Option[BasicMoveOverride] =
     state.abilities.ofType[BasicMoveOverride].headOption
 
-  def defaultBasicMove(path: Seq[HexCoordinates])(implicit random: Random, gameState: GameState): GameState = {
-    implicit val causedById: CharacterId = id
-
+  private def execMove(path: Seq[HexCoordinates])(implicit random: Random, gameState: GameState): GameState =
     path.tail.foldLeft(gameState)((acc, coordinate) => acc.basicMoveOneCell(id, coordinate)(random, id))
-      .logEvent(CharacterBasicMoved(randomUUID(), gameState.phase, gameState.turn, causedById, id, path))
+      .logEvent(CharacterBasicMoved(randomUUID(), gameState.phase, gameState.turn, id, id, path))
+
+  def defaultBasicMove(path: Seq[HexCoordinates])(implicit random: Random, gameState: GameState): GameState = {
+
+    val firstEnemyCellOnThePathOpt = path
+      .flatMap(_.toCellOpt)
+      .whereEnemiesOfC(id)
+      .headOption
+
+    firstEnemyCellOnThePathOpt match {
+      case Some(firstEnemyCellOnThePath) =>
+        val realPath = path.takeWhile(_ != firstEnemyCellOnThePath.coordinates)
+        execMove(realPath)
+          .logEvent(GameEvent.BasicMoveInterrupted(
+            randomUUID(),
+            gameState.phase,
+            gameState.turn,
+            firstEnemyCellOnThePath.characterId.get,
+            id,
+          ))
+      case None =>
+        execMove(path)
+    }
   }
 
   // case if characterOpt dies on the way? make a test of this and create a new functions with while(onMap)
