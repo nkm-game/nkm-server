@@ -18,7 +18,7 @@ class PublicDataSpec extends ApiTrait {
       Get(route) ~> Route.seal(routes) ~> check {
         status shouldEqual OK
         val data = responseAs[B]
-        data.size should be > 0
+        data should not be empty
       }
 
     "return hexmaps" in

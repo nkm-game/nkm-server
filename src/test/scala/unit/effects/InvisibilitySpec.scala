@@ -28,9 +28,9 @@ class InvisibilitySpec
     .teleportCharacter(s.p(0)(1).character.id, HexCoordinates(-2, 0)) // move this character out of the way
     .addEffect(s.defaultCharacter.id, Invisibility(randomUUID(), 2))
   private val enemyTurnGs: GameState = eGs.passTurn(s.defaultCharacter.id)
-  private val enemyTurnSpaceyGs: GameState =
+  private val enemyTurnCollisionGs: GameState =
     enemyTurnGs
-      .teleportCharacter(s.p(0)(1).character.id, HexCoordinates(-5, 0))
+      .teleportCharacter(s.p(0)(1).character.id, HexCoordinates(-4, 0))
       .teleportCharacter(s.defaultCharacter.id, HexCoordinates(-2, 0))
 
   private val friendView = enemyTurnGs.toView(Some(s.owners(0)))
@@ -65,7 +65,6 @@ class InvisibilitySpec
       implicit val gameState: GameState = enemyTurnGs
       gameState.abilityById(defaultEnemyContactAbilityId).targetsInRange should not contain s.defaultCoordinates
     }
-
     "hide parent in enemy ability validator" in {
       implicit val gameState: GameState = enemyTurnGs
       assertCommandFailure {
@@ -90,7 +89,6 @@ class InvisibilitySpec
       enemyCharacterView.basicAttackTargets should be(empty)
       enemyCharacterView.basicAttackCellCoords should be(empty)
     }
-
     "hide parent effects" in {
       friendView.effects.find(_.parentCharacterId == s.defaultCharacter.id) should not be None
       enemyView.effects.find(_.parentCharacterId == s.defaultCharacter.id) should be(None)
@@ -105,22 +103,39 @@ class InvisibilitySpec
     }
     "interrupt enemy basic movement if enemy steps on them" in {
       val interruptGs =
-        enemyTurnSpaceyGs.basicMoveCharacter(s.defaultEnemy.id, CoordinateSeq((0, 0), (-1, 0), (-2, 0), (-3, 0)))
+        enemyTurnCollisionGs.basicMoveCharacter(s.defaultEnemy.id, CoordinateSeq((0, 0), (-1, 0), (-2, 0), (-3, 0)))
 
       s.defaultEnemy.parentCell(interruptGs).get.coordinates should be(-1, 0)
     }
-    "interrupt enemy move ability when they would be in range instead of target and enemy steps on them" in {
-      val aInterruptGs = enemyTurnSpaceyGs.useAbilityOnCharacter(defaultEnemyContactAbilityId, s.p(0)(1).character.id)
-      // TODO: in case of teleporting on an invisible unit, randomly push and reveal it.
-      // TODO: in case of using abilities like Ogre Cutter, add something like onCollision and abort ability usage with it (in case of Ogre Cutter deal damage to invisible unit)
-      fail()
-    }
     "reveal parent when enemy steps on them" in {
       val interruptGs =
-        enemyTurnSpaceyGs.basicMoveCharacter(s.defaultEnemy.id, CoordinateSeq((0, 0), (-1, 0), (-2, 0), (-3, 0)))
+        enemyTurnCollisionGs.basicMoveCharacter(s.defaultEnemy.id, CoordinateSeq((0, 0), (-1, 0), (-2, 0), (-3, 0)))
 
       assertEffectDoesNotExistsOfType[effects.Invisibility](s.defaultCharacter.id)(interruptGs)
+
+      s.defaultEnemy.parentCell(interruptGs).map(_.coordinates) should be(Some(HexCoordinates(-1, 0)))
+      s.defaultCharacter.parentCell(interruptGs).map(_.coordinates) should be(Some(HexCoordinates(-2, 0)))
     }
+    "reveal and push parent when enemy teleports on them" in {
+      val setupTpGs = enemyTurnGs
+        .teleportCharacter(s.defaultCharacter.id, HexCoordinates(-4, 0))
+        .teleportCharacter(s.p(0)(1).character.id, HexCoordinates(-1, 0))
+      val tpGs = setupTpGs.useAbilityOnCharacter(defaultEnemyContactAbilityId, s.p(0)(1).character.id)
+
+      assertEffectDoesNotExistsOfType[effects.Invisibility](s.defaultCharacter.id)(tpGs)
+      s.defaultEnemy.parentCell(tpGs).map(_.coordinates) should be(Some(HexCoordinates(-4, 0)))
+      s.defaultCharacter.parentCell(tpGs).map(_.coordinates) should not be Some(HexCoordinates(-4, 0))
+    }
+    // not sure if it should work this way, commented for now
+//    "reveal parent and hit it on collision with enemy move ability" in {
+//      val aInterruptGs =
+//        enemyTurnCollisionGs.useAbilityOnCharacter(defaultEnemyContactAbilityId, s.p(0)(1).character.id)
+//
+//      assertEffectDoesNotExistsOfType[effects.Invisibility](s.defaultCharacter.id)(aInterruptGs)
+//      aInterruptGs.gameLog.events
+//        .ofType[GameEvent.CharacterDamaged]
+//        .ofCharacter(s.defaultCharacter.id) should not be empty
+//    }
     "reveal parent and hit it when enemy melee character tries to attack over them" in {
       val attackedOverGs = enemyTurnGs.basicAttack(s.defaultEnemy.id, s.p(0)(1).character.id)
 
@@ -143,8 +158,11 @@ class InvisibilitySpec
       damagedEvents.head.characterId should be(s.defaultCharacter.id)
     }
     "not reveal parent when enemy ranged character attacks over them" in {
-      // TODO
-      fail()
+      val attackedOverGs = enemyTurnGs
+        .setAttackType(s.defaultEnemy.id, AttackType.Ranged)
+        .basicAttack(s.defaultEnemy.id, s.p(0)(1).character.id)
+
+      assertEffectExistsOfType[effects.Invisibility](s.defaultCharacter.id)(attackedOverGs)
     }
     "reveal parent on parent basic attack" in {
       val basicAttackGs = eGs.basicAttack(s.defaultCharacter.id, s.defaultEnemy.id)
