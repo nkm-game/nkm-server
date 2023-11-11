@@ -37,6 +37,10 @@ case class Invisibility(effectId: CharacterEffectId, initialCooldown: Int)
         if (!ability.metadata.traits.contains(AbilityTrait.ContactEnemy)) return gameState
 
         gameState.removeEffect(id)(random, id)
+      case GameEvent.BasicMoveInterrupted(_, _, _, causedById, _) =>
+        if (causedById != parentCharacter.id) return gameState
+
+        gameState.removeEffect(id)(random, id)
       case _ => gameState
     }
 }

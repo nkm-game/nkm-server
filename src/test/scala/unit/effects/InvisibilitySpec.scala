@@ -105,7 +105,7 @@ class InvisibilitySpec
       val interruptGs =
         enemyTurnCollisionGs.basicMoveCharacter(s.defaultEnemy.id, CoordinateSeq((0, 0), (-1, 0), (-2, 0), (-3, 0)))
 
-      s.defaultEnemy.parentCellOpt(interruptGs).get.coordinates should be(-1, 0)
+      s.defaultEnemy.parentCellOpt(interruptGs).get.coordinates.toTuple should be(-1, 0)
     }
     "reveal parent when enemy steps on them" in {
       val interruptGs =
