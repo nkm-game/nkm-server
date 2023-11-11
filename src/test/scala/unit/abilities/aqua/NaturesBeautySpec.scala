@@ -33,7 +33,7 @@ class NaturesBeautySpec
     }
     "not show parent character as basic attack target" in {
       val parentCharacter = damagedGameState.characterById(s.defaultCharacter.id)
-      parentCharacter.basicAttackTargets(damagedGameState) should not contain s.defaultCharacter.parentCell(
+      parentCharacter.basicAttackTargets(damagedGameState) should not contain s.defaultCharacter.parentCellOpt(
         damagedGameState
       ).get.coordinates
     }

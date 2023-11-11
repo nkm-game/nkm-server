@@ -34,17 +34,17 @@ class RubberRubberFruitSpec
 
   abilityMetadata.name must {
     "jump with rocket" in {
-      s.defaultCharacter.parentCell(rocket1Gs).get.coordinates.toTuple shouldBe (-5, 0)
-      s.defaultCharacter.parentCell(rocket2Gs).get.coordinates.toTuple shouldBe (-5, 0)
-      s.defaultCharacter.parentCell(rocket3Gs).get.coordinates.toTuple shouldBe (-3, 0)
+      s.defaultCharacter.parentCellOpt(rocket1Gs).get.coordinates.toTuple shouldBe (-5, 0)
+      s.defaultCharacter.parentCellOpt(rocket2Gs).get.coordinates.toTuple shouldBe (-5, 0)
+      s.defaultCharacter.parentCellOpt(rocket3Gs).get.coordinates.toTuple shouldBe (-3, 0)
     }
 
     "knockback with bazooka" in {
-      s.p(1)(0).character.parentCell(bazookaGs).get.coordinates.toTuple shouldBe (9, 0)
+      s.p(1)(0).character.parentCellOpt(bazookaGs).get.coordinates.toTuple shouldBe (9, 0)
     }
 
     "knockback further with jet bazooka" in {
-      s.p(1)(0).character.parentCell(jetBazookaGs).get.coordinates.toTuple shouldBe (13, 0)
+      s.p(1)(0).character.parentCellOpt(jetBazookaGs).get.coordinates.toTuple shouldBe (13, 0)
     }
 
     "damage with pistols and bazookas" in {

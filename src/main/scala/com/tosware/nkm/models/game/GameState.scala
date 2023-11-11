@@ -193,8 +193,8 @@ case class GameState(
 
   def getDirection(from: CharacterId, to: CharacterId)(implicit gameState: GameState): Option[HexDirection] =
     for {
-      fromCoordinates: HexCoordinates <- characterById(from).parentCell.map(_.coordinates)
-      toCoordinates: HexCoordinates <- characterById(to).parentCell.map(_.coordinates)
+      fromCoordinates: HexCoordinates <- characterById(from).parentCellOpt.map(_.coordinates)
+      toCoordinates: HexCoordinates <- characterById(to).parentCellOpt.map(_.coordinates)
       direction: HexDirection <- fromCoordinates.getDirection(toCoordinates)
     } yield direction
 
@@ -202,7 +202,7 @@ case class GameState(
     characters
       .filterNot(c => forPlayerOpt.contains(c.owner.id))
       .filter(_.isInvisible)
-      .flatMap(_.parentCell.map(_.coordinates))
+      .flatMap(_.parentCellOpt.map(_.coordinates))
 
   private def handleTrigger(event: GameEvent, trigger: GameEventListener)(implicit
       random: Random,
@@ -587,7 +587,7 @@ case class GameState(
       targetCellCoordinates: HexCoordinates,
       hideEvent: Boolean = false,
   )(implicit random: Random, causedById: String): GameState = {
-    val parentCellOpt = characterById(characterId).parentCell(this)
+    val parentCellOpt = characterById(characterId).parentCellOpt(this)
 
     val removedFromParentCellState =
       parentCellOpt.fold(this)(c => updateHexCell(c.coordinates)(_.copy(characterId = None)))
@@ -631,14 +631,6 @@ case class GameState(
       newGameState.removeEffect(blockEffects.head.id)
     } else {
       attackingCharacter.basicAttack(targetCharacterId)(random, newGameState)
-        .logEvent(CharacterBasicAttacked(
-          randomUUID(),
-          phase,
-          turn,
-          causedById,
-          attackingCharacterId,
-          targetCharacterId,
-        ))
     }
   }
 
@@ -946,7 +938,7 @@ case class GameState(
   }
 
   def removeCharacterFromMap(characterId: CharacterId)(implicit random: Random, causedById: String): GameState = {
-    val parentCellOpt = characterById(characterId).parentCell(this)
+    val parentCellOpt = characterById(characterId).parentCellOpt(this)
 
     parentCellOpt.fold(this)(c => updateHexCell(c.coordinates)(_.copy(characterId = None)))
       .modify(_.characterIdsOutsideMap).setTo(characterIdsOutsideMap + characterId)

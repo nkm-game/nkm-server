@@ -31,7 +31,7 @@ case class SkillRelease(abilityId: AbilityId, parentCharacterId: CharacterId)
     gameState
       .effects
       .filter(_.state.name == CharacterEffectName.ZeroGravity)
-      .flatMap(_.parentCharacter.parentCell)
+      .flatMap(_.parentCharacter.parentCellOpt)
       .map(_.coordinates)
 
   override def use(useData: UseData)(implicit random: Random, gameState: GameState): GameState = {

@@ -71,13 +71,13 @@ class CastlingSpec
       )
       newGameState
         .characterById(s.p(1)(0).character.id)
-        .parentCell.get
-        .coordinates shouldBe s.p(0)(1).character.parentCell(newGameState).get.coordinates
+        .parentCellOpt.get
+        .coordinates shouldBe s.p(0)(1).character.parentCellOpt(newGameState).get.coordinates
 
       newGameState
         .characterById(s.p(0)(1).character.id)
-        .parentCell.get
-        .coordinates shouldBe s.p(1)(0).character.parentCell(newGameState).get.coordinates
+        .parentCellOpt.get
+        .coordinates shouldBe s.p(1)(0).character.parentCellOpt(newGameState).get.coordinates
     }
   }
 }

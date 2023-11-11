@@ -27,13 +27,13 @@ class BlackBloodSpec
         .ofType[GameEvent.CharacterDamaged]
         .causedBy(abilityId).size shouldBe abilityRange
 
-      val coordsInRange = s.p(0)(0).character.parentCell(newGameState).get.coordinates.getCircle(abilityRange)
+      val coordsInRange = s.p(0)(0).character.parentCellOpt(newGameState).get.coordinates.getCircle(abilityRange)
 
       s.p(1).map(_.character).foreach { c =>
         val state = newGameState.characterById(c.id).state
         val hp = state.healthPoints
         val maxHp = state.maxHealthPoints
-        if (coordsInRange.contains(c.parentCell(newGameState).get.coordinates)) {
+        if (coordsInRange.contains(c.parentCellOpt(newGameState).get.coordinates)) {
           hp should be < maxHp
         } else {
           hp should be(maxHp)

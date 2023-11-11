@@ -19,7 +19,7 @@ abstract class CharacterEffect(val id: CharacterEffectId)
   def parentCharacter(implicit gameState: GameState): NkmCharacter =
     gameState.characters.find(_.state.effects.map(_.id).contains(id)).get
   def parentCell(implicit gameState: GameState): Option[HexCell] =
-    parentCharacter.parentCell
+    parentCharacter.parentCellOpt
 
   def getDecrementCooldownState(implicit gameState: GameState): CharacterEffectState =
     state.copy(cooldown = math.max(state.cooldown - 1, 0))

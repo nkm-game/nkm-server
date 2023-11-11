@@ -28,7 +28,7 @@ trait TestScenario extends TestUtils {
   lazy val defaultAbilityId: AbilityId =
     defaultCharacter.state.abilities.head.id
   lazy val defaultCoordinates: HexCoordinates =
-    defaultCharacter.parentCell(gameState).get.coordinates
+    defaultCharacter.parentCellOpt(gameState).get.coordinates
   lazy val ultGs: GameState =
     gameState.incrementPhase(4)
 }

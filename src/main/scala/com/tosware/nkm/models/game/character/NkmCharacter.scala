@@ -138,7 +138,7 @@ case class NkmCharacter(
       case AbilityType.Ultimate => !usedAbilityThisPhase && !usedBasicAttackThisTurn && !usedBasicMoveThisTurn
     }) && !state.effects.exists(e => abilityImpairmentCcNames.contains(e.metadata.name))
 
-  def parentCell(implicit gameState: GameState): Option[HexCell] =
+  def parentCellOpt(implicit gameState: GameState): Option[HexCell] =
     gameState.hexMap.getCellOfCharacter(id)
 
   def owner(implicit gameState: GameState): Player =
@@ -174,8 +174,44 @@ case class NkmCharacter(
   def basicAttackTargets(implicit gameState: GameState): Set[HexCoordinates] =
     basicAttackOverride.fold(defaultBasicAttackTargets)(_.basicAttackTargets)
 
-  def basicAttack(targetCharacterId: CharacterId)(implicit random: Random, gameState: GameState): GameState =
-    basicAttackOverride.fold(defaultBasicAttack(targetCharacterId))(_.basicAttack(targetCharacterId))
+  def getRealBasicAttackTargetId(targetCharacterId: CharacterId)(
+      implicit
+      random: Random,
+      gameState: GameState,
+  ): CharacterId =
+    state.attackType match {
+      case AttackType.Melee =>
+        (for {
+          targetCoords <- gameState.hexMap.getCellOfCharacter(targetCharacterId).map(_.coordinates)
+          parentCell <- parentCellOpt
+          direction <- parentCell.coordinates.getDirection(targetCoords)
+          isTargetEnemy = isEnemyForC(targetCharacterId)
+          firstCharacterInLine <-
+            if (isTargetEnemy) {
+              val firstEnemy =
+                parentCell.firstCharacterInLine(direction, state.basicAttackRange, c => c.isEnemyForC(id))
+              firstEnemy
+            } else {
+              val firstCharacter = parentCell.firstCharacterInLine(direction, state.basicAttackRange)
+              firstCharacter
+            }
+        } yield firstCharacterInLine.id).getOrElse(targetCharacterId)
+      case AttackType.Ranged => targetCharacterId
+    }
+
+  def basicAttack(targetCharacterId: CharacterId)(implicit random: Random, gameState: GameState): GameState = {
+    val realBasicAttackTarget = getRealBasicAttackTargetId(targetCharacterId)
+
+    basicAttackOverride.fold(defaultBasicAttack(realBasicAttackTarget))(_.basicAttack(realBasicAttackTarget))
+      .logEvent(CharacterBasicAttacked(
+        randomUUID(),
+        gameState.phase,
+        gameState.turn,
+        id,
+        id,
+        realBasicAttackTarget,
+      ))
+  }
 
   def basicMoveOverride: Option[BasicMoveOverride] =
     state.abilities.ofType[BasicMoveOverride].headOption
@@ -192,7 +228,7 @@ case class NkmCharacter(
     basicMoveOverride.fold(defaultBasicMove(path))(_.basicMove(path))
 
   def defaultMeleeBasicAttackCells(implicit gameState: GameState): Set[HexCoordinates] =
-    parentCell.map { c =>
+    parentCellOpt.map { c =>
       c.getArea(
         state.basicAttackRange,
         Set(SearchFlag.StopAtWalls, SearchFlag.StopAfterEnemies, SearchFlag.StopAfterFriends, SearchFlag.StraightLine),
@@ -201,7 +237,7 @@ case class NkmCharacter(
     }
       .getOrElse(Set.empty)
   def defaultRangedBasicAttackCells(implicit gameState: GameState): Set[HexCoordinates] =
-    parentCell.map { c =>
+    parentCellOpt.map { c =>
       c.getArea(
         state.basicAttackRange,
         Set(SearchFlag.StraightLine),

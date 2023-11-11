@@ -144,13 +144,13 @@ package object nkm {
       cells.filter(_.isFreeToPass(forCharacterId))
 
     def whereFriendsOfC(characterId: CharacterId): Set[HexCell] =
-      friendsOfC(characterId).map(_.parentCell.get)
+      friendsOfC(characterId).map(_.parentCellOpt.get)
 
     def whereEnemiesOfC(characterId: CharacterId): Set[HexCell] =
-      enemiesOfC(characterId).map(_.parentCell.get)
+      enemiesOfC(characterId).map(_.parentCellOpt.get)
 
     def whereSeenEnemiesOfC(characterId: CharacterId): Set[HexCell] =
-      enemiesOfC(characterId).filterNot(_.isInvisible).map(_.parentCell.get)
+      enemiesOfC(characterId).filterNot(_.isInvisible).map(_.parentCellOpt.get)
 
     def friendsOfC(characterId: CharacterId): Set[NkmCharacter] =
       characters.filter(_.isFriendForC(characterId))
@@ -159,10 +159,10 @@ package object nkm {
       characters.filter(_.isEnemyForC(characterId))
 
     def whereFriendsOf(playerId: PlayerId): Set[HexCell] =
-      friendsOf(playerId).map(_.parentCell.get)
+      friendsOf(playerId).map(_.parentCellOpt.get)
 
     def whereEnemiesOf(playerId: PlayerId): Set[HexCell] =
-      enemiesOf(playerId).map(_.parentCell.get)
+      enemiesOf(playerId).map(_.parentCellOpt.get)
 
     def friendsOf(playerId: PlayerId): Set[NkmCharacter] =
       characters.filter(_.isFriendFor(playerId))
@@ -194,10 +194,10 @@ package object nkm {
       cells.filter(_.isFreeToPass(forCharacterId))
 
     def whereFriendsOfC(characterId: CharacterId): Seq[HexCell] =
-      friendsOfC(characterId).map(_.parentCell.get)
+      friendsOfC(characterId).map(_.parentCellOpt.get)
 
     def whereEnemiesOfC(characterId: CharacterId): Seq[HexCell] =
-      enemiesOfC(characterId).map(_.parentCell.get)
+      enemiesOfC(characterId).map(_.parentCellOpt.get)
 
     def friendsOfC(characterId: CharacterId): Seq[NkmCharacter] =
       characters.filter(_.isFriendForC(characterId))
@@ -206,10 +206,10 @@ package object nkm {
       characters.filter(_.isEnemyForC(characterId))
 
     def whereFriendsOf(playerId: PlayerId): Seq[HexCell] =
-      friendsOf(playerId).map(_.parentCell.get)
+      friendsOf(playerId).map(_.parentCellOpt.get)
 
     def whereEnemiesOf(playerId: PlayerId): Seq[HexCell] =
-      enemiesOf(playerId).map(_.parentCell.get)
+      enemiesOf(playerId).map(_.parentCellOpt.get)
 
     def friendsOf(playerId: PlayerId): Seq[NkmCharacter] =
       characters.filter(_.isFriendFor(playerId))

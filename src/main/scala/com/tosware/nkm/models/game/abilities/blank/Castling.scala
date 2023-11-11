@@ -33,8 +33,8 @@ case class Castling(abilityId: AbilityId, parentCharacterId: CharacterId) extend
     gameState
       .removeCharacterFromMap(target1.id)
       .removeCharacterFromMap(target2.id)
-      .placeCharacter(target2.parentCell.get.coordinates, target1.id)
-      .placeCharacter(target1.parentCell.get.coordinates, target2.id)
+      .placeCharacter(target2.parentCellOpt.get.coordinates, target1.id)
+      .placeCharacter(target1.parentCellOpt.get.coordinates, target2.id)
   }
 
   override def useChecks(implicit target: CharacterId, useData: UseData, gameState: GameState): Set[UseCheck] = {

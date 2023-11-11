@@ -121,7 +121,7 @@ class SwitchSpec
     "not be able to use switch with himself" in {
       val ngs = gameState.teleportCharacter(s.defaultCharacter.id, HexCoordinates(2, 0))
 
-      ngs.abilityById(abilityId).targetsInRange(ngs) should not contain s.defaultCharacter.parentCell(
+      ngs.abilityById(abilityId).targetsInRange(ngs) should not contain s.defaultCharacter.parentCellOpt(
         ngs
       ).get.coordinates
 

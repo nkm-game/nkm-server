@@ -39,11 +39,11 @@ class SummerBreezeSpec
     }
 
     "knockback on use till wall or character" in {
-      s.p(1)(0).character.parentCell(abilityUsedOnP1FirstGs).get
+      s.p(1)(0).character.parentCellOpt(abilityUsedOnP1FirstGs).get
         .coordinates.toTuple shouldBe (3, 0)
-      s.p(1)(1).character.parentCell(abilityUsedOnP1SecondGs).get
+      s.p(1)(1).character.parentCellOpt(abilityUsedOnP1SecondGs).get
         .coordinates.toTuple shouldBe (7, 0)
-      s.p(1)(0).character.parentCell(abilityUsedOnP1FirstWithoutSecondGs).get
+      s.p(1)(0).character.parentCellOpt(abilityUsedOnP1FirstWithoutSecondGs).get
         .coordinates.toTuple shouldBe (7, 0)
     }
 
