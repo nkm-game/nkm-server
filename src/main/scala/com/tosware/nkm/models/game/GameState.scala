@@ -785,6 +785,13 @@ case class GameState(
     updateCharacter(characterId)(_.modify(_.state.shield).setTo(amount))
       .logEvent(CharacterShieldSet(randomUUID(), phase, turn, causedById, characterId, amount))
 
+  def setAttackType(characterId: CharacterId, attackType: AttackType)(implicit
+      random: Random,
+      causedById: String,
+  ): GameState =
+    updateCharacter(characterId)(_.modify(_.state.attackType).setTo(attackType))
+      .logEvent(CharacterAttackTypeSet(randomUUID(), phase, turn, causedById, characterId, attackType))
+
   def setStat(characterId: CharacterId, statType: StatType, amount: Int)(implicit
       random: Random,
       causedById: String,

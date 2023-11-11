@@ -64,6 +64,7 @@ trait NkmJsonProtocol
         case e: CharacterHealed            => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
         case e: CharacterHpSet             => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
         case e: CharacterShieldSet         => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
+        case e: CharacterAttackTypeSet     => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
         case e: CharacterStatSet           => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
         case e: CharacterDied              => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
         case e: CharacterRemovedFromMap    => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
@@ -119,6 +120,7 @@ trait NkmJsonProtocol
         case "CharacterHealed"            => ges.eventJson.parseJson.convertTo[CharacterHealed]
         case "CharacterHpSet"             => ges.eventJson.parseJson.convertTo[CharacterHpSet]
         case "CharacterShieldSet"         => ges.eventJson.parseJson.convertTo[CharacterShieldSet]
+        case "CharacterAttackTypeSet"     => ges.eventJson.parseJson.convertTo[CharacterAttackTypeSet]
         case "CharacterStatSet"           => ges.eventJson.parseJson.convertTo[CharacterStatSet]
         case "CharacterDied"              => ges.eventJson.parseJson.convertTo[CharacterDied]
         case "CharacterRemovedFromMap"    => ges.eventJson.parseJson.convertTo[CharacterRemovedFromMap]

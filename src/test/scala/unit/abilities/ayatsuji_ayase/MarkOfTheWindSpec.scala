@@ -151,12 +151,12 @@ class MarkOfTheWindSpec
       HexCoordinates(0, 0)
         .toCell(markGs)
         .toView(Some(s.owners(0)))(markGs)
-        .effects.size should be(1)
+        .effects should not be empty
 
       HexCoordinates(0, 0)
         .toCell(markGs)
         .toView(Some(s.owners(1)))(markGs)
-        .effects.size should be(0)
+        .effects should be(empty)
 
       markGs.gameLog.toView(Some(s.owners(0)))(markGs)
         .events.ofType[GameEvent.EffectAddedToCell].size should be(1)

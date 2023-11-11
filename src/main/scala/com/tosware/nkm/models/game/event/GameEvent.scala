@@ -2,7 +2,7 @@ package com.tosware.nkm.models.game.event
 
 import com.tosware.nkm.*
 import com.tosware.nkm.models.game.*
-import com.tosware.nkm.models.game.character.StatType
+import com.tosware.nkm.models.game.character.{AttackType, StatType}
 import com.tosware.nkm.models.game.hex.HexCoordinates
 
 object GameEvent {
@@ -240,6 +240,15 @@ object GameEvent {
       causedById: String,
       characterId: CharacterId,
       amount: Int,
+  ) extends GameEvent
+      with ContainsCharacterId
+  case class CharacterAttackTypeSet(
+      id: GameEventId,
+      phase: Phase,
+      turn: Turn,
+      causedById: String,
+      characterId: CharacterId,
+      attackType: AttackType,
   ) extends GameEvent
       with ContainsCharacterId
   case class CharacterStatSet(

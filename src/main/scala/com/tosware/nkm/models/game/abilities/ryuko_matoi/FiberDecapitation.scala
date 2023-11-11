@@ -48,7 +48,7 @@ case class FiberDecapitation(abilityId: AbilityId, parentCharacterId: CharacterI
           targetDirection: HexDirection <- pCell.coordinates.getDirection(targetCoordinates)
           tpCoords: HexCoordinates <- Some(teleportCoordinates(targetCoordinates, targetDirection))
           tpCell: HexCell <- tpCoords.toCellOpt(gameState)
-          isFreeToStand: Boolean <- Some(tpCell.isFreeToStand)
+          isFreeToStand: Boolean <- Some(tpCell.looksFreeToStand(parentCharacterId))
         } yield isFreeToStand
       }.getOrElse(false)
     )
@@ -78,7 +78,7 @@ case class FiberDecapitation(abilityId: AbilityId, parentCharacterId: CharacterI
         targetDirection: HexDirection <- parentCell.get.coordinates.getDirection(targetCoordinates)
         tpCoords: HexCoordinates <- Some(teleportCoordinates(targetCoordinates, targetDirection))
         tpCell: HexCell <- tpCoords.toCellOpt(gameState)
-        isFreeToStand: Boolean <- Some(tpCell.isFreeToStand)
+        isFreeToStand: Boolean <- Some(tpCell.looksFreeToStand(parentCharacterId))
       } yield isFreeToStand
     }.getOrElse(false)
 

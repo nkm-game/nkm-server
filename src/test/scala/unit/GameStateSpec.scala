@@ -149,15 +149,13 @@ class GameStateSpec extends TestUtils {
         .toView(Some(s.owners(0)))
         .gameLog
         .events
-        .ofType[GameEvent.CharacterTeleported]
-        .size should be(0)
+        .ofType[GameEvent.CharacterTeleported] should be(empty)
 
       basicMoveGs
         .toView(None)
         .gameLog
         .events
-        .ofType[GameEvent.CharacterTeleported]
-        .size should be(0)
+        .ofType[GameEvent.CharacterTeleported] should be(empty)
     }
 
     "hide character related events for invisible characters" in {
@@ -212,13 +210,14 @@ class GameStateSpec extends TestUtils {
 
       assertEventHiddenOfType[GameEvent.CharacterBasicMoved](basicMoveGs)
 
+      // basic attack reveals invisibility
       val basicAttackGs = invisibleGs.basicAttack(
         bigS.defaultCharacter.id,
         bigS.p(1)(0).character.id,
       )
 
-      assertEventHiddenOfType[GameEvent.CharacterPreparedToAttack](basicAttackGs)
-      assertEventHiddenOfType[GameEvent.CharacterBasicAttacked](basicAttackGs)
+      assertEventNotHiddenOfType[GameEvent.CharacterPreparedToAttack](basicAttackGs)
+      assertEventNotHiddenOfType[GameEvent.CharacterBasicAttacked](basicAttackGs)
 
       assertEventNotHiddenOfType[GameEvent.DamageSent](basicAttackGs)
       assertEventNotHiddenOfType[GameEvent.ShieldDamaged](basicAttackGs)

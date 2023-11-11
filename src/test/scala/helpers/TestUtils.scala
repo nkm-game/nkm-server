@@ -64,8 +64,7 @@ trait TestUtils
       .characterById(cid)
       .state
       .effects
-      .ofType[A]
-      .size should be > 0
+      .ofType[A] should not be empty
 
   protected def assertEffectsExist(
       effectNames: Seq[CharacterEffectName],
@@ -92,8 +91,7 @@ trait TestUtils
       .characterById(cid)
       .state
       .effects
-      .ofType[A]
-      .size should be(0)
+      .ofType[A] should be(empty)
 
   protected def assertBuffExists(statType: StatType, cid: CharacterId)(gameState: GameState): Assertion =
     gameState
