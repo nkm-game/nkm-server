@@ -30,6 +30,9 @@ Send selected character and cell to the server.
 Then show characters in range again and send to the server again.
 2. MjolnirDestinyImpulse: show circular air selection in range and send middle cell to the server.
 Then immediately show it again if this ability is free because of a kill.
+#### Monkey D. Luffy
+1. RubberRubberFruit: show characters and cells in range, select one and send to the server.
+2. GearSecond: use the ability immediately on ability image click.
 
 ### Conclusion
 We should improve ability metadata to have more data:
@@ -43,13 +46,15 @@ We should improve ability metadata to have more data:
     )
     ```
    Examples:
-    1. Purification: `Seq((1 to 1, Target.Character))`
-    2. Resurrection: `Seq((1 to 1, Target.Character, TargetSelectionType.DeadCharacters), (1 to 1, Target.HexCoordinate))`
-    3. MarkOfTheWind: `Seq((1 to 1, Target.HexCoordinate))`
-    4. CrackTheSky: `Seq((1 to ∞, Target.HexCoordinate))`
-    5. Check: `Seq((1 to 1, Target.Character))`
-    6. Castling: `Seq((2 to 2, Target.Character))`
-    7. BindingRibbons: `Seq((1 to 1, Target.HexCoordinate))`
-    8. TiamatsIntervention: `Seq((1 to 1, Target.Character), (1 to 1, Target.HexCoordinate))`
-    9. MjolnirHammer: `Seq((1 to 1, Target.Character))`
-    10. MjolnirDestinyImpulse: `Seq((1 to 1, Target.HexCoordinate))`
+   1. Purification: `Seq((1 to 1, Target.Character))`
+   2. Resurrection: `Seq((1 to 1, Target.Character, TargetSelectionType.DeadCharacters), (1 to 1, Target.HexCoordinate))`
+   3. MarkOfTheWind: `Seq((1 to 1, Target.HexCoordinate))`
+   4. CrackTheSky: `Seq((1 to ∞, Target.HexCoordinate))`
+   5. Check: `Seq((1 to 1, Target.Character))`
+   6. Castling: `Seq((2 to 2, Target.Character))`
+   7. BindingRibbons: `Seq((1 to 1, Target.HexCoordinate))`
+   8. TiamatsIntervention: `Seq((1 to 1, Target.Character), (1 to 1, Target.HexCoordinate))`
+   9. MjolnirHammer: `Seq((1 to 1, Target.Character))`
+   10. MjolnirDestinyImpulse: `Seq((1 to 1, Target.HexCoordinate))`
+   11. RubberRubberFruit: `Seq((1 to 1, Target.CharacterOrHexCoordinate))`
+   12. GearSecond: `Seq()`
