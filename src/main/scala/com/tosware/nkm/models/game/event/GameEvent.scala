@@ -128,7 +128,7 @@ object GameEvent {
       path: Seq[HexCoordinates],
   ) extends GameEvent
       with ContainsCharacterId
-  case class BasicMoveInterrupted(
+  case class MovementInterrupted(
       id: GameEventId,
       phase: Phase,
       turn: Turn,

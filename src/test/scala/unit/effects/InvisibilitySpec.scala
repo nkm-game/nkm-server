@@ -11,6 +11,7 @@ import com.tosware.nkm.models.game.event.GameEvent
 import com.tosware.nkm.models.game.hex.{HexCoordinates, TestHexMapName}
 import helpers.{TestScenario, TestUtils}
 import org.scalatest.wordspec.AnyWordSpecLike
+import org.scalatest.Checkpoints.Checkpoint
 
 class InvisibilitySpec
     extends AnyWordSpecLike
@@ -122,9 +123,11 @@ class InvisibilitySpec
         .teleportCharacter(s.p(0)(1).character.id, HexCoordinates(-1, 0))
       val tpGs = setupTpGs.useAbilityOnCharacter(defaultEnemyContactAbilityId, s.p(0)(1).character.id)
 
-      assertEffectDoesNotExistsOfType[effects.Invisibility](s.defaultCharacter.id)(tpGs)
-      s.defaultEnemy.parentCellOpt(tpGs).map(_.coordinates) should be(Some(HexCoordinates(-4, 0)))
-      s.defaultCharacter.parentCellOpt(tpGs).map(_.coordinates) should not be Some(HexCoordinates(-4, 0))
+      val cp = new Checkpoint
+      cp(assertEffectDoesNotExistsOfType[effects.Invisibility](s.defaultCharacter.id)(tpGs))
+      cp(s.defaultEnemy.parentCellOpt(tpGs).map(_.coordinates) should be(Some(HexCoordinates(-4, 0))))
+      cp(s.defaultCharacter.parentCellOpt(tpGs).map(_.coordinates) should not be Some(HexCoordinates(-4, 0)))
+      cp.reportAll()
     }
     // not sure if it should work this way, commented for now
 //    "reveal parent and hit it on collision with enemy move ability" in {
