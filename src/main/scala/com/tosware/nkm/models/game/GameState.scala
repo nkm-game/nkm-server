@@ -587,21 +587,45 @@ case class GameState(
       targetCellCoordinates: HexCoordinates,
       hideEvent: Boolean = false,
   )(implicit random: Random, causedById: String): GameState = {
-    val parentCellOpt = characterById(characterId).parentCellOpt(this)
-
-    val removedFromParentCellState =
-      parentCellOpt.fold(this)(c => updateHexCell(c.coordinates)(_.copy(characterId = None)))
-    val targetIsFreeToStand = hexMap.getCell(targetCellCoordinates).get.isFreeToStand
-    val characterIsOnMap = characterById(characterId).isOnMap(this)
-
-    val ngs = if (targetIsFreeToStand) {
-      if (characterIsOnMap)
-        removedFromParentCellState.updateHexCell(targetCellCoordinates)(_.copy(characterId = Some(characterId)))
-      else removedFromParentCellState.placeCharacter(targetCellCoordinates, characterId)
-    } else {
-      // probably just passing by a friendly characterOpt
-      removedFromParentCellState.removeCharacterFromMap(characterId)
+    val targetCell = hexMap.getCell(targetCellCoordinates) match {
+      case Some(value) => value
+      case None        => return this
     }
+
+    val characterToTp = characterById(characterId)
+    val characterIsOnMap = characterToTp.isOnMap(this)
+
+    val parentCellOpt = characterById(characterId).parentCellOpt(this)
+    val removedFromParentCellGs =
+      parentCellOpt.fold(this)(c => updateHexCell(c.coordinates)(_.copy(characterId = None)))
+
+    val ngs = if (!targetCell.isFreeToStand) {
+      val targetStandingOpt = targetCell.characterOpt(this)
+      if (targetStandingOpt.isEmpty) return this // probably a bug
+      val isFriendStanding = targetStandingOpt.exists(_.isFriendFor(characterId)(this))
+      if (isFriendStanding) {
+        // probably just passing by
+        removedFromParentCellGs.removeCharacterFromMap(characterId)
+      } else {
+        // probably an invisible character standing in a way
+        val targetStanding = targetStandingOpt.get
+        val tpInterruptedEvent =
+          GameEvent.MovementInterrupted(randomUUID(), phase, turn, targetStanding.id, characterId)
+
+        val targetMovedGs = removedFromParentCellGs
+          .logEvent(tpInterruptedEvent)
+          .moveToClosestFreeCell(targetStanding.id)
+
+        if (characterIsOnMap)
+          targetMovedGs.updateHexCell(targetCellCoordinates)(_.copy(characterId = Some(characterId)))
+        else targetMovedGs.placeCharacter(targetCellCoordinates, characterId)
+      }
+    } else {
+      if (characterIsOnMap)
+        removedFromParentCellGs.updateHexCell(targetCellCoordinates)(_.copy(characterId = Some(characterId)))
+      else removedFromParentCellGs.placeCharacter(targetCellCoordinates, characterId)
+    }
+
     val tpEvent = CharacterTeleported(randomUUID(), phase, turn, causedById, characterId, targetCellCoordinates)
     if (hideEvent) {
       ngs.logAndHideEvent(tpEvent, Seq(), RevealCondition.Never)
@@ -847,6 +871,16 @@ case class GameState(
       teleportCharacter(characterId, cellToTeleport.coordinates)(random, id)
     }
   }
+
+  def moveToClosestFreeCell(characterId: CharacterId)(implicit random: Random, causedById: String): GameState =
+    hexMap.getCellOfCharacter(characterId) match {
+      case Some(sourceCell) =>
+        sourceCell.findClosestFreeCell(this, random) match {
+          case Some(closestFreeCell) => teleportCharacter(characterId, closestFreeCell.coordinates)
+          case None                  => this
+        }
+      case None => this
+    }
 
   def checkIfCharacterDied(characterId: CharacterId)(implicit random: Random, causedById: String): GameState =
     if (characterById(characterId).isDead) {

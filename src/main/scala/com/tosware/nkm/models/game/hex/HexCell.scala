@@ -9,6 +9,7 @@ import com.tosware.nkm.models.game.hex_effect.HexCellEffect
 import com.tosware.nkm.models.game.{GameState, GameStatus}
 
 import scala.annotation.tailrec
+import scala.util.Random
 
 object HexCell {
   def empty(
@@ -52,8 +53,6 @@ case class HexCell(
       size: Int,
       characterPredicate: NkmCharacter => Boolean = _ => true,
   )(implicit gameState: GameState): Option[NkmCharacter] = {
-    implicit val hexMap: HexMap = gameState.hexMap
-
     @tailrec
     def scan(depth: Int, lastCell: HexCell): Option[NkmCharacter] = {
       if (depth == 0) return None
@@ -116,6 +115,21 @@ case class HexCell(
     if (searchFlags.contains(SearchFlag.StraightLine))
       getLines(HexDirection.values.toSet, depth, shouldStop) + this
     else getAreaInner(depth, Set(this), Set(this))
+  }
+
+  def findClosestFreeCell(implicit gameState: GameState, random: Random): Option[HexCell] = {
+    @tailrec
+    def findClosestFreeCellInner(depth: Int, lastFoundCellsCount: Int): Option[HexCell] = {
+      val foundCells = coordinates.getCircle(depth).flatMap(_.toCellOpt)
+      if (foundCells.size == lastFoundCellsCount) None
+      else {
+        val emptyCells = foundCells.filter(_.isFreeToStand)
+        if (emptyCells.isEmpty) findClosestFreeCellInner(depth + 1, foundCells.size)
+        else Some(random.shuffle(emptyCells.toSeq).head)
+      }
+    }
+
+    findClosestFreeCellInner(1, 0)
   }
 
   def toTemplate: HexCellTemplate =

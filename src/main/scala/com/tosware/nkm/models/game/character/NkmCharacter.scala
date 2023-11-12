@@ -231,7 +231,7 @@ case class NkmCharacter(
       case Some(firstEnemyCellOnThePath) =>
         val realPath = path.takeWhile(_ != firstEnemyCellOnThePath.coordinates)
         execMove(realPath)
-          .logEvent(GameEvent.BasicMoveInterrupted(
+          .logEvent(GameEvent.MovementInterrupted(
             randomUUID(),
             gameState.phase,
             gameState.turn,
