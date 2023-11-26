@@ -12,7 +12,7 @@ class GameRoutes(deps: NkmDependencies) extends JwtDirective
   val jwtSecretKey: JwtSecretKey = deps.jwtSecretKey
   val gameService: GameService = deps.gameService
 
-  val gameGetRoutes = concat(
+  val getRoutes = concat(
     path("state" / Segment) { (lobbyId: String) =>
       gameService.getGameStateViewOpt(lobbyId, None) match {
         case Some(gameStateView) => complete(gameStateView)

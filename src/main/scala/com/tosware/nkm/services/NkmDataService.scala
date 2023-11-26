@@ -1,6 +1,7 @@
 package com.tosware.nkm.services
 
 import com.tosware.nkm.NkmTimeouts
+import com.tosware.nkm.models.NkmColor
 import com.tosware.nkm.models.game.ability.AbilityMetadata
 import com.tosware.nkm.models.game.character.CharacterMetadata
 import com.tosware.nkm.models.game.character_effect.CharacterEffectMetadata
@@ -9,6 +10,8 @@ import com.tosware.nkm.models.game.hex_effect.HexCellEffectMetadata
 import com.tosware.nkm.providers.*
 
 class NkmDataService extends NkmTimeouts {
+  def getColorNames: Seq[String] = NkmColor.availableColorNames
+
   def getHexMaps: Seq[HexMapTemplate] = HexMapProvider().getHexMaps
 
   def getCharacterMetadatas: Seq[CharacterMetadata] = CharacterMetadatasProvider().getCharacterMetadatas

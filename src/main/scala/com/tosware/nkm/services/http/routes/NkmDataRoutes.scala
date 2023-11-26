@@ -11,7 +11,10 @@ class NkmDataRoutes(deps: NkmDependencies) extends JwtDirective
   val jwtSecretKey: JwtSecretKey = deps.jwtSecretKey
   val nkmDataService: NkmDataService = deps.nkmDataService
 
-  val nkmDataGetRoutes = concat(
+  val getRoutes = concat(
+    path("colors") {
+      complete(nkmDataService.getColorNames)
+    },
     path("maps") {
       complete(nkmDataService.getHexMaps)
     },

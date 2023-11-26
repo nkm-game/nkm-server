@@ -14,7 +14,7 @@ class HttpService(deps: NkmDependencies)
     with NkmJsonProtocol
     with NkmTimeouts
     with LoggingDirective {
-  val authRoutes = new AuthRoutes(deps)
+  val userRoutes = new UserRoutes(deps)
   val lobbyRoutes = new LobbyRoutes(deps)
   val gameRoutes = new GameRoutes(deps)
   val nkmDataRoutes = new NkmDataRoutes(deps)
@@ -29,20 +29,23 @@ class HttpService(deps: NkmDependencies)
             websocketRoutes.websocketRoutes
           },
           pathPrefix("api") {
-            get {
-              concat(
-                lobbyRoutes.lobbyGetRoutes,
-                gameRoutes.gameGetRoutes,
-                nkmDataRoutes.nkmDataGetRoutes,
-                bugReportRoutes.bugReportGetRoutes,
-              )
-            } ~
-              post {
+            concat(
+              userRoutes.userRoutes,
+              get {
                 concat(
-                  authRoutes.authPostRoutes,
-                  bugReportRoutes.bugReportPostRoutes,
+                  lobbyRoutes.getRoutes,
+                  gameRoutes.getRoutes,
+                  nkmDataRoutes.getRoutes,
+                  bugReportRoutes.getRoutes,
                 )
-              }
+              } ~
+                post {
+                  concat(
+                    userRoutes.authPostRoutes,
+                    bugReportRoutes.postRoutes,
+                  )
+                },
+            )
           },
         )
       }

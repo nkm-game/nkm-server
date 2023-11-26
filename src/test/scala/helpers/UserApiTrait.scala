@@ -6,12 +6,14 @@ import akka.http.scaladsl.model.StatusCode
 import akka.http.scaladsl.model.headers.RawHeader
 import com.tosware.nkm.actors.User
 import com.tosware.nkm.actors.User.GrantAdmin
-import com.tosware.nkm.models.*
+import com.tosware.nkm.models.user.UserStateView
+import com.tosware.nkm.models.user.response.AuthResponse
+import com.tosware.nkm.services.http.routes.UserRequest
 
 trait UserApiTrait extends ApiTrait {
   val numberOfUsers = 5
   val emails: Seq[String] = (0 until numberOfUsers).map(x => s"test_user_$x@example.com")
-  val registerRequests: Seq[RegisterRequest] = emails.map(e => RegisterRequest(e, "password"))
+  val registerRequests: Seq[UserRequest.Register] = emails.map(e => UserRequest.Register(e, "password"))
   var tokens: Seq[String] = Seq()
   var userStates: Seq[UserStateView] = Seq()
 
@@ -37,7 +39,7 @@ trait UserApiTrait extends ApiTrait {
     adminActor ! GrantAdmin
 
     registerRequests.foreach(r =>
-      Post("/api/login", Credentials(r.email, r.password)) ~> routes ~> check {
+      Post("/api/login", UserRequest.Login(r.email, r.password)) ~> routes ~> check {
         tokens = tokens :+ responseAs[AuthResponse].token
         userStates = userStates :+ responseAs[AuthResponse].userState
       }

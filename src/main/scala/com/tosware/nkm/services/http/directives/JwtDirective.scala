@@ -3,7 +3,8 @@ package com.tosware.nkm.services.http.directives
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives.{authorize, complete, optionalHeaderValueByName, provide}
 import akka.http.scaladsl.server.{Directive0, Directive1}
-import com.tosware.nkm.models.{JwtContent, UserStateView}
+import com.tosware.nkm.models.JwtContent
+import com.tosware.nkm.models.user.UserStateView
 import com.tosware.nkm.serializers.NkmJsonProtocol
 import pdi.jwt.*
 import spray.json.*

@@ -13,7 +13,7 @@ class LobbyRoutes(deps: NkmDependencies) extends JwtDirective
   val jwtSecretKey: JwtSecretKey = deps.jwtSecretKey
   val lobbyService: LobbyService = deps.lobbyService
 
-  val lobbyGetRoutes = concat(
+  val getRoutes = concat(
     path(LobbyRoute.Lobbies.value) {
       val lobbies = lobbyService.getAllLobbies()
       complete(lobbies)

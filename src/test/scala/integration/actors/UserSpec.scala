@@ -4,8 +4,7 @@ import akka.actor.{ActorRef, ActorSystem}
 import akka.pattern.ask
 import com.tosware.nkm.actors.User
 import com.tosware.nkm.actors.User.*
-import com.tosware.nkm.models.UserState
-import com.tosware.nkm.models.UserStateView
+import com.tosware.nkm.models.user.{UserSettings, UserState, UserStateView}
 import helpers.NkmPersistenceTestKit
 
 class UserSpec extends NkmPersistenceTestKit(ActorSystem("UserSpec")) {
@@ -63,6 +62,7 @@ class UserSpec extends NkmPersistenceTestKit(ActorSystem("UserSpec")) {
           "test3@example.com",
           Some("test3@example.com"),
           isAdmin = false,
+          UserSettings.default(),
         ))
       }
     }

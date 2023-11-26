@@ -21,6 +21,9 @@ class PublicDataSpec extends ApiTrait {
         data should not be empty
       }
 
+    "return available colors" in
+      assertDataExists[Seq[String]]("/api/colors")
+
     "return hexmaps" in
       assertDataExists[Seq[HexMapTemplate]]("/api/maps")
 

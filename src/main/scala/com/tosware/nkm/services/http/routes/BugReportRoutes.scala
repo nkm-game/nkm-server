@@ -24,7 +24,7 @@ class BugReportRoutes(deps: NkmDependencies) extends JwtDirective
 
   val bugReportPrefix = "bug_reports"
 
-  val bugReportGetRoutes = concat(
+  val getRoutes = concat(
     pathPrefix(bugReportPrefix) {
       requireAdmin {
         path("fetch") {
@@ -34,7 +34,7 @@ class BugReportRoutes(deps: NkmDependencies) extends JwtDirective
     }
   )
 
-  val bugReportPostRoutes = concat(
+  val postRoutes = concat(
     pathPrefix(bugReportPrefix) {
       concat(
         path("create") {

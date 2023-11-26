@@ -12,8 +12,11 @@ import akka.util.ByteString
 import com.tosware.nkm.NkmTimeouts
 import com.tosware.nkm.actors.User
 import com.tosware.nkm.actors.User.*
-import com.tosware.nkm.models.{Credentials, RegisterRequest}
+import com.tosware.nkm.models.CommandResponse.CommandResponse
+import com.tosware.nkm.models.NkmColor
+import com.tosware.nkm.models.user.{UserSettings, UserState}
 import com.tosware.nkm.serializers.NkmJsonProtocol
+import com.tosware.nkm.services.http.routes.UserRequest
 import spray.json.*
 
 import scala.concurrent.{ExecutionContextExecutor, Future}
@@ -21,7 +24,13 @@ import scala.concurrent.{ExecutionContextExecutor, Future}
 class UserService(implicit system: ActorSystem)
     extends NkmTimeouts
     with NkmJsonProtocol {
-  def authenticate(creds: Credentials): LoginEvent = {
+
+  private def getState(email: String): UserState = {
+    val userActor: ActorRef = system.actorOf(User.props(email))
+    aw(userActor ? GetState).asInstanceOf[UserState]
+  }
+
+  def authenticate(creds: UserRequest.Login): LoginEvent = {
     val userActor: ActorRef = system.actorOf(User.props(creds.email))
     aw(userActor ? CheckLogin(creds.password)).asInstanceOf[LoginEvent]
   }
@@ -48,7 +57,7 @@ class UserService(implicit system: ActorSystem)
     aw(result)
   }
 
-  def register(request: RegisterRequest): RegisterEvent = {
+  def register(request: UserRequest.Register): RegisterEvent = {
     val readJournal: JdbcReadJournal =
       PersistenceQuery(system).readJournalFor[JdbcReadJournal](JdbcReadJournal.Identifier)
     val userActor: ActorRef = system.actorOf(User.props(request.email))
@@ -74,4 +83,26 @@ class UserService(implicit system: ActorSystem)
     if (emailExists) RegisterFailure
     else aw(userActor ? Register(request.password)).asInstanceOf[RegisterEvent]
   }
+
+  def getUserSettings(email: String): UserSettings = {
+    getState(email).userSettings
+  }
+
+  def setPreferredColor(email: String, colorNameOpt: Option[String]): Future[CommandResponse] = {
+    val userActor: ActorRef = system.actorOf(User.props(email))
+
+    val colorOpt = colorNameOpt.flatMap(colorName => NkmColor.availableColors.find(_.name == colorName))
+    (userActor ? User.SetPreferredColor(colorOpt)).mapTo[CommandResponse]
+  }
+
+  def setLanguage(email: String, language: String): Future[CommandResponse] = {
+    val userActor: ActorRef = system.actorOf(User.props(email))
+    (userActor ? User.SetLanguage(language)).mapTo[CommandResponse]
+  }
+
+  def isColorAvailable(color: Option[String]): Boolean =
+    color.fold(true)(NkmColor.availableColorNames.contains)
+
+  def isLanguageAvailable(language: String): Boolean =
+    Seq("English", "Polski").contains(language)
 }

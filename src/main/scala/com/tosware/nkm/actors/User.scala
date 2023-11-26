@@ -4,8 +4,10 @@ import akka.actor.{ActorLogging, Props}
 import akka.persistence.journal.Tagged
 import akka.persistence.{PersistentActor, RecoveryCompleted}
 import com.github.t3hnar.bcrypt.*
+import com.softwaremill.quicklens.ModifyPimp
 import com.tosware.nkm.NkmTimeouts
 import com.tosware.nkm.models.*
+import com.tosware.nkm.models.user.{UserState, UserStateView}
 
 object User extends NkmTimeouts {
   sealed trait Query
@@ -17,6 +19,8 @@ object User extends NkmTimeouts {
   case class CheckLogin(password: String) extends Command
   case class OauthLogin() extends Command
   case object GrantAdmin extends Command
+  case class SetPreferredColor(colorOpt: Option[NkmColor]) extends Command
+  case class SetLanguage(language: String) extends Command
 
   sealed trait Event
   sealed trait RegisterEvent extends Event
@@ -31,6 +35,8 @@ object User extends NkmTimeouts {
   case class LoginFailure(reason: String) extends LoginEvent
 
   case class AdminGranted(email: String) extends Event
+  case class PreferredColorSet(colorOpt: Option[NkmColor]) extends Event
+  case class LanguageSet(language: String) extends Event
 
   def props(email: String): Props = Props(new User(email))
 
@@ -88,6 +94,16 @@ class User(email: String) extends PersistentActor with ActorLogging {
     LoginSuccess(userState.toView)
   }
 
+  def setPreferredColor(colorOpt: Option[NkmColor]): Unit =
+    userState = userState
+      .modify(_.userSettings.preferredColor)
+      .setTo(colorOpt)
+
+  def setLanguage(language: String): Unit =
+    userState = userState
+      .modify(_.userSettings.language)
+      .setTo(language)
+
   override def receive: Receive = {
     case GetState =>
       log.info("Received state request")
@@ -107,7 +123,6 @@ class User(email: String) extends PersistentActor with ActorLogging {
         val e = OauthRegisterSuccess(email)
         val taggedE = Tagged(e, Set(oauthRegisterTag))
         persist(taggedE) { _ =>
-          context.system.eventStream.publish(e)
           oauthRegister(email)
           log.info(s"Persisted user: $email")
         }
@@ -117,9 +132,19 @@ class User(email: String) extends PersistentActor with ActorLogging {
       log.info(s"Granting admin to: $email")
       val e = AdminGranted(email)
       persist(e) { _ =>
-        context.system.eventStream.publish(e)
         grantAdmin()
         log.info(s"Granted admin for: $email")
+      }
+      sender() ! CommandResponse.Success()
+
+    case SetPreferredColor(colorOpt) =>
+      persist(PreferredColorSet(colorOpt)) { _ =>
+        setPreferredColor(colorOpt)
+      }
+      sender() ! CommandResponse.Success()
+    case SetLanguage(language) =>
+      persist(LanguageSet(language)) { _ =>
+        setLanguage(language)
       }
       sender() ! CommandResponse.Success()
     case e => log.warning(s"Unknown message: $e")
@@ -135,6 +160,10 @@ class User(email: String) extends PersistentActor with ActorLogging {
     case AdminGranted(_) =>
       grantAdmin()
       log.debug(s"Recovered grant admin")
+    case PreferredColorSet(colorOpt) =>
+      setPreferredColor(colorOpt)
+    case LanguageSet(language) =>
+      setLanguage(language)
     case RecoveryCompleted =>
     case e                 => log.warning(s"Unknown message: $e")
   }
