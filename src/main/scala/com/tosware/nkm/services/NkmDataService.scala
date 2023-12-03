@@ -10,7 +10,7 @@ import com.tosware.nkm.models.game.hex_effect.HexCellEffectMetadata
 import com.tosware.nkm.providers.*
 
 class NkmDataService extends NkmTimeouts {
-  def getColorNames: Seq[String] = NkmColor.availableColorNames
+  def getColorNames: Seq[NkmColor] = NkmColor.availableColors
 
   def getHexMaps: Seq[HexMapTemplate] = HexMapProvider().getHexMaps
 

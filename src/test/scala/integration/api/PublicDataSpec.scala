@@ -3,6 +3,7 @@ package integration.api
 import akka.http.scaladsl.model.StatusCodes.*
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.unmarshalling.FromResponseUnmarshaller
+import com.tosware.nkm.models.NkmColor
 import com.tosware.nkm.models.game.ability.AbilityMetadata
 import com.tosware.nkm.models.game.character.CharacterMetadata
 import com.tosware.nkm.models.game.character_effect.CharacterEffectMetadata
@@ -22,7 +23,7 @@ class PublicDataSpec extends ApiTrait {
       }
 
     "return available colors" in
-      assertDataExists[Seq[String]]("/api/colors")
+      assertDataExists[Seq[NkmColor]]("/api/colors")
 
     "return hexmaps" in
       assertDataExists[Seq[HexMapTemplate]]("/api/maps")
