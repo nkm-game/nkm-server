@@ -29,7 +29,7 @@ case class HealOverTime(effectId: CharacterEffectId, initialCooldown: Int, heal:
         if (effectId == eid)
           return gameState.setEffectVariable(id, healKey, heal.toString)
         gameState
-      case TurnFinished(_, _, _, _) =>
+      case TurnFinished(_, _, _, _, _) =>
         val characterIdThatTookAction = gameState.gameLog.characterThatTookActionInTurn(e.turn.number).get
         if (characterIdThatTookAction == parentCharacter.id) {
           gameState.heal(parentCharacter.id, heal)(random, id)

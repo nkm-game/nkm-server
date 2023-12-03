@@ -81,7 +81,7 @@ case class GodrobeSenketsu(
     if (!state.isEnabled) return gameState
 
     e match {
-      case TurnFinished(_, _, _, _) =>
+      case TurnFinished(_, _, _, _, _) =>
         val characterIdThatTookAction = gameState.gameLog.characterThatTookActionInTurn(e.turn.number).get
         if (characterIdThatTookAction != parentCharacter.id) return gameState
         val bonusAdPerTurn = metadata.variables("bonusAttackDamagePerTurn")

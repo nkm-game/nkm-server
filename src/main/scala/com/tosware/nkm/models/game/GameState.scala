@@ -1106,7 +1106,7 @@ case class GameState(
 
   def endTurn()(implicit random: Random, causedById: String = id): GameState =
     this
-      .logEvent(TurnFinished(randomUUID(), phase, turn, causedById))
+      .logEvent(TurnFinished(randomUUID(), currentPlayer.id, phase, turn, causedById))
       .decreaseTime(currentPlayer.id, millisSinceLastClockUpdate())
       .decrementEndTurnCooldowns()
       .modify(_.characterIdsThatTookActionThisPhase).using(c => c + characterTakingActionThisTurn.get)
@@ -1115,7 +1115,10 @@ case class GameState(
       .finishPhaseIfEveryCharacterTookAction()
       .skipTurnIfPlayerKnockedOut()
       .skipTurnIfNoCharactersToTakeAction()
-      .logEvent(TurnStarted(randomUUID(), phase, turn, causedById))
+      .startTurn()
+
+  def startTurn()(implicit random: Random, causedById: String = id): GameState =
+    logEvent(TurnStarted(randomUUID(), currentPlayer.id, phase, turn, causedById))
 
   protected def skipTurnIfNoCharactersToTakeAction()(implicit random: Random, causedById: String = id): GameState =
     if (currentPlayer.characterIds.intersect(charactersToTakeAction).isEmpty)

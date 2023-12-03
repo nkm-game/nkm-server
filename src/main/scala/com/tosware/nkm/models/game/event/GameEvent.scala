@@ -349,9 +349,9 @@ object GameEvent {
       extends GameEvent
   case class CharactersPicked(id: GameEventId, phase: Phase, turn: Turn, causedById: String)
       extends GameEvent
-  case class TurnFinished(id: GameEventId, phase: Phase, turn: Turn, causedById: String)
+  case class TurnFinished(id: GameEventId, playerId: PlayerId, phase: Phase, turn: Turn, causedById: PlayerId)
       extends GameEvent
-  case class TurnStarted(id: GameEventId, phase: Phase, turn: Turn, causedById: String)
+  case class TurnStarted(id: GameEventId, playerId: PlayerId, phase: Phase, turn: Turn, causedById: PlayerId)
       extends GameEvent
   case class PhaseFinished(id: GameEventId, phase: Phase, turn: Turn, causedById: String)
       extends GameEvent

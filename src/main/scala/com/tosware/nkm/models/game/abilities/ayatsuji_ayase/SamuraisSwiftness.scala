@@ -36,7 +36,7 @@ case class SamuraisSwiftness(abilityId: AbilityId, parentCharacterId: CharacterI
           gameState.setAbilityEnabled(abilityId, newEnabled = true)
         else
           gameState
-      case TurnStarted(_, _, _, _) =>
+      case TurnStarted(_, _, _, _, _) =>
         if (state.isEnabled) {
           gameState
             .addEffect(

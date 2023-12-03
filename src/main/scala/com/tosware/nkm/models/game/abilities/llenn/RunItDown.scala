@@ -53,7 +53,7 @@ case class RunItDown(abilityId: AbilityId, parentCharacterId: CharacterId)
 
         ngs.refreshBasicMove(parentCharacterId)(random, id)
 
-      case GameEvent.TurnFinished(_, _, _, _) =>
+      case GameEvent.TurnFinished(_, _, _, _, _) =>
         val characterIdThatTookAction = gameState.gameLog.characterThatTookActionInTurn(e.turn.number).get
         if (characterIdThatTookAction != parentCharacterId) return gameState
         if (movesLeft <= 0) return gameState

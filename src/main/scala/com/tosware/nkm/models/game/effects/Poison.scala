@@ -46,7 +46,7 @@ case class Poison(
         if (effectId == eid)
           return gameState.setEffectVariable(id, damageKey, damage.toJson.toString)
         gameState
-      case TurnFinished(_, _, _, _) =>
+      case TurnFinished(_, _, _, _, _) =>
         val characterIdThatTookAction = gameState.gameLog.characterThatTookActionInTurn(e.turn.number).get
         if (characterIdThatTookAction == parentCharacter.id) {
           gameState.damageCharacter(parentCharacter.id, damage)(random, id)
