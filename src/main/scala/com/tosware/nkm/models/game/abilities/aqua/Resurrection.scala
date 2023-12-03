@@ -21,7 +21,7 @@ object Resurrection extends NkmConf.AutoExtract {
 }
 
 case class Resurrection(abilityId: AbilityId, parentCharacterId: CharacterId)
-    extends Ability(abilityId, parentCharacterId) with UsableOnCoordinates {
+    extends Ability(abilityId) with UsableOnCoordinates {
   override val metadata = Resurrection.metadata
 
   override def rangeCellCoords(implicit gameState: GameState) =

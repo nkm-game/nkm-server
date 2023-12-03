@@ -27,7 +27,7 @@ object CrackTheSky extends NkmConf.AutoExtract {
 }
 
 case class CrackTheSky(abilityId: AbilityId, parentCharacterId: CharacterId)
-    extends Ability(abilityId, parentCharacterId)
+    extends Ability(abilityId)
     with Usable
     with GameEventListener {
   override val metadata: AbilityMetadata = CrackTheSky.metadata

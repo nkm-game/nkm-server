@@ -7,68 +7,83 @@ import akka.persistence.journal.Tagged
 import akka.persistence.{PersistentActor, RecoveryCompleted}
 import com.tosware.nkm.*
 import com.tosware.nkm.models.CommandResponse.*
-import com.tosware.nkm.models.game.pick.PickType
+import com.tosware.nkm.models.NkmColor
 import com.tosware.nkm.models.game.*
+import com.tosware.nkm.models.game.pick.PickType
 import com.tosware.nkm.models.lobby.LobbyState
-import com.tosware.nkm.services.NkmDataService
+import com.tosware.nkm.services.{NkmDataService, UserService}
 
-import java.time.LocalDateTime
+import java.time.ZonedDateTime
 
 object Lobby {
   sealed trait Query
-
   case object GetState extends Query
 
   sealed trait Command
-
   case class Create(name: String, hostUserId: UserId) extends Command
-
   case class UserJoin(userId: UserId) extends Command
-
   case class UserLeave(userId: UserId) extends Command
-
   case class SetMapName(hexMapName: String) extends Command
-
   case class SetNumberOfBans(numberOfBans: Int) extends Command
-
   case class SetNumberOfCharactersPerPlayer(numberOfCharactersPerPlayer: Int) extends Command
-
   case class SetPickType(pickType: PickType) extends Command
-
   case class SetLobbyName(name: String) extends Command
-
   case class SetClockConfig(clockConfig: ClockConfig) extends Command
-
+  case class SetColor(userId: UserId, newColorName: String) extends Command
   case class StartGame(gameActor: ActorRef) extends Command
 
   sealed trait Event {
     val id: GameId
   }
 
-  case class CreateSuccess(id: GameId, name: String, hostUserId: UserId, creationDate: LocalDateTime) extends Event
-
+  case class CreateSuccess(id: GameId, name: String, hostUserId: UserId, creationDate: ZonedDateTime) extends Event
   case class UserJoined(id: GameId, userId: UserId) extends Event
-
   case class UserLeft(id: GameId, userId: UserId) extends Event
-
   case class MapNameSet(id: GameId, hexMapName: String) extends Event
-
   case class NumberOfBansSet(id: GameId, numberOfBans: Int) extends Event
-
   case class NumberOfCharactersPerPlayerSet(id: GameId, numberOfCharactersPerPlayer: Int) extends Event
-
   case class PickTypeSet(id: GameId, pickType: PickType) extends Event
-
   case class LobbyNameSet(id: GameId, name: String) extends Event
-
   case class ClockConfigSet(id: GameId, clockConfig: ClockConfig) extends Event
-
+  case class ColorSet(id: GameId, userId: UserId, newColor: NkmColor) extends Event
   case class GameStarted(id: GameId) extends Event
 
-  def props(id: GameId)(implicit nkmDataService: NkmDataService): Props = Props(new Lobby(id))
+  def props(id: GameId)(implicit nkmDataService: NkmDataService, userService: UserService): Props = Props(new Lobby(id))
+
+  object UseCheck {
+    def IsNotCreated(lobbyState: LobbyState): UseCheck =
+      (!lobbyState.created()) -> "Lobby is already created"
+
+    def IsCreated(lobbyState: LobbyState): UseCheck =
+      lobbyState.created() -> "Lobby is not created"
+
+    def IsUserNotInLobby(userId: UserId)(lobbyState: LobbyState): UseCheck =
+      (!lobbyState.userIds.contains(userId)) -> s"Lobby already contains $userId"
+
+    def IsUserInLobby(userId: UserId)(lobbyState: LobbyState): UseCheck =
+      lobbyState.userIds.contains(userId) -> s"Lobby does not contain $userId"
+
+    def IsValidMapName(hexMapName: String)(implicit nkmDataService: NkmDataService): UseCheck =
+      nkmDataService.getHexMaps.map(_.name).contains(hexMapName) -> s"Invalid map name: $hexMapName"
+
+    def IsValidNumberOfBans(numberOfBans: Int, minBans: Int, maxBans: Int): UseCheck =
+      (numberOfBans >= minBans && numberOfBans <= maxBans) -> s"Invalid number of bans: $numberOfBans"
+
+    def IsValidNumberOfCharacters(numberOfCharacters: Int, minCharacters: Int, maxCharacters: Int): UseCheck =
+      (numberOfCharacters >= minCharacters && numberOfCharacters <= maxCharacters) -> s"Invalid number of characters per player: $numberOfCharacters"
+
+    def CanStartGame(lobbyState: LobbyState): UseCheck =
+      (lobbyState.chosenHexMapName.nonEmpty && lobbyState.userIds.length > 1) -> "Cannot start the game"
+
+    def IsColorNameUnique(newColorName: String)(lobbyState: LobbyState): UseCheck =
+      (!lobbyState.playerColors.values.map(_.name).toSet.contains(newColorName)) -> "Color name already taken"
+
+    def ColorExists(newColorName: String): UseCheck =
+      (NkmColor.colorByName(newColorName).nonEmpty) -> "Color does not exist"
+  }
 }
 
-class Lobby(id: GameId)(implicit nkmDataService: NkmDataService)
+class Lobby(id: GameId)(implicit nkmDataService: NkmDataService, userService: UserService)
     extends PersistentActor
     with ActorLogging
     with NkmTimeouts {
@@ -82,22 +97,42 @@ class Lobby(id: GameId)(implicit nkmDataService: NkmDataService)
 
   var lobbyState: LobbyState = LobbyState(id)
 
-  def canStartGame(): Boolean =
-    lobbyState.chosenHexMapName.nonEmpty && lobbyState.userIds.length > 1
+  def create(name: String, hostUserId: UserId, creationDate: ZonedDateTime): Unit = {
+    val preferredColor = userService.getUserSettings(hostUserId).preferredColor
 
-  def create(name: String, hostUserId: UserId, creationDate: LocalDateTime): Unit =
     lobbyState = lobbyState.copy(
       name = Some(name),
       creationDate = Some(creationDate),
       hostUserId = Some(hostUserId),
       userIds = List(hostUserId),
+      playerColors = Map(hostUserId -> preferredColor.getOrElse(NkmColor.availableColors.head)),
     )
+  }
 
-  def joinLobby(userId: UserId): Unit =
+  def joinLobby(userId: UserId): Unit = {
     lobbyState = lobbyState.copy(userIds = lobbyState.userIds :+ userId)
 
+    val preferredColorOpt = userService.getUserSettings(userId).preferredColor
+    val takenColors = lobbyState.playerColors.values.toSet
+    val nextColor = NkmColor.availableColors.filterNot(c => takenColors.contains(c)).head
+
+    preferredColorOpt match {
+      case Some(preferredColor) =>
+        if (takenColors.contains(preferredColor)) {
+          setColor(userId, nextColor)
+        } else {
+          setColor(userId, preferredColor)
+        }
+      case None =>
+        setColor(userId, nextColor)
+    }
+  }
+
   def leaveLobby(userId: UserId): Unit =
-    lobbyState = lobbyState.copy(userIds = lobbyState.userIds.filterNot(_ == userId))
+    lobbyState = lobbyState.copy(
+      userIds = lobbyState.userIds.filterNot(_ == userId),
+      playerColors = lobbyState.playerColors.removed(userId),
+    )
 
   def setMapName(hexMapName: String): Unit =
     lobbyState = lobbyState.copy(chosenHexMapName = Some(hexMapName))
@@ -118,6 +153,9 @@ class Lobby(id: GameId)(implicit nkmDataService: NkmDataService)
   def setClockConfig(clockConfig: ClockConfig): Unit =
     lobbyState = lobbyState.copy(clockConfig = clockConfig)
 
+  def setColor(userId: UserId, color: NkmColor): Unit =
+    lobbyState = lobbyState.copy(playerColors = lobbyState.playerColors.updated(userId, color))
+
   def setGameStarted(): Unit =
     lobbyState = lobbyState.copy(gameStarted = true)
 
@@ -131,16 +169,24 @@ class Lobby(id: GameId)(implicit nkmDataService: NkmDataService)
     persist(Tagged(event, Set(tag)))(handler)
   }
 
+  def check(useChecks: Set[UseCheck])(onSuccess: => Unit): Unit =
+    models.UseCheck.canBeUsed(useChecks) match {
+      case Success(_) => onSuccess
+      case Failure(msg) =>
+        sender() ! Failure(msg)
+    }
+
   override def receive: Receive = {
     case GetState =>
       log.debug("Received state request")
       sender() ! lobbyState
     case Create(name, hostUserId) =>
       log.debug(s"Received create request")
-      if (lobbyState.created()) {
-        sender() ! Failure("Lobby is already created")
-      } else {
-        val creationDate = LocalDateTime.now()
+      val useChecks = Set(
+        UseCheck.IsNotCreated(lobbyState)
+      )
+      check(useChecks) {
+        val creationDate = ZonedDateTime.now()
         val e = CreateSuccess(id, name, hostUserId, creationDate)
         persistAndPublishWithTag(e, "lobby") { _ =>
           create(name, hostUserId, creationDate)
@@ -148,13 +194,14 @@ class Lobby(id: GameId)(implicit nkmDataService: NkmDataService)
           sender() ! Success()
         }
       }
+
     case UserJoin(userId) =>
       log.debug(s"$userId tries to join lobby")
-      if (!lobbyState.created()) {
-        sender() ! Failure("Lobby is not created")
-      } else if (lobbyState.userIds.contains(userId)) {
-        sender() ! Failure(s"Lobby already contains $userId")
-      } else {
+      val useChecks = Set(
+        UseCheck.IsCreated(lobbyState),
+        UseCheck.IsUserNotInLobby(userId)(lobbyState),
+      )
+      check(useChecks) {
         val e = UserJoined(id, userId)
         persistAndPublish(e) { _ =>
           joinLobby(userId)
@@ -164,11 +211,11 @@ class Lobby(id: GameId)(implicit nkmDataService: NkmDataService)
       }
     case UserLeave(userId) =>
       log.debug(s"$userId tries to leave lobby")
-      if (!lobbyState.created()) {
-        sender() ! Failure("Lobby is not created")
-      } else if (!lobbyState.userIds.contains(userId)) {
-        sender() ! Failure(s"Lobby does not contain $userId")
-      } else {
+      val useChecks = Set(
+        UseCheck.IsCreated(lobbyState),
+        UseCheck.IsUserInLobby(userId)(lobbyState),
+      )
+      check(useChecks) {
         val e = UserLeft(id, userId)
         persistAndPublish(e) { _ =>
           leaveLobby(userId)
@@ -177,9 +224,11 @@ class Lobby(id: GameId)(implicit nkmDataService: NkmDataService)
         }
       }
     case SetMapName(hexMapName) =>
-      if (!lobbyState.created()) {
-        sender() ! Failure("Lobby is not created")
-      } else {
+      val useChecks = Set(
+        UseCheck.IsCreated(lobbyState),
+        UseCheck.IsValidMapName(hexMapName),
+      )
+      check(useChecks) {
         val e = MapNameSet(id, hexMapName)
         persistAndPublish(e) { _ =>
           setMapName(hexMapName)
@@ -188,9 +237,12 @@ class Lobby(id: GameId)(implicit nkmDataService: NkmDataService)
         }
       }
     case SetNumberOfBans(numberOfBans) =>
-      if (!lobbyState.created()) {
-        sender() ! Failure("Lobby is not created")
-      } else {
+      val useChecks = Set(
+        UseCheck.IsCreated(lobbyState)
+        // TODO(NKM-291): check based on number of available and picked characters
+//        UseCheck.IsValidNumberOfBans(numberOfBans, 0, ???)
+      )
+      check(useChecks) {
         val e = NumberOfBansSet(id, numberOfBans)
         persistAndPublish(e) { _ =>
           setNumberOfBans(numberOfBans)
@@ -199,9 +251,12 @@ class Lobby(id: GameId)(implicit nkmDataService: NkmDataService)
         }
       }
     case SetNumberOfCharactersPerPlayer(numberOfCharactersPerPlayer) =>
-      if (!lobbyState.created()) {
-        sender() ! Failure("Lobby is not created")
-      } else {
+      val useChecks = Set(
+        UseCheck.IsCreated(lobbyState)
+        // TODO(NKM-291): check based on the map size
+//        UseCheck.IsValidNumberOfCharacters(numberOfCharactersPerPlayer, 1, ???),
+      )
+      check(useChecks) {
         val e = NumberOfCharactersPerPlayerSet(id, numberOfCharactersPerPlayer)
         persistAndPublish(e) { _ =>
           setNumberOfCharactersPerPlayer(numberOfCharactersPerPlayer)
@@ -210,9 +265,10 @@ class Lobby(id: GameId)(implicit nkmDataService: NkmDataService)
         }
       }
     case SetPickType(pickType) =>
-      if (!lobbyState.created()) {
-        sender() ! Failure("Lobby is not created")
-      } else {
+      val useChecks = Set(
+        UseCheck.IsCreated(lobbyState)
+      )
+      check(useChecks) {
         val e = PickTypeSet(id, pickType)
         persistAndPublish(e) { _ =>
           setPickType(pickType)
@@ -221,9 +277,10 @@ class Lobby(id: GameId)(implicit nkmDataService: NkmDataService)
         }
       }
     case SetLobbyName(name) =>
-      if (!lobbyState.created()) {
-        sender() ! Failure("Lobby is not created")
-      } else {
+      val useChecks = Set(
+        UseCheck.IsCreated(lobbyState)
+      )
+      check(useChecks) {
         val e = LobbyNameSet(id, name)
         persistAndPublish(e) { _ =>
           setLobbyName(name)
@@ -232,9 +289,10 @@ class Lobby(id: GameId)(implicit nkmDataService: NkmDataService)
         }
       }
     case SetClockConfig(clockConfig) =>
-      if (!lobbyState.created()) {
-        sender() ! Failure("Lobby is not created")
-      } else {
+      val useChecks = Set(
+        UseCheck.IsCreated(lobbyState)
+      )
+      check(useChecks) {
         val e = ClockConfigSet(id, clockConfig)
         persistAndPublish(e) { _ =>
           setClockConfig(clockConfig)
@@ -242,16 +300,33 @@ class Lobby(id: GameId)(implicit nkmDataService: NkmDataService)
           sender() ! Success()
         }
       }
+    case SetColor(userId: UserId, newColorName: String) =>
+      val useChecks = Set(
+        UseCheck.IsCreated(lobbyState),
+        UseCheck.IsUserInLobby(userId)(lobbyState),
+        UseCheck.IsColorNameUnique(newColorName)(lobbyState),
+        UseCheck.ColorExists(newColorName),
+      )
+      check(useChecks) {
+        val color = NkmColor.colorByName(newColorName).get
+        val e = ColorSet(id, userId, color)
+        persistAndPublish(e) { _ =>
+          setColor(userId, color)
+          sender() ! Success()
+        }
+      }
     case StartGame(gameActor) =>
-      if (!canStartGame()) {
-        sender() ! Failure("Cannot start the game")
-      } else {
+      val useChecks = Set(
+        UseCheck.IsCreated(lobbyState),
+        UseCheck.CanStartGame(lobbyState),
+      )
+      check(useChecks) {
         val e = GameStarted(id)
         persistAndPublish(e) { _ =>
           val hexMaps = nkmDataService.getHexMaps
           log.info("Received game start request")
           val hostUserId = lobbyState.hostUserId.get
-          val players: List[Player] = lobbyState.userIds.map(i => Player(i)).map {
+          val players: Seq[Player] = lobbyState.userIds.map(i => Player(i)).map {
             case p: Player if p.name == hostUserId => p.copy(isHost = true)
             case p: Player                         => p
           }
@@ -305,6 +380,8 @@ class Lobby(id: GameId)(implicit nkmDataService: NkmDataService)
     case ClockConfigSet(_, clockConfig) =>
       setClockConfig(clockConfig)
       log.debug(s"Recovered setting clock config")
+    case ColorSet(_, userId, newColor) =>
+      setColor(userId, newColor)
     case GameStarted(_) =>
       setGameStarted()
       log.debug(s"Recovered starting game")

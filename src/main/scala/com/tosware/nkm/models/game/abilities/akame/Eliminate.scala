@@ -19,7 +19,7 @@ object Eliminate extends NkmConf.AutoExtract {
     )
 }
 
-case class Eliminate(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId)
+case class Eliminate(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId)
     with UsableOnCharacter {
   override val metadata = Eliminate.metadata
 

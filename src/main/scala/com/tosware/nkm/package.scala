@@ -21,6 +21,9 @@ package object nkm {
 
   type AbilityMetadataId = String
   type AbilityId = String
+
+  /** if the check on the left is false, then the check fails with message on right
+    */
   type UseCheck = (Boolean, String)
 
   type CharacterEffectMetadataId = String

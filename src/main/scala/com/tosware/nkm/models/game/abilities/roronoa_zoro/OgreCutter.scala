@@ -23,7 +23,7 @@ object OgreCutter extends NkmConf.AutoExtract {
 }
 
 case class OgreCutter(abilityId: AbilityId, parentCharacterId: CharacterId)
-    extends Ability(abilityId, parentCharacterId) with UsableOnCharacter {
+    extends Ability(abilityId) with UsableOnCharacter {
   override val metadata = OgreCutter.metadata
 
   private def teleportCoordinates(from: HexCoordinates, direction: HexDirection) =

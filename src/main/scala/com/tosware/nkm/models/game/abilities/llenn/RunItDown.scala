@@ -22,7 +22,7 @@ object RunItDown extends NkmConf.AutoExtract {
 }
 
 case class RunItDown(abilityId: AbilityId, parentCharacterId: CharacterId)
-    extends Ability(abilityId, parentCharacterId)
+    extends Ability(abilityId)
     with Usable
     with GameEventListener {
   override val metadata = RunItDown.metadata

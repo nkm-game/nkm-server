@@ -18,7 +18,7 @@ trait NkmJsonProtocol
     with LocalDateTimeString {
   implicit object CoordinatesCharacterMapFormat extends RootJsonFormat[Map[HexCoordinates, CharacterId]] {
     override def write(obj: Map[HexCoordinates, CharacterId]) = {
-      val m: List[JsField] = obj.map { case (coordinates, characterId) =>
+      val m: Seq[JsField] = obj.map { case (coordinates, characterId) =>
         (coordinates.toJson.toString(), JsString(characterId))
       }.toList
       JsObject(m*)

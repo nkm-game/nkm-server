@@ -1,7 +1,6 @@
 package integration.api
 
 import akka.http.scaladsl.model.StatusCodes.*
-import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.server.Route
 import com.tosware.nkm.models.bugreport.BugReport
 import com.tosware.nkm.services.http.routes.BugReportRequest
@@ -9,8 +8,7 @@ import helpers.UserApiTrait
 
 class BugReportApiSpec extends UserApiTrait {
   def fetchBugReports(): Seq[BugReport] =
-    Get("/api/bug_reports/fetch")
-      .addHeader(RawHeader("Authorization", s"Bearer $adminToken"))
+    Get("/api/bug_reports/fetch").addAuthHeader(adminToken)
       ~> Route.seal(routes) ~> check {
         status shouldEqual OK
         responseAs[Seq[BugReport]]
@@ -23,7 +21,7 @@ class BugReportApiSpec extends UserApiTrait {
         responseAs[String] should be("Authentication is possible but has failed or not yet been provided.")
       }
 
-      Get("/api/bug_reports/fetch").addHeader(RawHeader("Authorization", s"Bearer ${tokens(0)}")) ~> Route.seal(
+      Get("/api/bug_reports/fetch").addAuthHeader(0) ~> Route.seal(
         routes
       ) ~> check {
         status shouldEqual Forbidden
@@ -32,8 +30,7 @@ class BugReportApiSpec extends UserApiTrait {
     }
 
     "allow admins to fetch bug reports" in {
-      Get("/api/bug_reports/fetch")
-        .addHeader(RawHeader("Authorization", s"Bearer $adminToken"))
+      Get("/api/bug_reports/fetch").addAuthHeader(adminToken)
         ~> Route.seal(routes) ~> check {
           status shouldEqual OK
           responseAs[Seq[BugReport]] should be(Seq.empty)
@@ -41,7 +38,7 @@ class BugReportApiSpec extends UserApiTrait {
     }
     "allow bug report creation for logged in users" in {
       Post("/api/bug_reports/create", BugReportRequest.Create("nkm is bad", None))
-        .addHeader(RawHeader("Authorization", s"Bearer ${tokens(0)}")) ~> Route.seal(routes) ~> check {
+        .addAuthHeader(0) ~> Route.seal(routes) ~> check {
         status shouldEqual Created
       }
 
@@ -80,7 +77,7 @@ class BugReportApiSpec extends UserApiTrait {
       }
 
       Post("/api/bug_reports/set_resolved", BugReportRequest.SetResolved(reports.head.id, resolved = true))
-        .addHeader(RawHeader("Authorization", s"Bearer ${tokens(0)}"))
+        .addAuthHeader(0)
         ~> Route.seal(routes) ~> check {
           status shouldEqual Forbidden
         }
@@ -97,7 +94,7 @@ class BugReportApiSpec extends UserApiTrait {
       reports.head.resolved should be(false)
 
       Post("/api/bug_reports/set_resolved", BugReportRequest.SetResolved(reports.head.id, resolved = true))
-        .addHeader(RawHeader("Authorization", s"Bearer $adminToken"))
+        .addAuthHeader(adminToken)
         ~> Route.seal(routes) ~> check {
           status shouldEqual OK
         }

@@ -23,7 +23,7 @@ object FinalSolution extends NkmConf.AutoExtract {
 }
 
 case class FinalSolution(abilityId: AbilityId, parentCharacterId: CharacterId)
-    extends Ability(abilityId, parentCharacterId)
+    extends Ability(abilityId)
     with UsableOnCharacter {
   override val metadata = FinalSolution.metadata
 

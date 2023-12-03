@@ -20,7 +20,7 @@ object PChan extends NkmConf.AutoExtract {
 case class PChan(
     abilityId: AbilityId,
     parentCharacterId: CharacterId,
-) extends Ability(abilityId, parentCharacterId) with GameEventListener {
+) extends Ability(abilityId) with GameEventListener {
   override val metadata = PChan.metadata
 
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =

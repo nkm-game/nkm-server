@@ -37,4 +37,7 @@ object NkmColor {
   )
 
   val availableColorNames: Seq[String] = availableColors.map(_.name)
+
+  def colorByName(colorName: String): Option[NkmColor] =
+    availableColors.find(_.name == colorName)
 }

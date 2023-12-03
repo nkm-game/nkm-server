@@ -45,7 +45,7 @@ object RubberRubberFruit extends NkmConf.AutoExtract {
 }
 
 case class RubberRubberFruit(abilityId: AbilityId, parentCharacterId: CharacterId)
-    extends Ability(abilityId, parentCharacterId)
+    extends Ability(abilityId)
     with UsableOnCoordinates {
   override val metadata: AbilityMetadata = RubberRubberFruit.metadata
 

@@ -36,7 +36,7 @@ object GodrobeSenketsu extends NkmConf.AutoExtract {
 case class GodrobeSenketsu(
     abilityId: AbilityId,
     parentCharacterId: CharacterId,
-) extends Ability(abilityId, parentCharacterId) with Usable with GameEventListener {
+) extends Ability(abilityId) with Usable with GameEventListener {
   override val metadata = GodrobeSenketsu.metadata
 
   private def damageBonus(implicit gameState: GameState): Int =

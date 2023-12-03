@@ -11,10 +11,12 @@ import scala.util.Random
 class NkmDependencies(_system: ActorSystem) {
   implicit val system: ActorSystem = _system
   implicit val nkmDataService: NkmDataService = new NkmDataService()
-  val gameIdTrackerActor: ActorRef = system.actorOf(GameIdTrackerActor.props(nkmDataService), "game_id_tracker")
+  implicit val userService: UserService = new UserService()
+
+  val gameIdTrackerActor: ActorRef =
+    system.actorOf(GameIdTrackerActor.props(nkmDataService, userService), "game_id_tracker")
   val bugReportActor: ActorRef = system.actorOf(BugReportActor.props(), "bug_report")
 
-  implicit val userService: UserService = new UserService()
   implicit val gameService: GameService = new GameService(gameIdTrackerActor)
   implicit val lobbyService: LobbyService = new LobbyService(gameIdTrackerActor)
   implicit val bugReportService: BugReportService = new BugReportService(bugReportActor)

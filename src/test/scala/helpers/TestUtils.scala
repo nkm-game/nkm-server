@@ -162,7 +162,7 @@ trait TestUtils
   }
 
   private def _passAllCharactersInNPhases(gs: GameState, n: Int): GameState =
-    Function.chain(List.fill(n)(_passAllCharactersInCurrentPhase))(gs)
+    Function.chain(Seq.fill(n)(_passAllCharactersInCurrentPhase))(gs)
 
   private def _passAllCharactersInCurrentPhase(gs: GameState): GameState =
     _passAllCharactersInPhase(gs, gs.phase.number)

@@ -2,14 +2,15 @@ package com.tosware.nkm.actors.ws
 
 import akka.actor.ActorRef
 import akka.http.scaladsl.model.StatusCodes
-import com.tosware.nkm.models.CommandResponse.*
+import com.tosware.nkm.models.CommandResponse
+import com.tosware.nkm.models.CommandResponse.CommandResponse
 import com.tosware.nkm.models.lobby.ws.*
 import com.tosware.nkm.services.LobbyService
 import com.tosware.nkm.services.http.directives.JwtSecretKey
 import spray.json.*
 
-import scala.concurrent.Await
-import scala.concurrent.duration.DurationInt
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.Try
 
 trait LobbyWebsocketUserBehaviour extends WebsocketUserBehaviour {
   val session: ActorRef
@@ -26,7 +27,7 @@ trait LobbyWebsocketUserBehaviour extends WebsocketUserBehaviour {
       }
       log.debug(s"Request: $request")
       val response = parseWebsocketLobbyRequest(request, outgoing, self, AuthStatus(username))
-      if (response.lobbyResponseType != LobbyResponseType.Ping) {
+      if (response.lobbyResponseType != LobbyResponse.Ping) {
         log.info(s"[${username.getOrElse("")}] ${response.lobbyResponseType}(${response.statusCode})")
       }
       log.debug(s"Response: $response")
@@ -35,31 +36,31 @@ trait LobbyWebsocketUserBehaviour extends WebsocketUserBehaviour {
       case e: Exception =>
         log.error(e.toString)
         val response = WebsocketLobbyResponse(
-          LobbyResponseType.Error,
+          LobbyResponse.Error,
           StatusCodes.InternalServerError.intValue,
           "Error with request parsing.",
         )
         outgoing ! OutgoingMessage(response.toJson.toString)
     }
 
-  def ok(msg: String = "")(implicit responseType: LobbyResponseType): WebsocketLobbyResponse =
+  def ok(msg: String = "")(implicit responseType: LobbyResponse): WebsocketLobbyResponse =
     WebsocketLobbyResponse(responseType, StatusCodes.OK.intValue, msg)
 
-  def nok(msg: String = "")(implicit responseType: LobbyResponseType): WebsocketLobbyResponse =
+  def nok(msg: String = "")(implicit responseType: LobbyResponse): WebsocketLobbyResponse =
     WebsocketLobbyResponse(responseType, StatusCodes.InternalServerError.intValue, msg)
 
-  def unauthorized(msg: String = "")(implicit responseType: LobbyResponseType): WebsocketLobbyResponse =
+  def unauthorized(msg: String = "")(implicit responseType: LobbyResponse): WebsocketLobbyResponse =
     WebsocketLobbyResponse(responseType, StatusCodes.Unauthorized.intValue, msg)
 
-  def notFound(msg: String = "")(implicit responseType: LobbyResponseType): WebsocketLobbyResponse =
+  def notFound(msg: String = "")(implicit responseType: LobbyResponse): WebsocketLobbyResponse =
     WebsocketLobbyResponse(responseType, StatusCodes.NotFound.intValue, msg)
 
-  def resolveResponse(commandResponse: CommandResponse)(implicit
-      responseType: LobbyResponseType
+  def resolveResponse(commandResponse: CommandResponse)(
+      implicit responseType: LobbyResponse
   ): WebsocketLobbyResponse =
     commandResponse match {
-      case Success(msg) => ok(msg)
-      case Failure(msg) => nok(msg)
+      case CommandResponse.Success(msg) => ok(msg)
+      case CommandResponse.Failure(msg) => nok(msg)
     }
 
   def parseWebsocketLobbyRequest(
@@ -70,109 +71,106 @@ trait LobbyWebsocketUserBehaviour extends WebsocketUserBehaviour {
   ): WebsocketLobbyResponse = {
     import LobbyRequest.*
 
+    def parseJson[T: JsonFormat](f: T => WebsocketLobbyResponse)(
+        implicit responseType: LobbyResponse
+    ): WebsocketLobbyResponse =
+      Try(request.requestJson.parseJson.convertTo[T]) match {
+        case util.Success(parsed) => f(parsed)
+        case util.Failure(_)      => nok("Invalid request.")
+      }
+
+    def handleGetLobby(getLobby: GetLobby) = {
+      implicit val responseType: LobbyResponse = LobbyResponse.GetLobby
+      lobbyService.getLobbyStateOpt(getLobby.lobbyId) match {
+        case Some(lobbyFuture) => ok(aw(lobbyFuture).toJson.toString)
+        case None              => notFound()
+      }
+    }
+
+    def handleAuthLobbyOperation[T <: LobbyRequest: JsonFormat](operation: (String, T) => CommandResponse)(
+        entity: T
+    )(implicit responseType: LobbyResponse): WebsocketLobbyResponse =
+      if (authStatus.userIdOpt.isDefined) {
+        val username = authStatus.userIdOpt.get
+        resolveResponse(operation(username, entity))
+      } else unauthorized()
+
     request.requestPath match {
       case LobbyRoute.Ping =>
-        implicit val responseType: LobbyResponseType = LobbyResponseType.Ping
+        implicit val responseType: LobbyResponse = LobbyResponse.Ping
         ok("pong")
+
       case LobbyRoute.Auth =>
-        implicit val responseType: LobbyResponseType = LobbyResponseType.Auth
-        val token = request.requestJson.parseJson.convertTo[Auth].token
-        authenticateToken(token) match {
-          case Some(userStateView) =>
-            userActor ! WebsocketUser.Authenticate(userStateView.email)
-            ok(userStateView.email)
-          case None =>
-            unauthorized("Invalid token.")
+        implicit val responseType: LobbyResponse = LobbyResponse.Auth
+        parseJson[Auth] { auth =>
+          authenticateToken(auth.token) match {
+            case Some(userStateView) =>
+              userActor ! WebsocketUser.Authenticate(userStateView.email)
+              ok(userStateView.email)
+            case None => unauthorized("Invalid token.")
+          }
         }
+
       case LobbyRoute.Observe =>
-        implicit val responseType: LobbyResponseType = LobbyResponseType.Observe
-        val lobbyId = request.requestJson.parseJson.convertTo[Observe].lobbyId
-        session ! SessionActor.Observe(lobbyId, outgoing)
-        ok()
-      case LobbyRoute.Lobbies =>
-        implicit val responseType: LobbyResponseType = LobbyResponseType.Lobbies
-        val lobbies = Await.result(lobbyService.getAllLobbies(), 5000.millis)
-        ok(lobbies.toJson.toString)
-      case LobbyRoute.Lobby =>
-        implicit val responseType: LobbyResponseType = LobbyResponseType.Lobby
-        val lobbyId = request.requestJson.parseJson.convertTo[GetLobby].lobbyId
-        lobbyService.getLobbyStateOpt(lobbyId) match {
-          case Some(lobbyFuture) =>
-            val lobby = aw(lobbyFuture)
-            ok(lobby.toJson.toString)
-          case None =>
-            notFound()
+        implicit val responseType: LobbyResponse = LobbyResponse.Observe
+        parseJson[Observe] { observe =>
+          session ! SessionActor.Observe(observe.lobbyId, outgoing)
+          ok()
         }
+
+      case LobbyRoute.GetLobbies =>
+        implicit val responseType: LobbyResponse = LobbyResponse.GetLobbies
+        aw(lobbyService.getAllLobbies().map(lobbies => ok(lobbies.toJson.toString)))
+
+      case LobbyRoute.GetLobby =>
+        implicit val responseType: LobbyResponse = LobbyResponse.GetLobby
+        parseJson[GetLobby](handleGetLobby)
+
       case LobbyRoute.CreateLobby =>
-        implicit val responseType: LobbyResponseType = LobbyResponseType.CreateLobby
-        val lobbyName = request.requestJson.parseJson.convertTo[LobbyCreation].name
-        if (authStatus.userIdOpt.isEmpty) return unauthorized()
-        val username = authStatus.userIdOpt.get
-        val response = aw(lobbyService.createLobby(lobbyName, username))
-        resolveResponse(response)
+        implicit val responseType: LobbyResponse = LobbyResponse.CreateLobby
+        parseJson[CreateLobby](entity => handleAuthLobbyOperation(lobbyService.createLobby)(entity))
+
       case LobbyRoute.JoinLobby =>
-        implicit val responseType: LobbyResponseType = LobbyResponseType.JoinLobby
-        val entity = request.requestJson.parseJson.convertTo[LobbyJoin]
-        if (authStatus.userIdOpt.isEmpty) return unauthorized()
-        val username = authStatus.userIdOpt.get
-        val response = lobbyService.joinLobby(username, entity)
-        resolveResponse(response)
+        implicit val responseType: LobbyResponse = LobbyResponse.JoinLobby
+        parseJson[JoinLobby](entity => handleAuthLobbyOperation(lobbyService.joinLobby)(entity))
+
       case LobbyRoute.LeaveLobby =>
-        implicit val responseType: LobbyResponseType = LobbyResponseType.LeaveLobby
-        val entity = request.requestJson.parseJson.convertTo[LobbyLeave]
-        if (authStatus.userIdOpt.isEmpty) return unauthorized()
-        val username = authStatus.userIdOpt.get
-        val response = lobbyService.leaveLobby(username, entity)
-        resolveResponse(response)
+        implicit val responseType: LobbyResponse = LobbyResponse.LeaveLobby
+        parseJson[LeaveLobby](entity => handleAuthLobbyOperation(lobbyService.leaveLobby)(entity))
+
       case LobbyRoute.SetHexMap =>
-        implicit val responseType: LobbyResponseType = LobbyResponseType.SetHexMap
-        val entity = request.requestJson.parseJson.convertTo[SetHexMapName]
-        if (authStatus.userIdOpt.isEmpty) return unauthorized()
-        val username = authStatus.userIdOpt.get
-        val response = lobbyService.setHexmapName(username, entity)
-        resolveResponse(response)
+        implicit val responseType: LobbyResponse = LobbyResponse.SetHexMap
+        parseJson[SetHexMapName](entity => handleAuthLobbyOperation(lobbyService.setHexmapName)(entity))
+
       case LobbyRoute.SetPickType =>
-        implicit val responseType: LobbyResponseType = LobbyResponseType.SetPickType
-        val entity = request.requestJson.parseJson.convertTo[SetPickType]
-        if (authStatus.userIdOpt.isEmpty) return unauthorized()
-        val username = authStatus.userIdOpt.get
-        val response = lobbyService.setPickType(username, entity)
-        resolveResponse(response)
+        implicit val responseType: LobbyResponse = LobbyResponse.SetPickType
+        parseJson[SetPickType](entity => handleAuthLobbyOperation(lobbyService.setPickType)(entity))
+
       case LobbyRoute.SetNumberOfBans =>
-        implicit val responseType: LobbyResponseType = LobbyResponseType.SetNumberOfBans
-        val entity = request.requestJson.parseJson.convertTo[SetNumberOfBans]
-        if (authStatus.userIdOpt.isEmpty) return unauthorized()
-        val username = authStatus.userIdOpt.get
-        val response = lobbyService.setNumberOfBans(username, entity)
-        resolveResponse(response)
-      case LobbyRoute.SetNumberOfCharacters =>
-        implicit val responseType: LobbyResponseType = LobbyResponseType.SetNumberOfCharacters
-        val entity = request.requestJson.parseJson.convertTo[SetNumberOfCharactersPerPlayer]
-        if (authStatus.userIdOpt.isEmpty) return unauthorized()
-        val username = authStatus.userIdOpt.get
-        val response = lobbyService.setNumberOfCharactersPerPlayer(username, entity)
-        resolveResponse(response)
+        implicit val responseType: LobbyResponse = LobbyResponse.SetNumberOfBans
+        parseJson[SetNumberOfBans](entity => handleAuthLobbyOperation(lobbyService.setNumberOfBans)(entity))
+
+      case LobbyRoute.SetNumberOfCharactersPerPlayer =>
+        implicit val responseType: LobbyResponse = LobbyResponse.SetNumberOfCharactersPerPlayer
+        parseJson[SetNumberOfCharactersPerPlayer](entity =>
+          handleAuthLobbyOperation(lobbyService.setNumberOfCharactersPerPlayer)(entity)
+        )
+
       case LobbyRoute.SetLobbyName =>
-        implicit val responseType: LobbyResponseType = LobbyResponseType.SetLobbyName
-        val entity = request.requestJson.parseJson.convertTo[SetLobbyName]
-        if (authStatus.userIdOpt.isEmpty) return unauthorized()
-        val username = authStatus.userIdOpt.get
-        val response = lobbyService.setLobbyName(username, entity)
-        resolveResponse(response)
+        implicit val responseType: LobbyResponse = LobbyResponse.SetLobbyName
+        parseJson[SetLobbyName](entity => handleAuthLobbyOperation(lobbyService.setLobbyName)(entity))
+
       case LobbyRoute.SetClockConfig =>
-        implicit val responseType: LobbyResponseType = LobbyResponseType.SetClockConfig
-        val entity = request.requestJson.parseJson.convertTo[SetClockConfig]
-        if (authStatus.userIdOpt.isEmpty) return unauthorized()
-        val username = authStatus.userIdOpt.get
-        val response = lobbyService.setClockConfig(username, entity)
-        resolveResponse(response)
+        implicit val responseType: LobbyResponse = LobbyResponse.SetClockConfig
+        parseJson[SetClockConfig](entity => handleAuthLobbyOperation(lobbyService.setClockConfig)(entity))
+
+      case LobbyRoute.SetColor =>
+        implicit val responseType: LobbyResponse = LobbyResponse.SetColor
+        parseJson[SetColor](entity => handleAuthLobbyOperation(lobbyService.setColor)(entity))
+
       case LobbyRoute.StartGame =>
-        implicit val responseType: LobbyResponseType = LobbyResponseType.StartGame
-        val entity = request.requestJson.parseJson.convertTo[StartGame]
-        if (authStatus.userIdOpt.isEmpty) return unauthorized()
-        val username = authStatus.userIdOpt.get
-        val response = lobbyService.startGame(username, entity)
-        resolveResponse(response)
+        implicit val responseType: LobbyResponse = LobbyResponse.StartGame
+        parseJson[StartGame](entity => handleAuthLobbyOperation(lobbyService.startGame)(entity))
     }
   }
 }

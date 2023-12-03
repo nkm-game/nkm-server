@@ -23,7 +23,7 @@ object WingsOfCrimson extends NkmConf.AutoExtract {
 }
 
 case class WingsOfCrimson(abilityId: AbilityId, parentCharacterId: CharacterId)
-    extends Ability(abilityId, parentCharacterId)
+    extends Ability(abilityId)
     with GameEventListener {
   override val metadata: AbilityMetadata = WingsOfCrimson.metadata
 

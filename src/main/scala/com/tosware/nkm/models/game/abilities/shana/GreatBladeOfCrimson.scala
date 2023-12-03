@@ -20,7 +20,7 @@ object GreatBladeOfCrimson extends NkmConf.AutoExtract {
 }
 
 case class GreatBladeOfCrimson(abilityId: AbilityId, parentCharacterId: CharacterId)
-    extends Ability(abilityId, parentCharacterId) with Usable {
+    extends Ability(abilityId) with Usable {
   override val metadata: AbilityMetadata = GreatBladeOfCrimson.metadata
 
   override def use(useData: UseData)(implicit random: Random, gameState: GameState): GameState =

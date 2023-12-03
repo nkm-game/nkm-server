@@ -25,7 +25,7 @@ object MarkOfTheWind extends NkmConf.AutoExtract {
 }
 
 case class MarkOfTheWind(abilityId: AbilityId, parentCharacterId: CharacterId)
-    extends Ability(abilityId, parentCharacterId)
+    extends Ability(abilityId)
     with UsableOnCoordinates {
   override val metadata: AbilityMetadata = MarkOfTheWind.metadata
 

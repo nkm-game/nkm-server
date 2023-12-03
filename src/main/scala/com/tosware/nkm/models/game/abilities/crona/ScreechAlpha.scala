@@ -23,7 +23,7 @@ object ScreechAlpha extends NkmConf.AutoExtract {
 }
 
 case class ScreechAlpha(abilityId: AbilityId, parentCharacterId: CharacterId)
-    extends Ability(abilityId, parentCharacterId)
+    extends Ability(abilityId)
     with Usable {
   override val metadata = ScreechAlpha.metadata
 

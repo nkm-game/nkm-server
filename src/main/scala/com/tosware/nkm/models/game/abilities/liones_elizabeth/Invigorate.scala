@@ -21,7 +21,7 @@ object Invigorate extends NkmConf.AutoExtract {
 }
 
 case class Invigorate(abilityId: AbilityId, parentCharacterId: CharacterId)
-    extends Ability(abilityId, parentCharacterId) with UsableOnCharacter {
+    extends Ability(abilityId) with UsableOnCharacter {
   override val metadata = Invigorate.metadata
 
   override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =

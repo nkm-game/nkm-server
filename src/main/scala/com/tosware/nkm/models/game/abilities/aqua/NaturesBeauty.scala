@@ -18,7 +18,7 @@ object NaturesBeauty extends NkmConf.AutoExtract {
 }
 
 case class NaturesBeauty(abilityId: AbilityId, parentCharacterId: CharacterId)
-    extends Ability(abilityId, parentCharacterId)
+    extends Ability(abilityId)
     with BasicAttackOverride {
   override val metadata: AbilityMetadata = NaturesBeauty.metadata
 

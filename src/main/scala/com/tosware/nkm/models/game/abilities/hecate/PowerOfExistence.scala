@@ -20,7 +20,7 @@ object PowerOfExistence extends NkmConf.AutoExtract {
 }
 
 case class PowerOfExistence(abilityId: AbilityId, parentCharacterId: CharacterId)
-    extends Ability(abilityId, parentCharacterId) with Usable {
+    extends Ability(abilityId) with Usable {
   override val metadata: AbilityMetadata = PowerOfExistence.metadata
   override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =
     gameState.hexMap.cells.toCoords

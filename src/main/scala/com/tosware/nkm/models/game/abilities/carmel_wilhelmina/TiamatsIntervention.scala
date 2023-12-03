@@ -26,7 +26,7 @@ object TiamatsIntervention extends NkmConf.AutoExtract {
 }
 
 case class TiamatsIntervention(abilityId: AbilityId, parentCharacterId: CharacterId)
-    extends Ability(abilityId, parentCharacterId) with UsableOnCharacter {
+    extends Ability(abilityId) with UsableOnCharacter {
   override val metadata: AbilityMetadata = TiamatsIntervention.metadata
 
   override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =

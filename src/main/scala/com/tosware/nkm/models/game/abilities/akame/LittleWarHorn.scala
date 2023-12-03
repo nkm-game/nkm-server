@@ -24,7 +24,7 @@ object LittleWarHorn extends NkmConf.AutoExtract {
 }
 
 case class LittleWarHorn(abilityId: AbilityId, parentCharacterId: CharacterId, effectIdToListen: CharacterEffectId = "")
-    extends Ability(abilityId, parentCharacterId)
+    extends Ability(abilityId)
     with Usable
     with GameEventListener {
   override val metadata = LittleWarHorn.metadata

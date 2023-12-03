@@ -21,7 +21,7 @@ object Aster extends NkmConf.AutoExtract {
     )
 }
 
-case class Aster(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId)
+case class Aster(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId)
     with UsableOnCoordinates {
   override val metadata: AbilityMetadata = Aster.metadata
 

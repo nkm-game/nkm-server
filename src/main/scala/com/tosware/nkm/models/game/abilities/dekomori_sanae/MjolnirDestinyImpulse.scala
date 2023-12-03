@@ -23,7 +23,7 @@ object MjolnirDestinyImpulse extends NkmConf.AutoExtract {
 }
 
 case class MjolnirDestinyImpulse(abilityId: AbilityId, parentCharacterId: CharacterId)
-    extends Ability(abilityId, parentCharacterId)
+    extends Ability(abilityId)
     with UsableOnCoordinates
     with GameEventListener {
   override val metadata: AbilityMetadata = MjolnirDestinyImpulse.metadata

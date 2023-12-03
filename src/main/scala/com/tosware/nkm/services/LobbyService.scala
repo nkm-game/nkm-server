@@ -21,6 +21,7 @@ class LobbyService(gameIdTrackerActor: ActorRef)(
     system: ActorSystem,
     nkmDataService: NkmDataService,
     gameService: GameService,
+    userService: UserService,
 ) extends NkmTimeouts {
   import com.tosware.nkm.models.CommandResponse.*
 
@@ -44,13 +45,13 @@ class LobbyService(gameIdTrackerActor: ActorRef)(
   def getGameState(lobbyId: String): Option[Future[GameState]] =
     gameService.getGameState(lobbyId)
 
-  def createLobby(name: String, hostUserId: String): Future[CommandResponse] =
-    (gameIdTrackerActor ? Lobby.Create(name, hostUserId)).mapTo[CommandResponse]
+  def createLobby(hostUserId: String, request: CreateLobby): CommandResponse =
+    aw(gameIdTrackerActor ? Lobby.Create(request.name, hostUserId)).asInstanceOf[CommandResponse]
 
   def isLobbyCreated(lobbyId: String): Boolean =
     getLobbyActorOpt(lobbyId).isDefined
 
-  def joinLobby(userId: String, request: LobbyJoin): CommandResponse = {
+  def joinLobby(userId: String, request: JoinLobby): CommandResponse = {
     val lobbyActor = getLobbyActorOpt(request.lobbyId).getOrElse(return failGameIdDoesNotExist)
     val gameState = aw(getGameState(request.lobbyId).getOrElse(return failGameIdDoesNotExist))
 
@@ -59,7 +60,7 @@ class LobbyService(gameIdTrackerActor: ActorRef)(
     aw(lobbyActor ? Lobby.UserJoin(userId)).asInstanceOf[CommandResponse]
   }
 
-  def leaveLobby(userId: String, request: LobbyLeave): CommandResponse = {
+  def leaveLobby(userId: String, request: LeaveLobby): CommandResponse = {
     val lobbyActor = getLobbyActorOpt(request.lobbyId).getOrElse(return failGameIdDoesNotExist)
     val gameState = aw(getGameState(request.lobbyId).getOrElse(return failGameIdDoesNotExist))
 
@@ -144,6 +145,18 @@ class LobbyService(gameIdTrackerActor: ActorRef)(
     if (!lobbyState.hostUserId.contains(username)) return Failure("You are not the host")
 
     aw(lobbyActor ? Lobby.SetClockConfig(request.newConfig)).asInstanceOf[CommandResponse]
+  }
+
+  def setColor(username: String, request: SetColor): CommandResponse = {
+    val lobbyActor = getLobbyActorOpt(request.lobbyId).getOrElse(return failGameIdDoesNotExist)
+    val gameState = aw(getGameState(request.lobbyId).getOrElse(return failGameIdDoesNotExist))
+    val lobbyState = aw(getLobbyState(lobbyActor))
+
+    if (gameState.gameStatus != GameStatus.NotStarted) return Failure("Game is already started")
+
+    if (!lobbyState.hostUserId.contains(username)) return Failure("You are not the host")
+
+    aw(lobbyActor ? Lobby.SetColor(username, request.newColorName)).asInstanceOf[CommandResponse]
   }
 
   def startGame(username: String, request: StartGame): CommandResponse = {

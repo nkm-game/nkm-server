@@ -99,19 +99,19 @@ trait WSTrait extends UserApiTrait {
     sendWSRequestG(GameRoute.Observe, GameRequest.General.Observe(lobbyId).toJson.toString)
 
   def createLobby(lobbyName: String)(implicit wsClient: WSProbe): WebsocketLobbyResponse =
-    sendWSRequestL(LobbyRoute.CreateLobby, LobbyRequest.LobbyCreation(lobbyName).toJson.toString)
+    sendWSRequestL(LobbyRoute.CreateLobby, LobbyRequest.CreateLobby(lobbyName).toJson.toString)
 
   def fetchLobbies()(implicit wsClient: WSProbe): WebsocketLobbyResponse =
-    sendWSRequestL(LobbyRoute.Lobbies)
+    sendWSRequestL(LobbyRoute.GetLobbies)
 
   def fetchLobby(lobbyId: String)(implicit wsClient: WSProbe): WebsocketLobbyResponse =
-    sendWSRequestL(LobbyRoute.Lobby, LobbyRequest.GetLobby(lobbyId).toJson.toString)
+    sendWSRequestL(LobbyRoute.GetLobby, LobbyRequest.GetLobby(lobbyId).toJson.toString)
 
   def joinLobby(lobbyId: String)(implicit wsClient: WSProbe): WebsocketLobbyResponse =
-    sendWSRequestL(LobbyRoute.JoinLobby, LobbyRequest.LobbyJoin(lobbyId).toJson.toString)
+    sendWSRequestL(LobbyRoute.JoinLobby, LobbyRequest.JoinLobby(lobbyId).toJson.toString)
 
   def leaveLobby(lobbyId: String)(implicit wsClient: WSProbe): WebsocketLobbyResponse =
-    sendWSRequestL(LobbyRoute.LeaveLobby, LobbyRequest.LobbyLeave(lobbyId).toJson.toString)
+    sendWSRequestL(LobbyRoute.LeaveLobby, LobbyRequest.LeaveLobby(lobbyId).toJson.toString)
 
   def setHexMap(lobbyId: String, hexMapName: String)(implicit wsClient: WSProbe): WebsocketLobbyResponse =
     sendWSRequestL(LobbyRoute.SetHexMap, LobbyRequest.SetHexMapName(lobbyId, hexMapName).toJson.toString)
@@ -126,7 +126,7 @@ trait WSTrait extends UserApiTrait {
       wsClient: WSProbe
   ): WebsocketLobbyResponse =
     sendWSRequestL(
-      LobbyRoute.SetNumberOfCharacters,
+      LobbyRoute.SetNumberOfCharactersPerPlayer,
       LobbyRequest.SetNumberOfCharactersPerPlayer(lobbyId, numberOfCharacters).toJson.toString,
     )
 
@@ -135,6 +135,9 @@ trait WSTrait extends UserApiTrait {
 
   def setClockConfig(lobbyId: String, newConfig: ClockConfig)(implicit wsClient: WSProbe): WebsocketLobbyResponse =
     sendWSRequestL(LobbyRoute.SetClockConfig, LobbyRequest.SetClockConfig(lobbyId, newConfig).toJson.toString)
+
+  def setColor(lobbyId: String, newColorName: String)(implicit wsClient: WSProbe): WebsocketLobbyResponse =
+    sendWSRequestL(LobbyRoute.SetColor, LobbyRequest.SetColor(lobbyId, newColorName).toJson.toString)
 
   def startGame(lobbyId: String)(implicit wsClient: WSProbe): WebsocketLobbyResponse =
     sendWSRequestL(LobbyRoute.StartGame, LobbyRequest.StartGame(lobbyId).toJson.toString)

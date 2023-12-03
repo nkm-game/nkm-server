@@ -25,7 +25,7 @@ object FiberDecapitation extends NkmConf.AutoExtract {
 }
 
 case class FiberDecapitation(abilityId: AbilityId, parentCharacterId: CharacterId)
-    extends Ability(abilityId, parentCharacterId) with UsableOnCharacter {
+    extends Ability(abilityId) with UsableOnCharacter {
   override val metadata = FiberDecapitation.metadata
 
   private def teleportCoordinates(from: HexCoordinates, direction: HexDirection) =

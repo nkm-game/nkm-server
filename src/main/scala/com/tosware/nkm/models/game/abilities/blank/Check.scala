@@ -18,7 +18,7 @@ object Check extends NkmConf.AutoExtract {
     )
 }
 
-case class Check(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId)
+case class Check(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId)
     with UsableOnCharacter {
   override val metadata: AbilityMetadata = Check.metadata
 

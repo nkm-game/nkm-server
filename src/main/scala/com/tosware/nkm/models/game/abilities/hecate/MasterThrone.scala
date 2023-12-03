@@ -26,7 +26,7 @@ object MasterThrone extends NkmConf.AutoExtract {
 case class MasterThrone(
     abilityId: AbilityId,
     parentCharacterId: CharacterId,
-) extends Ability(abilityId, parentCharacterId) with GameEventListener {
+) extends Ability(abilityId) with GameEventListener {
   import MasterThrone.*
 
   override val metadata = MasterThrone.metadata

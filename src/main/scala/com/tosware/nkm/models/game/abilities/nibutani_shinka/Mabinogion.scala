@@ -31,7 +31,7 @@ object Mabinogion extends NkmConf.AutoExtract {
 case class Mabinogion(
     abilityId: AbilityId,
     parentCharacterId: CharacterId,
-) extends Ability(abilityId, parentCharacterId) with GameEventListener {
+) extends Ability(abilityId) with GameEventListener {
   override val metadata = Mabinogion.metadata
 
   override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =

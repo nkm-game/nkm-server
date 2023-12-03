@@ -26,7 +26,7 @@ object ZeroGravity extends NkmConf.AutoExtract {
 }
 
 case class ZeroGravity(abilityId: AbilityId, parentCharacterId: CharacterId)
-    extends Ability(abilityId, parentCharacterId)
+    extends Ability(abilityId)
     with BasicAttackOverride {
   override val metadata: AbilityMetadata = ZeroGravity.metadata
 

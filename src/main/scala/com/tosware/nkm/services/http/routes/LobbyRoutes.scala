@@ -14,11 +14,11 @@ class LobbyRoutes(deps: NkmDependencies) extends JwtDirective
   val lobbyService: LobbyService = deps.lobbyService
 
   val getRoutes = concat(
-    path(LobbyRoute.Lobbies.value) {
+    path(LobbyRoute.GetLobbies.value) {
       val lobbies = lobbyService.getAllLobbies()
       complete(lobbies)
     },
-    path(LobbyRoute.Lobby.value / Segment) { (lobbyId: String) =>
+    path(LobbyRoute.GetLobby.value / Segment) { (lobbyId: String) =>
       lobbyService.getLobbyStateOpt(lobbyId) match {
         case Some(lobby) => complete(lobby)
         case None        => complete(StatusCodes.NotFound)

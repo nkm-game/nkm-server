@@ -6,7 +6,7 @@ import akka.persistence.{PersistentActor, RecoveryCompleted}
 import com.tosware.nkm.actors.GameIdTrackerActor.Event.*
 import com.tosware.nkm.actors.GameIdTrackerActor.*
 import com.tosware.nkm.models.CommandResponse.*
-import com.tosware.nkm.services.NkmDataService
+import com.tosware.nkm.services.{NkmDataService, UserService}
 import com.tosware.nkm.{GameId, NkmTimeouts}
 
 object GameIdTrackerActor {
@@ -29,10 +29,11 @@ object GameIdTrackerActor {
     case class GameIdTracked(gameId: GameId) extends Event
   }
 
-  def props(nkmDataService: NkmDataService): Props = Props(new GameIdTrackerActor(nkmDataService))
+  def props(nkmDataService: NkmDataService, userService: UserService): Props =
+    Props(new GameIdTrackerActor(nkmDataService, userService))
 }
 
-class GameIdTrackerActor(nkmDataService: NkmDataService)
+class GameIdTrackerActor(nkmDataService: NkmDataService, userService: UserService)
     extends PersistentActor
     with ActorLogging
     with NkmTimeouts {
@@ -61,7 +62,7 @@ class GameIdTrackerActor(nkmDataService: NkmDataService)
     def getLobbyActor(gameId: GameId): ActorRef =
       lobbyActors.getOrElse(
         gameId, {
-          val lobbyActor: ActorRef = context.actorOf(Lobby.props(gameId)(nkmDataService))
+          val lobbyActor: ActorRef = context.actorOf(Lobby.props(gameId)(nkmDataService, userService))
           lobbyActors = lobbyActors.updated(gameId, lobbyActor)
           return lobbyActor
         },

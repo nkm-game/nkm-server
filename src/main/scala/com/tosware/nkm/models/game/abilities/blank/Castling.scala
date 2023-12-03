@@ -15,7 +15,7 @@ object Castling extends NkmConf.AutoExtract {
     )
 }
 
-case class Castling(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId)
+case class Castling(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId)
     with UsableOnCharacter {
   override val metadata = Castling.metadata
 

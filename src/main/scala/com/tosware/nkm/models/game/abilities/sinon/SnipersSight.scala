@@ -20,7 +20,7 @@ object SnipersSight extends NkmConf.AutoExtract {
 case class SnipersSight(
     abilityId: AbilityId,
     parentCharacterId: CharacterId,
-) extends Ability(abilityId, parentCharacterId) with BasicAttackOverride {
+) extends Ability(abilityId) with BasicAttackOverride {
   override val metadata = SnipersSight.metadata
 
   override def basicAttackCells(implicit gameState: GameState): Set[HexCoordinates] = {

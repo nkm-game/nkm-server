@@ -23,7 +23,7 @@ object WickedEyesServant extends NkmConf.AutoExtract {
 }
 
 case class WickedEyesServant(abilityId: AbilityId, parentCharacterId: CharacterId)
-    extends Ability(abilityId, parentCharacterId)
+    extends Ability(abilityId)
     with GameEventListener {
   override val metadata: AbilityMetadata = WickedEyesServant.metadata
 

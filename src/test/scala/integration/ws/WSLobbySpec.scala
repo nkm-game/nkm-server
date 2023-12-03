@@ -1,9 +1,13 @@
 package integration.ws
 
+import akka.http.scaladsl.model.StatusCodes.NoContent
+import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.testkit.WSProbe
+import com.tosware.nkm.models.NkmColor
 import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.pick.PickType
 import com.tosware.nkm.models.lobby.ws.*
+import com.tosware.nkm.services.http.routes.UserRequest
 import helpers.WSTrait
 import helpers.WSTrait.*
 
@@ -25,7 +29,7 @@ class WSLobbySpec extends WSTrait {
         wsClient.sendMessage("invalid request")
         val response = fetchResponse()
         response.statusCode shouldBe 500
-        response.lobbyResponseType shouldBe LobbyResponseType.Error
+        response.lobbyResponseType shouldBe LobbyResponse.Error
       }
     }
 
@@ -48,8 +52,8 @@ class WSLobbySpec extends WSTrait {
         observe(lobbyId).statusCode shouldBe ok
 
         val possibleResponseTypes = Set(
-          LobbyResponseType.SetLobbyName,
-          LobbyResponseType.Lobby,
+          LobbyResponse.SetLobbyName,
+          LobbyResponse.GetLobby,
         )
 
         val setLobbyNameResponse = setLobbyName(lobbyId, "hi")
@@ -66,7 +70,7 @@ class WSLobbySpec extends WSTrait {
       withLobbyWS { implicit wsClient: WSProbe =>
         auth(0)
 
-        val createLobbyRequest = LobbyRequest.LobbyCreation(lobbyName).toJson.toString
+        val createLobbyRequest = LobbyRequest.CreateLobby(lobbyName).toJson.toString
         val wsRequest = WebsocketLobbyRequest(LobbyRoute.CreateLobby, createLobbyRequest)
 
         sendRequest(wsRequest)
@@ -166,12 +170,12 @@ class WSLobbySpec extends WSTrait {
     }
 
     "allow setting number of bans in a lobby for a host" in {
-      val numberOfBansList = List(5, 3, 2, 1, 0, 3)
+      val numberOfBansSeq = Seq(5, 3, 2, 1, 0, 3)
       withLobbyWS { implicit wsClient: WSProbe =>
         auth(0)
         val lobbyId = createLobby(lobbyName).body
 
-        numberOfBansList.foreach { b =>
+        numberOfBansSeq.foreach { b =>
           setNumberOfBans(lobbyId, b)
           fetchAndParseLobby(lobbyId).numberOfBans shouldBe b
         }
@@ -179,24 +183,24 @@ class WSLobbySpec extends WSTrait {
     }
 
     "disallow setting invalid number of bans in a lobby for a host" in {
-      val numberOfBansList = List(-1, -4, -234)
+      val numberOfBansSeq = Seq(-1, -4, -234)
       withLobbyWS { implicit wsClient: WSProbe =>
         auth(0)
         val lobbyId = createLobby(lobbyName).body
 
-        numberOfBansList.foreach { b =>
+        numberOfBansSeq.foreach { b =>
           setNumberOfBans(lobbyId, b).statusCode shouldBe nok
         }
       }
     }
 
     "allow setting number of characters in a lobby for a host" in {
-      val numberOfCharactersList = List(5, 3, 2, 3, 8)
+      val numberOfCharactersSeq = Seq(5, 3, 2, 3, 8)
       withLobbyWS { implicit wsClient: WSProbe =>
         auth(0)
         val lobbyId = createLobby(lobbyName).body
 
-        numberOfCharactersList.foreach { n =>
+        numberOfCharactersSeq.foreach { n =>
           setNumberOfCharacters(lobbyId, n)
           fetchAndParseLobby(lobbyId).numberOfCharactersPerPlayer shouldBe n
         }
@@ -204,12 +208,12 @@ class WSLobbySpec extends WSTrait {
     }
 
     "disallow setting invalid number of characters in a lobby for a host" in {
-      val numberOfCharactersList = List(-1, 0, -234)
+      val numberOfCharactersSeq = Seq(-1, 0, -234)
       withLobbyWS { implicit wsClient: WSProbe =>
         auth(0)
         val lobbyId = createLobby(lobbyName).body
 
-        numberOfCharactersList.foreach { n =>
+        numberOfCharactersSeq.foreach { n =>
           setNumberOfCharacters(lobbyId, n).statusCode shouldBe nok
         }
       }
@@ -380,6 +384,101 @@ class WSLobbySpec extends WSTrait {
         startGame(lobbyId).statusCode shouldBe nok
         leaveLobby(lobbyId)
         startGame(lobbyId).statusCode shouldBe ok
+      }
+    }
+  }
+  "Lobby colors" must {
+
+    "assign colors initially" in {
+      withLobbyWS { implicit wsClient: WSProbe =>
+        auth(0)
+        val lobbyId = createLobby(lobbyName).body
+
+        auth(1)
+        joinLobby(lobbyId)
+
+        fetchAndParseLobby(lobbyId).playerColors.values.map(_.name) shouldBe NkmColor.availableColorNames.take(2)
+      }
+    }
+
+    "assign preferred color to user if available" in {
+      val preferredColorName = NkmColor.availableColorNames(12)
+
+      Post(
+        "/api/user/settings/set_preferred_color",
+        UserRequest.SetPreferredColor(Some(preferredColorName)),
+      ).addAuthHeader(1) ~> Route.seal(routes) ~> check {
+        status shouldEqual NoContent
+      }
+
+      withLobbyWS { implicit wsClient: WSProbe =>
+        auth(0)
+        val lobbyId = createLobby(lobbyName).body
+
+        auth(1)
+        joinLobby(lobbyId)
+
+        {
+          val lobbyState = fetchAndParseLobby(lobbyId)
+          lobbyState.playerColors(emails(0)).name should not be preferredColorName
+          lobbyState.playerColors(emails(1)).name shouldBe preferredColorName
+        }
+      }
+    }
+
+    "assign not taken color to user if preferred color is taken" in {
+      val preferredColorName = NkmColor.availableColorNames(12)
+
+      Post(
+        "/api/user/settings/set_preferred_color",
+        UserRequest.SetPreferredColor(Some(preferredColorName)),
+      ).addAuthHeader(1) ~> Route.seal(routes) ~> check {
+        status shouldEqual NoContent
+      }
+
+      withLobbyWS { implicit wsClient: WSProbe =>
+        auth(0)
+        val lobbyId = createLobby(lobbyName).body
+
+        setColor(lobbyId, preferredColorName).statusCode shouldBe ok
+
+        auth(1)
+        joinLobby(lobbyId)
+
+        {
+          val lobbyState = fetchAndParseLobby(lobbyId)
+          lobbyState.playerColors(emails(0)).name shouldBe preferredColorName
+          lobbyState.playerColors(emails(1)).name should not be preferredColorName
+        }
+      }
+    }
+
+    "allow changing colors" in {
+      withLobbyWS { implicit wsClient: WSProbe =>
+        auth(0)
+        val lobbyId = createLobby(lobbyName).body
+        val preferredColor = "Olive"
+        setColor(lobbyId, preferredColor).statusCode shouldBe ok
+
+        fetchAndParseLobby(lobbyId).playerColors(emails(0)).name shouldBe preferredColor
+      }
+    }
+
+    "disallow user to change to a taken color" in {
+      withLobbyWS { implicit wsClient: WSProbe =>
+        auth(0)
+        val lobbyId = createLobby(lobbyName).body
+        val color = "Olive"
+
+        setColor(lobbyId, color).statusCode shouldBe ok
+
+        auth(1)
+        joinLobby(lobbyId)
+        setColor(lobbyId, color).statusCode shouldBe nok
+
+        val lobbyState = fetchAndParseLobby(lobbyId)
+        lobbyState.playerColors(emails(1)).name should not be color
+        NkmColor.availableColors should contain(lobbyState.playerColors(emails(1)))
       }
     }
   }

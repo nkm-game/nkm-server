@@ -22,7 +22,7 @@ object SummerBreeze extends NkmConf.AutoExtract {
 }
 
 case class SummerBreeze(abilityId: AbilityId, parentCharacterId: CharacterId)
-    extends Ability(abilityId, parentCharacterId) with UsableOnCharacter {
+    extends Ability(abilityId) with UsableOnCharacter {
   override val metadata: AbilityMetadata = SummerBreeze.metadata
 
   override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =

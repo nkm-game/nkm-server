@@ -1,7 +1,6 @@
 package integration.api
 
 import akka.http.scaladsl.model.StatusCodes.*
-import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.server.Route
 import com.tosware.nkm.models.NkmColor
 import com.tosware.nkm.models.user.UserSettings
@@ -11,7 +10,7 @@ import helpers.UserApiTrait
 class UserApiSpec extends UserApiTrait {
   def fetchUserSettings(): UserSettings =
     Get("/api/user/settings/fetch")
-      .addHeader(RawHeader("Authorization", s"Bearer ${tokens(0)}"))
+      .addAuthHeader(0)
       ~> Route.seal(routes) ~> check {
         status shouldEqual OK
         responseAs[UserSettings]
@@ -33,8 +32,7 @@ class UserApiSpec extends UserApiTrait {
       Post(
         "/api/user/settings/set_preferred_color",
         UserRequest.SetPreferredColor(Some(NkmColor.availableColorNames(3))),
-      )
-        .addHeader(RawHeader("Authorization", s"Bearer ${tokens(0)}")) ~> Route.seal(routes) ~> check {
+      ).addAuthHeader(0) ~> Route.seal(routes) ~> check {
         status shouldEqual NoContent
       }
 
@@ -44,7 +42,7 @@ class UserApiSpec extends UserApiTrait {
         "/api/user/settings/set_preferred_color",
         UserRequest.SetPreferredColor(None),
       )
-        .addHeader(RawHeader("Authorization", s"Bearer ${tokens(0)}")) ~> Route.seal(routes) ~> check {
+        .addAuthHeader(0) ~> Route.seal(routes) ~> check {
         status shouldEqual NoContent
       }
 
@@ -54,7 +52,7 @@ class UserApiSpec extends UserApiTrait {
 
     "disallow users to set a preferred color that is not available" in {
       Post("/api/user/settings/set_preferred_color", UserRequest.SetPreferredColor(Some("invalidColor")))
-        .addHeader(RawHeader("Authorization", s"Bearer ${tokens(0)}")) ~> Route.seal(routes) ~> check {
+        .addAuthHeader(0) ~> Route.seal(routes) ~> check {
         status shouldEqual BadRequest
         responseAs[String] should include("Color not available")
       }
@@ -71,14 +69,14 @@ class UserApiSpec extends UserApiTrait {
 
     "allow users to set a language" in {
       Post("/api/user/settings/set_language", UserRequest.SetLanguage("English"))
-        .addHeader(RawHeader("Authorization", s"Bearer ${tokens(0)}")) ~> Route.seal(routes) ~> check {
+        .addAuthHeader(0) ~> Route.seal(routes) ~> check {
         status shouldEqual NoContent
       }
     }
 
     "disallow users to set a language that is not available" in {
       Post("/api/user/settings/set_language", UserRequest.SetLanguage("InvalidLanguage"))
-        .addHeader(RawHeader("Authorization", s"Bearer ${tokens(0)}")) ~> Route.seal(routes) ~> check {
+        .addAuthHeader(0) ~> Route.seal(routes) ~> check {
         status shouldEqual BadRequest
         responseAs[String] should include("Language not available")
       }

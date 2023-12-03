@@ -18,7 +18,7 @@ object BlackBlood extends NkmConf.AutoExtract {
 }
 
 case class BlackBlood(abilityId: AbilityId, parentCharacterId: CharacterId)
-    extends Ability(abilityId, parentCharacterId)
+    extends Ability(abilityId)
     with GameEventListener {
   override val metadata = BlackBlood.metadata
 

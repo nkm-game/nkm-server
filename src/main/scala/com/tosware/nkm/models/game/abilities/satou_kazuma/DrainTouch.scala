@@ -22,7 +22,7 @@ object DrainTouch extends NkmConf.AutoExtract {
 }
 
 case class DrainTouch(abilityId: AbilityId, parentCharacterId: CharacterId)
-    extends Ability(abilityId, parentCharacterId)
+    extends Ability(abilityId)
     with UsableOnCharacter {
   override val metadata: AbilityMetadata = DrainTouch.metadata
 

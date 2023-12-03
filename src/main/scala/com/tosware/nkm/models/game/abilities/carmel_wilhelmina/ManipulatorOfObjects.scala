@@ -22,7 +22,7 @@ object ManipulatorOfObjects extends NkmConf.AutoExtract {
 }
 
 case class ManipulatorOfObjects(abilityId: AbilityId, parentCharacterId: CharacterId)
-    extends Ability(abilityId, parentCharacterId) with GameEventListener {
+    extends Ability(abilityId) with GameEventListener {
   override val metadata = ManipulatorOfObjects.metadata
 
   private def tryToSnare(targetCharacterId: CharacterId)(implicit random: Random, gameState: GameState): GameState =

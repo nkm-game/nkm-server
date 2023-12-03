@@ -21,7 +21,7 @@ object GrenadeThrow extends NkmConf.AutoExtract {
 }
 
 case class GrenadeThrow(abilityId: AbilityId, parentCharacterId: CharacterId)
-    extends Ability(abilityId, parentCharacterId) with UsableOnCoordinates {
+    extends Ability(abilityId) with UsableOnCoordinates {
   override val metadata: AbilityMetadata = GrenadeThrow.metadata
 
   override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =

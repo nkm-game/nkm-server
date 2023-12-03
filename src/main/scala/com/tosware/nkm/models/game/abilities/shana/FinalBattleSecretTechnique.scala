@@ -32,7 +32,7 @@ object FinalBattleSecretTechnique extends NkmConf.AutoExtract {
 }
 
 case class FinalBattleSecretTechnique(abilityId: AbilityId, parentCharacterId: CharacterId)
-    extends Ability(abilityId, parentCharacterId) with UsableOnCharacter {
+    extends Ability(abilityId) with UsableOnCharacter {
   override val metadata: AbilityMetadata = FinalBattleSecretTechnique.metadata
 
   override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =

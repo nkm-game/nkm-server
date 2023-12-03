@@ -24,7 +24,7 @@ object Contact extends NkmConf.AutoExtract {
 case class Contact(
     abilityId: AbilityId,
     parentCharacterId: CharacterId,
-) extends Ability(abilityId, parentCharacterId) with GameEventListener {
+) extends Ability(abilityId) with GameEventListener {
   import Contact.*
   override val metadata = Contact.metadata
 

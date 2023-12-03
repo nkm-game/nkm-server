@@ -25,7 +25,7 @@ object Survivor extends NkmConf.AutoExtract {
 }
 
 case class Survivor(abilityId: AbilityId, parentCharacterId: CharacterId)
-    extends Ability(abilityId, parentCharacterId)
+    extends Ability(abilityId)
     with Usable {
   override val metadata = Survivor.metadata
 

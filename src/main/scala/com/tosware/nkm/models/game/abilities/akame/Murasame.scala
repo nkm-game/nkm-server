@@ -24,7 +24,7 @@ object Murasame extends NkmConf.AutoExtract {
     )
 }
 
-case class Murasame(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId)
+case class Murasame(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId)
     with GameEventListener {
   override val metadata = Murasame.metadata
 

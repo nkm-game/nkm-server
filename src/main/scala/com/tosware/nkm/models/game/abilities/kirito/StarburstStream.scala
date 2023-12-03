@@ -29,7 +29,7 @@ object StarburstStream extends NkmConf.AutoExtract {
 }
 
 case class StarburstStream(abilityId: AbilityId, parentCharacterId: CharacterId)
-    extends Ability(abilityId, parentCharacterId)
+    extends Ability(abilityId)
     with UsableOnCharacter
     with GameEventListener {
   override val metadata = StarburstStream.metadata

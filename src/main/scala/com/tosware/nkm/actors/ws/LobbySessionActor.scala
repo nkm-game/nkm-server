@@ -23,7 +23,7 @@ class LobbySessionActor(implicit val lobbyService: LobbyService)
       val lobbyId = e.id
       val lobbyState = aw(lobbyService.getLobbyStateOpt(lobbyId).get)
       val response =
-        WebsocketLobbyResponse(LobbyResponseType.Lobby, StatusCodes.OK.intValue, lobbyState.toJson.toString)
+        WebsocketLobbyResponse(LobbyResponse.GetLobby, StatusCodes.OK.intValue, lobbyState.toJson.toString)
       getObservers(lobbyId).foreach(_ ! WebsocketUser.OutgoingMessage(response.toJson.toString))
   }
 }

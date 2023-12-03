@@ -1,8 +1,7 @@
 package helpers
 
 import akka.actor.ActorRef
-import akka.http.scaladsl.marshalling.ToEntityMarshaller
-import akka.http.scaladsl.model.StatusCode
+import akka.http.scaladsl.model.HttpRequest
 import akka.http.scaladsl.model.headers.RawHeader
 import com.tosware.nkm.actors.User
 import com.tosware.nkm.actors.User.GrantAdmin
@@ -20,16 +19,12 @@ trait UserApiTrait extends ApiTrait {
   private val adminUserIndex = 4
   lazy val adminToken = tokens(adminUserIndex)
 
-  def getAuthHeader(token: String) = RawHeader("Authorization", s"Bearer $token")
+  def getAuthHeader(token: String): RawHeader = RawHeader("Authorization", s"Bearer $token")
 
-  def checkPostRequest[T](path: String, request: T, statusShouldBe: StatusCode)(implicit m: ToEntityMarshaller[T]) =
-    Post(path, request) ~> routes ~> check(status shouldEqual statusShouldBe)
-  def checkPostRequest[T](path: String, request: T, statusShouldBe: StatusCode, tokenNumber: Int)(implicit
-      m: ToEntityMarshaller[T]
-  ) =
-    Post(path, request).addHeader(getAuthHeader(tokens(tokenNumber))) ~> routes ~> check(
-      status shouldEqual statusShouldBe
-    )
+  implicit class HttpRequestExtensions(httpRequest: HttpRequest) {
+    def addAuthHeader(token: String): HttpRequest = httpRequest.addHeader(getAuthHeader(token))
+    def addAuthHeader(token: Int): HttpRequest = addAuthHeader(tokens(token))
+  }
 
   override def beforeEach(): Unit = {
     super.beforeEach()

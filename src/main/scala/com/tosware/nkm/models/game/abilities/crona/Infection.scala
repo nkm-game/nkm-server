@@ -21,7 +21,7 @@ object Infection extends NkmConf.AutoExtract {
 }
 
 case class Infection(abilityId: AbilityId, parentCharacterId: CharacterId)
-    extends Ability(abilityId, parentCharacterId)
+    extends Ability(abilityId)
     with UsableOnCharacter {
   override val metadata = Infection.metadata
 

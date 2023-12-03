@@ -20,7 +20,7 @@ object PreciseShot extends NkmConf.AutoExtract {
 }
 
 case class PreciseShot(abilityId: AbilityId, parentCharacterId: CharacterId)
-    extends Ability(abilityId, parentCharacterId) with UsableOnCharacter {
+    extends Ability(abilityId) with UsableOnCharacter {
   override val metadata = PreciseShot.metadata
 
   override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =

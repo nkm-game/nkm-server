@@ -24,7 +24,7 @@ object GearSecond extends NkmConf.AutoExtract {
 }
 
 case class GearSecond(abilityId: AbilityId, parentCharacterId: CharacterId)
-    extends Ability(abilityId, parentCharacterId)
+    extends Ability(abilityId)
     with Usable {
   override val metadata: AbilityMetadata = GearSecond.metadata
 

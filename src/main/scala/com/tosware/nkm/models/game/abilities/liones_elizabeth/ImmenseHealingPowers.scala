@@ -20,7 +20,7 @@ object ImmenseHealingPowers extends NkmConf.AutoExtract {
 }
 
 case class ImmenseHealingPowers(abilityId: AbilityId, parentCharacterId: CharacterId)
-    extends Ability(abilityId, parentCharacterId)
+    extends Ability(abilityId)
     with GameEventListener {
   override val metadata = ImmenseHealingPowers.metadata
 

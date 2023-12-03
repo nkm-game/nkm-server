@@ -24,7 +24,7 @@ object OneHundredEightPoundPhoenix extends NkmConf.AutoExtract {
 }
 
 case class OneHundredEightPoundPhoenix(abilityId: AbilityId, parentCharacterId: CharacterId)
-    extends Ability(abilityId, parentCharacterId) with UsableOnCharacter {
+    extends Ability(abilityId) with UsableOnCharacter {
   override val metadata = OneHundredEightPoundPhoenix.metadata
 
   override def rangeCellCoords(implicit gameState: GameState) =

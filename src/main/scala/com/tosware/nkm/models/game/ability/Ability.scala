@@ -11,15 +11,9 @@ import com.tosware.nkm.serializers.NkmJsonProtocol
 
 import scala.util.{Random, Try}
 
-abstract class Ability(val id: AbilityId, pid: CharacterId)
+abstract class Ability(val id: AbilityId)
     extends NkmJsonProtocol {
   val metadata: AbilityMetadata
-
-  def _canBeUsed(useChecks: Set[UseCheck])(implicit gameState: GameState): CommandResponse = {
-    val failures = useChecks.filter(_._1 == false)
-    if (failures.isEmpty) Success()
-    else Failure(failures.map(_._2).mkString("\n"))
-  }
 
   def baseUseChecks(implicit gameState: GameState): Set[UseCheck] =
     Set(
@@ -69,7 +63,7 @@ abstract class Ability(val id: AbilityId, pid: CharacterId)
     if (!forPlayer.exists(parentCharacter.isSeenBy)) None
     else {
 
-      val canBeUsedResponse = _canBeUsed(baseUseChecks)
+      val canBeUsedResponse = models.UseCheck.canBeUsed(baseUseChecks)
       val canBeUsed = canBeUsedResponse match {
         case Success(_) => true
         case Failure(_) => false

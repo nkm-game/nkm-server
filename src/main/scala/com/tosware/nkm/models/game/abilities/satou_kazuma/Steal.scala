@@ -33,7 +33,7 @@ final case class StolenData(
 )
 
 case class Steal(abilityId: AbilityId, parentCharacterId: CharacterId)
-    extends Ability(abilityId, parentCharacterId)
+    extends Ability(abilityId)
     with UsableOnCharacter
     with GameEventListener {
   override val metadata: AbilityMetadata = Steal.metadata

@@ -21,7 +21,7 @@ object Purification extends NkmConf.AutoExtract {
 }
 
 case class Purification(abilityId: AbilityId, parentCharacterId: CharacterId)
-    extends Ability(abilityId, parentCharacterId) with UsableOnCharacter {
+    extends Ability(abilityId) with UsableOnCharacter {
   override val metadata = Purification.metadata
 
   override def rangeCellCoords(implicit gameState: GameState) =

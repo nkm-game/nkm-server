@@ -18,7 +18,7 @@ object Parry extends NkmConf.AutoExtract {
     )
 }
 
-case class Parry(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId)
+case class Parry(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId)
     with GameEventListener {
   override val metadata = Parry.metadata
 

@@ -19,7 +19,7 @@ object HighLuck extends NkmConf.AutoExtract {
 }
 
 case class HighLuck(abilityId: AbilityId, parentCharacterId: CharacterId)
-    extends Ability(abilityId, parentCharacterId)
+    extends Ability(abilityId)
     with GameEventListener {
   override val metadata: AbilityMetadata = HighLuck.metadata
 

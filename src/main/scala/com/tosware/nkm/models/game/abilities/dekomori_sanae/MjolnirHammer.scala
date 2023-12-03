@@ -22,7 +22,7 @@ object MjolnirHammer extends NkmConf.AutoExtract {
 }
 
 case class MjolnirHammer(abilityId: AbilityId, parentCharacterId: CharacterId)
-    extends Ability(abilityId, parentCharacterId)
+    extends Ability(abilityId)
     with Usable {
   override val metadata: AbilityMetadata = MjolnirHammer.metadata
 

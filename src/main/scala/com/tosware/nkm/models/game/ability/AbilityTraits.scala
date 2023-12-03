@@ -22,7 +22,7 @@ trait Usable { this: Ability =>
   def useChecks(implicit useData: UseData, gameState: GameState): Set[UseCheck] =
     baseUseChecks
   final def canBeUsed(implicit useData: UseData, gameState: GameState): CommandResponse =
-    _canBeUsed(useChecks)
+    models.UseCheck.canBeUsed(useChecks)
 }
 
 trait UsableOnTarget[T] { this: Ability =>
@@ -30,7 +30,7 @@ trait UsableOnTarget[T] { this: Ability =>
   def useChecks(implicit target: T, useData: UseData, gameState: GameState): Set[UseCheck] =
     baseUseChecks
   final def canBeUsed(implicit target: T, useData: UseData, gameState: GameState): CommandResponse =
-    _canBeUsed(useChecks)
+    models.UseCheck.canBeUsed(useChecks)
 }
 
 trait UsableOnCoordinates extends UsableOnTarget[HexCoordinates] { this: Ability =>

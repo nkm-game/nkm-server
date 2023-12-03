@@ -23,7 +23,7 @@ object ReducedWeight extends NkmConf.AutoExtract {
 }
 
 case class ReducedWeight(abilityId: AbilityId, parentCharacterId: CharacterId)
-    extends Ability(abilityId, parentCharacterId)
+    extends Ability(abilityId)
     with UsableOnCharacter {
   override val metadata: AbilityMetadata = ReducedWeight.metadata
 

@@ -20,7 +20,7 @@ object RubberHuman extends NkmConf.AutoExtract {
 }
 
 case class RubberHuman(abilityId: AbilityId, parentCharacterId: CharacterId)
-    extends Ability(abilityId, parentCharacterId)
+    extends Ability(abilityId)
     with GameEventListener {
   override val metadata: AbilityMetadata = RubberHuman.metadata
 

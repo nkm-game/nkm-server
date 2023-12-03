@@ -24,7 +24,7 @@ object BindingRibbons extends NkmConf.AutoExtract {
 }
 
 case class BindingRibbons(abilityId: AbilityId, parentCharacterId: CharacterId)
-    extends Ability(abilityId, parentCharacterId) with UsableOnCoordinates {
+    extends Ability(abilityId) with UsableOnCoordinates {
   override val metadata: AbilityMetadata = BindingRibbons.metadata
 
   override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =

@@ -21,7 +21,7 @@ object LackOfOrientation extends NkmConf.AutoExtract {
 }
 
 case class LackOfOrientation(abilityId: AbilityId, parentCharacterId: CharacterId)
-    extends Ability(abilityId, parentCharacterId)
+    extends Ability(abilityId)
     with BasicMoveOverride {
   import LackOfOrientation.*
   override val metadata = LackOfOrientation.metadata

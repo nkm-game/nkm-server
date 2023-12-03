@@ -22,7 +22,7 @@ object SkillRelease extends NkmConf.AutoExtract {
 }
 
 case class SkillRelease(abilityId: AbilityId, parentCharacterId: CharacterId)
-    extends Ability(abilityId, parentCharacterId)
+    extends Ability(abilityId)
     with Usable {
   override val metadata: AbilityMetadata = SkillRelease.metadata
   override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =

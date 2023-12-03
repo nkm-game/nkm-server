@@ -23,7 +23,7 @@ object Switch extends NkmConf.AutoExtract {
     )
 }
 
-case class Switch(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId, parentCharacterId)
+case class Switch(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId)
     with UsableOnCharacter {
   override val metadata = Switch.metadata
 
