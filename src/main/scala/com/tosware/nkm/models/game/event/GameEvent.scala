@@ -325,6 +325,10 @@ object GameEvent {
       with ContainsCharacterId
   case class PlayerLost(id: GameEventId, phase: Phase, turn: Turn, causedById: String, playerId: PlayerId)
       extends GameEvent
+  case class PlayerWon(id: GameEventId, phase: Phase, turn: Turn, causedById: String, playerId: PlayerId)
+      extends GameEvent
+  case class PlayerDrew(id: GameEventId, phase: Phase, turn: Turn, causedById: String, playerId: PlayerId)
+      extends GameEvent
   case class PlayerSurrendered(id: GameEventId, phase: Phase, turn: Turn, causedById: String, playerId: PlayerId)
       extends GameEvent
 

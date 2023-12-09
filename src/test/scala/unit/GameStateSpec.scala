@@ -5,6 +5,7 @@ import com.tosware.nkm.models.game.abilities.akame.LittleWarHorn
 import com.tosware.nkm.models.game.abilities.sinon.TacticalEscape
 import com.tosware.nkm.models.game.character.{CharacterMetadata, StatType}
 import com.tosware.nkm.models.game.event.GameEvent
+import com.tosware.nkm.models.game.event.GameEvent.{PlayerLost, PlayerWon}
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import com.tosware.nkm.{CoordinateSeq, randomUUID}
 import helpers.*
@@ -74,6 +75,19 @@ class GameStateSpec extends TestUtils {
 
       p0CharacterKilledGameState.players(1).victoryStatus should be(VictoryStatus.Won)
       p1CharacterKilledGameState.players(0).victoryStatus should be(VictoryStatus.Won)
+
+      p0CharacterKilledGameState.gameLog.events.ofType[PlayerLost].size should be(1)
+      p0CharacterKilledGameState.gameLog.events.ofType[PlayerWon].size should be(1)
+    }
+
+    "end the game in draw when players are knocked out at the same time" in {
+//      TODO(NKM-293): This is possible only in theory, in practice we need simultanous damage
+//      val gs: GameState = gameState.executeCharacters(Set(s.defaultCharacter.id, s.defaultEnemy.id))(random, "test")
+//
+//      gs.gameStatus should be(GameStatus.Finished)
+//
+//      gs.players.map(_.victoryStatus).toSet should be(Set(VictoryStatus.Drawn))
+//      gs.gameLog.events.ofType[PlayerDrew].size should be(2)
     }
 
     "skip player turn when he has no characters to take action" in {

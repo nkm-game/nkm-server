@@ -370,14 +370,18 @@ case class GameState(
 
   def checkVictoryStatus()(implicit random: Random, causedById: String): GameState = {
     def filterPendingPlayers: Player => Boolean = _.victoryStatus == VictoryStatus.Pending
+    val pendingPlayerIds = players.filter(filterPendingPlayers).map(_.id)
 
     if (gameStatus == GameStatus.CharacterPick && players.count(_.victoryStatus == VictoryStatus.Lost) > 0) {
       this.modify(_.players.eachWhere(filterPendingPlayers).victoryStatus)
         .setTo(VictoryStatus.Drawn)
+        .logEvents(pendingPlayerIds.map(pid => PlayerDrew(randomUUID(), phase, turn, pid, pid)))
         .finishGame()
+
     } else if (players.count(_.victoryStatus == VictoryStatus.Pending) == 1) {
       this.modify(_.players.eachWhere(filterPendingPlayers).victoryStatus)
         .setTo(VictoryStatus.Won)
+        .logEvents(pendingPlayerIds.map(pid => PlayerWon(randomUUID(), phase, turn, pid, pid)))
         .finishGame()
     } else this
   }
@@ -883,6 +887,7 @@ case class GameState(
 
   def knockOutPlayer(playerId: PlayerId)(implicit random: Random, causedById: String): GameState =
     updatePlayer(playerId)(_.modify(_.victoryStatus).setTo(VictoryStatus.Lost))
+      .logEvent(PlayerLost(randomUUID(), phase, turn, causedById, playerId))
       .checkVictoryStatus()
       .skipTurnIfPlayerKnockedOut()(random, playerId)
 

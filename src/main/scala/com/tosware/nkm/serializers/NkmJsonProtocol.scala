@@ -77,6 +77,8 @@ trait NkmJsonProtocol
         case e: AnythingRefreshed          => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
         case e: CharactersPicked           => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
         case e: PlayerLost                 => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
+        case e: PlayerWon                  => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
+        case e: PlayerDrew                 => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
         case e: PlayerSurrendered          => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
         case e: PlayerBanned               => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
         case e: PlayerFinishedBanning      => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
@@ -136,6 +138,8 @@ trait NkmJsonProtocol
         case "AnythingRefreshed"          => ges.eventJson.parseJson.convertTo[AnythingRefreshed]
         case "CharactersPicked"           => ges.eventJson.parseJson.convertTo[CharactersPicked]
         case "PlayerLost"                 => ges.eventJson.parseJson.convertTo[PlayerLost]
+        case "PlayerWon"                  => ges.eventJson.parseJson.convertTo[PlayerWon]
+        case "PlayerDrew"                 => ges.eventJson.parseJson.convertTo[PlayerDrew]
         case "PlayerSurrendered"          => ges.eventJson.parseJson.convertTo[PlayerSurrendered]
         case "PlayerBanned"               => ges.eventJson.parseJson.convertTo[PlayerBanned]
         case "PlayerFinishedBanning"      => ges.eventJson.parseJson.convertTo[PlayerFinishedBanning]
