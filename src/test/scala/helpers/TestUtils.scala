@@ -86,7 +86,7 @@ trait TestUtils
       .effects
       .map(_.metadata.name) should contain noElementsOf effectNames
 
-  protected def assertEffectDoesNotExistsOfType[A: ClassTag](cid: CharacterId)(gameState: GameState): Assertion =
+  protected def assertEffectDoesNotExistOfType[A: ClassTag](cid: CharacterId)(gameState: GameState): Assertion =
     gameState
       .characterById(cid)
       .state

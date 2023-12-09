@@ -40,20 +40,20 @@ class SkillReleaseSpec
     }
 
     "remove Zero Gravity effects" in {
-      assertEffectDoesNotExistsOfType[effects.Fly](s.defaultCharacter.id)(zeroGravityGs)
-      assertEffectDoesNotExistsOfType[effects.Fly](s.p(1)(0).character.id)(zeroGravityGs)
+      assertEffectDoesNotExistOfType[effects.Fly](s.defaultCharacter.id)(zeroGravityGs)
+      assertEffectDoesNotExistOfType[effects.Fly](s.p(1)(0).character.id)(zeroGravityGs)
     }
 
     "not work unrelated Fly effects" in {
       assertEffectExistsOfType[effects.Fly](s.defaultCharacter.id)(flyGs)
       assertEffectExistsOfType[effects.Fly](s.p(1)(0).character.id)(flyGs)
 
-      assertEffectDoesNotExistsOfType[effects.Stun](s.defaultCharacter.id)(flyGs)
-      assertEffectDoesNotExistsOfType[effects.Stun](s.p(1)(0).character.id)(flyGs)
+      assertEffectDoesNotExistOfType[effects.Stun](s.defaultCharacter.id)(flyGs)
+      assertEffectDoesNotExistOfType[effects.Stun](s.p(1)(0).character.id)(flyGs)
     }
 
     "stun enemies that had Zero Gravity" in {
-      assertEffectDoesNotExistsOfType[effects.Stun](s.defaultCharacter.id)(zeroGravityGs)
+      assertEffectDoesNotExistOfType[effects.Stun](s.defaultCharacter.id)(zeroGravityGs)
       assertEffectExistsOfType[effects.Stun](s.p(1)(0).character.id)(zeroGravityGs)
     }
   }

@@ -112,7 +112,7 @@ class InvisibilitySpec
       val interruptGs =
         enemyTurnCollisionGs.basicMoveCharacter(s.defaultEnemy.id, CoordinateSeq((0, 0), (-1, 0), (-2, 0), (-3, 0)))
 
-      assertEffectDoesNotExistsOfType[effects.Invisibility](s.defaultCharacter.id)(interruptGs)
+      assertEffectDoesNotExistOfType[effects.Invisibility](s.defaultCharacter.id)(interruptGs)
 
       s.defaultEnemy.parentCellOpt(interruptGs).map(_.coordinates) should be(Some(HexCoordinates(-1, 0)))
       s.defaultCharacter.parentCellOpt(interruptGs).map(_.coordinates) should be(Some(HexCoordinates(-2, 0)))
@@ -124,7 +124,7 @@ class InvisibilitySpec
       val tpGs = setupTpGs.useAbilityOnCharacter(defaultEnemyContactAbilityId, s.p(0)(1).character.id)
 
       val cp = new Checkpoint
-      cp(assertEffectDoesNotExistsOfType[effects.Invisibility](s.defaultCharacter.id)(tpGs))
+      cp(assertEffectDoesNotExistOfType[effects.Invisibility](s.defaultCharacter.id)(tpGs))
       cp(s.defaultEnemy.parentCellOpt(tpGs).map(_.coordinates) should be(Some(HexCoordinates(-4, 0))))
       cp(s.defaultCharacter.parentCellOpt(tpGs).map(_.coordinates) should not be Some(HexCoordinates(-4, 0)))
       cp.reportAll()
@@ -142,7 +142,7 @@ class InvisibilitySpec
     "reveal parent and hit it when enemy melee character tries to attack over them" in {
       val attackedOverGs = enemyTurnGs.basicAttack(s.defaultEnemy.id, s.p(0)(1).character.id)
 
-      assertEffectDoesNotExistsOfType[effects.Invisibility](s.defaultCharacter.id)(attackedOverGs)
+      assertEffectDoesNotExistOfType[effects.Invisibility](s.defaultCharacter.id)(attackedOverGs)
 
       val basicAttackEvents =
         attackedOverGs
@@ -169,15 +169,31 @@ class InvisibilitySpec
     }
     "reveal parent on parent basic attack" in {
       val basicAttackGs = eGs.basicAttack(s.defaultCharacter.id, s.defaultEnemy.id)
-      assertEffectDoesNotExistsOfType[effects.Invisibility](s.defaultCharacter.id)(basicAttackGs)
+      assertEffectDoesNotExistOfType[effects.Invisibility](s.defaultCharacter.id)(basicAttackGs)
     }
     "reveal parent on parent contact ability use" in {
       val aGs = eGs.useAbilityOnCharacter(defaultCharacterContactAbilityId, s.defaultEnemy.id)
-      assertEffectDoesNotExistsOfType[effects.Invisibility](s.defaultCharacter.id)(aGs)
+      assertEffectDoesNotExistOfType[effects.Invisibility](s.defaultCharacter.id)(aGs)
     }
     "not reveal parent on parent non-contact ability use" in {
       val aGs = eGs.useAbilityOnCoordinates(defaultCharacterAsterId, s.p(1)(0).spawnCoordinates)
       assertEffectExistsOfType[effects.Invisibility](s.defaultCharacter.id)(aGs)
+    }
+    "not reveal parent when only one of the invisibility effects is expired" in {
+      val twoInvisGs = s.gameState
+        .addEffect(s.defaultCharacter.id, Invisibility(randomUUID(), 1))
+        .addEffect(s.defaultCharacter.id, Invisibility(randomUUID(), 2))
+
+      val passedGs = twoInvisGs.passTurn(s.defaultCharacter.id)
+
+      assertEffectExistsOfType[effects.Invisibility](s.defaultCharacter.id)(passedGs)
+      passedGs.gameLog.events.ofType[GameEvent.EventsRevealed].size should be(2) // game init events
+      passedGs.gameLog.events.ofType[GameEvent.CharacterRevealed] should be(empty)
+
+      val twoPassedGs = passedGs.passTurn(s.defaultEnemy.id).passTurn(s.defaultCharacter.id)
+      assertEffectDoesNotExistOfType[effects.Invisibility](s.defaultCharacter.id)(twoPassedGs)
+      twoPassedGs.gameLog.events.ofType[GameEvent.EventsRevealed].size should be(3)
+      twoPassedGs.gameLog.events.ofType[GameEvent.CharacterRevealed] should not be empty
     }
   }
 }

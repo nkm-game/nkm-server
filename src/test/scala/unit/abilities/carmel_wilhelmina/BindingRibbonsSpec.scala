@@ -24,7 +24,7 @@ class BindingRibbonsSpec
   abilityMetadata.name must {
     "only silence hit enemies" in {
       assertEffectExistsOfType[effects.Silence](s.p(1)(0).character.id)(twoHitGameState)
-      assertEffectDoesNotExistsOfType[effects.Snare](s.p(1)(0).character.id)(twoHitGameState)
+      assertEffectDoesNotExistOfType[effects.Snare](s.p(1)(0).character.id)(twoHitGameState)
     }
 
     "silence and snare hit enemies when enough of them are hit" in {

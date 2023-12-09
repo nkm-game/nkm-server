@@ -196,7 +196,7 @@ class GameStateSpec extends TestUtils {
         effects.HealOverTime(effectUuid, 5, 5),
       )
 
-      assertEventHiddenOfType[GameEvent.EffectAddedToCharacter](effectAddedGs)
+      assertEventNotHiddenOfType[GameEvent.CharacterWentInvisible](effectAddedGs)
       assertEventHiddenOfType[GameEvent.EffectVariableSet](effectAddedGs)
 
       val effectRemovedGs = effectAddedGs.removeEffect(effectUuid)

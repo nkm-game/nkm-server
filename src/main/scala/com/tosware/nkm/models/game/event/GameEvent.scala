@@ -25,6 +25,23 @@ object GameEvent {
       extends GameEvent
   case class EventsRevealed(id: GameEventId, phase: Phase, turn: Turn, causedById: String, eventIds: Seq[GameEventId])
       extends GameEvent
+  case class CharacterWentInvisible(
+      id: GameEventId,
+      phase: Phase,
+      turn: Turn,
+      causedById: String,
+      characterId: CharacterId,
+  ) extends GameEvent
+      with ContainsCharacterId
+  case class CharacterRevealed(
+      id: GameEventId,
+      phase: Phase,
+      turn: Turn,
+      causedById: String,
+      characterId: CharacterId,
+  ) extends GameEvent
+      with ContainsCharacterId
+
   case class ClockUpdated(id: GameEventId, phase: Phase, turn: Turn, causedById: String, newClock: Clock)
       extends GameEvent
   case class CharacterPlaced(
@@ -56,17 +73,21 @@ object GameEvent {
       phase: Phase,
       turn: Turn,
       causedById: String,
+      effectMetadataId: CharacterEffectMetadataId,
       effectId: CharacterEffectId,
       characterId: CharacterId,
   ) extends GameEvent
+      with ContainsCharacterId
   case class EffectRemovedFromCharacter(
       id: GameEventId,
       phase: Phase,
       turn: Turn,
       causedById: String,
+      effectMetadataId: CharacterEffectMetadataId,
       effectId: CharacterEffectId,
       characterId: CharacterId,
   ) extends GameEvent
+      with ContainsCharacterId
   case class EffectVariableSet(
       id: GameEventId,
       phase: Phase,

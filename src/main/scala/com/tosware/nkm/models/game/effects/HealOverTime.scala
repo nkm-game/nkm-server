@@ -25,7 +25,7 @@ case class HealOverTime(effectId: CharacterEffectId, initialCooldown: Int, heal:
   override val metadata: CharacterEffectMetadata = HealOverTime.metadata
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
     e match {
-      case GameEvent.EffectAddedToCharacter(_, _, _, _, eid, _) =>
+      case GameEvent.EffectAddedToCharacter(_, _, _, _, _, eid, _) =>
         if (effectId == eid)
           return gameState.setEffectVariable(id, healKey, heal.toString)
         gameState

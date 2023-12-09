@@ -65,7 +65,7 @@ class FiberDecapitationSpec
 
     "not apply basic attack effects" in {
       val aGs: GameState = s.gameState.useAbilityOnCharacter(s.defaultAbilityId, s.defaultEnemy.id)
-      assertEffectDoesNotExistsOfType[StatNerf](s.defaultEnemy.id)(aGs)
+      assertEffectDoesNotExistOfType[StatNerf](s.defaultEnemy.id)(aGs)
     }
   }
 }

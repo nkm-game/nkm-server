@@ -63,7 +63,7 @@ case class Murasame(abilityId: AbilityId, parentCharacterId: CharacterId) extend
         if (parentCharacterId == gameState.abilityById(abilityId).parentCharacter.id) {
           applyPoison(targetCharacterId)
         } else gameState
-      case EffectAddedToCharacter(_, _, _, _, _, targetCharacterId) =>
+      case EffectAddedToCharacter(_, _, _, _, _, _, targetCharacterId) =>
         killCharacterIfFullyStacked(targetCharacterId)
       case _ => gameState
     }

@@ -233,9 +233,9 @@ case class GameState(
 
   def logEvent(e: GameEvent)(implicit random: Random): GameState = {
     val targetCharacter = e match {
-      case EffectAddedToCharacter(_, _, _, _, _, characterId) =>
+      case EffectAddedToCharacter(_, _, _, _, _, _, characterId) =>
         characterById(characterId)
-      case EffectRemovedFromCharacter(_, _, _, _, _, characterId) =>
+      case EffectRemovedFromCharacter(_, _, _, _, _, _, characterId) =>
         characterById(characterId)
       case EffectVariableSet(_, _, _, _, effectId, _, _) =>
         effectById(effectId).parentCharacter(this)
@@ -281,13 +281,7 @@ case class GameState(
         null
     }
 
-    val isAddInvisibilityEvent = e match {
-      case EffectAddedToCharacter(_, _, _, _, effectId, _) =>
-        effectById(effectId).state(this).name == CharacterEffectName.Invisibility
-      case _ => false
-    }
-
-    if (targetCharacter != null && targetCharacter.isInvisible && !isAddInvisibilityEvent) {
+    if (targetCharacter != null && targetCharacter.isInvisible) {
       logAndHideEvent(
         e,
         Seq(targetCharacter.owner(this).id),
@@ -897,15 +891,45 @@ case class GameState(
       knockOutPlayer(playerId)
     } else this
 
-  def handleCharacterDeath(characterId: CharacterId)(implicit random: Random, causedById: String): GameState =
+  private def handleCharacterDeath(characterId: CharacterId)(implicit random: Random, causedById: String): GameState =
     this.removeCharacterFromMap(characterId)
       .logEvent(CharacterDied(randomUUID(), phase, turn, causedById, characterId))
       .checkIfPlayerKnockedOut(characterById(characterId).owner(this).id)
 
+  private def checkIfCharacterWentInvisible(characterId: CharacterId, wasCharacterInvisible: Boolean)(implicit
+      random: Random,
+      causedById: String,
+  ): GameState = {
+    val wentInvisible =
+      if (wasCharacterInvisible) false
+      else characterById(characterId).isInvisible
+
+    if (wentInvisible)
+      logEvent(GameEvent.CharacterWentInvisible(randomUUID(), phase, turn, causedById, characterId))
+    else this
+  }
+
+  private def checkIfCharacterRevealed(characterId: CharacterId, wasCharacterInvisible: Boolean)(implicit
+      random: Random,
+      causedById: String,
+  ): GameState = {
+    val wasRevealed =
+      if (!wasCharacterInvisible) false
+      else !characterById(characterId).isInvisible
+
+    if (wasRevealed)
+      reveal(RevealCondition.RelatedCharacterRevealed(characterId))
+        .logEvent(GameEvent.CharacterRevealed(randomUUID(), phase, turn, causedById, characterId))
+    else this
+  }
+
   def addEffect(characterId: CharacterId, characterEffect: CharacterEffect)(implicit
       random: Random,
       causedById: String,
-  ): GameState =
+  ): GameState = {
+    val character = characterById(characterId)
+    val wasCharacterInvisible = character.isInvisible
+
     updateCharacter(characterId)(_.addEffect(characterEffect))
       .modify(_.characterEffectStates)
       .using(_.updated(
@@ -915,7 +939,17 @@ case class GameState(
           characterEffect.initialCooldown,
         ),
       ))
-      .logEvent(EffectAddedToCharacter(randomUUID(), phase, turn, causedById, characterEffect.id, characterId))
+      .logEvent(EffectAddedToCharacter(
+        randomUUID(),
+        phase,
+        turn,
+        causedById,
+        characterEffect.metadata.id,
+        characterEffect.id,
+        characterId,
+      ))
+      .checkIfCharacterWentInvisible(characterId, wasCharacterInvisible)
+  }
 
   def removeEffects(characterEffectIds: Seq[CharacterEffectId])(implicit
       random: Random,
@@ -926,13 +960,20 @@ case class GameState(
   def removeEffect(characterEffectId: CharacterEffectId)(implicit random: Random, causedById: String): GameState = {
     val effect = effectById(characterEffectId)
     val character = effect.parentCharacter(this)
-    val ngs = if (effect.state(this).name == CharacterEffectName.Invisibility) {
-      reveal(RevealCondition.RelatedCharacterRevealed(character.id))
-    } else this
+    val wasCharacterInvisible = character.isInvisible
 
-    ngs.updateCharacter(character.id)(_.removeEffect(characterEffectId))
+    updateCharacter(character.id)(_.removeEffect(characterEffectId))
       .modify(_.characterEffectStates).using(ces => ces.removed(characterEffectId))
-      .logEvent(EffectRemovedFromCharacter(randomUUID(), phase, turn, causedById, characterEffectId, character.id))
+      .logEvent(EffectRemovedFromCharacter(
+        randomUUID(),
+        phase,
+        turn,
+        causedById,
+        effect.metadata.id,
+        characterEffectId,
+        character.id,
+      ))
+      .checkIfCharacterRevealed(character.id, wasCharacterInvisible)
   }
 
   def addHexCellEffect(coordinates: HexCoordinates, hexCellEffect: HexCellEffect)(implicit

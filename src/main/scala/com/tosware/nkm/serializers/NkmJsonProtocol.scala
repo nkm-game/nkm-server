@@ -37,6 +37,8 @@ trait NkmJsonProtocol
       JsObject((obj match {
         case e: GameStatusUpdated          => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
         case e: EventsRevealed             => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
+        case e: CharacterWentInvisible     => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
+        case e: CharacterRevealed          => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
         case e: ClockUpdated               => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
         case e: CharacterPlaced            => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
         case e: EffectAddedToCell          => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
@@ -94,6 +96,8 @@ trait NkmJsonProtocol
       ges.className match {
         case "GameStatusUpdated"          => ges.eventJson.parseJson.convertTo[GameStatusUpdated]
         case "EventsRevealed"             => ges.eventJson.parseJson.convertTo[EventsRevealed]
+        case "CharacterWentInvisible"     => ges.eventJson.parseJson.convertTo[CharacterWentInvisible]
+        case "CharacterRevealed"          => ges.eventJson.parseJson.convertTo[CharacterRevealed]
         case "ClockUpdated"               => ges.eventJson.parseJson.convertTo[ClockUpdated]
         case "CharacterPlaced"            => ges.eventJson.parseJson.convertTo[CharacterPlaced]
         case "EffectAddedToCell"          => ges.eventJson.parseJson.convertTo[EffectAddedToCell]
