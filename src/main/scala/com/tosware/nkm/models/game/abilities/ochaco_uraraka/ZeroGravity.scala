@@ -29,7 +29,6 @@ case class ZeroGravity(abilityId: AbilityId, parentCharacterId: CharacterId)
     extends Ability(abilityId)
     with BasicAttackOverride {
   override val metadata: AbilityMetadata = ZeroGravity.metadata
-
   override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =
     gameState.characterById(parentCharacterId).basicAttackCellCoords(gameState)
   override def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] =
@@ -40,7 +39,6 @@ case class ZeroGravity(abilityId: AbilityId, parentCharacterId: CharacterId)
     basicAttackCells.whereCharacters
   override def basicAttack(targetCharacterId: CharacterId)(implicit random: Random, gameState: GameState): GameState = {
     val zeroGravityAppliedGs = applyZeroGravity(targetCharacterId, gameState)(random, id)
-
     if (gameState.characterById(targetCharacterId).isFriendForC(parentCharacterId))
       zeroGravityAppliedGs
     else

@@ -36,11 +36,6 @@ case class GearSecond(abilityId: AbilityId, parentCharacterId: CharacterId)
       )(random, id)
       .addEffect(
         parentCharacterId,
-        effects.StatBuff(
-          randomUUID(),
-          metadata.variables("duration"),
-          StatType.Speed,
-          metadata.variables("bonusSpeed"),
-        ),
+        effects.StatBuff(randomUUID(), metadata.variables("duration"), StatType.Speed, metadata.variables("bonusSpeed")),
       )(random, id)
 }

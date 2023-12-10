@@ -4,8 +4,8 @@ import com.tosware.nkm.models.GameStateValidator
 import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.blank.Castling
 import com.tosware.nkm.models.game.ability.UseData
-import com.tosware.nkm.models.game.character.CharacterMetadata
-import helpers.{TestUtils, scenarios}
+import com.tosware.nkm.models.game.hex.TestHexMapName
+import helpers.{TestScenario, TestUtils}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
@@ -14,70 +14,68 @@ class CastlingSpec
     with Matchers
     with TestUtils {
   private val abilityMetadata = Castling.metadata
-  private val characterMetadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
-  private val s = scenarios.Simple2v2TestScenario(characterMetadata)
-  implicit private val gameState: GameState = s.gameState.incrementPhase(4)
-  private val abilityId = s.p(0)(0).character.state.abilities.head.id
+  private val s = TestScenario.generate(TestHexMapName.Simple2v2, abilityMetadata.id)
+  private val gameState: GameState = s.ultGs
+  private val abilityId = s.defaultAbilityId
 
   abilityMetadata.name must {
     "be able to use castling on characters on map" in {
-      val r = GameStateValidator()
-        .validateAbilityUseOnCharacter(
-          s.p(0)(0).character.owner.id,
-          abilityId,
-          s.p(1)(0).character.id,
-          UseData(s.p(0)(1).character.id),
-        )
-      assertCommandSuccess(r)
+      assertCommandSuccess {
+        GameStateValidator()(gameState)
+          .validateAbilityUse(
+            s.owners(0),
+            abilityId,
+            UseData(Seq(s.defaultEnemy.id, s.p(0)(1).character.id)),
+          )
+      }
     }
     "not be able to use castling on the same character" in {
-      val r = GameStateValidator()
-        .validateAbilityUseOnCharacter(
-          s.p(0)(0).character.owner.id,
-          abilityId,
-          s.p(1)(0).character.id,
-          UseData(s.p(1)(0).character.id),
-        )
-      assertCommandFailure(r)
+      assertCommandFailure {
+        GameStateValidator()(gameState)
+          .validateAbilityUse(
+            s.owners(0),
+            abilityId,
+            UseData(Seq(s.defaultEnemy.id, s.defaultEnemy.id)),
+          )
+      }
     }
     "not be able to use castling on character outside map" in {
       val s1 = gameState.removeCharacterFromMap(s.p(0)(1).character.id)
-      val s2 = gameState.removeCharacterFromMap(s.p(1)(0).character.id)
+      val s2 = gameState.removeCharacterFromMap(s.defaultEnemy.id)
 
-      val r1 = GameStateValidator()(s1)
-        .validateAbilityUseOnCharacter(
-          s.p(0)(0).character.owner.id,
-          abilityId,
-          s.p(1)(0).character.id,
-          UseData(s.p(0)(1).character.id),
-        )
-      assertCommandFailure(r1)
+      assertCommandFailure {
+        GameStateValidator()(s1)
+          .validateAbilityUse(
+            s.owners(0),
+            abilityId,
+            UseData(Seq(s.defaultEnemy.id, s.p(0)(1).character.id)),
+          )
+      }
 
-      val r2 = GameStateValidator()(s2)
-        .validateAbilityUseOnCharacter(
-          s.p(0)(0).character.owner.id,
-          abilityId,
-          s.p(1)(0).character.id,
-          UseData(s.p(0)(1).character.id),
-        )
-      assertCommandFailure(r2)
+      assertCommandFailure {
+        GameStateValidator()(s2)
+          .validateAbilityUse(
+            s.owners(0),
+            abilityId,
+            UseData(Seq(s.defaultEnemy.id, s.p(0)(1).character.id)),
+          )
+      }
     }
 
     "swap positions with castling" in {
-      val newGameState = gameState.useAbilityOnCharacter(
+      val ngs = gameState.useAbility(
         abilityId,
-        s.p(1)(0).character.id,
-        UseData(s.p(0)(1).character.id),
+        UseData(Seq(s.defaultEnemy.id, s.p(0)(1).character.id)),
       )
-      newGameState
-        .characterById(s.p(1)(0).character.id)
-        .parentCellOpt.get
-        .coordinates shouldBe s.p(0)(1).character.parentCellOpt(newGameState).get.coordinates
+      ngs
+        .characterById(s.defaultEnemy.id)
+        .parentCellOpt(gameState).get
+        .coordinates shouldBe s.p(0)(1).character.parentCellOpt(ngs).get.coordinates
 
-      newGameState
+      ngs
         .characterById(s.p(0)(1).character.id)
-        .parentCellOpt.get
-        .coordinates shouldBe s.p(1)(0).character.parentCellOpt(newGameState).get.coordinates
+        .parentCellOpt(gameState).get
+        .coordinates shouldBe s.defaultEnemy.parentCellOpt(ngs).get.coordinates
     }
   }
 }

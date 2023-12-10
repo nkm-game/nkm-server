@@ -20,13 +20,14 @@ object MarkOfTheWind extends NkmConf.AutoExtract {
           |
           |Range: circular, {range}
           |Max. number of traps: {trapLimit}""".stripMargin,
+      targetsMetadata = Seq(AbilityTargetMetadata.SingleCoordinate),
     )
   val trapLocationsKey = "trapLocations"
 }
 
 case class MarkOfTheWind(abilityId: AbilityId, parentCharacterId: CharacterId)
     extends Ability(abilityId)
-    with UsableOnCoordinates {
+    with Usable {
   override val metadata: AbilityMetadata = MarkOfTheWind.metadata
 
   def trapLocations(implicit gameState: GameState): Seq[HexCoordinates] =
@@ -43,10 +44,8 @@ case class MarkOfTheWind(abilityId: AbilityId, parentCharacterId: CharacterId)
       .filterNot(_.effects.exists(_.metadata.name == HexCellEffectName.MarkOfTheWind))
       .toCoords
 
-  override def use(target: HexCoordinates, useData: UseData)(implicit
-      random: Random,
-      gameState: GameState,
-  ): GameState = {
+  override def use(useData: UseData)(implicit random: Random, gameState: GameState): GameState = {
+    val target = useData.firstAsCoordinates
     val limitExceeded = trapLocations.size == metadata.variables("trapLimit")
     val newTrapLocations =
       if (limitExceeded)
@@ -65,9 +64,12 @@ case class MarkOfTheWind(abilityId: AbilityId, parentCharacterId: CharacterId)
       .setAbilityVariable(id, trapLocationsKey, newTrapLocations.toJson.toString)
   }
 
-  override def useChecks(implicit target: HexCoordinates, useData: UseData, gameState: GameState): Set[UseCheck] =
-    super.useChecks ++ Seq(
+  override def useChecks(implicit useData: UseData, gameState: GameState): Set[UseCheck] = {
+    val target = useData.firstAsCoordinates
+
+    super.useChecks ++ coordinatesBaseUseChecks(target) ++ Seq(
       !target.toCellOpt.fold(true)(_.effects.exists(_.metadata.name == HexCellEffectName.MarkOfTheWind)) ->
         "There is a trap already on target coordinates."
     )
+  }
 }

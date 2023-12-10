@@ -21,16 +21,15 @@ object FiberDecapitation extends NkmConf.AutoExtract {
           |
           |Range: linear, stops at walls and enemies, {range}""".stripMargin,
       traits = Seq(AbilityTrait.Move, AbilityTrait.ContactEnemy),
+      targetsMetadata = Seq(AbilityTargetMetadata.SingleCharacter),
     )
 }
 
 case class FiberDecapitation(abilityId: AbilityId, parentCharacterId: CharacterId)
-    extends Ability(abilityId) with UsableOnCharacter {
-  override val metadata = FiberDecapitation.metadata
-
+    extends Ability(abilityId) with Usable {
+  override val metadata: AbilityMetadata = FiberDecapitation.metadata
   private def teleportCoordinates(from: HexCoordinates, direction: HexDirection) =
     from.getInDirection(direction, metadata.variables("targetCellOffset"))
-
   override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =
     parentCell.fold(Set.empty[HexCell])(c =>
       c.getArea(
@@ -39,7 +38,6 @@ case class FiberDecapitation(abilityId: AbilityId, parentCharacterId: CharacterI
         friendlyPlayerIdOpt = Some(parentCharacter.owner.id),
       )
     ).toCoords
-
   override def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] =
     rangeCellCoords.whereSeenEnemiesOfC(parentCharacterId).filter(targetCoordinates =>
       {
@@ -52,8 +50,8 @@ case class FiberDecapitation(abilityId: AbilityId, parentCharacterId: CharacterI
         } yield isFreeToStand
       }.getOrElse(false)
     )
-
-  override def use(target: CharacterId, useData: UseData)(implicit random: Random, gameState: GameState): GameState = {
+  override def use(useData: UseData)(implicit random: Random, gameState: GameState): GameState = {
+    val target = useData.firstAsCharacterId
     val targetCharacter = gameState.characterById(target)
     val targetCoordinates = targetCharacter.parentCellOpt.get.coordinates
     val targetDirection = parentCell.get.coordinates.getDirection(targetCoordinates).get
@@ -69,8 +67,8 @@ case class FiberDecapitation(abilityId: AbilityId, parentCharacterId: CharacterI
       .damageCharacter(target, Damage(DamageType.Physical, metadata.variables("damage")))(random, id)
       .teleportCharacter(parentCharacterId, tpCoords)(random, id)
   }
-
-  override def useChecks(implicit target: CharacterId, useData: UseData, gameState: GameState): Set[UseCheck] = {
+  override def useChecks(implicit useData: UseData, gameState: GameState): Set[UseCheck] = {
+    val target = useData.firstAsCharacterId
     def cellToTeleportIsFreeToStand(): Boolean = {
       for {
         targetCharacter: NkmCharacter <- Some(gameState.characterById(target))
@@ -81,10 +79,11 @@ case class FiberDecapitation(abilityId: AbilityId, parentCharacterId: CharacterI
         isFreeToStand: Boolean <- Some(tpCell.looksFreeToStand(parentCharacterId))
       } yield isFreeToStand
     }.getOrElse(false)
-
-    super.useChecks ++ Seq(
-      UseCheck.TargetCharacter.IsEnemy,
-      cellToTeleportIsFreeToStand() -> "Cell to teleport is not free to stand or does not exist.",
-    )
+    super.useChecks
+      ++ characterBaseUseChecks(target)
+      ++ Seq(
+        UseCheck.Character.IsEnemy(target),
+        cellToTeleportIsFreeToStand() -> "Cell to teleport is not free to stand or does not exist.",
+      )
   }
 }

@@ -3,9 +3,11 @@ package unit.abilities.crona
 import com.tosware.nkm.models.GameStateValidator
 import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.crona.Infection
+import com.tosware.nkm.models.game.ability.UseData
 import com.tosware.nkm.models.game.character.CharacterMetadata
 import com.tosware.nkm.models.game.event.GameEvent
-import helpers.{TestUtils, scenarios}
+import com.tosware.nkm.models.game.hex.TestHexMapName
+import helpers.{TestScenario, TestUtils}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
@@ -15,20 +17,20 @@ class InfectionSpec
     with TestUtils {
   private val abilityMetadata = Infection.metadata
   private val characterMetadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
-  private val s = scenarios.Simple2v2TestScenario(characterMetadata)
-  implicit private val gameState: GameState = s.gameState.incrementPhase(4)
-  private val abilityId = s.p(0)(0).character.state.abilities.head.id
+  private val s = TestScenario.generate(TestHexMapName.Simple2v2, characterMetadata)
+  implicit private val gameState: GameState = s.ultGs
+  private val abilityId = s.defaultAbilityId
   private val abilityId2 = s.p(0)(1).character.state.abilities.head.id
 
   abilityMetadata.name must {
     "be able to use" in {
       val r = GameStateValidator()
-        .validateAbilityUseOnCharacter(s.p(0)(0).character.owner.id, abilityId, s.p(1)(0).character.id)
+        .validateAbilityUse(s.owners(0), abilityId, UseData(s.defaultEnemy.id))
       assertCommandSuccess(r)
     }
 
     "be able to infect and deal damage" in {
-      val abilityGameState: GameState = gameState.useAbilityOnCharacter(abilityId, s.p(1)(0).character.id)
+      val abilityGameState: GameState = gameState.useAbility(abilityId, UseData(s.defaultEnemy.id))
       abilityGameState.gameLog.events
         .ofType[GameEvent.EffectAddedToCharacter]
         .causedBy(abilityId).size shouldBe 1
@@ -37,7 +39,7 @@ class InfectionSpec
         abilityGameState
           .endTurn()
           .passTurn(s.p(0)(1).character.id)
-          .basicAttack(s.p(0)(1).character.id, s.p(1)(0).character.id)
+          .basicAttack(s.p(0)(1).character.id, s.defaultEnemy.id)
 
       attackGameState.gameLog.events
         .ofType[GameEvent.CharacterDamaged]
@@ -47,13 +49,13 @@ class InfectionSpec
 
     "be able to trigger loop correctly" in {
       val newGameState: GameState = gameState
-        .useAbilityOnCharacter(abilityId, s.p(1)(0).character.id)
+        .useAbility(abilityId, UseData(s.defaultEnemy.id))
         .endTurn()
         .passTurn(s.p(0)(1).character.id)
-        .useAbilityOnCharacter(abilityId2, s.p(1)(1).character.id)
+        .useAbility(abilityId2, UseData(s.p(1)(1).character.id))
         .endTurn()
-        .passTurn(s.p(0)(0).character.id)
-        .basicAttack(s.p(0)(1).character.id, s.p(1)(0).character.id)
+        .passTurn(s.defaultCharacter.id)
+        .basicAttack(s.p(0)(1).character.id, s.defaultEnemy.id)
 
       newGameState.gameLog.events
         .ofType[GameEvent.CharacterDied]

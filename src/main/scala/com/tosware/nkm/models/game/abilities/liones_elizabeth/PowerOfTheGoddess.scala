@@ -23,7 +23,6 @@ case class PowerOfTheGoddess(abilityId: AbilityId, parentCharacterId: CharacterI
     gameState.hexMap.cells.toCoords
   override def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] =
     rangeCellCoords.whereFriendsOfC(parentCharacterId)
-
   override def use(useData: UseData)(implicit random: Random, gameState: GameState): GameState = {
     val targets = targetsInRange.characters.map(_.id)
     targets.foldLeft(gameState) { (acc, cid) =>

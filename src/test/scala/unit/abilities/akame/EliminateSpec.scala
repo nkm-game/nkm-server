@@ -3,9 +3,10 @@ package unit.abilities.akame
 import com.tosware.nkm.models.GameStateValidator
 import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.akame.Eliminate
-import com.tosware.nkm.models.game.character.CharacterMetadata
+import com.tosware.nkm.models.game.ability.UseData
 import com.tosware.nkm.models.game.event.GameEvent.CharacterDamaged
-import helpers.{TestUtils, scenarios}
+import com.tosware.nkm.models.game.hex.TestHexMapName
+import helpers.{TestScenario, TestUtils}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
@@ -14,23 +15,18 @@ class EliminateSpec
     with Matchers
     with TestUtils {
   private val abilityMetadata = Eliminate.metadata
-  private val characterMetadata = CharacterMetadata.empty()
-    .copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
-  private val s = scenarios.Simple1v1TestScenario(characterMetadata)
-  implicit private val gameState: GameState = s.gameState
-  private val abilityId = s.p(0)(0).character.state.abilities.head.id
+  private val s = TestScenario.generate(TestHexMapName.Simple1v1, abilityMetadata.id)
+  private val abilityId = s.defaultAbilityId
 
   abilityMetadata.name must {
     "be able to use" in {
-      val r = GameStateValidator()
-        .validateAbilityUseOnCharacter(s.p(0)(0).character.owner.id, abilityId, s.p(1)(0).character.id)
-      assertCommandSuccess(r)
+      assertCommandSuccess {
+        GameStateValidator()(s.gameState)
+          .validateAbilityUse(s.owners(0), abilityId, UseData(s.defaultEnemy.id))
+      }
     }
     "deal damage" in {
-      val newGameState: GameState = gameState.useAbilityOnCharacter(
-        abilityId,
-        s.p(1)(0).character.id,
-      )
+      val newGameState: GameState = s.gameState.useAbility(abilityId, UseData(s.defaultEnemy.id))
 
       newGameState
         .gameLog

@@ -23,8 +23,8 @@ import com.tosware.nkm.models.game.abilities.sinon.*
 import com.tosware.nkm.models.game.ability.AbilityMetadata
 import com.tosware.nkm.serializers.NkmJsonProtocol
 
-case class AbilityMetadatasProvider() extends NkmJsonProtocol {
-  def getAbilityMetadatas: Seq[AbilityMetadata] = Seq(
+case class AbilityMetadataProvider() extends NkmJsonProtocol {
+  def getAbilityMetadataSeq: Seq[AbilityMetadata] = Seq(
     Murasame.metadata,
     Eliminate.metadata,
     LittleWarHorn.metadata,

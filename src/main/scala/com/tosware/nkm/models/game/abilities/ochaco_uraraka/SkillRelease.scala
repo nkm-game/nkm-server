@@ -20,7 +20,6 @@ object SkillRelease extends NkmConf.AutoExtract {
           | - enemies that lost Zero Gravity are Stunned for {stunDuration}t.""".stripMargin,
     )
 }
-
 case class SkillRelease(abilityId: AbilityId, parentCharacterId: CharacterId)
     extends Ability(abilityId)
     with Usable {
@@ -33,13 +32,11 @@ case class SkillRelease(abilityId: AbilityId, parentCharacterId: CharacterId)
       .filter(_.state.name == CharacterEffectName.ZeroGravity)
       .flatMap(_.parentCharacter.parentCellOpt)
       .map(_.coordinates)
-
   override def use(useData: UseData)(implicit random: Random, gameState: GameState): GameState = {
     val zeroGravityEffects =
       gameState
         .effects
         .filter(_.state.name == CharacterEffectName.ZeroGravity)
-
     val eidsToRemove: Set[CharacterEffectId] = zeroGravityEffects.map(_.id)
     val characterIdsToStun =
       zeroGravityEffects
@@ -47,11 +44,9 @@ case class SkillRelease(abilityId: AbilityId, parentCharacterId: CharacterId)
         .filter(_.isEnemyForC(parentCharacterId))
         .map(_.id)
         .toSeq
-
     val effectsRemovedGs =
       gameState
         .removeEffects(eidsToRemove.toSeq)(random, id)
-
     characterIdsToStun.foldLeft(effectsRemovedGs) { (acc, cid) =>
       val stunEffect = effects.Stun(randomUUID(), metadata.variables("stunDuration"))
       acc.addEffect(cid, stunEffect)(random, id)

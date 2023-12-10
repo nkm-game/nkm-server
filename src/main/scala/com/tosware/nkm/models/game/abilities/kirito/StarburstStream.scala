@@ -23,6 +23,7 @@ object StarburstStream extends NkmConf.AutoExtract {
           |
           |Range: linear, {range}""".stripMargin,
       traits = Seq(AbilityTrait.ContactEnemy),
+      targetsMetadata = Seq(AbilityTargetMetadata.SingleCharacter),
     )
 
   val doubleAttackEnabledKey = "doubleAttackEnabled"
@@ -30,33 +31,25 @@ object StarburstStream extends NkmConf.AutoExtract {
 
 case class StarburstStream(abilityId: AbilityId, parentCharacterId: CharacterId)
     extends Ability(abilityId)
-    with UsableOnCharacter
+    with Usable
     with GameEventListener {
-  override val metadata = StarburstStream.metadata
-
-  def doubleAttackEnabled(implicit gameState: GameState): Boolean =
-    state.variables.get(doubleAttackEnabledKey)
-      .map(_.parseJson.convertTo[Boolean])
-      .getOrElse(false)
-
+  override val metadata: AbilityMetadata = StarburstStream.metadata
+  private def doubleAttackEnabled(implicit gameState: GameState): Boolean =
+    state.variables.get(doubleAttackEnabledKey).exists(_.parseJson.convertTo[Boolean])
   private def setDoubleAttackEnabled()(implicit random: Random, gameState: GameState): GameState =
     gameState.setAbilityVariable(id, doubleAttackEnabledKey, true.toJson.toString)
-
   override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =
     parentCell.get.getArea(metadata.variables("range"), Set(SearchFlag.StraightLine)).toCoords
-
   override def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] =
     rangeCellCoords.whereSeenEnemiesOfC(parentCharacterId)
-
-  override def use(target: CharacterId, useData: UseData)(implicit random: Random, gameState: GameState): GameState = {
+  override def use(useData: UseData)(implicit random: Random, gameState: GameState): GameState = {
+    val target = useData.firstAsCharacterId
     val enabledGs = setDoubleAttackEnabled()
-
     val times = metadata.variables("attackTimes")
     (0 to times).foldLeft(enabledGs) { (acc, _) =>
       hitAndDamageCharacter(target, Damage(DamageType.True, metadata.variables("damage")))(random, acc)
     }
   }
-
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
     e match {
       case CharacterBasicAttacked(_, _, _, _, characterId, _) =>
@@ -71,4 +64,6 @@ case class StarburstStream(abilityId: AbilityId, parentCharacterId: CharacterId)
         gameState.refreshBasicAttack(parentCharacterId)(random, id)
       case _ => gameState
     }
+  override def useChecks(implicit useData: UseData, gameState: GameState): Set[UseCheck] =
+    super.useChecks ++ characterBaseUseChecks(useData.firstAsCharacterId)
 }

@@ -26,13 +26,11 @@ case class Contact(
     parentCharacterId: CharacterId,
 ) extends Ability(abilityId) with GameEventListener {
   import Contact.*
-  override val metadata = Contact.metadata
-
-  def hitCharacterIds(implicit gameState: GameState): Set[CharacterId] =
+  override val metadata: AbilityMetadata = Contact.metadata
+  private def hitCharacterIds(implicit gameState: GameState): Set[CharacterId] =
     state.variables.get(hitCharacterIdsKey)
       .map(_.parseJson.convertTo[Set[CharacterId]])
       .getOrElse(Set.empty)
-
   def hitCharacter(characterId: CharacterId)(implicit random: Random, gameState: GameState): GameState = {
     val damage = Damage(DamageType.Physical, metadata.variables("damage"))
 
@@ -41,7 +39,6 @@ case class Contact(
 
     hitAndDamageCharacter(characterId, damage)(random, ngs)
   }
-
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
     e match {
       case GameEvent.CharacterBasicAttacked(_, _, _, _, characterId, targetCharacterId) =>

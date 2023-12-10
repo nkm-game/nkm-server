@@ -19,44 +19,44 @@ object MjolnirDestinyImpulse extends NkmConf.AutoExtract {
           |
           |Range: circular, {range}
           |Radius: circular, {radius}""".stripMargin,
+      targetsMetadata = Seq(AbilityTargetMetadata.SingleCoordinate),
     )
 }
 
 case class MjolnirDestinyImpulse(abilityId: AbilityId, parentCharacterId: CharacterId)
     extends Ability(abilityId)
-    with UsableOnCoordinates
+    with Usable
     with GameEventListener {
   override val metadata: AbilityMetadata = MjolnirDestinyImpulse.metadata
-
   override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =
     parentCell.get.coordinates.getCircle(metadata.variables("range")).whereExists
-
   override def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] =
     rangeCellCoords
-
-  override def use(target: HexCoordinates, useData: UseData)(implicit
+  override def use(useData: UseData)(implicit
       random: Random,
       gameState: GameState,
   ): GameState = {
-    val targets = target.getCircle(metadata.variables("radius")).whereSeenEnemiesOfC(parentCharacterId).characters.map(_.id)
+    val targets =
+      useData.firstAsCoordinates
+        .getCircle(metadata.variables("radius"))
+        .whereSeenEnemiesOfC(parentCharacterId)
+        .characters.map(_.id)
     val damage = Damage(DamageType.Physical, metadata.variables("damage"))
     val ngs = targets.foldLeft(gameState)((acc, cid) => hitAndDamageCharacter(cid, damage)(random, acc))
-
-    val refreshAbility =
+    val shouldRefreshAbility =
       ngs
         .newGameEventsSince(gameState)
         .ofType[GameEvent.CharacterDied]
         .nonEmpty
-
-    ngs.setAbilityEnabled(id, newEnabled = refreshAbility)
+    ngs.setAbilityEnabled(id, newEnabled = shouldRefreshAbility)
   }
-
-  override def useChecks(implicit target: HexCoordinates, useData: UseData, gameState: GameState): Set[UseCheck] =
+  override def useChecks(implicit useData: UseData, gameState: GameState): Set[UseCheck] = {
+    val baseUseChecks = super.useChecks ++ coordinatesBaseUseChecks(useData.firstAsCoordinates)
     if (state.isEnabled)
-      super.useChecks - UseCheck.Base.IsNotOnCooldown - UseCheck.Base.CanBeUsedByParent
+      baseUseChecks - UseCheck.Base.IsNotOnCooldown - UseCheck.Base.CanBeUsedByParent
     else
-      super.useChecks
-
+      baseUseChecks
+  }
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState = e match {
     case GameEvent.TurnFinished(_, _, _, _, _) =>
       val characterIdThatTookAction = gameState.gameLog.characterThatTookActionInTurn(e.turn.number).get

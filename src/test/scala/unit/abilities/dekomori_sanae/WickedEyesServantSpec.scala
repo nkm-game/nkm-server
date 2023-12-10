@@ -20,17 +20,17 @@ class WickedEyesServantSpec
 
   private val moreAdGs: GameState =
     s.gameState
-      .updateCharacter(s.p(1)(0).character.id)(_.modify(_.state.pureAttackPoints).setTo(1000))
+      .updateCharacter(s.defaultEnemy.id)(_.modify(_.state.pureAttackPoints).setTo(1000))
 
   private val takanashiGs: GameState =
     s.gameState
-      .updateCharacter(s.p(1)(0).character.id)(_.modify(_.state.name).setTo("Rikka Takanashi"))
+      .updateCharacter(s.defaultEnemy.id)(_.modify(_.state.name).setTo("Rikka Takanashi"))
 
   private def killGs(gs: GameState) =
     gs.executeCharacter(s.p(1)(1).character.id)(random, s.defaultCharacter.id)
 
   private def damagedGs(gs: GameState) =
-    gs.basicAttack(s.defaultCharacter.id, s.p(1)(0).character.id)
+    gs.basicAttack(s.defaultCharacter.id, s.defaultEnemy.id)
 
   private def damageAmountsCausedByAbility(gs: GameState) =
     gs

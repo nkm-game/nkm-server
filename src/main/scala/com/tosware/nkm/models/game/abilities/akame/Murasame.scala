@@ -26,7 +26,7 @@ object Murasame extends NkmConf.AutoExtract {
 
 case class Murasame(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId)
     with GameEventListener {
-  override val metadata = Murasame.metadata
+  override val metadata: AbilityMetadata = Murasame.metadata
 
   private def killCharacterIfFullyStacked(targetCharacterId: CharacterId)(implicit
       random: Random,

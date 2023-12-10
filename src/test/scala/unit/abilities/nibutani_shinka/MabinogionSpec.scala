@@ -6,7 +6,8 @@ import com.tosware.nkm.models.game.abilities.nibutani_shinka.Mabinogion
 import com.tosware.nkm.models.game.ability.AbilityType
 import com.tosware.nkm.models.game.character.CharacterMetadata
 import com.tosware.nkm.models.game.event.GameEvent
-import helpers.{TestUtils, scenarios}
+import com.tosware.nkm.models.game.hex.TestHexMapName
+import helpers.{TestScenario, TestUtils}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
@@ -16,15 +17,15 @@ class MabinogionSpec
     with TestUtils {
   private val abilityMetadata = Mabinogion.metadata
   private val characterMetadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
-  private val s = scenarios.Simple1v9LineTestScenario(characterMetadata)
+  private val s = TestScenario.generate(TestHexMapName.Simple1v9Line, characterMetadata)
   private val gameState: GameState = s.gameState
-  private val abilityId = s.p(0)(0).character.state.abilities.head.id
+  private val abilityId = s.defaultAbilityId
   private val abilityRange = abilityMetadata.variables("radius")
 
-  private val turnPassedGs = gameState.passTurn(s.p(0)(0).character.id)
+  private val turnPassedGs = gameState.passTurn(s.defaultCharacter.id)
   private val enchantedTurnPassedGs = gameState
-    .addEffect(s.p(0)(0).character.id, effects.AbilityEnchant(randomUUID(), 1, AbilityType.Passive))
-    .passTurn(s.p(0)(0).character.id)
+    .addEffect(s.defaultCharacter.id, effects.AbilityEnchant(randomUUID(), 1, AbilityType.Passive))
+    .passTurn(s.defaultCharacter.id)
 
   private val healEvents = turnPassedGs.gameLog.events
     .ofType[GameEvent.CharacterHealed]
@@ -67,19 +68,19 @@ class MabinogionSpec
       enchantedTurnPassedGs.gameLog.events.ofType[GameEvent.EffectAddedToCharacter].causedBy(abilityId).size shouldBe 1
     }
 
-    "not add shield above treshold" in {
-      val enchantedShield = enchantedTurnPassedGs.characterById(s.p(0)(0).character.id).state.shield
+    "not add shield above Threshold" in {
+      val enchantedShield = enchantedTurnPassedGs.characterById(s.defaultCharacter.id).state.shield
 
-      val shieldSetGs = gameState.setShield(s.p(0)(0).character.id, 2)
-
-      shieldSetGs
-        .passTurn(s.p(0)(0).character.id)
-        .characterById(s.p(0)(0).character.id).state.shield shouldBe 2
+      val shieldSetGs = gameState.setShield(s.defaultCharacter.id, 2)
 
       shieldSetGs
-        .addEffect(s.p(0)(0).character.id, effects.AbilityEnchant(randomUUID(), 1, AbilityType.Passive))
-        .passTurn(s.p(0)(0).character.id)
-        .characterById(s.p(0)(0).character.id).state.shield shouldBe enchantedShield
+        .passTurn(s.defaultCharacter.id)
+        .characterById(s.defaultCharacter.id).state.shield shouldBe 2
+
+      shieldSetGs
+        .addEffect(s.defaultCharacter.id, effects.AbilityEnchant(randomUUID(), 1, AbilityType.Passive))
+        .passTurn(s.defaultCharacter.id)
+        .characterById(s.defaultCharacter.id).state.shield shouldBe enchantedShield
     }
   }
 }

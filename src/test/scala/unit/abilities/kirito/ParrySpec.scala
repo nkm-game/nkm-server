@@ -2,7 +2,8 @@ package unit.abilities.kirito
 
 import com.tosware.nkm.models.game.abilities.kirito.Parry
 import com.tosware.nkm.models.game.character.CharacterMetadata
-import helpers.{TestUtils, scenarios}
+import com.tosware.nkm.models.game.hex.TestHexMapName
+import helpers.{TestScenario, TestUtils}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
@@ -17,14 +18,14 @@ class ParrySpec
       initialHealthPoints = initialHp,
       initialAbilitiesMetadataIds = Seq(abilityMetadata.id),
     )
-  private val s = scenarios.Simple1v1TestScenario(characterMetadata)
+  private val s = TestScenario.generate(TestHexMapName.Simple1v1, characterMetadata)
 
   abilityMetadata.name must {
     "make parent character block attacks sometimes" in {
-      def attack() = s.gameState.basicAttack(s.p(0)(0).character.id, s.p(1)(0).character.id)
+      def attack() = s.gameState.basicAttack(s.defaultCharacter.id, s.defaultEnemy.id)
       def moveAndGetHpChanged() = {
         val attackGameState = attack()
-        attackGameState.characterById(s.p(1)(0).character.id).state.healthPoints != initialHp
+        attackGameState.characterById(s.defaultEnemy.id).state.healthPoints != initialHp
       }
       val results = (0 to 50).map(_ => moveAndGetHpChanged())
       results.toSet should be(Set(true, false))

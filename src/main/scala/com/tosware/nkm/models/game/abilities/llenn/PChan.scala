@@ -21,8 +21,7 @@ case class PChan(
     abilityId: AbilityId,
     parentCharacterId: CharacterId,
 ) extends Ability(abilityId) with GameEventListener {
-  override val metadata = PChan.metadata
-
+  override val metadata: AbilityMetadata = PChan.metadata
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
     e match {
       case GameEvent.CharacterDied(_, _, _, _, characterId) =>

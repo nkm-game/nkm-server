@@ -4,9 +4,10 @@ import com.tosware.nkm.models.GameStateValidator
 import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.hecate.PowerOfExistence
 import com.tosware.nkm.models.game.abilities.kirito.Switch
+import com.tosware.nkm.models.game.ability.UseData
 import com.tosware.nkm.models.game.character.CharacterMetadata
-import com.tosware.nkm.models.game.hex.HexCoordinates
-import helpers.{TestUtils, scenarios}
+import com.tosware.nkm.models.game.hex.{HexCoordinates, TestHexMapName}
+import helpers.{TestScenario, TestUtils}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
@@ -21,33 +22,25 @@ class SwitchSpec
       initialBasicAttackRange = 1,
       initialAbilitiesMetadataIds = Seq(abilityMetadata.id, ultimateAbilityMetadata.id),
     )
-  private val s = scenarios.Simple2v2TestScenario(characterMetadata)
-  implicit private val gameState: GameState = s.gameState.incrementPhase(4)
-  private val abilityId = s.p(0)(0).character.state.abilities.head.id
-  private val ultimateAbilityId = s.p(0)(0).character.state.abilities.tail.head.id
+  private val s = TestScenario.generate(TestHexMapName.Simple2v2, characterMetadata)
+  implicit private val gameState: GameState = s.ultGs
+  private val abilityId = s.defaultAbilityId
+  private val ultimateAbilityId = s.defaultCharacter.state.abilities.tail.head.id
 
   abilityMetadata.name must {
     "be able to switch" when {
       "character is in range of an enemy" in {
-        val ngs = gameState.teleportCharacter(s.p(0)(0).character.id, HexCoordinates(2, 0))
+        val ngs = gameState.teleportCharacter(s.defaultCharacter.id, HexCoordinates(2, 0))
         assertCommandSuccess {
           GameStateValidator()(ngs)
-            .validateAbilityUseOnCharacter(
-              s.p(0)(0).character.owner.id,
-              abilityId,
-              s.p(0)(1).character.id,
-            )
+            .validateAbilityUse(s.owners(0), abilityId, UseData(s.p(0)(1).character.id))
         }
       }
       "friend is in range of an enemy" in {
         val ngs = gameState.teleportCharacter(s.p(0)(1).character.id, HexCoordinates(2, 0))
         assertCommandSuccess {
           GameStateValidator()(ngs)
-            .validateAbilityUseOnCharacter(
-              s.p(0)(0).character.owner.id,
-              abilityId,
-              s.p(0)(1).character.id,
-            )
+            .validateAbilityUse(s.owners(0), abilityId, UseData(s.p(0)(1).character.id))
         }
       }
     }
@@ -55,14 +48,14 @@ class SwitchSpec
     "be able to basic attack after using switch" in {
       val ngs = gameState
         .teleportCharacter(s.p(0)(1).character.id, HexCoordinates(2, 0))
-        .useAbilityOnCharacter(abilityId, s.p(0)(1).character.id)
+        .useAbility(abilityId, UseData(s.p(0)(1).character.id))
 
       assertCommandSuccess {
         GameStateValidator()(ngs)
           .validateBasicAttackCharacter(
-            s.p(0)(0).character.owner.id,
-            s.p(0)(0).character.id,
-            s.p(1)(0).character.id,
+            s.owners(0),
+            s.defaultCharacter.id,
+            s.defaultEnemy.id,
           )
       }
     }
@@ -70,12 +63,12 @@ class SwitchSpec
     "be able to use ultimate ability after using switch" in {
       val ngs = gameState
         .teleportCharacter(s.p(0)(1).character.id, HexCoordinates(2, 0))
-        .useAbilityOnCharacter(abilityId, s.p(0)(1).character.id)
+        .useAbility(abilityId, UseData(s.p(0)(1).character.id))
 
       assertCommandSuccess {
         GameStateValidator()(ngs)
           .validateAbilityUse(
-            s.p(0)(0).character.owner.id,
+            s.owners(0),
             ultimateAbilityId,
           )
       }
@@ -84,13 +77,13 @@ class SwitchSpec
     "not be able to attack and use ultimate ability after using switch" in {
       val ngs = gameState
         .teleportCharacter(s.p(0)(1).character.id, HexCoordinates(2, 0))
-        .useAbilityOnCharacter(abilityId, s.p(0)(1).character.id)
-        .basicAttack(s.defaultCharacter.id, s.p(1)(0).character.id)
+        .useAbility(abilityId, UseData(s.p(0)(1).character.id))
+        .basicAttack(s.defaultCharacter.id, s.defaultEnemy.id)
 
       assertCommandFailure {
         GameStateValidator()(ngs)
           .validateAbilityUse(
-            s.p(0)(0).character.owner.id,
+            s.owners(0),
             ultimateAbilityId,
           )
       }
@@ -99,22 +92,14 @@ class SwitchSpec
     "not be able switch when character and friend are not in range of an enemy" in {
       assertCommandFailure {
         GameStateValidator()(gameState)
-          .validateAbilityUseOnCharacter(
-            s.p(0)(0).character.owner.id,
-            abilityId,
-            s.p(0)(1).character.id,
-          )
+          .validateAbilityUse(s.owners(0), abilityId, UseData(s.p(0)(1).character.id))
       }
     }
 
     "not be able to use switch on enemies" in {
       assertCommandFailure {
         GameStateValidator()(gameState)
-          .validateAbilityUseOnCharacter(
-            s.p(0)(0).character.owner.id,
-            abilityId,
-            s.p(1)(0).character.id,
-          )
+          .validateAbilityUse(s.owners(0), abilityId, UseData(s.defaultEnemy.id))
       }
     }
 
@@ -127,26 +112,18 @@ class SwitchSpec
 
       assertCommandFailure {
         GameStateValidator()(ngs)
-          .validateAbilityUseOnCharacter(
-            s.owners(0),
-            abilityId,
-            s.defaultCharacter.id,
-          )
+          .validateAbilityUse(s.owners(0), abilityId, UseData(s.defaultCharacter.id))
       }
     }
 
     "not be able to use switch on character outside map" in {
       val ngs = gameState
-        .teleportCharacter(s.p(0)(0).character.id, HexCoordinates(2, 0))
+        .teleportCharacter(s.defaultCharacter.id, HexCoordinates(2, 0))
         .removeCharacterFromMap(s.p(0)(1).character.id)
 
       assertCommandFailure {
         GameStateValidator()(ngs)
-          .validateAbilityUseOnCharacter(
-            s.p(0)(0).character.owner.id,
-            abilityId,
-            s.p(0)(1).character.id,
-          )
+          .validateAbilityUse(s.owners(0), abilityId, UseData(s.p(0)(1).character.id))
       }
     }
   }

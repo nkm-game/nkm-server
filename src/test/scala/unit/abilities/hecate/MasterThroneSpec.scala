@@ -2,8 +2,10 @@ package unit.abilities.hecate
 
 import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.hecate.*
+import com.tosware.nkm.models.game.ability.UseData
 import com.tosware.nkm.models.game.character.CharacterMetadata
-import helpers.{TestUtils, scenarios}
+import com.tosware.nkm.models.game.hex.TestHexMapName
+import helpers.{TestScenario, TestUtils}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
@@ -20,7 +22,7 @@ class MasterThroneSpec
         PowerOfExistence.metadata.id,
       )
     )
-  private val s = scenarios.Simple2v2TestScenario(metadata)
+  private val s = TestScenario.generate(TestHexMapName.Simple2v2, metadata)
   private val asterAbilityId =
     s.defaultCharacter.state.abilities(1).id
   private val powerOfExistenceAbilityId =
@@ -31,8 +33,8 @@ class MasterThroneSpec
       .asInstanceOf[MasterThrone]
       .collectedEnergy(gs)
 
-  private val aaGs: GameState = s.gameState.basicAttack(s.p(0)(0).character.id, s.p(1)(0).character.id)
-  private val asterGs: GameState = s.gameState.useAbilityOnCoordinates(asterAbilityId, s.p(0)(1).spawnCoordinates)
+  private val aaGs: GameState = s.gameState.basicAttack(s.defaultCharacter.id, s.defaultEnemy.id)
+  private val asterGs: GameState = s.gameState.useAbility(asterAbilityId, UseData(s.p(0)(1).spawnCoordinates))
   private val poeGs: GameState = s.gameState.useAbility(powerOfExistenceAbilityId)
 
   abilityMetadata.name must {

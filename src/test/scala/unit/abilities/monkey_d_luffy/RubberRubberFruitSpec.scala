@@ -3,7 +3,7 @@ package unit.abilities.monkey_d_luffy
 import com.tosware.nkm.*
 import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.monkey_d_luffy.RubberRubberFruit
-import com.tosware.nkm.models.game.ability.AbilityType
+import com.tosware.nkm.models.game.ability.{AbilityType, UseData}
 import com.tosware.nkm.models.game.event.GameEvent
 import com.tosware.nkm.models.game.hex.{HexCoordinates, TestHexMapName}
 import helpers.{TestScenario, TestUtils}
@@ -17,11 +17,11 @@ class RubberRubberFruitSpec
   private val abilityMetadata = RubberRubberFruit.metadata
   private val s = TestScenario.generate(TestHexMapName.RubberRubberFruit, abilityMetadata.id)
 
-  private val rocket1Gs = s.gameState.useAbilityOnCoordinates(s.defaultAbilityId, HexCoordinates(-6, 0))
-  private val rocket2Gs = s.gameState.useAbilityOnCoordinates(s.defaultAbilityId, HexCoordinates(-4, 0))
-  private val rocket3Gs = s.gameState.useAbilityOnCoordinates(s.defaultAbilityId, HexCoordinates(-2, 0))
-  private val bazookaGs = s.gameState.useAbilityOnCoordinates(s.defaultAbilityId, HexCoordinates(1, 0))
-  private val pistolGs = s.gameState.useAbilityOnCoordinates(s.defaultAbilityId, HexCoordinates(8, 0))
+  private val rocket1Gs = s.gameState.useAbility(s.defaultAbilityId, UseData(HexCoordinates(-6, 0)))
+  private val rocket2Gs = s.gameState.useAbility(s.defaultAbilityId, UseData(HexCoordinates(-4, 0)))
+  private val rocket3Gs = s.gameState.useAbility(s.defaultAbilityId, UseData(HexCoordinates(-2, 0)))
+  private val bazookaGs = s.gameState.useAbility(s.defaultAbilityId, UseData(HexCoordinates(1, 0)))
+  private val pistolGs = s.gameState.useAbility(s.defaultAbilityId, UseData(HexCoordinates(8, 0)))
 
   private val enchantedGs = s.gameState
     .addEffect(
@@ -29,8 +29,8 @@ class RubberRubberFruitSpec
       effects.AbilityEnchant(randomUUID(), 2, AbilityType.Normal),
     )
 
-  private val jetBazookaGs = enchantedGs.useAbilityOnCoordinates(s.defaultAbilityId, HexCoordinates(1, 0))
-  private val jetPistolGs = enchantedGs.useAbilityOnCoordinates(s.defaultAbilityId, HexCoordinates(8, 0))
+  private val jetBazookaGs = enchantedGs.useAbility(s.defaultAbilityId, UseData(HexCoordinates(1, 0)))
+  private val jetPistolGs = enchantedGs.useAbility(s.defaultAbilityId, UseData(HexCoordinates(8, 0)))
 
   abilityMetadata.name must {
     "jump with rocket" in {
@@ -40,11 +40,11 @@ class RubberRubberFruitSpec
     }
 
     "knockback with bazooka" in {
-      s.p(1)(0).character.parentCellOpt(bazookaGs).get.coordinates.toTuple shouldBe (9, 0)
+      s.defaultEnemy.parentCellOpt(bazookaGs).get.coordinates.toTuple shouldBe (9, 0)
     }
 
     "knockback further with jet bazooka" in {
-      s.p(1)(0).character.parentCellOpt(jetBazookaGs).get.coordinates.toTuple shouldBe (13, 0)
+      s.defaultEnemy.parentCellOpt(jetBazookaGs).get.coordinates.toTuple shouldBe (13, 0)
     }
 
     "damage with pistols and bazookas" in {
@@ -62,7 +62,7 @@ class RubberRubberFruitSpec
 
     "not crash when there is no space to move" in {
       val closeToWallGs = s.gameState.teleportCharacter(s.defaultCharacter.id, HexCoordinates(0, 100))
-      closeToWallGs.useAbilityOnCoordinates(s.defaultAbilityId, HexCoordinates(1, 100))
+      closeToWallGs.useAbility(s.defaultAbilityId, UseData(HexCoordinates(1, 100)))
     }
   }
 }

@@ -22,7 +22,6 @@ case class HighLuck(abilityId: AbilityId, parentCharacterId: CharacterId)
     extends Ability(abilityId)
     with GameEventListener {
   override val metadata: AbilityMetadata = HighLuck.metadata
-
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
     e match {
       case GameEvent.DamagePrepared(damagePreparedId, _, _, causedById, _, damage) =>

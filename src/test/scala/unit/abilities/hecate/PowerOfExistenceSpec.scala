@@ -5,7 +5,8 @@ import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.hecate.{MasterThrone, PowerOfExistence}
 import com.tosware.nkm.models.game.character.CharacterMetadata
 import com.tosware.nkm.models.game.event.GameEvent
-import helpers.{TestUtils, scenarios}
+import com.tosware.nkm.models.game.hex.TestHexMapName
+import helpers.{TestScenario, TestUtils}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
@@ -16,11 +17,11 @@ class PowerOfExistenceSpec
   private val abilityMetadata = PowerOfExistence.metadata
   private val metadata =
     CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id, MasterThrone.metadata.id))
-  private val s = scenarios.Simple2v2TestScenario(metadata)
+  private val s = TestScenario.generate(TestHexMapName.Simple2v2, metadata)
   private val masterThroneAbilityId = s.defaultCharacter.state.abilities.tail.head.id
   private val aaGameState: GameState =
     s.ultGs
-      .basicAttack(s.defaultCharacter.id, s.p(1)(0).character.id)
+      .basicAttack(s.defaultCharacter.id, s.defaultEnemy.id)
       .passAllCharactersInCurrentPhase()
 
   private val aGs: GameState = aaGameState.useAbility(s.defaultAbilityId)

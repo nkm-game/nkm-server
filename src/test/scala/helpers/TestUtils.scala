@@ -125,6 +125,16 @@ trait TestUtils
     getTestGameStateCustom(testHexMapName, characterMetadatass)
   }
 
+  protected def getTestGameState(testHexMapName: TestHexMapName, metadata: Seq[CharacterMetadata]): GameState = {
+    val hexMap = HexMapProvider().getTestHexMap(testHexMapName)
+    val characterMetadatass = hexMap.numberOfSpawnsPerPlayer
+      .map { case (playerIndex, numberOfSpawns) =>
+        (0 until numberOfSpawns).map(x => metadata(playerIndex).copy(name = s"p($playerIndex)($x)"))
+      }.toSeq
+
+    getTestGameStateCustom(testHexMapName, characterMetadatass)
+  }
+
   protected def getTestGameStateCustom(
       testHexMapName: TestHexMapName,
       characterMetadatass: Seq[Seq[CharacterMetadata]],

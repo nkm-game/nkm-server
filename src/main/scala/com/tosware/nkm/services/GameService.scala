@@ -95,20 +95,6 @@ class GameService(gameIdTrackerActor: ActorRef)
     (gameActor ? Game.UseAbility(username, request.abilityId, request.useData)).mapTo[CommandResponse]
   }
 
-  def useAbilityOnCoordinates(username: String, request: Action.UseAbilityOnCoordinates): Future[CommandResponse] = {
-    val gameActor: ActorRef = getGameActorOpt(request.lobbyId).getOrElse(return failGameIdDoesNotExist)
-
-    (gameActor ? Game.UseAbilityOnCoordinates(username, request.abilityId, request.target, request.useData))
-      .mapTo[CommandResponse]
-  }
-
-  def useAbilityOnCharacter(username: String, request: Action.UseAbilityOnCharacter): Future[CommandResponse] = {
-    val gameActor: ActorRef = getGameActorOpt(request.lobbyId).getOrElse(return failGameIdDoesNotExist)
-
-    (gameActor ? Game.UseAbilityOnCharacter(username, request.abilityId, request.target, request.useData))
-      .mapTo[CommandResponse]
-  }
-
   def getGameState(gameActor: ActorRef): Future[GameState] =
     (gameActor ? GetState).mapTo[GameState]
 

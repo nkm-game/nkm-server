@@ -11,6 +11,11 @@ object TestScenario extends TestUtils {
       val gameState: GameState = getTestGameState(testHexMapName, metadata)
     }
 
+  def generate(testHexMapName: TestHexMapName, metadata: Seq[CharacterMetadata]): TestScenario =
+    new TestScenario {
+      val gameState: GameState = getTestGameState(testHexMapName, metadata)
+    }
+
   def generate(testHexMapName: TestHexMapName, abilityMetadataId: AbilityMetadataId): TestScenario =
     generate(testHexMapName, CharacterMetadata.withAbility(abilityMetadataId))
 }

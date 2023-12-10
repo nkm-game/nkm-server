@@ -18,23 +18,22 @@ object DrainTouch extends NkmConf.AutoExtract {
           |
           |Range: linear, {range}""".stripMargin,
       traits = Seq(AbilityTrait.ContactEnemy),
+      targetsMetadata = Seq(AbilityTargetMetadata.SingleCharacter),
     )
 }
 
 case class DrainTouch(abilityId: AbilityId, parentCharacterId: CharacterId)
     extends Ability(abilityId)
-    with UsableOnCharacter {
+    with Usable {
   override val metadata: AbilityMetadata = DrainTouch.metadata
-
   override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =
     parentCell.fold(Set.empty[HexCoordinates])(
       _.getArea(metadata.variables("range"), Set(SearchFlag.StraightLine)).toCoords
     )
-
   override def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] =
     rangeCellCoords.whereSeenEnemiesOfC(parentCharacterId)
-
-  override def use(target: CharacterId, useData: UseData)(implicit random: Random, gameState: GameState): GameState = {
+  override def use(useData: UseData)(implicit random: Random, gameState: GameState): GameState = {
+    val target = useData.firstAsCharacterId
     val hitGs = hitAndDamageCharacter(target, Damage(DamageType.Magical, metadata.variables("damage")))
     val amountToHealOpt =
       hitGs
@@ -48,4 +47,6 @@ case class DrainTouch(abilityId: AbilityId, parentCharacterId: CharacterId)
       hitGs.heal(parentCharacterId, amountToHeal)(random, id)
     }
   }
+  override def useChecks(implicit useData: UseData, gameState: GameState): Set[UseCheck] =
+    super.useChecks ++ characterBaseUseChecks(useData.firstAsCharacterId)
 }

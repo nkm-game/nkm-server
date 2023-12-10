@@ -4,7 +4,8 @@ import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.ryuko_matoi.ScissorBlade
 import com.tosware.nkm.models.game.character.{CharacterMetadata, StatType}
 import com.tosware.nkm.models.game.effects.StatNerf
-import helpers.{TestUtils, scenarios}
+import com.tosware.nkm.models.game.hex.TestHexMapName
+import helpers.{TestScenario, TestUtils}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
@@ -15,13 +16,13 @@ class ScissorBladeSpec
 
   private val abilityMetadata = ScissorBlade.metadata
   private val characterMetadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
-  private val s = scenarios.Simple1v1TestScenario(characterMetadata)
+  private val s = TestScenario.generate(TestHexMapName.Simple1v1, characterMetadata)
   implicit private val gameState: GameState = s.gameState
 
   abilityMetadata.name must {
     "decrease target physical defense" in {
-      val attackedGameState = gameState.basicAttack(s.p(0)(0).character.id, s.p(1)(0).character.id)
-      val statNerfEffects = attackedGameState.characterById(s.p(1)(0).character.id).state.effects.ofType[StatNerf]
+      val attackedGameState = gameState.basicAttack(s.defaultCharacter.id, s.defaultEnemy.id)
+      val statNerfEffects = attackedGameState.characterById(s.defaultEnemy.id).state.effects.ofType[StatNerf]
       statNerfEffects should not be empty
       statNerfEffects.head.statType should be(StatType.PhysicalDefense)
     }

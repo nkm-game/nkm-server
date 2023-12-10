@@ -23,8 +23,7 @@ object ScissorBlade extends NkmConf.AutoExtract {
 
 case class ScissorBlade(abilityId: AbilityId, parentCharacterId: CharacterId)
     extends Ability(abilityId) with GameEventListener {
-  override val metadata = ScissorBlade.metadata
-
+  override val metadata: AbilityMetadata = ScissorBlade.metadata
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
     e match {
       case GameEvent.CharacterPreparedToAttack(_, _, _, _, characterId, targetCharacterId) =>

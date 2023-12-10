@@ -20,15 +20,15 @@ class RubberHumanSpec
   private val s = TestScenario.generate(TestHexMapName.Simple1v1, abilityMetadata.id)
   private val rangedAttackerGs =
     s.gameState
-      .updateCharacter(s.p(1)(0).character.id)(_.modify(_.state.attackType).setTo(AttackType.Ranged))
+      .updateCharacter(s.defaultEnemy.id)(_.modify(_.state.attackType).setTo(AttackType.Ranged))
   private val meleeAttackerGs =
     s.gameState
-      .updateCharacter(s.p(1)(0).character.id)(_.modify(_.state.attackType).setTo(AttackType.Melee))
+      .updateCharacter(s.defaultEnemy.id)(_.modify(_.state.attackType).setTo(AttackType.Melee))
 
   def getDamageDealtByAttack(gs: GameState): Int =
     gs
       .passTurn(s.defaultCharacter.id)
-      .basicAttack(s.p(1)(0).character.id, s.defaultCharacter.id)
+      .basicAttack(s.defaultEnemy.id, s.defaultCharacter.id)
       .gameLog
       .events
       .ofType[CharacterDamaged]
@@ -40,7 +40,7 @@ class RubberHumanSpec
       .addEffect(
         s.defaultCharacter.id,
         Poison(randomUUID(), 2, Damage(DamageType.Physical, 30)),
-      )(random, s.p(1)(0).character.id)
+      )(random, s.defaultEnemy.id)
       .passTurn(s.defaultCharacter.id)
       .gameLog
       .events

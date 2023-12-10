@@ -3,9 +3,11 @@ package unit.abilities.liones_elizabeth
 import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.aqua.NaturesBeauty
 import com.tosware.nkm.models.game.abilities.liones_elizabeth.*
+import com.tosware.nkm.models.game.ability.UseData
 import com.tosware.nkm.models.game.character.CharacterMetadata
 import com.tosware.nkm.models.game.event.GameEvent.{CharacterHealed, HealAmplified}
-import helpers.{TestUtils, scenarios}
+import com.tosware.nkm.models.game.hex.TestHexMapName
+import helpers.{TestScenario, TestUtils}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
@@ -22,13 +24,12 @@ class ImmenseHealingPowersSpec
       PowerOfTheGoddess.metadata.id,
     )
   )
-  private val s = scenarios.Simple2v2TestScenario(metadata)
+  private val s = TestScenario.generate(TestHexMapName.Simple2v2, metadata)
 
   private val invigorateAbilityId =
-    s.p(0)(0).character.state.abilities(2).id
-
+    s.defaultCharacter.state.abilities(2).id
   private val potgAbilityId =
-    s.p(0)(0).character.state.abilities(3).id
+    s.defaultCharacter.state.abilities(3).id
 
   private def dmgGs(dmg: Int): GameState =
     s.gameState.damageCharacter(s.p(0)(1).character.id, Damage(DamageType.True, dmg))
@@ -38,16 +39,16 @@ class ImmenseHealingPowersSpec
   private val dmgGs95: GameState = dmgGs(95)
 
   private def invigorateAppliedGs(gs: GameState): GameState =
-    gs.useAbilityOnCharacter(invigorateAbilityId, s.p(0)(1).character.id)
+    gs.useAbility(invigorateAbilityId, UseData(s.p(0)(1).character.id))
       .endTurn()
-      .passTurn(s.p(1)(0).character.id)
+      .passTurn(s.defaultEnemy.id)
       .passTurn(s.p(0)(1).character.id)
 
   private def potgUsedGs(gs: GameState): GameState =
     gs.useAbility(potgAbilityId)
 
   private def naturesBeautyUsedGs(gs: GameState): GameState =
-    gs.basicAttack(s.p(0)(0).character.id, s.p(0)(1).character.id)
+    gs.basicAttack(s.defaultCharacter.id, s.p(0)(1).character.id)
 
   abilityMetadata.name must {
     "apply heal amplifying effect" in {

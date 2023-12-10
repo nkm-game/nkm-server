@@ -18,34 +18,30 @@ object SummerBreeze extends NkmConf.AutoExtract {
           |
           |Range: linear, {range}""".stripMargin,
       relatedEffectIds = Seq(effects.Stun.metadata.id),
+      targetsMetadata = Seq(AbilityTargetMetadata.SingleCharacter),
     )
 }
 
 case class SummerBreeze(abilityId: AbilityId, parentCharacterId: CharacterId)
-    extends Ability(abilityId) with UsableOnCharacter {
+    extends Ability(abilityId) with Usable {
   override val metadata: AbilityMetadata = SummerBreeze.metadata
-
   override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =
     parentCell.fold(Set.empty[HexCoordinates])(
       _.getArea(metadata.variables("range"), Set(SearchFlag.StraightLine)).toCoords
     )
-
   override def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] =
     rangeCellCoords.whereSeenEnemiesOfC(parentCharacterId)
-
   private def stunAndDamage(target: CharacterId)(implicit random: Random, gameState: GameState): GameState =
     gameState
       .addEffect(target, effects.Stun(randomUUID(), metadata.variables("stunDuration")))(random, id)
       .damageCharacter(target, Damage(DamageType.Magical, metadata.variables("damage")))(random, id)
-
-  override def use(target: CharacterId, useData: UseData)(implicit random: Random, gameState: GameState): GameState = {
+  override def use(useData: UseData)(implicit random: Random, gameState: GameState): GameState = {
+    val target = useData.firstAsCharacterId
     val direction = gameState.getDirection(parentCharacterId, target).get
-
     val (knockbackGs, knockbackResult) =
       gameState
         .abilityHitCharacter(id, target)
         .knockbackCharacter(target, direction, metadata.variables("knockback"))(random, id)
-
     knockbackResult match {
       case KnockbackResult.HitNothing =>
         knockbackGs
@@ -53,4 +49,6 @@ case class SummerBreeze(abilityId: AbilityId, parentCharacterId: CharacterId)
         stunAndDamage(target)(random, knockbackGs)
     }
   }
+  override def useChecks(implicit useData: UseData, gameState: GameState): Set[UseCheck] =
+    super.useChecks ++ characterBaseUseChecks(useData.firstAsCharacterId)
 }

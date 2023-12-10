@@ -5,7 +5,8 @@ import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.liones_elizabeth.PowerOfTheGoddess
 import com.tosware.nkm.models.game.character.CharacterMetadata
 import com.tosware.nkm.models.game.event.GameEvent
-import helpers.{TestUtils, scenarios}
+import com.tosware.nkm.models.game.hex.TestHexMapName
+import helpers.{TestScenario, TestUtils}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
@@ -15,15 +16,15 @@ class PowerOfTheGodessSpec
     with TestUtils {
   private val abilityMetadata = PowerOfTheGoddess.metadata
   private val metadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
-  private val s = scenarios.Simple2v2TestScenario(metadata)
-  private val gameState: GameState = s.gameState.incrementPhase(4)
-  private val abilityId = s.p(0)(0).character.state.abilities.head.id
+  private val s = TestScenario.generate(TestHexMapName.Simple2v2, metadata)
+  private val gameState: GameState = s.ultGs
+  private val abilityId = s.defaultAbilityId
 
   abilityMetadata.name must {
     "be able to use" in {
       assertCommandSuccess {
         GameStateValidator()(gameState)
-          .validateAbilityUse(s.p(0)(0).ownerId, abilityId)
+          .validateAbilityUse(s.owners(0), abilityId)
       }
     }
 

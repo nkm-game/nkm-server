@@ -32,28 +32,22 @@ object GodrobeSenketsu extends NkmConf.AutoExtract {
   val bonusDamageKey: String = "bonusDamage"
   val abilityEffectIdsKey: String = "abilityEffectIds"
 }
-
 case class GodrobeSenketsu(
     abilityId: AbilityId,
     parentCharacterId: CharacterId,
 ) extends Ability(abilityId) with Usable with GameEventListener {
-  override val metadata = GodrobeSenketsu.metadata
-
+  override val metadata: AbilityMetadata = GodrobeSenketsu.metadata
   private def damageBonus(implicit gameState: GameState): Int =
     state.variables.get(bonusDamageKey).map(_.toInt).getOrElse(0)
-
   private def abilityEffects()(implicit random: Random, gameState: GameState): Set[CharacterEffectId] =
     state.variables.get(abilityEffectIdsKey).map(_.parseJson.convertTo[Set[CharacterEffectId]]).getOrElse(Set.empty)
-
   private def changeDamageBonus(newAdBonus: Int)(implicit random: Random, gameState: GameState): GameState =
     gameState.setAbilityVariable(id, bonusDamageKey, newAdBonus.toString)
-
   private def changeAbilityEffects(aes: Set[CharacterEffectId])(implicit
       random: Random,
       gameState: GameState,
   ): GameState =
     gameState.setAbilityVariable(id, abilityEffectIdsKey, aes.toJson.toString)
-
   private def applyAbilityEffects()(implicit random: Random, gameState: GameState): GameState = {
     val e1 = effects.Fly(randomUUID(), Int.MaxValue)
     val e2 = effects.StatBuff(randomUUID(), Int.MaxValue, StatType.AttackPoints, damageBonus)
@@ -63,7 +57,6 @@ case class GodrobeSenketsu(
       .addEffect(parentCharacterId, e1)(random, id)
       .addEffect(parentCharacterId, e2)(random, id)
   }
-
   override def use(useData: UseData)(implicit random: Random, gameState: GameState): GameState =
     if (state.isEnabled) {
       changeDamageBonus(0)
@@ -79,7 +72,6 @@ case class GodrobeSenketsu(
 
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState = {
     if (!state.isEnabled) return gameState
-
     e match {
       case TurnFinished(_, _, _, _, _) =>
         val characterIdThatTookAction = gameState.gameLog.characterThatTookActionInTurn(e.turn.number).get

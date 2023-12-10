@@ -180,15 +180,14 @@ trait WSTrait extends UserApiTrait {
   ): WebsocketGameResponse =
     sendWSRequestG(GameRoute.BasicAttack, BasicAttack(lobbyId, attackingCharacterId, targetCharacterId).toJson.toString)
 
-  def useAbilityOnCharacter(
+  def useAbility(
       lobbyId: String,
       abilityId: AbilityId,
-      target: CharacterId,
       useData: UseData = UseData(),
   )(implicit wsClient: WSProbe): WebsocketGameResponse =
     sendWSRequestG(
-      GameRoute.UseAbilityOnCharacter,
-      UseAbilityOnCharacter(lobbyId, abilityId, target, useData).toJson.toString,
+      GameRoute.UseAbility,
+      UseAbility(lobbyId, abilityId, useData).toJson.toString,
     )
 
   def endTurn(lobbyId: String)(implicit wsClient: WSProbe): WebsocketGameResponse =

@@ -5,13 +5,14 @@ import com.tosware.nkm.models.GameStateValidator
 import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.hecate.Aster
 import com.tosware.nkm.models.game.abilities.ryuko_matoi.FiberDecapitation
+import com.tosware.nkm.models.game.ability.UseData
 import com.tosware.nkm.models.game.character.{AttackType, CharacterMetadata}
 import com.tosware.nkm.models.game.effects.Invisibility
 import com.tosware.nkm.models.game.event.GameEvent
 import com.tosware.nkm.models.game.hex.{HexCoordinates, TestHexMapName}
 import helpers.{TestScenario, TestUtils}
-import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatest.Checkpoints.Checkpoint
+import org.scalatest.wordspec.AnyWordSpecLike
 
 class InvisibilitySpec
     extends AnyWordSpecLike
@@ -70,11 +71,11 @@ class InvisibilitySpec
       implicit val gameState: GameState = enemyTurnGs
       assertCommandFailure {
         GameStateValidator()
-          .validateAbilityUseOnCharacter(s.owners(1), defaultEnemyContactAbilityId, s.defaultCharacter.id)
+          .validateAbilityUse(s.owners(1), defaultEnemyContactAbilityId, UseData(s.defaultCharacter.id))
       }
       assertCommandSuccess {
         GameStateValidator()
-          .validateAbilityUseOnCharacter(s.owners(1), defaultEnemyContactAbilityId, s.p(0)(1).character.id)
+          .validateAbilityUse(s.owners(1), defaultEnemyContactAbilityId, UseData(s.p(0)(1).character.id))
       }
       gameState.abilityById(defaultEnemyContactAbilityId).targetsInRange should not contain s.defaultCoordinates
     }
@@ -121,7 +122,7 @@ class InvisibilitySpec
       val setupTpGs = enemyTurnGs
         .teleportCharacter(s.defaultCharacter.id, HexCoordinates(-4, 0))
         .teleportCharacter(s.p(0)(1).character.id, HexCoordinates(-1, 0))
-      val tpGs = setupTpGs.useAbilityOnCharacter(defaultEnemyContactAbilityId, s.p(0)(1).character.id)
+      val tpGs = setupTpGs.useAbility(defaultEnemyContactAbilityId, UseData(s.p(0)(1).character.id))
 
       val cp = new Checkpoint
       cp(assertEffectDoesNotExistOfType[effects.Invisibility](s.defaultCharacter.id)(tpGs))
@@ -132,7 +133,7 @@ class InvisibilitySpec
     // not sure if it should work this way, commented for now
 //    "reveal parent and hit it on collision with enemy move ability" in {
 //      val aInterruptGs =
-//        enemyTurnCollisionGs.useAbilityOnCharacter(defaultEnemyContactAbilityId, s.p(0)(1).character.id)
+//        enemyTurnCollisionGs.useAbility(defaultEnemyContactAbilityId, UseData(s.p(0)(1).character.id))
 //
 //      assertEffectDoesNotExistsOfType[effects.Invisibility](s.defaultCharacter.id)(aInterruptGs)
 //      aInterruptGs.gameLog.events
@@ -172,11 +173,11 @@ class InvisibilitySpec
       assertEffectDoesNotExistOfType[effects.Invisibility](s.defaultCharacter.id)(basicAttackGs)
     }
     "reveal parent on parent contact ability use" in {
-      val aGs = eGs.useAbilityOnCharacter(defaultCharacterContactAbilityId, s.defaultEnemy.id)
+      val aGs = eGs.useAbility(defaultCharacterContactAbilityId, UseData(s.defaultEnemy.id))
       assertEffectDoesNotExistOfType[effects.Invisibility](s.defaultCharacter.id)(aGs)
     }
     "not reveal parent on parent non-contact ability use" in {
-      val aGs = eGs.useAbilityOnCoordinates(defaultCharacterAsterId, s.p(1)(0).spawnCoordinates)
+      val aGs = eGs.useAbility(defaultCharacterAsterId, UseData(s.p(1)(0).spawnCoordinates))
       assertEffectExistsOfType[effects.Invisibility](s.defaultCharacter.id)(aGs)
     }
     "not reveal parent when only one of the invisibility effects is expired" in {

@@ -21,8 +21,7 @@ case class SnipersSight(
     abilityId: AbilityId,
     parentCharacterId: CharacterId,
 ) extends Ability(abilityId) with BasicAttackOverride {
-  override val metadata = SnipersSight.metadata
-
+  override val metadata: AbilityMetadata = SnipersSight.metadata
   override def basicAttackCells(implicit gameState: GameState): Set[HexCoordinates] = {
     if (parentCell.isEmpty) return Set.empty
     parentCharacter.state.attackType match {
@@ -36,10 +35,8 @@ case class SnipersSight(
         parentCell.get.getArea(parentCharacter.state.basicAttackRange).toCoords
     }
   }
-
   override def basicAttackTargets(implicit gameState: GameState): Set[HexCoordinates] =
     parentCharacter.defaultBasicAttackTargets
-
   override def basicAttack(targetCharacterId: CharacterId)(implicit random: Random, gameState: GameState): GameState =
     parentCharacter.defaultBasicAttack(targetCharacterId)
 }

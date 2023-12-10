@@ -20,23 +20,21 @@ object OneHundredEightPoundPhoenix extends NkmConf.AutoExtract {
           |Range: linear, stops at walls and enemies, {range}
           |""".stripMargin,
       traits = Seq(AbilityTrait.ContactEnemy),
+      targetsMetadata = Seq(AbilityTargetMetadata.SingleCharacter),
     )
 }
 
 case class OneHundredEightPoundPhoenix(abilityId: AbilityId, parentCharacterId: CharacterId)
-    extends Ability(abilityId) with UsableOnCharacter {
-  override val metadata = OneHundredEightPoundPhoenix.metadata
-
-  override def rangeCellCoords(implicit gameState: GameState) =
+    extends Ability(abilityId) with Usable {
+  override val metadata: AbilityMetadata = OneHundredEightPoundPhoenix.metadata
+  override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =
     parentCell.fold(Set.empty[HexCell])(_.getArea(
       metadata.variables("range"),
       Set(SearchFlag.StopAtWalls, SearchFlag.StopAfterEnemies, SearchFlag.StraightLine),
       friendlyPlayerIdOpt = Some(parentCharacter.owner.id),
     )).toCoords
-
-  override def targetsInRange(implicit gameState: GameState) =
+  override def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] =
     rangeCellCoords.whereSeenEnemiesOfC(parentCharacterId)
-
   private def sendShockwave(direction: HexDirection)(implicit random: Random, gameState: GameState): GameState = {
     val targetOpt =
       parentCell.get.firstCharacterInLine(direction, metadata.variables("range"), c => c.isEnemyForC(parentCharacterId))
@@ -44,8 +42,8 @@ case class OneHundredEightPoundPhoenix(abilityId: AbilityId, parentCharacterId: 
       gameState.damageCharacter(c.id, Damage(DamageType.Physical, metadata.variables("damage")))(random, id)
     )
   }
-
-  override def use(target: CharacterId, useData: UseData)(implicit random: Random, gameState: GameState): GameState = {
+  override def use(useData: UseData)(implicit random: Random, gameState: GameState): GameState = {
+    val target = useData.firstAsCharacterId
     val targetCoordinates = gameState.characterById(target).parentCellOpt.get.coordinates
     val targetDirection = parentCell.get.coordinates.getDirection(targetCoordinates).get
 
@@ -55,4 +53,6 @@ case class OneHundredEightPoundPhoenix(abilityId: AbilityId, parentCharacterId: 
     g3
   }
 
+  override def useChecks(implicit useData: UseData, gameState: GameState): Set[UseCheck] =
+    super.useChecks ++ characterBaseUseChecks(useData.firstAsCharacterId)
 }

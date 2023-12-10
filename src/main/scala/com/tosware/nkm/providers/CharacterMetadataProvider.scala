@@ -23,9 +23,9 @@ import com.tosware.nkm.models.game.abilities.sinon.*
 import com.tosware.nkm.models.game.character.{AttackType, CharacterMetadata}
 import com.tosware.nkm.serializers.NkmJsonProtocol
 
-case class CharacterMetadatasProvider() extends NkmJsonProtocol {
+case class CharacterMetadataProvider() extends NkmJsonProtocol {
 
-  def getCharacterMetadatas: Seq[CharacterMetadata] = Seq(
+  def getCharacterMetadataSeq: Seq[CharacterMetadata] = Seq(
     CharacterMetadata(
       name = "『 』",
       attackType = AttackType.Melee,
@@ -471,7 +471,7 @@ case class CharacterMetadatasProvider() extends NkmJsonProtocol {
     ),
   )
 
-  def getBotMetadatas: Seq[CharacterMetadata] = 1 to 30 map (i =>
+  def getBotMetadataSeq: Seq[CharacterMetadata] = 1 to 30 map (i =>
     CharacterMetadata(
       name = s"Bot$i",
       AttackType.Melee,

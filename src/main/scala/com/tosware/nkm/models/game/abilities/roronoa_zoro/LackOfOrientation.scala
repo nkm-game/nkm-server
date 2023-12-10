@@ -24,24 +24,19 @@ case class LackOfOrientation(abilityId: AbilityId, parentCharacterId: CharacterI
     extends Ability(abilityId)
     with BasicMoveOverride {
   import LackOfOrientation.*
-  override val metadata = LackOfOrientation.metadata
-
-  def timesMoved(implicit gameState: GameState): Int =
+  override val metadata: AbilityMetadata = LackOfOrientation.metadata
+  private def timesMoved(implicit gameState: GameState): Int =
     state.variables.get(timesMovedKey)
       .map(_.parseJson.convertTo[Int])
       .getOrElse(0)
-
-  def timesLost(implicit gameState: GameState): Int =
+  private def timesLost(implicit gameState: GameState): Int =
     state.variables.get(timesLostKey)
       .map(_.parseJson.convertTo[Int])
       .getOrElse(0)
-
   private def setTimesMoved(value: Int)(implicit random: Random, gameState: GameState): GameState =
     gameState.setAbilityVariable(id, timesMovedKey, value.toJson.toString)
-
   private def setTimesLost(value: Int)(implicit random: Random, gameState: GameState): GameState =
     gameState.setAbilityVariable(id, timesLostKey, value.toJson.toString)
-
   override def basicMove(path: Seq[HexCoordinates])(implicit random: Random, gameState: GameState): GameState = {
     @tailrec
     def generateLostPath(acc: Seq[HexCoordinates], coordsLeft: Int): Seq[HexCoordinates] = {
@@ -71,5 +66,4 @@ case class LackOfOrientation(abilityId: AbilityId, parentCharacterId: CharacterI
 
     parentCharacter.defaultBasicMove(newPath)(random, ngs)
   }
-
 }

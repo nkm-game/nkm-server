@@ -243,10 +243,6 @@ case class GameState(
         characterById(targetCharacterId)
       case AbilityUsed(_, _, _, _, abilityId) =>
         abilityById(abilityId).parentCharacter(this)
-      case AbilityUsedOnCoordinates(_, _, _, _, abilityId, _) =>
-        abilityById(abilityId).parentCharacter(this)
-      case AbilityUsedOnCharacter(_, _, _, _, abilityId, _) =>
-        abilityById(abilityId).parentCharacter(this)
       case AbilityUseFinished(_, _, _, _, abilityId) =>
         abilityById(abilityId).parentCharacter(this)
       case AbilityVariableSet(_, _, _, _, abilityId, _, _) =>
@@ -1024,6 +1020,18 @@ case class GameState(
       .modify(_.characterIdsOutsideMap).setTo(characterIdsOutsideMap + characterId)
       .logEvent(CharacterRemovedFromMap(randomUUID(), phase, turn, causedById, characterId))
   }
+  def swapCharacters(characterId1: CharacterId, characterId2: CharacterId)(implicit
+      random: Random,
+      gameState: GameState,
+      causedById: String,
+  ): GameState = {
+    val character1 = characterById(characterId1)
+    val character2 = characterById(characterId2)
+    removeCharacterFromMap(character1.id)
+      .removeCharacterFromMap(character2.id)
+      .placeCharacter(character2.parentCellOpt.get.coordinates, character1.id)
+      .placeCharacter(character1.parentCellOpt.get.coordinates, character2.id)
+  }
 
   def takeActionWithCharacter(characterId: CharacterId)(implicit random: Random): GameState = {
     implicit val causedById: String = characterId
@@ -1118,32 +1126,6 @@ case class GameState(
     val newGameState = takeActionWithCharacter(parentCharacter.id)
       .logEvent(AbilityUsed(randomUUID(), phase, turn, causedById, abilityId))
     ability.use(useData)(random, newGameState)
-      .afterAbilityUse(abilityId)
-  }
-
-  def useAbilityOnCoordinates(abilityId: AbilityId, target: HexCoordinates, useData: UseData = UseData())(implicit
-      random: Random
-  ): GameState = {
-    implicit val causedById: String = abilityId
-    val ability = abilityById(abilityId).asInstanceOf[Ability & UsableOnCoordinates]
-    val parentCharacter = ability.parentCharacter(this)
-
-    val newGameState = takeActionWithCharacter(parentCharacter.id)
-      .logEvent(AbilityUsedOnCoordinates(randomUUID(), phase, turn, causedById, abilityId, target))
-    ability.use(target, useData)(random, newGameState)
-      .afterAbilityUse(abilityId)
-  }
-
-  def useAbilityOnCharacter(abilityId: AbilityId, target: CharacterId, useData: UseData = UseData())(implicit
-      random: Random
-  ): GameState = {
-    implicit val causedById: String = abilityId
-    val ability = abilityById(abilityId).asInstanceOf[Ability & UsableOnCharacter]
-    val parentCharacter = ability.parentCharacter(this)
-
-    val newGameState = takeActionWithCharacter(parentCharacter.id)
-      .logEvent(AbilityUsedOnCharacter(randomUUID(), phase, turn, causedById, abilityId, target))
-    ability.use(target, useData)(random, newGameState)
       .afterAbilityUse(abilityId)
   }
 

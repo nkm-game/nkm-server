@@ -27,11 +27,11 @@ case class LittleWarHorn(abilityId: AbilityId, parentCharacterId: CharacterId, e
     extends Ability(abilityId)
     with Usable
     with GameEventListener {
-  override val metadata = LittleWarHorn.metadata
+  override val metadata: AbilityMetadata = LittleWarHorn.metadata
 
   private val duration = metadata.variables("duration")
 
-  def updateEffectToListen(effectId: CharacterEffectId)(implicit gameState: GameState): LittleWarHorn =
+  private def updateEffectToListen(effectId: CharacterEffectId): LittleWarHorn =
     this.modify(_.effectIdToListen).setTo(effectId)
 
   override def use(useData: UseData)(implicit random: Random, gameState: GameState): GameState = {

@@ -21,6 +21,7 @@ object CrackTheSky extends NkmConf.AutoExtract {
           |Deal {damage}+B physical damage to all hit enemies.
           |
           |Trap detonation radius: circular, {radius}""".stripMargin,
+      targetsMetadata = Seq(AbilityTargetMetadata.SingleCoordinate),
     )
 
   val markOfTheWindAbilityIdKey = "markOfTheWindAbilityId"
@@ -47,7 +48,7 @@ case class CrackTheSky(abilityId: AbilityId, parentCharacterId: CharacterId)
       .get
 
   override def use(useData: UseData)(implicit random: Random, gameState: GameState): GameState = {
-    val targetCoords = useData.data.parseJson.convertTo[Seq[HexCoordinates]]
+    val targetCoords = useData.allAsCoordinates
     val trapEffectIds = targetCoords.toCells.flatMap(_.effects.ofType[hex_effects.MarkOfTheWind]).map(_.id)
 
     val damage = Damage(DamageType.Physical, parentCharacter.state.attackPoints + metadata.variables("damage"))
@@ -73,12 +74,11 @@ case class CrackTheSky(abilityId: AbilityId, parentCharacterId: CharacterId)
   }
 
   override def useChecks(implicit useData: UseData, gameState: GameState): Set[UseCheck] = {
-    val targetCoords = useData.data.parseJson.convertTo[Seq[HexCoordinates]]
-    super.useChecks ++ Seq(
-      (targetCoords.toCells.size == targetCoords.size) ->
-        "Not all selected coordinates exist.",
+    val targetCoords = useData.allAsCoordinates
+
+    super.useChecks ++ targetCoords.map(UseCheck.Coordinates.ExistsOnMap) ++ Seq(
       targetCoords.toCells.forall(_.effects.ofType[hex_effects.MarkOfTheWind].nonEmpty) ->
-        "Not all selected coordinates have traps on them.",
+        "Not all selected coordinates have traps on them."
     )
   }
 

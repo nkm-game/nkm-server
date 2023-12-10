@@ -19,27 +19,27 @@ object FinalSolution extends NkmConf.AutoExtract {
           |Range: linear, {range}
           |""".stripMargin,
       traits = Seq(AbilityTrait.ContactEnemy),
+      targetsMetadata = Seq(AbilityTargetMetadata.SingleCharacter),
     )
 }
 
 case class FinalSolution(abilityId: AbilityId, parentCharacterId: CharacterId)
     extends Ability(abilityId)
-    with UsableOnCharacter {
-  override val metadata = FinalSolution.metadata
-
+    with Usable {
+  override val metadata: AbilityMetadata = FinalSolution.metadata
   override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =
     parentCell.get.getArea(metadata.variables("range"), Set(SearchFlag.StraightLine)).toCoords
-
   override def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] =
     rangeCellCoords.whereSeenEnemiesOfC(parentCharacterId)
-
-  override def use(target: CharacterId, useData: UseData)(implicit random: Random, gameState: GameState): GameState = {
+  override def use(useData: UseData)(implicit random: Random, gameState: GameState): GameState = {
+    val target = useData.firstAsCharacterId
     val targetMissingHp = gameState.characterById(target).state.missingHp
     val damage = Damage(DamageType.Physical, targetMissingHp)
     val bleedDamage = Damage(DamageType.True, metadata.variables("bleedDamage"))
     val bleedEffect = effects.Poison(randomUUID(), metadata.variables("bleedDuration"), bleedDamage)
-
     hitAndDamageCharacter(target, damage)
       .addEffect(target, bleedEffect)(random, id)
   }
+  override def useChecks(implicit useData: UseData, gameState: GameState): Set[UseCheck] =
+    super.useChecks ++ characterBaseUseChecks(useData.firstAsCharacterId)
 }

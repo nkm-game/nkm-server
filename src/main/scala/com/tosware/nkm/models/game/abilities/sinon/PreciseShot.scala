@@ -16,24 +16,25 @@ object PreciseShot extends NkmConf.AutoExtract {
         """Shoot an enemy dealing {damage} physical damage.
           |
           |Range: circular, {range}""".stripMargin,
+      targetsMetadata = Seq(AbilityTargetMetadata.SingleCharacter),
     )
 }
 
 case class PreciseShot(abilityId: AbilityId, parentCharacterId: CharacterId)
-    extends Ability(abilityId) with UsableOnCharacter {
-  override val metadata = PreciseShot.metadata
-
+    extends Ability(abilityId) with Usable {
+  override val metadata: AbilityMetadata = PreciseShot.metadata
   override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =
     parentCell.get.coordinates.getCircle(metadata.variables("range")).whereExists
-
   override def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] =
     rangeCellCoords.whereSeenEnemiesOfC(parentCharacterId)
-
-  override def use(target: CharacterId, useData: UseData)(implicit random: Random, gameState: GameState): GameState =
+  override def use(useData: UseData)(implicit random: Random, gameState: GameState): GameState = {
+    val target = useData.firstAsCharacterId
     gameState
       .abilityHitCharacter(id, target)
       .damageCharacter(target, Damage(DamageType.Physical, metadata.variables("damage")))(random, id)
-
-  override def useChecks(implicit target: CharacterId, useData: UseData, gameState: GameState): Set[UseCheck] =
-    super.useChecks + UseCheck.TargetCharacter.IsEnemy
+  }
+  override def useChecks(implicit useData: UseData, gameState: GameState): Set[UseCheck] =
+    super.useChecks
+      ++ characterBaseUseChecks(useData.firstAsCharacterId)
+      + UseCheck.Character.IsEnemy(useData.firstAsCharacterId)
 }

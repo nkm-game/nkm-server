@@ -20,12 +20,12 @@ class SkillReleaseSpec
   private val flyGs: GameState =
     s.ultGs
       .addEffect(s.defaultCharacter.id, effects.Fly(randomUUID(), 10))
-      .addEffect(s.p(1)(0).character.id, effects.Fly(randomUUID(), 10))
+      .addEffect(s.defaultEnemy.id, effects.Fly(randomUUID(), 10))
       .useAbility(s.defaultAbilityId)
   private val zeroGravityGs: GameState =
     s.ultGs
       .addEffect(s.defaultCharacter.id, effects.Fly(randomUUID(), 10, ZeroGravity.metadata))
-      .addEffect(s.p(1)(0).character.id, effects.Fly(randomUUID(), 10, ZeroGravity.metadata))
+      .addEffect(s.defaultEnemy.id, effects.Fly(randomUUID(), 10, ZeroGravity.metadata))
       .useAbility(s.defaultAbilityId)
 
   abilityMetadata.name must {
@@ -41,20 +41,20 @@ class SkillReleaseSpec
 
     "remove Zero Gravity effects" in {
       assertEffectDoesNotExistOfType[effects.Fly](s.defaultCharacter.id)(zeroGravityGs)
-      assertEffectDoesNotExistOfType[effects.Fly](s.p(1)(0).character.id)(zeroGravityGs)
+      assertEffectDoesNotExistOfType[effects.Fly](s.defaultEnemy.id)(zeroGravityGs)
     }
 
     "not work unrelated Fly effects" in {
       assertEffectExistsOfType[effects.Fly](s.defaultCharacter.id)(flyGs)
-      assertEffectExistsOfType[effects.Fly](s.p(1)(0).character.id)(flyGs)
+      assertEffectExistsOfType[effects.Fly](s.defaultEnemy.id)(flyGs)
 
       assertEffectDoesNotExistOfType[effects.Stun](s.defaultCharacter.id)(flyGs)
-      assertEffectDoesNotExistOfType[effects.Stun](s.p(1)(0).character.id)(flyGs)
+      assertEffectDoesNotExistOfType[effects.Stun](s.defaultEnemy.id)(flyGs)
     }
 
     "stun enemies that had Zero Gravity" in {
       assertEffectDoesNotExistOfType[effects.Stun](s.defaultCharacter.id)(zeroGravityGs)
-      assertEffectExistsOfType[effects.Stun](s.p(1)(0).character.id)(zeroGravityGs)
+      assertEffectExistsOfType[effects.Stun](s.defaultEnemy.id)(zeroGravityGs)
     }
   }
 }

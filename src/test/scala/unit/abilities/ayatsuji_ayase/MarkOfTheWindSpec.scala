@@ -7,11 +7,11 @@ import com.tosware.nkm.models.game.abilities.ayatsuji_ayase.{CrackTheSky, MarkOf
 import com.tosware.nkm.models.game.ability.UseData
 import com.tosware.nkm.models.game.character.CharacterMetadata
 import com.tosware.nkm.models.game.event.GameEvent
-import com.tosware.nkm.models.game.hex.HexCoordinates
-import helpers.{TestUtils, scenarios}
+import com.tosware.nkm.models.game.hex.{HexCoordinates, TestHexMapName}
+import helpers.{TestScenario, TestUtils}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
-import spray.json.*
+import UseData.HexCoordinatesMarker
 
 class MarkOfTheWindSpec
     extends AnyWordSpecLike
@@ -24,7 +24,7 @@ class MarkOfTheWindSpec
         CrackTheSky.metadata.id,
       )
     )
-  private val s = scenarios.Spacey1v1TestScenario(metadata)
+  private val s = TestScenario.generate(TestHexMapName.Spacey1v1, metadata)
   private val gameState: GameState = s.gameState
   private val markAbilityId =
     s.defaultAbilityId
@@ -32,97 +32,97 @@ class MarkOfTheWindSpec
     s.defaultCharacter.state.abilities(1).id
 
   private val markGs: GameState = gameState
-    .useAbilityOnCoordinates(markAbilityId, HexCoordinates(0, 0))
+    .useAbility(markAbilityId, UseData(HexCoordinates(0, 0)))
     .passAllCharactersInCurrentPhase()
 
   private val crackGs: GameState = markGs
-    .useAbility(crackAbilityId, UseData(CoordinateSeq((0, 0)).toJson.toString))
+    .useAbility(crackAbilityId, UseData(CoordinateSeq((0, 0))))
     .passAllCharactersInCurrentPhase()
 
   private val doubleMarkGs: GameState = markGs
-    .useAbilityOnCoordinates(markAbilityId, HexCoordinates(1, 0))
+    .useAbility(markAbilityId, UseData(HexCoordinates(1, 0)))
     .passAllCharactersInCurrentPhase()
 
   private val doubleCrackGs: GameState = doubleMarkGs
-    .useAbility(crackAbilityId, UseData(CoordinateSeq((0, 0), (1, 0)).toJson.toString))
+    .useAbility(crackAbilityId, UseData(CoordinateSeq((0, 0), (1, 0))))
     .passAllCharactersInCurrentPhase()
 
   private val fiveMarkGs: GameState = doubleMarkGs
-    .useAbilityOnCoordinates(markAbilityId, HexCoordinates(2, 0)).endTurn().passTurn(s.p(1)(0).character.id)
-    .useAbilityOnCoordinates(markAbilityId, HexCoordinates(3, 0)).endTurn().passTurn(s.p(1)(0).character.id)
-    .useAbilityOnCoordinates(markAbilityId, HexCoordinates(4, 0)).endTurn().passTurn(s.p(1)(0).character.id)
+    .useAbility(markAbilityId, UseData(HexCoordinates(2, 0))).endTurn().passTurn(s.defaultEnemy.id)
+    .useAbility(markAbilityId, UseData(HexCoordinates(3, 0))).endTurn().passTurn(s.defaultEnemy.id)
+    .useAbility(markAbilityId, UseData(HexCoordinates(4, 0))).endTurn().passTurn(s.defaultEnemy.id)
 
   private val sixMarkGs: GameState = fiveMarkGs
-    .useAbilityOnCoordinates(markAbilityId, HexCoordinates(5, 0)).endTurn().passTurn(s.p(1)(0).character.id)
+    .useAbility(markAbilityId, UseData(HexCoordinates(5, 0))).endTurn().passTurn(s.defaultEnemy.id)
 
   MarkOfTheWind.metadata.name must {
     "be able to set up traps" in {
       assertCommandSuccess {
         GameStateValidator()(gameState)
-          .validateAbilityUseOnCoordinates(s.owners(0), markAbilityId, HexCoordinates(0, 0))
+          .validateAbilityUse(s.owners(0), markAbilityId, UseData(HexCoordinates(0, 0)))
       }
 
       assertCommandSuccess {
         GameStateValidator()(crackGs)
-          .validateAbilityUseOnCoordinates(s.owners(0), markAbilityId, HexCoordinates(0, 0))
+          .validateAbilityUse(s.owners(0), markAbilityId, UseData(HexCoordinates(0, 0)))
       }
     }
 
     "not be able to set up traps on the same tile" in {
       assertCommandFailure {
         GameStateValidator()(markGs)
-          .validateAbilityUseOnCoordinates(s.owners(0), markAbilityId, HexCoordinates(0, 0))
+          .validateAbilityUse(s.owners(0), markAbilityId, UseData(HexCoordinates(0, 0)))
       }
     }
 
     "not be able to set up traps outside map" in {
       assertCommandFailure {
         GameStateValidator()(gameState)
-          .validateAbilityUseOnCoordinates(s.owners(0), markAbilityId, HexCoordinates(-10, 0))
+          .validateAbilityUse(s.owners(0), markAbilityId, UseData(HexCoordinates(-10, 0)))
       }
     }
 
     "be able to detonate traps" in {
       assertCommandSuccess {
         GameStateValidator()(markGs)
-          .validateAbilityUse(s.owners(0), crackAbilityId, UseData(CoordinateSeq((0, 0)).toJson.toString))
+          .validateAbilityUse(s.owners(0), crackAbilityId, UseData(CoordinateSeq((0, 0))))
       }
 
       assertCommandSuccess {
         GameStateValidator()(doubleMarkGs)
-          .validateAbilityUse(s.owners(0), crackAbilityId, UseData(CoordinateSeq((0, 0)).toJson.toString))
+          .validateAbilityUse(s.owners(0), crackAbilityId, UseData(CoordinateSeq((0, 0))))
       }
 
       assertCommandSuccess {
         GameStateValidator()(doubleMarkGs)
-          .validateAbilityUse(s.owners(0), crackAbilityId, UseData(CoordinateSeq((1, 0)).toJson.toString))
+          .validateAbilityUse(s.owners(0), crackAbilityId, UseData(CoordinateSeq((1, 0))))
       }
 
       assertCommandSuccess {
         GameStateValidator()(doubleMarkGs)
-          .validateAbilityUse(s.owners(0), crackAbilityId, UseData(CoordinateSeq((0, 0), (1, 0)).toJson.toString))
+          .validateAbilityUse(s.owners(0), crackAbilityId, UseData(CoordinateSeq((0, 0), (1, 0))))
       }
     }
 
     "not be able to detonate non existent traps" in {
       assertCommandFailure {
         GameStateValidator()(markGs)
-          .validateAbilityUse(s.owners(0), crackAbilityId, UseData(CoordinateSeq((0, 0), (1, 0)).toJson.toString))
+          .validateAbilityUse(s.owners(0), crackAbilityId, UseData(CoordinateSeq((0, 0), (1, 0))))
       }
 
       assertCommandFailure {
         GameStateValidator()(markGs)
-          .validateAbilityUse(s.owners(0), crackAbilityId, UseData(CoordinateSeq((1, 0)).toJson.toString))
+          .validateAbilityUse(s.owners(0), crackAbilityId, UseData(CoordinateSeq((1, 0))))
       }
 
       assertCommandFailure {
         GameStateValidator()(markGs)
-          .validateAbilityUse(s.owners(0), crackAbilityId, UseData(CoordinateSeq((0, 0), (-1000, 0)).toJson.toString))
+          .validateAbilityUse(s.owners(0), crackAbilityId, UseData(CoordinateSeq((0, 0), (-1000, 0))))
       }
 
       assertCommandFailure {
         GameStateValidator()(markGs)
-          .validateAbilityUse(s.owners(0), crackAbilityId, UseData(CoordinateSeq((-1000, 0)).toJson.toString))
+          .validateAbilityUse(s.owners(0), crackAbilityId, UseData(CoordinateSeq((-1000, 0))))
       }
     }
 

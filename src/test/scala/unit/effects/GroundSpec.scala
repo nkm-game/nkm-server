@@ -5,6 +5,7 @@ import com.tosware.nkm.models.GameStateValidator
 import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.kirito.Switch
 import com.tosware.nkm.models.game.abilities.sinon.TacticalEscape
+import com.tosware.nkm.models.game.ability.UseData
 import com.tosware.nkm.models.game.character.CharacterMetadata
 import com.tosware.nkm.models.game.effects.Ground
 import com.tosware.nkm.models.game.hex.TestHexMapName
@@ -35,10 +36,10 @@ class GroundSpec
     }
     "disallow using move abilities" in {
       assertCommandFailure {
-        defaultValidator.validateAbilityUseOnCharacter(
+        defaultValidator.validateAbilityUse(
           s.owners(0),
           s.defaultAbilityId,
-          s.p(0)(1).character.id,
+          UseData(s.p(0)(1).character.id),
         )
       }
     }

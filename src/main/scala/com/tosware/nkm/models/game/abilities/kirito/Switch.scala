@@ -20,13 +20,13 @@ object Switch extends NkmConf.AutoExtract {
           |Range: circular, {range}""".stripMargin,
       relatedEffectIds = Seq(effects.AbilityUnlock.metadata.id),
       traits = Seq(AbilityTrait.Move),
+      targetsMetadata = Seq(AbilityTargetMetadata.SingleCharacter),
     )
 }
 
 case class Switch(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId)
-    with UsableOnCharacter {
-  override val metadata = Switch.metadata
-
+    with Usable {
+  override val metadata: AbilityMetadata = Switch.metadata
   override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] = {
     if (parentCell.isEmpty) return Set.empty
     val rangeCoords = parentCell.get.coordinates.getCircle(metadata.variables("range")) - parentCell.get.coordinates
@@ -40,20 +40,20 @@ case class Switch(abilityId: AbilityId, parentCharacterId: CharacterId) extends 
     if (enemiesAaCoords.contains(parentCell.get.coordinates)) rangeCoords
     else rangeCoords.intersect(enemiesAaCoords)
   }
-
   override def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] =
     rangeCellCoords.whereFriendsOfC(parentCharacterId)
-
-  override def use(target: CharacterId, useData: UseData)(implicit random: Random, gameState: GameState) = {
+  override def use(useData: UseData)(implicit random: Random, gameState: GameState): GameState = {
     val target1 = gameState.characterById(parentCharacterId)
-    val target2 = gameState.characterById(target)
+    val target2 = gameState.characterById(useData.firstAsCharacterId)
     implicit val causedById: String = id
 
     gameState
-      .removeCharacterFromMap(target1.id)
-      .removeCharacterFromMap(target2.id)
-      .placeCharacter(target2.parentCellOpt.get.coordinates, target1.id)
-      .placeCharacter(target1.parentCellOpt.get.coordinates, target2.id)
+      .swapCharacters(target1.id, target2.id)
       .refreshAnything(parentCharacterId)
+  }
+
+  override def useChecks(implicit useData: UseData, gameState: GameState): Set[UseCheck] = {
+    val target = useData.firstAsCharacterId
+    super.useChecks ++ characterBaseUseChecks(target) + UseCheck.Character.IsFriend(target)
   }
 }

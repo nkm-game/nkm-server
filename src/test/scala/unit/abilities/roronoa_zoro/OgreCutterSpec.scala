@@ -3,10 +3,10 @@ package unit.abilities.roronoa_zoro
 import com.tosware.nkm.models.GameStateValidator
 import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.roronoa_zoro.OgreCutter
-import com.tosware.nkm.models.game.character.CharacterMetadata
+import com.tosware.nkm.models.game.ability.UseData
 import com.tosware.nkm.models.game.event.GameEvent
-import com.tosware.nkm.models.game.hex.HexCoordinates
-import helpers.{TestUtils, scenarios}
+import com.tosware.nkm.models.game.hex.{HexCoordinates, TestHexMapName}
+import helpers.{TestScenario, TestUtils}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
@@ -16,50 +16,48 @@ class OgreCutterSpec
     with TestUtils {
 
   private val abilityMetadata = OgreCutter.metadata
-  private val metadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
-  private val s = scenarios.OgreCutterTestScenario(metadata)
-  implicit private val gameState: GameState = s.gameState
-  private val abilityId = s.p(0)(0).character.state.abilities.head.id
+  private val s = TestScenario.generate(TestHexMapName.OgreCutter, abilityMetadata.id)
+  private val abilityId = s.defaultAbilityId
 
   abilityMetadata.name must {
     "be able to use" in {
       assertCommandSuccess {
-        GameStateValidator()
-          .validateAbilityUseOnCharacter(s.p(0)(0).character.owner.id, abilityId, s.p(1)(0).character.id)
+        GameStateValidator()(s.gameState)
+          .validateAbilityUse(s.owners(0), abilityId, UseData(s.defaultEnemy.id))
       }
     }
 
     "not be able to use if teleport cell is not free to stand" in {
-      val newGameState = gameState.teleportCharacter(s.p(1)(0).character.id, HexCoordinates(4, 0))
+      val newGameState = s.gameState.teleportCharacter(s.defaultEnemy.id, HexCoordinates(4, 0))
       val targetsInRange = newGameState.abilityById(abilityId).targetsInRange(newGameState)
-      val targetCoordinates = s.p(1)(0).character.parentCellOpt(newGameState).get.coordinates
+      val targetCoordinates = s.defaultEnemy.parentCellOpt(newGameState).get.coordinates
 
       targetsInRange should not contain targetCoordinates
 
       assertCommandFailure {
         GameStateValidator()(newGameState)
-          .validateAbilityUseOnCharacter(s.p(0)(0).character.owner.id, abilityId, s.p(1)(0).character.id)
+          .validateAbilityUse(s.owners(0), abilityId, UseData(s.defaultEnemy.id))
       }
     }
 
     "not be able to use if teleport cell does not exist" in {
-      val newGameState = gameState.teleportCharacter(s.p(1)(0).character.id, HexCoordinates(5, 0))
+      val newGameState = s.gameState.teleportCharacter(s.defaultEnemy.id, HexCoordinates(5, 0))
       assertCommandFailure {
         GameStateValidator()(newGameState)
-          .validateAbilityUseOnCharacter(s.p(0)(0).character.owner.id, abilityId, s.p(1)(0).character.id)
+          .validateAbilityUse(s.owners(0), abilityId, UseData(s.defaultEnemy.id))
       }
     }
 
     "be able to damage and teleport" in {
-      val newGameState: GameState = gameState.useAbilityOnCharacter(abilityId, s.p(1)(0).character.id)
+      val newGameState: GameState = s.gameState.useAbility(abilityId, UseData(s.defaultEnemy.id))
 
       newGameState
         .gameLog.events
-        .causedBy(s.p(0)(0).character.id)
+        .causedBy(s.defaultCharacter.id)
         .ofType[GameEvent.CharacterDamaged] should not be empty
 
       newGameState.hexMap
-        .getCellOfCharacter(s.p(0)(0).character.id).get
+        .getCellOfCharacter(s.defaultCharacter.id).get
         .coordinates.toTuple shouldBe (5, 0)
     }
   }

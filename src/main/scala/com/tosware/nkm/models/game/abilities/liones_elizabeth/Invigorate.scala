@@ -17,28 +17,25 @@ object Invigorate extends NkmConf.AutoExtract {
           |
           |Range: circular, {range}""".stripMargin,
       relatedEffectIds = Seq(effects.HealOverTime.metadata.id),
+      targetsMetadata = Seq(AbilityTargetMetadata.SingleCharacter),
     )
 }
 
 case class Invigorate(abilityId: AbilityId, parentCharacterId: CharacterId)
-    extends Ability(abilityId) with UsableOnCharacter {
-  override val metadata = Invigorate.metadata
-
+    extends Ability(abilityId) with Usable {
+  override val metadata: AbilityMetadata = Invigorate.metadata
   override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =
     gameState.hexMap.cells.toCoords
-
   override def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] =
     rangeCellCoords.whereFriendsOfC(parentCharacterId)
-
-  override def use(target: CharacterId, useData: UseData)(implicit random: Random, gameState: GameState): GameState =
+  override def use(useData: UseData)(implicit random: Random, gameState: GameState): GameState =
     gameState
       .addEffect(
-        target,
+        useData.firstAsCharacterId,
         effects.HealOverTime(randomUUID(), metadata.variables("duration"), metadata.variables("heal")),
       )(random, id)
 
-  override def useChecks(implicit target: CharacterId, useData: UseData, gameState: GameState): Set[UseCheck] =
-    super.useChecks ++ Seq(
-      UseCheck.TargetCharacter.IsFriend
-    )
+  override def useChecks(implicit useData: UseData, gameState: GameState): Set[UseCheck] =
+    super.useChecks
+      ++ characterBaseUseChecks(useData.firstAsCharacterId) + UseCheck.Character.IsFriend(useData.firstAsCharacterId)
 }

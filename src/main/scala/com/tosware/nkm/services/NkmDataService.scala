@@ -14,15 +14,16 @@ class NkmDataService extends NkmTimeouts {
 
   def getHexMaps: Seq[HexMapTemplate] = HexMapProvider().getHexMaps
 
-  def getCharacterMetadatas: Seq[CharacterMetadata] = CharacterMetadatasProvider().getCharacterMetadatas
+  def getCharacterMetadataSeq: Seq[CharacterMetadata] = CharacterMetadataProvider().getCharacterMetadataSeq
     .filter(_.initialAbilitiesMetadataIds.size >= 3)
 
-  def getAbilityMetadatas: Seq[AbilityMetadata] = AbilityMetadatasProvider().getAbilityMetadatas
+  def getAbilityMetadataSeq: Seq[AbilityMetadata] = AbilityMetadataProvider().getAbilityMetadataSeq
 
-  def getCharacterEffectMetadatas: Seq[CharacterEffectMetadata] =
-    CharacterEffectMetadatasProvider().getCharacterEffectMetadatas
+  def getCharacterEffectMetadataSeq: Seq[CharacterEffectMetadata] =
+    CharacterEffectMetadataProvider().getCharacterEffectMetadata
 
-  def getHexCellEffectMetadatas: Seq[HexCellEffectMetadata] = HexCellEffectMetadatasProvider().getHexCellEffectMetadatas
+  def getHexCellEffectMetadataSeq: Seq[HexCellEffectMetadata] =
+    HexCellEffectMetadataProvider().getHexCellEffectMetadataSeq
 
   def getCurrentVersion: String = scala.io.Source.fromResource("version.txt").mkString.trim
 }

@@ -53,12 +53,6 @@ object Game {
 
   case class UseAbility(playerId: PlayerId, abilityId: AbilityId, useData: UseData) extends Command
 
-  case class UseAbilityOnCoordinates(playerId: PlayerId, abilityId: AbilityId, target: HexCoordinates, useData: UseData)
-      extends Command
-
-  case class UseAbilityOnCharacter(playerId: PlayerId, abilityId: AbilityId, target: CharacterId, useData: UseData)
-      extends Command
-
   // sent only by self /////////
   //
   case class CharacterSelectTimeout(pickNumber: Int) extends Command
@@ -108,22 +102,6 @@ object Game {
   ) extends Event
 
   case class AbilityUsed(id: GameId, playerId: PlayerId, abilityId: AbilityId, useData: UseData) extends Event
-
-  case class AbilityUsedOnCoordinates(
-      id: GameId,
-      playerId: PlayerId,
-      abilityId: AbilityId,
-      target: HexCoordinates,
-      useData: UseData,
-  ) extends Event
-
-  case class AbilityUsedOnCharacter(
-      id: GameId,
-      playerId: PlayerId,
-      abilityId: AbilityId,
-      target: CharacterId,
-      useData: UseData,
-  ) extends Event
 
   // CLOCK TIMEOUTS /////////////////////
   //
@@ -377,27 +355,6 @@ class Game(id: GameId)(implicit nkmDataService: NkmDataService) extends Persiste
     }
   }
 
-  def useAbilityOnCoordinates(
-      playerId: PlayerId,
-      abilityId: AbilityId,
-      target: HexCoordinates,
-      useData: UseData,
-  ): Unit = {
-    val e = AbilityUsedOnCoordinates(id, playerId, abilityId, target, useData)
-    persistAndPublish(e) { _ =>
-      updateGameState(gameState.useAbilityOnCoordinates(abilityId, target, useData))
-      sender() ! Success()
-    }
-  }
-
-  def useAbilityOnCharacter(playerId: PlayerId, abilityId: AbilityId, target: CharacterId, useData: UseData): Unit = {
-    val e = AbilityUsedOnCharacter(id, playerId, abilityId, target, useData)
-    persistAndPublish(e) { _ =>
-      updateGameState(gameState.useAbilityOnCharacter(abilityId, target, useData))
-      sender() ! Success()
-    }
-  }
-
   override def receive: Receive = {
     case GetState =>
       sender() ! gameState
@@ -453,14 +410,6 @@ class Game(id: GameId)(implicit nkmDataService: NkmDataService) extends Persiste
     case UseAbility(playerId, abilityId, useData) =>
       validate(v().validateAbilityUse(playerId, abilityId, useData))(() =>
         useAbility(playerId, abilityId, useData)
-      )
-    case UseAbilityOnCoordinates(playerId, abilityId, target, useData) =>
-      validate(v().validateAbilityUseOnCoordinates(playerId, abilityId, target, useData))(() =>
-        useAbilityOnCoordinates(playerId, abilityId, target, useData)
-      )
-    case UseAbilityOnCharacter(playerId, abilityId, target, useData) =>
-      validate(v().validateAbilityUseOnCharacter(playerId, abilityId, target, useData))(() =>
-        useAbilityOnCharacter(playerId, abilityId, target, useData)
       )
     case CharacterSelectTimeout(pickNumber) =>
       if (gameState.isInCharacterSelect) {
@@ -519,12 +468,6 @@ class Game(id: GameId)(implicit nkmDataService: NkmDataService) extends Persiste
     case AbilityUsed(_, _, abilityId, useData) =>
       updateGameState(gameState.useAbility(abilityId, useData))
       log.debug(s"Recovered ability $abilityId use")
-    case AbilityUsedOnCoordinates(_, _, abilityId, target, useData) =>
-      updateGameState(gameState.useAbilityOnCoordinates(abilityId, target, useData))
-      log.debug(s"Recovered ability $abilityId use on coordinates $target")
-    case AbilityUsedOnCharacter(_, _, abilityId, target, useData) =>
-      updateGameState(gameState.useAbilityOnCharacter(abilityId, target, useData))
-      log.debug(s"Recovered ability $abilityId use on character $target")
     case BanningPhaseTimedOut(_) =>
       log.debug(s"Recovered banning phase timeout")
       updateGameState(gameState.finishBanningPhase())

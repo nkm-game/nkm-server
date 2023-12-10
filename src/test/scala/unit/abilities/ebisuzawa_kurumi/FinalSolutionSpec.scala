@@ -3,6 +3,7 @@ package unit.abilities.ebisuzawa_kurumi
 import com.tosware.nkm.models.GameStateValidator
 import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.ebisuzawa_kurumi.FinalSolution
+import com.tosware.nkm.models.game.ability.UseData
 import com.tosware.nkm.models.game.event.GameEvent
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.{TestScenario, TestUtils}
@@ -19,17 +20,17 @@ class FinalSolutionSpec
 
   private val damagedGs: GameState =
     s.ultGs
-      .damageCharacter(s.p(1)(0).character.id, Damage(DamageType.True, 20))
+      .damageCharacter(s.defaultEnemy.id, Damage(DamageType.True, 20))
 
   private val aGs: GameState =
     damagedGs
-      .useAbilityOnCharacter(abilityId, s.p(1)(0).character.id)
+      .useAbility(abilityId, UseData(s.defaultEnemy.id))
 
   abilityMetadata.name must {
     "be able to use" in {
       assertCommandSuccess {
         GameStateValidator()(damagedGs)
-          .validateAbilityUseOnCharacter(s.owners(0), abilityId, s.p(1)(0).character.id)
+          .validateAbilityUse(s.owners(0), abilityId, UseData(s.defaultEnemy.id))
       }
     }
 
@@ -42,7 +43,7 @@ class FinalSolutionSpec
     }
 
     "apply bleeding effect" in {
-      assertEffectExistsOfType[effects.Poison](s.p(1)(0).character.id)(aGs)
+      assertEffectExistsOfType[effects.Poison](s.defaultEnemy.id)(aGs)
     }
   }
 }

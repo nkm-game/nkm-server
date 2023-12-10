@@ -27,9 +27,7 @@ object GameRoute extends StringEnum[GameRoute] {
   case object PassTurn extends GameRoute("pass_turn")
   case object Move extends GameRoute("move")
   case object BasicAttack extends GameRoute("basic_attack")
-  case object UseAbility extends GameRoute("use_ability_without_target")
-  case object UseAbilityOnCoordinates extends GameRoute("use_ability_on_coordinates")
-  case object UseAbilityOnCharacter extends GameRoute("use_ability_on_character")
+  case object UseAbility extends GameRoute("use_ability")
 
   // Chat
   case object SendChatMessage extends GameRoute("send_chat_msg")

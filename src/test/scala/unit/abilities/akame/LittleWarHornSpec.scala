@@ -5,7 +5,8 @@ import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.akame.LittleWarHorn
 import com.tosware.nkm.models.game.character.{CharacterMetadata, StatType}
 import com.tosware.nkm.models.game.effects.StatBuff
-import helpers.{TestUtils, scenarios}
+import com.tosware.nkm.models.game.hex.TestHexMapName
+import helpers.{TestScenario, TestUtils}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
@@ -21,15 +22,15 @@ class LittleWarHornSpec
       initialAbilitiesMetadataIds = Seq(abilityMetadata.id),
       initialSpeed = 7,
     )
-  private val s = scenarios.Simple1v1TestScenario(characterMetadata)
-  implicit private val gameState: GameState = s.gameState.incrementPhase(4)
-  private val abilityId = s.p(0)(0).character.state.abilities.head.id
+  private val s = TestScenario.generate(TestHexMapName.Simple1v1, characterMetadata)
+  implicit private val gameState: GameState = s.ultGs
+  private val abilityId = s.defaultAbilityId
 
   abilityMetadata.name must {
     "be able to use" in {
       val r = GameStateValidator()
         .validateAbilityUse(
-          s.p(0)(0).character.owner.id,
+          s.owners(0),
           abilityId,
         )
       assertCommandSuccess(r)
@@ -37,7 +38,7 @@ class LittleWarHornSpec
     "add AD and speed buffs" in {
       val newGameState: GameState = gameState.useAbility(abilityId)
       val statBuffs = newGameState
-        .characterById(s.p(0)(0).character.id)
+        .characterById(s.defaultCharacter.id)
         .state
         .effects
         .ofType[StatBuff]
@@ -47,8 +48,8 @@ class LittleWarHornSpec
 
     def skipPhase(gameState: GameState): GameState =
       gameState
-        .passTurn(s.p(0)(0).character.id)
-        .passTurn(s.p(1)(0).character.id)
+        .passTurn(s.defaultCharacter.id)
+        .passTurn(s.defaultEnemy.id)
 
     @tailrec
     def skipPhaseN(n: Int)(gameState: GameState): GameState =
@@ -57,16 +58,16 @@ class LittleWarHornSpec
 
     "set characters base speed after duration time" in {
       val duration = abilityMetadata.variables("duration")
-      val initialSpeed = s.p(0)(0).character.state.pureSpeed
+      val initialSpeed = s.defaultCharacter.state.pureSpeed
 
       val abilityUseGameState: GameState = gameState.useAbility(abilityId)
       abilityUseGameState
-        .characterById(s.p(0)(0).character.id)
+        .characterById(s.defaultCharacter.id)
         .state.pureSpeed should be(initialSpeed)
 
       val afterDurationGameState = skipPhaseN(duration)(abilityUseGameState)
       afterDurationGameState
-        .characterById(s.p(0)(0).character.id)
+        .characterById(s.defaultCharacter.id)
         .state.pureSpeed should not be initialSpeed
     }
   }

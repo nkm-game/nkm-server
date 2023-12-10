@@ -2,8 +2,10 @@ package unit.character_interaction
 
 import com.tosware.nkm.models.GameStateValidator
 import com.tosware.nkm.models.game.*
-import com.tosware.nkm.providers.CharacterMetadatasProvider
-import helpers.{TestUtils, scenarios}
+import com.tosware.nkm.models.game.ability.UseData
+import com.tosware.nkm.models.game.hex.TestHexMapName
+import com.tosware.nkm.providers.CharacterMetadataProvider
+import helpers.{TestScenario, TestUtils}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
@@ -11,23 +13,23 @@ class AquaCronaSpec
     extends AnyWordSpecLike
     with Matchers
     with TestUtils {
-  private val characters = CharacterMetadatasProvider().getCharacterMetadatas
-  private val s =
-    scenarios.Simple1v1TestScenario(characters.find(_.name == "Crona").get, characters.find(_.name == "Aqua"))
-  implicit private val gameState: GameState = s.gameState.incrementPhase(4)
-  private val blackBloodId = s.p(0)(0).character.state.abilities(2).id
-  private val purificationId = s.p(1)(0).character.state.abilities(1).id
+  private val characters = CharacterMetadataProvider()
+    .getCharacterMetadataSeq.filter(c => Seq("Aqua", "Crona").contains(c.name)).reverse
+  private val s = TestScenario.generate(TestHexMapName.Simple1v1, characters)
+  private val gameState: GameState = s.ultGs
+  private val blackBloodId = s.defaultCharacter.state.abilities(2).id
+  private val purificationId = s.defaultEnemy.state.abilities(1).id
 
   "Aqua with Crona" must {
     "purify Black Blood" in {
-      val bbGameState = gameState.useAbilityOnCharacter(blackBloodId, s.p(1)(0).character.id).endTurn()
+      val bbGameState = gameState.useAbility(blackBloodId, UseData(s.defaultEnemy.id)).endTurn()
       assertCommandSuccess {
         GameStateValidator()(bbGameState)
-          .validateAbilityUseOnCharacter(s.p(1)(0).character.owner.id, purificationId, s.p(1)(0).character.id)
+          .validateAbilityUse(s.owners(1), purificationId, UseData(s.defaultEnemy.id))
 
       }
-      val purifiedGameState = bbGameState.useAbilityOnCharacter(purificationId, s.p(1)(0).character.id)
-      purifiedGameState.characterById(s.p(1)(0).character.id).state.effects.size should be(0)
+      val purifiedGameState = bbGameState.useAbility(purificationId, UseData(s.defaultEnemy.id))
+      purifiedGameState.characterById(s.defaultEnemy.id).state.effects.size should be(0)
     }
   }
 }

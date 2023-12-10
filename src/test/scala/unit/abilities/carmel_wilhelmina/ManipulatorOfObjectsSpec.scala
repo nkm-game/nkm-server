@@ -2,9 +2,9 @@ package unit.abilities.carmel_wilhelmina
 
 import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.carmel_wilhelmina.ManipulatorOfObjects
-import com.tosware.nkm.models.game.character.CharacterMetadata
 import com.tosware.nkm.models.game.effects.Snare
-import helpers.{TestUtils, scenarios}
+import com.tosware.nkm.models.game.hex.TestHexMapName
+import helpers.{TestScenario, TestUtils}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
@@ -14,23 +14,22 @@ class ManipulatorOfObjectsSpec
     with TestUtils {
 
   private val abilityMetadata = ManipulatorOfObjects.metadata
-  private val characterMetadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
-  private val s = scenarios.Simple1v1TestScenario(characterMetadata)
+  private val s = TestScenario.generate(TestHexMapName.Simple1v1, abilityMetadata.id)
   implicit private val gameState: GameState = s.gameState
 
   abilityMetadata.name must {
     "snare enemies" in {
-      val attackedGameState = gameState.basicAttack(s.p(0)(0).character.id, s.p(1)(0).character.id)
-      attackedGameState.characterById(s.p(1)(0).character.id).state.effects.ofType[Snare] should not be empty
+      val attackedGameState = gameState.basicAttack(s.defaultCharacter.id, s.defaultEnemy.id)
+      attackedGameState.characterById(s.defaultEnemy.id).state.effects.ofType[Snare] should not be empty
     }
     "disallow snaring enemies in another phase" in {
       val attackedSecondTimeGameState = gameState
-        .basicAttack(s.p(0)(0).character.id, s.p(1)(0).character.id)
+        .basicAttack(s.defaultCharacter.id, s.defaultEnemy.id)
         .endTurn()
-        .passTurn(s.p(1)(0).character.id)
-        .basicAttack(s.p(0)(0).character.id, s.p(1)(0).character.id)
+        .passTurn(s.defaultEnemy.id)
+        .basicAttack(s.defaultCharacter.id, s.defaultEnemy.id)
 
-      attackedSecondTimeGameState.characterById(s.p(1)(0).character.id).state.effects.ofType[Snare] should be(empty)
+      attackedSecondTimeGameState.characterById(s.defaultEnemy.id).state.effects.ofType[Snare] should be(empty)
     }
   }
 }

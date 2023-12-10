@@ -3,8 +3,10 @@ package unit.abilities.kirito
 import com.tosware.nkm.models.GameStateValidator
 import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.kirito.StarburstStream
+import com.tosware.nkm.models.game.ability.UseData
 import com.tosware.nkm.models.game.character.CharacterMetadata
-import helpers.{TestUtils, scenarios}
+import com.tosware.nkm.models.game.hex.TestHexMapName
+import helpers.{TestScenario, TestUtils}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
@@ -19,49 +21,49 @@ class StarburstStreamSpec
       initialHealthPoints = initialHp,
       initialAbilitiesMetadataIds = Seq(abilityMetadata.id),
     )
-  private val s = scenarios.Simple1v1TestScenario(characterMetadata)
-  implicit private val gameState: GameState = s.gameState.incrementPhase(4)
-  private val abilityId = s.p(0)(0).character.state.abilities.head.id
+  private val s = TestScenario.generate(TestHexMapName.Simple1v1, characterMetadata)
+  implicit private val gameState: GameState = s.ultGs
+  private val abilityId = s.defaultAbilityId
 
   abilityMetadata.name must {
     "be able to use" in {
       assertCommandSuccess {
         GameStateValidator()
-          .validateAbilityUseOnCharacter(
-            s.p(0)(0).character.owner.id,
+          .validateAbilityUse(
+            s.owners(0),
             abilityId,
-            s.p(1)(0).character.id,
+            UseData(s.defaultEnemy.id),
           )
       }
     }
 
     "deal damage" in {
-      val ngs = gameState.useAbilityOnCharacter(abilityId, s.p(1)(0).character.id)
-      ngs.characterById(s.p(1)(0).character.id).state.healthPoints should be < initialHp
+      val ngs = gameState.useAbility(abilityId, UseData(s.defaultEnemy.id))
+      ngs.characterById(s.defaultEnemy.id).state.healthPoints should be < initialHp
     }
 
     "allow attacking two times per turn" in {
-      val ngs = gameState.useAbilityOnCharacter(abilityId, s.p(1)(0).character.id)
-        .endTurn().passTurn(s.p(1)(0).character.id)
-        .basicAttack(s.p(0)(0).character.id, s.p(1)(0).character.id)
+      val ngs = gameState.useAbility(abilityId, UseData(s.defaultEnemy.id))
+        .endTurn().passTurn(s.defaultEnemy.id)
+        .basicAttack(s.defaultCharacter.id, s.defaultEnemy.id)
 
       assertCommandSuccess {
         GameStateValidator()(ngs)
           .validateBasicAttackCharacter(
-            s.p(0)(0).character.owner.id,
-            s.p(0)(0).character.id,
-            s.p(1)(0).character.id,
+            s.owners(0),
+            s.defaultCharacter.id,
+            s.defaultEnemy.id,
           )
       }
 
-      val ngs2 = ngs.basicAttack(s.p(0)(0).character.id, s.p(1)(0).character.id)
+      val ngs2 = ngs.basicAttack(s.defaultCharacter.id, s.defaultEnemy.id)
 
       assertCommandFailure {
         GameStateValidator()(ngs2)
           .validateBasicAttackCharacter(
-            s.p(0)(0).character.owner.id,
-            s.p(0)(0).character.id,
-            s.p(1)(0).character.id,
+            s.owners(0),
+            s.defaultCharacter.id,
+            s.defaultEnemy.id,
           )
       }
 

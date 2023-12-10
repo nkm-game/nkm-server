@@ -51,15 +51,15 @@ class ImplementationCheckerSpec
     }
 
     "provide all ability metadatas in API" taggedAs NotWorkingOnCI in {
-      testMetadataProvider("game/abilities", "AbilityMetadatasProvider")
+      testMetadataProvider("game/abilities", "AbilityMetadataProvider")
     }
 
     "provide all effect metadatas in API" taggedAs NotWorkingOnCI in {
-      testMetadataProvider("game/effects", "CharacterEffectMetadatasProvider")
+      testMetadataProvider("game/effects", "CharacterEffectMetadataProvider")
     }
 
     "provide all hex effect metadatas in API" taggedAs NotWorkingOnCI in {
-      testMetadataProvider("game/hex_effects", "HexCellEffectMetadatasProvider")
+      testMetadataProvider("game/hex_effects", "HexCellEffectMetadataProvider")
     }
   }
 }

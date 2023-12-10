@@ -26,7 +26,6 @@ case class PowerOfExistence(abilityId: AbilityId, parentCharacterId: CharacterId
     gameState.hexMap.cells.toCoords
   override def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] =
     rangeCellCoords.whereSeenEnemiesOfC(parentCharacterId)
-
   override def use(useData: UseData)(implicit random: Random, gameState: GameState): GameState = {
     val targets = targetsInRange.characters.map(_.id)
     val masterThroneOpt = parentCharacter.state.abilities.collectFirst { case a: MasterThrone => a }

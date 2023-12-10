@@ -4,7 +4,8 @@ import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.crona.BlackBlood
 import com.tosware.nkm.models.game.character.CharacterMetadata
 import com.tosware.nkm.models.game.event.GameEvent
-import helpers.{TestUtils, scenarios}
+import com.tosware.nkm.models.game.hex.TestHexMapName
+import helpers.{TestScenario, TestUtils}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
@@ -13,21 +14,26 @@ class BlackBloodSpec
     with Matchers
     with TestUtils {
   private val abilityMetadata = BlackBlood.metadata
-  private val characterMetadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
-  private val s = scenarios.Simple1v9LineTestScenario(characterMetadata)
-  private val gameState: GameState = s.gameState.passTurn(s.p(0)(0).character.id)
-  private val abilityId = s.p(0)(0).character.state.abilities.head.id
+  private val characterMetadata: Seq[CharacterMetadata] =
+    Seq(
+      CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id)),
+      CharacterMetadata.empty(),
+    )
+
+  private val s = TestScenario.generate(TestHexMapName.Simple1v9Line, characterMetadata)
+  private val gameState: GameState = s.gameState.passTurn(s.defaultCharacter.id)
+  private val abilityId = s.defaultAbilityId
   private val abilityRange = abilityMetadata.variables("radius")
-  private val attackingCharacter = s.p(1)(0).character
+  private val attackingCharacter = s.defaultEnemy
 
   abilityMetadata.name must {
     "deal damage to surrounding enemies" in {
-      val newGameState: GameState = gameState.basicAttack(attackingCharacter.id, s.p(0)(0).character.id)
+      val newGameState: GameState = gameState.basicAttack(attackingCharacter.id, s.defaultCharacter.id)
       newGameState.gameLog.events
         .ofType[GameEvent.CharacterDamaged]
         .causedBy(abilityId).size shouldBe abilityRange
 
-      val coordsInRange = s.p(0)(0).character.parentCellOpt(newGameState).get.coordinates.getCircle(abilityRange)
+      val coordsInRange = s.defaultCharacter.parentCellOpt(newGameState).get.coordinates.getCircle(abilityRange)
 
       s.p(1).map(_.character).foreach { c =>
         val state = newGameState.characterById(c.id).state

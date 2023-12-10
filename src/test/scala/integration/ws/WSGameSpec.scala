@@ -3,6 +3,7 @@ package integration.ws
 import akka.http.scaladsl.testkit.WSProbe
 import com.tosware.nkm.*
 import com.tosware.nkm.models.game.*
+import com.tosware.nkm.models.game.ability.UseData
 import com.tosware.nkm.models.game.event.GameEvent
 import com.tosware.nkm.models.game.hex.{HexCellType, HexCoordinates}
 import com.tosware.nkm.models.game.pick.PickType
@@ -1142,7 +1143,7 @@ class WSGameSpec extends WSTrait {
 
         auth(0)
 
-        useAbilityOnCharacter(lobbyId, ability0, character1).statusCode shouldBe ok
+        useAbility(lobbyId, ability0, UseData(character1)).statusCode shouldBe ok
       }
     }
 

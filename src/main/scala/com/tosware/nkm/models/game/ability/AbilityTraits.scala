@@ -24,21 +24,3 @@ trait Usable { this: Ability =>
   final def canBeUsed(implicit useData: UseData, gameState: GameState): CommandResponse =
     models.UseCheck.canBeUsed(useChecks)
 }
-
-trait UsableOnTarget[T] { this: Ability =>
-  def use(target: T, useData: UseData = UseData())(implicit random: Random, gameState: GameState): GameState
-  def useChecks(implicit target: T, useData: UseData, gameState: GameState): Set[UseCheck] =
-    baseUseChecks
-  final def canBeUsed(implicit target: T, useData: UseData, gameState: GameState): CommandResponse =
-    models.UseCheck.canBeUsed(useChecks)
-}
-
-trait UsableOnCoordinates extends UsableOnTarget[HexCoordinates] { this: Ability =>
-  override def useChecks(implicit target: HexCoordinates, useData: UseData, gameState: GameState): Set[UseCheck] =
-    super.useChecks + UseCheck.TargetCoordinates.ExistsOnMap + UseCheck.TargetCoordinates.InRange
-}
-
-trait UsableOnCharacter extends UsableOnTarget[CharacterId] { this: Ability =>
-  override def useChecks(implicit target: CharacterId, useData: UseData, gameState: GameState): Set[UseCheck] =
-    super.useChecks + UseCheck.TargetCharacter.InRange
-}

@@ -6,11 +6,10 @@ import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.dekomori_sanae.MjolnirHammer
 import com.tosware.nkm.models.game.ability.UseData
 import com.tosware.nkm.models.game.event.GameEvent.DamageSent
-import com.tosware.nkm.models.game.hex.{HexCoordinates, TestHexMapName}
+import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.{TestScenario, TestUtils}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
-import spray.json.*
 
 class MjolnirHammerSpec
     extends AnyWordSpecLike
@@ -21,16 +20,16 @@ class MjolnirHammerSpec
   private val s = TestScenario.generate(TestHexMapName.Simple1v9Line, abilityMetadata.id)
 
   private val noneUseData =
-    UseData(Seq.empty[HexCoordinates].toJson.toString)
+    UseData()
 
   private val singleUseData =
-    UseData(Seq(s.p(1)(0).spawnCoordinates).toJson.toString)
+    UseData(s.defaultEnemy.id)
 
   private val doubleUseData =
-    UseData((0 to 1).map(x => s.p(1)(x).spawnCoordinates).toJson.toString)
+    UseData((0 to 1).map(x => s.p(1)(x).character.id))
 
   private val tripleUseData =
-    UseData((0 to 2).map(x => s.p(1)(x).spawnCoordinates).toJson.toString)
+    UseData((0 to 2).map(x => s.p(1)(x).character.id))
 
   private val usedOnSingleGs: GameState =
     s.gameState
@@ -41,10 +40,7 @@ class MjolnirHammerSpec
       .useAbility(s.defaultAbilityId, doubleUseData)
 
   private val doubleInvalidUseData =
-    UseData(CoordinateSeq((-1, 0), (1, 0)).toJson.toString)
-
-  private val doubleSameInvalidUseData =
-    UseData(Seq(s.p(1)(0).spawnCoordinates, s.p(1)(0).spawnCoordinates).toJson.toString)
+    UseData(Seq(s.defaultEnemy.id, s.defaultCharacter.id))
 
   abilityMetadata.name must {
     "not be able to use without target" in {
@@ -78,13 +74,6 @@ class MjolnirHammerSpec
       assertCommandFailure {
         GameStateValidator()(s.gameState)
           .validateAbilityUse(s.owners(0), s.defaultAbilityId, doubleInvalidUseData)
-      }
-    }
-
-    "not be able to use on same target as double target" in {
-      assertCommandFailure {
-        GameStateValidator()(s.gameState)
-          .validateAbilityUse(s.owners(0), s.defaultAbilityId, doubleSameInvalidUseData)
       }
     }
 

@@ -4,8 +4,8 @@ import com.tosware.nkm.models.game.character_effect.*
 import com.tosware.nkm.models.game.effects.*
 import com.tosware.nkm.serializers.NkmJsonProtocol
 
-case class CharacterEffectMetadatasProvider() extends NkmJsonProtocol {
-  def getCharacterEffectMetadatas: Seq[CharacterEffectMetadata] = Seq(
+case class CharacterEffectMetadataProvider() extends NkmJsonProtocol {
+  def getCharacterEffectMetadata: Seq[CharacterEffectMetadata] = Seq(
     AbilityEnchant.metadata,
     AbilityUnlock.metadata,
     ApplyEffectOnBasicAttack.metadata,

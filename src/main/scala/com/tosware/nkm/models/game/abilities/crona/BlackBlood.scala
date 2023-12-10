@@ -20,7 +20,7 @@ object BlackBlood extends NkmConf.AutoExtract {
 case class BlackBlood(abilityId: AbilityId, parentCharacterId: CharacterId)
     extends Ability(abilityId)
     with GameEventListener {
-  override val metadata = BlackBlood.metadata
+  override val metadata: AbilityMetadata = BlackBlood.metadata
 
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
     e match {

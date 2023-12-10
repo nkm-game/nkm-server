@@ -8,7 +8,7 @@ import com.tosware.nkm.models.game.abilities.sinon.TacticalEscape
 import com.tosware.nkm.models.game.character.{AttackType, CharacterMetadata}
 import com.tosware.nkm.models.game.effects.*
 import com.tosware.nkm.models.game.hex.{HexCoordinates, TestHexMapName}
-import helpers.{TestUtils, scenarios}
+import helpers.{TestScenario, TestUtils}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
@@ -23,17 +23,17 @@ class GameStateValidatorSpec
       initialAbilitiesMetadataIds = Seq(PowerOfExistence.metadata.id, TacticalEscape.metadata.id),
     )
 
-  private val s = scenarios.Simple2v2TestScenario(metadata)
+  private val s = TestScenario.generate(TestHexMapName.Simple2v2, metadata)
   implicit private val gameState: GameState = s.gameState
 
-  private val wallMeleeScenario = scenarios.Simple2v2TestScenario(
-    metadata.copy(attackType = AttackType.Melee, initialBasicAttackRange = 4),
+  private val wallMeleeScenario = TestScenario.generate(
     TestHexMapName.Simple2v2Wall,
+    metadata.copy(attackType = AttackType.Melee, initialBasicAttackRange = 4),
   )
 
-  private val wallRangedScenario = scenarios.Simple2v2TestScenario(
-    metadata.copy(attackType = AttackType.Ranged, initialBasicAttackRange = 4),
+  private val wallRangedScenario = TestScenario.generate(
     TestHexMapName.Simple2v2Wall,
+    metadata.copy(attackType = AttackType.Ranged, initialBasicAttackRange = 4),
   )
 
   private val ultimateAbilityId = s.p(0)(1).character.state.abilities.head.id
@@ -142,7 +142,7 @@ class GameStateValidatorSpec
           validator.validateBasicMoveCharacter(
             gameState.players(1).id,
             CoordinateSeq((3, 0), (2, 0)),
-            s.p(1)(0).character.id,
+            s.defaultEnemy.id,
           )
         }
       }
@@ -152,7 +152,7 @@ class GameStateValidatorSpec
           validator.validateBasicMoveCharacter(
             gameState.players(0).id,
             CoordinateSeq((3, 0), (2, 0)),
-            s.p(1)(0).character.id,
+            s.defaultEnemy.id,
           )
         }
       }
@@ -266,7 +266,7 @@ class GameStateValidatorSpec
           GameStateValidator()(moveGameState).validateBasicAttackCharacter(
             s.p(0)(1).character.owner.id,
             s.p(0)(1).character.id,
-            s.p(1)(0).character.id,
+            s.defaultEnemy.id,
           )
         }
       }
@@ -278,7 +278,7 @@ class GameStateValidatorSpec
           GameStateValidator().validateBasicAttackCharacter(
             s.p(0)(1).character.owner.id,
             s.p(0)(1).character.id,
-            s.p(1)(0).character.id,
+            s.defaultEnemy.id,
           )
         }
       }
@@ -290,7 +290,7 @@ class GameStateValidatorSpec
           GameStateValidator().validateBasicAttackCharacter(
             s.p(0)(1).character.owner.id,
             s.p(0)(1).character.id,
-            s.p(1)(0).character.id,
+            s.defaultEnemy.id,
           )
         }
       }
@@ -326,7 +326,7 @@ class GameStateValidatorSpec
           GameStateValidator()(newGameState).validateBasicAttackCharacter(
             gameState.players(0).id,
             s.p(0)(1).character.id,
-            s.p(1)(0).character.id,
+            s.defaultEnemy.id,
           )
         }
       }
@@ -338,7 +338,7 @@ class GameStateValidatorSpec
           GameStateValidator()(newGameState).validateBasicAttackCharacter(
             gameState.players(0).id,
             s.p(0)(1).character.id,
-            s.p(1)(0).character.id,
+            s.defaultEnemy.id,
           )
         }
       }
@@ -350,7 +350,7 @@ class GameStateValidatorSpec
           GameStateValidator()(newGameState).validateBasicAttackCharacter(
             gameState.players(0).id,
             s.p(0)(1).character.id,
-            s.p(1)(0).character.id,
+            s.defaultEnemy.id,
           )
         }
       }
@@ -362,7 +362,7 @@ class GameStateValidatorSpec
           GameStateValidator()(newGameState).validateBasicAttackCharacter(
             gameState.players(0).id,
             s.p(0)(1).character.id,
-            s.p(1)(0).character.id,
+            s.defaultEnemy.id,
           )
         }
       }
@@ -374,7 +374,7 @@ class GameStateValidatorSpec
           GameStateValidator()(newGameState).validateBasicAttackCharacter(
             gameState.players(0).id,
             s.p(0)(1).character.id,
-            s.p(1)(0).character.id,
+            s.defaultEnemy.id,
           )
         }
       }
@@ -384,19 +384,19 @@ class GameStateValidatorSpec
           validator.validateBasicAttackCharacter(
             gameState.players(0).id,
             s.p(0)(1).character.id,
-            s.p(1)(0).character.id,
+            s.defaultEnemy.id,
           )
         }
       }
 
       "disallow if character already basic attacked" in {
-        val newState = moveGameState.basicAttack(s.p(0)(1).character.id, s.p(1)(0).character.id)
+        val newState = moveGameState.basicAttack(s.p(0)(1).character.id, s.defaultEnemy.id)
 
         assertCommandFailure {
           GameStateValidator()(newState).validateBasicAttackCharacter(
             gameState.players(0).id,
             s.p(0)(1).character.id,
-            s.p(1)(0).character.id,
+            s.defaultEnemy.id,
           )
         }
       }
@@ -408,7 +408,7 @@ class GameStateValidatorSpec
           GameStateValidator()(newGameState).validateBasicAttackCharacter(
             gameState.players(0).id,
             s.p(0)(1).character.id,
-            s.p(1)(0).character.id,
+            s.defaultEnemy.id,
           )
         }
       }
@@ -420,7 +420,7 @@ class GameStateValidatorSpec
           GameStateValidator()(newGameState).validateBasicAttackCharacter(
             gameState.players(0).id,
             s.p(0)(1).character.id,
-            s.p(1)(0).character.id,
+            s.defaultEnemy.id,
           )
         }
       }
@@ -458,7 +458,7 @@ class GameStateValidatorSpec
         val incrementGameState = gameState.incrementPhase(4)
         val newGameState = incrementGameState.useAbility(ultimateAbilityId)
           .endTurn()
-          .passTurn(s.p(1)(0).character.id)
+          .passTurn(s.defaultEnemy.id)
         newGameState.abilityById(ultimateAbilityId).state(newGameState).cooldown should be > 0
 
         assertCommandFailure {
@@ -470,7 +470,7 @@ class GameStateValidatorSpec
         val incrementGameState = gameState.incrementPhase(4)
         val newGameState = incrementGameState.useAbility(ultimateAbilityId)
           .endTurn()
-          .passTurn(s.p(1)(0).character.id)
+          .passTurn(s.defaultEnemy.id)
           .decrementAbilityCooldown(ultimateAbilityId, 999)
         newGameState.abilityById(ultimateAbilityId).state(newGameState).cooldown should be(0)
 
@@ -497,7 +497,7 @@ class GameStateValidatorSpec
         s.p(0)(1).character.id,
         CoordinateSeq((0, 0), (1, 0)),
       ).endTurn()
-        .passTurn(s.p(1)(0).character.id)
+        .passTurn(s.defaultEnemy.id)
 
       assertCommandFailure {
         GameStateValidator()(newGameState).validateBasicMoveCharacter(
@@ -511,15 +511,15 @@ class GameStateValidatorSpec
     "disallow basic attacking for a second time in one phase" in {
       val moveGameState = gameState.teleportCharacter(s.p(0)(1).character.id, HexCoordinates(2, 0))
       val newGameState = moveGameState
-        .basicAttack(s.p(0)(1).character.id, s.p(1)(0).character.id)
+        .basicAttack(s.p(0)(1).character.id, s.defaultEnemy.id)
         .endTurn()
-        .passTurn(s.p(1)(0).character.id)
+        .passTurn(s.defaultEnemy.id)
 
       assertCommandFailure {
         GameStateValidator()(newGameState).validateBasicAttackCharacter(
           gameState.players(0).id,
           s.p(0)(1).character.id,
-          s.p(1)(0).character.id,
+          s.defaultEnemy.id,
         )
       }
     }
@@ -533,7 +533,7 @@ class GameStateValidatorSpec
         GameStateValidator()(newGameState).validateBasicAttackCharacter(
           gameState.players(0).id,
           s.p(0)(1).character.id,
-          s.p(1)(0).character.id,
+          s.defaultEnemy.id,
         )
       }
     }

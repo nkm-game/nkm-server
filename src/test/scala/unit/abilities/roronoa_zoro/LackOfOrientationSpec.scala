@@ -4,7 +4,8 @@ import com.tosware.nkm.*
 import com.tosware.nkm.models.game.abilities.roronoa_zoro.LackOfOrientation
 import com.tosware.nkm.models.game.character.CharacterMetadata
 import com.tosware.nkm.models.game.event.GameEvent
-import helpers.{TestUtils, scenarios}
+import com.tosware.nkm.models.game.hex.TestHexMapName
+import helpers.{TestScenario, TestUtils}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
@@ -18,15 +19,16 @@ class LackOfOrientationSpec
 
   private val abilityMetadata = LackOfOrientation.metadata
   private val characterMetadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
-  private val s = scenarios.Simple2v2TestScenario(characterMetadata)
+  private val s = TestScenario.generate(TestHexMapName.Simple2v2, characterMetadata)
 
   abilityMetadata.name must {
     "make parent character get lost sometimes" in {
       def move() =
-        s.gameState.basicMoveCharacter(s.p(0)(0).character.id, CoordinateSeq((0, 0), (1, 0), (2, 0), (2, 1), (1, 1)))
+        s.gameState.basicMoveCharacter(s.defaultCharacter.id, CoordinateSeq((0, 0), (1, 0), (2, 0), (2, 1), (1, 1)))
       def moveAndGetParentCoords() = {
         val moveGameState = move()
-        val targetCoords = moveGameState.characterById(s.p(0)(0).character.id).parentCellOpt(moveGameState).get.coordinates
+        val targetCoords =
+          moveGameState.characterById(s.defaultCharacter.id).parentCellOpt(moveGameState).get.coordinates
 
         // verify if CharacterBasicMoved event was changed
         if (targetCoords.toTuple != (1, 1)) {

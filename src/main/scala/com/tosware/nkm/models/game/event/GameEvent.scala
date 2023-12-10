@@ -109,24 +109,6 @@ object GameEvent {
   case class AbilityUsed(id: GameEventId, phase: Phase, turn: Turn, causedById: String, abilityId: AbilityId)
       extends GameEvent
       with ContainsAbilityId
-  case class AbilityUsedOnCoordinates(
-      id: GameEventId,
-      phase: Phase,
-      turn: Turn,
-      causedById: String,
-      abilityId: AbilityId,
-      target: HexCoordinates,
-  ) extends GameEvent
-      with ContainsAbilityId
-  case class AbilityUsedOnCharacter(
-      id: GameEventId,
-      phase: Phase,
-      turn: Turn,
-      causedById: String,
-      abilityId: AbilityId,
-      targetCharacterId: CharacterId,
-  ) extends GameEvent
-      with ContainsAbilityId
   case class AbilityUseFinished(id: GameEventId, phase: Phase, turn: Turn, causedById: String, abilityId: AbilityId)
       extends GameEvent
       with ContainsAbilityId

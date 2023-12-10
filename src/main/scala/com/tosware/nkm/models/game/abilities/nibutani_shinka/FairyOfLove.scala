@@ -19,8 +19,7 @@ object FairyOfLove extends NkmConf.AutoExtract {
 
 case class FairyOfLove(abilityId: AbilityId, parentCharacterId: CharacterId)
     extends Ability(abilityId) with Usable {
-  override val metadata = FairyOfLove.metadata
-
+  override val metadata: AbilityMetadata = FairyOfLove.metadata
   override def use(useData: UseData)(implicit random: Random, gameState: GameState): GameState =
     gameState.addEffect(
       parentCharacterId,

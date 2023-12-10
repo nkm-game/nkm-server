@@ -23,7 +23,7 @@ object AceInTheHole extends NkmConf.AutoExtract {
 case class AceInTheHole(abilityId: AbilityId, parentCharacterId: CharacterId)
     extends Ability(abilityId)
     with GameEventListener {
-  override val metadata = AceInTheHole.metadata
+  override val metadata: AbilityMetadata = AceInTheHole.metadata
 
   private def getDamageThisTurn()(implicit gameState: GameState): Int =
     gameState.gameLog.events

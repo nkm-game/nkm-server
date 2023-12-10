@@ -3,6 +3,7 @@ package unit.abilities.ryuko_matoi
 import com.tosware.nkm.models.GameStateValidator
 import com.tosware.nkm.models.game.GameState
 import com.tosware.nkm.models.game.abilities.ryuko_matoi.{FiberDecapitation, ScissorBlade}
+import com.tosware.nkm.models.game.ability.UseData
 import com.tosware.nkm.models.game.character.CharacterMetadata
 import com.tosware.nkm.models.game.effects.StatNerf
 import com.tosware.nkm.models.game.event.GameEvent
@@ -25,7 +26,7 @@ class FiberDecapitationSpec
     "be able to use" in {
       assertCommandSuccess {
         GameStateValidator()(s.gameState)
-          .validateAbilityUseOnCharacter(s.owners(0), s.defaultAbilityId, s.defaultEnemy.id)
+          .validateAbilityUse(s.owners(0), s.defaultAbilityId, UseData(s.defaultEnemy.id))
       }
     }
 
@@ -33,7 +34,7 @@ class FiberDecapitationSpec
       val nGs = s.gameState.teleportCharacter(s.defaultEnemy.id, HexCoordinates(4, 0))
       assertCommandFailure {
         GameStateValidator()(nGs)
-          .validateAbilityUseOnCharacter(s.owners(0), s.defaultAbilityId, s.defaultEnemy.id)
+          .validateAbilityUse(s.owners(0), s.defaultAbilityId, UseData(s.defaultEnemy.id))
       }
     }
 
@@ -41,14 +42,14 @@ class FiberDecapitationSpec
       val nGs = s.gameState.teleportCharacter(s.defaultEnemy.id, HexCoordinates(5, 0))
       assertCommandFailure {
         GameStateValidator()(nGs)
-          .validateAbilityUseOnCharacter(s.owners(0), s.defaultAbilityId, s.defaultEnemy.id)
+          .validateAbilityUse(s.owners(0), s.defaultAbilityId, UseData(s.defaultEnemy.id))
       }
     }
 
     "be able to decrease physical defense, damage and teleport" in {
       val oldPhysicalDefense = s.gameState.characterById(s.defaultEnemy.id).state.purePhysicalDefense
 
-      val newGameState: GameState = s.gameState.useAbilityOnCharacter(s.defaultAbilityId, s.defaultEnemy.id)
+      val newGameState: GameState = s.gameState.useAbility(s.defaultAbilityId, UseData(s.defaultEnemy.id))
       val newPhysicalDefense = newGameState.characterById(s.defaultEnemy.id).state.purePhysicalDefense
 
       oldPhysicalDefense should be > newPhysicalDefense
@@ -64,7 +65,7 @@ class FiberDecapitationSpec
     }
 
     "not apply basic attack effects" in {
-      val aGs: GameState = s.gameState.useAbilityOnCharacter(s.defaultAbilityId, s.defaultEnemy.id)
+      val aGs: GameState = s.gameState.useAbility(s.defaultAbilityId, UseData(s.defaultEnemy.id))
       assertEffectDoesNotExistOfType[StatNerf](s.defaultEnemy.id)(aGs)
     }
   }

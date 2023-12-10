@@ -15,7 +15,7 @@ class RunItDownSpec
     with TestUtils {
   private val abilityMetadata = RunItDown.metadata
   private val s = TestScenario.generate(TestHexMapName.Simple2v2, abilityMetadata.id)
-  private val gameState: GameState = s.gameState.incrementPhase(4)
+  private val gameState: GameState = s.ultGs
   private val abilityId = s.p(0)(1).character.state.abilities.head.id
   private val aGs: GameState = gameState.useAbility(abilityId)
 
@@ -33,7 +33,7 @@ class RunItDownSpec
           .validateBasicAttackCharacter(
             s.owners(0),
             s.p(0)(1).character.id,
-            s.p(1)(0).character.id,
+            s.defaultEnemy.id,
           )
 
       def validateBasicMove(gameState: GameState, cs: Seq[(Int, Int)]) =
@@ -44,7 +44,7 @@ class RunItDownSpec
         )
 
       def basicAttack(gameState: GameState) =
-        gameState.basicAttack(s.p(0)(1).character.id, s.p(1)(0).character.id)
+        gameState.basicAttack(s.p(0)(1).character.id, s.defaultEnemy.id)
 
       def basicMove(gameState: GameState, cs: Seq[(Int, Int)]) =
         gameState.basicMoveCharacter(s.p(0)(1).character.id, CoordinateSeq(cs*))

@@ -19,16 +19,15 @@ object OgreCutter extends NkmConf.AutoExtract {
           |
           |Range: linear, stops at walls and enemies, {range}""".stripMargin,
       traits = Seq(AbilityTrait.Move, AbilityTrait.ContactEnemy),
+      targetsMetadata = Seq(AbilityTargetMetadata.SingleCharacter),
     )
 }
 
 case class OgreCutter(abilityId: AbilityId, parentCharacterId: CharacterId)
-    extends Ability(abilityId) with UsableOnCharacter {
-  override val metadata = OgreCutter.metadata
-
+    extends Ability(abilityId) with Usable {
+  override val metadata: AbilityMetadata = OgreCutter.metadata
   private def teleportCoordinates(from: HexCoordinates, direction: HexDirection) =
     from.getInDirection(direction, metadata.variables("targetCellOffset"))
-
   override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =
     parentCell.fold(Set.empty[HexCell])(c =>
       c.getArea(
@@ -37,7 +36,6 @@ case class OgreCutter(abilityId: AbilityId, parentCharacterId: CharacterId)
         friendlyPlayerIdOpt = Some(parentCharacter.owner.id),
       )
     ).toCoords
-
   override def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] =
     rangeCellCoords.whereSeenEnemiesOfC(parentCharacterId).filter(targetCoordinates =>
       {
@@ -50,8 +48,8 @@ case class OgreCutter(abilityId: AbilityId, parentCharacterId: CharacterId)
         } yield isFreeToStand
       }.getOrElse(false)
     )
-
-  override def use(target: CharacterId, useData: UseData)(implicit random: Random, gameState: GameState): GameState = {
+  override def use(useData: UseData)(implicit random: Random, gameState: GameState): GameState = {
+    val target = useData.firstAsCharacterId
     val targetCoordinates = gameState.characterById(target).parentCellOpt.get.coordinates
     val targetDirection = parentCell.get.coordinates.getDirection(targetCoordinates).get
     val tpCoords = teleportCoordinates(targetCoordinates, targetDirection)
@@ -61,8 +59,8 @@ case class OgreCutter(abilityId: AbilityId, parentCharacterId: CharacterId)
       .basicAttack(parentCharacterId, target)
       .teleportCharacter(parentCharacterId, tpCoords)(random, id)
   }
-
-  override def useChecks(implicit target: CharacterId, useData: UseData, gameState: GameState): Set[UseCheck] = {
+  override def useChecks(implicit useData: UseData, gameState: GameState): Set[UseCheck] = {
+    val target = useData.firstAsCharacterId
     def cellToTeleportIsFreeToStand(): Boolean = {
       for {
         targetCharacter: NkmCharacter <- Some(gameState.characterById(target))
@@ -73,10 +71,10 @@ case class OgreCutter(abilityId: AbilityId, parentCharacterId: CharacterId)
         isFreeToStand: Boolean <- Some(tpCell.looksFreeToStand(parentCharacterId))
       } yield isFreeToStand
     }.getOrElse(false)
-
-    super.useChecks ++ Seq(
-      UseCheck.TargetCharacter.IsEnemy,
-      cellToTeleportIsFreeToStand() -> "Cell to teleport is not free to stand or does not exist.",
-    )
+    super.useChecks ++ characterBaseUseChecks(target)
+      ++ Seq(
+        UseCheck.Character.IsEnemy(target),
+        cellToTeleportIsFreeToStand() -> "Cell to teleport is not free to stand or does not exist.",
+      )
   }
 }

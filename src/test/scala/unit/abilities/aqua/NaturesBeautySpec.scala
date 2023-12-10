@@ -29,7 +29,7 @@ class NaturesBeautySpec
         .isFriendForC(s.p(0)(1).character.id)(healedGameState) shouldBe true
 
       healedGameState.characterById(s.p(0)(1).character.id)
-        .state.healthPoints should be(30 + healedGameState.characterById(s.p(0)(0).character.id).state.attackPoints)
+        .state.healthPoints should be(30 + healedGameState.characterById(s.defaultCharacter.id).state.attackPoints)
     }
     "not show parent character as basic attack target" in {
       val parentCharacter = damagedGameState.characterById(s.defaultCharacter.id)

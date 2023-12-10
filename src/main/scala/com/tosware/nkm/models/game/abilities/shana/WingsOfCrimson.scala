@@ -26,22 +26,16 @@ case class WingsOfCrimson(abilityId: AbilityId, parentCharacterId: CharacterId)
     extends Ability(abilityId)
     with GameEventListener {
   override val metadata: AbilityMetadata = WingsOfCrimson.metadata
-
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
     e match {
       case GameEvent.CharacterDamaged(_, _, _, _, characterId, _) =>
         if (characterId != parentCharacterId) return gameState
+        val duration = metadata.variables("duration")
+        val e1 = effects.Fly(randomUUID(), duration)
+        val e2 = effects.StatBuff(randomUUID(), duration, StatType.Speed, metadata.variables("bonusSpeed"))
         gameState
-          .addEffect(parentCharacterId, effects.Fly(randomUUID(), metadata.variables("duration")))(random, id)
-          .addEffect(
-            parentCharacterId,
-            effects.StatBuff(
-              randomUUID(),
-              metadata.variables("duration"),
-              StatType.Speed,
-              metadata.variables("bonusSpeed"),
-            ),
-          )(random, id)
+          .addEffect(parentCharacterId, e1)(random, id)
+          .addEffect(parentCharacterId, e2)(random, id)
       case _ =>
         gameState
     }

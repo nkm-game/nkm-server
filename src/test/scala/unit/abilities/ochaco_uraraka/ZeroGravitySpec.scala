@@ -15,13 +15,13 @@ class ZeroGravitySpec
   private val abilityMetadata = ZeroGravity.metadata
   private val s = TestScenario.generate(TestHexMapName.Simple2v2, abilityMetadata.id)
 
-  private val friendAttackedGs = s.gameState.basicAttack(s.p(0)(0).character.id, s.p(0)(1).character.id)
-  private val enemyAttackedGs = s.gameState.basicAttack(s.p(0)(0).character.id, s.p(1)(0).character.id)
+  private val friendAttackedGs = s.gameState.basicAttack(s.defaultCharacter.id, s.p(0)(1).character.id)
+  private val enemyAttackedGs = s.gameState.basicAttack(s.defaultCharacter.id, s.defaultEnemy.id)
 
   abilityMetadata.name must {
     "be able to apply Zero Gravity on friends on basic attacks" in {
       friendAttackedGs
-        .characterById(s.p(0)(0).character.id)
+        .characterById(s.defaultCharacter.id)
         .isFriendForC(s.p(0)(1).character.id)(friendAttackedGs) shouldBe true
 
       assertEffectExistsOfType[Fly](s.p(0)(1).character.id)(friendAttackedGs)
@@ -29,11 +29,11 @@ class ZeroGravitySpec
     }
     "be able to apply Zero Gravity on enemies on basic attacks" in {
       enemyAttackedGs
-        .characterById(s.p(0)(0).character.id)
-        .isFriendForC(s.p(1)(0).character.id)(enemyAttackedGs) shouldBe false
+        .characterById(s.defaultCharacter.id)
+        .isFriendForC(s.defaultEnemy.id)(enemyAttackedGs) shouldBe false
 
-      assertEffectExistsOfType[Fly](s.p(1)(0).character.id)(enemyAttackedGs)
-      assertEffectsExist(Seq(CharacterEffectName.ZeroGravity), s.p(1)(0).character.id)(enemyAttackedGs)
+      assertEffectExistsOfType[Fly](s.defaultEnemy.id)(enemyAttackedGs)
+      assertEffectsExist(Seq(CharacterEffectName.ZeroGravity), s.defaultEnemy.id)(enemyAttackedGs)
     }
   }
 }

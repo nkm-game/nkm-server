@@ -20,19 +20,17 @@ object BindingRibbons extends NkmConf.AutoExtract {
           |Range: circular, {range}
           |Radius: circular, {radius}""".stripMargin,
       relatedEffectIds = Seq(Silence.metadata.id, Snare.metadata.id),
+      targetsMetadata = Seq(AbilityTargetMetadata.CircularAirSelection),
     )
 }
 
 case class BindingRibbons(abilityId: AbilityId, parentCharacterId: CharacterId)
-    extends Ability(abilityId) with UsableOnCoordinates {
+    extends Ability(abilityId) with Usable {
   override val metadata: AbilityMetadata = BindingRibbons.metadata
-
   override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =
     parentCell.get.coordinates.getCircle(metadata.variables("range")).whereExists
-
   override def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] =
     rangeCellCoords
-
   private def hitCharacter(target: CharacterId, targetsHit: Int)(implicit
       random: Random,
       gameState: GameState,
@@ -47,12 +45,15 @@ case class BindingRibbons(abilityId: AbilityId, parentCharacterId: CharacterId)
         .addEffect(target, effects.Snare(randomUUID(), metadata.variables("snareDuration")))(random, id)
     } else silencedGameState
   }
-
-  override def use(target: HexCoordinates, useData: UseData)(implicit
+  override def use(useData: UseData)(implicit
       random: Random,
       gameState: GameState,
   ): GameState = {
-    val targets = target.getCircle(metadata.variables("radius")).whereSeenEnemiesOfC(parentCharacterId).characters.map(_.id)
+    val target = useData.firstAsCoordinates
+    val targets =
+      target.getCircle(metadata.variables("radius")).whereSeenEnemiesOfC(parentCharacterId).characters.map(_.id)
     targets.foldLeft(gameState)((acc, cid) => hitCharacter(cid, targets.size)(random, acc))
   }
+  override def useChecks(implicit useData: UseData, gameState: GameState): Set[UseCheck] =
+    super.useChecks ++ coordinatesBaseUseChecks(useData.firstAsCoordinates)
 }

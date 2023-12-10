@@ -63,19 +63,9 @@ case class NkmCharacter(
       .nonEmpty
 
   private def getUsedAbilitiesThisPhase(implicit gameState: GameState): Seq[Ability] =
-    (
-      gameState.gameLog.events
-        .inPhase(gameState.phase.number)
-        .ofType[GameEvent.AbilityUsed]
-        ++
-          gameState.gameLog.events
-            .inPhase(gameState.phase.number)
-            .ofType[GameEvent.AbilityUsedOnCoordinates]
-          ++
-          gameState.gameLog.events
-            .inPhase(gameState.phase.number)
-            .ofType[GameEvent.AbilityUsedOnCharacter]
-    )
+    gameState.gameLog.events
+      .inPhase(gameState.phase.number)
+      .ofType[GameEvent.AbilityUsed]
       .map(_.abilityId)
       .map(gameState.abilityById)
       .filter(a => a.parentCharacter.id == id)
@@ -113,9 +103,7 @@ case class NkmCharacter(
   def hasRefreshedAnything(implicit gameState: GameState): Boolean =
     hasRefreshed[GameEvent.AnythingRefreshed, GameEvent.CharacterBasicAttacked] &&
       hasRefreshed[GameEvent.AnythingRefreshed, GameEvent.CharacterBasicMoved] &&
-      hasRefreshed[GameEvent.AnythingRefreshed, GameEvent.AbilityUsed] &&
-      hasRefreshed[GameEvent.AnythingRefreshed, GameEvent.AbilityUsedOnCharacter] &&
-      hasRefreshed[GameEvent.AnythingRefreshed, GameEvent.AbilityUsedOnCoordinates]
+      hasRefreshed[GameEvent.AnythingRefreshed, GameEvent.AbilityUsed]
 
   def hasRefreshedBasicMove(implicit gameState: GameState): Boolean =
     hasRefreshed[GameEvent.BasicMoveRefreshed, GameEvent.CharacterBasicMoved] || hasRefreshedAnything

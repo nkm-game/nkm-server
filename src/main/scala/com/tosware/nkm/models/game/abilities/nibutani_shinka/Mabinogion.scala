@@ -32,29 +32,24 @@ case class Mabinogion(
     abilityId: AbilityId,
     parentCharacterId: CharacterId,
 ) extends Ability(abilityId) with GameEventListener {
-  override val metadata = Mabinogion.metadata
-
+  override val metadata: AbilityMetadata = Mabinogion.metadata
   override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =
     parentCell.get.getArea(metadata.variables("radius")).toCoords
-
   override def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] =
     if (isEnchanted)
       rangeCellCoords.whereFriendsOfC(parentCharacterId)
     else
       rangeCellCoords.whereCharacters
-
-  def healAmount(implicit gameState: GameState): Int = {
+  private def healAmount(implicit gameState: GameState): Int = {
     val baseHeal = metadata.variables("heal")
     if (isEnchanted) baseHeal * 3
     else baseHeal
   }
-
-  def shieldAmount(implicit gameState: GameState): Int = {
+  private def shieldAmount(implicit gameState: GameState): Int = {
     val baseShield = metadata.variables("shield")
     if (isEnchanted) baseShield * 3
     else baseShield
   }
-
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
     e match {
       case GameEvent.TurnFinished(_, _, _, _, _) =>

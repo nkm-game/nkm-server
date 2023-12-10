@@ -3,6 +3,7 @@ package unit.abilities.ochaco_uraraka
 import com.tosware.nkm.models.GameStateValidator
 import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.ochaco_uraraka.ReducedWeight
+import com.tosware.nkm.models.game.ability.UseData
 import com.tosware.nkm.models.game.character.StatType
 import com.tosware.nkm.models.game.character_effect.CharacterEffectName
 import com.tosware.nkm.models.game.effects.Fly
@@ -17,16 +18,16 @@ class ReducedWeightSpec
     with TestUtils {
   private val abilityMetadata = ReducedWeight.metadata
   private val s = TestScenario.generate(TestHexMapName.Simple2v2, abilityMetadata.id)
-  private val aGs: GameState = s.gameState.useAbilityOnCharacter(s.defaultAbilityId, s.defaultCharacter.id)
+  private val aGs: GameState = s.gameState.useAbility(s.defaultAbilityId, UseData(s.defaultCharacter.id))
 
   abilityMetadata.name must {
     "be able to use" in {
       assertCommandSuccess {
         GameStateValidator()(s.gameState)
-          .validateAbilityUseOnCharacter(s.owners(0), s.defaultAbilityId, s.defaultCharacter.id)
+          .validateAbilityUse(s.owners(0), s.defaultAbilityId, UseData(s.defaultCharacter.id))
 
         GameStateValidator()(s.gameState)
-          .validateAbilityUseOnCharacter(s.owners(0), s.defaultAbilityId, s.p(0)(1).character.id)
+          .validateAbilityUse(s.owners(0), s.defaultAbilityId, UseData(s.p(0)(1).character.id))
       }
     }
 

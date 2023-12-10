@@ -14,7 +14,7 @@ class SamuraisSwiftnessSpec
   private val abilityMetadata = SamuraisSwiftness.metadata
   private val s = TestScenario.generate(TestHexMapName.Simple1v1, abilityMetadata.id)
 
-  private val damagedGs = s.gameState.basicAttack(s.defaultCharacter.id, s.p(1)(0).character.id)
+  private val damagedGs = s.gameState.basicAttack(s.defaultCharacter.id, s.defaultEnemy.id)
   private val newPhaseGs = damagedGs.passAllCharactersInCurrentPhase()
 
   abilityMetadata.name must {

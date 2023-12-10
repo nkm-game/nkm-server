@@ -22,20 +22,12 @@ object GreatBladeOfCrimson extends NkmConf.AutoExtract {
 case class GreatBladeOfCrimson(abilityId: AbilityId, parentCharacterId: CharacterId)
     extends Ability(abilityId) with Usable {
   override val metadata: AbilityMetadata = GreatBladeOfCrimson.metadata
-
-  override def use(useData: UseData)(implicit random: Random, gameState: GameState): GameState =
+  override def use(useData: UseData)(implicit random: Random, gameState: GameState): GameState = {
+    val duration = metadata.variables("duration")
+    val e1 = StatBuff(randomUUID(), duration, StatType.AttackPoints, metadata.variables("bonusAD"))
+    val e2 = StatBuff(randomUUID(), duration, StatType.BasicAttackRange, metadata.variables("bonusRange"))
     gameState
-      .addEffect(
-        parentCharacterId,
-        StatBuff(randomUUID(), metadata.variables("duration"), StatType.AttackPoints, metadata.variables("bonusAD")),
-      )(random, id)
-      .addEffect(
-        parentCharacterId,
-        StatBuff(
-          randomUUID(),
-          metadata.variables("duration"),
-          StatType.BasicAttackRange,
-          metadata.variables("bonusRange"),
-        ),
-      )(random, id)
+      .addEffect(parentCharacterId, e1)(random, id)
+      .addEffect(parentCharacterId, e2)(random, id)
+  }
 }

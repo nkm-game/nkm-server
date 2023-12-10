@@ -3,7 +3,8 @@ package unit.abilities.kazuma
 import com.tosware.nkm.models.game.abilities.satou_kazuma.HighLuck
 import com.tosware.nkm.models.game.character.CharacterMetadata
 import com.tosware.nkm.models.game.event.GameEvent.CharacterDamaged
-import helpers.{TestUtils, scenarios}
+import com.tosware.nkm.models.game.hex.TestHexMapName
+import helpers.{TestScenario, TestUtils}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
@@ -18,11 +19,11 @@ class HighLuckSpec
       initialHealthPoints = initialHp,
       initialAbilitiesMetadataIds = Seq(abilityMetadata.id),
     )
-  private val s = scenarios.Simple1v1TestScenario(characterMetadata)
+  private val s = TestScenario.generate(TestHexMapName.Simple1v1, characterMetadata)
 
   abilityMetadata.name must {
     "critically strike sometimes with basic attacks" in {
-      def generateAttackGs() = s.gameState.basicAttack(s.p(0)(0).character.id, s.p(1)(0).character.id)
+      def generateAttackGs() = s.gameState.basicAttack(s.defaultCharacter.id, s.defaultEnemy.id)
       def damageAmount() =
         generateAttackGs()
           .gameLog.events.ofType[CharacterDamaged].head.damageAmount

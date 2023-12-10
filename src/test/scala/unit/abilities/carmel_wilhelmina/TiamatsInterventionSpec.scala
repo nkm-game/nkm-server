@@ -1,13 +1,12 @@
 package unit.abilities.carmel_wilhelmina
 
-import com.tosware.nkm.*
 import com.tosware.nkm.models.GameStateValidator
 import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.carmel_wilhelmina.TiamatsIntervention
 import com.tosware.nkm.models.game.ability.UseData
 import com.tosware.nkm.models.game.character.CharacterMetadata
-import com.tosware.nkm.models.game.hex.HexCoordinates
-import helpers.{TestUtils, scenarios}
+import com.tosware.nkm.models.game.hex.{HexCoordinates, TestHexMapName}
+import helpers.{TestScenario, TestUtils}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 import spray.json.*
@@ -18,54 +17,50 @@ class TiamatsInterventionSpec
     with TestUtils {
   private val abilityMetadata = TiamatsIntervention.metadata
   private val characterMetadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
-  private val s = scenarios.Simple2v2TestScenario(characterMetadata)
-  implicit private val gameState: GameState = s.gameState.incrementPhase(4)
-  private val abilityId = s.p(0)(0).character.state.abilities.head.id
+  private val s = TestScenario.generate(TestHexMapName.Simple2v2, characterMetadata)
+  implicit private val gameState: GameState = s.ultGs
+  private val abilityId = s.defaultAbilityId
 
   abilityMetadata.name must {
     "not be able to use when there are no tiles nearby to pull" in {
-      val s = scenarios.Simple1v9LineTestScenario(characterMetadata)
-      val gs = s.gameState.incrementPhase(4)
-      val abilityId = s.p(0)(0).character.state.abilities.head.id
+      val s = TestScenario.generate(TestHexMapName.Simple1v9Line, characterMetadata)
+      val gs = s.ultGs
+      val abilityId = s.defaultAbilityId
       assertCommandFailure {
         GameStateValidator()(gs)
-          .validateAbilityUseOnCharacter(
-            s.p(0)(0).ownerId,
+          .validateAbilityUse(
+            s.owners(0),
             abilityId,
-            s.p(1)(0).character.id,
-            UseData(HexCoordinates(1, 0).toJson.toString),
+            UseData(Seq(s.defaultEnemy.id, HexCoordinates(1, 0).toJson.toString)),
           )
       }
     }
     "not be able to use on cell that is not free to stand" in {
-      val s = scenarios.Simple1v9LineTestScenario(characterMetadata)
-      val gs = s.gameState.incrementPhase(4).executeCharacter(s.p(1)(1).character.id)(random, "test")
-      val abilityId = s.p(0)(0).character.state.abilities.head.id
+      val s = TestScenario.generate(TestHexMapName.Simple1v9Line, characterMetadata)
+      val gs = s.ultGs.executeCharacter(s.p(1)(1).character.id)(random, "test")
+      val abilityId = s.defaultAbilityId
       assertCommandFailure {
         GameStateValidator()(gs)
-          .validateAbilityUseOnCharacter(
-            s.p(0)(0).ownerId,
+          .validateAbilityUse(
+            s.owners(0),
             abilityId,
-            s.p(1)(0).character.id,
-            UseData(HexCoordinates(1, 0).toJson.toString),
+            UseData(Seq(s.defaultEnemy.id, HexCoordinates(1, 0).toJson.toString)),
           )
       }
     }
     "be able to pull allies and give them shield" in {
       assertCommandSuccess {
         GameStateValidator()
-          .validateAbilityUseOnCharacter(
-            s.p(0)(0).character.owner.id,
+          .validateAbilityUse(
+            s.owners(0),
             abilityId,
-            s.p(0)(1).character.id,
-            UseData(HexCoordinates(1, 0).toJson.toString),
+            UseData(Seq(s.p(0)(1).character.id, HexCoordinates(1, 0).toJson.toString)),
           )
       }
 
-      val newGameState = gameState.useAbilityOnCharacter(
+      val newGameState = gameState.useAbility(
         abilityId,
-        s.p(0)(1).character.id,
-        UseData(HexCoordinates(1, 0).toJson.toString),
+        UseData(Seq(s.p(0)(1).character.id, HexCoordinates(1, 0).toJson.toString)),
       )
       val targetCharacter = newGameState.characterById(s.p(0)(1).character.id)
       targetCharacter.parentCellOpt(newGameState).get.coordinates should be(HexCoordinates(1, 0))
@@ -75,20 +70,18 @@ class TiamatsInterventionSpec
     "be able to pull enemies and stun them" in {
       assertCommandSuccess {
         GameStateValidator()
-          .validateAbilityUseOnCharacter(
-            s.p(0)(0).character.owner.id,
+          .validateAbilityUse(
+            s.owners(0),
             abilityId,
-            s.p(1)(0).character.id,
-            UseData(HexCoordinates(1, 0).toJson.toString),
+            UseData(Seq(s.defaultEnemy.id, HexCoordinates(1, 0).toJson.toString)),
           )
       }
 
-      val newGameState = gameState.useAbilityOnCharacter(
+      val newGameState = gameState.useAbility(
         abilityId,
-        s.p(1)(0).character.id,
-        UseData(HexCoordinates(1, 0).toJson.toString),
+        UseData(Seq(s.defaultEnemy.id, HexCoordinates(1, 0).toJson.toString)),
       )
-      val targetCharacter = newGameState.characterById(s.p(1)(0).character.id)
+      val targetCharacter = newGameState.characterById(s.defaultEnemy.id)
       targetCharacter.parentCellOpt(newGameState).get.coordinates should be(HexCoordinates(1, 0))
       targetCharacter.state.shield should be(0)
       targetCharacter.state.effects.ofType[effects.Stun].size should be > 0

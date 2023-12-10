@@ -3,7 +3,6 @@ package com.tosware.nkm.models.game.abilities.aqua
 import com.tosware.nkm.*
 import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.ability.*
-import com.tosware.nkm.models.game.character.NkmCharacter
 import com.tosware.nkm.models.game.event.GameEvent
 import com.tosware.nkm.models.game.hex.HexCoordinates
 
@@ -17,44 +16,49 @@ object Resurrection extends NkmConf.AutoExtract {
       description =
         """Resurrect an ally that died in the last {diedMaxInLastNPhases} phases (current phase counts).
           |Resurrected character respawns with half of base HP on selected spawn point.""".stripMargin,
+      targetsMetadata = Seq(
+        AbilityTargetMetadata(1 to 1, AbilityTargetType.DeadCharacter),
+        AbilityTargetMetadata.SingleCoordinate,
+      ),
     )
 }
 
 case class Resurrection(abilityId: AbilityId, parentCharacterId: CharacterId)
-    extends Ability(abilityId) with UsableOnCoordinates {
-  override val metadata = Resurrection.metadata
+    extends Ability(abilityId) with Usable {
+  override val metadata: AbilityMetadata = Resurrection.metadata
 
-  override def rangeCellCoords(implicit gameState: GameState) =
+  override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =
     gameState.hexMap.getSpawnPointsFor(parentCharacter.owner.id).map(_.coordinates)
 
-  override def targetsInRange(implicit gameState: GameState) =
+  override def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] =
     rangeCellCoords.whereEmpty
 
-  override def use(target: HexCoordinates, useData: UseData)(implicit random: Random, gameState: GameState) = {
-    val targetCharacter = gameState.characterById(useData.data)
+  override def use(useData: UseData)(implicit
+      random: Random,
+      gameState: GameState,
+  ): GameState = {
+    val targetCoordinates = useData.firstAsCoordinates
+    val targetCharacter = gameState.characterById(useData.secondAsCharacterId)
 
     gameState
       .setHp(targetCharacter.id, targetCharacter.state.maxHealthPoints / 2)(random, id)
-      .placeCharacter(target, targetCharacter.id)(random, id)
+      .placeCharacter(targetCoordinates, targetCharacter.id)(random, id)
   }
 
-  override def useChecks(implicit
-      target: HexCoordinates,
-      useData: UseData,
-      gameState: GameState,
-  ): Set[(Boolean, CharacterId)] = {
-    val targetCharacter: NkmCharacter = gameState.characterById(useData.data)
+  override def useChecks(implicit useData: UseData, gameState: GameState): Set[(Boolean, CharacterId)] = {
+    val targetCoordinates = useData.firstAsCoordinates
+    val targetCharacterId = useData.secondAsCharacterId
 
-    super.useChecks ++ Seq(
-      UseCheck.TargetCharacter.IsFriend(targetCharacter.id, useData, gameState),
-      UseCheck.TargetCoordinates.IsFriendlySpawn,
-      UseCheck.TargetCoordinates.IsFreeToStand,
-      targetCharacter.isDead -> "Target character is not dead.",
+    super.useChecks ++ coordinatesBaseUseChecks(targetCoordinates) ++ Seq(
+      UseCheck.Character.IsFriend(targetCharacterId),
+      UseCheck.Character.IsDead(targetCharacterId),
+      UseCheck.Coordinates.IsFriendlySpawn(targetCoordinates),
+      UseCheck.Coordinates.IsFreeToStand(targetCoordinates),
       gameState.gameLog.events.ofType[GameEvent.CharacterDied]
-        .ofCharacter(targetCharacter.id)
+        .ofCharacter(targetCharacterId)
         .exists(e =>
           gameState.phase.number - e.phase.number < metadata.variables("diedMaxInLastNPhases")
-        ) -> "Target character has not died in the last 2 phases.",
+        ) -> s"Target character has not died in the last ${metadata.variables("diedMaxInLastNPhases")} phases.",
     )
   }
 }

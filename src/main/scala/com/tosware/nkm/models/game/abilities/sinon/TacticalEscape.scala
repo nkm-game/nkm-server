@@ -20,11 +20,9 @@ object TacticalEscape extends NkmConf.AutoExtract {
 
 case class TacticalEscape(abilityId: AbilityId, parentCharacterId: CharacterId)
     extends Ability(abilityId) with Usable {
-  override val metadata = TacticalEscape.metadata
-
-  override def use(useData: UseData)(implicit random: Random, gameState: GameState): GameState =
-    gameState.addEffect(
-      parentCharacterId,
-      StatBuff(randomUUID(), metadata.variables("duration"), StatType.Speed, metadata.variables("speedIncrease")),
-    )(random, id)
+  override val metadata: AbilityMetadata = TacticalEscape.metadata
+  override def use(useData: UseData)(implicit random: Random, gameState: GameState): GameState = {
+    val e = StatBuff(randomUUID(), metadata.variables("duration"), StatType.Speed, metadata.variables("speedIncrease"))
+    gameState.addEffect(parentCharacterId, e)(random, id)
+  }
 }

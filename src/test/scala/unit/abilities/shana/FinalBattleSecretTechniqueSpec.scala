@@ -3,6 +3,7 @@ package unit.abilities.shana
 import com.tosware.nkm.models.GameStateValidator
 import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.shana.FinalBattleSecretTechnique
+import com.tosware.nkm.models.game.ability.UseData
 import com.tosware.nkm.models.game.event.GameEvent
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.{TestScenario, TestUtils}
@@ -15,19 +16,19 @@ class FinalBattleSecretTechniqueSpec
     with TestUtils {
   private val abilityMetadata = FinalBattleSecretTechnique.metadata
   private val s = TestScenario.generate(TestHexMapName.FinalBattleSecretTechnique, abilityMetadata.id)
-  private val gameState = s.gameState.incrementPhase(4)
-  private val abilityUsedGs = gameState.useAbilityOnCharacter(s.defaultAbilityId, s.p(1)(0).character.id)
+  private val gameState = s.ultGs
+  private val abilityUsedGs = gameState.useAbility(s.defaultAbilityId, UseData(s.defaultEnemy.id))
 
   abilityMetadata.name must {
     "be able to use" in {
       assertCommandSuccess {
         GameStateValidator()(gameState)
-          .validateAbilityUseOnCharacter(s.owners(0), s.defaultAbilityId, s.p(1)(0).character.id)
+          .validateAbilityUse(s.owners(0), s.defaultAbilityId, UseData(s.defaultEnemy.id))
       }
     }
 
     "knockback on use with shinku" in {
-      s.p(1)(0).character.parentCellOpt(abilityUsedGs).get
+      s.defaultEnemy.parentCellOpt(abilityUsedGs).get
         .coordinates.toTuple shouldBe (7, 0)
     }
 

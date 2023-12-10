@@ -20,8 +20,7 @@ object Parry extends NkmConf.AutoExtract {
 
 case class Parry(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId)
     with GameEventListener {
-  override val metadata = Parry.metadata
-
+  override val metadata: AbilityMetadata = Parry.metadata
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
     e match {
       case CharacterPreparedToAttack(_, _, _, _, _, targetCharacterId) =>
