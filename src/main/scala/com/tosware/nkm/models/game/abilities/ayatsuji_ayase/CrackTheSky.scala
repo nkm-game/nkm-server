@@ -21,7 +21,8 @@ object CrackTheSky extends NkmConf.AutoExtract {
           |Deal {damage}+B physical damage to all hit enemies.
           |
           |Trap detonation radius: circular, {radius}""".stripMargin,
-      targetsMetadata = Seq(AbilityTargetMetadata.SingleCoordinate),
+      targetsMetadata =
+        Seq(AbilityTargetMetadata(1 to MarkOfTheWind.metadata.variables("trapLimit"), AbilityTargetType.HexCoordinates)),
     )
 
   val markOfTheWindAbilityIdKey = "markOfTheWindAbilityId"
