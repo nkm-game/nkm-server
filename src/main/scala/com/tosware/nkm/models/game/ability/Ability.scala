@@ -55,11 +55,17 @@ abstract class Ability(val id: AbilityId)
       .abilityHitCharacter(id, target)
       .damageCharacter(target, damage)(random, id)
 
-  def toView(forPlayer: Option[PlayerId])(implicit gameState: GameState): Option[AbilityView] =
-    if (!forPlayer.exists(parentCharacter.isSeenBy)) None
+  def toView(forPlayerOpt: Option[PlayerId])(implicit gameState: GameState): Option[AbilityView] =
+    if (!parentCharacter.isSeenBy(forPlayerOpt)) None
     else {
+      val baseUseChecksFiltered = this match {
+        case usable: Usable =>
+          // some abilities can temporarily remove some of the base use checks
+          usable.useChecks(UseData(), gameState).intersect(baseUseChecks)
+        case _ => baseUseChecks
+      }
 
-      val canBeUsedResponse = models.UseCheck.canBeUsed(baseUseChecks)
+      val canBeUsedResponse = models.UseCheck.canBeUsed(baseUseChecksFiltered)
       val canBeUsed = canBeUsedResponse match {
         case Success(_) => true
         case Failure(_) => false

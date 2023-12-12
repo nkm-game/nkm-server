@@ -27,8 +27,8 @@ abstract class CharacterEffect(val id: CharacterEffectId)
   def getVariablesChangedState(key: String, value: String)(implicit gameState: GameState): CharacterEffectState =
     state.modify(_.variables).using(_.updated(key, value))
 
-  def toView(forPlayer: Option[PlayerId])(implicit gameState: GameState): Option[CharacterEffectView] =
-    if (forPlayer.exists(parentCharacter.isSeenBy))
+  def toView(forPlayerOpt: Option[PlayerId])(implicit gameState: GameState): Option[CharacterEffectView] =
+    if (parentCharacter.isSeenBy(forPlayerOpt))
       Some(CharacterEffectView(
         id = id,
         metadataId = metadata.id,

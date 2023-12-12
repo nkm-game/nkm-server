@@ -150,8 +150,8 @@ case class NkmCharacter(
   def isFriendFor(playerId: PlayerId)(implicit gameState: GameState): Boolean =
     playerId == owner.id
 
-  def isSeenBy(playerId: PlayerId)(implicit gameState: GameState): Boolean =
-    !(isInvisible && isEnemyFor(playerId))
+  def isSeenBy(playerIdOpt: Option[PlayerId])(implicit gameState: GameState): Boolean =
+    !(isInvisible && playerIdOpt.fold(true)(isEnemyFor(_)))
 
   def basicAttackOverride: Option[BasicAttackOverride] =
     state.abilities.ofType[BasicAttackOverride].headOption
@@ -284,16 +284,16 @@ case class NkmCharacter(
   def removeEffect(effectId: CharacterEffectId): NkmCharacter =
     this.modify(_.state.effects).using(_.filterNot(_.id == effectId))
 
-  def toView(forPlayer: Option[PlayerId])(implicit gameState: GameState): NkmCharacterView = NkmCharacterView(
+  def toView(forPlayerOpt: Option[PlayerId])(implicit gameState: GameState): NkmCharacterView = NkmCharacterView(
     id = id,
     metadataId = metadataId,
-    state = state.toView(forPlayer, owner.id),
+    state = state.toView(forPlayerOpt, owner.id),
     ownerId = owner.id,
     isDead = isDead,
     canBasicMove = canBasicMove,
     canBasicAttack = canBasicAttack,
     isOnMap = isOnMap,
-    basicAttackCellCoords = if (forPlayer.exists(isSeenBy)) basicAttackCellCoords else Set.empty,
-    basicAttackTargets = if (forPlayer.exists(isSeenBy)) basicAttackTargets else Set.empty,
+    basicAttackCellCoords = if (isSeenBy(forPlayerOpt)) basicAttackCellCoords else Set.empty,
+    basicAttackTargets = if (isSeenBy(forPlayerOpt)) basicAttackTargets else Set.empty,
   )
 }
