@@ -553,7 +553,17 @@ case class GameState(
   ): GameState = {
     val ngs = updateHexCell(targetCellCoordinates)(_.copy(characterId = Some(characterId)))
       .modify(_.characterIdsOutsideMap).using(_.filter(_ != characterId))
-    val cpEvent = CharacterPlaced(randomUUID(), phase, turn, causedById, characterId, targetCellCoordinates)
+
+    val character = characterById(characterId)
+    val cpEvent = CharacterPlaced(
+      randomUUID(),
+      phase,
+      turn,
+      causedById,
+      characterId,
+      targetCellCoordinates,
+      character.toView(None)(ngs).state,
+    )
     if (gameStatus == GameStatus.CharacterPlacing) {
       ngs.logAndHideEvent(
         cpEvent,
