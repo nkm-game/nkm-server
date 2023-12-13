@@ -83,5 +83,10 @@ class MjolnirDestinyImpulseSpec
           .validateAbilityUse(s.owners(0), s.defaultAbilityId, UseData(s.p(1)(0).spawnCoordinates))
       }
     }
+
+    "be able to use in ability view" in {
+      aGsRefresh1.abilityById(s.defaultAbilityId).toView(None)(aGsRefresh1).get.canBeUsed should be(true)
+      aGsRefresh2.abilityById(s.defaultAbilityId).toView(None)(aGsRefresh2).get.canBeUsed should be(true)
+    }
   }
 }

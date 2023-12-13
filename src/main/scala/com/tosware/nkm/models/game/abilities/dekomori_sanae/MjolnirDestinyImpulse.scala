@@ -1,10 +1,10 @@
 package com.tosware.nkm.models.game.abilities.dekomori_sanae
 
 import com.tosware.nkm.*
+import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.ability.*
 import com.tosware.nkm.models.game.event.{GameEvent, GameEventListener}
 import com.tosware.nkm.models.game.hex.HexCoordinates
-import com.tosware.nkm.models.game.*
 
 import scala.util.Random
 
@@ -50,13 +50,6 @@ case class MjolnirDestinyImpulse(abilityId: AbilityId, parentCharacterId: Charac
         .nonEmpty
     ngs.setAbilityEnabled(id, newEnabled = shouldRefreshAbility)
   }
-  override def useChecks(implicit useData: UseData, gameState: GameState): Set[UseCheck] = {
-    val baseUseChecks = super.useChecks ++ coordinatesBaseUseChecks(useData.firstAsCoordinates)
-    if (state.isEnabled)
-      baseUseChecks - UseCheck.Base.IsNotOnCooldown - UseCheck.Base.CanBeUsedByParent
-    else
-      baseUseChecks
-  }
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState = e match {
     case GameEvent.TurnFinished(_, _, _, _, _) =>
       val characterIdThatTookAction = gameState.gameLog.characterThatTookActionInTurn(e.turn.number).get
@@ -64,4 +57,13 @@ case class MjolnirDestinyImpulse(abilityId: AbilityId, parentCharacterId: Charac
       gameState.setAbilityEnabled(id, newEnabled = false)
     case _ => gameState
   }
+
+  override def baseUseChecks(implicit gameState: GameState): Set[UseCheck] =
+    if (state.isEnabled)
+      super.baseUseChecks - UseCheck.Base.IsNotOnCooldown - UseCheck.Base.CanBeUsedByParent
+    else
+      super.baseUseChecks
+
+  override def useChecks(implicit useData: UseData, gameState: GameState): Set[UseCheck] =
+    super.useChecks ++ coordinatesBaseUseChecks(useData.firstAsCoordinates)
 }
