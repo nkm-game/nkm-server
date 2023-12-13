@@ -924,13 +924,22 @@ case class GameState(
       random: Random,
       causedById: String,
   ): GameState = {
+    val character = characterById(characterId)
     val wasRevealed =
       if (!wasCharacterInvisible) false
-      else !characterById(characterId).isInvisible
+      else !character.isInvisible
 
     if (wasRevealed)
       reveal(RevealCondition.RelatedCharacterRevealed(characterId))
-        .logEvent(GameEvent.CharacterRevealed(randomUUID(), phase, turn, causedById, characterId))
+        .logEvent(GameEvent.CharacterRevealed(
+          randomUUID(),
+          phase,
+          turn,
+          causedById,
+          characterId,
+          character.parentCellOpt(this).map(_.coordinates),
+          character.toView(Some(character.owner(this).id))(this).state,
+        ))
     else this
   }
 

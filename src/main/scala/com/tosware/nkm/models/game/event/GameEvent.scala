@@ -39,6 +39,8 @@ object GameEvent {
       turn: Turn,
       causedById: String,
       characterId: CharacterId,
+      revealedOnCoordinates: Option[HexCoordinates],
+      characterState: Option[NkmCharacterStateView],
   ) extends GameEvent
       with ContainsCharacterId
 
