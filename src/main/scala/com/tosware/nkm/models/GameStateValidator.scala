@@ -28,11 +28,11 @@ case class GameStateValidator()(implicit gameState: GameState) {
   private def banValid(playerId: PlayerId, characterIds: Set[CharacterMetadataId]) =
     gameState.draftPickState.fold(false)(_.validateBan(playerId, characterIds))
 
-  private def characterPickValid(playerId: PlayerId, characterId: CharacterMetadataId) =
-    gameState.draftPickState.fold(false)(_.validatePick(playerId, characterId))
+  private def draftPickChecks(playerId: PlayerId, characterMetadataId: CharacterMetadataId): Set[UseCheck] =
+    gameState.draftPickState.map(_.pickChecks(playerId, characterMetadataId)).getOrElse(Set.empty[UseCheck])
 
-  private def characterBlindPickValid(playerId: PlayerId, characterIds: Set[CharacterMetadataId]) =
-    gameState.blindPickState.fold(false)(_.validatePick(playerId, characterIds))
+  private def blindPickChecks(playerId: PlayerId, characterMetadataId: Set[CharacterMetadataId]): Set[UseCheck] =
+    gameState.blindPickState.map(_.pickChecks(playerId, characterMetadataId)).getOrElse(Set.empty[UseCheck])
 
   private def checkCharacterPlacings(
       playerId: PlayerId,
@@ -69,7 +69,6 @@ case class GameStateValidator()(implicit gameState: GameState) {
     val noCharacterTookAction = "No character took action this turn."
     val notYourTurn = "Not your turn."
     val otherCharacterAlreadyActedThisTurn = "Other character already took action this turn."
-    val pickNotValid = "Pick is not valid."
     val playerFinishedGame = "You have already finished the game."
     val playerNotHost = "Player is not a host."
     val playerNotInGame = "Player is not in the game."
@@ -116,12 +115,12 @@ case class GameStateValidator()(implicit gameState: GameState) {
     object DraftPick {
       def BanValid(playerId: PlayerId, characterMetadataIds: Set[CharacterMetadataId]): UseCheck =
         banValid(playerId, characterMetadataIds) -> Message.banNotValid
-      def CharacterPickValid(playerId: PlayerId, characterId: CharacterId): UseCheck =
-        characterPickValid(playerId, characterId) -> Message.pickNotValid
+      def PickChecks(playerId: PlayerId, characterMetadataId: CharacterMetadataId): Set[UseCheck] =
+        draftPickChecks(playerId, characterMetadataId)
     }
     object BlindPick {
-      def CharacterPickValid(playerId: PlayerId, characterIds: Set[CharacterId]): UseCheck =
-        characterBlindPickValid(playerId, characterIds) -> Message.pickNotValid
+      def PickChecks(playerId: PlayerId, characterMetadataIds: Set[CharacterMetadataId]): Set[UseCheck] =
+        blindPickChecks(playerId, characterMetadataIds)
     }
     object Character {
       def InGame(characterId: CharacterId): UseCheck =
@@ -159,7 +158,6 @@ case class GameStateValidator()(implicit gameState: GameState) {
           case usable: Usable =>
             usable.useChecks(useData, gameState)
           case _ => Set.empty
-
         }
     }
     object MovePath {
@@ -211,21 +209,22 @@ case class GameStateValidator()(implicit gameState: GameState) {
     models.UseCheck.canBeUsed(checks)
   }
 
-  def validatePickCharacter(playerId: PlayerId, characterId: CharacterMetadataId): CommandResponse = {
+  def validatePickCharacter(playerId: PlayerId, characterMetadataId: CharacterMetadataId): CommandResponse = {
     val checks = Set(
       UseCheck.Player.InGame(playerId),
       UseCheck.Game.InCharacterPick,
-      UseCheck.DraftPick.CharacterPickValid(playerId, characterId),
-    )
+    ) ++ UseCheck.DraftPick.PickChecks(playerId, characterMetadataId)
     models.UseCheck.canBeUsed(checks)
   }
 
-  def validateBlindPickCharacters(playerId: PlayerId, characterIds: Set[CharacterMetadataId]): CommandResponse = {
+  def validateBlindPickCharacters(
+      playerId: PlayerId,
+      characterMetadataIds: Set[CharacterMetadataId],
+  ): CommandResponse = {
     val checks = Set(
       UseCheck.Player.InGame(playerId),
       UseCheck.Game.InCharacterPick,
-      UseCheck.BlindPick.CharacterPickValid(playerId, characterIds),
-    )
+    ) ++ UseCheck.BlindPick.PickChecks(playerId, characterMetadataIds)
     models.UseCheck.canBeUsed(checks)
   }
 

@@ -1,6 +1,7 @@
 package unit
 
 import com.tosware.nkm.*
+import com.tosware.nkm.models.UseCheck
 import com.tosware.nkm.models.game.pick.blindpick.*
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
@@ -23,10 +24,10 @@ class BlindPickStateSpec
         state.pickPhase shouldBe BlindPickPhase.Picking
 
         def validateAndPick(playerId: PlayerId, characters: Set[CharacterMetadataId]): Unit = {
-          state.validatePick(playerId, config.availableCharacters) shouldBe false
-          state.validatePick(playerId, Set()) shouldBe false
+          UseCheck.canBeUsed(state.pickChecks(playerId, config.availableCharacters)).toBoolean shouldBe false
+          UseCheck.canBeUsed(state.pickChecks(playerId, Set())).toBoolean shouldBe false
 
-          state.validatePick(playerId, characters) shouldBe true
+          UseCheck.canBeUsed(state.pickChecks(playerId, characters)).toBoolean shouldBe true
           state = state.pick(playerId, characters)
         }
 

@@ -61,11 +61,11 @@ case class DraftPickState(
   def ban(playerId: PlayerId, characters: Set[CharacterMetadataId]): DraftPickState =
     copy(bans = bans.updated(playerId, Some(characters)))
 
-  def validatePick(playerId: PlayerId, character: CharacterMetadataId): Boolean = {
-    if (!charactersAvailableToPick.contains(character)) return false
-    if (!currentPlayerPicking.contains(playerId)) return false
-    true
-  }
+  def pickChecks(playerId: PlayerId, character: CharacterMetadataId): Set[UseCheck] =
+    Set(
+      charactersAvailableToPick.contains(character) -> s"Character $character is not available to pick",
+      currentPlayerPicking.contains(playerId) -> s"This is not your turn to pick",
+    )
 
   def pick(playerId: PlayerId, character: CharacterMetadataId): DraftPickState =
     copy(characterSelection = characterSelection.updated(playerId, characterSelection(playerId) :+ character))

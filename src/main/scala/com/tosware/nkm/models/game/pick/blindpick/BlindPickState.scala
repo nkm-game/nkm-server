@@ -26,12 +26,17 @@ case class BlindPickState(
     case BlindPickPhase.Finished => 1
   }
 
-  def validatePick(playerId: PlayerId, characters: Set[CharacterMetadataId]): Boolean = {
-    if (!characters.subsetOf(config.availableCharacters)) return false
-    if (!characterSelection.get(playerId).fold(false)(_.isEmpty)) return false
-    if (characters.size != config.numberOfCharactersPerPlayer) return false
-    true
-  }
+  def pickChecks(playerId: PlayerId, characters: Set[CharacterMetadataId]): Set[UseCheck] =
+    Set(
+      characters.subsetOf(
+        config.availableCharacters
+      ) ->
+        s"""Some characters you want to pick are not available:
+           | ${(characters -- config.availableCharacters).mkString(", ")}""".stripMargin,
+      characterSelection.get(playerId).fold(true)(_.isEmpty) -> "You have already picked.",
+      (characters.size == config.numberOfCharactersPerPlayer) ->
+        s"You need to pick ${config.numberOfCharactersPerPlayer} characters.",
+    )
 
   def pick(playerId: PlayerId, characters: Set[CharacterMetadataId]): BlindPickState =
     copy(characterSelection = characterSelection.updated(playerId, characters))

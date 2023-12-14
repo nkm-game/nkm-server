@@ -1,8 +1,8 @@
 package unit
 
 import com.tosware.nkm.*
+import com.tosware.nkm.models.UseCheck
 import com.tosware.nkm.models.game.pick.draftpick.*
-
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
@@ -33,7 +33,7 @@ class DraftPickStateSpec
         state.pickPhase shouldBe DraftPickPhase.Picking
 
         def validateAndPick(playerId: PlayerId, character: CharacterMetadataId): Unit = {
-          state.validatePick(playerId, character) shouldBe true
+          UseCheck.canBeUsed(state.pickChecks(playerId, character)).toBoolean shouldBe true
           state = state.pick(playerId, character)
         }
 
