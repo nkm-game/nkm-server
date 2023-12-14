@@ -136,12 +136,22 @@ case class GameState(
 
   def triggerEffects: Set[CharacterEffect & GameEventListener] = effects.collect { case e: GameEventListener => e }
 
+  // safe
+  def characterByIdOpt(characterId: CharacterId): Option[NkmCharacter] = characters.find(_.id == characterId)
+
+  // unsafe before validation
   def characterById(characterId: CharacterId): NkmCharacter = characters.find(_.id == characterId).get
 
+  // safe
+  def abilityByIdOpt(abilityId: AbilityId): Option[Ability] = abilities.find(_.id == abilityId)
+
+  // unsafe before validation
   def abilityById(abilityId: AbilityId): Ability = abilities.find(_.id == abilityId).get
 
+  // unsafe before validation
   def effectById(effectId: CharacterEffectId): CharacterEffect = effects.find(_.id == effectId).get
 
+  // unsafe before validation
   def hexCellEffectById(effectId: HexCellEffectId): HexCellEffect = hexCellEffects.find(_.id == effectId).get
 
   def hiddenEventsFor(forPlayerOpt: Option[PlayerId]): Seq[EventHideData] =

@@ -53,33 +53,24 @@ object Lobby {
   object UseCheck {
     def IsNotCreated(lobbyState: LobbyState): UseCheck =
       (!lobbyState.created()) -> "Lobby is already created"
-
     def IsCreated(lobbyState: LobbyState): UseCheck =
       lobbyState.created() -> "Lobby is not created"
-
     def IsUserNotInLobby(userId: UserId)(lobbyState: LobbyState): UseCheck =
       (!lobbyState.userIds.contains(userId)) -> s"Lobby already contains $userId"
-
     def IsUserInLobby(userId: UserId)(lobbyState: LobbyState): UseCheck =
       lobbyState.userIds.contains(userId) -> s"Lobby does not contain $userId"
-
     def IsValidMapName(hexMapName: String)(implicit nkmDataService: NkmDataService): UseCheck =
       nkmDataService.getHexMaps.map(_.name).contains(hexMapName) -> s"Invalid map name: $hexMapName"
-
     def IsValidNumberOfBans(numberOfBans: Int, minBans: Int, maxBans: Int): UseCheck =
       (numberOfBans >= minBans && numberOfBans <= maxBans) -> s"Invalid number of bans: $numberOfBans"
-
     def IsValidNumberOfCharacters(numberOfCharacters: Int, minCharacters: Int, maxCharacters: Int): UseCheck =
       (numberOfCharacters >= minCharacters && numberOfCharacters <= maxCharacters) -> s"Invalid number of characters per player: $numberOfCharacters"
-
     def CanStartGame(lobbyState: LobbyState): UseCheck =
       (lobbyState.chosenHexMapName.nonEmpty && lobbyState.userIds.length > 1) -> "Cannot start the game"
-
     def IsColorNameUnique(newColorName: String)(lobbyState: LobbyState): UseCheck =
       (!lobbyState.playerColors.values.map(_.name).toSet.contains(newColorName)) -> "Color name already taken"
-
     def ColorExists(newColorName: String): UseCheck =
-      (NkmColor.colorByName(newColorName).nonEmpty) -> "Color does not exist"
+      NkmColor.colorByName(newColorName).nonEmpty -> "Color does not exist"
   }
 }
 
