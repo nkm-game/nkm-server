@@ -87,6 +87,25 @@ class WSGameSpec extends WSTrait {
       }
     }
 
+    "allow observing for users outside game" in {
+      val lobbyId = createLobbyForGame(numberOfPlayers = 2)
+      observeEvents(lobbyId)
+
+      withGameWS { implicit wsClient: WSProbe =>
+        auth(3)
+        observe(lobbyId).statusCode shouldBe ok
+      }
+
+      withGameWS { implicit wsClient: WSProbe =>
+        auth(0)
+        surrender(lobbyId).statusCode shouldBe ok
+      }
+
+      val playerObservedEvents = collectObservedEvents()(0)
+      val nonPlayerObservedEvents = collectObservedEvents()(2)
+      playerObservedEvents.size shouldBe nonPlayerObservedEvents.size
+    }
+
     "allow getting current clock" in {
       val lobbyId = createLobbyForGame(
         pickType = PickType.DraftPick
