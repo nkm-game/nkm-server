@@ -9,13 +9,8 @@ import com.tosware.nkm.models.game.character_effect.CharacterEffectName
 import com.tosware.nkm.models.game.effects.Fly
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.{TestScenario, TestUtils}
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpecLike
 
-class ReducedWeightSpec
-    extends AnyWordSpecLike
-    with Matchers
-    with TestUtils {
+class ReducedWeightSpec extends TestUtils {
   private val abilityMetadata = ReducedWeight.metadata
   private val s = TestScenario.generate(TestHexMapName.Simple2v2, abilityMetadata.id)
   private val aGs: GameState = s.gameState.useAbility(s.defaultAbilityId, UseData(s.defaultCharacter.id))

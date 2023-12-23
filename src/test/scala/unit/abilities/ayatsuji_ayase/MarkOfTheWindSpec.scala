@@ -5,18 +5,13 @@ import com.tosware.nkm.models.GameStateValidator
 import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.ayatsuji_ayase.{CrackTheSky, MarkOfTheWind}
 import com.tosware.nkm.models.game.ability.UseData
+import com.tosware.nkm.models.game.ability.UseData.HexCoordinatesMarker
 import com.tosware.nkm.models.game.character.CharacterMetadata
 import com.tosware.nkm.models.game.event.GameEvent
 import com.tosware.nkm.models.game.hex.{HexCoordinates, TestHexMapName}
 import helpers.{TestScenario, TestUtils}
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpecLike
-import UseData.HexCoordinatesMarker
 
-class MarkOfTheWindSpec
-    extends AnyWordSpecLike
-    with Matchers
-    with TestUtils {
+class MarkOfTheWindSpec extends TestUtils {
   private val metadata = CharacterMetadata.empty()
     .copy(initialAbilitiesMetadataIds =
       Seq(

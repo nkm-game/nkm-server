@@ -6,13 +6,8 @@ import com.tosware.nkm.models.game.ability.UseData
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import com.tosware.nkm.providers.CharacterMetadataProvider
 import helpers.{TestScenario, TestUtils}
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpecLike
 
-class AquaCronaSpec
-    extends AnyWordSpecLike
-    with Matchers
-    with TestUtils {
+class AquaCronaSpec extends TestUtils {
   private val characters = CharacterMetadataProvider()
     .getCharacterMetadataSeq.filter(c => Seq("Aqua", "Crona").contains(c.name)).reverse
   private val s = TestScenario.generate(TestHexMapName.Simple1v1, characters)

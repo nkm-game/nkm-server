@@ -8,15 +8,10 @@ import com.tosware.nkm.models.game.character_effect.CharacterEffectName.*
 import com.tosware.nkm.models.game.event.GameEvent.CharacterDied
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.{TestScenario, TestUtils}
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpecLike
 
 import scala.annotation.tailrec
 
-class MurasameSpec
-    extends AnyWordSpecLike
-    with Matchers
-    with TestUtils {
+class MurasameSpec extends TestUtils {
   private val abilityMetadata = Murasame.metadata
   private val characterMetadata = CharacterMetadata.empty()
     .copy(initialAbilitiesMetadataIds =

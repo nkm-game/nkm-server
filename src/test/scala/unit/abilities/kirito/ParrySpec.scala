@@ -4,13 +4,8 @@ import com.tosware.nkm.models.game.abilities.kirito.Parry
 import com.tosware.nkm.models.game.character.CharacterMetadata
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.{TestScenario, TestUtils}
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpecLike
 
-class ParrySpec
-    extends AnyWordSpecLike
-    with Matchers
-    with TestUtils {
+class ParrySpec extends TestUtils {
   private val initialHp = 10000
   private val abilityMetadata = Parry.metadata
   private val characterMetadata = CharacterMetadata.empty()

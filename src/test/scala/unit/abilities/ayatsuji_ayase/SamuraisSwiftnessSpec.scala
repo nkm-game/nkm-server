@@ -4,13 +4,8 @@ import com.tosware.nkm.models.game.abilities.ayatsuji_ayase.SamuraisSwiftness
 import com.tosware.nkm.models.game.character.StatType
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.{TestScenario, TestUtils}
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpecLike
 
-class SamuraisSwiftnessSpec
-    extends AnyWordSpecLike
-    with Matchers
-    with TestUtils {
+class SamuraisSwiftnessSpec extends TestUtils {
   private val abilityMetadata = SamuraisSwiftness.metadata
   private val s = TestScenario.generate(TestHexMapName.Simple1v1, abilityMetadata.id)
 

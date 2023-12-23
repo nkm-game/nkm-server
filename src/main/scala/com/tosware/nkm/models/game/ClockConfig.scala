@@ -1,7 +1,9 @@
 package com.tosware.nkm.models.game
 
-import com.tosware.nkm.NkmConf
+import com.tosware.nkm.models.CommandResponse.CommandResponse
+import com.tosware.nkm.models.UseCheck
 import com.tosware.nkm.models.game.pick.PickType
+import com.tosware.nkm.{NkmConf, UseCheck}
 
 object ClockConfig {
   def empty(): ClockConfig =
@@ -31,4 +33,23 @@ case class ClockConfig(
     maxPickTimeMillis: Long,
     timeAfterPickMillis: Long,
     timeForCharacterPlacing: Long,
-)
+) {
+  def validate: CommandResponse = {
+    val minTime = 0
+    val maxTime = 1000 * 60 * 60 * 60 * 24 * 30 // 30 days
+
+    def timeChecks(timeMillis: Long, timeName: String) = Set[UseCheck](
+      (minTime <= timeMillis) -> s"$timeName is too small, needs to be at least $minTime",
+      (timeMillis <= maxTime) -> s"$timeName is too big, needs to be at most $maxTime",
+    )
+
+    val useChecks = timeChecks(initialTimeMillis, "initialTimeMillis") ++
+      timeChecks(incrementMillis, "incrementMillis") ++
+      timeChecks(maxBanTimeMillis, "maxBanTimeMillis") ++
+      timeChecks(maxPickTimeMillis, "maxPickTimeMillis") ++
+      timeChecks(timeAfterPickMillis, "timeAfterPickMillis") ++
+      timeChecks(timeForCharacterPlacing, "timeForCharacterPlacing")
+
+    UseCheck.canBeUsed(useChecks)
+  }
+}

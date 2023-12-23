@@ -136,6 +136,10 @@ class LobbyService(gameIdTrackerActor: ActorRef)(
   }
 
   def setClockConfig(username: String, request: SetClockConfig): CommandResponse = {
+    request.newConfig.validate match {
+      case Success(_)     =>
+      case f @ Failure(_) => return f
+    }
     val lobbyActor = getLobbyActorOpt(request.lobbyId).getOrElse(return failGameIdDoesNotExist)
     val gameState = aw(getGameState(request.lobbyId).getOrElse(return failGameIdDoesNotExist))
     val lobbyState = aw(getLobbyState(lobbyActor))

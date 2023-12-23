@@ -9,13 +9,8 @@ import com.tosware.nkm.models.game.character.{AttackType, CharacterMetadata}
 import com.tosware.nkm.models.game.effects.*
 import com.tosware.nkm.models.game.hex.{HexCoordinates, TestHexMapName}
 import helpers.{TestScenario, TestUtils}
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpecLike
 
-class GameStateValidatorSpec
-    extends AnyWordSpecLike
-    with Matchers
-    with TestUtils {
+class GameStateValidatorSpec extends TestUtils {
   private val metadata = CharacterMetadata.empty()
     .copy(
       initialSpeed = 3,

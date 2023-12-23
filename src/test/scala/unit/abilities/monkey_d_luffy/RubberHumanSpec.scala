@@ -9,13 +9,8 @@ import com.tosware.nkm.models.game.effects.Poison
 import com.tosware.nkm.models.game.event.GameEvent.CharacterDamaged
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.{TestScenario, TestUtils}
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpecLike
 
-class RubberHumanSpec
-    extends AnyWordSpecLike
-    with Matchers
-    with TestUtils {
+class RubberHumanSpec extends TestUtils {
   private val abilityMetadata = RubberHuman.metadata
   private val s = TestScenario.generate(TestHexMapName.Simple1v1, abilityMetadata.id)
   private val rangedAttackerGs =

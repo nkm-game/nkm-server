@@ -7,13 +7,8 @@ import com.tosware.nkm.models.game.ability.UseData
 import com.tosware.nkm.models.game.event.GameEvent.CharacterDamaged
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.{TestScenario, TestUtils}
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpecLike
 
-class EliminateSpec
-    extends AnyWordSpecLike
-    with Matchers
-    with TestUtils {
+class EliminateSpec extends TestUtils {
   private val abilityMetadata = Eliminate.metadata
   private val s = TestScenario.generate(TestHexMapName.Simple1v1, abilityMetadata.id)
   private val abilityId = s.defaultAbilityId

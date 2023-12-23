@@ -6,13 +6,8 @@ import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.llenn.RunItDown
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.{TestScenario, TestUtils}
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpecLike
 
-class RunItDownSpec
-    extends AnyWordSpecLike
-    with Matchers
-    with TestUtils {
+class RunItDownSpec extends TestUtils {
   private val abilityMetadata = RunItDown.metadata
   private val s = TestScenario.generate(TestHexMapName.Simple2v2, abilityMetadata.id)
   private val gameState: GameState = s.ultGs

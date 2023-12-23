@@ -7,13 +7,8 @@ import com.tosware.nkm.models.game.ability.AbilityType
 import com.tosware.nkm.models.game.effects.AbilityEnchant
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.{TestScenario, TestUtils}
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpecLike
 
-class FairyOfLoveSpec
-    extends AnyWordSpecLike
-    with Matchers
-    with TestUtils {
+class FairyOfLoveSpec extends TestUtils {
   private val abilityMetadata = FairyOfLove.metadata
   private val s = TestScenario.generate(TestHexMapName.Simple2v2, abilityMetadata.id)
   private val aGs: GameState = s.ultGs.useAbility(s.defaultAbilityId)

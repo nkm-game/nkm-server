@@ -8,13 +8,8 @@ import com.tosware.nkm.models.game.ability.UseData
 import com.tosware.nkm.models.game.event.GameEvent
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.{TestScenario, TestUtils}
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpecLike
 
-class AsterSpec
-    extends AnyWordSpecLike
-    with Matchers
-    with TestUtils {
+class AsterSpec extends TestUtils {
   private val abilityMetadata = Aster.metadata
   private val s = TestScenario.generate(TestHexMapName.Simple2v2, abilityMetadata.id)
 

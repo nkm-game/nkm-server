@@ -6,13 +6,8 @@ import com.tosware.nkm.models.game.character.CharacterMetadata
 import com.tosware.nkm.models.game.event.GameEvent
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.{TestScenario, TestUtils}
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpecLike
 
-class LackOfOrientationSpec
-    extends AnyWordSpecLike
-    with Matchers
-    with TestUtils {
+class LackOfOrientationSpec extends TestUtils {
   // TODO: override seed
   //  val lostSeed = 1337
   //  override implicit val random = new Random(lostSeed)

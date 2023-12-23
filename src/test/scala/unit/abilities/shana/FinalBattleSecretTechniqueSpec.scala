@@ -7,13 +7,8 @@ import com.tosware.nkm.models.game.ability.UseData
 import com.tosware.nkm.models.game.event.GameEvent
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.{TestScenario, TestUtils}
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpecLike
 
-class FinalBattleSecretTechniqueSpec
-    extends AnyWordSpecLike
-    with Matchers
-    with TestUtils {
+class FinalBattleSecretTechniqueSpec extends TestUtils {
   private val abilityMetadata = FinalBattleSecretTechnique.metadata
   private val s = TestScenario.generate(TestHexMapName.FinalBattleSecretTechnique, abilityMetadata.id)
   private val gameState = s.ultGs

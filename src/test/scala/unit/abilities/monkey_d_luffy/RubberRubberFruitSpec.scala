@@ -7,13 +7,8 @@ import com.tosware.nkm.models.game.ability.{AbilityType, UseData}
 import com.tosware.nkm.models.game.event.GameEvent
 import com.tosware.nkm.models.game.hex.{HexCoordinates, TestHexMapName}
 import helpers.{TestScenario, TestUtils}
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpecLike
 
-class RubberRubberFruitSpec
-    extends AnyWordSpecLike
-    with Matchers
-    with TestUtils {
+class RubberRubberFruitSpec extends TestUtils {
   private val abilityMetadata = RubberRubberFruit.metadata
   private val s = TestScenario.generate(TestHexMapName.RubberRubberFruit, abilityMetadata.id)
 

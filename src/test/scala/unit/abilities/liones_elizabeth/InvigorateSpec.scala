@@ -7,13 +7,8 @@ import com.tosware.nkm.models.game.ability.UseData
 import com.tosware.nkm.models.game.effects.HealOverTime
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.{TestScenario, TestUtils}
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpecLike
 
-class InvigorateSpec
-    extends AnyWordSpecLike
-    with Matchers
-    with TestUtils {
+class InvigorateSpec extends TestUtils {
   private val abilityMetadata = Invigorate.metadata
   private val s = TestScenario.generate(TestHexMapName.Simple1v1, abilityMetadata.id)
   private val damagedGs =

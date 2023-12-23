@@ -6,6 +6,10 @@ import com.tosware.nkm.actors.{BugReportActor, GameIdTrackerActor}
 import com.tosware.nkm.services.*
 import com.tosware.nkm.services.http.directives.JwtSecretKey
 
+import scala.concurrent.duration.*
+import akka.pattern.gracefulStop
+
+import scala.concurrent.Await
 import scala.util.Random
 
 class NkmDependencies(_system: ActorSystem) {
@@ -29,9 +33,15 @@ class NkmDependencies(_system: ActorSystem) {
     system.actorOf(GameSessionActor.props(), s"game_session_${randomUUID()(new Random())}")
 
   def cleanup(): Unit = {
-    system.stop(gameIdTrackerActor)
-    system.stop(bugReportActor)
-    system.stop(lobbySessionActor)
-    system.stop(gameSessionActor)
+    val timeout = 5.seconds
+
+    val stops = Seq(
+      gracefulStop(gameIdTrackerActor, timeout),
+      gracefulStop(bugReportActor, timeout),
+      gracefulStop(lobbySessionActor, timeout),
+      gracefulStop(gameSessionActor, timeout),
+    )
+
+    stops.foreach(stop => Await.result(stop, timeout))
   }
 }

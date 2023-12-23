@@ -7,13 +7,8 @@ import com.tosware.nkm.models.game.ability.UseData
 import com.tosware.nkm.models.game.event.GameEvent
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.{TestScenario, TestUtils}
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpecLike
 
-class DrainTouchSpec
-    extends AnyWordSpecLike
-    with Matchers
-    with TestUtils {
+class DrainTouchSpec extends TestUtils {
   private val abilityMetadata = DrainTouch.metadata
   private val s = TestScenario.generate(TestHexMapName.Simple1v1, abilityMetadata.id)
   private val aGs: GameState =

@@ -7,13 +7,8 @@ import com.tosware.nkm.models.game.ability.UseData
 import com.tosware.nkm.models.game.event.GameEvent
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.{TestScenario, TestUtils}
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpecLike
 
-class SummerBreezeSpec
-    extends AnyWordSpecLike
-    with Matchers
-    with TestUtils {
+class SummerBreezeSpec extends TestUtils {
   private val abilityMetadata = SummerBreeze.metadata
   private val s = TestScenario.generate(TestHexMapName.SummerBreeze, abilityMetadata.id)
   private val gameState: GameState = s.gameState
