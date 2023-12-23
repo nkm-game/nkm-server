@@ -5,13 +5,8 @@ import com.tosware.nkm.models.game.abilities.llenn.PChan
 import com.tosware.nkm.models.game.character.CharacterMetadata
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.{TestScenario, TestUtils}
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpecLike
 
-class PChanSpec
-    extends AnyWordSpecLike
-    with Matchers
-    with TestUtils {
+class PChanSpec extends TestUtils {
   private val metadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(PChan.metadata.id))
   private val s = TestScenario.generate(TestHexMapName.Simple2v2, metadata)
   implicit private val gameState: GameState = s.gameState

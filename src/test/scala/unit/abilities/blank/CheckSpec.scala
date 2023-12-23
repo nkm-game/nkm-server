@@ -8,13 +8,8 @@ import com.tosware.nkm.models.game.character.CharacterMetadata
 import com.tosware.nkm.models.game.character_effect.CharacterEffectName
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.{TestScenario, TestUtils}
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpecLike
 
-class CheckSpec
-    extends AnyWordSpecLike
-    with Matchers
-    with TestUtils {
+class CheckSpec extends TestUtils {
   private val abilityMetadata = Check.metadata
   private val characterMetadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
   private val s = TestScenario.generate(TestHexMapName.Simple2v2, characterMetadata)

@@ -7,13 +7,8 @@ import com.tosware.nkm.models.game.abilities.dekomori_sanae.WickedEyesServant
 import com.tosware.nkm.models.game.event.GameEvent.CharacterDamaged
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.{TestScenario, TestUtils}
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpecLike
 
-class WickedEyesServantSpec
-    extends AnyWordSpecLike
-    with Matchers
-    with TestUtils {
+class WickedEyesServantSpec extends TestUtils {
 
   private val abilityMetadata = WickedEyesServant.metadata
   private val s = TestScenario.generate(TestHexMapName.Simple2v2, abilityMetadata.id)

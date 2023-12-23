@@ -4,13 +4,9 @@ import com.tosware.nkm.models.GameStateValidator
 import com.tosware.nkm.models.game.abilities.aqua.NaturesBeauty
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.{TestScenario, TestUtils}
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpecLike
 
 class NaturesBeautySpec
-    extends AnyWordSpecLike
-    with Matchers
-    with TestUtils {
+    extends TestUtils {
   private val abilityMetadata = NaturesBeauty.metadata
   private val s = TestScenario.generate(TestHexMapName.Simple2v2, abilityMetadata.id)
 

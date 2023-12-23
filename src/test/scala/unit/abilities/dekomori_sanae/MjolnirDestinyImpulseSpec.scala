@@ -9,13 +9,8 @@ import com.tosware.nkm.models.game.ability.UseData
 import com.tosware.nkm.models.game.event.GameEvent
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.{TestScenario, TestUtils}
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpecLike
 
-class MjolnirDestinyImpulseSpec
-    extends AnyWordSpecLike
-    with Matchers
-    with TestUtils {
+class MjolnirDestinyImpulseSpec extends TestUtils {
   private val abilityMetadata = MjolnirDestinyImpulse.metadata
   private val s = TestScenario.generate(TestHexMapName.Simple2v2v2, abilityMetadata.id)
 

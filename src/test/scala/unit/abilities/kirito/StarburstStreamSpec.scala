@@ -7,13 +7,8 @@ import com.tosware.nkm.models.game.ability.UseData
 import com.tosware.nkm.models.game.character.CharacterMetadata
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.{TestScenario, TestUtils}
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpecLike
 
-class StarburstStreamSpec
-    extends AnyWordSpecLike
-    with Matchers
-    with TestUtils {
+class StarburstStreamSpec extends TestUtils {
   private val initialHp = 10000
   private val abilityMetadata = StarburstStream.metadata
   private val characterMetadata = CharacterMetadata.empty()

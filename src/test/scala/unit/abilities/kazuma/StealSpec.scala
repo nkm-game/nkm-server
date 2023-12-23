@@ -6,13 +6,8 @@ import com.tosware.nkm.models.game.abilities.satou_kazuma.Steal
 import com.tosware.nkm.models.game.ability.UseData
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.{TestScenario, TestUtils}
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpecLike
 
-class StealSpec
-    extends AnyWordSpecLike
-    with Matchers
-    with TestUtils {
+class StealSpec extends TestUtils {
   private val abilityMetadata = Steal.metadata
   private val s = TestScenario.generate(TestHexMapName.Simple1v1, abilityMetadata.id)
   private val aGs: GameState =

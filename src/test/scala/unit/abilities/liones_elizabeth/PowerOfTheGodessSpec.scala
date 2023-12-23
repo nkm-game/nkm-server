@@ -7,13 +7,8 @@ import com.tosware.nkm.models.game.character.CharacterMetadata
 import com.tosware.nkm.models.game.event.GameEvent
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.{TestScenario, TestUtils}
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpecLike
 
-class PowerOfTheGodessSpec
-    extends AnyWordSpecLike
-    with Matchers
-    with TestUtils {
+class PowerOfTheGodessSpec extends TestUtils {
   private val abilityMetadata = PowerOfTheGoddess.metadata
   private val metadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
   private val s = TestScenario.generate(TestHexMapName.Simple2v2, metadata)

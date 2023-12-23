@@ -8,13 +8,8 @@ import com.tosware.nkm.models.game.character_effect.CharacterEffectName.*
 import com.tosware.nkm.models.game.event.GameEvent
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.{TestScenario, TestUtils}
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpecLike
 
-class ScreechAlphaSpec
-    extends AnyWordSpecLike
-    with Matchers
-    with TestUtils {
+class ScreechAlphaSpec extends TestUtils {
   private val abilityMetadata = ScreechAlpha.metadata
   private val characterMetadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
   private val s = TestScenario.generate(TestHexMapName.Simple1v9Line, characterMetadata)

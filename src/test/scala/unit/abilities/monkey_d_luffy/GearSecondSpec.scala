@@ -8,13 +8,8 @@ import com.tosware.nkm.models.game.character.StatType
 import com.tosware.nkm.models.game.effects.AbilityEnchant
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.{TestScenario, TestUtils}
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpecLike
 
-class GearSecondSpec
-    extends AnyWordSpecLike
-    with Matchers
-    with TestUtils {
+class GearSecondSpec extends TestUtils {
   private val abilityMetadata = GearSecond.metadata
   private val s = TestScenario.generate(TestHexMapName.Simple1v1, abilityMetadata.id)
   private val aGs: GameState = s.ultGs.useAbility(s.defaultAbilityId)

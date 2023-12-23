@@ -8,13 +8,8 @@ import com.tosware.nkm.models.game.ability.UseData
 import com.tosware.nkm.models.game.event.GameEvent.DamageSent
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.{TestScenario, TestUtils}
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpecLike
 
-class MjolnirHammerSpec
-    extends AnyWordSpecLike
-    with Matchers
-    with TestUtils {
+class MjolnirHammerSpec extends TestUtils {
 
   private val abilityMetadata = MjolnirHammer.metadata
   private val s = TestScenario.generate(TestHexMapName.Simple1v9Line, abilityMetadata.id)

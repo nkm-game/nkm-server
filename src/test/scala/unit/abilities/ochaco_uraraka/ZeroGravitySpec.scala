@@ -5,13 +5,8 @@ import com.tosware.nkm.models.game.character_effect.CharacterEffectName
 import com.tosware.nkm.models.game.effects.Fly
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.{TestScenario, TestUtils}
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpecLike
 
-class ZeroGravitySpec
-    extends AnyWordSpecLike
-    with Matchers
-    with TestUtils {
+class ZeroGravitySpec extends TestUtils {
   private val abilityMetadata = ZeroGravity.metadata
   private val s = TestScenario.generate(TestHexMapName.Simple2v2, abilityMetadata.id)
 

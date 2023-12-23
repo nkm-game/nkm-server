@@ -6,13 +6,8 @@ import com.tosware.nkm.models.game.abilities.sinon.TacticalEscape
 import com.tosware.nkm.models.game.character.{CharacterMetadata, StatType}
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.{TestScenario, TestUtils}
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpecLike
 
-class TacticalEscapeSpec
-    extends AnyWordSpecLike
-    with Matchers
-    with TestUtils {
+class TacticalEscapeSpec extends TestUtils {
   private val abilityMetadata = TacticalEscape.metadata
   private val metadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
   private val s = TestScenario.generate(TestHexMapName.Simple2v2, metadata)

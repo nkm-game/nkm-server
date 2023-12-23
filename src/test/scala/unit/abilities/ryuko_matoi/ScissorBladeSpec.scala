@@ -6,13 +6,8 @@ import com.tosware.nkm.models.game.character.{CharacterMetadata, StatType}
 import com.tosware.nkm.models.game.effects.StatNerf
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.{TestScenario, TestUtils}
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpecLike
 
-class ScissorBladeSpec
-    extends AnyWordSpecLike
-    with Matchers
-    with TestUtils {
+class ScissorBladeSpec extends TestUtils {
 
   private val abilityMetadata = ScissorBlade.metadata
   private val characterMetadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))

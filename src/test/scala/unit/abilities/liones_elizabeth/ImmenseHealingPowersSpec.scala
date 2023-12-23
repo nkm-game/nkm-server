@@ -8,13 +8,8 @@ import com.tosware.nkm.models.game.character.CharacterMetadata
 import com.tosware.nkm.models.game.event.GameEvent.{CharacterHealed, HealAmplified}
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.{TestScenario, TestUtils}
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpecLike
 
-class ImmenseHealingPowersSpec
-    extends AnyWordSpecLike
-    with Matchers
-    with TestUtils {
+class ImmenseHealingPowersSpec extends TestUtils {
   private val abilityMetadata = ImmenseHealingPowers.metadata
   private val metadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds =
     Seq(

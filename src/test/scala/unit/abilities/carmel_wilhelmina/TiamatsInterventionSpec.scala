@@ -7,14 +7,9 @@ import com.tosware.nkm.models.game.ability.UseData
 import com.tosware.nkm.models.game.character.CharacterMetadata
 import com.tosware.nkm.models.game.hex.{HexCoordinates, TestHexMapName}
 import helpers.{TestScenario, TestUtils}
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpecLike
 import spray.json.*
 
-class TiamatsInterventionSpec
-    extends AnyWordSpecLike
-    with Matchers
-    with TestUtils {
+class TiamatsInterventionSpec extends TestUtils {
   private val abilityMetadata = TiamatsIntervention.metadata
   private val characterMetadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
   private val s = TestScenario.generate(TestHexMapName.Simple2v2, characterMetadata)

@@ -5,13 +5,8 @@ import com.tosware.nkm.models.game.abilities.shana.WingsOfCrimson
 import com.tosware.nkm.models.game.character.{CharacterMetadata, StatType}
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.{TestScenario, TestUtils}
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpecLike
 
-class WingsOfCrimsonSpec
-    extends AnyWordSpecLike
-    with Matchers
-    with TestUtils {
+class WingsOfCrimsonSpec extends TestUtils {
   private val abilityMetadata = WingsOfCrimson.metadata
   private val characterMetadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
   private val s = TestScenario.generate(TestHexMapName.Simple1v1, characterMetadata)

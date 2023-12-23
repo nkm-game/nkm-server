@@ -7,13 +7,8 @@ import com.tosware.nkm.models.game.character.CharacterMetadata
 import com.tosware.nkm.models.game.event.GameEvent
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.{TestScenario, TestUtils}
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpecLike
 
-class PowerOfExistenceSpec
-    extends AnyWordSpecLike
-    with Matchers
-    with TestUtils {
+class PowerOfExistenceSpec extends TestUtils {
   private val abilityMetadata = PowerOfExistence.metadata
   private val metadata =
     CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id, MasterThrone.metadata.id))

@@ -6,13 +6,8 @@ import com.tosware.nkm.models.game.character.CharacterMetadata
 import com.tosware.nkm.models.game.event.GameEvent
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.{TestScenario, TestUtils}
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpecLike
 
-class BlackBloodSpec
-    extends AnyWordSpecLike
-    with Matchers
-    with TestUtils {
+class BlackBloodSpec extends TestUtils {
   private val abilityMetadata = BlackBlood.metadata
   private val characterMetadata: Seq[CharacterMetadata] =
     Seq(

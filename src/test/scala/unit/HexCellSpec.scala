@@ -5,14 +5,8 @@ import com.tosware.nkm.models.game.GameState
 import com.tosware.nkm.models.game.character.CharacterMetadata
 import com.tosware.nkm.models.game.hex.*
 import helpers.{TestScenario, TestUtils}
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpecLike
 
-class HexCellSpec
-    extends AnyWordSpecLike
-    with Matchers
-    with Logging
-    with TestUtils {
+class HexCellSpec extends TestUtils {
   private val metadata = CharacterMetadata.empty()
   private val s = TestScenario.generate(TestHexMapName.Simple2v2, metadata)
   implicit val gameState: GameState = s.gameState

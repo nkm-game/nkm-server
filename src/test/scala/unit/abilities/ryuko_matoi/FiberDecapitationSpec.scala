@@ -9,13 +9,8 @@ import com.tosware.nkm.models.game.effects.StatNerf
 import com.tosware.nkm.models.game.event.GameEvent
 import com.tosware.nkm.models.game.hex.{HexCoordinates, TestHexMapName}
 import helpers.{TestScenario, TestUtils}
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpecLike
 
-class FiberDecapitationSpec
-    extends AnyWordSpecLike
-    with Matchers
-    with TestUtils {
+class FiberDecapitationSpec extends TestUtils {
   private val abilityMetadata = FiberDecapitation.metadata
   private val characterMetadata =
     CharacterMetadata.empty()

@@ -6,14 +6,9 @@ import com.tosware.nkm.models.game.abilities.aqua.Resurrection
 import com.tosware.nkm.models.game.ability.UseData
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.{TestScenario, TestUtils}
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpecLike
 import spray.json.*
 
-class ResurrectionSpec
-    extends AnyWordSpecLike
-    with Matchers
-    with TestUtils {
+class ResurrectionSpec extends TestUtils {
   private val abilityMetadata = Resurrection.metadata
   private val s = TestScenario.generate(TestHexMapName.Simple2v2, abilityMetadata.id)
   private val gameState: GameState = s.ultGs

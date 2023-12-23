@@ -6,13 +6,8 @@ import com.tosware.nkm.models.game.abilities.shana.GreatBladeOfCrimson
 import com.tosware.nkm.models.game.character.{CharacterMetadata, StatType}
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.{TestScenario, TestUtils}
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpecLike
 
-class GreatBladeOfCrimsonSpec
-    extends AnyWordSpecLike
-    with Matchers
-    with TestUtils {
+class GreatBladeOfCrimsonSpec extends TestUtils {
   private val abilityMetadata = GreatBladeOfCrimson.metadata
   private val metadata = CharacterMetadata.empty()
     .copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))

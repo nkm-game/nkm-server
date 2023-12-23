@@ -7,13 +7,8 @@ import com.tosware.nkm.models.game.ability.UseData
 import com.tosware.nkm.models.game.event.GameEvent
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.{TestScenario, TestUtils}
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpecLike
 
-class FinalSolutionSpec
-    extends AnyWordSpecLike
-    with Matchers
-    with TestUtils {
+class FinalSolutionSpec extends TestUtils {
   private val abilityMetadata = FinalSolution.metadata
   private val s = TestScenario.generate(TestHexMapName.Simple2v2, abilityMetadata.id)
   private val abilityId = s.p(0)(1).character.state.abilities.head.id

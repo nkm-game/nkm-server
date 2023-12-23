@@ -6,13 +6,8 @@ import com.tosware.nkm.models.game.ability.UseData
 import com.tosware.nkm.models.game.character.CharacterMetadata
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.{TestScenario, TestUtils}
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpecLike
 
-class MasterThroneSpec
-    extends AnyWordSpecLike
-    with Matchers
-    with TestUtils {
+class MasterThroneSpec extends TestUtils {
   private val abilityMetadata = MasterThrone.metadata
   private val metadata = CharacterMetadata.empty()
     .copy(initialAbilitiesMetadataIds =

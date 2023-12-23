@@ -7,15 +7,10 @@ import com.tosware.nkm.models.game.character.{CharacterMetadata, StatType}
 import com.tosware.nkm.models.game.effects.StatBuff
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.{TestScenario, TestUtils}
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpecLike
 
 import scala.annotation.tailrec
 
-class LittleWarHornSpec
-    extends AnyWordSpecLike
-    with Matchers
-    with TestUtils {
+class LittleWarHornSpec extends TestUtils {
   private val abilityMetadata = LittleWarHorn.metadata
   private val characterMetadata = CharacterMetadata.empty()
     .copy(
