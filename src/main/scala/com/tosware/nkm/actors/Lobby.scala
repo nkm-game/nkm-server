@@ -36,8 +36,14 @@ object Lobby {
     val id: GameId
   }
 
-  case class CreateSuccess(id: GameId, name: String, hostUserId: UserId, creationDate: ZonedDateTime) extends Event
-  case class UserJoined(id: GameId, userId: UserId) extends Event
+  case class CreateSuccess(
+      id: GameId,
+      name: String,
+      hostUserId: UserId,
+      creationDate: ZonedDateTime,
+      preferredColorOpt: Option[NkmColor],
+  ) extends Event
+  case class UserJoined(id: GameId, userId: UserId, preferredColorOpt: Option[NkmColor]) extends Event
   case class UserLeft(id: GameId, userId: UserId) extends Event
   case class MapNameSet(id: GameId, hexMapName: String) extends Event
   case class NumberOfBansSet(id: GameId, numberOfBans: Int) extends Event
@@ -88,22 +94,17 @@ class Lobby(id: GameId)(implicit nkmDataService: NkmDataService, userService: Us
 
   var lobbyState: LobbyState = LobbyState(id)
 
-  def create(name: String, hostUserId: UserId, creationDate: ZonedDateTime): Unit = {
-    val preferredColor = userService.getUserSettings(hostUserId).preferredColor
-
+  def create(name: String, hostUserId: UserId, creationDate: ZonedDateTime, preferredColorOpt: Option[NkmColor]): Unit =
     lobbyState = lobbyState.copy(
       name = Some(name),
       creationDate = Some(creationDate),
       hostUserId = Some(hostUserId),
       userIds = List(hostUserId),
-      playerColors = Map(hostUserId -> preferredColor.getOrElse(NkmColor.availableColors.head)),
+      playerColors = Map(hostUserId -> preferredColorOpt.getOrElse(NkmColor.availableColors.head)),
     )
-  }
 
-  def joinLobby(userId: UserId): Unit = {
+  def joinLobby(userId: UserId, preferredColorOpt: Option[NkmColor]): Unit = {
     lobbyState = lobbyState.copy(userIds = lobbyState.userIds :+ userId)
-
-    val preferredColorOpt = userService.getUserSettings(userId).preferredColor
     val takenColors = lobbyState.playerColors.values.toSet
     val nextColor = NkmColor.availableColors.filterNot(c => takenColors.contains(c)).head
 
@@ -177,10 +178,11 @@ class Lobby(id: GameId)(implicit nkmDataService: NkmDataService, userService: Us
         UseCheck.IsNotCreated(lobbyState)
       )
       check(useChecks) {
+        val preferredColorOpt = userService.getUserSettings(hostUserId).preferredColor
         val creationDate = ZonedDateTime.now()
-        val e = CreateSuccess(id, name, hostUserId, creationDate)
+        val e = CreateSuccess(id, name, hostUserId, creationDate, preferredColorOpt)
         persistAndPublishWithTag(e, "lobby") { _ =>
-          create(name, hostUserId, creationDate)
+          create(name, hostUserId, creationDate, preferredColorOpt)
           log.info(s"Created lobby $name for $hostUserId")
           sender() ! Success()
         }
@@ -193,9 +195,10 @@ class Lobby(id: GameId)(implicit nkmDataService: NkmDataService, userService: Us
         UseCheck.IsUserNotInLobby(userId)(lobbyState),
       )
       check(useChecks) {
-        val e = UserJoined(id, userId)
+        val preferredColorOpt = userService.getUserSettings(userId).preferredColor
+        val e = UserJoined(id, userId, preferredColorOpt)
         persistAndPublish(e) { _ =>
-          joinLobby(userId)
+          joinLobby(userId, preferredColorOpt)
           log.info(s"$userId joined lobby")
           sender() ! Success()
         }
@@ -355,11 +358,11 @@ class Lobby(id: GameId)(implicit nkmDataService: NkmDataService, userService: Us
   }
 
   override def receiveRecover: Receive = {
-    case CreateSuccess(_, name, hostUserId, creationDate) =>
-      create(name, hostUserId, creationDate)
+    case CreateSuccess(_, name, hostUserId, creationDate, preferredColorOpt) =>
+      create(name, hostUserId, creationDate, preferredColorOpt)
       log.debug(s"Recovered create")
-    case UserJoined(_, userId) =>
-      joinLobby(userId)
+    case UserJoined(_, userId, preferredColorOpt) =>
+      joinLobby(userId, preferredColorOpt)
       log.debug(s"Recovered user join")
     case UserLeft(_, userId) =>
       leaveLobby(userId)
