@@ -82,22 +82,22 @@ case class NkmCharacter(
       RefreshEvent <: GameEvent & ContainsCharacterId: ClassTag,
       ActionEvent <: GameEvent: ClassTag,
   ](implicit gameState: GameState): Boolean = {
-    if (!gameState.characterTakingActionThisTurn.contains(id)) return false
+    if (!gameState.characterTakingActionThisTurnOpt.contains(id)) return false
 
-    val lastRefreshIndex = gameState.gameLog.events
+    val eventsThisTurn = gameState.gameLog.events.inTurn(gameState.turn.number)
+
+    val lastRefreshIdxOpt = eventsThisTurn
       .ofType[RefreshEvent]
-      .inTurn(gameState.turn.number)
       .ofCharacter(id)
       .map(_.index)
       .lastOption
 
-    val lastActionIndex = gameState.gameLog.events
+    val lastActionIdxOpt = eventsThisTurn
       .ofType[ActionEvent]
-      .inTurn(gameState.turn.number)
       .map(_.index)
       .lastOption
 
-    lastRefreshIndex.isDefined && (lastActionIndex.isEmpty || lastRefreshIndex.get > lastActionIndex.get)
+    lastRefreshIdxOpt.exists(refreshIdx => lastActionIdxOpt.forall(actionIdx => refreshIdx > actionIdx))
   }
 
   def hasRefreshedAnything(implicit gameState: GameState): Boolean =

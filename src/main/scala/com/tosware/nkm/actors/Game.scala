@@ -204,7 +204,7 @@ class Game(id: GameId)(implicit nkmDataService: NkmDataService) extends Persiste
       case PickType.AllRandom =>
         startPlacingCharactersAfterTimeout()
       case PickType.DraftPick =>
-        val draftPickState = gameState.draftPickState.get
+        val draftPickState = gameState.draftPickStateOpt.get
         if (draftPickState.pickNumber == pickNumber) {
           draftPickState.pickPhase match {
             case DraftPickPhase.Banning =>
@@ -216,7 +216,7 @@ class Game(id: GameId)(implicit nkmDataService: NkmDataService) extends Persiste
           }
         }
       case PickType.BlindPick =>
-        val blindPickState = gameState.blindPickState.get
+        val blindPickState = gameState.blindPickStateOpt.get
         if (blindPickState.pickNumber == pickNumber) {
           blindPickState.pickPhase match {
             case BlindPickPhase.Picking =>

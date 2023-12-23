@@ -179,7 +179,7 @@ trait TestUtils
 
   @tailrec
   final private def _passAllCharactersInPhase(gs: GameState, phaseNumber: Int): GameState = {
-    val ngs = gs.characterTakingActionThisTurn.fold(gs)(_ => gs.endTurn())
+    val ngs = gs.characterTakingActionThisTurnOpt.fold(gs)(_ => gs.endTurn())
     if (ngs.phase.number != phaseNumber) return ngs
 
     val charactersToPass = ngs.currentPlayer.characterIds.intersect(ngs.charactersToTakeAction)

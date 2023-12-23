@@ -165,16 +165,28 @@ class LobbyService(gameIdTrackerActor: ActorRef)(
     val lobbyState = aw(getLobbyState(lobbyActor))
 
     if (!lobbyState.hostUserId.contains(username)) return Failure("You are not the host")
-    if (lobbyState.chosenHexMapName.isEmpty) return Failure("Chosen hex map name is empty")
     if (lobbyState.userIds.length < 2) return Failure("There are less than 2 players")
 
-    val chosenHexMap: HexMap = nkmDataService.getHexMaps.find(_.name == lobbyState.chosenHexMapName.get).get.toHexMap
-    if (chosenHexMap.maxNumberOfPlayers < lobbyState.userIds.length)
-      return Failure("There are more players than allowed for this map")
+    val chosenHexMapOpt: Option[HexMap] =
+      lobbyState.chosenHexMapName match {
+        case Some(chosenHexMapName) =>
+          nkmDataService.getHexMaps.find(_.name == chosenHexMapName).map(_.toHexMap)
+        case None => return Failure("Chosen hex map name is empty")
+      }
+
+    chosenHexMapOpt match {
+      case Some(chosenHexMap) if chosenHexMap.maxNumberOfPlayers < lobbyState.userIds.length =>
+        return Failure("There are more players than allowed for this map")
+      case None =>
+        return Failure("Map does not exist.")
+      case _ => // nothing
+    }
 
     if (gameState.gameStatus != GameStatus.NotStarted) return Failure("Game is already started")
 
-    aw(lobbyActor ? Lobby.StartGame(gameService.getGameActorOpt(request.lobbyId).get)).asInstanceOf[CommandResponse]
+    val gameActor: ActorRef = gameService.getGameActorOpt(request.lobbyId).getOrElse(return failGameIdDoesNotExist)
+
+    aw(lobbyActor ? Lobby.StartGame(gameActor)).asInstanceOf[CommandResponse]
   }
 
   def getAllLobbies(): Future[Seq[LobbyState]] = {

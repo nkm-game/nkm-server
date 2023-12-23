@@ -17,16 +17,16 @@ trait HexCellLike {
   def isFreeToStand: Boolean =
     isEmpty && !isWall
   def isFriendStanding(forCharacterId: CharacterId)(implicit gameState: GameState): Boolean =
-    !isEmpty && gameState.characterById(forCharacterId).isFriendForC(characterId.get)
+    characterOpt.exists(_.isFriendForC(forCharacterId))
   def isFreeToPass(forCharacterId: CharacterId)(implicit gameState: GameState): Boolean =
     isFreeToStand || isFriendStanding(forCharacterId) || gameState.characterById(forCharacterId).isFlying
   def characterOpt(implicit gameState: GameState): Option[NkmCharacter] =
     characterId.map(cid => gameState.characterById(cid))
-
   def looksEmpty(forCharacterId: CharacterId)(implicit gameState: GameState): Boolean =
-    isEmpty || {
-      val character = gameState.characterById(characterId.get)
-      character.isInvisible && character.isEnemyForC(forCharacterId)
+    characterOpt match {
+      case Some(character) if character.isEnemyForC(forCharacterId) => character.isInvisible
+      case Some(friendlyCharacter)                                  => false
+      case None                                                     => true
     }
   def looksFreeToStand(forCharacterId: CharacterId)(implicit gameState: GameState): Boolean =
     looksEmpty(forCharacterId) && !isWall

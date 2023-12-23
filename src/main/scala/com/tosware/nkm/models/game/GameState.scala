@@ -28,8 +28,8 @@ object GameState extends Logging {
       charactersMetadata = Set(),
       numberOfBans = 0,
       numberOfCharactersPerPlayers = 1,
-      draftPickState = None,
-      blindPickState = None,
+      draftPickStateOpt = None,
+      blindPickStateOpt = None,
       hexMap = HexMap.empty,
       players = Seq(),
       characters = Set(),
@@ -39,7 +39,7 @@ object GameState extends Logging {
       pickType = defaultPickType,
       characterIdsOutsideMap = Set(),
       characterIdsThatTookActionThisPhase = Set(),
-      characterTakingActionThisTurn = None,
+      characterTakingActionThisTurnOpt = None,
       playerIdsThatPlacedCharacters = Set(),
       abilityStates = Map(),
       characterEffectStates = Map(),
@@ -60,8 +60,8 @@ case class GameState(
     pickType: PickType,
     numberOfBans: Int,
     numberOfCharactersPerPlayers: Int,
-    draftPickState: Option[DraftPickState],
-    blindPickState: Option[BlindPickState],
+    draftPickStateOpt: Option[DraftPickState],
+    blindPickStateOpt: Option[BlindPickState],
     hexMap: HexMap,
     players: Seq[Player],
     characters: Set[NkmCharacter],
@@ -69,7 +69,7 @@ case class GameState(
     turn: Turn,
     characterIdsOutsideMap: Set[CharacterId],
     characterIdsThatTookActionThisPhase: Set[CharacterId],
-    characterTakingActionThisTurn: Option[CharacterId],
+    characterTakingActionThisTurnOpt: Option[CharacterId],
     playerIdsThatPlacedCharacters: Set[PlayerId],
     abilityStates: Map[AbilityId, AbilityState],
     characterEffectStates: Map[CharacterEffectId, CharacterEffectState],
@@ -85,9 +85,9 @@ case class GameState(
 
   def currentPlayerNumber: Int = turn.number % players.size
 
-  def isBlindPickingPhase: Boolean = blindPickState.fold(false)(_.pickPhase == BlindPickPhase.Picking)
+  def isBlindPickingPhase: Boolean = blindPickStateOpt.fold(false)(_.pickPhase == BlindPickPhase.Picking)
 
-  def isDraftBanningPhase: Boolean = draftPickState.fold(false)(_.pickPhase == DraftPickPhase.Banning)
+  def isDraftBanningPhase: Boolean = draftPickStateOpt.fold(false)(_.pickPhase == DraftPickPhase.Banning)
 
   def isInCharacterSelect: Boolean = Seq(GameStatus.CharacterPick, GameStatus.CharacterPicked).contains(gameStatus)
 
@@ -103,7 +103,7 @@ case class GameState(
 
   def currentPlayer: Player = players(currentPlayerNumber)
 
-  def currentCharacterOpt: Option[NkmCharacter] = characterTakingActionThisTurn.map(characterById)
+  def currentCharacterOpt: Option[NkmCharacter] = characterTakingActionThisTurnOpt.map(characterById)
 
   def currentPlayerTime: Long = clock.playerTimes(currentPlayer.id)
 
@@ -155,10 +155,7 @@ case class GameState(
   def hexCellEffectById(effectId: HexCellEffectId): HexCellEffect = hexCellEffects.find(_.id == effectId).get
 
   def hiddenEventsFor(forPlayerOpt: Option[PlayerId]): Seq[EventHideData] =
-    if (forPlayerOpt.isEmpty)
-      hiddenEvents
-    else
-      hiddenEvents.filterNot(_.showOnlyFor.contains(forPlayerOpt.get))
+    forPlayerOpt.fold(hiddenEvents)(forPlayer => hiddenEvents.filterNot(_.showOnlyFor.contains(forPlayer)))
 
   def hiddenEidsFor(forPlayerOpt: Option[PlayerId]): Seq[GameEventId] =
     hiddenEventsFor(forPlayerOpt).map(_.eid)
@@ -168,8 +165,8 @@ case class GameState(
 
   def characterPickFinished: Boolean = {
     if (pickType == PickType.AllRandom) return true
-    val draftPickFinished = draftPickState.fold(false)(_.pickPhase == DraftPickPhase.Finished)
-    val blindPickFinished = blindPickState.fold(false)(_.pickPhase == BlindPickPhase.Finished)
+    val draftPickFinished = draftPickStateOpt.fold(false)(_.pickPhase == DraftPickPhase.Finished)
+    val blindPickFinished = blindPickStateOpt.fold(false)(_.pickPhase == BlindPickPhase.Finished)
     draftPickFinished || blindPickFinished
   }
 
@@ -180,8 +177,8 @@ case class GameState(
     case GameStatus.CharacterPick | GameStatus.CharacterPicked =>
       pickType match {
         case PickType.AllRandom => 0
-        case PickType.DraftPick => draftPickState.fold(0)(_.pickNumber)
-        case PickType.BlindPick => blindPickState.fold(0)(_.pickNumber)
+        case PickType.DraftPick => draftPickStateOpt.fold(0)(_.pickNumber)
+        case PickType.BlindPick => blindPickStateOpt.fold(0)(_.pickNumber)
       }
     case GameStatus.CharacterPlacing | GameStatus.Running | GameStatus.Finished =>
       turn.number
@@ -347,9 +344,9 @@ case class GameState(
       numberOfBans = g.numberOfBansPerPlayer,
       numberOfCharactersPerPlayers = g.numberOfCharactersPerPlayer,
       gameStatus = if (g.pickType == PickType.AllRandom) GameStatus.CharacterPicked else GameStatus.CharacterPick,
-      draftPickState =
+      draftPickStateOpt =
         if (g.pickType == PickType.DraftPick) Some(DraftPickState.empty(DraftPickConfig.generate(g))) else None,
-      blindPickState =
+      blindPickStateOpt =
         if (g.pickType == PickType.BlindPick) Some(BlindPickState.empty(BlindPickConfig.generate(g))) else None,
       clockConfig = g.clockConfig,
       clock = Clock.fromConfig(g.clockConfig, playerOrder = g.players.map(_.name)),
@@ -407,9 +404,9 @@ case class GameState(
           .take(players.length)
         players.map(_.id).zip(pickedCharacters).toMap
       case PickType.DraftPick =>
-        draftPickState.get.characterSelection
+        draftPickStateOpt.get.characterSelection
       case PickType.BlindPick =>
-        blindPickState.get.characterSelection
+        blindPickStateOpt.get.characterSelection
     }
 
     val playersWithCharacters =
@@ -492,7 +489,7 @@ case class GameState(
   }
 
   def ban(playerId: PlayerId, characterIds: Set[CharacterMetadataId])(implicit random: Random): GameState =
-    copy(draftPickState = draftPickState.map(_.ban(playerId, characterIds)))
+    copy(draftPickStateOpt = draftPickStateOpt.map(_.ban(playerId, characterIds)))
       .logAndHideEvent(
         PlayerBanned(randomUUID(), phase, turn, playerId, playerId, characterIds),
         Seq(playerId),
@@ -501,7 +498,7 @@ case class GameState(
       .logEvent(PlayerFinishedBanning(randomUUID(), phase, turn, playerId, playerId))
 
   def finishBanningPhase()(implicit random: Random): GameState =
-    copy(draftPickState = draftPickState.map(_.finishBanning()))
+    copy(draftPickStateOpt = draftPickStateOpt.map(_.finishBanning()))
       .updateClock(clock.setSharedTime(clockConfig.maxPickTimeMillis))(random, id)
       .reveal(RevealCondition.BanningPhaseFinished)
       .logEvent(BanningPhaseFinished(randomUUID(), phase, turn, id))
@@ -510,19 +507,24 @@ case class GameState(
       random: Random,
       causedById: String,
   ): GameState =
-    copy(draftPickState = draftPickState.map(_.pick(playerId, characterId)))
+    copy(draftPickStateOpt = draftPickStateOpt.map(_.pick(playerId, characterId)))
       .updateClock(clock.setSharedTime(clockConfig.maxPickTimeMillis))(random, id)
       .logEvent(PlayerPicked(randomUUID(), phase, turn, playerId, playerId, characterId))
       .checkIfCharacterPickFinished()
 
-  def draftPickTimeout()(implicit random: Random, causedById: String): GameState =
-    surrender(draftPickState.get.currentPlayerPicking.get)
+  def draftPickTimeout()(implicit random: Random, causedById: String): GameState = {
+    val currentPlayerIdOpt = for {
+      draftPickState <- draftPickStateOpt
+      currentPlayerPicking <- draftPickState.currentPlayerPicking
+    } yield currentPlayerPicking
+    currentPlayerIdOpt.fold(this)(currentPlayerId => surrender(currentPlayerId))
+  }
 
   def blindPick(playerId: PlayerId, characterIds: Set[CharacterMetadataId])(implicit
       random: Random,
       causedById: String,
   ): GameState =
-    copy(blindPickState = blindPickState.map(_.pick(playerId, characterIds)))
+    copy(blindPickStateOpt = blindPickStateOpt.map(_.pick(playerId, characterIds)))
       .logAndHideEvent(
         PlayerBlindPicked(randomUUID(), phase, turn, playerId, playerId, characterIds),
         Seq(playerId),
@@ -532,7 +534,7 @@ case class GameState(
       .checkIfCharacterPickFinished()
 
   def blindPickTimeout()(implicit random: Random, causedById: String): GameState =
-    surrender(blindPickState.get.pickingPlayers*)
+    surrender(blindPickStateOpt.get.pickingPlayers*)
 
   def placingCharactersTimeout()(implicit random: Random, causedById: String): GameState = {
     val pidsThatDidNotPlace: Set[PlayerId] = players.map(_.id).toSet -- playerIdsThatPlacedCharacters
@@ -842,35 +844,39 @@ case class GameState(
       direction: HexDirection,
       knockback: Int,
   )(implicit random: Random, causedById: String): (GameState, KnockbackResult) = {
-    val targetCellOpt = hexMap.getCellOfCharacter(characterId)
-    targetCellOpt.fold((this, KnockbackResult.HitNothing)) { targetCell =>
-      val lineCells: Seq[HexCell] = targetCell.getLine(direction, knockback)(this)
-      if (lineCells.isEmpty)
-        return (this, KnockbackResult.HitEndOfMap)
-
-      val firstBlockedCellOpt = lineCells.find(!_.isFreeToStand)
-
-      firstBlockedCellOpt.fold {
-        val teleportGs = teleportCharacter(characterId, lineCells.last.coordinates)(random, id)
-        if (lineCells.size < knockback)
-          return (teleportGs, KnockbackResult.HitEndOfMap)
-        else
-          return (teleportGs, KnockbackResult.HitNothing)
-      } { firstBlockedCell =>
-        val cellToTeleportIndex = lineCells.indexOf(firstBlockedCellOpt.get) - 1
-        val result = if (firstBlockedCell.isWall)
-          KnockbackResult.HitWall
-        else
-          KnockbackResult.HitCharacter
-        if (cellToTeleportIndex < 0) {
-          return (this, result)
-        } else {
-          val cellToTeleport = lineCells(cellToTeleportIndex)
-          val teleportGs = teleportCharacter(characterId, cellToTeleport.coordinates)(random, id)
-          return (teleportGs, result)
-        }
+    def determineResult(blockedCellOption: Option[HexCell]): KnockbackResult =
+      blockedCellOption match {
+        case Some(blocked) if blocked.isWall => KnockbackResult.HitWall
+        case Some(_)                         => KnockbackResult.HitCharacter
+        case None                            => KnockbackResult.HitNothing
       }
+
+    def computeCellToTeleport(lineCells: Seq[HexCell], blockedCellOption: Option[HexCell]): Option[HexCell] =
+      blockedCellOption match {
+        case Some(blockedCell) =>
+          val cellsBeforeBlockage = lineCells.takeWhile(_ != blockedCell)
+          cellsBeforeBlockage.lastOption
+
+        case None =>
+          lineCells.lastOption
+      }
+
+    val targetCellOption = hexMap.getCellOfCharacter(characterId)
+    val defaultResult = if (targetCellOption.isEmpty) KnockbackResult.HitNothing else KnockbackResult.HitEndOfMap
+
+    val result = for {
+      targetCell <- targetCellOption
+      lineCells = targetCell.getLine(direction, knockback)(this)
+      if lineCells.nonEmpty
+      firstBlockedCellOption = lineCells.find(!_.isFreeToStand)
+      cellToTeleport <- computeCellToTeleport(lineCells, firstBlockedCellOption)
+    } yield {
+      val result = determineResult(firstBlockedCellOption)
+      val teleportGs = teleportCharacter(characterId, cellToTeleport.coordinates)
+      (teleportGs, result)
     }
+
+    result.getOrElse((this, defaultResult))
   }
 
   def jump(
@@ -1016,14 +1022,18 @@ case class GameState(
 
     val causedByPlayer = backtrackCauseToPlayerId(causedById)(ngs)
 
-    if (causedByPlayer.isDefined && hexCellEffect.metadata.name == HexCellEffectName.MarkOfTheWind) {
-      ngs.logAndHideEvent(
-        EffectAddedToCell(randomUUID(), phase, turn, causedById, hexCellEffect.id, coordinates),
-        Seq(causedByPlayer.get),
-        RevealCondition.RelatedTrapRevealed(hexCellEffect.id),
-      )
-    } else {
-      ngs.logEvent(EffectAddedToCell(randomUUID(), phase, turn, causedById, hexCellEffect.id, coordinates))
+    val createEffectAddedEvent =
+      EffectAddedToCell(randomUUID(), phase, turn, causedById, hexCellEffect.id, coordinates)
+
+    causedByPlayer match {
+      case Some(player) if hexCellEffect.metadata.name == HexCellEffectName.MarkOfTheWind =>
+        ngs.logAndHideEvent(
+          createEffectAddedEvent,
+          Seq(player),
+          RevealCondition.RelatedTrapRevealed(hexCellEffect.id),
+        )
+      case _ =>
+        ngs.logEvent(createEffectAddedEvent)
     }
   }
 
@@ -1065,9 +1075,9 @@ case class GameState(
   def takeActionWithCharacter(characterId: CharacterId)(implicit random: Random): GameState = {
     implicit val causedById: String = characterId
 
-    if (characterTakingActionThisTurn.isDefined) // do not log event more than once
+    if (characterTakingActionThisTurnOpt.isDefined) // do not log event more than once
       return this
-    this.modify(_.characterTakingActionThisTurn)
+    this.modify(_.characterTakingActionThisTurnOpt)
       .setTo(Some(characterId))
       .logEvent(CharacterTookAction(randomUUID(), phase, turn, causedById, characterId))
   }
@@ -1162,17 +1172,21 @@ case class GameState(
     this.modify(_.turn).using(oldTurn => Turn(oldTurn.number + 1))
 
   def endTurn()(implicit random: Random, causedById: String = id): GameState =
-    this
-      .logEvent(TurnFinished(randomUUID(), currentPlayer.id, phase, turn, causedById))
-      .decreaseTime(currentPlayer.id, millisSinceLastClockUpdate())
-      .decrementEndTurnCooldowns()
-      .modify(_.characterIdsThatTookActionThisPhase).using(c => c + characterTakingActionThisTurn.get)
-      .modify(_.characterTakingActionThisTurn).setTo(None)
-      .incrementTurn()
-      .finishPhaseIfEveryCharacterTookAction()
-      .skipTurnIfPlayerKnockedOut()
-      .skipTurnIfNoCharactersToTakeAction()
-      .startTurn()
+    characterTakingActionThisTurnOpt match {
+      case Some(characterTakingActionThisTurn) =>
+        this
+          .logEvent(TurnFinished(randomUUID(), currentPlayer.id, phase, turn, causedById))
+          .decreaseTime(currentPlayer.id, millisSinceLastClockUpdate())
+          .decrementEndTurnCooldowns()
+          .modify(_.characterIdsThatTookActionThisPhase).using(c => c + characterTakingActionThisTurn)
+          .modify(_.characterTakingActionThisTurnOpt).setTo(None)
+          .incrementTurn()
+          .finishPhaseIfEveryCharacterTookAction()
+          .skipTurnIfPlayerKnockedOut()
+          .skipTurnIfNoCharactersToTakeAction()
+          .startTurn()
+      case None => this
+    }
 
   def startTurn()(implicit random: Random, causedById: String = id): GameState =
     logEvent(TurnStarted(randomUUID(), currentPlayer.id, phase, turn, causedById))
@@ -1230,8 +1244,8 @@ case class GameState(
       pickType = pickType,
       numberOfBans = numberOfBans,
       numberOfCharactersPerPlayers = numberOfCharactersPerPlayers,
-      draftPickState = draftPickState.map(_.toView(forPlayerOpt)),
-      blindPickState = blindPickState.map(_.toView(forPlayerOpt)),
+      draftPickState = draftPickStateOpt.map(_.toView(forPlayerOpt)),
+      blindPickState = blindPickStateOpt.map(_.toView(forPlayerOpt)),
       hexMap = hexMap.toView(forPlayerOpt)(this),
       players = players,
       characters = characters.map(_.toView(forPlayerOpt)(this)),
@@ -1239,7 +1253,7 @@ case class GameState(
       turn = turn,
       characterIdsOutsideMap = characterIdsOutsideMap,
       characterIdsThatTookActionThisPhase = characterIdsThatTookActionThisPhase,
-      characterTakingActionThisTurn = characterTakingActionThisTurn,
+      characterTakingActionThisTurn = characterTakingActionThisTurnOpt,
       playerIdsThatPlacedCharacters = playerIdsThatPlacedCharacters,
       abilities = abilities.flatMap(_.toView(forPlayerOpt)(this)),
       effects = effects.flatMap(_.toView(forPlayerOpt)(this)),

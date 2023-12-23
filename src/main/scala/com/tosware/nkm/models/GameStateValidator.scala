@@ -26,13 +26,13 @@ case class GameStateValidator()(implicit gameState: GameState) {
     gameState.gameStatus == gameStatus
 
   private def banValid(playerId: PlayerId, characterIds: Set[CharacterMetadataId]) =
-    gameState.draftPickState.fold(false)(_.validateBan(playerId, characterIds))
+    gameState.draftPickStateOpt.fold(false)(_.validateBan(playerId, characterIds))
 
   private def draftPickChecks(playerId: PlayerId, characterMetadataId: CharacterMetadataId): Set[UseCheck] =
-    gameState.draftPickState.map(_.pickChecks(playerId, characterMetadataId)).getOrElse(Set.empty[UseCheck])
+    gameState.draftPickStateOpt.map(_.pickChecks(playerId, characterMetadataId)).getOrElse(Set.empty[UseCheck])
 
   private def blindPickChecks(playerId: PlayerId, characterMetadataId: Set[CharacterMetadataId]): Set[UseCheck] =
-    gameState.blindPickState.map(_.pickChecks(playerId, characterMetadataId)).getOrElse(Set.empty[UseCheck])
+    gameState.blindPickStateOpt.map(_.pickChecks(playerId, characterMetadataId)).getOrElse(Set.empty[UseCheck])
 
   private def checkCharacterPlacings(
       playerId: PlayerId,
@@ -110,7 +110,7 @@ case class GameStateValidator()(implicit gameState: GameState) {
       def InCharacterPlacing: UseCheck =
         gameStatusIs(GameStatus.CharacterPlacing) -> Message.gameNotInCharacterPlacing
       def SomeCharacterTookAction: UseCheck =
-        gameState.characterTakingActionThisTurn.nonEmpty -> Message.noCharacterTookAction
+        gameState.characterTakingActionThisTurnOpt.nonEmpty -> Message.noCharacterTookAction
     }
     object DraftPick {
       def BanValid(playerId: PlayerId, characterMetadataIds: Set[CharacterMetadataId]): UseCheck =
@@ -129,7 +129,7 @@ case class GameStateValidator()(implicit gameState: GameState) {
         gameState.characterByIdOpt(characterId)
           .fold(true)(_.owner(gameState).id == playerId) -> Message.characterNotOwned
       def OtherCharacterDidNotTakeActionThisTurn(characterId: CharacterId): UseCheck =
-        (!gameState.characterTakingActionThisTurn.exists(_ != characterId)) ->
+        (!gameState.characterTakingActionThisTurnOpt.exists(_ != characterId)) ->
           Message.otherCharacterAlreadyActedThisTurn
       def DidNotActThisPhase(characterId: CharacterId): UseCheck =
         (!gameState.characterIdsThatTookActionThisPhase.contains(characterId)) -> Message.characterAlreadyActedPhase

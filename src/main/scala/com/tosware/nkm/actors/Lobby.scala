@@ -326,17 +326,28 @@ class Lobby(id: GameId)(implicit nkmDataService: NkmDataService, userService: Us
               ClockConfig.defaultForPickType(lobbyState.pickType)
             else
               lobbyState.clockConfig
-          val deps = GameStartDependencies(
-            players = players,
-            hexMap = hexMaps.filter(m => m.name == lobbyState.chosenHexMapName.get).head.toHexMap,
-            pickType = lobbyState.pickType,
-            numberOfBansPerPlayer = lobbyState.numberOfBans,
-            numberOfCharactersPerPlayer = lobbyState.numberOfCharactersPerPlayer,
-            nkmDataService.getCharacterMetadataSeq.toSet,
-            clockConfig = clockConfig,
-          )
-          sender() ! aw(gameActor ? Game.StartGame(deps)).asInstanceOf[CommandResponse]
-          setGameStarted()
+
+          val chosenHexMapOpt = hexMaps
+            .find(m => lobbyState.chosenHexMapName.contains(m.name))
+            .map(_.toHexMap)
+
+          chosenHexMapOpt match {
+            case Some(chosenHexMap) =>
+              val deps = GameStartDependencies(
+                players = players,
+                hexMap = chosenHexMap,
+                pickType = lobbyState.pickType,
+                numberOfBansPerPlayer = lobbyState.numberOfBans,
+                numberOfCharactersPerPlayer = lobbyState.numberOfCharactersPerPlayer,
+                nkmDataService.getCharacterMetadataSeq.toSet,
+                clockConfig = clockConfig,
+              )
+              sender() ! aw(gameActor ? Game.StartGame(deps)).asInstanceOf[CommandResponse]
+              setGameStarted()
+            case None =>
+              log.error("Map not found.")
+              sender() ! Failure("Map not found.")
+          }
         }
       }
 

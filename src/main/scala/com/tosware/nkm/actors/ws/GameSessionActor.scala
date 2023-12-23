@@ -29,7 +29,13 @@ class GameSessionActor(implicit gameService: GameService)
       // TODO: use async proprely
       getObservers(e.gameId).foreach { ob =>
         val authStatus = getAuthStatus(ob)
-        val sendEvent = e.hideData.isEmpty || authStatus.nonEmpty && e.hideData.get.showOnlyFor.contains(authStatus.get)
+
+        val sendEvent = (e.hideData, authStatus) match {
+          case (Some(hideData), Some(userId)) => hideData.showOnlyFor.contains(userId)
+          case (None, _)                      => true
+          case _                              => false
+        }
+
         if (sendEvent) {
           sendGameEvent(ob, e.event)
         }

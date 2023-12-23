@@ -19,17 +19,19 @@ trait HexMapLike[T <: HexCellLike] {
     getSpawnPointsByNumber(gameState.playerNumber(playerId))
 
   def maxNumberOfPlayers: Int =
-    getSpawnPoints.map(_.spawnNumber.get).size
+    getSpawnPoints.flatMap(_.spawnNumber).size
 
   def numberOfSpawnsPerPlayer: Map[Int, Int] =
     getSpawnPoints
-      .groupBy(_.spawnNumber.get)
+      .toSeq
+      .flatMap(s => s.spawnNumber)
+      .groupBy(identity)
       .view
       .mapValues(_.size)
       .toMap
 
   def getCellOfCharacter(id: CharacterId): Option[T] =
-    cells.find(c => c.characterId.nonEmpty && c.characterId.get == id)
+    cells.find(_.characterId.contains(id))
 
   def toTextUi: String = {
     val coords = cells.map(_.coordinates)

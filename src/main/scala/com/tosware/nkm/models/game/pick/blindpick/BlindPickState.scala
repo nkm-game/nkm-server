@@ -45,11 +45,14 @@ case class BlindPickState(
     val filteredCharacterSelection =
       if (pickPhase == BlindPickPhase.Finished)
         characterSelection
-      else if (forPlayerOpt.isEmpty)
-        Map.empty[PlayerId, Set[CharacterMetadataId]]
-      else // show only characters from player watching
-        config.playersPicking.map(x => x -> Set[CharacterMetadataId]()).toMap
-          .updated(forPlayerOpt.get, characterSelection(forPlayerOpt.get))
+      else forPlayerOpt match {
+        case Some(forPlayer) =>
+          // show only characters from player watching
+          config.playersPicking.map(x => x -> Set[CharacterMetadataId]()).toMap
+            .updated(forPlayer, characterSelection(forPlayer))
+        case None =>
+          Map.empty[PlayerId, Set[CharacterMetadataId]]
+      }
 
     BlindPickStateView(config, filteredCharacterSelection, pickPhase)
   }

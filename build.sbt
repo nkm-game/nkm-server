@@ -33,7 +33,6 @@ libraryDependencies += "pl.iterators" %% "kebs-slick" % KebsVersion
 
 libraryDependencies += "com.beachape" %% "enumeratum" % "1.7.0"
 
-
 libraryDependencies += "com.pauldijou" %% "jwt-core" % JwtVersion
 libraryDependencies += "com.pauldijou" %% "jwt-spray-json" % JwtVersion
 
@@ -64,6 +63,8 @@ libraryDependencies += "com.github.dnvriend" %% "akka-persistence-inmemory" % "2
 
 libraryDependencies += "com.github.dnvriend" %% "akka-persistence-jdbc" % AkkaPersistenceVersion
 libraryDependencies += "mysql" % "mysql-connector-java" % "8.0.30"
+
+libraryDependencies += "org.typelevel" %% "cats-core" % "2.10.0"
 
 Compile / scalacOptions ++= Seq(
   "-deprecation",

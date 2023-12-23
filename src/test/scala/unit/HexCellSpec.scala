@@ -19,10 +19,10 @@ class HexCellSpec
   implicit val hexMap: HexMap = s.gameState.hexMap
   "HexCell" must {
     "calculate correct neighbours" in {
-      HexCoordinates(0, 0).toCell.getNeighbour(HexDirection.W).get.coordinates should be(HexCoordinates(-1, 0))
-      HexCoordinates(-2, 2).toCell.getNeighbour(HexDirection.NE) should be(None) // not on map
-      HexCoordinates(0, 0).toCell.getNeighbour(HexDirection.SW).get.coordinates should be(HexCoordinates(0, -1))
-      HexCoordinates(0, 0).toCell.getNeighbour(HexDirection.SE).get.coordinates should be(HexCoordinates(1, -1))
+      HexCoordinates(0, 0).toCell.getNeighbourOpt(HexDirection.W).get.coordinates should be(HexCoordinates(-1, 0))
+      HexCoordinates(-2, 2).toCell.getNeighbourOpt(HexDirection.NE) should be(None) // not on map
+      HexCoordinates(0, 0).toCell.getNeighbourOpt(HexDirection.SW).get.coordinates should be(HexCoordinates(0, -1))
+      HexCoordinates(0, 0).toCell.getNeighbourOpt(HexDirection.SE).get.coordinates should be(HexCoordinates(1, -1))
     }
     "calculate correct line" in {
       HexCoordinates(0, 0).toCell.getLine(HexDirection.E, 0) should be(Seq.empty)

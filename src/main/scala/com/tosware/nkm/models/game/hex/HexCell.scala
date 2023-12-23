@@ -34,7 +34,7 @@ case class HexCell(
   def removeEffect(effectId: HexCellEffectId): HexCell =
     this.modify(_.effects).using(_.filterNot(_.id == effectId))
 
-  def getNeighbour(direction: HexDirection)(implicit gameState: GameState): Option[HexCell] =
+  def getNeighbourOpt(direction: HexDirection)(implicit gameState: GameState): Option[HexCell] =
     coordinates.getNeighbour(direction).toCellOpt
 
   def getLine(
@@ -43,7 +43,7 @@ case class HexCell(
       stopPredicate: HexCell => Boolean = _ => false,
   )(implicit gameState: GameState): Seq[HexCell] = {
     if (size <= 0) return Seq.empty
-    val neighbour = getNeighbour(direction)
+    val neighbour = getNeighbourOpt(direction)
     if (neighbour.fold(true)(c => stopPredicate(c))) return Seq.empty
     neighbour.get +: neighbour.get.getLine(direction, size - 1)
   }
@@ -56,14 +56,14 @@ case class HexCell(
     @tailrec
     def scan(depth: Int, lastCell: HexCell): Option[NkmCharacter] = {
       if (depth == 0) return None
-      val neighbour = lastCell.getNeighbour(direction)
-      if (neighbour.isEmpty) return None
-      if (neighbour.get.characterId.isDefined) {
-        val target = neighbour.get.characterOpt.get
-        if (characterPredicate(target))
-          return Some(neighbour.get.characterOpt.get)
+      lastCell.getNeighbourOpt(direction) match {
+        case Some(neighbour) =>
+          neighbour.characterOpt match {
+            case Some(character) if characterPredicate(character) => Some(character)
+            case _                                                => scan(depth - 1, neighbour)
+          }
+        case None => None
       }
-      scan(depth - 1, neighbour.get)
     }
     scan(size, this)
   }

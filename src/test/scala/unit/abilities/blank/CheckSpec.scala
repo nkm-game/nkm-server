@@ -33,7 +33,7 @@ class CheckSpec
         .useAbility(abilityId, UseData(s.defaultEnemy.id))
         .endTurn()
 
-      abilityGameState.characterTakingActionThisTurn should be(Some(s.defaultEnemy.id))
+      abilityGameState.characterTakingActionThisTurnOpt should be(Some(s.defaultEnemy.id))
     }
 
     "apply disarm" in {
