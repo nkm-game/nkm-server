@@ -1190,6 +1190,7 @@ case class GameState(
 
   def startTurn()(implicit random: Random, causedById: String = id): GameState =
     logEvent(TurnStarted(randomUUID(), currentPlayer.id, phase, turn, causedById))
+      .increaseTime(currentPlayer.id, clockConfig.incrementMillis)
 
   protected def skipTurnIfNoCharactersToTakeAction()(implicit random: Random, causedById: String = id): GameState =
     if (currentPlayer.characterIds.intersect(charactersToTakeAction).isEmpty)
