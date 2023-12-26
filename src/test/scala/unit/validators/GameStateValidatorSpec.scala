@@ -7,6 +7,7 @@ import com.tosware.nkm.models.game.abilities.hecate.PowerOfExistence
 import com.tosware.nkm.models.game.abilities.sinon.TacticalEscape
 import com.tosware.nkm.models.game.character.{AttackType, CharacterMetadata}
 import com.tosware.nkm.models.game.effects.*
+import com.tosware.nkm.models.game.game_state.GameState
 import com.tosware.nkm.models.game.hex.{HexCoordinates, TestHexMapName}
 import helpers.{TestScenario, TestUtils}
 

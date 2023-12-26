@@ -9,7 +9,7 @@ import com.tosware.nkm.NkmTimeouts
 import com.tosware.nkm.actors.*
 import com.tosware.nkm.actors.GameIdTrackerActor.Response
 import com.tosware.nkm.models.CommandResponse
-import com.tosware.nkm.models.game.*
+import com.tosware.nkm.models.game.game_state.{GameState, GameStatus}
 import com.tosware.nkm.models.game.hex.HexMap
 import com.tosware.nkm.models.lobby.*
 import com.tosware.nkm.models.lobby.ws.LobbyRequest.*

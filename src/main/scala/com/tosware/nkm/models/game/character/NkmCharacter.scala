@@ -7,6 +7,7 @@ import com.tosware.nkm.models.game.ability.*
 import com.tosware.nkm.models.game.character_effect.{CharacterEffect, CharacterEffectName}
 import com.tosware.nkm.models.game.event.GameEvent
 import com.tosware.nkm.models.game.event.GameEvent.*
+import com.tosware.nkm.models.game.game_state.GameState
 import com.tosware.nkm.models.game.hex.*
 import com.tosware.nkm.providers.AbilityProvider
 

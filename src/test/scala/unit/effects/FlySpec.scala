@@ -2,8 +2,8 @@ package unit.effects
 
 import com.tosware.nkm.*
 import com.tosware.nkm.models.GameStateValidator
-import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.effects.Fly
+import com.tosware.nkm.models.game.game_state.GameState
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.{TestScenario, TestUtils}
 import org.scalatest.wordspec.AnyWordSpecLike

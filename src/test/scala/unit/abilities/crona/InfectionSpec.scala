@@ -1,11 +1,11 @@
 package unit.abilities.crona
 
 import com.tosware.nkm.models.GameStateValidator
-import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.crona.Infection
 import com.tosware.nkm.models.game.ability.UseData
 import com.tosware.nkm.models.game.character.CharacterMetadata
 import com.tosware.nkm.models.game.event.GameEvent
+import com.tosware.nkm.models.game.game_state.GameState
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.{TestScenario, TestUtils}
 

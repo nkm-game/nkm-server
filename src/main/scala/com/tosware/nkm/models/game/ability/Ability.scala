@@ -6,6 +6,7 @@ import com.tosware.nkm.models.CommandResponse.*
 import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.character.NkmCharacter
 import com.tosware.nkm.models.game.effects.{AbilityEnchant, FreeAbility}
+import com.tosware.nkm.models.game.game_state.GameState
 import com.tosware.nkm.models.game.hex.{HexCell, HexCoordinates}
 import com.tosware.nkm.serializers.NkmJsonProtocol
 

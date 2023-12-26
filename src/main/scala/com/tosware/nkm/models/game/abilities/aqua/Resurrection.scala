@@ -1,9 +1,9 @@
 package com.tosware.nkm.models.game.abilities.aqua
 
 import com.tosware.nkm.*
-import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.ability.*
 import com.tosware.nkm.models.game.event.GameEvent
+import com.tosware.nkm.models.game.game_state.GameState
 import com.tosware.nkm.models.game.hex.HexCoordinates
 
 import scala.util.Random

@@ -3,6 +3,7 @@ package unit.abilities.ryuko_matoi
 import com.tosware.nkm.models.GameStateValidator
 import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.ryuko_matoi.GodrobeSenketsu
+import com.tosware.nkm.models.game.game_state.GameState
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.{TestScenario, TestUtils}
 

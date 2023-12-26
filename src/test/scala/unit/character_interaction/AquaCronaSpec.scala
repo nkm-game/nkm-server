@@ -1,8 +1,8 @@
 package unit.character_interaction
 
 import com.tosware.nkm.models.GameStateValidator
-import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.ability.UseData
+import com.tosware.nkm.models.game.game_state.GameState
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import com.tosware.nkm.providers.CharacterMetadataProvider
 import helpers.{TestScenario, TestUtils}

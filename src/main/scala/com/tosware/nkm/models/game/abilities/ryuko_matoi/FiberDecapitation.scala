@@ -4,7 +4,8 @@ import com.tosware.nkm.*
 import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.ability.*
 import com.tosware.nkm.models.game.character.{NkmCharacter, StatType}
-import com.tosware.nkm.models.game.hex.{HexCell, HexCoordinates, HexDirection, SearchFlag}
+import com.tosware.nkm.models.game.game_state.GameState
+import com.tosware.nkm.models.game.hex.*
 
 import scala.util.Random
 

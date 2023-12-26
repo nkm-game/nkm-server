@@ -5,6 +5,7 @@ import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.testkit.WSProbe
 import com.tosware.nkm.models.NkmColor
 import com.tosware.nkm.models.game.*
+import com.tosware.nkm.models.game.game_state.{GameStateView, GameStatus}
 import com.tosware.nkm.models.game.pick.PickType
 import com.tosware.nkm.models.lobby.ws.*
 import com.tosware.nkm.services.http.routes.UserRequest

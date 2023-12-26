@@ -2,12 +2,12 @@ package unit.effects
 
 import com.tosware.nkm.*
 import com.tosware.nkm.models.GameStateValidator
-import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.kirito.Switch
 import com.tosware.nkm.models.game.abilities.sinon.TacticalEscape
 import com.tosware.nkm.models.game.ability.UseData
 import com.tosware.nkm.models.game.character.CharacterMetadata
 import com.tosware.nkm.models.game.effects.Ground
+import com.tosware.nkm.models.game.game_state.GameState
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.{TestScenario, TestUtils}
 import org.scalatest.wordspec.AnyWordSpecLike

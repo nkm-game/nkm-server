@@ -1,8 +1,8 @@
 package com.tosware.nkm.models.game.hex
 
 import com.tosware.nkm.*
-import com.tosware.nkm.models.game.GameState
 import com.tosware.nkm.models.game.character.NkmCharacter
+import com.tosware.nkm.models.game.game_state.GameState
 
 trait HexCellLike {
   val coordinates: HexCoordinates

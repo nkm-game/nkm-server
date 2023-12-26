@@ -6,6 +6,7 @@ import com.tosware.nkm.models.game.ability.*
 import com.tosware.nkm.models.game.effects.{ManipulatorOfObjectsImmunity, Snare}
 import com.tosware.nkm.models.game.event.GameEvent.CharacterBasicAttacked
 import com.tosware.nkm.models.game.event.{GameEvent, GameEventListener}
+import com.tosware.nkm.models.game.game_state.GameState
 
 import scala.util.Random
 

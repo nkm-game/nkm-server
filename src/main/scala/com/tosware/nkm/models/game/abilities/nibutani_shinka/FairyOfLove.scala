@@ -4,6 +4,7 @@ import com.tosware.nkm.*
 import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.ability.*
 import com.tosware.nkm.models.game.effects.AbilityEnchant
+import com.tosware.nkm.models.game.game_state.GameState
 
 import scala.util.Random
 

@@ -3,6 +3,7 @@ package unit.abilities.shana
 import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.shana.WingsOfCrimson
 import com.tosware.nkm.models.game.character.{CharacterMetadata, StatType}
+import com.tosware.nkm.models.game.game_state.GameState
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.{TestScenario, TestUtils}
 

@@ -3,6 +3,7 @@ package com.tosware.nkm.models.game.event
 import com.tosware.nkm.*
 import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.character.*
+import com.tosware.nkm.models.game.game_state.{GameState, GameStatus}
 import com.tosware.nkm.models.game.hex.HexCoordinates
 
 object GameEvent {

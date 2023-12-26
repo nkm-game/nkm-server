@@ -1,11 +1,11 @@
 package unit.abilities.monkey_d_luffy
 
 import com.tosware.nkm.models.GameStateValidator
-import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.monkey_d_luffy.GearSecond
 import com.tosware.nkm.models.game.ability.AbilityType
 import com.tosware.nkm.models.game.character.StatType
 import com.tosware.nkm.models.game.effects.AbilityEnchant
+import com.tosware.nkm.models.game.game_state.GameState
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.{TestScenario, TestUtils}
 

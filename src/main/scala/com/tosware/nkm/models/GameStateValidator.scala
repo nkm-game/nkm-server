@@ -4,6 +4,7 @@ import com.tosware.nkm.*
 import com.tosware.nkm.models.CommandResponse.*
 import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.ability.*
+import com.tosware.nkm.models.game.game_state.{GameState, GameStatus}
 import com.tosware.nkm.models.game.hex.HexCoordinates
 
 case class GameStateValidator()(implicit gameState: GameState) {

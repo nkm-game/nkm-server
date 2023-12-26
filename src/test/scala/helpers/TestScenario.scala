@@ -1,9 +1,9 @@
 package helpers
 
-import com.tosware.nkm.{AbilityId, AbilityMetadataId, PlayerId}
-import com.tosware.nkm.models.game.GameState
 import com.tosware.nkm.models.game.character.{CharacterMetadata, NkmCharacter}
+import com.tosware.nkm.models.game.game_state.GameState
 import com.tosware.nkm.models.game.hex.{HexCoordinates, TestHexMapName}
+import com.tosware.nkm.{AbilityId, AbilityMetadataId, PlayerId}
 
 object TestScenario extends TestUtils {
   def generate(testHexMapName: TestHexMapName, metadata: CharacterMetadata = CharacterMetadata.empty()): TestScenario =

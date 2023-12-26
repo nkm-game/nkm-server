@@ -7,6 +7,7 @@ import com.tosware.nkm.actors.Game.*
 import com.tosware.nkm.actors.GameIdTrackerActor.Response
 import com.tosware.nkm.models.CommandResponse
 import com.tosware.nkm.models.game.*
+import com.tosware.nkm.models.game.game_state.{GameState, GameStateView}
 import com.tosware.nkm.models.game.ws.GameRequest.*
 import com.tosware.nkm.{NkmTimeouts, *}
 

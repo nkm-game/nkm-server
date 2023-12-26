@@ -4,9 +4,9 @@ import com.softwaremill.quicklens.ModifyPimp
 import com.tosware.nkm.*
 import com.tosware.nkm.models.game.character.NkmCharacter
 import com.tosware.nkm.models.game.event.RevealCondition
+import com.tosware.nkm.models.game.game_state.{GameState, GameStatus}
 import com.tosware.nkm.models.game.hex.HexCellType.Normal
 import com.tosware.nkm.models.game.hex_effect.HexCellEffect
-import com.tosware.nkm.models.game.{GameState, GameStatus}
 
 import scala.annotation.tailrec
 import scala.util.Random

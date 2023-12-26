@@ -2,8 +2,8 @@ package com.tosware.nkm.models.game.character_effect
 
 import com.softwaremill.quicklens.*
 import com.tosware.nkm.*
-import com.tosware.nkm.models.game.GameState
 import com.tosware.nkm.models.game.character.NkmCharacter
+import com.tosware.nkm.models.game.game_state.GameState
 import com.tosware.nkm.models.game.hex.HexCell
 import com.tosware.nkm.serializers.NkmJsonProtocol
 

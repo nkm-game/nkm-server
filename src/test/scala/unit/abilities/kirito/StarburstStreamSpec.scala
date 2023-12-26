@@ -1,10 +1,10 @@
 package unit.abilities.kirito
 
 import com.tosware.nkm.models.GameStateValidator
-import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.kirito.StarburstStream
 import com.tosware.nkm.models.game.ability.UseData
 import com.tosware.nkm.models.game.character.CharacterMetadata
+import com.tosware.nkm.models.game.game_state.GameState
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.{TestScenario, TestUtils}
 

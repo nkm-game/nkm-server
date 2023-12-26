@@ -5,6 +5,7 @@ import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.character_effect.*
 import com.tosware.nkm.models.game.effects.BlackBlood.{sourceAbilityIdKey, sourceCharacterIdKey}
 import com.tosware.nkm.models.game.event.{GameEvent, GameEventListener}
+import com.tosware.nkm.models.game.game_state.GameState
 
 import scala.util.Random
 

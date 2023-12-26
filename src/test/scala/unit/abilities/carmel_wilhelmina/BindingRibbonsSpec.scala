@@ -3,6 +3,7 @@ package unit.abilities.carmel_wilhelmina
 import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.carmel_wilhelmina.BindingRibbons
 import com.tosware.nkm.models.game.ability.UseData
+import com.tosware.nkm.models.game.game_state.GameState
 import com.tosware.nkm.models.game.hex.{HexCoordinates, TestHexMapName}
 import helpers.{TestScenario, TestUtils}
 

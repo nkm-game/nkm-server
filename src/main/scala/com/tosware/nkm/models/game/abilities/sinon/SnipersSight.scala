@@ -1,9 +1,9 @@
 package com.tosware.nkm.models.game.abilities.sinon
 
 import com.tosware.nkm.*
-import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.ability.*
 import com.tosware.nkm.models.game.character.AttackType
+import com.tosware.nkm.models.game.game_state.GameState
 import com.tosware.nkm.models.game.hex.{HexCoordinates, SearchFlag}
 
 import scala.util.Random

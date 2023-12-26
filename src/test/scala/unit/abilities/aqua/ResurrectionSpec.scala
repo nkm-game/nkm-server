@@ -4,6 +4,7 @@ import com.tosware.nkm.models.GameStateValidator
 import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.aqua.Resurrection
 import com.tosware.nkm.models.game.ability.UseData
+import com.tosware.nkm.models.game.game_state.GameState
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.{TestScenario, TestUtils}
 import spray.json.*

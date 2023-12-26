@@ -5,6 +5,7 @@ import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.liones_elizabeth.Invigorate
 import com.tosware.nkm.models.game.ability.UseData
 import com.tosware.nkm.models.game.effects.HealOverTime
+import com.tosware.nkm.models.game.game_state.GameState
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.{TestScenario, TestUtils}
 

@@ -1,11 +1,11 @@
 package unit.abilities.ebisuzawa_kurumi
 
-import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.ebisuzawa_kurumi.Contact
 import com.tosware.nkm.models.game.abilities.hecate.*
 import com.tosware.nkm.models.game.ability.UseData
 import com.tosware.nkm.models.game.character.CharacterMetadata
 import com.tosware.nkm.models.game.event.GameEvent
+import com.tosware.nkm.models.game.game_state.GameState
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.{TestScenario, TestUtils}
 

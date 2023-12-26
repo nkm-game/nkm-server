@@ -1,11 +1,11 @@
 package com.tosware.nkm.models.game.effects
 
 import com.tosware.nkm.*
-import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.character.StatType
 import com.tosware.nkm.models.game.character_effect.*
 import com.tosware.nkm.models.game.effects.StatNerf.{statTypeKey, statValueKey}
 import com.tosware.nkm.models.game.event.{GameEvent, GameEventListener}
+import com.tosware.nkm.models.game.game_state.GameState
 
 import scala.util.Random
 

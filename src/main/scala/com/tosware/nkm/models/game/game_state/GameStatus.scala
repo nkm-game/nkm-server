@@ -1,4 +1,4 @@
-package com.tosware.nkm.models.game
+package com.tosware.nkm.models.game.game_state
 
 import enumeratum.*
 

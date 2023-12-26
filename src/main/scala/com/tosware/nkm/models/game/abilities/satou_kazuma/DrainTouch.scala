@@ -4,6 +4,7 @@ import com.tosware.nkm.*
 import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.ability.*
 import com.tosware.nkm.models.game.event.GameEvent.CharacterDamaged
+import com.tosware.nkm.models.game.game_state.GameState
 import com.tosware.nkm.models.game.hex.{HexCoordinates, SearchFlag}
 
 import scala.util.Random

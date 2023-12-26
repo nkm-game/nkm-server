@@ -7,6 +7,7 @@ import com.tosware.nkm.models.game.abilities.monkey_d_luffy.RubberHuman
 import com.tosware.nkm.models.game.character.AttackType
 import com.tosware.nkm.models.game.effects.Poison
 import com.tosware.nkm.models.game.event.GameEvent.CharacterDamaged
+import com.tosware.nkm.models.game.game_state.GameState
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.{TestScenario, TestUtils}
 

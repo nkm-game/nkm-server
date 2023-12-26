@@ -1,9 +1,9 @@
 package unit.abilities.sinon
 
 import com.tosware.nkm.models.GameStateValidator
-import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.sinon.SnipersSight
 import com.tosware.nkm.models.game.character.CharacterMetadata
+import com.tosware.nkm.models.game.game_state.GameState
 import com.tosware.nkm.models.game.hex.{HexCoordinates, TestHexMapName}
 import helpers.{TestScenario, TestUtils}
 

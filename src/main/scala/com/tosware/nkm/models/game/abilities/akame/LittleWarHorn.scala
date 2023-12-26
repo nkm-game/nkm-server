@@ -8,6 +8,9 @@ import com.tosware.nkm.models.game.character.StatType
 import com.tosware.nkm.models.game.effects.StatBuff
 import com.tosware.nkm.models.game.event.GameEvent.EffectRemovedFromCharacter
 import com.tosware.nkm.models.game.event.{GameEvent, GameEventListener}
+import com.tosware.nkm.models.game.game_state.GameState
+import com.tosware.nkm.models.game.game_state.extensions.GameStateEffectUtils.GameStateEffectUtils
+import com.tosware.nkm.models.game.game_state.extensions.GameStateUpdateUtils.GameStateUpdateUtils
 
 import scala.util.Random
 

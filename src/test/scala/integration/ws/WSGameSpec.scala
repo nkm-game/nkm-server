@@ -5,6 +5,7 @@ import com.tosware.nkm.*
 import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.ability.UseData
 import com.tosware.nkm.models.game.event.GameEvent
+import com.tosware.nkm.models.game.game_state.{GameStateView, GameStatus}
 import com.tosware.nkm.models.game.hex.{HexCellType, HexCoordinates}
 import com.tosware.nkm.models.game.pick.PickType
 import com.tosware.nkm.models.game.pick.blindpick.BlindPickPhase

@@ -6,6 +6,7 @@ import com.tosware.nkm.models.game.character_effect.*
 import com.tosware.nkm.models.game.effects.Poison.damageKey
 import com.tosware.nkm.models.game.event.GameEvent.TurnFinished
 import com.tosware.nkm.models.game.event.{GameEvent, GameEventListener}
+import com.tosware.nkm.models.game.game_state.GameState
 import spray.json.*
 
 import scala.util.Random

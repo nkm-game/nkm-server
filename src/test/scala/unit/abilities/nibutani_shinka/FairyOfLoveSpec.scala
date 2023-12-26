@@ -1,10 +1,10 @@
 package unit.abilities.nibutani_shinka
 
 import com.tosware.nkm.models.GameStateValidator
-import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.nibutani_shinka.FairyOfLove
 import com.tosware.nkm.models.game.ability.AbilityType
 import com.tosware.nkm.models.game.effects.AbilityEnchant
+import com.tosware.nkm.models.game.game_state.GameState
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.{TestScenario, TestUtils}
 

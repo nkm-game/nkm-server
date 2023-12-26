@@ -1,10 +1,10 @@
 package com.tosware.nkm.models.game.abilities.monkey_d_luffy
 
 import com.tosware.nkm.*
-import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.ability.*
 import com.tosware.nkm.models.game.character.AttackType
 import com.tosware.nkm.models.game.event.{GameEvent, GameEventListener}
+import com.tosware.nkm.models.game.game_state.GameState
 
 import scala.util.Random
 

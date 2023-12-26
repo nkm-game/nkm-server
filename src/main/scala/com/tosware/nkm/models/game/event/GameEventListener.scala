@@ -1,7 +1,7 @@
 package com.tosware.nkm.models.game.event
 
-import com.tosware.nkm.models.game.GameState
 import com.tosware.nkm.models.game.event.GameEvent.GameEvent
+import com.tosware.nkm.models.game.game_state.GameState
 
 import scala.util.Random
 

@@ -3,8 +3,9 @@ package helpers
 import com.tosware.nkm.*
 import com.tosware.nkm.models.CommandResponse.*
 import com.tosware.nkm.models.game.*
-import com.tosware.nkm.models.game.character.{CharacterMetadata, NkmCharacter, StatType}
+import com.tosware.nkm.models.game.character.*
 import com.tosware.nkm.models.game.character_effect.CharacterEffectName
+import com.tosware.nkm.models.game.game_state.GameState
 import com.tosware.nkm.models.game.hex.{HexCoordinates, TestHexMapName}
 import com.tosware.nkm.models.game.pick.PickType.BlindPick
 import com.tosware.nkm.providers.HexMapProvider

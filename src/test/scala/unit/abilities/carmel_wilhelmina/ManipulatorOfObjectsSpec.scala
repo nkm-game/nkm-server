@@ -1,8 +1,8 @@
 package unit.abilities.carmel_wilhelmina
 
-import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.carmel_wilhelmina.ManipulatorOfObjects
 import com.tosware.nkm.models.game.effects.Snare
+import com.tosware.nkm.models.game.game_state.GameState
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.{TestScenario, TestUtils}
 

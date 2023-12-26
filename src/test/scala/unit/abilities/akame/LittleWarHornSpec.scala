@@ -1,10 +1,10 @@
 package unit.abilities.akame
 
 import com.tosware.nkm.models.GameStateValidator
-import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.akame.LittleWarHorn
 import com.tosware.nkm.models.game.character.{CharacterMetadata, StatType}
 import com.tosware.nkm.models.game.effects.StatBuff
+import com.tosware.nkm.models.game.game_state.GameState
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.{TestScenario, TestUtils}
 

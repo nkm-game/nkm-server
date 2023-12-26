@@ -1,8 +1,8 @@
 package com.tosware
 
-import com.tosware.nkm.models.game.GameState
 import com.tosware.nkm.models.game.character.NkmCharacter
 import com.tosware.nkm.models.game.event.GameEvent.*
+import com.tosware.nkm.models.game.game_state.GameState
 import com.tosware.nkm.models.game.hex.*
 
 import scala.math.abs

@@ -7,6 +7,7 @@ import com.tosware.nkm.models.game.character_effect.CharacterEffectName
 import com.tosware.nkm.models.game.effects.MurasamePoison
 import com.tosware.nkm.models.game.event.GameEvent.*
 import com.tosware.nkm.models.game.event.{GameEvent, GameEventListener}
+import com.tosware.nkm.models.game.game_state.GameState
 
 import scala.util.Random
 

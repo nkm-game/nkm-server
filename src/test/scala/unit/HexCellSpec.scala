@@ -1,8 +1,8 @@
 package unit
 
 import com.tosware.nkm.*
-import com.tosware.nkm.models.game.GameState
 import com.tosware.nkm.models.game.character.CharacterMetadata
+import com.tosware.nkm.models.game.game_state.GameState
 import com.tosware.nkm.models.game.hex.*
 import helpers.{TestScenario, TestUtils}
 

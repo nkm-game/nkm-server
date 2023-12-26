@@ -6,6 +6,7 @@ import com.tosware.nkm.models.game.abilities.sinon.TacticalEscape
 import com.tosware.nkm.models.game.character.{CharacterMetadata, StatType}
 import com.tosware.nkm.models.game.event.GameEvent
 import com.tosware.nkm.models.game.event.GameEvent.{PlayerLost, PlayerWon}
+import com.tosware.nkm.models.game.game_state.{GameState, GameStatus}
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import com.tosware.nkm.{CoordinateSeq, randomUUID}
 import helpers.*

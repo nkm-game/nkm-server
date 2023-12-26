@@ -5,6 +5,7 @@ import com.tosware.nkm.models.GameStateValidator
 import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.abilities.ochaco_uraraka.SkillRelease
 import com.tosware.nkm.models.game.effects.ZeroGravity
+import com.tosware.nkm.models.game.game_state.GameState
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.{TestScenario, TestUtils}
 

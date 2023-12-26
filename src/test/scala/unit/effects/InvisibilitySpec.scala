@@ -9,6 +9,7 @@ import com.tosware.nkm.models.game.ability.UseData
 import com.tosware.nkm.models.game.character.{AttackType, CharacterMetadata}
 import com.tosware.nkm.models.game.effects.Invisibility
 import com.tosware.nkm.models.game.event.GameEvent
+import com.tosware.nkm.models.game.game_state.GameState
 import com.tosware.nkm.models.game.hex.{HexCoordinates, TestHexMapName}
 import helpers.{TestScenario, TestUtils}
 import org.scalatest.Checkpoints.Checkpoint
