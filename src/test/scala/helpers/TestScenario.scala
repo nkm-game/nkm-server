@@ -35,5 +35,5 @@ trait TestScenario extends TestUtils {
   lazy val defaultCoordinates: HexCoordinates =
     defaultCharacter.parentCellOpt(gameState).get.coordinates
   lazy val ultGs: GameState =
-    gameState.incrementPhase(4)
+    gameState.incrementPhase(3)
 }

@@ -1014,7 +1014,7 @@ class WSGameSpec extends WSTrait {
           val gameState = fetchAndParseGame(lobbyId)
 
           gameState.turn.number shouldBe 0
-          gameState.phase.number shouldBe 0
+          gameState.phase.number shouldBe 1
         }
 
         endTurn(lobbyId).statusCode shouldBe nok
@@ -1025,7 +1025,7 @@ class WSGameSpec extends WSTrait {
         {
           val gameState = fetchAndParseGame(lobbyId)
           gameState.turn.number shouldBe 1
-          gameState.phase.number shouldBe 0
+          gameState.phase.number shouldBe 1
         }
 
         auth(1)
@@ -1037,7 +1037,7 @@ class WSGameSpec extends WSTrait {
         {
           val gameState = fetchAndParseGame(lobbyId)
           gameState.turn.number shouldBe 2
-          gameState.phase.number shouldBe 1
+          gameState.phase.number shouldBe 2
         }
       }
     }
@@ -1092,7 +1092,7 @@ class WSGameSpec extends WSTrait {
           val gameState = fetchAndParseGame(lobbyId)
 
           gameState.turn.number shouldBe 0
-          gameState.phase.number shouldBe 0
+          gameState.phase.number shouldBe 1
         }
 
         passTurn(lobbyId, character1).statusCode shouldBe nok
@@ -1103,7 +1103,7 @@ class WSGameSpec extends WSTrait {
         {
           val gameState = fetchAndParseGame(lobbyId)
           gameState.turn.number shouldBe 1
-          gameState.phase.number shouldBe 0
+          gameState.phase.number shouldBe 1
         }
 
         auth(1)
@@ -1113,7 +1113,7 @@ class WSGameSpec extends WSTrait {
         {
           val gameState = fetchAndParseGame(lobbyId)
           gameState.turn.number shouldBe 2
-          gameState.phase.number shouldBe 1
+          gameState.phase.number shouldBe 2
         }
       }
     }

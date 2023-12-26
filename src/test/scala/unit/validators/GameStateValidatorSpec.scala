@@ -423,7 +423,7 @@ class GameStateValidatorSpec extends TestUtils {
 
     "validate using abilities" when {
       "allow use of ability" in {
-        val incrementGameState = gameState.incrementPhase(4)
+        val incrementGameState = gameState.incrementPhase(3)
         assertCommandSuccess {
           GameStateValidator()(incrementGameState)
             .validateAbilityUse(s.p(0)(1).character.owner.id, ultimateAbilityId)
@@ -436,21 +436,21 @@ class GameStateValidatorSpec extends TestUtils {
             .validateAbilityUse(s.p(0)(1).character.owner.id, ultimateAbilityId)
         }
 
-        val increment3GameState = gameState.incrementPhase(3)
+        val increment2GameState = gameState.incrementPhase(2)
         assertCommandFailure {
-          GameStateValidator()(increment3GameState)
+          GameStateValidator()(increment2GameState)
             .validateAbilityUse(s.p(0)(1).character.owner.id, ultimateAbilityId)
         }
 
-        val increment4GameState = gameState.incrementPhase(4)
+        val increment3GameState = gameState.incrementPhase(3)
         assertCommandSuccess {
-          GameStateValidator()(increment4GameState)
+          GameStateValidator()(increment3GameState)
             .validateAbilityUse(s.p(0)(1).character.owner.id, ultimateAbilityId)
         }
       }
 
       "disallow use of ability on cooldown" in {
-        val incrementGameState = gameState.incrementPhase(4)
+        val incrementGameState = gameState.incrementPhase(3)
         val newGameState = incrementGameState.useAbility(ultimateAbilityId)
           .endTurn()
           .passTurn(s.defaultEnemy.id)
@@ -462,7 +462,7 @@ class GameStateValidatorSpec extends TestUtils {
         }
       }
       "disallow using ability another time in phase" in {
-        val incrementGameState = gameState.incrementPhase(4)
+        val incrementGameState = gameState.incrementPhase(3)
         val newGameState = incrementGameState.useAbility(ultimateAbilityId)
           .endTurn()
           .passTurn(s.defaultEnemy.id)
@@ -478,7 +478,7 @@ class GameStateValidatorSpec extends TestUtils {
       "disallow using ability while stunned" in {
         val stunEffect = effects.Stun(randomUUID(), 1)
         val stunnedGameState = gameState
-          .incrementPhase(4)
+          .incrementPhase(3)
           .addEffect(s.p(0)(1).character.id, stunEffect)
 
         assertCommandFailure {
@@ -519,7 +519,7 @@ class GameStateValidatorSpec extends TestUtils {
       }
     }
     "disallow basic attacking after using a basic ability" in {
-      val incrementGameState = gameState.incrementPhase(4)
+      val incrementGameState = gameState.incrementPhase(3)
       val moveGameState = incrementGameState.teleportCharacter(s.p(0)(1).character.id, HexCoordinates(2, 0))
 
       val newGameState = moveGameState.useAbility(normalAbilityId)

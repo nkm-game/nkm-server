@@ -33,7 +33,7 @@ object GameState extends Logging {
       hexMap = HexMap.empty,
       players = Seq(),
       characters = Set(),
-      phase = Phase(0),
+      phase = Phase(1),
       turn = Turn(0),
       gameStatus = GameStatus.NotStarted,
       pickType = defaultPickType,

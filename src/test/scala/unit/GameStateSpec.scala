@@ -107,7 +107,7 @@ class GameStateSpec extends TestUtils {
         .passTurn(s2v2.p(1)(0).character.id)
         .passTurn(s2v2.p(0)(1).character.id)
       gs.characterIdsThatTookActionThisPhase should be(Set.empty)
-      gs.phase.number should be(1)
+      gs.phase.number should be(2)
     }
 
     "handle knocking out one player correctly" in {
