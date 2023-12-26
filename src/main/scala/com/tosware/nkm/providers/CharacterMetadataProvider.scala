@@ -144,11 +144,11 @@ case class CharacterMetadataProvider() extends NkmJsonProtocol {
     ),
     CharacterMetadata(
       name = "Ebisuzawa Kurumi",
-      attackType = AttackType.Ranged,
+      attackType = AttackType.Melee,
       initialHealthPoints = 54,
       initialAttackPoints = 16,
-      initialBasicAttackRange = 3,
-      initialSpeed = 8,
+      initialBasicAttackRange = 1,
+      initialSpeed = 6,
       initialPhysicalDefense = 15,
       initialMagicalDefense = 5,
       initialAbilitiesMetadataIds = Seq(

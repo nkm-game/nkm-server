@@ -48,7 +48,7 @@ case class Survivor(abilityId: AbilityId, parentCharacterId: CharacterId)
         effects.NextBasicAttackBuff(
           randomUUID(),
           Int.MaxValue,
-          metadata.variables("bonusDamagePercent") * parentCharacter.state.attackPoints / 100,
+          (metadata.variables("bonusDamagePercent") - 100) * parentCharacter.state.attackPoints / 100,
         ), // TODO calculate buff at attack
       )(random, id)
 }
