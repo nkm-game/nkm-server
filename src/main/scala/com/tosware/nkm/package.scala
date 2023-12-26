@@ -87,7 +87,7 @@ package object nkm {
 
   implicit class HexCoordinatesSeqUtils(coords: Seq[HexCoordinates])(implicit gameState: GameState) {
     def toCells: Seq[HexCell] =
-      coords.flatMap(c => gameState.hexMap.getCell(c))
+      coords.flatMap(c => gameState.hexMap.getCellOpt(c))
 
     def characters: Seq[NkmCharacter] =
       toCells.characters

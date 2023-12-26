@@ -32,8 +32,7 @@ object GameState extends Logging
     with GameStateInitialization
     with GameStateInternalTriggers
     with GameStateTimeManagement
-    with GameStateUpdateUtils
-{
+    with GameStateUpdateUtils {
   def empty(id: String): GameState = {
     val defaultPickType = PickType.AllRandom
     val defaultClockConfig = ClockConfig.defaultForPickType(defaultPickType)
@@ -95,7 +94,7 @@ case class GameState(
     gameLog: GameLog,
     hiddenEvents: Seq[EventHideData],
 ) extends Logging {
-  def hostId: PlayerId = players.find(_.isHost).get.id
+  def hostIdOpt: Option[PlayerId] = players.find(_.isHost).map(_.id)
 
   def currentPlayerNumber: Int = turn.number % players.size
 
@@ -111,9 +110,6 @@ case class GameState(
   def playerNumber(playerId: PlayerId): Int = players.indexWhere(_.id == playerId)
 
   def playerByIdOpt(playerId: PlayerId): Option[Player] = players.find(_.id == playerId)
-
-  def playerById(playerId: PlayerId): Player =
-    playerByIdOpt(playerId).get
 
   def currentPlayer: Player = players(currentPlayerNumber)
 
@@ -154,19 +150,25 @@ case class GameState(
   def characterByIdOpt(characterId: CharacterId): Option[NkmCharacter] = characters.find(_.id == characterId)
 
   // unsafe before validation
-  def characterById(characterId: CharacterId): NkmCharacter = characters.find(_.id == characterId).get
+  def characterById(characterId: CharacterId): NkmCharacter = characterByIdOpt(characterId).get
 
   // safe
   def abilityByIdOpt(abilityId: AbilityId): Option[Ability] = abilities.find(_.id == abilityId)
 
   // unsafe before validation
-  def abilityById(abilityId: AbilityId): Ability = abilities.find(_.id == abilityId).get
+  def abilityById(abilityId: AbilityId): Ability = abilityByIdOpt(abilityId).get
+
+  // safe
+  def effectByIdOpt(effectId: CharacterEffectId): Option[CharacterEffect] = effects.find(_.id == effectId)
 
   // unsafe before validation
-  def effectById(effectId: CharacterEffectId): CharacterEffect = effects.find(_.id == effectId).get
+  def effectById(effectId: CharacterEffectId): CharacterEffect = effectByIdOpt(effectId).get
+
+  // safe
+  def hexCellEffectByIdOpt(effectId: HexCellEffectId): Option[HexCellEffect] = hexCellEffects.find(_.id == effectId)
 
   // unsafe before validation
-  def hexCellEffectById(effectId: HexCellEffectId): HexCellEffect = hexCellEffects.find(_.id == effectId).get
+  def hexCellEffectById(effectId: HexCellEffectId): HexCellEffect = hexCellEffectByIdOpt(effectId).get
 
   def hiddenEventsFor(forPlayerOpt: Option[PlayerId]): Seq[EventHideData] =
     forPlayerOpt.fold(hiddenEvents)(forPlayer => hiddenEvents.filterNot(_.showOnlyFor.contains(forPlayer)))
@@ -231,7 +233,7 @@ case class GameState(
       clock = currentClock(),
       gameLog = gameLog.toView(forPlayerOpt)(this),
       currentPlayerId = currentPlayer.id,
-      hostId = hostId,
+      hostId = hostIdOpt.getOrElse(""),
       isBlindPickingPhase = isBlindPickingPhase,
       isDraftBanningPhase = isDraftBanningPhase,
       isInCharacterSelect = isInCharacterSelect,

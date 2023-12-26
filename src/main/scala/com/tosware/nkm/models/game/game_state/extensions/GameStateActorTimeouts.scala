@@ -48,7 +48,7 @@ trait GameStateActorTimeouts {
 
     def blindPickTimeout()(implicit random: Random, causedById: String): GameState = {
       if (gs.gameStatus == GameStatus.Finished) return gs
-      gs.surrender(gs.blindPickStateOpt.get.pickingPlayers*)
+      gs.surrender(gs.blindPickStateOpt.map(_.pickingPlayers).getOrElse(Seq.empty)*)
     }
 
     def placingCharactersTimeout()(implicit random: Random, causedById: String): GameState = {

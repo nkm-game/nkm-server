@@ -26,7 +26,7 @@ case class GrenadeThrow(abilityId: AbilityId, parentCharacterId: CharacterId)
     extends Ability(abilityId) with Usable {
   override val metadata: AbilityMetadata = GrenadeThrow.metadata
   override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =
-    parentCell.get.coordinates.getCircle(metadata.variables("range")).whereExists
+    defaultCircleRange(metadata.variables("range"))
   override def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] =
     rangeCellCoords
   override def use(useData: UseData)(implicit

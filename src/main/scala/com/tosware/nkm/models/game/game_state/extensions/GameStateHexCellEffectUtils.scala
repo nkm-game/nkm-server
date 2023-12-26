@@ -42,17 +42,25 @@ trait GameStateHexCellEffectUtils {
     def removeHexCellEffects(heids: Seq[HexCellEffectId])(implicit random: Random, causedById: String): GameState =
       heids.foldLeft(gs) { case (acc, eid) => acc.removeHexCellEffect(eid) }
 
+    private def hexCellEffectCoordsOpt(heid: HexCellEffectId): Option[HexCoordinates] =
+      gs
+        .hexCellEffectByIdOpt(heid)
+        .flatMap(_.parentCell(gs))
+        .map(_.coordinates)
+
     def removeHexCellEffect(heid: HexCellEffectId)(implicit random: Random, causedById: String): GameState = {
-      val hexCellEffect = gs.hexCellEffectById(heid)
-      val coordinates = hexCellEffect.parentCell(gs).get.coordinates
-
-      val ngs = if (hexCellEffect.metadata.name == HexCellEffectName.MarkOfTheWind) {
-        gs.reveal(RevealCondition.RelatedTrapRevealed(heid))
-      } else gs
-      ngs.updateHexCell(coordinates)(_.removeEffect(heid))
-        .modify(_.hexCellEffectStates).using(hes => hes.removed(heid))
-        .logEvent(EffectRemovedFromCell(randomUUID(), gs.phase, gs.turn, causedById, heid))
+      val ngs =
+        (for {
+          hexCellEffect <- gs.hexCellEffectByIdOpt(heid)
+          if hexCellEffect.metadata.name == HexCellEffectName.MarkOfTheWind
+        } yield gs.reveal(RevealCondition.RelatedTrapRevealed(heid))) getOrElse gs
+      hexCellEffectCoordsOpt(heid) match {
+        case Some(coords) =>
+          ngs.updateHexCell(coords)(_.removeEffect(heid))
+            .modify(_.hexCellEffectStates).using(hes => hes.removed(heid))
+            .logEvent(EffectRemovedFromCell(randomUUID(), gs.phase, gs.turn, causedById, heid))
+        case None => ngs
+      }
     }
-
   }
 }

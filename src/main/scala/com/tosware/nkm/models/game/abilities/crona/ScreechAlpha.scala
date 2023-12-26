@@ -29,7 +29,8 @@ case class ScreechAlpha(abilityId: AbilityId, parentCharacterId: CharacterId)
     with Usable {
   override val metadata: AbilityMetadata = ScreechAlpha.metadata
   override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =
-    parentCell.get.coordinates.getCircle(metadata.variables("radius")).whereExists
+    defaultCircleRange(metadata.variables("radius"))
+
   override def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] =
     rangeCellCoords.whereSeenEnemiesOfC(parentCharacterId)
   private def addEffects(target: CharacterId)(implicit random: Random, gameState: GameState) = {

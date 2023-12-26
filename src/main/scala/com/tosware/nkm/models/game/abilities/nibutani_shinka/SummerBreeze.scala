@@ -27,7 +27,7 @@ case class SummerBreeze(abilityId: AbilityId, parentCharacterId: CharacterId)
     extends Ability(abilityId) with Usable {
   override val metadata: AbilityMetadata = SummerBreeze.metadata
   override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =
-    parentCell.fold(Set.empty[HexCoordinates])(
+    parentCellOpt.fold(Set.empty[HexCoordinates])(
       _.getArea(metadata.variables("range"), Set(SearchFlag.StraightLine)).toCoords
     )
   override def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] =

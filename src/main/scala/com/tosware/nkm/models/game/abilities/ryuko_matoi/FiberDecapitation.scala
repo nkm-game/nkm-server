@@ -32,7 +32,7 @@ case class FiberDecapitation(abilityId: AbilityId, parentCharacterId: CharacterI
   private def teleportCoordinates(from: HexCoordinates, direction: HexDirection) =
     from.getInDirection(direction, metadata.variables("targetCellOffset"))
   override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =
-    parentCell.fold(Set.empty[HexCell])(c =>
+    parentCellOpt.fold(Set.empty[HexCell])(c =>
       c.getArea(
         metadata.variables("range"),
         Set(SearchFlag.StopAtWalls, SearchFlag.StopAfterEnemies, SearchFlag.StraightLine),
@@ -43,7 +43,7 @@ case class FiberDecapitation(abilityId: AbilityId, parentCharacterId: CharacterI
     rangeCellCoords.whereSeenEnemiesOfC(parentCharacterId).filter(targetCoordinates =>
       {
         for {
-          pCell <- parentCell
+          pCell <- parentCellOpt
           targetDirection: HexDirection <- pCell.coordinates.getDirection(targetCoordinates)
           tpCoords: HexCoordinates <- Some(teleportCoordinates(targetCoordinates, targetDirection))
           tpCell: HexCell <- tpCoords.toCellOpt(gameState)
@@ -55,7 +55,7 @@ case class FiberDecapitation(abilityId: AbilityId, parentCharacterId: CharacterI
     val target = useData.firstAsCharacterId
     val targetCharacter = gameState.characterById(target)
     val targetCoordinates = targetCharacter.parentCellOpt.get.coordinates
-    val targetDirection = parentCell.get.coordinates.getDirection(targetCoordinates).get
+    val targetDirection = parentCellOpt.get.coordinates.getDirection(targetCoordinates).get
     val tpCoords = teleportCoordinates(targetCoordinates, targetDirection)
 
     gameState
@@ -74,7 +74,7 @@ case class FiberDecapitation(abilityId: AbilityId, parentCharacterId: CharacterI
       for {
         targetCharacter: NkmCharacter <- Some(gameState.characterById(target))
         targetCoordinates: HexCoordinates <- targetCharacter.parentCellOpt.map(_.coordinates)
-        targetDirection: HexDirection <- parentCell.get.coordinates.getDirection(targetCoordinates)
+        targetDirection: HexDirection <- parentCellOpt.get.coordinates.getDirection(targetCoordinates)
         tpCoords: HexCoordinates <- Some(teleportCoordinates(targetCoordinates, targetDirection))
         tpCell: HexCell <- tpCoords.toCellOpt(gameState)
         isFreeToStand: Boolean <- Some(tpCell.looksFreeToStand(parentCharacterId))

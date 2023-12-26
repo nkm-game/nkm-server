@@ -28,7 +28,7 @@ case class Infection(abilityId: AbilityId, parentCharacterId: CharacterId)
     with Usable {
   override val metadata: AbilityMetadata = Infection.metadata
   override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =
-    parentCell.get.coordinates.getCircle(metadata.variables("range")).whereExists
+    defaultCircleRange(metadata.variables("range"))
   override def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] =
     rangeCellCoords.whereSeenEnemiesOfC(parentCharacterId)
   override def use(useData: UseData)(implicit random: Random, gameState: GameState): GameState = {

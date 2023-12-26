@@ -55,11 +55,11 @@ case class BlackBlood(
         if (!parentCharacter.isOnMap) return gameState
 
         val enemiesInRange =
-          parentCell.get.coordinates
+          parentCell.map(_.coordinates
             .getCircle(radius)
             .whereEnemiesOfC(sourceCharacterId)
             .characters
-            .map(_.id)
+            .map(_.id)).getOrElse(Set.empty)
 
         val dmg = Damage(DamageType.Magical, damage)
         enemiesInRange.foldLeft(gameState)((acc, cid) => hitCharacter(cid, dmg)(random, acc))

@@ -7,7 +7,7 @@ trait HexMapLike[T <: HexCellLike] {
   val name: String
   val cells: Set[T]
 
-  def getCell(hexCoordinates: HexCoordinates): Option[T] = cells.find(_.coordinates == hexCoordinates)
+  def getCellOpt(hexCoordinates: HexCoordinates): Option[T] = cells.find(_.coordinates == hexCoordinates)
 
   def getSpawnPoints: Set[T] =
     cells.filter(c => c.cellType == HexCellType.SpawnPoint)

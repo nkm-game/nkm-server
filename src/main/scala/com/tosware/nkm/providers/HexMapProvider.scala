@@ -52,5 +52,7 @@ case class HexMapProvider() extends NkmJsonProtocol {
     )
 
   def getTestHexMap(name: TestHexMapName): HexMap =
-    getTestHexMaps.find(_.name == name).get.hexMap
+    getTestHexMaps.find(_.name == name).map(_.hexMap).getOrElse(throw new Exception(
+      s"Unable to find hex map with name $name"
+    ))
 }

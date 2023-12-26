@@ -30,21 +30,17 @@ case class MarkOfTheWind(abilityId: AbilityId, parentCharacterId: CharacterId)
     extends Ability(abilityId)
     with Usable {
   override val metadata: AbilityMetadata = MarkOfTheWind.metadata
-
   def trapLocations(implicit gameState: GameState): Seq[HexCoordinates] =
     state.variables.get(trapLocationsKey)
       .map(_.parseJson.convertTo[Seq[HexCoordinates]])
       .getOrElse(Seq.empty)
-
   override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =
-    parentCell.get.coordinates.getCircle(metadata.variables("range")).whereExists
-
+    defaultCircleRange(metadata.variables("range"))
   override def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] =
     rangeCellCoords
       .toCells
       .filterNot(_.effects.exists(_.metadata.name == HexCellEffectName.MarkOfTheWind))
       .toCoords
-
   override def use(useData: UseData)(implicit random: Random, gameState: GameState): GameState = {
     val target = useData.firstAsCoordinates
     val limitExceeded = trapLocations.size == metadata.variables("trapLimit")

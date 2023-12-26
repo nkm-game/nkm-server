@@ -53,9 +53,9 @@ trait GameStateInitialization {
             .take(gs.players.length)
           gs.players.map(_.id).zip(pickedCharacters).toMap
         case PickType.DraftPick =>
-          gs.draftPickStateOpt.get.characterSelection
+          gs.draftPickStateOpt.map(_.characterSelection).getOrElse(Map.empty)
         case PickType.BlindPick =>
-          gs.blindPickStateOpt.get.characterSelection
+          gs.blindPickStateOpt.map(_.characterSelection).getOrElse(Map.empty)
       }
 
       val playersWithCharacters =

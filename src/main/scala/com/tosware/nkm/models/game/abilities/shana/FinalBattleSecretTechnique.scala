@@ -37,7 +37,7 @@ case class FinalBattleSecretTechnique(abilityId: AbilityId, parentCharacterId: C
     extends Ability(abilityId) with Usable {
   override val metadata: AbilityMetadata = FinalBattleSecretTechnique.metadata
   override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =
-    parentCell.fold(Set.empty[HexCoordinates])(
+    parentCellOpt.fold(Set.empty[HexCoordinates])(
       _.getArea(metadata.variables("range"), Set(SearchFlag.StraightLine, SearchFlag.StopAtWalls)).toCoords
     )
   override def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] =
@@ -51,7 +51,7 @@ case class FinalBattleSecretTechnique(abilityId: AbilityId, parentCharacterId: C
         .knockbackCharacter(target, direction, metadata.variables("trueCrimsonKnockback"))(random, id)
     val flameGs = (for {
       targetCoords: HexCoordinates <- knockbackGs.hexMap.getCellOfCharacter(target).map(_.coordinates)
-      parentCoords: HexCoordinates <- parentCell(knockbackGs).map(_.coordinates)
+      parentCoords: HexCoordinates <- parentCellOpt(knockbackGs).map(_.coordinates)
       blazingFlameCoords: Seq[HexCoordinates] =
         parentCoords.getThickLine(targetCoords, metadata.variables("blazingFlameWidth"))
       flameTargets = blazingFlameCoords.whereEnemiesOfC(parentCharacterId).characters.map(_.id)
@@ -63,7 +63,7 @@ case class FinalBattleSecretTechnique(abilityId: AbilityId, parentCharacterId: C
     val condemnationDamagePerCharacter = metadata.variables("judgementAndCondemnationDamagePerCharacter")
 
     val condemnationGs = for {
-      parentCoords: HexCoordinates <- parentCell(flameGs).map(_.coordinates)
+      parentCoords: HexCoordinates <- parentCellOpt(flameGs).map(_.coordinates)
       judgementMultiplier = parentCoords.getCircle(judgementRange).whereCharacters.size - 1
       damage = Damage(DamageType.True, condemnationDamagePerCharacter * judgementMultiplier)
       condemnationGs = hitAndDamageCharacter(target, damage)(random, flameGs)

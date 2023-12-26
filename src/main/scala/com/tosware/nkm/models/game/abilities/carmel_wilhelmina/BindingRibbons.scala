@@ -29,7 +29,9 @@ case class BindingRibbons(abilityId: AbilityId, parentCharacterId: CharacterId)
     extends Ability(abilityId) with Usable {
   override val metadata: AbilityMetadata = BindingRibbons.metadata
   override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =
-    parentCell.get.coordinates.getCircle(metadata.variables("range")).whereExists
+    parentCellOpt
+      .map(_.coordinates.getCircle(metadata.variables("range")).whereExists)
+      .getOrElse(Set.empty)
   override def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] =
     rangeCellCoords
   private def hitCharacter(target: CharacterId, targetsHit: Int)(implicit

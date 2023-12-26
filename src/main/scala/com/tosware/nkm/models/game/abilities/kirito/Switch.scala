@@ -28,19 +28,21 @@ object Switch extends NkmConf.AutoExtract {
 case class Switch(abilityId: AbilityId, parentCharacterId: CharacterId) extends Ability(abilityId)
     with Usable {
   override val metadata: AbilityMetadata = Switch.metadata
-  override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] = {
-    if (parentCell.isEmpty) return Set.empty
-    val rangeCoords = parentCell.get.coordinates.getCircle(metadata.variables("range")) - parentCell.get.coordinates
-    val enemiesAaCoords = gameState
-      .players.filterNot(_.name == parentCharacter.owner.id)
-      .flatMap(_.characterIds)
-      .map(gameState.characterById)
-      .flatMap(_.basicAttackCellCoords)
-      .toSet
+  override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =
+    parentCellOpt.map(_.coordinates) match {
+      case Some(parentCoords) =>
+        val rangeCoords = defaultCircleRange(metadata.variables("range")) - parentCoords
+        val enemiesAaCoords = gameState
+          .players.filterNot(_.name == parentCharacter.owner.id)
+          .flatMap(_.characterIds)
+          .map(gameState.characterById)
+          .flatMap(_.basicAttackCellCoords)
+          .toSet
 
-    if (enemiesAaCoords.contains(parentCell.get.coordinates)) rangeCoords
-    else rangeCoords.intersect(enemiesAaCoords)
-  }
+        if (enemiesAaCoords.contains(parentCoords)) rangeCoords
+        else rangeCoords.intersect(enemiesAaCoords)
+      case None => Set.empty
+    }
   override def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] =
     rangeCellCoords.whereFriendsOfC(parentCharacterId)
   override def use(useData: UseData)(implicit random: Random, gameState: GameState): GameState = {

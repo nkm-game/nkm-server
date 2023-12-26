@@ -39,7 +39,7 @@ case class Steal(abilityId: AbilityId, parentCharacterId: CharacterId)
     with GameEventListener {
   override val metadata: AbilityMetadata = Steal.metadata
   override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =
-    parentCell.fold(Set.empty[HexCoordinates])(_.coordinates.getCircle(metadata.variables("range")).whereExists)
+    parentCellOpt.fold(Set.empty[HexCoordinates])(_.coordinates.getCircle(metadata.variables("range")).whereExists)
   override def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] =
     rangeCellCoords.whereSeenEnemiesOfC(parentCharacterId)
   private def stolenDataSet(implicit gameState: GameState) =

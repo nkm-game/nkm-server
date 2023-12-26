@@ -18,10 +18,12 @@ case class GameStateValidator()(implicit gameState: GameState) {
     gameState.abilities.exists(_.id == abilityId)
 
   private def playerIsHost(playerId: PlayerId) =
-    gameState.hostId == playerId
+    gameState.hostIdOpt.contains(playerId)
 
   private def playerFinishedGame(playerId: PlayerId) =
-    gameState.players.find(_.name == playerId).get.victoryStatus != VictoryStatus.Pending
+    !gameState.playerByIdOpt(playerId)
+      .map(_.victoryStatus)
+      .contains(VictoryStatus.Pending)
 
   private def gameStatusIs(gameStatus: GameStatus) =
     gameState.gameStatus == gameStatus
@@ -39,7 +41,8 @@ case class GameStateValidator()(implicit gameState: GameState) {
       playerId: PlayerId,
       coordinatesToCharacterIdMap: Map[HexCoordinates, CharacterId],
   ): Set[UseCheck] = {
-    val playerCharacterIds: Set[CharacterId] = gameState.playerByIdOpt(playerId).get.characterIds
+    val playerCharacterIds: Set[CharacterId] =
+      gameState.playerByIdOpt(playerId).map(_.characterIds).getOrElse(Set.empty)
     val playerSpawnPoints: Set[HexCoordinates] =
       gameState.hexMap.getSpawnPointsByNumber(gameState.playerNumber(playerId)).map(_.coordinates)
 

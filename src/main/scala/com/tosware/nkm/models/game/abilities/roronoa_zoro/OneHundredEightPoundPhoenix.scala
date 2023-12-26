@@ -29,7 +29,7 @@ case class OneHundredEightPoundPhoenix(abilityId: AbilityId, parentCharacterId: 
     extends Ability(abilityId) with Usable {
   override val metadata: AbilityMetadata = OneHundredEightPoundPhoenix.metadata
   override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =
-    parentCell.fold(Set.empty[HexCell])(_.getArea(
+    parentCellOpt.fold(Set.empty[HexCell])(_.getArea(
       metadata.variables("range"),
       Set(SearchFlag.StopAtWalls, SearchFlag.StopAfterEnemies, SearchFlag.StraightLine),
       friendlyPlayerIdOpt = Some(parentCharacter.owner.id),
@@ -37,21 +37,28 @@ case class OneHundredEightPoundPhoenix(abilityId: AbilityId, parentCharacterId: 
   override def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] =
     rangeCellCoords.whereSeenEnemiesOfC(parentCharacterId)
   private def sendShockwave(direction: HexDirection)(implicit random: Random, gameState: GameState): GameState = {
-    val targetOpt =
-      parentCell.get.firstCharacterInLine(direction, metadata.variables("range"), c => c.isEnemyForC(parentCharacterId))
-    targetOpt.fold(gameState)(c =>
-      gameState.damageCharacter(c.id, Damage(DamageType.Physical, metadata.variables("damage")))(random, id)
-    )
+    val ngs = for {
+      parentCell <- parentCellOpt
+      targetCharacter <-
+        parentCell.firstCharacterInLine(direction, metadata.variables("range"), c => c.isEnemyForC(parentCharacterId))
+    } yield gameState.damageCharacter(targetCharacter.id, Damage(DamageType.Physical, metadata.variables("damage")))(random, id)
+
+    ngs.getOrElse(gameState)
   }
   override def use(useData: UseData)(implicit random: Random, gameState: GameState): GameState = {
     val target = useData.firstAsCharacterId
-    val targetCoordinates = gameState.characterById(target).parentCellOpt.get.coordinates
-    val targetDirection = parentCell.get.coordinates.getDirection(targetCoordinates).get
-
-    val g1 = sendShockwave(targetDirection)
-    val g2 = sendShockwave(targetDirection)(random, g1)
-    val g3 = sendShockwave(targetDirection)(random, g2)
-    g3
+    val ngs = for {
+      targetCharacter <- gameState.characterByIdOpt(target)
+      targetCell <- targetCharacter.parentCellOpt
+      parentCell <- parentCellOpt
+      direction <- parentCell.coordinates.getDirection(targetCell.coordinates)
+    } yield {
+      val g1 = sendShockwave(direction)
+      val g2 = sendShockwave(direction)(random, g1)
+      val g3 = sendShockwave(direction)(random, g2)
+      g3
+    }
+    ngs.getOrElse(gameState)
   }
 
   override def useChecks(implicit useData: UseData, gameState: GameState): Set[UseCheck] =

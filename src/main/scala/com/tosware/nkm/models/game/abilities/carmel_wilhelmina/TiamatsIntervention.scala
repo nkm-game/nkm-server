@@ -31,7 +31,7 @@ case class TiamatsIntervention(abilityId: AbilityId, parentCharacterId: Characte
   override val metadata: AbilityMetadata = TiamatsIntervention.metadata
 
   override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =
-    parentCell.fold(Set.empty[HexCoordinates])(_.coordinates.getCircle(metadata.variables("range")).whereExists)
+    parentCellOpt.fold(Set.empty[HexCoordinates])(_.coordinates.getCircle(metadata.variables("range")).whereExists)
 
   override def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] =
     rangeCellCoords.whereCharacters
@@ -57,7 +57,9 @@ case class TiamatsIntervention(abilityId: AbilityId, parentCharacterId: Characte
   override def useChecks(implicit useData: UseData, gameState: GameState): Set[UseCheck] = {
     val targetCharacter = useData.firstAsCharacterId
     val targetCoords = useData.secondAsCoordinates
-    val nearbyFreeCells = parentCell.get.coordinates.getCircle(metadata.variables("moveTargetRange")).whereFreeToStand
+    val nearbyFreeCells = parentCellOpt
+      .map(_.coordinates.getCircle(metadata.variables("moveTargetRange")).whereFreeToStand)
+      .getOrElse(Set.empty)
 
     super.useChecks ++ characterBaseUseChecks(targetCharacter) ++ Set(
       UseCheck.Coordinates.IsFreeToStand(targetCoords),

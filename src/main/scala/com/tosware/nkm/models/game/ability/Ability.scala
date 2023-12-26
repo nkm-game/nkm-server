@@ -32,11 +32,15 @@ abstract class Ability(val id: AbilityId)
     Set(UseCheck.Coordinates.ExistsOnMap(hexCoordinates), UseCheck.Coordinates.InRange(hexCoordinates))
   def state(implicit gameState: GameState): AbilityState =
     gameState.abilityStates(id)
+  protected def defaultCircleRange(range: Int)(implicit gameState: GameState) =
+    parentCellOpt
+      .map(_.coordinates.getCircle(range).whereExists)
+      .getOrElse(Set.empty)
   def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] = Set.empty
   def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] = Set.empty
   def parentCharacter(implicit gameState: GameState): NkmCharacter =
     gameState.characters.find(_.state.abilities.map(_.id).contains(id)).get
-  def parentCell(implicit gameState: GameState): Option[HexCell] =
+  def parentCellOpt(implicit gameState: GameState): Option[HexCell] =
     parentCharacter.parentCellOpt
   def isEnchanted(implicit gameState: GameState): Boolean =
     parentCharacter.state.effects.ofType[AbilityEnchant].exists(_.abilityType == metadata.abilityType)

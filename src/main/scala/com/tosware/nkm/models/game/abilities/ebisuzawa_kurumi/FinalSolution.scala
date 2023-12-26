@@ -29,7 +29,7 @@ case class FinalSolution(abilityId: AbilityId, parentCharacterId: CharacterId)
     with Usable {
   override val metadata: AbilityMetadata = FinalSolution.metadata
   override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =
-    parentCell.fold(Set.empty[HexCell])(_.getArea(
+    parentCellOpt.fold(Set.empty[HexCell])(_.getArea(
       metadata.variables("range"),
       Set(SearchFlag.StopAtWalls, SearchFlag.StopAfterEnemies, SearchFlag.StraightLine),
     )).toCoords

@@ -3,6 +3,7 @@ package com.tosware.nkm.models.game.game_state.extensions
 import com.softwaremill.quicklens.*
 import com.tosware.nkm.*
 import com.tosware.nkm.models.game.*
+import com.tosware.nkm.models.game.character.NkmCharacter
 import com.tosware.nkm.models.game.effects.*
 import com.tosware.nkm.models.game.event.*
 import com.tosware.nkm.models.game.event.GameEvent.*
@@ -43,8 +44,9 @@ trait GameStateInternalTriggers {
     }
 
     def decrementEndTurnCooldowns()(implicit random: Random, causedById: String = gs.id): GameState = {
-      val currentCharacterAbilityIds = gs.currentCharacterOpt.get.state.abilities.map(_.id)
-      val currentCharacterEffectIds = gs.currentCharacterOpt.get.state.effects.map(_.id)
+      val currentCharacter: NkmCharacter = gs.currentCharacterOpt.getOrElse(return gs)
+      val currentCharacterAbilityIds = currentCharacter.state.abilities.map(_.id)
+      val currentCharacterEffectIds = currentCharacter.state.effects.map(_.id)
 
       val decrementAbilityCooldownsState = currentCharacterAbilityIds.foldLeft(gs) { (acc, abilityId) =>
         acc.decrementAbilityCooldown(abilityId)
@@ -87,11 +89,12 @@ trait GameStateInternalTriggers {
     }
 
     def putAbilityOnCooldownOrDecrementFreeAbility(abilityId: AbilityId)(implicit random: Random): GameState = {
-      val freeAbilityEffectOpt =
-        gs.abilityById(abilityId).parentCharacter(gs).state.effects.ofType[FreeAbility].headOption
-      if (freeAbilityEffectOpt.nonEmpty) {
-        gs.decrementEffectCooldown(freeAbilityEffectOpt.get.effectId)
-      } else putAbilityOnCooldown(abilityId)
+      val ngs = for {
+        ability <- gs.abilityByIdOpt(abilityId)
+        freeAbilityEffect <- ability.parentCharacter(gs).state.effects.ofType[FreeAbility].headOption
+      } yield gs.decrementEffectCooldown(freeAbilityEffect.effectId)
+
+      ngs.getOrElse(putAbilityOnCooldown(abilityId))
     }
 
     def decrementAbilityCooldown(abilityId: AbilityId, amount: Int = 1): GameState = {

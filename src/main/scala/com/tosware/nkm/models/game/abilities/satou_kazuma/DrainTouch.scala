@@ -28,7 +28,7 @@ case class DrainTouch(abilityId: AbilityId, parentCharacterId: CharacterId)
     with Usable {
   override val metadata: AbilityMetadata = DrainTouch.metadata
   override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =
-    parentCell.fold(Set.empty[HexCoordinates])(
+    parentCellOpt.fold(Set.empty[HexCoordinates])(
       _.getArea(metadata.variables("range"), Set(SearchFlag.StraightLine)).toCoords
     )
   override def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] =

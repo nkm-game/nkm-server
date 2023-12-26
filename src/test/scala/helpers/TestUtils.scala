@@ -111,7 +111,7 @@ trait TestUtils
       .map(_.statType) should not contain (statType)
 
   protected def characterIdOnPoint(hexCoordinates: HexCoordinates)(implicit gameState: GameState): CharacterId =
-    gameState.hexMap.getCell(hexCoordinates).get.characterId.get
+    gameState.hexMap.getCellOpt(hexCoordinates).flatMap(_.characterId).get
 
   protected def characterOnPoint(hexCoordinates: HexCoordinates)(implicit gameState: GameState): NkmCharacter =
     gameState.characterById(characterIdOnPoint(hexCoordinates))

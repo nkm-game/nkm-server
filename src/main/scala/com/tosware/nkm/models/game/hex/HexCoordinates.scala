@@ -85,7 +85,7 @@ case class HexCoordinates(x: Int, z: Int) {
   def toTuple: (Int, Int) = (x, z)
 
   def toCellOpt(implicit gameState: GameState): Option[HexCell] =
-    gameState.hexMap.getCell(this)
+    gameState.hexMap.getCellOpt(this)
 
   def toCell(implicit gameState: GameState): HexCell =
     toCellOpt.get

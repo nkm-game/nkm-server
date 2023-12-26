@@ -26,7 +26,7 @@ case class Purification(abilityId: AbilityId, parentCharacterId: CharacterId)
     extends Ability(abilityId) with Usable {
   override val metadata: AbilityMetadata = Purification.metadata
   override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =
-    parentCell.get.coordinates.getCircle(metadata.variables("range")).whereExists
+    defaultCircleRange(metadata.variables("range"))
   override def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] =
     rangeCellCoords.whereFriendsOfC(parentCharacterId)
   override def use(useData: UseData)(implicit random: Random, gameState: GameState): GameState = {

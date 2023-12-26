@@ -37,10 +37,18 @@ trait GameStateCharacterUtils {
     ): GameState = {
       val character1 = gs.characterById(characterId1)
       val character2 = gs.characterById(characterId2)
-      removeCharacterFromMap(character1.id)
-        .removeCharacterFromMap(character2.id)
-        .placeCharacter(character2.parentCellOpt.get.coordinates, character1.id)
-        .placeCharacter(character1.parentCellOpt.get.coordinates, character2.id)
+
+      val ngs =
+        for {
+          coords1 <- character1.parentCellOpt.map(_.coordinates)
+          coords2 <- character2.parentCellOpt.map(_.coordinates)
+        } yield gs
+          .removeCharacterFromMap(character1.id)
+          .removeCharacterFromMap(character2.id)
+          .placeCharacter(coords2, character1.id)
+          .placeCharacter(coords1, character2.id)
+
+      ngs.getOrElse(gs)
     }
 
     def takeActionWithCharacter(characterId: CharacterId)(implicit random: Random): GameState = {
@@ -243,7 +251,7 @@ trait GameStateCharacterUtils {
         targetCellCoordinates: HexCoordinates,
         hideEvent: Boolean = false,
     )(implicit random: Random, causedById: String): GameState = {
-      val targetCell = gs.hexMap.getCell(targetCellCoordinates) match {
+      val targetCell = gs.hexMap.getCellOpt(targetCellCoordinates) match {
         case Some(value) => value
         case None        => return gs
       }

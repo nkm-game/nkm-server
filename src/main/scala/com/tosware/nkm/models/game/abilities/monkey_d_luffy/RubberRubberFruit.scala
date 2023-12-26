@@ -51,7 +51,7 @@ case class RubberRubberFruit(abilityId: AbilityId, parentCharacterId: CharacterI
     with Usable {
   override val metadata: AbilityMetadata = RubberRubberFruit.metadata
   override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =
-    parentCell.fold(Set.empty[HexCoordinates])(
+    parentCellOpt.fold(Set.empty[HexCoordinates])(
       _.getArea(metadata.variables("range"), Set(SearchFlag.StraightLine)).toCoords
     )
   override def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] =
@@ -59,30 +59,39 @@ case class RubberRubberFruit(abilityId: AbilityId, parentCharacterId: CharacterI
   private def rocket(target: HexCoordinates, distance: Int)(implicit
       random: Random,
       gameState: GameState,
-  ): GameState = {
-    val jumpDirection = parentCell.get.coordinates.getDirection(target).get
-    gameState.jump(parentCharacterId, jumpDirection, distance * 2)(random, id)
-  }
+  ): GameState =
+    parentCellOpt.flatMap(_.coordinates.getDirection(target)) match {
+      case Some(jumpDirection) =>
+        gameState.jump(parentCharacterId, jumpDirection, distance * 2)(random, id)
+      case None => gameState
+    }
   private def bazooka(target: HexCoordinates)(implicit random: Random, gameState: GameState): GameState = {
     val damageAmount = metadata.variables(if (isEnchanted) "jetBazookaDamage" else "bazookaDamage")
     val knockback = metadata.variables(if (isEnchanted) "jetBazookaKnockback" else "bazookaKnockback")
     val targetCharacterId = target.toCell.characterId.get
-    val knockbackDirection = parentCell.get.coordinates.getDirection(target).get
-    hitAndDamageCharacter(targetCharacterId, Damage(DamageType.Physical, damageAmount))
-      .jump(targetCharacterId, knockbackDirection, knockback)(random, id)
+
+    parentCellOpt.flatMap(_.coordinates.getDirection(target)) match {
+      case Some(knockbackDirection) =>
+        hitAndDamageCharacter(targetCharacterId, Damage(DamageType.Physical, damageAmount))
+          .jump(targetCharacterId, knockbackDirection, knockback)(random, id)
+      case None => gameState
+    }
   }
   private def pistol(target: HexCoordinates)(implicit random: Random, gameState: GameState): GameState = {
     val damageAmount = metadata.variables(if (isEnchanted) "jetPistolDamage" else "pistolDamage")
     hitAndDamageCharacter(target.toCell.characterId.get, Damage(DamageType.Physical, damageAmount))
   }
   override def use(useData: UseData)(implicit random: Random, gameState: GameState): GameState = {
-    val target = useData.firstAsCoordinates
-    val distance = parentCell.get.coordinates.getDistance(target).get
-    if (target.toCell.isWall)
-      return rocket(target, distance)
-    if (distance <= metadata.variables("bazookaRange"))
-      return bazooka(target)
-    pistol(target)
+    val targetCoords = useData.firstAsCoordinates
+    parentCellOpt.flatMap(_.coordinates.getDistance(targetCoords)) match {
+      case Some(distance) =>
+        if (targetCoords.toCell.isWall)
+          return rocket(targetCoords, distance)
+        if (distance <= metadata.variables("bazookaRange"))
+          return bazooka(targetCoords)
+        pistol(targetCoords)
+      case None => gameState
+    }
   }
   override def useChecks(implicit useData: UseData, gameState: GameState): Set[UseCheck] =
     super.useChecks ++ coordinatesBaseUseChecks(useData.firstAsCoordinates)

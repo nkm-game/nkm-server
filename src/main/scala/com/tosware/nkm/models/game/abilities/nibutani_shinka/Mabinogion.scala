@@ -35,7 +35,7 @@ case class Mabinogion(
 ) extends Ability(abilityId) with GameEventListener {
   override val metadata: AbilityMetadata = Mabinogion.metadata
   override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =
-    parentCell.get.getArea(metadata.variables("radius")).toCoords
+    defaultCircleRange(metadata.variables("radius"))
   override def targetsInRange(implicit gameState: GameState): Set[HexCoordinates] =
     if (isEnchanted)
       rangeCellCoords.whereFriendsOfC(parentCharacterId)
