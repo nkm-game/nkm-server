@@ -447,10 +447,13 @@ case class GameState(
         .logEvent(CharactersPicked(randomUUID(), phase, turn, id))
     } else this
 
-  def startPlacingCharacters()(implicit random: Random, causedById: String): GameState =
+  def startPlacingCharacters()(implicit random: Random, causedById: String): GameState = {
+    if (gameStatus == GameStatus.Finished) return this
+
     updateGameStatus(GameStatus.CharacterPlacing)
       .initializeCharacterPlacing()
       .pickAndPlaceCharactersRandomlyIfAllRandom()
+  }
 
   def decreaseSharedTime(timeMillis: Long)(implicit random: Random): GameState =
     updateClock(clock.setIsSharedTime(true).decreaseSharedTime(timeMillis))(random, id)
@@ -476,6 +479,8 @@ case class GameState(
     updateClock(clock.unpause())(random, id)
 
   def surrender(playerIds: PlayerId*)(implicit random: Random, causedById: String): GameState = {
+    if (gameStatus == GameStatus.Finished) return this
+
     def filterPlayers: Player => Boolean = p => playerIds.contains(p.name)
 
     this
@@ -497,11 +502,14 @@ case class GameState(
       )
       .logEvent(PlayerFinishedBanning(randomUUID(), phase, turn, playerId, playerId))
 
-  def finishBanningPhase()(implicit random: Random): GameState =
+  def finishBanningPhase()(implicit random: Random): GameState = {
+    if (gameStatus == GameStatus.Finished) return this
+
     copy(draftPickStateOpt = draftPickStateOpt.map(_.finishBanning()))
       .updateClock(clock.setSharedTime(clockConfig.maxPickTimeMillis))(random, id)
       .reveal(RevealCondition.BanningPhaseFinished)
       .logEvent(BanningPhaseFinished(randomUUID(), phase, turn, id))
+  }
 
   def pick(playerId: PlayerId, characterId: CharacterMetadataId)(implicit
       random: Random,
@@ -513,6 +521,8 @@ case class GameState(
       .checkIfCharacterPickFinished()
 
   def draftPickTimeout()(implicit random: Random, causedById: String): GameState = {
+    if (gameStatus == GameStatus.Finished) return this
+
     val currentPlayerIdOpt = for {
       draftPickState <- draftPickStateOpt
       currentPlayerPicking <- draftPickState.currentPlayerPicking
@@ -533,8 +543,10 @@ case class GameState(
       .logEvent(PlayerFinishedBlindPicking(randomUUID(), phase, turn, playerId, playerId))
       .checkIfCharacterPickFinished()
 
-  def blindPickTimeout()(implicit random: Random, causedById: String): GameState =
+  def blindPickTimeout()(implicit random: Random, causedById: String): GameState = {
+    if (gameStatus == GameStatus.Finished) return this
     surrender(blindPickStateOpt.get.pickingPlayers*)
+  }
 
   def placingCharactersTimeout()(implicit random: Random, causedById: String): GameState = {
     val pidsThatDidNotPlace: Set[PlayerId] = players.map(_.id).toSet -- playerIdsThatPlacedCharacters
