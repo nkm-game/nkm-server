@@ -461,9 +461,9 @@ class Game(id: GameId)(implicit nkmDataService: NkmDataService) extends Persiste
     case TurnPassed(_, _, characterId) =>
       updateGameState(gameState.passTurn(characterId))
       log.debug(s"Recovered turn pass")
-    case CharacterMoved(_, _, hexCoordinates, characterId) =>
-      updateGameState(gameState.basicMoveCharacter(characterId, hexCoordinates))
-      log.debug(s"Recovered $characterId to $hexCoordinates")
+    case CharacterMoved(_, _, path, characterId) =>
+      updateGameState(gameState.basicMoveCharacter(characterId, path))
+      log.debug(s"Recovered $characterId to $path")
     case CharacterBasicAttacked(_, _, attackingCharacterId, targetCharacterId) =>
       updateGameState(gameState.basicAttack(attackingCharacterId, targetCharacterId))
       log.debug(s"Recovered basic attack of $attackingCharacterId to $targetCharacterId")
@@ -479,6 +479,8 @@ class Game(id: GameId)(implicit nkmDataService: NkmDataService) extends Persiste
     case BlindPickTimedOut(_) =>
       log.debug(s"Recovered blind pick timeout")
       updateGameState(gameState.blindPickTimeout()(random, id))
+    case TimeAfterPickTimedOut(_) =>
+      log.debug(s"Recovered time after pick timeout (skipped)")
     case CharacterPlacingTimedOut(_) =>
       log.debug(s"Recovered character placing timeout")
       updateGameState(gameState.placingCharactersTimeout()(random, id))

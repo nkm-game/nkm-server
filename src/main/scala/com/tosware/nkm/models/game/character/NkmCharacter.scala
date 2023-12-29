@@ -205,9 +205,12 @@ case class NkmCharacter(
   def basicMoveOverride: Option[BasicMoveOverride] =
     state.abilities.ofType[BasicMoveOverride].headOption
 
-  private def execMove(path: Seq[HexCoordinates])(implicit random: Random, gameState: GameState): GameState =
-    path.tail.foldLeft(gameState)((acc, coordinate) => acc.basicMoveOneCell(id, coordinate)(random, id))
-      .logEvent(CharacterBasicMoved(randomUUID(), gameState.phase, gameState.turn, id, id, path))
+  private def execMove(path: Seq[HexCoordinates])(implicit random: Random, gameState: GameState) = path match {
+    case _ +: tail =>
+      tail.foldLeft(gameState)((acc, coordinate) => acc.basicMoveOneCell(id, coordinate)(random, id))
+        .logEvent(CharacterBasicMoved(randomUUID(), gameState.phase, gameState.turn, id, id, path))
+    case _ => gameState
+  }
 
   def defaultBasicMove(path: Seq[HexCoordinates])(implicit random: Random, gameState: GameState): GameState = {
 
