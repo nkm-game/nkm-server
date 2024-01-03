@@ -130,13 +130,16 @@ class User(email: String) extends PersistentActor with ActorLogging {
       sender() ! LoginSuccess(userState.toView)
     case GrantAdmin =>
       log.info(s"Granting admin to: $email")
-      val e = AdminGranted(email)
-      persist(e) { _ =>
-        grantAdmin()
-        log.info(s"Granted admin for: $email")
+      if (userState.isAdmin) {
+        sender() ! CommandResponse.Failure("User is already admin.")
+      } else {
+        val e = AdminGranted(email)
+        persist(e) { _ =>
+          grantAdmin()
+          log.info(s"Granted admin for: $email")
+        }
+        sender() ! CommandResponse.Success()
       }
-      sender() ! CommandResponse.Success()
-
     case SetPreferredColor(colorOpt) =>
       persist(PreferredColorSet(colorOpt)) { _ =>
         setPreferredColor(colorOpt)

@@ -34,7 +34,7 @@ object Main extends App with Logging {
         initDb(lastDelay + 1)
     }
 
-  // TODO: check if users are not already initialized
+  // TODO(NKM-326): send the replies to Ignore actor (available in typed actor system or create myself)
   def initUsers(): Unit = {
     val tojatosActor: ActorRef = system.actorOf(User.props("tojatos@gmail.com"))
     tojatosActor ! User.RegisterHash("$2a$10$PXY3u4hPEic7sbKMoVqhn.qoSRJFah36E1XiujvJnfZgyqxBm44zS")
@@ -45,9 +45,9 @@ object Main extends App with Logging {
     bigRedActor ! User.GrantAdmin
 
     val testUserActor1: ActorRef = system.actorOf(User.props("test1@example.com"))
-    val testUserActor2: ActorRef = system.actorOf(User.props("test2@example.com"))
-
     testUserActor1 ! User.Register("test")
+
+    val testUserActor2: ActorRef = system.actorOf(User.props("test2@example.com"))
     testUserActor2 ! User.Register("test")
   }
 

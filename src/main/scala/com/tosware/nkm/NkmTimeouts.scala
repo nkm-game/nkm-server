@@ -12,3 +12,5 @@ trait NkmTimeouts {
 
   def aw[A](f: Future[A]): A = Await.result(f, atMost)
 }
+
+object NkmTimeouts extends NkmTimeouts
