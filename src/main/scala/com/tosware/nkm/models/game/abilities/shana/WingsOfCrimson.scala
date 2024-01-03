@@ -29,7 +29,7 @@ case class WingsOfCrimson(abilityId: AbilityId, parentCharacterId: CharacterId)
   override val metadata: AbilityMetadata = WingsOfCrimson.metadata
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
     e match {
-      case GameEvent.CharacterDamaged(_, _, _, _, characterId, _) =>
+      case GameEvent.CharacterDamaged(_, characterId, _) =>
         if (characterId != parentCharacterId) return gameState
         val duration = metadata.variables("duration")
         val e1 = effects.Fly(randomUUID(), duration)

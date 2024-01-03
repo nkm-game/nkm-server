@@ -74,8 +74,8 @@ case class GodrobeSenketsu(
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState = {
     if (!state.isEnabled) return gameState
     e match {
-      case TurnFinished(_, _, _, _, _) =>
-        val characterIdThatTookAction = gameState.gameLog.characterThatTookActionInTurn(e.turn.number).get
+      case TurnFinished(_, _) =>
+        val characterIdThatTookAction = gameState.gameLog.characterThatTookActionInTurn(e.context.turn.number).get
         if (characterIdThatTookAction != parentCharacter.id) return gameState
         val bonusAdPerTurn = metadata.variables("bonusAttackDamagePerTurn")
         val newAdBonus = damageBonus + bonusAdPerTurn

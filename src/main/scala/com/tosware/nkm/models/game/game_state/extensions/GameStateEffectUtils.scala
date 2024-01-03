@@ -29,10 +29,7 @@ trait GameStateEffectUtils {
           ),
         ))
         .logEvent(EffectAddedToCharacter(
-          randomUUID(),
-          gs.phase,
-          gs.turn,
-          causedById,
+          gs.generateEventContext(),
           characterEffect.metadata.id,
           characterEffect.id,
           characterId,
@@ -55,10 +52,7 @@ trait GameStateEffectUtils {
       gs.updateCharacter(character.id)(_.removeEffect(characterEffectId))
         .modify(_.characterEffectStates).using(ces => ces.removed(characterEffectId))
         .logEvent(EffectRemovedFromCharacter(
-          randomUUID(),
-          gs.phase,
-          gs.turn,
-          causedById,
+          gs.generateEventContext(),
           effect.metadata.id,
           characterEffectId,
           character.id,
@@ -72,7 +66,7 @@ trait GameStateEffectUtils {
       implicit val causedById: String = effectId
       val newState = gs.effectById(effectId).getVariablesChangedState(key, value)(gs)
       gs.copy(characterEffectStates = gs.characterEffectStates.updated(effectId, newState))
-        .logEvent(EffectVariableSet(randomUUID(), gs.phase, gs.turn, causedById, effectId, key, value))
+        .logEvent(EffectVariableSet(gs.generateEventContext(), effectId, key, value))
     }
 
   }

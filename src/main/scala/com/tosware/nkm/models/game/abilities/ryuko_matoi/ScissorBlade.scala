@@ -27,7 +27,7 @@ case class ScissorBlade(abilityId: AbilityId, parentCharacterId: CharacterId)
   override val metadata: AbilityMetadata = ScissorBlade.metadata
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
     e match {
-      case GameEvent.CharacterPreparedToAttack(_, _, _, _, characterId, targetCharacterId) =>
+      case GameEvent.CharacterPreparedToAttack(_, characterId, targetCharacterId) =>
         if (characterId != parentCharacterId) gameState
         else {
           val effect = effects.StatNerf(

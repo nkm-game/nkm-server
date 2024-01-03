@@ -52,8 +52,8 @@ case class MjolnirDestinyImpulse(abilityId: AbilityId, parentCharacterId: Charac
     ngs.setAbilityEnabled(id, newEnabled = shouldRefreshAbility)
   }
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState = e match {
-    case GameEvent.TurnFinished(_, _, _, _, _) =>
-      val characterIdThatTookAction = gameState.gameLog.characterThatTookActionInTurn(e.turn.number).get
+    case GameEvent.TurnFinished(_, _) =>
+      val characterIdThatTookAction = gameState.gameLog.characterThatTookActionInTurn(e.context.turn.number).get
       if (characterIdThatTookAction != parentCharacterId) return gameState
       gameState.setAbilityEnabled(id, newEnabled = false)
     case _ => gameState

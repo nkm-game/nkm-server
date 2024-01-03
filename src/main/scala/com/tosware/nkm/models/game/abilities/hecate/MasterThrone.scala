@@ -51,17 +51,17 @@ case class MasterThrone(
       .setAbilityVariable(id, collectedEnergyKey, 0.toJson.toString)
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
     e match {
-      case GameEvent.CharacterBasicAttacked(_, _, _, _, characterId, targetCharacterId) =>
+      case GameEvent.CharacterBasicAttacked(_, characterId, targetCharacterId) =>
         if (characterId != parentCharacterId) return gameState
         if (collectedCharacterIds.contains(targetCharacterId)) return gameState
         collectEnergy(characterId)
-      case GameEvent.AbilityHitCharacter(_, _, _, _, abilityId, targetCharacterId) =>
+      case GameEvent.AbilityHitCharacter(_, abilityId, targetCharacterId) =>
         if (collectedCharacterIds.contains(targetCharacterId)) return gameState
         val ability = gameState.abilityById(abilityId)
         if (ability.parentCharacter.id != parentCharacterId) return gameState
         if (ability.metadata.abilityType != AbilityType.Normal) return gameState
         collectEnergy(targetCharacterId)
-      case GameEvent.AbilityUseFinished(_, _, _, _, abilityId) =>
+      case GameEvent.AbilityUseFinished(_, abilityId) =>
         val ability = gameState.abilityById(abilityId)
         if (ability.parentCharacter.id != parentCharacterId) return gameState
         if (ability.metadata.id == PowerOfExistence.metadata.id) reset()

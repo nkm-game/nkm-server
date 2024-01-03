@@ -25,7 +25,7 @@ trait GameStateHexCellEffectUtils {
       val causedByPlayer = gs.backtrackCauseToPlayerId(causedById)(ngs)
 
       val createEffectAddedEvent =
-        EffectAddedToCell(randomUUID(), gs.phase, gs.turn, causedById, hexCellEffect.id, coordinates)
+        EffectAddedToCell(gs.generateEventContext(), hexCellEffect.id, coordinates)
 
       causedByPlayer match {
         case Some(player) if hexCellEffect.metadata.name == HexCellEffectName.MarkOfTheWind =>
@@ -58,7 +58,7 @@ trait GameStateHexCellEffectUtils {
         case Some(coords) =>
           ngs.updateHexCell(coords)(_.removeEffect(heid))
             .modify(_.hexCellEffectStates).using(hes => hes.removed(heid))
-            .logEvent(EffectRemovedFromCell(randomUUID(), gs.phase, gs.turn, causedById, heid))
+            .logEvent(EffectRemovedFromCell(gs.generateEventContext(), heid))
         case None => ngs
       }
     }

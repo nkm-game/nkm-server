@@ -48,10 +48,8 @@ case class LittleWarHorn(abilityId: AbilityId, parentCharacterId: CharacterId, e
 
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
     e match {
-      case EffectRemovedFromCharacter(_, _, _, _, _, effectId, _) =>
-        if (effectIdToListen == effectId) {
-          gameState.setStat(parentCharacterId, StatType.Speed, metadata.variables("finalSpeed"))(random, id)
-        } else gameState
+      case EffectRemovedFromCharacter(_, _, effectId, _) if effectIdToListen == effectId =>
+        gameState.setStat(parentCharacterId, StatType.Speed, metadata.variables("finalSpeed"))(random, id)
       case _ => gameState
     }
 }

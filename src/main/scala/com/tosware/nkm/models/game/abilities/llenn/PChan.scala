@@ -24,7 +24,7 @@ case class PChan(
   override val metadata: AbilityMetadata = PChan.metadata
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
     e match {
-      case GameEvent.CharacterDied(_, _, _, _, characterId) =>
+      case GameEvent.CharacterDied(_, characterId) =>
         if (parentCharacter.isFriendForC(characterId)) {
           gameState
             .setAbilityVariable(

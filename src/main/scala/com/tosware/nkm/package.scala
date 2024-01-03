@@ -256,11 +256,11 @@ package object nkm {
 
   implicit class GameEventSeqUtils[T <: GameEvent](es: Seq[T]) {
     def inPhase(number: Int): Seq[T] =
-      es.filter(_.phase.number == number)
+      es.filter(_.context.phase.number == number)
     def inTurn(number: Int): Seq[T] =
-      es.filter(_.turn.number == number)
+      es.filter(_.context.turn.number == number)
     def causedBy(id: String): Seq[T] =
-      es.filter(_.causedById == id)
+      es.filter(_.context.causedById == id)
     def ofCharacter(id: CharacterId): Seq[T & ContainsCharacterId] =
       es.ofType[T & ContainsCharacterId].filter(_.characterId == id)
     def ofAbility(id: AbilityId): Seq[T & ContainsAbilityId] =

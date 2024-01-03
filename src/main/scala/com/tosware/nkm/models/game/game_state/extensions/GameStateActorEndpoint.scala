@@ -28,11 +28,11 @@ trait GameStateActorEndpoint {
         gs
           .modify(_.players.eachWhere(filterPlayers).victoryStatus).setTo(VictoryStatus.Lost)
           .logEvents(
-            playerIds.map(pid => PlayerSurrendered(randomUUID(), gs.phase, gs.turn, pid, pid)) ++
-              playerIds.map(pid => PlayerLost(randomUUID(), gs.phase, gs.turn, gs.id, pid))
+            playerIds.map(pid => PlayerSurrendered(gs.generateEventContext(), pid)) ++
+              playerIds.map(pid => PlayerLost(gs.generateEventContext(), pid))
           )
           .checkVictoryStatus()
-          .skipTurnIfPlayerKnockedOut()(random, playerIds.mkString(", "))
+          .skipTurnIfPlayerKnockedOut()
       }
     }
   }
@@ -65,11 +65,11 @@ trait GameStateActorEndpoint {
       def ban(playerId: PlayerId, characterIds: Set[CharacterMetadataId])(implicit random: Random): GameState =
         gs.copy(draftPickStateOpt = gs.draftPickStateOpt.map(_.ban(playerId, characterIds)))
           .logAndHideEvent(
-            PlayerBanned(randomUUID(), gs.phase, gs.turn, playerId, playerId, characterIds),
+            PlayerBanned(gs.generateEventContext()(random, playerId), playerId, characterIds),
             Seq(playerId),
             RevealCondition.BanningPhaseFinished,
           )
-          .logEvent(PlayerFinishedBanning(randomUUID(), gs.phase, gs.turn, playerId, playerId))
+          .logEvent(PlayerFinishedBanning(gs.generateEventContext()(random, playerId), playerId))
 
       def pick(playerId: PlayerId, characterId: CharacterMetadataId)(
           implicit
@@ -78,7 +78,7 @@ trait GameStateActorEndpoint {
       ): GameState =
         gs.copy(draftPickStateOpt = gs.draftPickStateOpt.map(_.pick(playerId, characterId)))
           .updateClock(gs.clock.setSharedTime(gs.clockConfig.maxPickTimeMillis))(random, gs.id)
-          .logEvent(PlayerPicked(randomUUID(), gs.phase, gs.turn, playerId, playerId, characterId))
+          .logEvent(PlayerPicked(gs.generateEventContext()(random, playerId), playerId, characterId))
           .checkIfCharacterPickFinished()
 
       def blindPick(playerId: PlayerId, characterIds: Set[CharacterMetadataId])(
@@ -88,11 +88,11 @@ trait GameStateActorEndpoint {
       ): GameState =
         gs.copy(blindPickStateOpt = gs.blindPickStateOpt.map(_.pick(playerId, characterIds)))
           .logAndHideEvent(
-            PlayerBlindPicked(randomUUID(), gs.phase, gs.turn, playerId, playerId, characterIds),
+            PlayerBlindPicked(gs.generateEventContext()(random, playerId), playerId, characterIds),
             Seq(playerId),
             RevealCondition.BlindPickFinished,
           )
-          .logEvent(PlayerFinishedBlindPicking(randomUUID(), gs.phase, gs.turn, playerId, playerId))
+          .logEvent(PlayerFinishedBlindPicking(gs.generateEventContext()(random, playerId), playerId))
           .checkIfCharacterPickFinished()
 
     }
@@ -134,7 +134,7 @@ trait GameStateActorEndpoint {
         gs.characterTakingActionThisTurnOpt match {
           case Some(characterTakingActionThisTurn) =>
             gs
-              .logEvent(TurnFinished(randomUUID(), gs.currentPlayer.id, gs.phase, gs.turn, causedById))
+              .logEvent(TurnFinished(gs.generateEventContext(), gs.currentPlayer.id))
               .decreaseTime(gs.currentPlayer.id, gs.millisSinceLastClockUpdate())
               .decrementEndTurnCooldowns()
               .modify(_.characterIdsThatTookActionThisPhase).using(c => c + characterTakingActionThisTurn)
@@ -162,14 +162,7 @@ trait GameStateActorEndpoint {
       ): GameState = {
         implicit val causedById: CharacterId = attackingCharacterId
         val ngs = gs.takeActionWithCharacter(attackingCharacterId)
-          .logEvent(CharacterPreparedToAttack(
-            randomUUID(),
-            gs.phase,
-            gs.turn,
-            causedById,
-            attackingCharacterId,
-            targetCharacterId,
-          ))
+          .logEvent(CharacterPreparedToAttack(gs.generateEventContext(), attackingCharacterId, targetCharacterId))
 
         val attackingCharacter = ngs.characterById(attackingCharacterId)
         val targetCharacter = ngs.characterById(targetCharacterId)
@@ -187,7 +180,7 @@ trait GameStateActorEndpoint {
         val parentCharacter = ability.parentCharacter(gs)
 
         val newGameState = gs.takeActionWithCharacter(parentCharacter.id)
-          .logEvent(AbilityUsed(randomUUID(), gs.phase, gs.turn, causedById, abilityId))
+          .logEvent(AbilityUsed(gs.generateEventContext(), abilityId))
         ability.use(useData)(random, newGameState)
           .afterAbilityUse(abilityId)
       }

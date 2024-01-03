@@ -53,8 +53,8 @@ case class Mabinogion(
   }
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
     e match {
-      case GameEvent.TurnFinished(_, _, _, _, _) =>
-        val characterIdThatTookAction = gameState.gameLog.characterThatTookActionInTurn(e.turn.number).get
+      case GameEvent.TurnFinished(_, _) =>
+        val characterIdThatTookAction = gameState.gameLog.characterThatTookActionInTurn(e.context.turn.number).get
         if (characterIdThatTookAction != parentCharacterId) return gameState
         val healGs = targetsInRange.characters.foldLeft(gameState)((acc, target) =>
           acc.heal(target.id, healAmount)(random, id)

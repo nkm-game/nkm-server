@@ -26,7 +26,7 @@ trait GameStateCharacterUtils {
 
       parentCellOpt.fold(gs)(c => gs.updateHexCell(c.coordinates)(_.copy(characterId = None)))
         .modify(_.characterIdsOutsideMap).setTo(gs.characterIdsOutsideMap + characterId)
-        .logEvent(CharacterRemovedFromMap(randomUUID(), gs.phase, gs.turn, causedById, characterId))
+        .logEvent(CharacterRemovedFromMap(gs.generateEventContext(), characterId))
     }
 
     def swapCharacters(characterId1: CharacterId, characterId2: CharacterId)(
@@ -58,23 +58,23 @@ trait GameStateCharacterUtils {
         return gs
       gs.modify(_.characterTakingActionThisTurnOpt)
         .setTo(Some(characterId))
-        .logEvent(CharacterTookAction(randomUUID(), gs.phase, gs.turn, causedById, characterId))
+        .logEvent(CharacterTookAction(gs.generateEventContext(), characterId))
     }
 
     def setHp(characterId: CharacterId, amount: Int)(implicit random: Random, causedById: String): GameState =
       gs.updateCharacter(characterId)(_.modify(_.state.healthPoints).setTo(amount))
-        .logEvent(CharacterHpSet(randomUUID(), gs.phase, gs.turn, causedById, characterId, amount))
+        .logEvent(CharacterHpSet(gs.generateEventContext(), characterId, amount))
 
     def setShield(characterId: CharacterId, amount: Int)(implicit random: Random, causedById: String): GameState =
       gs.updateCharacter(characterId)(_.modify(_.state.shield).setTo(amount))
-        .logEvent(CharacterShieldSet(randomUUID(), gs.phase, gs.turn, causedById, characterId, amount))
+        .logEvent(CharacterShieldSet(gs.generateEventContext(), characterId, amount))
 
     def setAttackType(characterId: CharacterId, attackType: AttackType)(implicit
         random: Random,
         causedById: String,
     ): GameState =
       gs.updateCharacter(characterId)(_.modify(_.state.attackType).setTo(attackType))
-        .logEvent(CharacterAttackTypeSet(randomUUID(), gs.phase, gs.turn, causedById, characterId, attackType))
+        .logEvent(CharacterAttackTypeSet(gs.generateEventContext(), characterId, attackType))
 
     def setStat(characterId: CharacterId, statType: StatType, amount: Int)(implicit
         random: Random,
@@ -88,7 +88,7 @@ trait GameStateCharacterUtils {
         case StatType.MagicalDefense   => modify(_: NkmCharacter)(_.state.pureMagicalDefense)
       }
       gs.updateCharacter(characterId)(c => updateStat(c).setTo(amount))
-        .logEvent(CharacterStatSet(randomUUID(), gs.phase, gs.turn, causedById, characterId, statType, amount))
+        .logEvent(CharacterStatSet(gs.generateEventContext(), characterId, statType, amount))
     }
 
     def knockbackCharacter(
@@ -150,7 +150,8 @@ trait GameStateCharacterUtils {
         return gs
       }
       val healPreparedId = randomUUID()
-      val healPreparedGs = gs.logEvent(HealPrepared(healPreparedId, gs.phase, gs.turn, causedById, characterId, amount))
+
+      val healPreparedGs = gs.logEvent(HealPrepared(gs.generateEventContext(healPreparedId), characterId, amount))
 
       val additionalHealing =
         healPreparedGs
@@ -165,7 +166,7 @@ trait GameStateCharacterUtils {
 
       healPreparedGs
         .updateCharacter(characterId)(_.heal(resultHealing))
-        .logEvent(CharacterHealed(randomUUID(), gs.phase, gs.turn, causedById, characterId, resultHealing))
+        .logEvent(CharacterHealed(gs.generateEventContext(), characterId, resultHealing))
     }
 
     def moveToClosestFreeCell(characterId: CharacterId)(implicit random: Random, causedById: String): GameState =
@@ -179,13 +180,13 @@ trait GameStateCharacterUtils {
       }
 
     def refreshAnything(targetCharacter: CharacterId)(implicit random: Random, causedById: String): GameState =
-      gs.logEvent(AnythingRefreshed(randomUUID(), gs.phase, gs.turn, causedById, targetCharacter))
+      gs.logEvent(AnythingRefreshed(gs.generateEventContext(), targetCharacter))
 
     def refreshBasicMove(targetCharacter: CharacterId)(implicit random: Random, causedById: String): GameState =
-      gs.logEvent(BasicMoveRefreshed(randomUUID(), gs.phase, gs.turn, causedById, targetCharacter))
+      gs.logEvent(BasicMoveRefreshed(gs.generateEventContext(), targetCharacter))
 
     def refreshBasicAttack(targetCharacter: CharacterId)(implicit random: Random, causedById: String): GameState =
-      gs.logEvent(BasicAttackRefreshed(randomUUID(), gs.phase, gs.turn, causedById, targetCharacter))
+      gs.logEvent(BasicAttackRefreshed(gs.generateEventContext(), targetCharacter))
 
     def damageCharacter(characterId: CharacterId, damage: Damage)(
         implicit
@@ -198,7 +199,7 @@ trait GameStateCharacterUtils {
       }
       val damagePreparedId = randomUUID()
       val damagePreparedGs =
-        gs.logEvent(DamagePrepared(damagePreparedId, gs.phase, gs.turn, causedById, characterId, damage))
+        gs.logEvent(DamagePrepared(gs.generateEventContext(damagePreparedId), characterId, damage))
 
       val additionalDamage =
         damagePreparedGs
@@ -215,7 +216,7 @@ trait GameStateCharacterUtils {
         return damagePreparedGs
 
       damagePreparedGs
-        .logEvent(DamageSent(randomUUID(), gs.phase, gs.turn, causedById, characterId, resultDamage))
+        .logEvent(DamageSent(gs.generateEventContext(), characterId, resultDamage))
         .applyDamageToCharacter(characterId, resultDamage)
     }
 
@@ -227,7 +228,7 @@ trait GameStateCharacterUtils {
       if (additionalAmount == 0)
         gs
       else
-        gs.logEvent(DamageAmplified(randomUUID(), gs.phase, gs.turn, causedById, damagePreparedId, additionalAmount))
+        gs.logEvent(DamageAmplified(gs.generateEventContext(), damagePreparedId, additionalAmount))
 
     def amplifyHeal(healPreparedId: GameEventId, additionalAmount: Int)(
         implicit
@@ -237,7 +238,7 @@ trait GameStateCharacterUtils {
       if (additionalAmount == 0)
         gs
       else
-        gs.logEvent(HealAmplified(randomUUID(), gs.phase, gs.turn, causedById, healPreparedId, additionalAmount))
+        gs.logEvent(HealAmplified(gs.generateEventContext(), healPreparedId, additionalAmount))
 
     def basicMoveOneCell(characterId: CharacterId, targetCellCoordinates: HexCoordinates)(
         implicit
@@ -274,7 +275,7 @@ trait GameStateCharacterUtils {
           // probably an invisible character standing in a way
           val targetStanding = targetStandingOpt.get
           val tpInterruptedEvent =
-            GameEvent.MovementInterrupted(randomUUID(), gs.phase, gs.turn, targetStanding.id, characterId)
+            GameEvent.MovementInterrupted(gs.generateEventContext()(random, targetStanding.id), characterId)
 
           val targetMovedGs = removedFromParentCellGs
             .logEvent(tpInterruptedEvent)
@@ -290,7 +291,7 @@ trait GameStateCharacterUtils {
         else removedFromParentCellGs.placeCharacter(targetCellCoordinates, characterId)
       }
 
-      val tpEvent = CharacterTeleported(randomUUID(), gs.phase, gs.turn, causedById, characterId, targetCellCoordinates)
+      val tpEvent = CharacterTeleported(gs.generateEventContext(), characterId, targetCellCoordinates)
       if (hideEvent) {
         ngs.logAndHideEvent(tpEvent, Seq(), RevealCondition.Never)
       } else {
@@ -316,7 +317,7 @@ trait GameStateCharacterUtils {
       if (c.state.shield >= damageAfterReduction) {
         val newShield = c.state.shield - damageAfterReduction
         gs.updateCharacter(characterId)(_.modify(_.state.shield).setTo(newShield))
-          .logEvent(ShieldDamaged(randomUUID(), gs.phase, gs.turn, causedById, characterId, damageAfterReduction))
+          .logEvent(ShieldDamaged(gs.generateEventContext(), characterId, damageAfterReduction))
       } else {
         val damageAfterShield = damageAfterReduction - c.state.shield
         val newShield = 0
@@ -327,14 +328,14 @@ trait GameStateCharacterUtils {
         val shieldDamagedEventGs =
           if (c.state.shield > 0)
             stateChangedGs
-              .logEvent(ShieldDamaged(randomUUID(), gs.phase, gs.turn, causedById, characterId, c.state.shield))
+              .logEvent(ShieldDamaged(gs.generateEventContext(), characterId, c.state.shield))
           else stateChangedGs
 
         shieldDamagedEventGs
           .checkIfCharacterDied(
             characterId
           ) // needs to be removed from map before logging an event in order to avoid infinite triggers
-          .logEvent(CharacterDamaged(randomUUID(), gs.phase, gs.turn, causedById, characterId, damageAfterShield))
+          .logEvent(CharacterDamaged(gs.generateEventContext(), characterId, damageAfterShield))
       }
     }
 

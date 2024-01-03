@@ -11,14 +11,7 @@ trait GameStateAbilityUtils {
   implicit class GameStateAbilityUtils(gs: GameState) {
     def abilityHitCharacter(abilityId: AbilityId, targetCharacter: CharacterId)(implicit random: Random): GameState = {
       implicit val causedById: String = abilityId
-      gs.logEvent(AbilityHitCharacter(
-        randomUUID(),
-        gs.phase,
-        gs.turn,
-        causedById,
-        abilityId,
-        targetCharacter,
-      ))
+      gs.logEvent(AbilityHitCharacter(gs.generateEventContext(), abilityId, targetCharacter))
     }
 
     def setAbilityEnabled(abilityId: AbilityId, newEnabled: Boolean): GameState = {
@@ -30,7 +23,7 @@ trait GameStateAbilityUtils {
       implicit val causedById: String = abilityId
       val newState = gs.abilityById(abilityId).getVariablesChangedState(key, value)(gs)
       gs.copy(abilityStates = gs.abilityStates.updated(abilityId, newState))
-        .logEvent(AbilityVariableSet(randomUUID(), gs.phase, gs.turn, causedById, abilityId, key, value))
+        .logEvent(AbilityVariableSet(gs.generateEventContext(), abilityId, key, value))
     }
   }
 }

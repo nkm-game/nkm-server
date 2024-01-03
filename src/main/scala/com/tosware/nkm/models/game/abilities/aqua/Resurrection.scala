@@ -57,7 +57,7 @@ case class Resurrection(abilityId: AbilityId, parentCharacterId: CharacterId)
       gameState.gameLog.events.ofType[GameEvent.CharacterDied]
         .ofCharacter(targetCharacterId)
         .exists(e =>
-          gameState.phase.number - e.phase.number < metadata.variables("diedMaxInLastNPhases")
+          gameState.phase.number - e.context.phase.number < metadata.variables("diedMaxInLastNPhases")
         ) -> s"Target character has not died in the last ${metadata.variables("diedMaxInLastNPhases")} phases.",
     )
   }

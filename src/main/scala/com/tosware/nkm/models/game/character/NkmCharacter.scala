@@ -189,27 +189,25 @@ case class NkmCharacter(
     }
 
   def basicAttack(targetCharacterId: CharacterId)(implicit random: Random, gameState: GameState): GameState = {
+    implicit val causedById: String = id
     val realBasicAttackTarget = getRealBasicAttackTargetId(targetCharacterId)
 
     basicAttackOverride.fold(defaultBasicAttack(realBasicAttackTarget))(_.basicAttack(realBasicAttackTarget))
-      .logEvent(CharacterBasicAttacked(
-        randomUUID(),
-        gameState.phase,
-        gameState.turn,
-        id,
-        id,
-        realBasicAttackTarget,
-      ))
+      .logEvent(CharacterBasicAttacked(gameState.generateEventContext(), id, realBasicAttackTarget))
   }
 
   def basicMoveOverride: Option[BasicMoveOverride] =
     state.abilities.ofType[BasicMoveOverride].headOption
 
-  private def execMove(path: Seq[HexCoordinates])(implicit random: Random, gameState: GameState) = path match {
-    case _ +: tail =>
-      tail.foldLeft(gameState)((acc, coordinate) => acc.basicMoveOneCell(id, coordinate)(random, id))
-        .logEvent(CharacterBasicMoved(randomUUID(), gameState.phase, gameState.turn, id, id, path))
-    case _ => gameState
+  private def execMove(path: Seq[HexCoordinates])(implicit random: Random, gameState: GameState) = {
+    implicit val causedById: String = id
+
+    path match {
+      case _ +: tail =>
+        tail.foldLeft(gameState)((acc, coordinate) => acc.basicMoveOneCell(id, coordinate)(random, id))
+          .logEvent(CharacterBasicMoved(gameState.generateEventContext(), id, path))
+      case _ => gameState
+    }
   }
 
   def defaultBasicMove(path: Seq[HexCoordinates])(implicit random: Random, gameState: GameState): GameState = {
@@ -222,14 +220,9 @@ case class NkmCharacter(
     firstEnemyCellOnThePathOpt match {
       case Some(firstEnemyCellOnThePath) =>
         val realPath = path.takeWhile(_ != firstEnemyCellOnThePath.coordinates)
+        implicit val causedById: String = firstEnemyCellOnThePath.characterId.get
         execMove(realPath)
-          .logEvent(GameEvent.MovementInterrupted(
-            randomUUID(),
-            gameState.phase,
-            gameState.turn,
-            firstEnemyCellOnThePath.characterId.get,
-            id,
-          ))
+          .logEvent(GameEvent.MovementInterrupted(gameState.generateEventContext(), id))
       case None =>
         execMove(path)
     }

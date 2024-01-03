@@ -21,23 +21,21 @@ class RubberHumanSpec extends TestUtils {
     s.gameState
       .updateCharacter(s.defaultEnemy.id)(_.modify(_.state.attackType).setTo(AttackType.Melee))
 
-  def getDamageDealtByAttack(gs: GameState): Int =
+  def getAttackGs(gs: GameState): GameState =
     gs
       .passTurn(s.defaultCharacter.id)
       .basicAttack(s.defaultEnemy.id, s.defaultCharacter.id)
-      .gameLog
-      .events
-      .ofType[CharacterDamaged]
-      .head
-      .damageAmount
 
-  def getDamageDealtByEffect(gs: GameState): Int =
+  def getEffectGs(gs: GameState): GameState =
     gs
       .addEffect(
         s.defaultCharacter.id,
         Poison(randomUUID(), 2, Damage(DamageType.Physical, 30)),
       )(random, s.defaultEnemy.id)
       .passTurn(s.defaultCharacter.id)
+
+  def getDamageDealt(gs: GameState): Int =
+    gs
       .gameLog
       .events
       .ofType[CharacterDamaged]
@@ -46,11 +44,11 @@ class RubberHumanSpec extends TestUtils {
 
   abilityMetadata.name must {
     "reduce ranged basic attack damage" in {
-      getDamageDealtByAttack(rangedAttackerGs) should be < getDamageDealtByAttack(meleeAttackerGs)
+      getDamageDealt(getAttackGs(rangedAttackerGs)) should be < getDamageDealt(getAttackGs(meleeAttackerGs))
     }
 
     "not reduce ranged non basic attack damage" in {
-      getDamageDealtByEffect(rangedAttackerGs) should be(getDamageDealtByEffect(meleeAttackerGs))
+      getDamageDealt(getEffectGs(rangedAttackerGs)) should be(getDamageDealt(getEffectGs(meleeAttackerGs)))
     }
   }
 }

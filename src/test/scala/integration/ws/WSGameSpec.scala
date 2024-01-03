@@ -772,8 +772,10 @@ class WSGameSpec extends WSTrait {
 
       val observedEvents = collectObservedEvents().take(numberOfPlayers)
 
-      observedEvents(2).ofType[GameEvent.CharacterPlaced].count(_.causedById != emails(2)) should be(0)
-      observedEvents(2).ofType[GameEvent.CharacterPlaced].count(_.causedById == emails(2)) should be(numberOfCharacters)
+      observedEvents(2).ofType[GameEvent.CharacterPlaced].count(_.context.causedById != emails(2)) should be(0)
+      observedEvents(2).ofType[GameEvent.CharacterPlaced].count(_.context.causedById == emails(2)) should be(
+        numberOfCharacters
+      )
     }
 
     "place all characters in all random pick" in {

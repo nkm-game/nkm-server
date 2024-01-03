@@ -27,7 +27,7 @@ case class AbilityEnchant(effectId: CharacterEffectId, initialCooldown: Int, abi
 
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
     e match {
-      case GameEvent.EffectAddedToCharacter(_, _, _, _, _, eid, _) =>
+      case GameEvent.EffectAddedToCharacter(_, _, eid, _) =>
         if (effectId == eid)
           return gameState
             .setEffectVariable(id, abilityTypeKey, abilityType.toString)

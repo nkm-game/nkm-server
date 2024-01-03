@@ -24,21 +24,21 @@ case class Invisibility(effectId: CharacterEffectId, initialCooldown: Int)
 
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
     e match {
-      case GameEvent.CharacterBasicAttacked(_, _, _, _, characterId, targetCharacterId) =>
+      case GameEvent.CharacterBasicAttacked(_, characterId, targetCharacterId) =>
         val parentAttackedOther = characterId == parentCharacter.id && parentCharacter.isEnemyForC(targetCharacterId)
         val otherAttackedParent = targetCharacterId == parentCharacter.id && parentCharacter.isEnemyForC(characterId)
 
         if (!(parentAttackedOther || otherAttackedParent)) return gameState
 
         gameState.removeEffect(id)(random, id)
-      case GameEvent.AbilityUseFinished(_, _, _, _, abilityId) =>
+      case GameEvent.AbilityUseFinished(_, abilityId) =>
         val ability = gameState.abilityById(abilityId)
         if (ability.parentCharacter.id != parentCharacter.id) return gameState
         if (!ability.metadata.traits.contains(AbilityTrait.ContactEnemy)) return gameState
 
         gameState.removeEffect(id)(random, id)
-      case GameEvent.MovementInterrupted(_, _, _, causedById, _) =>
-        if (causedById != parentCharacter.id) return gameState
+      case GameEvent.MovementInterrupted(context, _) =>
+        if (context.causedById != parentCharacter.id) return gameState
 
         gameState.removeEffect(id)(random, id)
       case _ => gameState

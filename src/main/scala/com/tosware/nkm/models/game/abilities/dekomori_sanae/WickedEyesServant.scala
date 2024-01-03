@@ -38,20 +38,20 @@ case class WickedEyesServant(abilityId: AbilityId, parentCharacterId: CharacterI
       .exists(c => c.state.name == "Rikka Takanashi" || c.state.attackPoints > parentCharacter.state.attackPoints)
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
     e match {
-      case GameEvent.CharacterDied(_, _, _, causedById, characterId) =>
+      case GameEvent.CharacterDied(context, characterId) =>
         if (parentCharacter.isFriendForC(characterId))
           return gameState
-        val causedByCharacterOpt = gameState.backtrackCauseToCharacterId(causedById)
+        val causedByCharacterOpt = gameState.backtrackCauseToCharacterId(context.causedById)
         if (!causedByCharacterOpt.contains(parentCharacter.id))
           return gameState
         gameState
           .setAbilityVariable(id, damageBonusKey, (damageBonus + 1).toString)
-      case GameEvent.CharacterDamaged(_, _, _, causedById, characterId, _) =>
+      case GameEvent.CharacterDamaged(context, characterId, _) =>
         if (!isActive)
           return gameState
-        if (causedById == id)
+        if (context.causedById == id)
           return gameState
-        val causedByCharacterOpt = gameState.backtrackCauseToCharacterId(causedById)
+        val causedByCharacterOpt = gameState.backtrackCauseToCharacterId(context.causedById)
         if (!causedByCharacterOpt.contains(parentCharacter.id))
           return gameState
         gameState

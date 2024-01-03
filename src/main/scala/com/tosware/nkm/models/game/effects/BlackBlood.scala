@@ -43,14 +43,14 @@ case class BlackBlood(
 
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
     e match {
-      case GameEvent.EffectAddedToCharacter(_, _, _, _, _, eid, _) =>
+      case GameEvent.EffectAddedToCharacter(_, _, eid, _) =>
         if (effectId == eid)
           return gameState
             .setEffectVariable(id, sourceCharacterIdKey, sourceCharacterId)
             .setEffectVariable(id, sourceAbilityIdKey, sourceAbilityId)
         gameState
-      case e @ GameEvent.CharacterDamaged(_, _, _, _, characterId, _) =>
-        if (e.causedById == sourceAbilityId) return gameState // activate only once, prevents infinite loop
+      case GameEvent.CharacterDamaged(context, characterId, _) =>
+        if (context.causedById == sourceAbilityId) return gameState // activate only once, prevents infinite loop
         if (characterId != parentCharacter.id) return gameState
         if (!parentCharacter.isOnMap) return gameState
 

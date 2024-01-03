@@ -33,7 +33,7 @@ trait GameStateActorTimeouts {
       gs.copy(draftPickStateOpt = gs.draftPickStateOpt.map(_.finishBanning()))
         .updateClock(gs.clock.setSharedTime(gs.clockConfig.maxPickTimeMillis))(random, gs.id)
         .reveal(RevealCondition.BanningPhaseFinished)
-        .logEvent(BanningPhaseFinished(randomUUID(), gs.phase, gs.turn, gs.id))
+        .logEvent(BanningPhaseFinished(gs.generateEventContext()(random, gs.id)))
     }
 
     def draftPickTimeout()(implicit random: Random, causedById: String): GameState = {

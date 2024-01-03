@@ -6,364 +6,166 @@ import com.tosware.nkm.models.game.character.*
 import com.tosware.nkm.models.game.game_state.{GameState, GameStatus}
 import com.tosware.nkm.models.game.hex.HexCoordinates
 
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
+
 object GameEvent {
-  sealed trait GameEvent {
-    val id: GameEventId
-    implicit val phase: Phase
-    implicit val turn: Turn
-    implicit val causedById: String
-    def index(implicit gameState: GameState): Int =
-      gameState.gameLog.events.indexWhere(_.id == id)
+  case class GameEventContext(id: GameEventId, phase: Phase, turn: Turn, causedById: String, time: ZonedDateTime) {
+    override def toString: String = {
+      val shortId = id.take(5)
+      val formatter = DateTimeFormatter.ofPattern("ss.SSS")
+      val formattedTime = time.format(formatter)
+
+      s"Ctx($shortId, $phase, $turn, $causedById, $formattedTime)"
+    }
   }
+
   trait ContainsCharacterId {
     val characterId: CharacterId
   }
+
   trait ContainsAbilityId {
     val abilityId: AbilityId
   }
 
-  case class GameStatusUpdated(id: GameEventId, phase: Phase, turn: Turn, causedById: String, newGameStatus: GameStatus)
-      extends GameEvent
-  case class EventsRevealed(id: GameEventId, phase: Phase, turn: Turn, causedById: String, eventIds: Seq[GameEventId])
-      extends GameEvent
-  case class CharacterWentInvisible(
-      id: GameEventId,
-      phase: Phase,
-      turn: Turn,
-      causedById: String,
-      characterId: CharacterId,
-  ) extends GameEvent
+  sealed trait GameEvent {
+    def context: GameEventContext
+    def index(implicit gameState: GameState): Int =
+      gameState.gameLog.events.indexWhere(_.context.id == context.id)
+
+    def id: GameEventId = context.id
+    def phase: Phase = context.phase
+    def turn: Turn = context.turn
+    def causedById: PlayerId = context.causedById
+    def time: ZonedDateTime = context.time
+  }
+
+  case class GameStatusUpdated(context: GameEventContext, newGameStatus: GameStatus) extends GameEvent
+  case class EventsRevealed(context: GameEventContext, eventIds: Seq[GameEventId]) extends GameEvent
+  case class CharacterWentInvisible(context: GameEventContext, characterId: CharacterId) extends GameEvent
       with ContainsCharacterId
   case class CharacterRevealed(
-      id: GameEventId,
-      phase: Phase,
-      turn: Turn,
-      causedById: String,
+      context: GameEventContext,
       characterId: CharacterId,
       revealedOnCoordinates: Option[HexCoordinates],
       characterState: Option[NkmCharacterStateView],
-  ) extends GameEvent
-      with ContainsCharacterId
-
-  case class ClockUpdated(id: GameEventId, phase: Phase, turn: Turn, causedById: String, newClock: Clock)
-      extends GameEvent
+  ) extends GameEvent with ContainsCharacterId
+  case class ClockUpdated(context: GameEventContext, newClock: Clock) extends GameEvent
   case class CharacterPlaced(
-      id: GameEventId,
-      phase: Phase,
-      turn: Turn,
-      causedById: String,
+      context: GameEventContext,
       characterId: CharacterId,
       target: HexCoordinates,
       characterState: Option[NkmCharacterStateView],
-  ) extends GameEvent
-      with ContainsCharacterId
+  ) extends GameEvent with ContainsCharacterId
   case class EffectAddedToCell(
-      id: GameEventId,
-      phase: Phase,
-      turn: Turn,
-      causedById: String,
+      context: GameEventContext,
       hexCellEffectId: HexCellEffectId,
       target: HexCoordinates,
   ) extends GameEvent
-  case class EffectRemovedFromCell(
-      id: GameEventId,
-      phase: Phase,
-      turn: Turn,
-      causedById: String,
-      hexCellEffectId: HexCellEffectId,
-  ) extends GameEvent
+  case class EffectRemovedFromCell(context: GameEventContext, hexCellEffectId: HexCellEffectId) extends GameEvent
   case class EffectAddedToCharacter(
-      id: GameEventId,
-      phase: Phase,
-      turn: Turn,
-      causedById: String,
+      context: GameEventContext,
       effectMetadataId: CharacterEffectMetadataId,
       effectId: CharacterEffectId,
       characterId: CharacterId,
-  ) extends GameEvent
-      with ContainsCharacterId
+  ) extends GameEvent with ContainsCharacterId
   case class EffectRemovedFromCharacter(
-      id: GameEventId,
-      phase: Phase,
-      turn: Turn,
-      causedById: String,
+      context: GameEventContext,
       effectMetadataId: CharacterEffectMetadataId,
       effectId: CharacterEffectId,
       characterId: CharacterId,
-  ) extends GameEvent
-      with ContainsCharacterId
+  ) extends GameEvent with ContainsCharacterId
   case class EffectVariableSet(
-      id: GameEventId,
-      phase: Phase,
-      turn: Turn,
-      causedById: String,
+      context: GameEventContext,
       effectId: CharacterEffectId,
       key: String,
       value: String,
   ) extends GameEvent
-  case class AbilityHitCharacter(
-      id: GameEventId,
-      phase: Phase,
-      turn: Turn,
-      causedById: String,
-      abilityId: AbilityId,
-      targetCharacterId: CharacterId,
-  ) extends GameEvent
+  case class AbilityHitCharacter(context: GameEventContext, abilityId: AbilityId, targetCharacterId: CharacterId)
+      extends GameEvent with ContainsAbilityId
+  case class AbilityUsed(context: GameEventContext, abilityId: AbilityId) extends GameEvent
       with ContainsAbilityId
-  case class AbilityUsed(id: GameEventId, phase: Phase, turn: Turn, causedById: String, abilityId: AbilityId)
-      extends GameEvent
+  case class AbilityUseFinished(context: GameEventContext, abilityId: AbilityId) extends GameEvent
       with ContainsAbilityId
-  case class AbilityUseFinished(id: GameEventId, phase: Phase, turn: Turn, causedById: String, abilityId: AbilityId)
-      extends GameEvent
-      with ContainsAbilityId
-  case class AbilityVariableSet(
-      id: GameEventId,
-      phase: Phase,
-      turn: Turn,
-      causedById: String,
-      abilityId: AbilityId,
-      key: String,
-      value: String,
-  ) extends GameEvent
-      with ContainsAbilityId
-  case class CharacterBasicMoved(
-      id: GameEventId,
-      phase: Phase,
-      turn: Turn,
-      causedById: String,
-      characterId: CharacterId,
-      path: Seq[HexCoordinates],
-  ) extends GameEvent
-      with ContainsCharacterId
-  case class MovementInterrupted(
-      id: GameEventId,
-      phase: Phase,
-      turn: Turn,
-      causedById: String,
-      characterId: CharacterId,
-  ) extends GameEvent
+  case class AbilityVariableSet(context: GameEventContext, abilityId: AbilityId, key: String, value: String)
+      extends GameEvent with ContainsAbilityId
+  case class CharacterBasicMoved(context: GameEventContext, characterId: CharacterId, path: Seq[HexCoordinates])
+      extends GameEvent with ContainsCharacterId
+  case class MovementInterrupted(context: GameEventContext, characterId: CharacterId) extends GameEvent
       with ContainsCharacterId
   case class CharacterPreparedToAttack(
-      id: GameEventId,
-      phase: Phase,
-      turn: Turn,
-      causedById: String,
+      context: GameEventContext,
       characterId: CharacterId,
       targetCharacterId: CharacterId,
-  ) extends GameEvent
-      with ContainsCharacterId
+  ) extends GameEvent with ContainsCharacterId
   case class CharacterBasicAttacked(
-      id: GameEventId,
-      phase: Phase,
-      turn: Turn,
-      causedById: String,
+      context: GameEventContext,
       characterId: CharacterId,
       targetCharacterId: CharacterId,
-  ) extends GameEvent
+  ) extends GameEvent with ContainsCharacterId
+  case class CharacterTeleported(context: GameEventContext, characterId: CharacterId, target: HexCoordinates)
+      extends GameEvent with ContainsCharacterId
+  case class DamagePrepared(context: GameEventContext, characterId: CharacterId, damage: Damage)
+      extends GameEvent
       with ContainsCharacterId
-  case class CharacterTeleported(
-      id: GameEventId,
-      phase: Phase,
-      turn: Turn,
-      causedById: String,
-      characterId: CharacterId,
-      target: HexCoordinates,
-  ) extends GameEvent
+  case class DamageAmplified(context: GameEventContext, damagePreparedId: GameEventId, additionalAmount: Int)
+      extends GameEvent
+  case class DamageSent(context: GameEventContext, characterId: CharacterId, damage: Damage) extends GameEvent
       with ContainsCharacterId
-  case class DamagePrepared(
-      id: GameEventId,
-      phase: Phase,
-      turn: Turn,
-      causedById: String,
-      characterId: CharacterId,
-      damage: Damage,
-  ) extends GameEvent
-  case class DamageAmplified(
-      id: GameEventId,
-      phase: Phase,
-      turn: Turn,
-      causedById: String,
-      damagePreparedId: GameEventId,
-      additionalAmount: Int,
-  ) extends GameEvent
-  case class DamageSent(
-      id: GameEventId,
-      phase: Phase,
-      turn: Turn,
-      causedById: String,
-      characterId: CharacterId,
-      damage: Damage,
-  ) extends GameEvent
+  case class ShieldDamaged(context: GameEventContext, characterId: CharacterId, damageAmount: Int)
+      extends GameEvent
       with ContainsCharacterId
-  case class ShieldDamaged(
-      id: GameEventId,
-      phase: Phase,
-      turn: Turn,
-      causedById: String,
-      characterId: CharacterId,
-      damageAmount: Int,
-  ) extends GameEvent
+  case class CharacterDamaged(context: GameEventContext, characterId: CharacterId, damageAmount: Int)
+      extends GameEvent
       with ContainsCharacterId
-  case class CharacterDamaged(
-      id: GameEventId,
-      phase: Phase,
-      turn: Turn,
-      causedById: String,
-      characterId: CharacterId,
-      damageAmount: Int,
-  ) extends GameEvent
+  case class HealPrepared(context: GameEventContext, characterId: CharacterId, amount: Int) extends GameEvent
       with ContainsCharacterId
-  case class HealPrepared(
-      id: GameEventId,
-      phase: Phase,
-      turn: Turn,
-      causedById: String,
-      characterId: CharacterId,
-      amount: Int,
-  ) extends GameEvent
+  case class HealAmplified(context: GameEventContext, healPreparedId: GameEventId, additionalAmount: Int)
+      extends GameEvent
+  case class CharacterHealed(context: GameEventContext, characterId: CharacterId, amount: Int) extends GameEvent
       with ContainsCharacterId
-  case class HealAmplified(
-      id: GameEventId,
-      phase: Phase,
-      turn: Turn,
-      causedById: String,
-      healPreparedId: GameEventId,
-      additionalAmount: Int,
-  ) extends GameEvent
-  case class CharacterHealed(
-      id: GameEventId,
-      phase: Phase,
-      turn: Turn,
-      causedById: String,
-      characterId: CharacterId,
-      amount: Int,
-  ) extends GameEvent
+  case class CharacterHpSet(context: GameEventContext, characterId: CharacterId, amount: Int) extends GameEvent
       with ContainsCharacterId
-  case class CharacterHpSet(
-      id: GameEventId,
-      phase: Phase,
-      turn: Turn,
-      causedById: String,
-      characterId: CharacterId,
-      amount: Int,
-  ) extends GameEvent
+  case class CharacterShieldSet(context: GameEventContext, characterId: CharacterId, amount: Int)
+      extends GameEvent
       with ContainsCharacterId
-  case class CharacterShieldSet(
-      id: GameEventId,
-      phase: Phase,
-      turn: Turn,
-      causedById: String,
-      characterId: CharacterId,
-      amount: Int,
-  ) extends GameEvent
-      with ContainsCharacterId
-  case class CharacterAttackTypeSet(
-      id: GameEventId,
-      phase: Phase,
-      turn: Turn,
-      causedById: String,
-      characterId: CharacterId,
-      attackType: AttackType,
-  ) extends GameEvent
-      with ContainsCharacterId
+  case class CharacterAttackTypeSet(context: GameEventContext, characterId: CharacterId, attackType: AttackType)
+      extends GameEvent with ContainsCharacterId
   case class CharacterStatSet(
-      id: GameEventId,
-      phase: Phase,
-      turn: Turn,
-      causedById: String,
+      context: GameEventContext,
       characterId: CharacterId,
       statType: StatType,
       amount: Int,
-  ) extends GameEvent
+  ) extends GameEvent with ContainsCharacterId
+  case class CharacterDied(context: GameEventContext, characterId: CharacterId) extends GameEvent
       with ContainsCharacterId
-  case class CharacterDied(id: GameEventId, phase: Phase, turn: Turn, causedById: String, characterId: CharacterId)
-      extends GameEvent
+  case class CharacterRemovedFromMap(context: GameEventContext, characterId: CharacterId) extends GameEvent
       with ContainsCharacterId
-  case class CharacterRemovedFromMap(
-      id: GameEventId,
-      phase: Phase,
-      turn: Turn,
-      causedById: String,
-      characterId: CharacterId,
-  ) extends GameEvent
+  case class CharacterTookAction(context: GameEventContext, characterId: CharacterId) extends GameEvent
       with ContainsCharacterId
-  case class CharacterTookAction(
-      id: GameEventId,
-      phase: Phase,
-      turn: Turn,
-      causedById: String,
-      characterId: CharacterId,
-  ) extends GameEvent
+  case class BasicAttackRefreshed(context: GameEventContext, characterId: CharacterId) extends GameEvent
       with ContainsCharacterId
-  case class BasicAttackRefreshed(
-      id: GameEventId,
-      phase: Phase,
-      turn: Turn,
-      causedById: String,
-      characterId: CharacterId,
-  ) extends GameEvent
+  case class BasicMoveRefreshed(context: GameEventContext, characterId: CharacterId) extends GameEvent
       with ContainsCharacterId
-  case class BasicMoveRefreshed(id: GameEventId, phase: Phase, turn: Turn, causedById: String, characterId: CharacterId)
-      extends GameEvent
+  case class AnythingRefreshed(context: GameEventContext, characterId: CharacterId) extends GameEvent
       with ContainsCharacterId
-  case class AnythingRefreshed(id: GameEventId, phase: Phase, turn: Turn, causedById: String, characterId: CharacterId)
+  case class PlayerLost(context: GameEventContext, playerId: PlayerId) extends GameEvent
+  case class PlayerWon(context: GameEventContext, playerId: PlayerId) extends GameEvent
+  case class PlayerDrew(context: GameEventContext, playerId: PlayerId) extends GameEvent
+  case class PlayerSurrendered(context: GameEventContext, playerId: PlayerId) extends GameEvent
+  case class PlayerBanned(context: GameEventContext, playerId: PlayerId, characterIds: Set[CharacterMetadataId])
       extends GameEvent
-      with ContainsCharacterId
-  case class PlayerLost(id: GameEventId, phase: Phase, turn: Turn, causedById: String, playerId: PlayerId)
+  case class PlayerFinishedBanning(context: GameEventContext, playerId: PlayerId) extends GameEvent
+  case class PlayerPicked(context: GameEventContext, playerId: PlayerId, characterId: CharacterMetadataId)
       extends GameEvent
-  case class PlayerWon(id: GameEventId, phase: Phase, turn: Turn, causedById: String, playerId: PlayerId)
+  case class PlayerBlindPicked(context: GameEventContext, playerId: PlayerId, characterIds: Set[CharacterMetadataId])
       extends GameEvent
-  case class PlayerDrew(id: GameEventId, phase: Phase, turn: Turn, causedById: String, playerId: PlayerId)
-      extends GameEvent
-  case class PlayerSurrendered(id: GameEventId, phase: Phase, turn: Turn, causedById: String, playerId: PlayerId)
-      extends GameEvent
+  case class PlayerFinishedBlindPicking(context: GameEventContext, playerId: PlayerId) extends GameEvent
+  case class BanningPhaseFinished(context: GameEventContext) extends GameEvent
+  case class PlacingCharactersFinished(context: GameEventContext) extends GameEvent
+  case class CharactersPicked(context: GameEventContext) extends GameEvent
+  case class TurnFinished(context: GameEventContext, playerId: PlayerId) extends GameEvent
+  case class TurnStarted(context: GameEventContext, playerId: PlayerId) extends GameEvent
+  case class PhaseFinished(context: GameEventContext) extends GameEvent
 
-  // hidden for other players during ban phase
-  case class PlayerBanned(
-      id: GameEventId,
-      phase: Phase,
-      turn: Turn,
-      causedById: String,
-      playerId: PlayerId,
-      characterIds: Set[CharacterMetadataId],
-  ) extends GameEvent
-  case class PlayerFinishedBanning(id: GameEventId, phase: Phase, turn: Turn, causedById: String, playerId: PlayerId)
-      extends GameEvent
-  case class PlayerPicked(
-      id: GameEventId,
-      phase: Phase,
-      turn: Turn,
-      causedById: String,
-      playerId: PlayerId,
-      characterId: CharacterMetadataId,
-  ) extends GameEvent
-
-  // hidden for other players during blind pick
-  case class PlayerBlindPicked(
-      id: GameEventId,
-      phase: Phase,
-      turn: Turn,
-      causedById: String,
-      playerId: PlayerId,
-      characterIds: Set[CharacterMetadataId],
-  ) extends GameEvent
-  case class PlayerFinishedBlindPicking(
-      id: GameEventId,
-      phase: Phase,
-      turn: Turn,
-      causedById: String,
-      playerId: PlayerId,
-  ) extends GameEvent
-  case class BanningPhaseFinished(id: GameEventId, phase: Phase, turn: Turn, causedById: String)
-      extends GameEvent
-  case class PlacingCharactersFinished(id: GameEventId, phase: Phase, turn: Turn, causedById: String)
-      extends GameEvent
-  case class CharactersPicked(id: GameEventId, phase: Phase, turn: Turn, causedById: String)
-      extends GameEvent
-  case class TurnFinished(id: GameEventId, playerId: PlayerId, phase: Phase, turn: Turn, causedById: PlayerId)
-      extends GameEvent
-  case class TurnStarted(id: GameEventId, playerId: PlayerId, phase: Phase, turn: Turn, causedById: PlayerId)
-      extends GameEvent
-  case class PhaseFinished(id: GameEventId, phase: Phase, turn: Turn, causedById: String)
-      extends GameEvent
 }

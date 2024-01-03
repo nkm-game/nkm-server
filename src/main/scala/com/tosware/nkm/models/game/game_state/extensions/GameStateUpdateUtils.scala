@@ -20,11 +20,11 @@ trait GameStateUpdateUtils {
     def updateClock(newClock: Clock)(implicit random: Random, causedById: String): GameState =
       updateTimestamp()
         .copy(clock = newClock)
-        .logEvent(ClockUpdated(randomUUID(), gs.phase, gs.turn, causedById, newClock))
+        .logEvent(ClockUpdated(gs.generateEventContext(), newClock))
 
     def updateGameStatus(newGameStatus: GameStatus)(implicit random: Random, causedById: String): GameState =
       gs.copy(gameStatus = newGameStatus)
-        .logEvent(GameStatusUpdated(randomUUID(), gs.phase, gs.turn, causedById, newGameStatus))
+        .logEvent(GameStatusUpdated(gs.generateEventContext(), newGameStatus))
 
     def updatePlayer(playerId: PlayerId)(updateFunction: Player => Player): GameState =
       gs.modify(_.players.each).using {

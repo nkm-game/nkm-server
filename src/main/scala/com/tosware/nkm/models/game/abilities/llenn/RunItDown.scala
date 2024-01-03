@@ -38,15 +38,15 @@ case class RunItDown(abilityId: AbilityId, parentCharacterId: CharacterId)
       .refreshBasicAttack(parentCharacterId)(random, id)
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
     e match {
-      case GameEvent.CharacterBasicMoved(_, _, _, _, characterId, _) =>
+      case GameEvent.CharacterBasicMoved(_, characterId, _) =>
         if (characterId != parentCharacterId) return gameState
         if (movesLeft <= 0) return gameState
         val ngs = setMovesLeft(movesLeft - 1)
           .refreshBasicAttack(parentCharacterId)(random, id)
         if (movesLeft(ngs) <= 0) return ngs
         ngs.refreshBasicMove(parentCharacterId)(random, id)
-      case GameEvent.TurnFinished(_, _, _, _, _) =>
-        val characterIdThatTookAction = gameState.gameLog.characterThatTookActionInTurn(e.turn.number).get
+      case GameEvent.TurnFinished(_, _) =>
+        val characterIdThatTookAction = gameState.gameLog.characterThatTookActionInTurn(e.context.turn.number).get
         if (characterIdThatTookAction != parentCharacterId) return gameState
         if (movesLeft <= 0) return gameState
         setMovesLeft(0)

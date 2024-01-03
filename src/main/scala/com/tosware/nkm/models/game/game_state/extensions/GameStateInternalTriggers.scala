@@ -28,22 +28,22 @@ trait GameStateInternalTriggers {
       gs.modify(_.turn).using(oldTurn => Turn(oldTurn.number + 1))
 
     def startTurn()(implicit random: Random, causedById: String = gs.id): GameState =
-      gs.logEvent(TurnStarted(randomUUID(), gs.currentPlayer.id, gs.phase, gs.turn, causedById))
+      gs.logEvent(TurnStarted(gs.generateEventContext(), gs.currentPlayer.id))
         .increaseTime(gs.currentPlayer.id, gs.clockConfig.incrementMillis)
 
-    def skipTurnIfNoCharactersToTakeAction()(implicit random: Random, causedById: String = gs.id): GameState =
+    def skipTurnIfNoCharactersToTakeAction(): GameState =
       if (gs.currentPlayer.characterIds.intersect(gs.charactersToTakeAction).isEmpty)
         incrementTurn()
       else gs
 
-    def skipTurnIfPlayerKnockedOut()(implicit random: Random, causedById: String = gs.id): GameState = {
+    def skipTurnIfPlayerKnockedOut(): GameState = {
       if (gs.gameStatus != GameStatus.Running) return gs // prevent infinite loop if no one is playing
       if (gs.currentPlayer.victoryStatus != VictoryStatus.Pending)
         incrementTurn()
       else gs
     }
 
-    def decrementEndTurnCooldowns()(implicit random: Random, causedById: String = gs.id): GameState = {
+    def decrementEndTurnCooldowns()(implicit random: Random): GameState = {
       val currentCharacter: NkmCharacter = gs.currentCharacterOpt.getOrElse(return gs)
       val currentCharacterAbilityIds = currentCharacter.state.abilities.map(_.id)
       val currentCharacterEffectIds = currentCharacter.state.effects.map(_.id)
@@ -68,7 +68,7 @@ trait GameStateInternalTriggers {
     def finishPhase()(implicit random: Random, causedById: String = gs.id): GameState =
       refreshCharacterTakenActions()
         .incrementPhase()
-        .logEvent(PhaseFinished(randomUUID(), gs.phase, gs.turn, causedById))
+        .logEvent(PhaseFinished(gs.generateEventContext()))
 
     def finishPhaseIfEveryCharacterTookAction()(implicit random: Random): GameState =
       if (gs.charactersToTakeAction.isEmpty) gs.finishPhase()
@@ -85,7 +85,7 @@ trait GameStateInternalTriggers {
       val ngs = if (gs.abilityStates(abilityId).isEnabled) gs
       else putAbilityOnCooldownOrDecrementFreeAbility(abilityId)
 
-      ngs.logEvent(AbilityUseFinished(randomUUID(), gs.phase, gs.turn, causedById, abilityId))
+      ngs.logEvent(AbilityUseFinished(gs.generateEventContext(), abilityId))
     }
 
     def putAbilityOnCooldownOrDecrementFreeAbility(abilityId: AbilityId)(implicit random: Random): GameState = {
@@ -112,7 +112,7 @@ trait GameStateInternalTriggers {
         else gs.characterById(characterId).isInvisible
 
       if (wentInvisible)
-        gs.logEvent(GameEvent.CharacterWentInvisible(randomUUID(), gs.phase, gs.turn, causedById, characterId))
+        gs.logEvent(GameEvent.CharacterWentInvisible(gs.generateEventContext(), characterId))
       else gs
     }
 
@@ -129,10 +129,7 @@ trait GameStateInternalTriggers {
       if (wasRevealed)
         gs.reveal(RevealCondition.RelatedCharacterRevealed(characterId))
           .logEvent(GameEvent.CharacterRevealed(
-            randomUUID(),
-            gs.phase,
-            gs.turn,
-            causedById,
+            gs.generateEventContext(),
             characterId,
             character.parentCellOpt(gs).map(_.coordinates),
             character.toView(Some(character.owner(gs).id))(gs).state,
@@ -142,9 +139,9 @@ trait GameStateInternalTriggers {
 
     def knockOutPlayer(playerId: PlayerId)(implicit random: Random, causedById: String): GameState =
       gs.updatePlayer(playerId)(_.modify(_.victoryStatus).setTo(VictoryStatus.Lost))
-        .logEvent(PlayerLost(randomUUID(), gs.phase, gs.turn, causedById, playerId))
+        .logEvent(PlayerLost(gs.generateEventContext(), playerId))
         .checkVictoryStatus()
-        .skipTurnIfPlayerKnockedOut()(random, playerId)
+        .skipTurnIfPlayerKnockedOut()
 
     def checkIfPlayerKnockedOut(playerId: PlayerId)(implicit random: Random, causedById: String): GameState =
       if (gs.characters.filter(_.owner(gs).id == playerId).forall(_.isDead)) {
@@ -153,7 +150,7 @@ trait GameStateInternalTriggers {
 
     def handleCharacterDeath(characterId: CharacterId)(implicit random: Random, causedById: String): GameState =
       gs.removeCharacterFromMap(characterId)
-        .logEvent(CharacterDied(randomUUID(), gs.phase, gs.turn, causedById, characterId))
+        .logEvent(CharacterDied(gs.generateEventContext(), characterId))
         .checkIfPlayerKnockedOut(gs.characterById(characterId).owner(gs).id)
 
     def checkIfCharacterDied(characterId: CharacterId)(implicit random: Random, causedById: String): GameState =
@@ -171,10 +168,7 @@ trait GameStateInternalTriggers {
 
       val character = gs.characterById(characterId)
       val cpEvent = CharacterPlaced(
-        randomUUID(),
-        gs.phase,
-        gs.turn,
-        causedById,
+        gs.generateEventContext(),
         characterId,
         targetCellCoordinates,
         character.toView(None)(ngs).state,
@@ -202,13 +196,13 @@ trait GameStateInternalTriggers {
       if (gs.gameStatus == GameStatus.CharacterPick && gs.players.count(_.victoryStatus == VictoryStatus.Lost) > 0) {
         gs.modify(_.players.eachWhere(filterPendingPlayers).victoryStatus)
           .setTo(VictoryStatus.Drawn)
-          .logEvents(pendingPlayerIds.map(pid => PlayerDrew(randomUUID(), gs.phase, gs.turn, pid, pid)))
+          .logEvents(pendingPlayerIds.map(pid => PlayerDrew(gs.generateEventContext(), pid)))
           .finishGame()
 
       } else if (gs.players.count(_.victoryStatus == VictoryStatus.Pending) == 1) {
         gs.modify(_.players.eachWhere(filterPendingPlayers).victoryStatus)
           .setTo(VictoryStatus.Won)
-          .logEvents(pendingPlayerIds.map(pid => PlayerWon(randomUUID(), gs.phase, gs.turn, pid, pid)))
+          .logEvents(pendingPlayerIds.map(pid => PlayerWon(gs.generateEventContext(), pid)))
           .finishGame()
       } else gs
     }
@@ -219,12 +213,12 @@ trait GameStateInternalTriggers {
           .updateClock(gs.clock.setSharedTime(gs.clockConfig.timeAfterPickMillis))(random, gs.id)
           .assignCharactersToPlayers()
           .reveal(RevealCondition.BlindPickFinished)
-          .logEvent(CharactersPicked(randomUUID(), gs.phase, gs.turn, gs.id))
+          .logEvent(CharactersPicked(gs.generateEventContext()))
       } else gs
 
     def checkIfPlacingCharactersFinished()(implicit random: Random, causedById: String): GameState =
       if (gs.placingCharactersFinished)
-        gs.logEvent(PlacingCharactersFinished(randomUUID(), gs.phase, gs.turn, gs.id))
+        gs.logEvent(PlacingCharactersFinished(gs.generateEventContext()))
           .reveal(RevealCondition.CharacterPlacingFinished)
           .updateGameStatus(GameStatus.Running)
           .updateTimestamp() // timestamp needs to be updated when we change from shared to normal clock

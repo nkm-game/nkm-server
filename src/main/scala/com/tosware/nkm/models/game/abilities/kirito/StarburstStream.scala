@@ -55,7 +55,7 @@ case class StarburstStream(abilityId: AbilityId, parentCharacterId: CharacterId)
   }
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
     e match {
-      case CharacterBasicAttacked(_, _, _, _, characterId, _) =>
+      case CharacterBasicAttacked(_, characterId, _) =>
         if (characterId != parentCharacterId) return gameState
         if (!doubleAttackEnabled) return gameState
         val timesCharacterAttackedThisTurn = gameState.gameLog.events

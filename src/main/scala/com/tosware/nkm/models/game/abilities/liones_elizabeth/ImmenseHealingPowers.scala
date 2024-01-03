@@ -24,9 +24,10 @@ case class ImmenseHealingPowers(abilityId: AbilityId, parentCharacterId: Charact
     with GameEventListener {
   override val metadata: AbilityMetadata = ImmenseHealingPowers.metadata
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState = e match {
-    case GameEvent.HealPrepared(healPreparedId, _, _, causedById, targetCharacterId, amount) =>
+    case GameEvent.HealPrepared(context, targetCharacterId, amount) =>
       val additionalHealing = for {
-        causedByCharacter <- gameState.backtrackCauseToCharacterId(causedById) if causedByCharacter == parentCharacterId
+        causedByCharacter <- gameState.backtrackCauseToCharacterId(context.causedById)
+        if causedByCharacter == parentCharacterId
       } yield {
         val targetCharacter = gameState.characterById(targetCharacterId)
         val targetMissingHpPercent = targetCharacter.state.missingHpPercent
@@ -39,7 +40,7 @@ case class ImmenseHealingPowers(abilityId: AbilityId, parentCharacterId: Charact
         }
       }
       additionalHealing match {
-        case Some(healing) => gameState.amplifyHeal(healPreparedId, healing)(random, id)
+        case Some(healing) => gameState.amplifyHeal(context.id, healing)(random, id)
         case None          => gameState
       }
     case _ => gameState

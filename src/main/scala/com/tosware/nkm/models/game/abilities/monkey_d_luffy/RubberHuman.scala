@@ -25,19 +25,19 @@ case class RubberHuman(abilityId: AbilityId, parentCharacterId: CharacterId)
   override val metadata: AbilityMetadata = RubberHuman.metadata
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
     e match {
-      case GameEvent.DamagePrepared(id, _, _, _, _, damage) =>
-        val eventIndex = gameState.gameLog.events.indexWhere(_.id == id)
+      case GameEvent.DamagePrepared(_, _, damage) =>
+        val eventIndex = e.index
         if (eventIndex == 0)
           return gameState
         val lastEvent = gameState.gameLog.events(eventIndex - 1)
         lastEvent match {
-          case GameEvent.CharacterPreparedToAttack(_, _, _, _, characterId, targetCharacterId) =>
+          case GameEvent.CharacterPreparedToAttack(_, characterId, targetCharacterId) =>
             if (targetCharacterId != parentCharacter.id) return gameState
             val incomingAttackType = gameState.characterById(characterId).state.attackType
             if (incomingAttackType != AttackType.Ranged)
               return gameState
             val damageAmountReduction = damage.amount * metadata.variables("rangedDamageReductionPercent") / 100
-            gameState.amplifyDamage(id, -damageAmountReduction)(random, id)
+            gameState.amplifyDamage(e.id, -damageAmountReduction)(random, id)
           case _ =>
             gameState
         }

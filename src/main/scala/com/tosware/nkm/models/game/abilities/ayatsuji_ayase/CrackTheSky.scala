@@ -86,7 +86,7 @@ case class CrackTheSky(abilityId: AbilityId, parentCharacterId: CharacterId)
 
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
     e match {
-      case GameEvent.GameStatusUpdated(_, _, _, _, GameStatus.Running) =>
+      case GameEvent.GameStatusUpdated(_, GameStatus.Running) =>
         val markAbilityId =
           parentCharacter.state.abilities.ofType[abilities.ayatsuji_ayase.MarkOfTheWind].head.abilityId
         gameState

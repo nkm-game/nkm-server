@@ -24,13 +24,13 @@ case class HighLuck(abilityId: AbilityId, parentCharacterId: CharacterId)
   override val metadata: AbilityMetadata = HighLuck.metadata
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
     e match {
-      case GameEvent.DamagePrepared(damagePreparedId, _, _, causedById, _, damage) =>
-        val causedByCharacterIdOpt = gameState.backtrackCauseToCharacterId(causedById)
+      case GameEvent.DamagePrepared(context, _, damage) =>
+        val causedByCharacterIdOpt = gameState.backtrackCauseToCharacterId(context.causedById)
         causedByCharacterIdOpt.fold(gameState) { causedByCharacterId =>
           if (causedByCharacterId != parentCharacterId) return gameState
           val isCritical: Boolean = random.between(0f, 100f) < (metadata.variables("criticalStrikePercent"))
           if (!isCritical) return gameState
-          gameState.amplifyDamage(damagePreparedId, damage.amount)(random, id)
+          gameState.amplifyDamage(context.id, damage.amount)(random, id)
         }
       case _ =>
         gameState

@@ -64,19 +64,20 @@ case class Steal(abilityId: AbilityId, parentCharacterId: CharacterId)
         .modify(_.state.pureMagicalDefense).setTo(0))
   }
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState = e match {
-    case GameEvent.PhaseFinished(_, phase, _, _) =>
-      stolenDataSet.filter(_.willBeRestoredAtPhase == phase.number + 1).foldLeft(gameState) { (acc, stolenData) =>
-        val newStolenDatas = stolenDataSet - stolenData
+    case GameEvent.PhaseFinished(context) =>
+      stolenDataSet.filter(_.willBeRestoredAtPhase == context.phase.number + 1).foldLeft(gameState) {
+        (acc, stolenData) =>
+          val newStolenDatas = stolenDataSet - stolenData
 
-        acc
-          .setAbilityVariable(id, stolenDataKey, newStolenDatas.toJson.toString)
-          .setAbilityEnabled(abilityId, newEnabled = newStolenDatas.nonEmpty)
-          .updateCharacter(parentCharacterId)(_
-            .modify(_.state.purePhysicalDefense).using(_ - stolenData.stolenPhysicalDefense)
-            .modify(_.state.pureMagicalDefense).using(_ - stolenData.stolenMagicalDefense))
-          .updateCharacter(stolenData.stolenFrom)(_
-            .modify(_.state.purePhysicalDefense).using(_ + stolenData.stolenPhysicalDefense)
-            .modify(_.state.pureMagicalDefense).using(_ + stolenData.stolenPhysicalDefense))
+          acc
+            .setAbilityVariable(id, stolenDataKey, newStolenDatas.toJson.toString)
+            .setAbilityEnabled(abilityId, newEnabled = newStolenDatas.nonEmpty)
+            .updateCharacter(parentCharacterId)(_
+              .modify(_.state.purePhysicalDefense).using(_ - stolenData.stolenPhysicalDefense)
+              .modify(_.state.pureMagicalDefense).using(_ - stolenData.stolenMagicalDefense))
+            .updateCharacter(stolenData.stolenFrom)(_
+              .modify(_.state.purePhysicalDefense).using(_ + stolenData.stolenPhysicalDefense)
+              .modify(_.state.pureMagicalDefense).using(_ + stolenData.stolenPhysicalDefense))
       }
     case _ => gameState
   }

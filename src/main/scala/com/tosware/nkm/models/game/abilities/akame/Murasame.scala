@@ -56,15 +56,15 @@ case class Murasame(abilityId: AbilityId, parentCharacterId: CharacterId) extend
 
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
     e match {
-      case CharacterBasicAttacked(_, _, _, _, characterId, targetCharacterId) =>
+      case CharacterBasicAttacked(_, characterId, targetCharacterId) =>
         if (parentCharacterId == characterId) {
           applyPoison(targetCharacterId)
         } else gameState
-      case AbilityHitCharacter(_, _, _, _, abilityId, targetCharacterId) =>
+      case AbilityHitCharacter(_, abilityId, targetCharacterId) =>
         if (parentCharacterId == gameState.abilityById(abilityId).parentCharacter.id) {
           applyPoison(targetCharacterId)
         } else gameState
-      case EffectAddedToCharacter(_, _, _, _, _, _, targetCharacterId) =>
+      case EffectAddedToCharacter(_, _, _, targetCharacterId) =>
         killCharacterIfFullyStacked(targetCharacterId)
       case _ => gameState
     }

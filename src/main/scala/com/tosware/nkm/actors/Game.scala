@@ -143,7 +143,7 @@ class Game(id: GameId)(implicit nkmDataService: NkmDataService) extends Persiste
 
     newGameState
       .newGameEventsSince(lastGameState)
-      .map(e => GameEventMapped(id, e, newGameState.hiddenEvents.find(_.eid == e.id)))
+      .map(e => GameEventMapped(id, e, newGameState.hiddenEvents.find(_.eid == e.context.id)))
       .foreach(context.system.eventStream.publish)
   }
 
