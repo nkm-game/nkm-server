@@ -296,4 +296,18 @@ class GameStateSpec extends TestUtils {
     damagedGs.gameLog.events.ofType[GameEvent.ShieldDamaged].head.damageAmount should be(1)
     damagedGs.gameLog.events.ofType[GameEvent.CharacterDamaged].head.damageAmount should be(1)
   }
+  "send proper heal amount in event on heal" in {
+    val healGs = s.gameState
+      .damageCharacter(s.defaultCharacter.id, Damage(DamageType.True, 2))
+      .heal(s.defaultCharacter.id, 10)
+
+    healGs.gameLog.events.ofType[GameEvent.CharacterHealed].head.amount should be(2)
+  }
+
+  "do not send heal event if character if fully healed on heal" in {
+    val healGs = s.gameState
+      .heal(s.defaultCharacter.id, 10)
+
+    healGs.gameLog.events.ofType[GameEvent.CharacterHealed] should be(empty)
+  }
 }

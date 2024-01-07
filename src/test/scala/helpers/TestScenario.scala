@@ -36,4 +36,6 @@ trait TestScenario extends TestUtils {
     defaultCharacter.parentCellOpt(gameState).get.coordinates
   lazy val ultGs: GameState =
     gameState.incrementPhase(3)
+  lazy val characters: Seq[NkmCharacter] =
+    p.flatMap(_.map(_.character))
 }

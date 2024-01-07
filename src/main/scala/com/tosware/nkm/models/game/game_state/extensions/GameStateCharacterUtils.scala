@@ -145,7 +145,8 @@ trait GameStateCharacterUtils {
     }
 
     def heal(characterId: CharacterId, amount: Int)(implicit random: Random, causedById: String): GameState = {
-      if (gs.characterById(characterId).isDead) {
+      val character = gs.characterById(characterId)
+      if (character.isDead) {
         gs.logger.error(s"Unable to heal character $characterId. Character dead.")
         return gs
       }
@@ -162,11 +163,16 @@ trait GameStateCharacterUtils {
           .map(_.additionalAmount)
           .sum
 
-      val resultHealing = amount + additionalHealing
+      val resultHealing =
+        math.min(amount + additionalHealing, character.state.maxHealthPoints - character.state.healthPoints)
 
-      healPreparedGs
-        .updateCharacter(characterId)(_.heal(resultHealing))
-        .logEvent(CharacterHealed(gs.generateEventContext(), characterId, resultHealing))
+      if (resultHealing <= 0) {
+        gs
+      } else {
+        healPreparedGs
+          .updateCharacter(characterId)(_.heal(resultHealing))
+          .logEvent(CharacterHealed(gs.generateEventContext(), characterId, resultHealing))
+      }
     }
 
     def moveToClosestFreeCell(characterId: CharacterId)(implicit random: Random, causedById: String): GameState =
@@ -187,6 +193,12 @@ trait GameStateCharacterUtils {
 
     def refreshBasicAttack(targetCharacter: CharacterId)(implicit random: Random, causedById: String): GameState =
       gs.logEvent(BasicAttackRefreshed(gs.generateEventContext(), targetCharacter))
+
+    def damageCharacters(characterIds: Seq[CharacterId], damage: Damage)(implicit
+        random: Random,
+        causedById: String,
+    ): GameState =
+      characterIds.foldLeft(gs)((acc, cid) => acc.damageCharacter(cid, damage))
 
     def damageCharacter(characterId: CharacterId, damage: Damage)(
         implicit

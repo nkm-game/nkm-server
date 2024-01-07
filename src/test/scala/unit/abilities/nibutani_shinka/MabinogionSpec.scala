@@ -15,6 +15,7 @@ class MabinogionSpec extends TestUtils {
   private val characterMetadata = CharacterMetadata.empty().copy(initialAbilitiesMetadataIds = Seq(abilityMetadata.id))
   private val s = TestScenario.generate(TestHexMapName.Simple1v9Line, characterMetadata)
   private val gameState: GameState = s.gameState
+    .damageCharacters(s.characters.map(_.id), Damage(DamageType.True, 30))
   private val abilityId = s.defaultAbilityId
   private val abilityRange = abilityMetadata.variables("radius")
 
