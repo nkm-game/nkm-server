@@ -1,0 +1,7 @@
+2023-12-30 20:12:42,927 WARN [ScalaTest-run] c.t.n.NkmConf$ [NkmConf.scala:29] [ ] Config missing at path [abilities.aqua.NaturesBeauty]
+2023-12-30 20:12:43,350 WARN [ScalaTest-run] c.t.n.NkmConf$ [NkmConf.scala:29] [ ] Config missing at path [abilities.sinon.SnipersSight]
+2023-12-30 20:12:48,370 ERROR [ScalaTest-run-running-MurasameSpec] c.t.n.m.g.g.GameState [GameStateCharacterUtils.scala:196] [ ] Unable to damage character 1a77a566-0101-34de-8aa9-f15c9a523096. Character dead.
+2023-12-30 20:12:48,734 ERROR [ScalaTest-run-running-WickedEyesServantSpec] c.t.n.m.g.g.GameState [GameStateCharacterUtils.scala:196] [ ] Unable to damage character 37360881-0b69-3396-b555-b35a248a6a7b. Character dead.
+2023-12-30 20:23:39,558 INFO [main] c.t.n.Main$ [Main.scala:62] [ ] Started http server
+2023-12-30 20:26:38,768 WARN [nkm-actor-system-akka.actor.default-dispatcher-8] c.t.n.NkmConf$ [NkmConf.scala:29] [ ] Config missing at path [abilities.aqua.NaturesBeauty]
+2023-12-30 20:26:38,924 WARN [nkm-actor-system-akka.actor.default-dispatcher-4] c.t.n.NkmConf$ [NkmConf.scala:29] [ ] Config missing at path [abilities.sinon.SnipersSight]

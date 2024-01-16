@@ -1,19 +1,56 @@
 <configuration>
-
     <logger name="slick" level="WARN"/>
     <logger name="com.zaxxer.hikari" level="WARN"/>
 
+    <!-- Console Appender -->
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-        <!-- encoders are assigned the type
-             ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
         <encoder>
-            <!--        <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>-->
-            <pattern>%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n</pattern>
+            <pattern>%d{HH:mm:ss.SSS} %-5level %logger{36} - [%X{gameId} %X{logCategory}] %msg%n</pattern>
         </encoder>
     </appender>
 
-    <root level="debug">
+    <!-- File Appender for General Debug Logs -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>app-debug.log</file>
+        <encoder>
+            <pattern>%date %level [%thread] %logger{10} [%file:%line] [%X{gameId} %X{logCategory}] %msg%n</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>app-debug.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>30</maxHistory> <!-- Keeps 30 days of history -->
+        </rollingPolicy>
+    </appender>
+
+    <!-- Sifting Appender for Different Log Categories -->
+    <appender name="SIFT" class="ch.qos.logback.classic.sift.SiftingAppender">
+        <!-- The discriminator decides which key to use for separation -->
+        <discriminator>
+            <key>logCategory</key>
+            <defaultValue>unknown</defaultValue>
+        </discriminator>
+        <sift>
+            <appender name="FILE-${logCategory}" class="ch.qos.logback.core.rolling.RollingFileAppender">
+                <file>${logCategory}.log</file>
+                <encoder>
+                    <pattern>%date %level [%thread] %logger{10} [%X{gameId} %X{logCategory}] %msg%n</pattern>
+                </encoder>
+                <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                    <fileNamePattern>${logCategory}.%d{yyyy-MM-dd}.log</fileNamePattern>
+                    <maxHistory>30</maxHistory>
+                </rollingPolicy>
+            </appender>
+        </sift>
+    </appender>
+
+    <!-- Root Logger Configuration -->
+    <root level="info">
         <appender-ref ref="STDOUT"/>
     </root>
+
+    <!-- Separate Logger for DEBUG level which logs to the file -->
+    <logger name="com.tosware.nkm" level="debug" additivity="false">
+        <appender-ref ref="FILE"/>
+        <appender-ref ref="SIFT"/>
+    </logger>
 
 </configuration>
