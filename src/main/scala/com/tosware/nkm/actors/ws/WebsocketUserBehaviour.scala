@@ -1,14 +1,14 @@
 package com.tosware.nkm.actors.ws
 
-import akka.actor.{Actor, ActorLogging, ActorRef}
+import akka.actor.{Actor, ActorRef}
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
-import com.tosware.nkm.NkmTimeouts
 import com.tosware.nkm.serializers.NkmJsonProtocol
 import com.tosware.nkm.services.http.directives.JwtHelper
+import com.tosware.nkm.{Logging, NkmTimeouts}
 
 trait WebsocketUserBehaviour
     extends Actor
-    with ActorLogging
+    with Logging
     with SprayJsonSupport
     with NkmJsonProtocol
     with NkmTimeouts

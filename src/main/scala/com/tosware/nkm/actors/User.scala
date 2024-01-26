@@ -1,13 +1,13 @@
 package com.tosware.nkm.actors
 
-import akka.actor.{ActorLogging, Props}
+import akka.actor.Props
 import akka.persistence.journal.Tagged
 import akka.persistence.{PersistentActor, RecoveryCompleted}
 import com.github.t3hnar.bcrypt.*
 import com.softwaremill.quicklens.ModifyPimp
-import com.tosware.nkm.NkmTimeouts
 import com.tosware.nkm.models.*
 import com.tosware.nkm.models.user.{UserState, UserStateView}
+import com.tosware.nkm.{Logging, NkmTimeouts}
 
 object User extends NkmTimeouts {
   sealed trait Query
@@ -55,7 +55,7 @@ object User extends NkmTimeouts {
   val oauthRegisterTag = "oauth-register"
 }
 
-class User(email: String) extends PersistentActor with ActorLogging {
+class User(email: String) extends PersistentActor with Logging {
   import User.*
   override def persistenceId: String = s"user-$email"
 
@@ -150,7 +150,7 @@ class User(email: String) extends PersistentActor with ActorLogging {
         setLanguage(language)
       }
       sender() ! CommandResponse.Success()
-    case e => log.warning(s"Unknown message: $e")
+    case e => log.warn(s"Unknown message: $e")
   }
 
   override def receiveRecover: Receive = {
@@ -168,7 +168,7 @@ class User(email: String) extends PersistentActor with ActorLogging {
     case LanguageSet(language) =>
       setLanguage(language)
     case RecoveryCompleted =>
-    case e                 => log.warning(s"Unknown message: $e")
+    case e                 => log.warn(s"Unknown message: $e")
   }
 
   override def receiveCommand: Receive = {

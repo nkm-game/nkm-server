@@ -2,6 +2,7 @@ package com.tosware.nkm.actors.ws
 
 import akka.actor.ActorRef
 import akka.http.scaladsl.model.StatusCodes
+import com.tosware.nkm.Logging
 import com.tosware.nkm.models.CommandResponse
 import com.tosware.nkm.models.CommandResponse.CommandResponse
 import com.tosware.nkm.models.lobby.ws.*
@@ -20,27 +21,29 @@ trait LobbyWebsocketUserBehaviour extends WebsocketUserBehaviour {
   import WebsocketUser.*
 
   override def parseIncomingMessage(outgoing: ActorRef, username: Option[String], text: String): Unit =
-    try {
-      val request = text.parseJson.convertTo[WebsocketLobbyRequest]
-      if (request.requestPath != LobbyRoute.Ping) {
-        log.info(s"[${username.getOrElse("")}] ${request.requestPath}")
-      }
-      log.debug(s"Request: $request")
-      val response = parseWebsocketLobbyRequest(request, outgoing, self, AuthStatus(username))
-      if (response.lobbyResponseType != LobbyResponse.Ping) {
-        log.info(s"[${username.getOrElse("")}] ${response.lobbyResponseType}(${response.statusCode})")
-      }
-      log.debug(s"Response: $response")
-      outgoing ! OutgoingMessage(response.toJson.toString)
-    } catch {
-      case e: Exception =>
-        log.error(e.toString)
-        val response = WebsocketLobbyResponse(
-          LobbyResponse.Error,
-          StatusCodes.InternalServerError.intValue,
-          "Error with request parsing.",
-        )
+    Logging.withLobbyContext("Websocket") {
+      try {
+        val request = text.parseJson.convertTo[WebsocketLobbyRequest]
+        if (request.requestPath != LobbyRoute.Ping) {
+          log.info(s"[${username.getOrElse("")}] ${request.requestPath}")
+        }
+        log.debug(s"Request: $request")
+        val response = parseWebsocketLobbyRequest(request, outgoing, self, AuthStatus(username))
+        if (response.lobbyResponseType != LobbyResponse.Ping) {
+          log.info(s"[${username.getOrElse("")}] ${response.lobbyResponseType}(${response.statusCode})")
+        }
+        log.debug(s"Response: $response")
         outgoing ! OutgoingMessage(response.toJson.toString)
+      } catch {
+        case e: Exception =>
+          log.error(e.toString)
+          val response = WebsocketLobbyResponse(
+            LobbyResponse.Error,
+            StatusCodes.InternalServerError.intValue,
+            "Error with request parsing.",
+          )
+          outgoing ! OutgoingMessage(response.toJson.toString)
+      }
     }
 
   def ok(msg: String = "")(implicit responseType: LobbyResponse): WebsocketLobbyResponse =

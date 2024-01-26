@@ -1,13 +1,12 @@
 package com.tosware.nkm.actors
 
-import akka.actor.{ActorLogging, ActorRef, Props}
-import akka.event.LoggingAdapter
+import akka.actor.{ActorRef, Props}
 import akka.persistence.{PersistentActor, RecoveryCompleted}
-import com.tosware.nkm.actors.GameIdTrackerActor.Event.*
 import com.tosware.nkm.actors.GameIdTrackerActor.*
+import com.tosware.nkm.actors.GameIdTrackerActor.Event.*
 import com.tosware.nkm.models.CommandResponse.*
 import com.tosware.nkm.services.{NkmDataService, UserService}
-import com.tosware.nkm.{GameId, NkmTimeouts}
+import com.tosware.nkm.{GameId, Logging, NkmTimeouts}
 
 object GameIdTrackerActor {
   sealed trait Query
@@ -35,12 +34,10 @@ object GameIdTrackerActor {
 
 class GameIdTrackerActor(nkmDataService: NkmDataService, userService: UserService)
     extends PersistentActor
-    with ActorLogging
+    with Logging
     with NkmTimeouts {
 
   override def persistenceId: String = s"game-id-tracker"
-
-  override def log: LoggingAdapter = akka.event.Logging(context.system, s"${this.getClass}($persistenceId)")
 
   override def preStart(): Unit = log.info("Games id tracker started")
 
@@ -75,7 +72,7 @@ class GameIdTrackerActor(nkmDataService: NkmDataService, userService: UserServic
   def persistAndPublish[A](event: A)(handler: A => Unit): Unit = {
     context.system.eventStream.publish(event)
     persist(event)(handler)
-    log.warning(event.toString)
+    log.warn(event.toString)
   }
 
   override def receive: Receive = {
@@ -102,7 +99,7 @@ class GameIdTrackerActor(nkmDataService: NkmDataService, userService: UserServic
         trackGameId(randomId)
         sender() ! Success(randomId)
       }
-    case e => log.warning(s"Unknown message: $e")
+    case e => log.warn(s"Unknown message: $e")
   }
 
   override def receiveRecover: Receive = {
@@ -110,7 +107,7 @@ class GameIdTrackerActor(nkmDataService: NkmDataService, userService: UserServic
       trackGameId(gameId)
       log.debug(s"Recovered track of $gameId")
     case RecoveryCompleted =>
-    case e                 => log.warning(s"Unknown message: $e")
+    case e                 => log.warn(s"Unknown message: $e")
   }
 
   override def receiveCommand: Receive = {

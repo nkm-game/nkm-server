@@ -1,8 +1,8 @@
 package com.tosware.nkm.actors.ws
 
-import akka.actor.{Actor, ActorLogging, ActorRef, Terminated}
-import com.tosware.nkm.NkmTimeouts
+import akka.actor.{Actor, ActorRef, Terminated}
 import com.tosware.nkm.serializers.NkmJsonProtocol
+import com.tosware.nkm.{Logging, NkmTimeouts}
 
 import scala.collection.mutable
 
@@ -13,7 +13,7 @@ object SessionActor {
 
 trait SessionActor
     extends Actor
-    with ActorLogging
+    with Logging
     with NkmTimeouts
     with NkmJsonProtocol {
   import SessionActor.*

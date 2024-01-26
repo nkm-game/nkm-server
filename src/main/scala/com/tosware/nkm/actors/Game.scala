@@ -1,6 +1,6 @@
 package com.tosware.nkm.actors
 
-import akka.actor.{ActorLogging, Cancellable, Props}
+import akka.actor.{Cancellable, Props}
 import akka.persistence.{PersistentActor, RecoveryCompleted}
 import com.tosware.nkm.*
 import com.tosware.nkm.models.CommandResponse.*
@@ -123,7 +123,7 @@ object Game {
   def props(id: GameId)(implicit nkmDataService: NkmDataService): Props = Props(new Game(id))
 }
 
-class Game(id: GameId)(implicit nkmDataService: NkmDataService) extends PersistentActor with ActorLogging {
+class Game(id: GameId)(implicit nkmDataService: NkmDataService) extends PersistentActor with Logging {
   import Game.*
   import context.dispatcher
 
@@ -141,9 +141,16 @@ class Game(id: GameId)(implicit nkmDataService: NkmDataService) extends Persiste
     val lastGameState = gameState
     gameState = newGameState
 
-    newGameState
-      .newGameEventsSince(lastGameState)
-      .map(e => GameEventMapped(id, e, newGameState.hiddenEvents.find(_.eid == e.context.id)))
+    val newGameEvents = newGameState.newGameEventsSince(lastGameState)
+    Logging.withGameContext(id) {
+      log.info(
+        s"""NEW EVENTS:
+           | ${newGameEvents.mkString(",\n ")}
+           |""".stripMargin
+      )
+    }
+
+    newGameEvents.map(e => GameEventMapped(id, e, newGameState.hiddenEvents.find(_.eid == e.context.id)))
       .foreach(context.system.eventStream.publish)
   }
 
@@ -153,12 +160,12 @@ class Game(id: GameId)(implicit nkmDataService: NkmDataService) extends Persiste
   }
 
   def persistAndPublishAll[A](events: Seq[A])(handler: A => Unit): Unit = {
-    log.warning("EVENT " + events.toString)
+    log.debug(s"PERSISTING TO ACTOR: $events")
     persistAll(events)(handler)
   }
 
   def persistAndPublish[A](event: A)(handler: A => Unit): Unit = {
-    log.warning("EVENT " + event.toString)
+    log.debug(s"PERSISTING TO ACTOR: $event")
     persist(event)(handler)
   }
 
@@ -245,7 +252,9 @@ class Game(id: GameId)(implicit nkmDataService: NkmDataService) extends Persiste
 
   def validate(response: CommandResponse)(onSuccess: () => Unit): Unit =
     response match {
-      case failure @ Failure(_) => sender() ! failure
+      case failure @ Failure(msg) =>
+        log.debug(s"Validation failed with message: $msg")
+        sender() ! failure
       case Success(_) =>
         onSuccess()
     }
@@ -358,79 +367,85 @@ class Game(id: GameId)(implicit nkmDataService: NkmDataService) extends Persiste
   }
 
   override def receive: Receive = {
-    case GetState =>
-      sender() ! gameState
-    case GetCurrentClock =>
-      sender() ! gameState.currentClock()
-    case GetStateView(forPlayer) =>
-      sender() ! gameState.toView(forPlayer)
-    case StartGame(gameStartDependencies) =>
-      validate(v().validateStartGame())(() => startGame(gameStartDependencies))
-    case Pause(playerId) =>
-      validate(v().validatePause(playerId)) { () =>
-        if (gameState.clock.isRunning)
-          pauseGame()
-        else
-          unpauseGame()
-      }
-    case Surrender(playerId) =>
-      validate(v().validateSurrender(playerId))(() =>
-        surrender(playerId)(random, playerId)
-      )
-    case BanCharacters(playerId, characterIds) =>
-      validate(v().validateBanCharacters(playerId, characterIds))(() =>
-        banCharacters(playerId, characterIds)
-      )
-    case PickCharacter(playerId, characterId) =>
-      validate(v().validatePickCharacter(playerId, characterId))(() =>
-        pickCharacter(playerId, characterId)(random, playerId)
-      )
-    case BlindPickCharacters(playerId, characterIds) =>
-      validate(v().validateBlindPickCharacters(playerId, characterIds))(() =>
-        blindPickCharacters(playerId, characterIds)(random, playerId)
-      )
-    case PlaceCharacters(playerId, coordinatesToCharacterIdMap) =>
-      validate(v().validatePlacingCharacters(playerId, coordinatesToCharacterIdMap))(() =>
-        placeCharacters(playerId, coordinatesToCharacterIdMap)(random, playerId)
-      )
-    case EndTurn(playerId) =>
-      validate(v().validateEndTurn(playerId))(() =>
-        endTurn(playerId)
-      )
-    case PassTurn(playerId, characterId) =>
-      validate(v().validatePassTurn(playerId, characterId))(() =>
-        passTurn(playerId, characterId)
-      )
-    case MoveCharacter(playerId, path, characterId) =>
-      validate(v().validateBasicMoveCharacter(playerId, path, characterId))(() =>
-        moveCharacter(playerId, path, characterId)
-      )
-    case BasicAttackCharacter(playerId, attackingCharacterId, targetCharacterId) =>
-      validate(v().validateBasicAttackCharacter(playerId, attackingCharacterId, targetCharacterId))(() =>
-        basicAttackCharacter(playerId, attackingCharacterId, targetCharacterId)
-      )
-    case UseAbility(playerId, abilityId, useData) =>
-      validate(v().validateAbilityUse(playerId, abilityId, useData))(() =>
-        useAbility(playerId, abilityId, useData)
-      )
-    case CharacterSelectTimeout(pickNumber) =>
-      if (gameState.isInCharacterSelect) {
-        handleCharacterSelectTimeout(pickNumber)(random, id)
-      }
-    case CharacterPlacingTimeout() =>
-      if (gameState.gameStatus == GameStatus.CharacterPlacing) {
-        persistAndPublish(CharacterPlacingTimedOut(id)) { _ =>
-          updateGameStateAndScheduleDefault(gameState.placingCharactersTimeout()(random, id))
+    case message =>
+      Logging.withGameContext(id) {
+        log.debug(s"MESSAGE: $message")
+        message match {
+          case GetState =>
+            sender() ! gameState
+          case GetCurrentClock =>
+            sender() ! gameState.currentClock()
+          case GetStateView(forPlayer) =>
+            sender() ! gameState.toView(forPlayer)
+          case StartGame(gameStartDependencies) =>
+            validate(v().validateStartGame())(() => startGame(gameStartDependencies))
+          case Pause(playerId) =>
+            validate(v().validatePause(playerId)) { () =>
+              if (gameState.clock.isRunning)
+                pauseGame()
+              else
+                unpauseGame()
+            }
+          case Surrender(playerId) =>
+            validate(v().validateSurrender(playerId))(() =>
+              surrender(playerId)(random, playerId)
+            )
+          case BanCharacters(playerId, characterIds) =>
+            validate(v().validateBanCharacters(playerId, characterIds))(() =>
+              banCharacters(playerId, characterIds)
+            )
+          case PickCharacter(playerId, characterId) =>
+            validate(v().validatePickCharacter(playerId, characterId))(() =>
+              pickCharacter(playerId, characterId)(random, playerId)
+            )
+          case BlindPickCharacters(playerId, characterIds) =>
+            validate(v().validateBlindPickCharacters(playerId, characterIds))(() =>
+              blindPickCharacters(playerId, characterIds)(random, playerId)
+            )
+          case PlaceCharacters(playerId, coordinatesToCharacterIdMap) =>
+            validate(v().validatePlacingCharacters(playerId, coordinatesToCharacterIdMap))(() =>
+              placeCharacters(playerId, coordinatesToCharacterIdMap)(random, playerId)
+            )
+          case EndTurn(playerId) =>
+            validate(v().validateEndTurn(playerId))(() =>
+              endTurn(playerId)
+            )
+          case PassTurn(playerId, characterId) =>
+            validate(v().validatePassTurn(playerId, characterId))(() =>
+              passTurn(playerId, characterId)
+            )
+          case MoveCharacter(playerId, path, characterId) =>
+            validate(v().validateBasicMoveCharacter(playerId, path, characterId))(() =>
+              moveCharacter(playerId, path, characterId)
+            )
+          case BasicAttackCharacter(playerId, attackingCharacterId, targetCharacterId) =>
+            validate(v().validateBasicAttackCharacter(playerId, attackingCharacterId, targetCharacterId))(() =>
+              basicAttackCharacter(playerId, attackingCharacterId, targetCharacterId)
+            )
+          case UseAbility(playerId, abilityId, useData) =>
+            validate(v().validateAbilityUse(playerId, abilityId, useData))(() =>
+              useAbility(playerId, abilityId, useData)
+            )
+          case CharacterSelectTimeout(pickNumber) =>
+            if (gameState.isInCharacterSelect) {
+              handleCharacterSelectTimeout(pickNumber)(random, id)
+            }
+          case CharacterPlacingTimeout() =>
+            if (gameState.gameStatus == GameStatus.CharacterPlacing) {
+              persistAndPublish(CharacterPlacingTimedOut(id)) { _ =>
+                updateGameStateAndScheduleDefault(gameState.placingCharactersTimeout()(random, id))
+              }
+            }
+          case TurnTimeout(turnNumber) =>
+            if (gameState.turn.number == turnNumber) {
+              persistAndPublish(TurnTimedOut(id))(_ =>
+                updateGameStateAndScheduleDefault(gameState.surrender(gameState.currentPlayer.id)(random, id))
+              )
+            }
+
+          case e => log.warn(s"Unknown message: $e")
         }
       }
-    case TurnTimeout(turnNumber) =>
-      if (gameState.turn.number == turnNumber) {
-        persistAndPublish(TurnTimedOut(id))(_ =>
-          updateGameStateAndScheduleDefault(gameState.surrender(gameState.currentPlayer.id)(random, id))
-        )
-      }
-
-    case e => log.warning(s"Unknown message: $e")
   }
 
   override def receiveRecover: Receive = {

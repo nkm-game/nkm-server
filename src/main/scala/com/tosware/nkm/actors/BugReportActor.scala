@@ -1,7 +1,6 @@
 package com.tosware.nkm.actors
 
-import akka.actor.{ActorLogging, Props}
-import akka.event.LoggingAdapter
+import akka.actor.Props
 import akka.persistence.{PersistentActor, RecoveryCompleted}
 import com.tosware.nkm.*
 import com.tosware.nkm.models.CommandResponse.*
@@ -40,15 +39,12 @@ object BugReportActor {
 
 class BugReportActor
     extends PersistentActor
-    with ActorLogging
+    with Logging
     with NkmTimeouts {
 
   import BugReportActor.*
 
   override def persistenceId: String = s"bug-report"
-
-  override def log: LoggingAdapter =
-    akka.event.Logging(context.system, s"${this.getClass}($persistenceId)")
 
   implicit val random: Random = new Random(persistenceId.hashCode)
 
@@ -90,7 +86,7 @@ class BugReportActor
         log.debug(s"Set resolved bug report with id $id to $resolved")
         sender() ! Success()
       }
-    case e => log.warning(s"Unknown message: $e")
+    case e => log.warn(s"Unknown message: $e")
   }
 
   override def receiveRecover: Receive = {
@@ -101,7 +97,7 @@ class BugReportActor
       setResolved(id, resolved)
       log.debug(s"Recovered resolved set")
     case RecoveryCompleted =>
-    case e                 => log.warning(s"Unknown message: $e")
+    case e                 => log.warn(s"Unknown message: $e")
   }
 
   override def receiveCommand: Receive = {

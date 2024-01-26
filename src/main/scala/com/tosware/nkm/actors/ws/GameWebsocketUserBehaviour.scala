@@ -1,8 +1,8 @@
 package com.tosware.nkm.actors.ws
 
 import akka.actor.ActorRef
-import akka.event.Logging.{DebugLevel, WarningLevel}
 import akka.http.scaladsl.model.StatusCodes
+import com.tosware.nkm.Logging
 import com.tosware.nkm.models.CommandResponse.*
 import com.tosware.nkm.models.game.ws.*
 import com.tosware.nkm.services.GameService
@@ -17,30 +17,36 @@ trait GameWebsocketUserBehaviour extends WebsocketUserBehaviour {
   import WebsocketUser.*
 
   override def parseIncomingMessage(outgoing: ActorRef, username: Option[String], text: String): Unit =
-    try {
-      val request = text.parseJson.convertTo[WebsocketGameRequest]
+    Logging.withGameContext("Websocket") {
+      try {
+        val request = text.parseJson.convertTo[WebsocketGameRequest]
 
-      if (request.requestPath != GameRoute.Ping) {
-        log.info(s"[${username.getOrElse("")}] ${request.requestPath}")
-      }
-      log.debug(s"Request: $request")
-      val response = parseWebsocketGameRequest(request, outgoing, self, AuthStatus(username))
+        if (request.requestPath != GameRoute.Ping) {
+          log.info(s"[${username.getOrElse("")}] ${request.requestPath}")
+        }
+        log.debug(s"Request: $request")
+        val response = parseWebsocketGameRequest(request, outgoing, self, AuthStatus(username))
 
-      if (response.gameResponseType != GameResponseType.Ping) {
-        log.info(s"[${username.getOrElse("")}] ${response.gameResponseType}(${response.statusCode})")
-      }
-      val responseLogLevel = if (response.statusCode == StatusCodes.OK.intValue) DebugLevel else WarningLevel
-      log.log(responseLogLevel, s"Response: $response")
-      outgoing ! OutgoingMessage(response.toJson.toString)
-    } catch {
-      case e: Exception =>
-        log.error(e.toString)
-        val response = WebsocketGameResponse(
-          GameResponseType.Error,
-          StatusCodes.InternalServerError.intValue,
-          "Error with request parsing.",
-        )
+        if (response.gameResponseType != GameResponseType.Ping) {
+          log.debug(s"[${username.getOrElse("")}] ${response.gameResponseType}(${response.statusCode})")
+        }
+        val msg = s"Response: $response"
+        if (response.statusCode == StatusCodes.OK.intValue) {
+          log.debug(msg)
+        } else {
+          log.warn(msg)
+        }
         outgoing ! OutgoingMessage(response.toJson.toString)
+      } catch {
+        case e: Exception =>
+          log.error(e.toString)
+          val response = WebsocketGameResponse(
+            GameResponseType.Error,
+            StatusCodes.InternalServerError.intValue,
+            "Error with request parsing.",
+          )
+          outgoing ! OutgoingMessage(response.toJson.toString)
+      }
     }
 
   def ok(msg: String = "")(implicit responseType: GameResponseType): WebsocketGameResponse =

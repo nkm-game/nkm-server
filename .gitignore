@@ -12,3 +12,4 @@ out
 null
 .bsp
 src/main/resources/version.txt
+*.log

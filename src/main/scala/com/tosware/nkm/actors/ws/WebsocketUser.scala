@@ -1,9 +1,9 @@
 package com.tosware.nkm.actors.ws
 
-import akka.actor.{Actor, ActorLogging, ActorRef, PoisonPill, Props}
-import com.tosware.nkm.UserId
+import akka.actor.{Actor, ActorRef, PoisonPill, Props}
 import com.tosware.nkm.services.http.directives.JwtSecretKey
 import com.tosware.nkm.services.{GameService, LobbyService}
+import com.tosware.nkm.{Logging, UserId}
 
 object WebsocketUser {
   case object GetAuthStatus
@@ -21,7 +21,7 @@ object WebsocketUser {
 
 trait WebsocketUser
     extends Actor
-    with ActorLogging {
+    with Logging {
   import WebsocketUser.*
 
   var userId: Option[UserId] = None
