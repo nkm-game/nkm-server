@@ -77,7 +77,7 @@ case class Steal(abilityId: AbilityId, parentCharacterId: CharacterId)
               .modify(_.state.pureMagicalDefense).using(_ - stolenData.stolenMagicalDefense))
             .updateCharacter(stolenData.stolenFrom)(_
               .modify(_.state.purePhysicalDefense).using(_ + stolenData.stolenPhysicalDefense)
-              .modify(_.state.pureMagicalDefense).using(_ + stolenData.stolenPhysicalDefense))
+              .modify(_.state.pureMagicalDefense).using(_ + stolenData.stolenMagicalDefense))
       }
     case _ => gameState
   }

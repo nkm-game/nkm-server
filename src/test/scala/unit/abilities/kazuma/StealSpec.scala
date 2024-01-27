@@ -3,13 +3,21 @@ package unit.abilities.kazuma
 import com.tosware.nkm.models.GameStateValidator
 import com.tosware.nkm.models.game.abilities.satou_kazuma.Steal
 import com.tosware.nkm.models.game.ability.UseData
+import com.tosware.nkm.models.game.character.CharacterMetadata
 import com.tosware.nkm.models.game.game_state.GameState
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.{TestScenario, TestUtils}
 
 class StealSpec extends TestUtils {
   private val abilityMetadata = Steal.metadata
-  private val s = TestScenario.generate(TestHexMapName.Simple1v1, abilityMetadata.id)
+
+  private val characterMetadata = CharacterMetadata.empty()
+    .copy(
+      initialAbilitiesMetadataIds = Seq(abilityMetadata.id),
+      initialPhysicalDefense = 234, // modified so it won't be the same as magical defense
+      initialMagicalDefense = 43,
+    )
+  private val s = TestScenario.generate(TestHexMapName.Simple1v1, characterMetadata)
   private val aGs: GameState =
     s.ultGs.useAbility(s.defaultAbilityId, UseData(s.defaultEnemy.id))
 
