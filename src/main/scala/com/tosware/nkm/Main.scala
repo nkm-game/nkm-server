@@ -55,7 +55,7 @@ object Main extends App with Logging {
   initUsers()
 
   val deps = new NkmDependencies(system)
-  val httpService = new HttpService(deps)
+  val httpService = new HttpService(deps, port)
 
   try {
     Http().newServerAt("0.0.0.0", port).bind(httpService.routes)

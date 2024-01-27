@@ -4,11 +4,12 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.server.Directives.*
 import akka.http.scaladsl.server.Route
 import com.tosware.nkm.serializers.NkmJsonProtocol
+import com.tosware.nkm.services.SwaggerDocService
 import com.tosware.nkm.services.http.directives.*
 import com.tosware.nkm.services.http.routes.*
 import com.tosware.nkm.{CORSHandler, NkmDependencies, NkmTimeouts}
 
-class HttpService(deps: NkmDependencies)
+class HttpService(deps: NkmDependencies, port: Int)
     extends CORSHandler
     with SprayJsonSupport
     with NkmJsonProtocol
@@ -46,6 +47,13 @@ class HttpService(deps: NkmDependencies)
                   )
                 },
             )
+          },
+          new SwaggerDocService(port).routes,
+          pathPrefix("swagger") {
+            pathEndOrSingleSlash {
+              getFromResource("swagger-ui/index.html")
+            } ~
+              getFromResourceDirectory("swagger-ui")
           },
         )
       }

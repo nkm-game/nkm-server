@@ -9,8 +9,8 @@ enablePlugins(JavaAppPackaging)
 // needed because of issues like in https://stackoverflow.com/questions/19425613/unsatisfiedlinkerror-with-native-library-under-sbt
 fork := true
 
-lazy val AkkaVersion = "2.6.19"
-lazy val AkkaHttpVersion = "10.2.9"
+lazy val AkkaVersion = "2.6.20"
+lazy val AkkaHttpVersion = "10.2.10"
 lazy val AkkaPersistenceVersion = "3.5.3"
 lazy val CassandraVersion = "1.0.1"
 lazy val QuickLensVersion = "1.8.8"
@@ -18,7 +18,7 @@ lazy val LevelDBVersion = "1.8"
 lazy val ScalaTestVersion = "3.2.12"
 lazy val JwtVersion = "5.0.0"
 lazy val ScalaBcryptVersion = "4.3.0"
-lazy val LogbackClassicVersion = "1.2.11"
+lazy val LogbackClassicVersion = "1.4.7"
 lazy val KebsVersion = "1.9.4"
 
 libraryDependencies += "com.typesafe.akka" %% "akka-actor" % AkkaVersion
@@ -65,6 +65,10 @@ libraryDependencies += "com.github.dnvriend" %% "akka-persistence-jdbc" % AkkaPe
 libraryDependencies += "mysql" % "mysql-connector-java" % "8.0.30"
 
 libraryDependencies += "org.typelevel" %% "cats-core" % "2.10.0"
+
+libraryDependencies += "com.github.swagger-akka-http" %% "swagger-akka-http" % "2.10.0"
+libraryDependencies += "org.webjars" % "swagger-ui" % "4.18.1"
+libraryDependencies += "jakarta.ws.rs" % "jakarta.ws.rs-api" % "3.1.0"
 
 Compile / scalacOptions ++= Seq(
   "-deprecation",
