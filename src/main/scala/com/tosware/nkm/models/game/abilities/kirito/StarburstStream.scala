@@ -39,6 +39,7 @@ case class StarburstStream(abilityId: AbilityId, parentCharacterId: CharacterId)
     state.variables.get(doubleAttackEnabledKey).exists(_.parseJson.convertTo[Boolean])
   private def setDoubleAttackEnabled()(implicit random: Random, gameState: GameState): GameState =
     gameState.setAbilityVariable(id, doubleAttackEnabledKey, true.toJson.toString)
+      .setAbilityEnabled(id, newEnabled = true)
   override def rangeCellCoords(implicit gameState: GameState): Set[HexCoordinates] =
     parentCellOpt
       .map(_.getArea(metadata.variables("range"), Set(SearchFlag.StraightLine)).toCoords)

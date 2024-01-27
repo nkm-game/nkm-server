@@ -30,8 +30,15 @@ case class RunItDown(abilityId: AbilityId, parentCharacterId: CharacterId)
     state.variables.get(movesLeftKey)
       .map(_.parseJson.convertTo[Int])
       .getOrElse(0)
-  private def setMovesLeft(value: Int)(implicit random: Random, gameState: GameState): GameState =
-    gameState.setAbilityVariable(id, movesLeftKey, value.toJson.toString)
+  private def setMovesLeft(value: Int)(implicit random: Random, gameState: GameState): GameState = {
+    val ngs = gameState.setAbilityVariable(id, movesLeftKey, value.toJson.toString)
+    if (value > 0) {
+      ngs.setAbilityEnabled(id, newEnabled = true)
+    } else {
+      ngs.setAbilityEnabled(id, newEnabled = false)
+    }
+  }
+
   override def use(useData: UseData)(implicit random: Random, gameState: GameState): GameState =
     setMovesLeft(3)
       .refreshBasicMove(parentCharacterId)(random, id)

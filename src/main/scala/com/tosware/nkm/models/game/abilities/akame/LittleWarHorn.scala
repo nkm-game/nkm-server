@@ -50,6 +50,7 @@ case class LittleWarHorn(abilityId: AbilityId, parentCharacterId: CharacterId, e
     e match {
       case EffectRemovedFromCharacter(_, _, effectId, _) if effectIdToListen == effectId =>
         gameState.setStat(parentCharacterId, StatType.Speed, metadata.variables("finalSpeed"))(random, id)
+          .setAbilityEnabled(id, newEnabled = true)
       case _ => gameState
     }
 }
