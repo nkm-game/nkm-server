@@ -29,7 +29,7 @@ case class MasterThrone(
 ) extends Ability(abilityId) with GameEventListener {
   import MasterThrone.*
   override val metadata: AbilityMetadata = MasterThrone.metadata
-  private def collectedCharacterIds(implicit gameState: GameState): Set[CharacterId] =
+  def collectedCharacterIds(implicit gameState: GameState): Set[CharacterId] =
     state.variables.get(collectedCharacterIdsKey)
       .map(_.parseJson.convertTo[Set[CharacterId]])
       .getOrElse(Set.empty)
@@ -54,7 +54,7 @@ case class MasterThrone(
       case GameEvent.CharacterBasicAttacked(_, characterId, targetCharacterId) =>
         if (characterId != parentCharacterId) return gameState
         if (collectedCharacterIds.contains(targetCharacterId)) return gameState
-        collectEnergy(characterId)
+        collectEnergy(targetCharacterId)
       case GameEvent.AbilityHitCharacter(_, abilityId, targetCharacterId) =>
         if (collectedCharacterIds.contains(targetCharacterId)) return gameState
         val ability = gameState.abilityById(abilityId)
