@@ -26,7 +26,7 @@ object Main extends App with Logging {
     } catch {
       case e: Throwable =>
         if (lastDelay > 60) {
-          e.printStackTrace()
+          logger.error("Initializing database failed, giving up:", e)
           System.exit(1)
         }
         logger.error(s"Initializing database failed, retrying in ${lastDelay + 1} seconds...")
@@ -62,7 +62,7 @@ object Main extends App with Logging {
     logger.info("Started http server")
   } catch {
     case e: Throwable =>
-      e.printStackTrace()
+      logger.error("Exception occurred:", e)
       System.exit(1)
   }
 }

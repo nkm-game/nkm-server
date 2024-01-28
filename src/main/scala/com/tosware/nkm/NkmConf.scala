@@ -29,7 +29,7 @@ object NkmConf extends Logging {
         logger.warn(s"Config missing at path [$path]")
         Map.empty
       case e: ConfigException =>
-        e.printStackTrace()
+        logger.error("Exception occurred:", e)
         Map.empty
     }
 }
