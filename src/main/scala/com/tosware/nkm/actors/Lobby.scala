@@ -358,42 +358,64 @@ class Lobby(id: GameId)(implicit nkmDataService: NkmDataService, userService: Us
       }
   }
 
-  override def receiveRecover: Receive = {
-    case CreateSuccess(_, name, hostUserId, creationDate, preferredColorOpt) =>
-      create(name, hostUserId, creationDate, preferredColorOpt)
-      log.debug(s"Recovered create")
-    case UserJoined(_, userId, preferredColorOpt) =>
-      joinLobby(userId, preferredColorOpt)
-      log.debug(s"Recovered user join")
-    case UserLeft(_, userId) =>
-      leaveLobby(userId)
-      log.debug(s"Recovered user leave")
-    case MapNameSet(_, hexMapName) =>
-      setMapName(hexMapName)
-      log.debug(s"Recovered setting hex map name")
-    case NumberOfBansSet(_, numberOfBans) =>
-      setNumberOfBans(numberOfBans)
-      log.debug(s"Recovered setting number of bans")
-    case NumberOfCharactersPerPlayerSet(_, numberOfCharactersPerPlayer) =>
-      setNumberOfCharactersPerPlayer(numberOfCharactersPerPlayer)
-      log.debug(s"Recovered setting number of characters")
-    case PickTypeSet(_, pickType) =>
-      setPickType(pickType)
-      log.debug(s"Recovered setting pick type")
-    case LobbyNameSet(_, name) =>
-      setLobbyName(name)
-      log.debug(s"Recovered setting name")
-    case ClockConfigSet(_, clockConfig) =>
-      setClockConfig(clockConfig)
-      log.debug(s"Recovered setting clock config")
-    case ColorSet(_, userId, newColor) =>
-      setColor(userId, newColor)
-    case GameStarted(_) =>
-      setGameStarted()
-      log.debug(s"Recovered starting game")
-    case RecoveryCompleted =>
-    case e                 => log.warn(s"Unknown message: $e")
+  private def logRecovery[A](message: String)(block: => A): A = {
+    log.debug(s"Recovering $message")
+    val x = block
+    log.debug(s"Recovered $message")
+    x
   }
+
+  override def receiveRecover: Receive =
+    Logging.withLobbyRecoveryContext(id) {
+      case CreateSuccess(_, name, hostUserId, creationDate, preferredColorOpt) =>
+        logRecovery("create") {
+          create(name, hostUserId, creationDate, preferredColorOpt)
+        }
+      case UserJoined(_, userId, preferredColorOpt) =>
+        logRecovery(s"user $userId join") {
+          joinLobby(userId, preferredColorOpt)
+        }
+      case UserLeft(_, userId) =>
+        logRecovery(s"user $userId leave") {
+          leaveLobby(userId)
+        }
+      case MapNameSet(_, hexMapName) =>
+        logRecovery(s"setting hex map name to $hexMapName") {
+          setMapName(hexMapName)
+        }
+      case NumberOfBansSet(_, numberOfBans) =>
+        logRecovery(s"setting number of bans to $numberOfBans") {
+          setNumberOfBans(numberOfBans)
+        }
+      case NumberOfCharactersPerPlayerSet(_, numberOfCharactersPerPlayer) =>
+        logRecovery(s"setting number of characters per player to $numberOfCharactersPerPlayer") {
+          setNumberOfCharactersPerPlayer(numberOfCharactersPerPlayer)
+        }
+      case PickTypeSet(_, pickType) =>
+        logRecovery(s"setting pick type to $pickType") {
+          setPickType(pickType)
+        }
+      case LobbyNameSet(_, name) =>
+        logRecovery(s"setting lobby name to $name") {
+          setLobbyName(name)
+        }
+      case ClockConfigSet(_, clockConfig) =>
+        logRecovery("setting clock config") {
+          setClockConfig(clockConfig)
+        }
+      case ColorSet(_, userId, newColor) =>
+        logRecovery(s"setting color for user $userId to $newColor") {
+          setColor(userId, newColor)
+        }
+      case GameStarted(_) =>
+        logRecovery("starting game") {
+          setGameStarted()
+        }
+      case RecoveryCompleted =>
+      // Handle recovery completion if needed
+      case e =>
+        log.warn(s"Unknown message: $e")
+    }
 
   override def receiveCommand: Receive = {
     case _ =>
