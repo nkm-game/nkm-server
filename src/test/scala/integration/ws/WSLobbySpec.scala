@@ -58,6 +58,8 @@ class WSLobbySpec extends WSTrait {
         )
 
         val setLobbyNameResponse = setLobbyName(lobbyId, "hi")
+        log.info(s"Observed set lobby name response: $setLobbyNameResponse")
+
         val observedResponse = fetchResponse()
 
         log.info(s"Observed response: $observedResponse")
