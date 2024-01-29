@@ -28,7 +28,14 @@ trait ApiTrait
   }
 
   override def afterEach(): Unit = {
+    // cleanup with timeout so the tests can finish
     deps.cleanup()
+
+    // TODO: restart the actors to test if recovery works (below is not working)
+    //    _depsOption = Some(new NkmDependencies(system))
+    //    deps.gameService.getGameState("whatever")
+    //    deps.cleanup()
+
     super.afterEach()
   }
 }

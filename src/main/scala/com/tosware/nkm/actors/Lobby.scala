@@ -365,57 +365,61 @@ class Lobby(id: GameId)(implicit nkmDataService: NkmDataService, userService: Us
     x
   }
 
-  override def receiveRecover: Receive =
-    Logging.withLobbyRecoveryContext(id) {
-      case CreateSuccess(_, name, hostUserId, creationDate, preferredColorOpt) =>
-        logRecovery("create") {
-          create(name, hostUserId, creationDate, preferredColorOpt)
+  override def receiveRecover: Receive = {
+    case message =>
+      Logging.withLobbyRecoveryContext(id) {
+        message match {
+          case CreateSuccess(_, name, hostUserId, creationDate, preferredColorOpt) =>
+            logRecovery("create") {
+              create(name, hostUserId, creationDate, preferredColorOpt)
+            }
+          case UserJoined(_, userId, preferredColorOpt) =>
+            logRecovery(s"user $userId join") {
+              joinLobby(userId, preferredColorOpt)
+            }
+          case UserLeft(_, userId) =>
+            logRecovery(s"user $userId leave") {
+              leaveLobby(userId)
+            }
+          case MapNameSet(_, hexMapName) =>
+            logRecovery(s"setting hex map name to $hexMapName") {
+              setMapName(hexMapName)
+            }
+          case NumberOfBansSet(_, numberOfBans) =>
+            logRecovery(s"setting number of bans to $numberOfBans") {
+              setNumberOfBans(numberOfBans)
+            }
+          case NumberOfCharactersPerPlayerSet(_, numberOfCharactersPerPlayer) =>
+            logRecovery(s"setting number of characters per player to $numberOfCharactersPerPlayer") {
+              setNumberOfCharactersPerPlayer(numberOfCharactersPerPlayer)
+            }
+          case PickTypeSet(_, pickType) =>
+            logRecovery(s"setting pick type to $pickType") {
+              setPickType(pickType)
+            }
+          case LobbyNameSet(_, name) =>
+            logRecovery(s"setting lobby name to $name") {
+              setLobbyName(name)
+            }
+          case ClockConfigSet(_, clockConfig) =>
+            logRecovery("setting clock config") {
+              setClockConfig(clockConfig)
+            }
+          case ColorSet(_, userId, newColor) =>
+            logRecovery(s"setting color for user $userId to $newColor") {
+              setColor(userId, newColor)
+            }
+          case GameStarted(_) =>
+            logRecovery("starting game") {
+              setGameStarted()
+            }
+          case RecoveryCompleted =>
+          // Handle recovery completion if needed
+          case e =>
+            log.warn(s"Unknown message: $e")
         }
-      case UserJoined(_, userId, preferredColorOpt) =>
-        logRecovery(s"user $userId join") {
-          joinLobby(userId, preferredColorOpt)
-        }
-      case UserLeft(_, userId) =>
-        logRecovery(s"user $userId leave") {
-          leaveLobby(userId)
-        }
-      case MapNameSet(_, hexMapName) =>
-        logRecovery(s"setting hex map name to $hexMapName") {
-          setMapName(hexMapName)
-        }
-      case NumberOfBansSet(_, numberOfBans) =>
-        logRecovery(s"setting number of bans to $numberOfBans") {
-          setNumberOfBans(numberOfBans)
-        }
-      case NumberOfCharactersPerPlayerSet(_, numberOfCharactersPerPlayer) =>
-        logRecovery(s"setting number of characters per player to $numberOfCharactersPerPlayer") {
-          setNumberOfCharactersPerPlayer(numberOfCharactersPerPlayer)
-        }
-      case PickTypeSet(_, pickType) =>
-        logRecovery(s"setting pick type to $pickType") {
-          setPickType(pickType)
-        }
-      case LobbyNameSet(_, name) =>
-        logRecovery(s"setting lobby name to $name") {
-          setLobbyName(name)
-        }
-      case ClockConfigSet(_, clockConfig) =>
-        logRecovery("setting clock config") {
-          setClockConfig(clockConfig)
-        }
-      case ColorSet(_, userId, newColor) =>
-        logRecovery(s"setting color for user $userId to $newColor") {
-          setColor(userId, newColor)
-        }
-      case GameStarted(_) =>
-        logRecovery("starting game") {
-          setGameStarted()
-        }
-      case RecoveryCompleted =>
-      // Handle recovery completion if needed
-      case e =>
-        log.warn(s"Unknown message: $e")
-    }
+      }
+  }
 
   override def receiveCommand: Receive = {
     case _ =>

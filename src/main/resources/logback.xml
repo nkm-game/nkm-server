@@ -1,6 +1,8 @@
 <configuration>
+    <!-- Path where log files are stored -->
     <property name="LOG_ROOT" value="logs" />
 
+    <!-- Slick Database logger -->
     <logger name="slick" level="WARN"/>
     <logger name="com.zaxxer.hikari" level="WARN"/>
 
@@ -19,27 +21,26 @@
         <file>logs/app-debug.log</file>
         <encoder>
             <pattern>%date %-5level %-35(%file:%line) %X{compositeKey} - %msg%n</pattern>
-<!--            <pattern>%date %-5level [%file:%line] [%X{compositeKey}] %msg%n</pattern>-->
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <fileNamePattern>logs/app-debug.%d{yyyy-MM-dd}.log</fileNamePattern>
-            <maxHistory>30</maxHistory> <!-- Keeps 30 days of history -->
+            <maxHistory>30</maxHistory>
         </rollingPolicy>
     </appender>
+
+    <!-- TODO: Make writing to files async: https://doc.akka.io/docs/akka/current/logging.html -->
 
     <!-- Sifting Appender for Different Log Categories -->
     <appender name="SIFT" class="ch.qos.logback.classic.sift.SiftingAppender">
         <discriminator>
             <key>compositeKey</key>
-            <defaultValue>unknown</defaultValue>
+            <defaultValue>uncategorized</defaultValue>
         </discriminator>
 
         <sift>
-            <!-- Dynamic file name pattern -->
             <appender name="FILE-${compositeKey}" class="ch.qos.logback.core.rolling.RollingFileAppender">
                 <file>${LOG_ROOT}/${compositeKey}.log</file>
                 <encoder>
-<!--                    <pattern>%date %-5level [%file:%line] %msg%n</pattern>-->
                     <pattern>%date %-5level %-35(%file:%line) - %msg%n</pattern>
                 </encoder>
                 <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
@@ -50,15 +51,9 @@
         </sift>
     </appender>
 
-    <!-- Root Logger Configuration -->
-    <root level="info">
+    <root level="debug">
         <appender-ref ref="STDOUT"/>
-    </root>
-
-    <!-- Separate Logger for DEBUG level which logs to the file -->
-    <logger name="com.tosware.nkm" level="debug" additivity="true">
         <appender-ref ref="FILE"/>
         <appender-ref ref="SIFT"/>
-    </logger>
-
+    </root>
 </configuration>

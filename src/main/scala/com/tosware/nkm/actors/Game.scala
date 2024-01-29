@@ -459,81 +459,85 @@ class Game(id: GameId)(implicit nkmDataService: NkmDataService) extends Persiste
     x
   }
 
-  override def receiveRecover: Receive =
-    Logging.withGameRecoveryContext(id) {
-      case GameStarted(_, gameStartDependencies) =>
-        logRecovery("game start") {
-          updateGameState(gameState.startGame(gameStartDependencies))
+  override def receiveRecover: Receive = {
+    case message =>
+      Logging.withGameRecoveryContext(id) {
+        message match {
+          case GameStarted(_, gameStartDependencies) =>
+            logRecovery("game start") {
+              updateGameState(gameState.startGame(gameStartDependencies))
+            }
+          case Surrendered(_, playerId) =>
+            logRecovery(s"$playerId surrender") {
+              updateGameState(gameState.surrender(playerId)(random, playerId))
+            }
+          case CharactersBanned(_, playerId, characterIds) =>
+            logRecovery(s"$playerId ban of ${characterIds.mkString(", ")}") {
+              updateGameState(gameState.ban(playerId, characterIds))
+            }
+          case CharacterPicked(_, playerId, characterId) =>
+            logRecovery(s"$playerId pick of $characterId") {
+              updateGameState(gameState.pick(playerId, characterId)(random, playerId))
+            }
+          case CharactersBlindPicked(_, playerId, characterIds) =>
+            logRecovery(s"$playerId blind pick of ${characterIds.mkString(", ")}") {
+              updateGameState(gameState.blindPick(playerId, characterIds)(random, playerId))
+            }
+          case PlacingCharactersStarted(_) =>
+            logRecovery(s"start of character placing") {
+              updateGameState(gameState.startPlacingCharacters()(random, id))
+            }
+          case CharactersPlaced(_, playerId, coordinatesToCharacterIdMap) =>
+            logRecovery(s"placing characters by $playerId to $coordinatesToCharacterIdMap") {
+              updateGameState(gameState.placeCharacters(playerId, coordinatesToCharacterIdMap)(random, playerId))
+            }
+          case TurnEnded(_, _) =>
+            logRecovery("turn end") {
+              updateGameState(gameState.endTurn())
+            }
+          case TurnPassed(_, _, characterId) =>
+            logRecovery(s"turn pass of $characterId") {
+              updateGameState(gameState.passTurn(characterId))
+            }
+          case CharacterMoved(_, _, path, characterId) =>
+            logRecovery(s"character move of $characterId to $path") {
+              updateGameState(gameState.basicMoveCharacter(characterId, path))
+            }
+          case CharacterBasicAttacked(_, _, attackingCharacterId, targetCharacterId) =>
+            logRecovery(s"basic attack of $attackingCharacterId to $targetCharacterId") {
+              updateGameState(gameState.basicAttack(attackingCharacterId, targetCharacterId))
+            }
+          case AbilityUsed(_, _, abilityId, useData) =>
+            logRecovery(s"ability $abilityId use") {
+              updateGameState(gameState.useAbility(abilityId, useData))
+            }
+          case BanningPhaseTimedOut(_) =>
+            logRecovery("banning phase timeout") {
+              updateGameState(gameState.finishBanningPhase())
+            }
+          case DraftPickTimedOut(_) =>
+            logRecovery("draft pick timeout") {
+              updateGameState(gameState.draftPickTimeout()(random, id))
+            }
+          case BlindPickTimedOut(_) =>
+            logRecovery("blind pick timeout") {
+              updateGameState(gameState.blindPickTimeout()(random, id))
+            }
+          case CharacterPlacingTimedOut(_) =>
+            logRecovery("character placing timeout") {
+              updateGameState(gameState.placingCharactersTimeout()(random, id))
+            }
+          case TurnTimedOut(_) =>
+            logRecovery("turn timeout") {
+              updateGameState(gameState.surrender(gameState.currentPlayer.id)(random, id))
+            }
+          case RecoveryCompleted =>
+            // start a timer
+            scheduleDefault()
+          case e => log.error(s"Unknown message: $e")
         }
-      case Surrendered(_, playerId) =>
-        logRecovery(s"$playerId surrender") {
-          updateGameState(gameState.surrender(playerId)(random, playerId))
-        }
-      case CharactersBanned(_, playerId, characterIds) =>
-        logRecovery(s"$playerId ban of ${characterIds.mkString(", ")}") {
-          updateGameState(gameState.ban(playerId, characterIds))
-        }
-      case CharacterPicked(_, playerId, characterId) =>
-        logRecovery(s"$playerId pick of $characterId") {
-          updateGameState(gameState.pick(playerId, characterId)(random, playerId))
-        }
-      case CharactersBlindPicked(_, playerId, characterIds) =>
-        logRecovery(s"$playerId blind pick of ${characterIds.mkString(", ")}") {
-          updateGameState(gameState.blindPick(playerId, characterIds)(random, playerId))
-        }
-      case PlacingCharactersStarted(_) =>
-        logRecovery(s"start of character placing") {
-          updateGameState(gameState.startPlacingCharacters()(random, id))
-        }
-      case CharactersPlaced(_, playerId, coordinatesToCharacterIdMap) =>
-        logRecovery(s"placing characters by $playerId to $coordinatesToCharacterIdMap") {
-          updateGameState(gameState.placeCharacters(playerId, coordinatesToCharacterIdMap)(random, playerId))
-        }
-      case TurnEnded(_, _) =>
-        logRecovery("turn end") {
-          updateGameState(gameState.endTurn())
-        }
-      case TurnPassed(_, _, characterId) =>
-        logRecovery(s"turn pass of $characterId") {
-          updateGameState(gameState.passTurn(characterId))
-        }
-      case CharacterMoved(_, _, path, characterId) =>
-        logRecovery(s"character move of $characterId to $path") {
-          updateGameState(gameState.basicMoveCharacter(characterId, path))
-        }
-      case CharacterBasicAttacked(_, _, attackingCharacterId, targetCharacterId) =>
-        logRecovery(s"basic attack of $attackingCharacterId to $targetCharacterId") {
-          updateGameState(gameState.basicAttack(attackingCharacterId, targetCharacterId))
-        }
-      case AbilityUsed(_, _, abilityId, useData) =>
-        logRecovery(s"ability $abilityId use") {
-          updateGameState(gameState.useAbility(abilityId, useData))
-        }
-      case BanningPhaseTimedOut(_) =>
-        logRecovery("banning phase timeout") {
-          updateGameState(gameState.finishBanningPhase())
-        }
-      case DraftPickTimedOut(_) =>
-        logRecovery("draft pick timeout") {
-          updateGameState(gameState.draftPickTimeout()(random, id))
-        }
-      case BlindPickTimedOut(_) =>
-        logRecovery("blind pick timeout") {
-          updateGameState(gameState.blindPickTimeout()(random, id))
-        }
-      case CharacterPlacingTimedOut(_) =>
-        logRecovery("character placing timeout") {
-          updateGameState(gameState.placingCharactersTimeout()(random, id))
-        }
-      case TurnTimedOut(_) =>
-        logRecovery("turn timeout") {
-          updateGameState(gameState.surrender(gameState.currentPlayer.id)(random, id))
-        }
-      case RecoveryCompleted =>
-        // start a timer
-        scheduleDefault()
-      case e => log.error(s"Unknown message: $e")
-    }
+      }
+  }
 
   override def receiveCommand: Receive = {
     case _ =>

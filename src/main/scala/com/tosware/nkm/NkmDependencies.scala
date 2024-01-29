@@ -32,9 +32,7 @@ class NkmDependencies(_system: ActorSystem) {
   implicit val gameSessionActor: ActorRef =
     system.actorOf(GameSessionActor.props(), s"game_session_${randomUUID()(new Random())}")
 
-  def cleanup(): Unit = {
-    val timeout = 5.seconds
-
+  def cleanup(timeout: FiniteDuration = 5.seconds): Unit = {
     val stops = Seq(
       gracefulStop(gameIdTrackerActor, timeout),
       gracefulStop(bugReportActor, timeout),
