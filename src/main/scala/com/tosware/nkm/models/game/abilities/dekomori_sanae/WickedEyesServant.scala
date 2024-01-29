@@ -15,7 +15,7 @@ object WickedEyesServant extends NkmConf.AutoExtract {
       name = "Wicked Eyes Servant",
       abilityType = AbilityType.Passive,
       description =
-        """Deal <span style="color: deepskyblue;">{baseDamageBonus}</span> true damage after every damage you deal.
+        """Deal {damageBonus} true damage after every damage you deal.
           |This effect is active only if there is a character on the map that has more AD or Rikka Takanashi.
           |After you kill an enemy, gain permanently 1 bonus true damage on this ability.
           |""".stripMargin,
@@ -30,7 +30,7 @@ case class WickedEyesServant(abilityId: AbilityId, parentCharacterId: CharacterI
   def damageBonus(implicit gameState: GameState): Int =
     state.variables
       .get(damageBonusKey).map(_.toInt)
-      .getOrElse(metadata.variables("baseDamageBonus"))
+      .getOrElse(metadata.variables(damageBonusKey))
   private def isActive(implicit gameState: GameState): Boolean =
     gameState.characters
       .filter(_.isOnMap)
