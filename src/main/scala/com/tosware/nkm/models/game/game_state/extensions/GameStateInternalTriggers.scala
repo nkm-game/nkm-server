@@ -82,7 +82,7 @@ trait GameStateInternalTriggers {
     def afterAbilityUse(abilityId: AbilityId)(implicit random: Random): GameState = {
       implicit val causedById: String = abilityId
 
-      val ngs = if (gs.abilityStates(abilityId).isEnabled) gs
+      val ngs = if (gs.abilityCanBeDisabled(abilityId)) gs
       else putAbilityOnCooldownOrDecrementFreeAbility(abilityId)
 
       ngs.logEvent(AbilityUseFinished(gs.generateEventContext(), abilityId))

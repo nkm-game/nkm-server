@@ -63,12 +63,14 @@ case class GodrobeSenketsu(
       changeDamageBonus(0)
         .removeEffects(abilityEffects().toSeq)(random, id)
         .setAbilityEnabled(abilityId, false)
+        .setAbilityCanBeDisabled(abilityId, false)
     } else {
       val initialAdBonus = metadata.variables("initialAttackDamageBonus")
       val ngs = changeDamageBonus(initialAdBonus)
       applyAbilityEffects()(random, ngs)
         .refreshBasicMove(parentCharacterId)(random, id)
         .setAbilityEnabled(abilityId, true)
+        .setAbilityCanBeDisabled(abilityId, true)
     }
 
   override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState = {
