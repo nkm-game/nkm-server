@@ -8,6 +8,10 @@ services:
     networks:
       - web
       - default
+    volumes:
+      # TODO: use internal volume for security
+      # - logs_volume:/app/logs
+      - ./logs:/app/logs
     environment:
       - PORT=80
       - MYSQL_HOST=db-next
@@ -44,4 +48,5 @@ networks:
 
 volumes:
   mysql_data_next:
+  # logs_volume:
 
