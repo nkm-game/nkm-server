@@ -180,7 +180,7 @@ trait GameStateActorEndpoint {
         val parentCharacter = ability.parentCharacter(gs)
 
         val newGameState = gs.takeActionWithCharacter(parentCharacter.id)
-          .logEvent(AbilityUsed(gs.generateEventContext(), abilityId))
+          .logEvent(AbilityUsed(gs.generateEventContext(), abilityId, useData))
         ability.use(useData)(random, newGameState)
           .afterAbilityUse(abilityId)
       }

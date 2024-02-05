@@ -158,6 +158,12 @@ class MarkOfTheWindSpec extends TestUtils {
 
       markGs.gameLog.toView(Some(s.owners(1)))(markGs)
         .events.ofType[GameEvent.EffectAddedToCell].size should be(0)
+
+      markGs.gameLog.toView(Some(s.owners(0)))(markGs)
+        .events.ofType[GameEvent.AbilityUsed].ofAbility(markAbilityId).size should be(1)
+
+      markGs.gameLog.toView(Some(s.owners(1)))(markGs)
+        .events.ofType[GameEvent.AbilityUsed].ofAbility(markAbilityId).size should be(0)
     }
   }
 }

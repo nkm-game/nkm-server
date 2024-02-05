@@ -3,6 +3,7 @@ package com.tosware.nkm.models.game.game_state.extensions
 import com.softwaremill.quicklens.*
 import com.tosware.nkm.*
 import com.tosware.nkm.models.game.*
+import com.tosware.nkm.models.game.abilities.ayatsuji_ayase.MarkOfTheWind
 import com.tosware.nkm.models.game.event.*
 import com.tosware.nkm.models.game.event.GameEvent.*
 import com.tosware.nkm.models.game.game_state.GameState
@@ -55,7 +56,7 @@ trait GameStateEventManagement {
           gs.effectById(effectId).parentCharacter(gs)
         case AbilityHitCharacter(_, _, targetCharacterId) =>
           gs.characterById(targetCharacterId)
-        case AbilityUsed(_, abilityId) =>
+        case AbilityUsed(_, abilityId, _) =>
           gs.abilityById(abilityId).parentCharacter(gs)
         case AbilityUseFinished(_, abilityId) =>
           gs.abilityById(abilityId).parentCharacter(gs)
@@ -91,11 +92,25 @@ trait GameStateEventManagement {
           null
       }
 
+      val markOfTheWindAbilityUsedEventOpt = Seq(e)
+        .ofType[AbilityUsed]
+        .headOption
+
+      val isMarkOfTheWindAbilityUsedEvent =
+        markOfTheWindAbilityUsedEventOpt
+          .exists(e => gs.abilityById(e.abilityId).metadata.id == MarkOfTheWind.metadata.id)
+
       if (targetCharacter != null && targetCharacter.isInvisible) {
         logAndHideEvent(
           e,
           Seq(targetCharacter.owner(gs).id),
           RevealCondition.RelatedCharacterRevealed(targetCharacter.id),
+        )
+      } else if (isMarkOfTheWindAbilityUsedEvent) {
+        logAndHideEvent(
+          e,
+          Seq(targetCharacter.owner(gs).id),
+          RevealCondition.Never,
         )
       } else {
         _logEventWithoutChecks(e)

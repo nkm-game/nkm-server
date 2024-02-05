@@ -2,6 +2,7 @@ package com.tosware.nkm.models.game.event
 
 import com.tosware.nkm.*
 import com.tosware.nkm.models.game.*
+import com.tosware.nkm.models.game.ability.UseData
 import com.tosware.nkm.models.game.character.*
 import com.tosware.nkm.models.game.game_state.{GameState, GameStatus}
 import com.tosware.nkm.models.game.hex.HexCoordinates
@@ -83,7 +84,7 @@ object GameEvent {
   ) extends GameEvent
   case class AbilityHitCharacter(context: GameEventContext, abilityId: AbilityId, targetCharacterId: CharacterId)
       extends GameEvent with ContainsAbilityId
-  case class AbilityUsed(context: GameEventContext, abilityId: AbilityId) extends GameEvent
+  case class AbilityUsed(context: GameEventContext, abilityId: AbilityId, useData: UseData) extends GameEvent
       with ContainsAbilityId
   case class AbilityUseFinished(context: GameEventContext, abilityId: AbilityId) extends GameEvent
       with ContainsAbilityId
