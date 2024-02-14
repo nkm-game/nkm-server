@@ -94,6 +94,14 @@ trait TestUtils
       .effects
       .ofType[A] should be(empty)
 
+  protected def assertEffectSingleOfType[A: ClassTag](cid: CharacterId)(gameState: GameState): Assertion =
+    gameState
+      .characterById(cid)
+      .state
+      .effects
+      .ofType[A]
+      .size should be(1)
+
   protected def assertBuffExists(statType: StatType, cid: CharacterId)(gameState: GameState): Assertion =
     gameState
       .characterById(cid)
@@ -109,6 +117,14 @@ trait TestUtils
       .effects
       .ofType[effects.StatBuff]
       .map(_.statType) should not contain (statType)
+
+  protected def firstEffectOfType[A: ClassTag](cid: CharacterId)(gameState: GameState): A =
+    gameState
+      .characterById(cid)
+      .state
+      .effects
+      .ofType[A]
+      .head
 
   protected def characterIdOnPoint(hexCoordinates: HexCoordinates)(implicit gameState: GameState): CharacterId =
     gameState.hexMap.getCellOpt(hexCoordinates).flatMap(_.characterId).get

@@ -27,5 +27,23 @@ class WingsOfCrimsonSpec extends TestUtils {
       assertEffectExistsOfType[effects.Fly](s.defaultCharacter.id)(ngs)
       assertBuffExists(StatType.Speed, s.defaultCharacter.id)(ngs)
     }
+
+    "refresh flying and speed buff effects on being damaged when the effects are active" in {
+      val ngs: GameState = gameState
+        .damageCharacter(s.defaultCharacter.id, Damage(DamageType.True, 1))
+        .passTurn(s.defaultCharacter.id)
+        .damageCharacter(s.defaultCharacter.id, Damage(DamageType.True, 1))
+
+      assertEffectSingleOfType[effects.Fly](s.defaultCharacter.id)(ngs)
+      assertEffectSingleOfType[effects.StatBuff](s.defaultCharacter.id)(ngs)
+
+      firstEffectOfType[effects.Fly](s.defaultCharacter.id)(ngs)
+        .state(ngs)
+        .cooldown should be(abilityMetadata.variables("duration"))
+
+      firstEffectOfType[effects.StatBuff](s.defaultCharacter.id)(ngs)
+        .state(ngs)
+        .cooldown should be(abilityMetadata.variables("duration"))
+    }
   }
 }
