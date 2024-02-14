@@ -1,7 +1,6 @@
 package com.tosware.nkm.models.game.abilities.kirito
 
 import com.tosware.nkm.*
-import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.ability.*
 import com.tosware.nkm.models.game.game_state.GameState
 import com.tosware.nkm.models.game.hex.HexCoordinates
@@ -19,7 +18,6 @@ object Switch extends NkmConf.AutoExtract {
           |You can use basic attack or another ability just after switching.
           |
           |Range: circular, {range}""".stripMargin,
-      relatedEffectIds = Seq(effects.AbilityUnlock.metadata.id),
       traits = Seq(AbilityTrait.Move),
       targetsMetadata = Seq(AbilityTargetMetadata.SingleCharacter),
     )
