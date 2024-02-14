@@ -31,9 +31,9 @@ case class SnipersSight(
               parentCharacter.state.basicAttackRange,
               Set(SearchFlag.StopAtWalls, SearchFlag.StopAfterEnemies, SearchFlag.StopAfterFriends),
               friendlyPlayerIdOpt = Some(parentCharacter.owner.id),
-            ).toCoords
+            ).toCoords - parentCell.coordinates
           case AttackType.Ranged =>
-            parentCell.getArea(parentCharacter.state.basicAttackRange).toCoords
+            parentCell.getArea(parentCharacter.state.basicAttackRange).toCoords - parentCell.coordinates
         }
       case None => Set.empty
     }

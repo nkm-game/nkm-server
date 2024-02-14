@@ -21,5 +21,9 @@ class SnipersSightSpec extends TestUtils {
           .validateBasicAttackCharacter(s.owners(0), s.defaultCharacter.id, s.p(1)(1).character.id)
       }
     }
+    "not contain parent in range" in {
+      gameState.characterById(s.defaultCharacter.id)
+        .basicAttackCellCoords(gameState) should not contain s.defaultCoordinates
+    }
   }
 }
