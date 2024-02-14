@@ -4,7 +4,6 @@ import com.tosware.nkm.*
 import com.tosware.nkm.models.game.ability.AbilityType
 import com.tosware.nkm.models.game.character_effect.*
 import com.tosware.nkm.models.game.effects.AbilityEnchant.abilityTypeKey
-import com.tosware.nkm.models.game.event.{GameEvent, GameEventListener}
 import com.tosware.nkm.models.game.game_state.GameState
 
 import scala.util.Random
@@ -21,17 +20,13 @@ object AbilityEnchant {
 }
 
 case class AbilityEnchant(effectId: CharacterEffectId, initialCooldown: Int, abilityType: AbilityType)
-    extends CharacterEffect(effectId)
-    with GameEventListener {
+    extends CharacterEffect(effectId) {
   val metadata: CharacterEffectMetadata = AbilityEnchant.metadata
 
-  override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
-    e match {
-      case GameEvent.EffectAddedToCharacter(_, _, eid, _) =>
-        if (effectId == eid)
-          return gameState
-            .setEffectVariable(id, abilityTypeKey, abilityType.toString)
-        gameState
-      case _ => gameState
-    }
+  override def onInit()(implicit random: Random, gameState: GameState): GameState =
+    gameState
+      .setEffectVariable(id, abilityTypeKey, abilityType)
+
+  override def description(implicit gameState: GameState): String =
+    s"Buff an ability of {abilityType} type."
 }

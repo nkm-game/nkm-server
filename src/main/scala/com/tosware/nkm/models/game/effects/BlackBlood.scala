@@ -4,7 +4,7 @@ import com.tosware.nkm.*
 import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.character_effect.*
 import com.tosware.nkm.models.game.effects.BlackBlood.{sourceAbilityIdKey, sourceCharacterIdKey}
-import com.tosware.nkm.models.game.event.{GameEvent, GameEventListener}
+import com.tosware.nkm.models.game.event.GameEvent
 import com.tosware.nkm.models.game.game_state.GameState
 
 import scala.util.Random
@@ -30,8 +30,7 @@ case class BlackBlood(
     initialCooldown: Int,
     sourceCharacterId: CharacterId,
     sourceAbilityId: AbilityId,
-) extends CharacterEffect(effectId)
-    with GameEventListener {
+) extends CharacterEffect(effectId) {
   val metadata: CharacterEffectMetadata = BlackBlood.metadata
 
   override def effectType(implicit gameState: GameState): CharacterEffectType =
@@ -41,14 +40,15 @@ case class BlackBlood(
   val radius: Int = abilities.crona.BlackBlood.metadata.variables("radius")
   val damage: Int = abilities.crona.BlackBlood.metadata.variables("damage")
 
-  override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
+  override def onInit()(implicit random: Random, gameState: GameState): GameState =
+    gameState
+      .setEffectVariable(id, sourceCharacterIdKey, sourceCharacterId)
+      .setEffectVariable(id, sourceAbilityIdKey, sourceAbilityId)
+      .setEffectVariable(id, "damage", damage)
+      .setEffectVariable(id, "radius", radius)
+
+  override def onEventReceived(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
     e match {
-      case GameEvent.EffectAddedToCharacter(_, _, eid, _) =>
-        if (effectId == eid)
-          return gameState
-            .setEffectVariable(id, sourceCharacterIdKey, sourceCharacterId)
-            .setEffectVariable(id, sourceAbilityIdKey, sourceAbilityId)
-        gameState
       case GameEvent.CharacterDamaged(context, characterId, _) =>
         if (context.causedById == sourceAbilityId) return gameState // activate only once, prevents infinite loop
         if (characterId != parentCharacter.id) return gameState
@@ -73,4 +73,7 @@ case class BlackBlood(
       gameState
         .abilityHitCharacter(sourceAbilityId, target)
         .damageCharacter(target, damage)(random, sourceAbilityId)
+
+  override def description(implicit gameState: GameState): String =
+    metadata.description
 }

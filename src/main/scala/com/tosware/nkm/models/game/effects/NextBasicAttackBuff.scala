@@ -4,7 +4,7 @@ import com.tosware.nkm.*
 import com.tosware.nkm.models.game.character.StatType
 import com.tosware.nkm.models.game.character_effect.*
 import com.tosware.nkm.models.game.effects.NextBasicAttackBuff.adBuffKey
-import com.tosware.nkm.models.game.event.{GameEvent, GameEventListener}
+import com.tosware.nkm.models.game.event.GameEvent
 import com.tosware.nkm.models.game.game_state.GameState
 
 import scala.util.Random
@@ -22,17 +22,15 @@ object NextBasicAttackBuff {
 }
 
 case class NextBasicAttackBuff(effectId: CharacterEffectId, initialCooldown: Int, adBuff: Int)
-    extends CharacterEffect(effectId)
-    with GameEventListener {
+    extends CharacterEffect(effectId) {
   val metadata: CharacterEffectMetadata = NextBasicAttackBuff.metadata
   val eid = randomUUID()(new Random())
 
-  override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
+  override def onInit()(implicit random: Random, gameState: GameState): GameState =
+    gameState.setEffectVariable(id, adBuffKey, adBuff)
+
+  override def onEventReceived(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
     e match {
-      case GameEvent.EffectAddedToCharacter(_, _, eid, _) =>
-        if (effectId == eid)
-          return gameState.setEffectVariable(id, adBuffKey, adBuff.toString)
-        gameState
       case GameEvent.CharacterPreparedToAttack(_, characterId, _) =>
         if (characterId != parentCharacter.id) return gameState
         gameState.addEffect(characterId, StatBuff(eid, 1, StatType.AttackPoints, adBuff))(random, id)
@@ -43,4 +41,7 @@ case class NextBasicAttackBuff(effectId: CharacterEffectId, initialCooldown: Int
           .removeEffect(id)(random, id)
       case _ => gameState
     }
+
+  override def description(implicit gameState: GameState): String =
+    "Next basic attack is buffed for {adBuff} AD."
 }

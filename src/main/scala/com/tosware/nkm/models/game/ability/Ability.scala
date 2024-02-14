@@ -59,7 +59,6 @@ abstract class Ability(val id: AbilityId)
     gameState
       .abilityHitCharacter(id, target)
       .damageCharacter(target, damage)(random, id)
-
   def toView(forPlayerOpt: Option[PlayerId])(implicit gameState: GameState): Option[AbilityView] =
     if (!parentCharacter.isSeenBy(forPlayerOpt)) None
     else {

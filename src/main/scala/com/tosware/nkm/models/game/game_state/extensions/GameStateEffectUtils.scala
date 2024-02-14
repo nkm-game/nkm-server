@@ -5,11 +5,13 @@ import com.tosware.nkm.*
 import com.tosware.nkm.models.game.character_effect.*
 import com.tosware.nkm.models.game.event.GameEvent.*
 import com.tosware.nkm.models.game.game_state.GameState
+import com.tosware.nkm.serializers.NkmJsonProtocol
+import spray.json.*
 
 import scala.util.Random
 
 object GameStateEffectUtils extends GameStateEffectUtils
-trait GameStateEffectUtils {
+trait GameStateEffectUtils extends NkmJsonProtocol {
   implicit class GameStateEffectUtils(gs: GameState) {
     def addEffect(characterId: CharacterId, characterEffect: CharacterEffect)(
         implicit
@@ -60,14 +62,13 @@ trait GameStateEffectUtils {
         .checkIfCharacterRevealed(character.id, wasCharacterInvisible)
     }
 
-    def setEffectVariable(effectId: CharacterEffectId, key: String, value: String)(implicit
-        random: Random
+    def setEffectVariable[T: JsonFormat](effectId: CharacterEffectId, key: String, value: T)(
+        implicit random: Random
     ): GameState = {
       implicit val causedById: String = effectId
-      val newState = gs.effectById(effectId).getVariablesChangedState(key, value)(gs)
+      val newState = gs.effectById(effectId).getVariablesChangedState(key, value.toJson.toString)(gs)
       gs.copy(characterEffectStates = gs.characterEffectStates.updated(effectId, newState))
-        .logEvent(EffectVariableSet(gs.generateEventContext(), effectId, key, value))
+        .logEvent(EffectVariableSet(gs.generateEventContext(), effectId, key, value.toJson.toString))
     }
-
   }
 }

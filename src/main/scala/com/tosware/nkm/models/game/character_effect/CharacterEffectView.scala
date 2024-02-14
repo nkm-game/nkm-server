@@ -8,4 +8,5 @@ case class CharacterEffectView(
     parentCharacterId: CharacterId,
     state: CharacterEffectState,
     effectType: CharacterEffectType,
+    description: String,
 )

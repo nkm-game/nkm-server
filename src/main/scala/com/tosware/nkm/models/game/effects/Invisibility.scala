@@ -3,7 +3,7 @@ package com.tosware.nkm.models.game.effects
 import com.tosware.nkm.*
 import com.tosware.nkm.models.game.ability.AbilityTrait
 import com.tosware.nkm.models.game.character_effect.*
-import com.tosware.nkm.models.game.event.{GameEvent, GameEventListener}
+import com.tosware.nkm.models.game.event.GameEvent
 import com.tosware.nkm.models.game.game_state.GameState
 
 import scala.util.Random
@@ -18,11 +18,10 @@ object Invisibility {
 }
 
 case class Invisibility(effectId: CharacterEffectId, initialCooldown: Int)
-    extends CharacterEffect(effectId)
-    with GameEventListener {
+    extends CharacterEffect(effectId) {
   val metadata: CharacterEffectMetadata = Invisibility.metadata
 
-  override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
+  override def onEventReceived(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
     e match {
       case GameEvent.CharacterBasicAttacked(_, characterId, targetCharacterId) =>
         val parentAttackedOther = characterId == parentCharacter.id && parentCharacter.isEnemyForC(targetCharacterId)
@@ -43,4 +42,7 @@ case class Invisibility(effectId: CharacterEffectId, initialCooldown: Int)
         gameState.removeEffect(id)(random, id)
       case _ => gameState
     }
+
+  override def description(implicit gameState: GameState): String =
+    metadata.description
 }

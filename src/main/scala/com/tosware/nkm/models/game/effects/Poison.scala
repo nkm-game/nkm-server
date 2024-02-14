@@ -4,10 +4,9 @@ import com.tosware.nkm.*
 import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.character_effect.*
 import com.tosware.nkm.models.game.effects.Poison.damageKey
+import com.tosware.nkm.models.game.event.GameEvent
 import com.tosware.nkm.models.game.event.GameEvent.TurnFinished
-import com.tosware.nkm.models.game.event.{GameEvent, GameEventListener}
 import com.tosware.nkm.models.game.game_state.GameState
-import spray.json.*
 
 import scala.util.Random
 
@@ -39,14 +38,15 @@ case class Poison(
     initialCooldown: Int,
     damage: Damage,
     metadata: CharacterEffectMetadata = Poison.metadata,
-) extends CharacterEffect(effectId)
-    with GameEventListener {
-  override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
+) extends CharacterEffect(effectId) {
+  override def onInit()(implicit random: Random, gameState: GameState): GameState =
+    gameState
+      .setEffectVariable(id, damageKey, damage)
+      .setEffectVariable(id, "damageAmount", damage.amount)
+      .setEffectVariable(id, "damageType", damage.damageType)
+
+  override def onEventReceived(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
     e match {
-      case GameEvent.EffectAddedToCharacter(_, _, eid, _) =>
-        if (effectId == eid)
-          return gameState.setEffectVariable(id, damageKey, damage.toJson.toString)
-        gameState
       case TurnFinished(_, _) =>
         val characterIdThatTookAction = gameState.gameLog.characterThatTookActionInTurn(e.context.turn.number).get
         if (characterIdThatTookAction == parentCharacter.id) {
@@ -54,4 +54,10 @@ case class Poison(
         } else gameState
       case _ => gameState
     }
+
+  override def description(implicit gameState: GameState): String =
+    s"Receive {damageAmount} {damageType} damage at the end of the turn.${
+        if (metadata.name == CharacterEffectName.MurasamePoison) "\n\nMurasame Poison: executes when fully stacked."
+        else ""
+      }"
 }

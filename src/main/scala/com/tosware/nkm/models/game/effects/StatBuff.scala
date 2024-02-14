@@ -4,7 +4,6 @@ import com.tosware.nkm.*
 import com.tosware.nkm.models.game.character.StatType
 import com.tosware.nkm.models.game.character_effect.*
 import com.tosware.nkm.models.game.effects.StatBuff.{statTypeKey, statValueKey}
-import com.tosware.nkm.models.game.event.{GameEvent, GameEventListener}
 import com.tosware.nkm.models.game.game_state.GameState
 
 import scala.util.Random
@@ -22,18 +21,14 @@ object StatBuff {
 }
 
 case class StatBuff(effectId: CharacterEffectId, initialCooldown: Int, statType: StatType, value: Int)
-    extends CharacterEffect(effectId)
-    with GameEventListener {
+    extends CharacterEffect(effectId) {
   val metadata: CharacterEffectMetadata = StatBuff.metadata
 
-  override def onEvent(e: GameEvent.GameEvent)(implicit random: Random, gameState: GameState): GameState =
-    e match {
-      case GameEvent.EffectAddedToCharacter(_, _, eid, _) =>
-        if (effectId == eid)
-          return gameState
-            .setEffectVariable(id, statTypeKey, statType.toString)
-            .setEffectVariable(id, statValueKey, value.toString)
-        gameState
-      case _ => gameState
-    }
+  override def onInit()(implicit random: Random, gameState: GameState): GameState =
+    gameState
+      .setEffectVariable(id, statTypeKey, statType)
+      .setEffectVariable(id, statValueKey, value)
+
+  override def description(implicit gameState: GameState): String =
+    "Buff {statType} by {statValue}."
 }

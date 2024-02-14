@@ -2,6 +2,7 @@ package com.tosware.nkm.models.game.effects
 
 import com.tosware.nkm.*
 import com.tosware.nkm.models.game.character_effect.*
+import com.tosware.nkm.models.game.game_state.GameState
 
 object Fly {
   val metadata: CharacterEffectMetadata =
@@ -24,4 +25,7 @@ object ZeroGravity {
 }
 
 case class Fly(effectId: CharacterEffectId, initialCooldown: Int, metadata: CharacterEffectMetadata = Fly.metadata)
-    extends CharacterEffect(effectId)
+    extends CharacterEffect(effectId) {
+  override def description(implicit gameState: GameState): String =
+    metadata.description
+}
