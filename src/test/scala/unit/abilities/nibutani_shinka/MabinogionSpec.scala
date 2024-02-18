@@ -21,7 +21,7 @@ class MabinogionSpec extends TestUtils {
 
   private val turnPassedGs = gameState.passTurn(s.defaultCharacter.id)
   private val enchantedTurnPassedGs = gameState
-    .addEffect(s.defaultCharacter.id, effects.AbilityEnchant(randomUUID(), 1, AbilityType.Passive))
+    .addEffect(s.defaultCharacter.id, effects.AbilityEnchant(randomUUID(), 10, AbilityType.Passive))
     .passTurn(s.defaultCharacter.id)
 
   private val healEvents = turnPassedGs.gameLog.events
@@ -65,13 +65,18 @@ class MabinogionSpec extends TestUtils {
       enchantedTurnPassedGs.gameLog.events.ofType[GameEvent.EffectAddedToCharacter].causedBy(abilityId).size shouldBe 1
     }
 
+    "not immediately remove speed from herself when enchanted" in {
+      enchantedTurnPassedGs.gameLog.events
+        .ofType[GameEvent.EffectRemovedFromCharacter]
+        .size shouldBe 0
+    }
+
     "not add shield above Threshold" in {
       val enchantedShield = enchantedTurnPassedGs.characterById(s.defaultCharacter.id).state.shield
 
       val shieldSetGs = gameState.setShield(s.defaultCharacter.id, 2)
 
       shieldSetGs
-        .passTurn(s.defaultCharacter.id)
         .characterById(s.defaultCharacter.id).state.shield shouldBe 2
 
       shieldSetGs

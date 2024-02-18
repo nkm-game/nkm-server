@@ -63,12 +63,15 @@ case class Mabinogion(
           acc.setShield(target.id, Math.max(target.state.shield, shieldAmount))(random, id)
         )
         if (isEnchanted)
-          targetsInRange.whereFriendsOfC(parentCharacterId).characters.foldLeft(shieldGs)((acc, target) =>
+          targetsInRange.whereFriendsOfC(parentCharacterId).characters.foldLeft(shieldGs) { (acc, target) =>
+            // Workaround because cooldown is decreased immediately for parent
+            val duration = if (target.id == parentCharacterId) 2 else 1
+
             acc.addEffect(
               target.id,
-              effects.StatBuff(randomUUID(), 1, StatType.Speed, metadata.variables("enchantedSpeed")),
+              effects.StatBuff(randomUUID(), duration, StatType.Speed, metadata.variables("enchantedSpeed")),
             )(random, id)
-          )
+          }
         else shieldGs
       case _ => gameState
     }
