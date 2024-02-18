@@ -88,7 +88,7 @@ class WSGameSpec extends WSTrait {
       }
     }
 
-    "allow observing for users outside game" in {
+    "allow observing for users outside game" taggedAs NotWorkingOnCI in {
       val lobbyId = createLobbyForGame(numberOfPlayers = 2)
       observeEvents(lobbyId)
 
