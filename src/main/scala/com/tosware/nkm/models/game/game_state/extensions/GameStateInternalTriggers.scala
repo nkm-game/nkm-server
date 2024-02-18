@@ -34,6 +34,7 @@ trait GameStateInternalTriggers {
     def skipTurnIfNoCharactersToTakeAction(): GameState =
       if (gs.currentPlayer.characterIds.intersect(gs.charactersToTakeAction).isEmpty)
         incrementTurn()
+          .skipTurnIfNoCharactersToTakeAction()
       else gs
 
     def skipTurnIfPlayerKnockedOut(): GameState = {

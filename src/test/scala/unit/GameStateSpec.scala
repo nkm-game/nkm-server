@@ -101,6 +101,16 @@ class GameStateSpec extends TestUtils {
       gs.currentPlayer.id should be(s2v2.p(1)(0).ownerId)
     }
 
+    "skip many players turn when they have no characters to take action" in {
+      val gs = s2v2v2.gameState
+        .executeCharacter(s2v2v2.p(0)(1).character.id)(random, "test")
+        .executeCharacter(s2v2v2.p(1)(1).character.id)(random, "test")
+        .passTurn(s2v2v2.p(0)(0).character.id)
+        .passTurn(s2v2v2.p(1)(0).character.id)
+        .passTurn(s2v2v2.p(2)(0).character.id)
+      gs.currentPlayer.id should be(s2v2v2.p(2)(0).ownerId)
+    }
+
     "finish the phase when there are no characters to take action" in {
       val gs = s2v2.gameState
         .executeCharacter(s2v2.p(1)(1).character.id)(random, "test")
