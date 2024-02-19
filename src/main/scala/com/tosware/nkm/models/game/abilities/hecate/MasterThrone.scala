@@ -38,12 +38,20 @@ case class MasterThrone(
       .map(_.parseJson.convertTo[Int])
       .getOrElse(0)
   private def collectEnergy(characterId: CharacterId)(implicit random: Random, gameState: GameState): GameState = {
+    implicit val causedById: String = id
+
     val energy =
       (gameState.characterById(characterId).state.maxHealthPoints * (metadata.variables("healthPercent") / 100f)).toInt
 
     gameState
       .setAbilityVariable(id, collectedCharacterIdsKey, (collectedCharacterIds + characterId).toJson.toString)
       .setAbilityVariable(id, collectedEnergyKey, (collectedEnergy + energy).toJson.toString)
+      .logEvent(GameEvent.Ability.MasterThrone.EnergyCollected(
+        gameState.generateEventContext(),
+        id,
+        characterId,
+        energy,
+      ))
   }
   private def reset()(implicit random: Random, gameState: GameState): GameState =
     gameState

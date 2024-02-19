@@ -2,6 +2,7 @@ package com.tosware.nkm.serializers
 
 import com.tosware.nkm.*
 import com.tosware.nkm.models.game.event.GameEvent.*
+import com.tosware.nkm.models.game.event.GameEvent.Ability.MasterThrone.EnergyCollected
 import com.tosware.nkm.models.game.hex.HexCoordinates
 import pl.iterators.kebs.instances.time.{LocalDateTimeString, ZonedDateTimeString}
 import pl.iterators.kebs.json.{KebsEnumFormats, KebsSpray}
@@ -88,6 +89,7 @@ trait NkmJsonProtocol
         case e: TurnFinished               => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
         case e: TurnStarted                => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
         case e: PhaseFinished              => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
+        case e: EnergyCollected            => GameEventSerialized(e.getClass.getSimpleName, e.toJson.toString).toJson
         case unknown                       => deserializationError(s"json deserialize error: $unknown")
       }).asJsObject.fields)
 
@@ -147,6 +149,7 @@ trait NkmJsonProtocol
         case "TurnFinished"               => ges.eventJson.parseJson.convertTo[TurnFinished]
         case "TurnStarted"                => ges.eventJson.parseJson.convertTo[TurnStarted]
         case "PhaseFinished"              => ges.eventJson.parseJson.convertTo[PhaseFinished]
+        case "EnergyCollected"            => ges.eventJson.parseJson.convertTo[EnergyCollected]
         case unrecognized                 => serializationError(s"json serialization error $unrecognized")
       }
     }

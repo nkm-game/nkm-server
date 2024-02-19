@@ -169,4 +169,15 @@ object GameEvent {
   case class TurnStarted(context: GameEventContext, playerId: PlayerId) extends GameEvent
   case class PhaseFinished(context: GameEventContext) extends GameEvent
 
+  object Ability {
+    object MasterThrone {
+      case class EnergyCollected(
+          context: GameEventContext,
+          abilityId: AbilityId,
+          fromCharacterId: CharacterId,
+          amount: Int,
+      ) extends GameEvent
+          with ContainsAbilityId
+    }
+  }
 }
