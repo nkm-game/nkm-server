@@ -23,20 +23,18 @@ object User extends NkmTimeouts {
   case class SetLanguage(language: String) extends Command
 
   sealed trait Event
-  sealed trait RegisterEvent extends Event
-  sealed trait LoginEvent extends Event
-
-  case class RegisterSuccess(email: String, passwordHash: String) extends RegisterEvent
-  case class OauthRegisterSuccess(email: String) extends RegisterEvent
-  case object RegisterSuccess extends RegisterEvent
-  case object RegisterFailure extends RegisterEvent
-
-  case class LoginSuccess(userStateView: UserStateView) extends LoginEvent
-  case class LoginFailure(reason: String) extends LoginEvent
-
+  case class RegisterSuccess(email: String, passwordHash: String) extends Event
+  case class OauthRegisterSuccess(email: String) extends Event
   case class AdminGranted(email: String) extends Event
   case class PreferredColorSet(colorOpt: Option[NkmColor]) extends Event
   case class LanguageSet(language: String) extends Event
+
+  sealed trait RegisterEvent
+  case object RegisterSuccess extends RegisterEvent
+  case object RegisterFailure extends RegisterEvent
+  sealed trait LoginEvent
+  case class LoginSuccess(userStateView: UserStateView) extends LoginEvent
+  case class LoginFailure(reason: String) extends LoginEvent
 
   def props(email: String): Props = Props(new User(email))
 

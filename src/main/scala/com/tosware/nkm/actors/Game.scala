@@ -463,6 +463,15 @@ class Game(id: GameId)(implicit nkmDataService: NkmDataService) extends Persiste
     case message =>
       Logging.withGameRecoveryContext(id) {
         message match {
+          case GamePaused(_) =>
+            logRecovery("game pause") {
+              scheduledTimeout.cancel()
+              updateGameState(gameState.pause())
+            }
+          case GameUnpaused(_) =>
+            logRecovery("game unpause") {
+              updateGameStateAndScheduleDefault(gameState.unpause())
+            }
           case GameStarted(_, gameStartDependencies) =>
             logRecovery("game start") {
               updateGameState(gameState.startGame(gameStartDependencies))
@@ -522,6 +531,10 @@ class Game(id: GameId)(implicit nkmDataService: NkmDataService) extends Persiste
           case BlindPickTimedOut(_) =>
             logRecovery("blind pick timeout") {
               updateGameState(gameState.blindPickTimeout()(random, id))
+            }
+          case TimeAfterPickTimedOut(_) =>
+            logRecovery("time after pick timeout") {
+              // skip as it is published with PlacingCharactersStarted
             }
           case CharacterPlacingTimedOut(_) =>
             logRecovery("character placing timeout") {

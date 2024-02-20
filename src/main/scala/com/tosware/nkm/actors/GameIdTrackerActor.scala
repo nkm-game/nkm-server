@@ -103,7 +103,7 @@ class GameIdTrackerActor(nkmDataService: NkmDataService, userService: UserServic
   }
 
   override def receiveRecover: Receive = {
-    case Event.GameIdTracked(gameId) =>
+    case GameIdTracked(gameId) =>
       trackGameId(gameId)
       log.debug(s"Recovered track of $gameId")
     case RecoveryCompleted =>
