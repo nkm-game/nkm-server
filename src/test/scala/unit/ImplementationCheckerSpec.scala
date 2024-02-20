@@ -6,6 +6,8 @@ import helpers.{NotWorkingOnCI, TestUtils}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
+import java.io.{File, FilenameFilter}
+import scala.reflect.runtime.currentMirror as cm
 import scala.reflect.runtime.universe.*
 
 class ImplementationCheckerSpec
@@ -34,6 +36,38 @@ class ImplementationCheckerSpec
 
       subTypeNames.diff(writeClassNames) shouldBe empty
       subTypeNames.diff(readClassNames) shouldBe empty
+    }
+
+    def testEventRecoveryCompleteness(eventTypeClass: Class[_], fileName: String): Unit = {
+      val basePath = "src/main/scala/com/tosware/nkm/actors/"
+      val fullPath = basePath + fileName
+
+      val mirror = cm
+      val symbol = mirror.classSymbol(eventTypeClass)
+      val traitType = symbol.toType
+
+      val subTypes = traitType.typeSymbol.asClass.knownDirectSubclasses
+      val subTypeNames = subTypes.map(_.name.toString)
+
+      val fileContents = getFileContents(fullPath)
+      val usedInRecoveryMethod = findMatchingStrings("""case (\w+).* =>""".r, fileContents)
+
+      subTypeNames.diff(usedInRecoveryMethod) shouldBe empty
+    }
+
+    val actorsDirectory = new File("src/main/scala/com/tosware/nkm/actors")
+    val scalaFiles = actorsDirectory.listFiles(new FilenameFilter {
+      override def accept(dir: File, name: String): Boolean = name.endsWith(".scala")
+    }).map(_.getName)
+
+    scalaFiles.foreach { fileName =>
+      val className = fileName.replace(".scala", "")
+      val testName = s"implement all events in the $className actor recovery"
+      val eventType = Class.forName(s"com.tosware.nkm.actors.$className$$Event")
+
+      testName taggedAs NotWorkingOnCI in {
+        testEventRecoveryCompleteness(eventType, fileName)
+      }
     }
 
     def testMetadataProvider(modelPath: String, providerName: String) = {
