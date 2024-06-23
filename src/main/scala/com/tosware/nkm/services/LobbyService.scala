@@ -123,6 +123,18 @@ class LobbyService(gameIdTrackerActor: ActorRef)(
     aw(lobbyActor ? Lobby.SetPickType(request.pickType)).asInstanceOf[CommandResponse]
   }
 
+  def setGameMode(username: String, request: SetGameMode): CommandResponse = {
+    val lobbyActor = getLobbyActorOpt(request.lobbyId).getOrElse(return failGameIdDoesNotExist)
+    val gameState = aw(getGameState(request.lobbyId).getOrElse(return failGameIdDoesNotExist))
+    val lobbyState = aw(getLobbyState(lobbyActor))
+
+    if (gameState.gameStatus != GameStatus.NotStarted) return Failure("Game is already started")
+
+    if (!lobbyState.hostUserId.contains(username)) return Failure("You are not the host")
+
+    aw(lobbyActor ? Lobby.SetGameMode(request.gameMode)).asInstanceOf[CommandResponse]
+  }
+
   def setLobbyName(username: String, request: SetLobbyName): CommandResponse = {
     val lobbyActor = getLobbyActorOpt(request.lobbyId).getOrElse(return failGameIdDoesNotExist)
     val gameState = aw(getGameState(request.lobbyId).getOrElse(return failGameIdDoesNotExist))

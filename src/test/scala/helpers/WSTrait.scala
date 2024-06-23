@@ -117,6 +117,9 @@ trait WSTrait extends UserApiTrait {
   def setHexMap(lobbyId: String, hexMapName: String)(implicit wsClient: WSProbe): WebsocketLobbyResponse =
     sendWSRequestL(LobbyRoute.SetHexMap, LobbyRequest.SetHexMapName(lobbyId, hexMapName).toJson.toString)
 
+  def setGameMode(lobbyId: String, gameMode: GameMode)(implicit wsClient: WSProbe): WebsocketLobbyResponse =
+    sendWSRequestL(LobbyRoute.SetGameMode, LobbyRequest.SetGameMode(lobbyId, gameMode).toJson.toString)
+
   def setPickType(lobbyId: String, pickType: PickType)(implicit wsClient: WSProbe): WebsocketLobbyResponse =
     sendWSRequestL(LobbyRoute.SetPickType, LobbyRequest.SetPickType(lobbyId, pickType).toJson.toString)
 

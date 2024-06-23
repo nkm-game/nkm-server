@@ -2,7 +2,7 @@ package com.tosware.nkm.models.lobby
 
 import com.tosware.nkm.UserId
 import com.tosware.nkm.models.NkmColor
-import com.tosware.nkm.models.game.ClockConfig
+import com.tosware.nkm.models.game.{ClockConfig, GameMode}
 import com.tosware.nkm.models.game.pick.PickType
 import com.tosware.nkm.models.game.pick.PickType.AllRandom
 
@@ -16,6 +16,7 @@ case class LobbyState(
     chosenHexMapName: Option[String] = None,
     userIds: Seq[UserId] = Seq.empty,
     pickType: PickType = AllRandom,
+    gameMode: GameMode = GameMode.Deathmatch,
     numberOfCharactersPerPlayer: Int = 1,
     numberOfBans: Int = 0,
     clockConfig: ClockConfig = ClockConfig.empty(),

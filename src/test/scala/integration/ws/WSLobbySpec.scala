@@ -242,6 +242,18 @@ class WSLobbySpec extends WSTrait {
       }
     }
 
+    "allow setting game mode for a host" in {
+      withLobbyWS { implicit wsClient: WSProbe =>
+        auth(0)
+        val lobbyId = createLobby(lobbyName).body
+
+        GameMode.values.foreach { gameMode =>
+          setGameMode(lobbyId, gameMode)
+          fetchAndParseLobby(lobbyId).gameMode shouldBe gameMode
+        }
+      }
+    }
+
     "allow to start a game" in {
       val hexMapName = "Linia"
       withLobbyWS { implicit wsClient: WSProbe =>
