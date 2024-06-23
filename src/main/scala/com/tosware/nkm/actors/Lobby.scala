@@ -26,6 +26,7 @@ object Lobby {
   case class SetNumberOfBans(numberOfBans: Int) extends Command
   case class SetNumberOfCharactersPerPlayer(numberOfCharactersPerPlayer: Int) extends Command
   case class SetPickType(pickType: PickType) extends Command
+  case class SetGameMode(gameMode: GameMode) extends Command
   case class SetLobbyName(name: String) extends Command
   case class SetClockConfig(clockConfig: ClockConfig) extends Command
   case class SetColor(userId: UserId, newColorName: String) extends Command
@@ -48,6 +49,7 @@ object Lobby {
   case class NumberOfBansSet(id: GameId, numberOfBans: Int) extends Event
   case class NumberOfCharactersPerPlayerSet(id: GameId, numberOfCharactersPerPlayer: Int) extends Event
   case class PickTypeSet(id: GameId, pickType: PickType) extends Event
+  case class GameModeSet(id: GameId, gameMode: GameMode) extends Event
   case class LobbyNameSet(id: GameId, name: String) extends Event
   case class ClockConfigSet(id: GameId, clockConfig: ClockConfig) extends Event
   case class ColorSet(id: GameId, userId: UserId, newColor: NkmColor) extends Event
@@ -134,6 +136,9 @@ class Lobby(id: GameId)(implicit nkmDataService: NkmDataService, userService: Us
   def setPickType(pickType: PickType): Unit =
     lobbyState = lobbyState.copy(pickType = pickType)
       .copy(clockConfig = ClockConfig.defaultForPickType(pickType))
+
+  def setGameMode(gameMode: GameMode): Unit =
+    lobbyState = lobbyState.copy(gameMode = gameMode)
 
   def setLobbyName(name: String): Unit =
     lobbyState = lobbyState.copy(name = Some(name))
@@ -266,6 +271,18 @@ class Lobby(id: GameId)(implicit nkmDataService: NkmDataService, userService: Us
               persistAndPublish(e) { _ =>
                 setPickType(pickType)
                 log.info(s"Set pick type: $pickType")
+                sender() ! Success()
+              }
+            }
+          case SetGameMode(gameMode) =>
+            val useChecks = Set(
+              UseCheck.IsCreated(lobbyState)
+            )
+            check(useChecks) {
+              val e = GameModeSet(id, gameMode)
+              persistAndPublish(e) { _ =>
+                setGameMode(gameMode)
+                log.info(s"Set game mode: $gameMode")
                 sender() ! Success()
               }
             }

@@ -145,6 +145,10 @@ trait LobbyWebsocketUserBehaviour extends WebsocketUserBehaviour {
         implicit val responseType: LobbyResponse = LobbyResponse.SetHexMap
         parseJson[SetHexMapName](entity => handleAuthLobbyOperation(lobbyService.setHexmapName)(entity))
 
+      case LobbyRoute.SetGameMode =>
+        implicit val responseType: LobbyResponse = LobbyResponse.SetGameMode
+        parseJson[SetGameMode](entity => handleAuthLobbyOperation(lobbyService.setGameMode)(entity))
+
       case LobbyRoute.SetPickType =>
         implicit val responseType: LobbyResponse = LobbyResponse.SetPickType
         parseJson[SetPickType](entity => handleAuthLobbyOperation(lobbyService.setPickType)(entity))

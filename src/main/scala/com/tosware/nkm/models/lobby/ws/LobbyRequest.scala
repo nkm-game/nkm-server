@@ -1,7 +1,7 @@
 package com.tosware.nkm.models.lobby.ws
 
 import com.tosware.nkm.GameId
-import com.tosware.nkm.models.game.ClockConfig
+import com.tosware.nkm.models.game.{ClockConfig, GameMode}
 import com.tosware.nkm.models.game.pick.PickType
 
 sealed trait LobbyRequest
@@ -19,6 +19,7 @@ object LobbyRequest {
   final case class JoinLobby(lobbyId: String) extends LobbyRequest with ContainsLobbyId
   final case class LeaveLobby(lobbyId: String) extends LobbyRequest with ContainsLobbyId
   final case class SetHexMapName(lobbyId: String, hexMapName: String) extends LobbyRequest with ContainsLobbyId
+  final case class SetGameMode(lobbyId: String, gameMode: GameMode) extends LobbyRequest with ContainsLobbyId
   final case class SetNumberOfBans(lobbyId: String, numberOfBans: Int) extends LobbyRequest with ContainsLobbyId
   final case class SetNumberOfCharactersPerPlayer(lobbyId: String, charactersPerPlayer: Int) extends LobbyRequest
       with ContainsLobbyId
