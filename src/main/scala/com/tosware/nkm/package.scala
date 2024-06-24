@@ -43,6 +43,12 @@ package object nkm {
       case (x: Int, y: Int, t: HexCellType, i: Int) => HexCell.empty(HexCoordinates(x, y), t, Some(i))
     }
 
+  def pointParamsToPointGroups(params: Seq[Set[(Int, Int)]]): Seq[HexPointGroup] =
+    params.map { pointsSet =>
+      val coordsSet = pointsSet.map(coordTuple => HexCoordinates(coordTuple))
+      HexPointGroup(coordsSet)
+    }
+
   def getAdjacentCells[T <: HexCellLike](cells: Set[T], targetCellCoordinates: HexCoordinates): Set[T] =
     cells.filter(c =>
       abs(c.coordinates.x - targetCellCoordinates.x) <= 1

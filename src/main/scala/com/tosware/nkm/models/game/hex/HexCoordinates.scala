@@ -4,6 +4,10 @@ import com.tosware.nkm.models.game.game_state.GameState
 
 import scala.math.*
 
+object HexCoordinates {
+  def apply(tuple: (Int, Int)): HexCoordinates = HexCoordinates(tuple._1, tuple._2)
+}
+
 case class HexCoordinates(x: Int, z: Int) {
   def y: Int = -x - z
   def getNeighbour(direction: HexDirection): HexCoordinates =
