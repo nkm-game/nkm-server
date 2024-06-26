@@ -59,8 +59,36 @@ trait GameStateInternalTriggers {
       decrementEffectCooldownsState
     }
 
-    def calculatePointOwnerships(): GameState =
-      ???
+    def calculatePointOwnerships(): GameState = {
+      val newOwnerByPointGroupId = gs.hexMap.pointGroups.flatMap { pointGroup =>
+        val coords = pointGroup.coordinates.toSeq
+        val countByOwner = coords
+          .flatMap(_.toCellOpt(gs))
+          .flatMap(_.characterOpt(gs))
+          .map(_.owner(gs).id)
+          .groupBy(identity)
+          .view
+          .mapValues(_.size)
+          .toMap
+
+        val maxCountOpt = countByOwner.values.maxOption
+        val ownershipChanged =
+          maxCountOpt.fold(false) { maxCount =>
+            countByOwner.values.count(x => x == maxCount) == 1
+          }
+
+        if (ownershipChanged) {
+          Some((pointGroup.id, countByOwner.maxBy(_._2)._1))
+        } else None
+      }
+
+      newOwnerByPointGroupId.foldLeft(gs) { (acc, t) =>
+        val pointGroupId = t._1
+        val ownerId = t._2
+
+        acc.setHexPointGroupOwnership(pointGroupId, Some(ownerId))
+      }
+    }
 
     def refreshCharacterTakenActions(): GameState =
       gs.modify(_.characterIdsThatTookActionThisPhase).setTo(Set.empty)
