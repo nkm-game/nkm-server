@@ -90,6 +90,24 @@ trait GameStateInternalTriggers {
       }
     }
 
+    def increasePoints(playerId: PlayerId, points: Int): GameState =
+      gs.updatePlayer(playerId)(_.modify(_.points).using(oldPoints => oldPoints + points))
+
+    def giveOutPoints()(implicit random: Random, causedById: String): GameState = {
+      val playersWithPoints = gs.hexPointGroupOwnerships.flatMap { case (hexPointGroupId, playerIdOpt) =>
+        for {
+          playerId <- playerIdOpt
+          points <- gs.hexMap.pointGroups.find(_.id == hexPointGroupId).map(_.pointsPerPhase)
+        } yield (playerId, points)
+      }
+      val ngs = playersWithPoints.foldLeft(gs) { (acc, x) =>
+        val playerId = x._1
+        val points = x._2
+        acc.increasePoints(playerId, points)
+      }
+      ngs.checkVictoryStatus()
+    }
+
     def refreshCharacterTakenActions(): GameState =
       gs.modify(_.characterIdsThatTookActionThisPhase).setTo(Set.empty)
 
@@ -99,6 +117,7 @@ trait GameStateInternalTriggers {
     def finishPhase()(implicit random: Random, causedById: String = gs.id): GameState =
       refreshCharacterTakenActions()
         .calculatePointOwnerships()
+        .giveOutPoints()
         .incrementPhase()
         .logEvent(PhaseFinished(gs.generateEventContext()))
 

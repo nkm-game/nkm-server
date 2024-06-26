@@ -199,6 +199,11 @@ trait TestUtils
 
     def skipNPhases(n: Int): GameState = gs.passAllCharactersInNPhases(n)
     def skipPhase(): GameState = gs.passAllCharactersInCurrentPhase()
+    def skipPhaseWhile(condition: GameState => Boolean): GameState = {
+      var gameState = gs
+      while (condition(gameState)) gameState = gs.skipPhase()
+      gameState
+    }
   }
 
   def getFileContents(sourcePath: String): String =
