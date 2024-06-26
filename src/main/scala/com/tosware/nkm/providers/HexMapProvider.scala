@@ -44,6 +44,7 @@ case class HexMapProvider() extends NkmJsonProtocol {
       testmap.Simple1v1.hexMap,
       testmap.Simple1v9Line.hexMap,
       testmap.Simple2v2.hexMap,
+      testmap.Simple2v2Points.hexMap,
       testmap.Simple2v2Wall.hexMap,
       testmap.Simple2v2v2.hexMap,
       testmap.Spacey1v1.hexMap,

@@ -86,7 +86,5 @@ trait GameStateInitialization {
         abilityStates = gs.abilityStates.concat(abilityStatesMap)
       )
     }
-
   }
-
 }
