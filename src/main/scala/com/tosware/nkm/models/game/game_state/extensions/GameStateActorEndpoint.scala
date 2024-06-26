@@ -43,6 +43,7 @@ trait GameStateActorEndpoint {
       def startGame(g: GameStartDependencies)(implicit random: Random): GameState =
         gs.copy(
           hexMap = g.hexMap,
+          hexPointGroupOwnerships = g.hexMap.pointGroups.map(g => (g.id, None)).toMap,
           charactersMetadata = g.charactersMetadata,
           players = g.players,
           pickType = g.pickType,

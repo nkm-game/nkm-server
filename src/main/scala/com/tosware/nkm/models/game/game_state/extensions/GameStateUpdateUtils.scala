@@ -50,5 +50,8 @@ trait GameStateUpdateUtils {
         case ability                            => ability
       }
 
+    def setHexPointGroupOwnership(hexPointGroupId: HexPointGroupId, newOwnerOpt: Option[PlayerId]): GameState =
+      gs.copy(hexPointGroupOwnerships = gs.hexPointGroupOwnerships.updated(hexPointGroupId, newOwnerOpt))
+
   }
 }

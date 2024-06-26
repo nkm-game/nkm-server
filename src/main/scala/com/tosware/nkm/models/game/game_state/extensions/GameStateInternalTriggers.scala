@@ -60,6 +60,9 @@ trait GameStateInternalTriggers {
       decrementEffectCooldownsState
     }
 
+    def calculatePointOwnerships(): GameState =
+      ???
+
     def refreshCharacterTakenActions(): GameState =
       gs.modify(_.characterIdsThatTookActionThisPhase).setTo(Set.empty)
 
@@ -68,6 +71,7 @@ trait GameStateInternalTriggers {
 
     def finishPhase()(implicit random: Random, causedById: String = gs.id): GameState =
       refreshCharacterTakenActions()
+        .calculatePointOwnerships()
         .incrementPhase()
         .logEvent(PhaseFinished(gs.generateEventContext()))
 

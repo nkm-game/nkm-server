@@ -1,5 +1,6 @@
 package com.tosware.nkm.models.game.game_state
 
+import com.tosware.nkm.models.game.*
 import com.tosware.nkm.models.game.ability.AbilityView
 import com.tosware.nkm.models.game.character.{CharacterMetadata, NkmCharacterView}
 import com.tosware.nkm.models.game.character_effect.CharacterEffectView
@@ -8,8 +9,7 @@ import com.tosware.nkm.models.game.hex.HexMapView
 import com.tosware.nkm.models.game.pick.PickType
 import com.tosware.nkm.models.game.pick.blindpick.BlindPickStateView
 import com.tosware.nkm.models.game.pick.draftpick.DraftPickStateView
-import com.tosware.nkm.models.game.*
-import com.tosware.nkm.{CharacterId, GameId, PlayerId}
+import com.tosware.nkm.{CharacterId, GameId, HexPointGroupId, PlayerId}
 
 case class GameStateView(
     id: GameId,
@@ -21,6 +21,7 @@ case class GameStateView(
     draftPickState: Option[DraftPickStateView],
     blindPickState: Option[BlindPickStateView],
     hexMap: HexMapView,
+    hexPointGroupOwnerships: Map[HexPointGroupId, Option[PlayerId]],
     players: Seq[Player],
     characters: Set[NkmCharacterView],
     abilities: Set[AbilityView],

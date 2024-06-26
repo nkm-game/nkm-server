@@ -212,6 +212,9 @@ trait TestUtils
 
     final def passAllCharactersInPhase(phaseNumber: Int): GameState =
       _passAllCharactersInPhase(gs, phaseNumber)
+
+    def skipNPhases(n: Int): GameState = gs.passAllCharactersInNPhases(n)
+    def skipPhase(): GameState = gs.passAllCharactersInCurrentPhase()
   }
 
   def getFileContents(sourcePath: String): String =
