@@ -239,24 +239,58 @@ trait GameStateInternalTriggers {
       gs.updateGameStatus(GameStatus.Finished)
         .updateClock(gs.clock.pause())(random, gs.id)
 
-    def checkVictoryStatus()(implicit random: Random, causedById: String): GameState = {
-      def filterPendingPlayers: Player => Boolean = _.victoryStatus == VictoryStatus.Pending
+    private def checkVictoryStatusDeathmatch()(implicit random: Random, causedById: String): GameState = {
+      def isVictoryStatusPending: Player => Boolean = _.victoryStatus == VictoryStatus.Pending
 
-      val pendingPlayerIds = gs.players.filter(filterPendingPlayers).map(_.id)
+      val pendingPlayerIds = gs.players.filter(isVictoryStatusPending).map(_.id)
 
       if (gs.gameStatus == GameStatus.CharacterPick && gs.players.count(_.victoryStatus == VictoryStatus.Lost) > 0) {
-        gs.modify(_.players.eachWhere(filterPendingPlayers).victoryStatus)
+        gs.modify(_.players.eachWhere(isVictoryStatusPending).victoryStatus)
           .setTo(VictoryStatus.Drawn)
           .logEvents(pendingPlayerIds.map(pid => PlayerDrew(gs.generateEventContext(), pid)))
           .finishGame()
 
       } else if (gs.players.count(_.victoryStatus == VictoryStatus.Pending) == 1) {
-        gs.modify(_.players.eachWhere(filterPendingPlayers).victoryStatus)
+        gs.modify(_.players.eachWhere(isVictoryStatusPending).victoryStatus)
           .setTo(VictoryStatus.Won)
           .logEvents(pendingPlayerIds.map(pid => PlayerWon(gs.generateEventContext(), pid)))
           .finishGame()
       } else gs
     }
+
+    def checkVictoryCaptureThePoint()(implicit random: Random, causedById: String): GameState = {
+      val playersWithSufficientPoints = gs.players.filter(_.points >= 50)
+      if (playersWithSufficientPoints.nonEmpty) {
+        val maxPoints = playersWithSufficientPoints.map(_.points).max
+        val winners = playersWithSufficientPoints.filter(_.points == maxPoints)
+
+        def hasMaxPoints: Player => Boolean = _.points == maxPoints
+
+        val ngs = if (winners.size > 1) {
+          gs.modify(_.players.eachWhere(hasMaxPoints).victoryStatus)
+            .setTo(VictoryStatus.Drawn)
+            .logEvents(winners.map(w => PlayerDrew(gs.generateEventContext(), w.id)))
+        } else {
+          gs.modify(_.players.eachWhere(hasMaxPoints).victoryStatus)
+            .setTo(VictoryStatus.Won)
+            .logEvents(winners.map(w => PlayerWon(gs.generateEventContext(), w.id)))
+        }
+
+        def isVictoryStatusPending: Player => Boolean = _.victoryStatus == VictoryStatus.Pending
+        val pendingPlayerIds = ngs.players.filter(isVictoryStatusPending).map(_.id)
+
+        ngs.modify(_.players.eachWhere(isVictoryStatusPending).victoryStatus)
+          .setTo(VictoryStatus.Lost)
+          .logEvents(pendingPlayerIds.map(pid => PlayerLost(gs.generateEventContext(), pid)))
+          .finishGame()
+      } else gs
+    }
+
+    def checkVictoryStatus()(implicit random: Random, causedById: String): GameState =
+      gs.gameMode match {
+        case GameMode.Deathmatch      => checkVictoryStatusDeathmatch()
+        case GameMode.CaptureThePoint => checkVictoryCaptureThePoint()
+      }
 
     def checkIfCharacterPickFinished()(implicit random: Random, causedById: String): GameState =
       if (gs.characterPickFinished) {

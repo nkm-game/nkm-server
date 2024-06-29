@@ -15,7 +15,7 @@ class BlackBloodSpec extends TestUtils {
       CharacterMetadata.empty(),
     )
 
-  private val s = TestScenario.generate(TestHexMapName.Simple1v9Line, characterMetadata)
+  private val s = TestScenario.generateFromSeq(TestHexMapName.Simple1v9Line, characterMetadata)
   private val gameState: GameState = s.gameState.passTurn(s.defaultCharacter.id)
   private val abilityId = s.defaultAbilityId
   private val abilityRange = abilityMetadata.variables("radius")

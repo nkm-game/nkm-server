@@ -35,6 +35,7 @@ object GameState extends Logging
     with GameStateUpdateUtils {
   def empty(id: String): GameState = {
     val defaultPickType = PickType.AllRandom
+    val defaultGameMode = GameMode.Deathmatch
     val defaultClockConfig = ClockConfig.defaultForPickType(defaultPickType)
 
     GameState(
@@ -52,6 +53,7 @@ object GameState extends Logging
       turn = Turn(0),
       gameStatus = GameStatus.NotStarted,
       pickType = defaultPickType,
+      gameMode = defaultGameMode,
       characterIdsOutsideMap = Set(),
       characterIdsThatTookActionThisPhase = Set(),
       characterTakingActionThisTurnOpt = None,
@@ -73,6 +75,7 @@ case class GameState(
     charactersMetadata: Set[CharacterMetadata],
     gameStatus: GameStatus,
     pickType: PickType,
+    gameMode: GameMode,
     numberOfBans: Int,
     numberOfCharactersPerPlayers: Int,
     draftPickStateOpt: Option[DraftPickState],

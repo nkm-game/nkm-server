@@ -1,6 +1,7 @@
 package unit
 
-import com.tosware.nkm.models.game.VictoryStatus
+import com.tosware.nkm.models.game.{GameMode, VictoryStatus}
+import com.tosware.nkm.models.game.character.CharacterMetadata
 import com.tosware.nkm.models.game.game_state.GameState
 import com.tosware.nkm.models.game.hex.TestHexMapName
 import helpers.*
@@ -10,30 +11,37 @@ import scala.concurrent.duration.DurationInt
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class CaptureThePointSpec extends TestUtils {
-  private val s = TestScenario.generate(TestHexMapName.Simple2v2Points)
+  private val s =
+    TestScenario.generate(TestHexMapName.Simple2v2Points, CharacterMetadata.empty(), GameMode.CaptureThePoint)
   private val pointGroups = s.gameState.hexMap.pointGroups
-  private val point1Coords = pointGroups(0).coordinates.toSeq
-  private val point2Coords = pointGroups(1).coordinates.toSeq
+  private val point0Coords = pointGroups(0).coordinates.toSeq
+  private val point1Coords = pointGroups(1).coordinates.toSeq
+  private val point2Coords = pointGroups(2).coordinates.toSeq
 
   private val oneToZeroGs = s.gameState
-    .teleportCharacter(s.defaultCharacter.id, point1Coords(0))
+    .teleportCharacter(s.defaultCharacter.id, point0Coords(0))
   private val twoToOneGs = s.gameState
-    .teleportCharacter(s.defaultCharacter.id, point1Coords(0))
-    .teleportCharacter(s.p(0)(1).character.id, point1Coords(1))
-    .teleportCharacter(s.defaultEnemy.id, point1Coords(2))
+    .teleportCharacter(s.defaultCharacter.id, point0Coords(0))
+    .teleportCharacter(s.p(0)(1).character.id, point0Coords(1))
+    .teleportCharacter(s.defaultEnemy.id, point0Coords(2))
 
   private val zeroToOneGs = s.gameState
-    .teleportCharacter(s.defaultEnemy.id, point1Coords(0))
+    .teleportCharacter(s.defaultEnemy.id, point0Coords(0))
   private val oneToTwoGs = s.gameState
-    .teleportCharacter(s.defaultCharacter.id, point1Coords(0))
-    .teleportCharacter(s.p(1)(1).character.id, point1Coords(1))
-    .teleportCharacter(s.defaultEnemy.id, point1Coords(2))
+    .teleportCharacter(s.defaultCharacter.id, point0Coords(0))
+    .teleportCharacter(s.p(1)(1).character.id, point0Coords(1))
+    .teleportCharacter(s.defaultEnemy.id, point0Coords(2))
+
+  private val willBeADrawGs = s.gameState
+    .teleportCharacter(s.defaultCharacter.id, point0Coords(0))
+    .teleportCharacter(s.defaultEnemy.id, point2Coords(0))
 
   "capture the point" must {
     "initialize hex point group ownerships" in {
-      s.gameState.hexPointGroupOwnerships.size should be(2)
+      s.gameState.hexPointGroupOwnerships.size should be(3)
       s.gameState.hexPointGroupOwnerships(pointGroups(0).id) should be(None)
       s.gameState.hexPointGroupOwnerships(pointGroups(1).id) should be(None)
+      s.gameState.hexPointGroupOwnerships(pointGroups(2).id) should be(None)
     }
     "initialize player points" in {
       s.gameState.players(0).points should be(0)
@@ -52,33 +60,42 @@ class CaptureThePointSpec extends TestUtils {
       }
       {
         val ngs = s.gameState
-          .teleportCharacter(s.defaultCharacter.id, point1Coords(0))
-          .teleportCharacter(s.defaultEnemy.id, point2Coords(0))
+          .teleportCharacter(s.defaultCharacter.id, point0Coords(0))
+          .teleportCharacter(s.defaultEnemy.id, point1Coords(0))
           .skipPhase()
           .skipPhase()
         ngs.players(0).points should be(10)
         ngs.players(1).points should be(6)
       }
     }
-    "end the game when the point threshold is met" in {
-      {
+    "end the game when the point threshold is met" when {
+      "p0 win" in {
         val ngs =
           Await.result(
-            Future(oneToZeroGs.skipPhaseWhile(gs => gs.players(0).points <= 50)),
+            Future(oneToZeroGs.skipPhaseWhile { gs =>
+              gs.players(0).points <= 50
+            }),
             5.seconds,
           )
         ngs.players(0).victoryStatus should be(VictoryStatus.Won)
         ngs.players(1).victoryStatus should be(VictoryStatus.Lost)
       }
-      {
+      "p1 win" in {
         val ngs = Await.result(
-          Future(twoToOneGs.skipPhaseWhile(gs => gs.players(1).points <= 50)),
+          Future(oneToTwoGs.skipPhaseWhile(gs => gs.players(1).points <= 50)),
           5.seconds,
         )
         ngs.players(0).victoryStatus should be(VictoryStatus.Lost)
         ngs.players(1).victoryStatus should be(VictoryStatus.Won)
       }
-      // TODO: Add a case with a draw
+      "draw" in {
+        val ngs = Await.result(
+          Future(willBeADrawGs.skipPhaseWhile(gs => gs.players(1).points <= 50)),
+          5.seconds,
+        )
+        ngs.players(0).victoryStatus should be(VictoryStatus.Drawn)
+        ngs.players(1).victoryStatus should be(VictoryStatus.Drawn)
+      }
     }
   }
 

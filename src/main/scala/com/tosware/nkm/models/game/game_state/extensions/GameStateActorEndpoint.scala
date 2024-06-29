@@ -47,6 +47,7 @@ trait GameStateActorEndpoint {
           charactersMetadata = g.charactersMetadata,
           players = g.players,
           pickType = g.pickType,
+          gameMode = g.gameMode,
           numberOfBans = g.numberOfBansPerPlayer,
           numberOfCharactersPerPlayers = g.numberOfCharactersPerPlayer,
           gameStatus = if (g.pickType == PickType.AllRandom) GameStatus.CharacterPicked else GameStatus.CharacterPick,
