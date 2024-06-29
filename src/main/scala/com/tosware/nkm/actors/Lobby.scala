@@ -356,6 +356,7 @@ class Lobby(id: GameId)(implicit nkmDataService: NkmDataService, userService: Us
                       players = players,
                       hexMap = chosenHexMap,
                       pickType = lobbyState.pickType,
+                      gameMode = lobbyState.gameMode,
                       numberOfBansPerPlayer = lobbyState.numberOfBans,
                       numberOfCharactersPerPlayer = lobbyState.numberOfCharactersPerPlayer,
                       nkmDataService.getCharacterMetadataSeq.toSet,

@@ -10,7 +10,7 @@ import helpers.{TestScenario, TestUtils}
 class AquaCronaSpec extends TestUtils {
   private val characters = CharacterMetadataProvider()
     .getCharacterMetadataSeq.filter(c => Seq("Aqua", "Crona").contains(c.name)).reverse
-  private val s = TestScenario.generate(TestHexMapName.Simple1v1, characters)
+  private val s = TestScenario.generateFromSeq(TestHexMapName.Simple1v1, characters)
   private val gameState: GameState = s.ultGs
   private val blackBloodId = s.defaultCharacter.state.abilities(2).id
   private val purificationId = s.defaultEnemy.state.abilities(1).id

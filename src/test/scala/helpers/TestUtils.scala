@@ -132,29 +132,38 @@ trait TestUtils
   protected def characterOnPoint(hexCoordinates: HexCoordinates)(implicit gameState: GameState): NkmCharacter =
     gameState.characterById(characterIdOnPoint(hexCoordinates))
 
-  protected def getTestGameState(testHexMapName: TestHexMapName, metadata: CharacterMetadata): GameState = {
+  protected def getTestGameState(
+      testHexMapName: TestHexMapName,
+      metadata: CharacterMetadata,
+      gameMode: GameMode,
+  ): GameState = {
     val hexMap = HexMapProvider().getTestHexMap(testHexMapName)
     val characterMetadatass = hexMap.numberOfSpawnsPerPlayer
       .map { case (playerIndex, numberOfSpawns) =>
         (0 until numberOfSpawns).map(x => metadata.copy(name = s"p($playerIndex)($x)"))
       }.toSeq
 
-    getTestGameStateCustom(testHexMapName, characterMetadatass)
+    getTestGameStateCustom(testHexMapName, characterMetadatass, gameMode)
   }
 
-  protected def getTestGameState(testHexMapName: TestHexMapName, metadata: Seq[CharacterMetadata]): GameState = {
+  protected def getTestGameState(
+      testHexMapName: TestHexMapName,
+      metadata: Seq[CharacterMetadata],
+      gameMode: GameMode,
+  ): GameState = {
     val hexMap = HexMapProvider().getTestHexMap(testHexMapName)
     val characterMetadatass = hexMap.numberOfSpawnsPerPlayer
       .map { case (playerIndex, numberOfSpawns) =>
         (0 until numberOfSpawns).map(x => metadata(playerIndex).copy(name = s"p($playerIndex)($x)"))
       }.toSeq
 
-    getTestGameStateCustom(testHexMapName, characterMetadatass)
+    getTestGameStateCustom(testHexMapName, characterMetadatass, gameMode)
   }
 
   protected def getTestGameStateCustom(
       testHexMapName: TestHexMapName,
       characterMetadatass: Seq[Seq[CharacterMetadata]],
+      gameMode: GameMode,
   ): GameState = {
     val playerIds: Seq[PlayerId] = characterMetadatass.indices map (p => s"p$p")
     val hexMap = HexMapProvider().getTestHexMap(testHexMapName)
@@ -165,6 +174,7 @@ trait TestUtils
       players = playerIds.map(n => Player(n, isHost = n == playerIds.head)),
       hexMap = hexMap,
       pickType = BlindPick,
+      gameMode = gameMode,
       numberOfBansPerPlayer = 0,
       numberOfCharactersPerPlayer = characterMetadatass.head.size,
       charactersMetadata = characterMetadatass.flatten.toSet,
@@ -213,13 +223,12 @@ trait TestUtils
     final def passAllCharactersInPhase(phaseNumber: Int): GameState =
       _passAllCharactersInPhase(gs, phaseNumber)
 
-    def skipNPhases(n: Int): GameState = gs.passAllCharactersInNPhases(n)
-    def skipPhase(): GameState = gs.passAllCharactersInCurrentPhase()
-    def skipPhaseWhile(condition: GameState => Boolean): GameState = {
-      var gameState = gs
-      while (condition(gameState)) gameState = gs.skipPhase()
-      gameState
-    }
+    def skipNPhases(n: Int): GameState =
+      gs.passAllCharactersInNPhases(n)
+    def skipPhase(): GameState =
+      gs.passAllCharactersInCurrentPhase()
+    def skipPhaseWhile(condition: GameState => Boolean): GameState =
+      LazyList.iterate(gs)(_.skipPhase()).dropWhile(condition).head
   }
 
   def getFileContents(sourcePath: String): String =

@@ -1,19 +1,28 @@
 package helpers
 
+import com.tosware.nkm.models.game.GameMode
 import com.tosware.nkm.models.game.character.{CharacterMetadata, NkmCharacter}
 import com.tosware.nkm.models.game.game_state.GameState
 import com.tosware.nkm.models.game.hex.{HexCoordinates, TestHexMapName}
 import com.tosware.nkm.{AbilityId, AbilityMetadataId, PlayerId}
 
 object TestScenario extends TestUtils {
-  def generate(testHexMapName: TestHexMapName, metadata: CharacterMetadata = CharacterMetadata.empty()): TestScenario =
+  def generate(
+      testHexMapName: TestHexMapName,
+      metadata: CharacterMetadata = CharacterMetadata.empty(),
+      gameMode: GameMode = GameMode.Deathmatch,
+  ): TestScenario =
     new TestScenario {
-      val gameState: GameState = getTestGameState(testHexMapName, metadata)
+      val gameState: GameState = getTestGameState(testHexMapName, metadata, gameMode)
     }
 
-  def generate(testHexMapName: TestHexMapName, metadata: Seq[CharacterMetadata]): TestScenario =
+  def generateFromSeq(
+      testHexMapName: TestHexMapName,
+      metadata: Seq[CharacterMetadata],
+      gameMode: GameMode = GameMode.Deathmatch,
+  ): TestScenario =
     new TestScenario {
-      val gameState: GameState = getTestGameState(testHexMapName, metadata)
+      val gameState: GameState = getTestGameState(testHexMapName, metadata, gameMode)
     }
 
   def generate(testHexMapName: TestHexMapName, abilityMetadataId: AbilityMetadataId): TestScenario =
