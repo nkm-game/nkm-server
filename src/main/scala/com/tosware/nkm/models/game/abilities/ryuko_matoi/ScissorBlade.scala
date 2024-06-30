@@ -12,7 +12,7 @@ import scala.util.Random
 object ScissorBlade extends NkmConf.AutoExtract {
   val metadata: AbilityMetadata =
     AbilityMetadata(
-      name = "ScissorBlade",
+      name = "Scissor Blade",
       abilityType = AbilityType.Passive,
       description =
         """Basic attacks decrease physical defense of target by {physicalDefenseDecrease} for {duration}t.
