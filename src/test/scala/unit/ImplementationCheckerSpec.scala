@@ -15,6 +15,11 @@ class ImplementationCheckerSpec
     with Matchers
     with Logging
     with TestUtils {
+  private val actorsDirectory = new File("src/main/scala/com/tosware/nkm/actors")
+  private val scalaFiles = actorsDirectory.listFiles(new FilenameFilter {
+    override def accept(dir: File, name: String): Boolean = name.endsWith(".scala")
+  }).map(_.getName)
+
   "Scala files in project" must {
     "implement all events in NkmJsonProtocol" taggedAs NotWorkingOnCI in {
       // Get the names of all classes that derive from GameEvent
@@ -52,13 +57,10 @@ class ImplementationCheckerSpec
       val fileContents = getFileContents(fullPath)
       val usedInRecoveryMethod = findMatchingStrings("""case (\w+).* =>""".r, fileContents)
 
+      log.info(usedInRecoveryMethod.mkString("\n"))
+
       subTypeNames.diff(usedInRecoveryMethod) shouldBe empty
     }
-
-    val actorsDirectory = new File("src/main/scala/com/tosware/nkm/actors")
-    val scalaFiles = actorsDirectory.listFiles(new FilenameFilter {
-      override def accept(dir: File, name: String): Boolean = name.endsWith(".scala")
-    }).map(_.getName)
 
     scalaFiles.foreach { fileName =>
       val className = fileName.replace(".scala", "")
