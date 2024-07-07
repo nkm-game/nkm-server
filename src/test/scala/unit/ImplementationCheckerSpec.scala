@@ -56,7 +56,10 @@ class ImplementationCheckerSpec
 
       val fileContents = getFileContents(fullPath)
       val usedInRecoveryMethod = findMatchingStrings("""case (\w+).* =>""".r, fileContents)
+      // Above works good enough, below enforces logRecovery method
+      //      val usedInRecoveryMethod = findMatchingStrings("""case (\w+).* =>\R.*logRecovery""".r, fileContents)
 
+      log.info("Found in recovery:")
       log.info(usedInRecoveryMethod.mkString("\n"))
 
       subTypeNames.diff(usedInRecoveryMethod) shouldBe empty

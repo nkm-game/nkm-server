@@ -415,6 +415,10 @@ class Lobby(id: GameId)(implicit nkmDataService: NkmDataService, userService: Us
             logRecovery(s"setting pick type to $pickType") {
               setPickType(pickType)
             }
+          case GameModeSet(_, gameMode) =>
+            logRecovery(s"setting game mode to $gameMode") {
+              setGameMode(gameMode)
+            }
           case LobbyNameSet(_, name) =>
             logRecovery(s"setting lobby name to $name") {
               setLobbyName(name)
