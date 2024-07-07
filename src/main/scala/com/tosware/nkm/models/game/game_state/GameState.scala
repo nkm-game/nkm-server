@@ -155,25 +155,40 @@ case class GameState(
   def characterByIdOpt(characterId: CharacterId): Option[NkmCharacter] = characters.find(_.id == characterId)
 
   // unsafe before validation
-  def characterById(characterId: CharacterId): NkmCharacter = characterByIdOpt(characterId).get
+  def characterById(characterId: CharacterId): NkmCharacter =
+    characterByIdOpt(characterId).getOrElse {
+      throw new RuntimeException(
+        s"""Failed to find character id $characterId
+           |Available character ids: ${characters.map(_.id).mkString(", ")}
+           |""".stripMargin
+      )
+    }
 
   // safe
   def abilityByIdOpt(abilityId: AbilityId): Option[Ability] = abilities.find(_.id == abilityId)
 
   // unsafe before validation
-  def abilityById(abilityId: AbilityId): Ability = abilityByIdOpt(abilityId).get
+  def abilityById(abilityId: AbilityId): Ability = abilityByIdOpt(abilityId).getOrElse {
+    throw new RuntimeException(
+      s"""Failed to find ability id $abilityId
+         |Available ability ids: ${abilities.map(_.id).mkString(", ")}
+         |""".stripMargin
+    )
+  }
 
   // safe
   def effectByIdOpt(effectId: CharacterEffectId): Option[CharacterEffect] = effects.find(_.id == effectId)
 
   // unsafe before validation
-  def effectById(effectId: CharacterEffectId): CharacterEffect = effectByIdOpt(effectId).get
+  def effectById(effectId: CharacterEffectId): CharacterEffect = effectByIdOpt(effectId).getOrElse {
+    throw new RuntimeException(
+      s"""Failed to find effect id $effectId
+         |Available effect ids: ${effects.map(_.id).mkString(", ")}
+         |""".stripMargin
+    )
+  }
 
-  // safe
   def hexCellEffectByIdOpt(effectId: HexCellEffectId): Option[HexCellEffect] = hexCellEffects.find(_.id == effectId)
-
-  // unsafe before validation
-  def hexCellEffectById(effectId: HexCellEffectId): HexCellEffect = hexCellEffectByIdOpt(effectId).get
 
   def hiddenEventsFor(forPlayerOpt: Option[PlayerId]): Seq[EventHideData] =
     forPlayerOpt.fold(hiddenEvents)(forPlayer => hiddenEvents.filterNot(_.showOnlyFor.contains(forPlayer)))
