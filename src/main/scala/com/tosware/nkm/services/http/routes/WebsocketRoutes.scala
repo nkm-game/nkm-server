@@ -10,6 +10,7 @@ import com.tosware.nkm.actors.ws.*
 import com.tosware.nkm.services.http.directives.{JwtDirective, JwtSecretKey}
 import com.tosware.nkm.services.{GameService, LobbyService}
 import com.tosware.nkm.{Logging, NkmDependencies}
+import akka.http.scaladsl.server.Route
 
 class WebsocketRoutes(deps: NkmDependencies) extends JwtDirective with Logging {
   implicit val jwtSecretKey: JwtSecretKey = deps.jwtSecretKey
@@ -18,8 +19,8 @@ class WebsocketRoutes(deps: NkmDependencies) extends JwtDirective with Logging {
   implicit val gameService: GameService = deps.gameService
 
   // new connection - new user actor
-  def newUser(userActor: ActorRef) = {
-    val onFailureMessage = (onFailureMessage: Throwable) => logger.error(onFailureMessage.getMessage)
+  def newUser(userActor: ActorRef): Flow[Message,TextMessage.Strict,NotUsed] = {
+    val onFailureMessage = ((onFailureMessage: Throwable)) => logger.error(onFailureMessage.getMessage)
 
     val incomingMessages =
       Flow[Message].map {
@@ -45,13 +46,13 @@ class WebsocketRoutes(deps: NkmDependencies) extends JwtDirective with Logging {
     ).mapMaterializedValue { outActor =>
       userActor ! WebsocketUser.Connected(outActor)
       NotUsed
-    }.map((outMsg: WebsocketUser.OutgoingMessage) => TextMessage(outMsg.text))
+    }.map(((outMsg: WebsocketUser.OutgoingMessage)) => TextMessage(outMsg.text))
 
     // then combine both to a flow
     Flow.fromSinkAndSource(incomingMessages, outgoingMessages)
   }
 
-  val websocketRoutes = concat(
+  val websocketRoutes: Route = concat(
     path("lobby") {
       // new connection - new user actor
       handleWebSocketMessages(newUser(system.actorOf(WebsocketUser.lobbyProps(deps.lobbySessionActor))))

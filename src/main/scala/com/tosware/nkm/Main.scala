@@ -12,7 +12,7 @@ import scala.annotation.tailrec
 
 object Main extends App with Logging {
   val db: JdbcBackend.Database = Database.forConfig("slick.db")
-  val port = sys.env.getOrElse("PORT", "3737").toInt
+  val port: Int = sys.env.getOrElse("PORT", "3737").toInt
 
   implicit val system: ActorSystem = ActorSystem("nkm-actor-system")
 

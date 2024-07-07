@@ -8,6 +8,7 @@ import com.tosware.nkm.serializers.NkmJsonProtocol
 import com.tosware.nkm.services.BugReportService
 import com.tosware.nkm.services.http.directives.{JwtDirective, JwtSecretKey}
 import com.tosware.nkm.{BugReportId, GameId, Logging, NkmDependencies}
+import akka.http.scaladsl.server.Route
 
 object BugReportRequest {
   case class Create(description: String, gameId: Option[GameId])
@@ -24,7 +25,7 @@ class BugReportRoutes(deps: NkmDependencies) extends JwtDirective
 
   val bugReportPrefix = "bug_reports"
 
-  val getRoutes = concat(
+  val getRoutes: Route = concat(
     pathPrefix(bugReportPrefix) {
       requireAdmin {
         path("fetch") {

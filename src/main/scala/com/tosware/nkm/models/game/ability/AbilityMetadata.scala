@@ -35,7 +35,7 @@ case class AbilityMetadata(
 ) {
   val id: AbilityMetadataId = name
 
-  def toMarshallable = AbilityMetadataMarshallable(
+  def toMarshallable: AbilityMetadataMarshallable = AbilityMetadataMarshallable(
     name,
     abilityType,
     description,

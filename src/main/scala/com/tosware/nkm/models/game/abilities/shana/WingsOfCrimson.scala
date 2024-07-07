@@ -32,8 +32,8 @@ case class WingsOfCrimson(abilityId: AbilityId, parentCharacterId: CharacterId)
     with GameEventListener {
   override val metadata: AbilityMetadata = WingsOfCrimson.metadata
 
-  val duration = metadata.variables("duration")
-  val bonusSpeed = metadata.variables("bonusSpeed")
+  val duration: Int = metadata.variables("duration")
+  val bonusSpeed: Int = metadata.variables("bonusSpeed")
 
   private def abilityEffects()(implicit random: Random, gameState: GameState): Set[CharacterEffectId] =
     state.variables.get(abilityEffectIdsKey).map(_.parseJson.convertTo[Set[CharacterEffectId]]).getOrElse(Set.empty)

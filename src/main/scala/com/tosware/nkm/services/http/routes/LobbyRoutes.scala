@@ -7,18 +7,19 @@ import com.tosware.nkm.NkmDependencies
 import com.tosware.nkm.models.lobby.ws.*
 import com.tosware.nkm.services.LobbyService
 import com.tosware.nkm.services.http.directives.{JwtDirective, JwtSecretKey}
+import akka.http.scaladsl.server.Route
 
 class LobbyRoutes(deps: NkmDependencies) extends JwtDirective
     with SprayJsonSupport {
   val jwtSecretKey: JwtSecretKey = deps.jwtSecretKey
   val lobbyService: LobbyService = deps.lobbyService
 
-  val getRoutes = concat(
+  val getRoutes: Route = concat(
     path(LobbyRoute.GetLobbies.value) {
       val lobbies = lobbyService.getAllLobbies()
       complete(lobbies)
     },
-    path(LobbyRoute.GetLobby.value / Segment) { (lobbyId: String) =>
+    path(LobbyRoute.GetLobby.value / Segment) { ((lobbyId: String)) =>
       lobbyService.getLobbyStateOpt(lobbyId) match {
         case Some(lobby) => complete(lobby)
         case None        => complete(StatusCodes.NotFound)

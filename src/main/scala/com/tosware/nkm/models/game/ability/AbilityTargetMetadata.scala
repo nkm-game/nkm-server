@@ -1,9 +1,9 @@
 package com.tosware.nkm.models.game.ability
 
 object AbilityTargetMetadata {
-  val SingleCharacter = AbilityTargetMetadata(1 to 1, AbilityTargetType.Character)
-  val SingleCoordinate = AbilityTargetMetadata(1 to 1, AbilityTargetType.HexCoordinates)
-  val CircularAirSelection = AbilityTargetMetadata(1 to 1, AbilityTargetType.HexCoordinates, AirSelectionType.Circular)
+  val SingleCharacter: AbilityTargetMetadata = AbilityTargetMetadata(1 to 1, AbilityTargetType.Character)
+  val SingleCoordinate: AbilityTargetMetadata = AbilityTargetMetadata(1 to 1, AbilityTargetType.HexCoordinates)
+  val CircularAirSelection: AbilityTargetMetadata = AbilityTargetMetadata(1 to 1, AbilityTargetType.HexCoordinates, AirSelectionType.Circular)
 }
 
 final case class AbilityTargetMetadata(
@@ -11,7 +11,7 @@ final case class AbilityTargetMetadata(
     targetType: AbilityTargetType,
     airSelectionType: AirSelectionType = AirSelectionType.None,
 ) {
-  def toMarshallable =
+  def toMarshallable: AbilityTargetMetadataMarshallable =
     AbilityTargetMetadataMarshallable(
       allowedRange.min,
       allowedRange.max,

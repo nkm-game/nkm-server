@@ -73,7 +73,7 @@ class UserRoutes(deps: NkmDependencies)
     )
   }
 
-  val authPostRoutes = concat(
+  val authPostRoutes: Route = concat(
     path("register") {
       entity(as[Register]) { entity =>
         logger.info(s"Received register request for ${entity.email}")

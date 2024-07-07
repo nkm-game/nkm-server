@@ -17,7 +17,7 @@ trait UserApiTrait extends ApiTrait {
   var userStates: Seq[UserStateView] = Seq()
 
   private val adminUserIndex = 4
-  lazy val adminToken = tokens(adminUserIndex)
+  lazy val adminToken: String = tokens(adminUserIndex)
 
   def getAuthHeader(token: String): RawHeader = RawHeader("Authorization", s"Bearer $token")
 

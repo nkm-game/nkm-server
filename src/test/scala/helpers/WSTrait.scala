@@ -19,8 +19,8 @@ import spray.json.*
 
 object WSTrait {
   val wsPrefix = "/ws"
-  val wsLobbyUri = s"$wsPrefix/lobby"
-  val wsGameUri = s"$wsPrefix/game"
+  val wsLobbyUri: String = s"$wsPrefix/lobby"
+  val wsGameUri: String = s"$wsPrefix/game"
 
   val ok = StatusCodes.OK.intValue
   val nok = StatusCodes.InternalServerError.intValue

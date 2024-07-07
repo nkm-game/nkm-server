@@ -32,7 +32,7 @@ abstract class Ability(val id: AbilityId)
     Set(UseCheck.Coordinates.ExistsOnMap(hexCoordinates), UseCheck.Coordinates.InRange(hexCoordinates))
   def state(implicit gameState: GameState): AbilityState =
     gameState.abilityStates(id)
-  protected def defaultCircleRange(range: Int)(implicit gameState: GameState) =
+  protected def defaultCircleRange(range: Int)(implicit gameState: GameState): Set[HexCoordinates] =
     parentCellOpt
       .map(_.coordinates.getCircle(range).whereExists)
       .getOrElse(Set.empty)

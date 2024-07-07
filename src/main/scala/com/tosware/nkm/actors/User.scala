@@ -68,7 +68,7 @@ class User(email: String) extends PersistentActor with Logging {
   def grantAdmin(): Unit =
     userState = userState.copy(isAdmin = true)
 
-  def registerHash(passwordHash: String) =
+  def registerHash(passwordHash: String): Unit =
     if (userState.isRegistered || !isEmailValid(email)) {
       sender() ! RegisterFailure
     } else {

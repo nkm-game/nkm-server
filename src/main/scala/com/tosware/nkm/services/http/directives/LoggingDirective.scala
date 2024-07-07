@@ -7,6 +7,7 @@ import akka.http.scaladsl.server.Directives.logRequestResult
 import akka.http.scaladsl.server.RouteResult
 import akka.http.scaladsl.server.directives.{LogEntry, LoggingMagnet}
 import com.tosware.nkm.serializers.NkmJsonProtocol
+import akka.http.scaladsl.server.Directive0
 
 trait LoggingDirective extends NkmJsonProtocol {
   def akkaResponseTimeLoggingFunction(
@@ -36,11 +37,11 @@ trait LoggingDirective extends NkmJsonProtocol {
     entry.logTo(loggingAdapter)
   }
 
-  def printResponseTime(log: LoggingAdapter) = {
+  def printResponseTime(log: LoggingAdapter): HttpRequest => (RouteResult => Unit) = {
     val requestTimestamp = System.nanoTime
     akkaResponseTimeLoggingFunction(log, requestTimestamp) _
   }
 
-  val logRequestResponse = logRequestResult(LoggingMagnet(printResponseTime))
+  val logRequestResponse: Directive0 = logRequestResult(LoggingMagnet(printResponseTime))
 
 }

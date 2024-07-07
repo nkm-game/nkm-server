@@ -42,7 +42,7 @@ trait GameStateEventManagement {
       }
     }
 
-    def _logEventWithoutChecks(e: GameEvent)(implicit random: Random) =
+    def _logEventWithoutChecks(e: GameEvent)(implicit random: Random): GameState =
       gs.copy(gameLog = gs.gameLog.modify(_.events).using(es => es :+ e))
         .executeEventTriggers(e)
 
