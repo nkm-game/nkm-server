@@ -4,12 +4,14 @@ import com.tosware.nkm.models.game.character.NkmCharacter
 import com.tosware.nkm.models.game.event.GameEvent.*
 import com.tosware.nkm.models.game.game_state.GameState
 import com.tosware.nkm.models.game.hex.*
+import org.slf4j.LoggerFactory
 
 import scala.math.abs
 import scala.reflect.ClassTag
 import scala.util.Random
 
 package object nkm {
+  private val log = LoggerFactory.getLogger(this.getClass)
   type UserId = String
   type PlayerId = String
   type GameId = String
@@ -33,8 +35,11 @@ package object nkm {
   type HexCellEffectId = String
 
   type BugReportId = String
-  def randomUUID()(implicit random: Random): String =
-    java.util.UUID.nameUUIDFromBytes(random.nextBytes(16)).toString
+  def randomUUID()(implicit random: Random): String = {
+    val uuid = java.util.UUID.nameUUIDFromBytes(random.nextBytes(16)).toString
+    log.debug(s"RANDOM UUID GENERATED: $uuid")
+    uuid
+  }
 
   def hexCellParamsToCells(params: Set[Any]): Set[HexCell] =
     params.map {
