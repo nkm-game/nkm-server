@@ -25,7 +25,7 @@ libraryDependencies += "com.typesafe.akka" %% "akka-actor" % AkkaVersion
 libraryDependencies += "com.typesafe.akka" %% "akka-stream" % AkkaVersion
 libraryDependencies += "com.typesafe.akka" %% "akka-http" % AkkaHttpVersion
 libraryDependencies += "com.typesafe.akka" %% "akka-http-spray-json" % AkkaHttpVersion
-libraryDependencies += "com.typesafe.akka" %% "akka-serialization-jackson" % AkkaVersion
+libraryDependencies += "io.altoo" %% "akka-kryo-serialization" % "2.4.3"
 
 libraryDependencies += "pl.iterators" %% "kebs-spray-json" % KebsVersion
 libraryDependencies += "pl.iterators" %% "kebs-slick" % KebsVersion
