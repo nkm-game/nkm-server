@@ -44,9 +44,9 @@ case class OgreCutter(abilityId: AbilityId, parentCharacterId: CharacterId)
   }
   override def useChecks(implicit useData: UseData, gameState: GameState): Set[UseCheck] = {
     val target = useData.firstAsCharacterId
-    super.useChecks
-      ++ characterBaseUseChecks(target)
-      ++ Seq(
+    super.useChecks ++
+      characterBaseUseChecks(target) ++
+      Seq(
         UseCheck.Character.IsEnemy(target),
         TeleportThroughUtils.UseCheck.CellToTeleportLooksFreeToStand(this, target, OgreCutter.tpOffset),
       )

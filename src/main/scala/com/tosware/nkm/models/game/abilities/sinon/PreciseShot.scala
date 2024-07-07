@@ -35,7 +35,7 @@ case class PreciseShot(abilityId: AbilityId, parentCharacterId: CharacterId)
       .damageCharacter(target, Damage(DamageType.Physical, metadata.variables("damage")))(random, id)
   }
   override def useChecks(implicit useData: UseData, gameState: GameState): Set[UseCheck] =
-    super.useChecks
-      ++ characterBaseUseChecks(useData.firstAsCharacterId)
-      + UseCheck.Character.IsEnemy(useData.firstAsCharacterId)
+    super.useChecks ++
+      characterBaseUseChecks(useData.firstAsCharacterId) +
+      UseCheck.Character.IsEnemy(useData.firstAsCharacterId)
 }

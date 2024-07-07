@@ -31,8 +31,8 @@ trait HexCellLike {
   def looksFreeToStand(forCharacterId: CharacterId)(implicit gameState: GameState): Boolean =
     looksEmpty(forCharacterId) && !isWall
   def looksFreeToPass(forCharacterId: CharacterId)(implicit gameState: GameState): Boolean =
-    looksFreeToStand(forCharacterId)
-      || isFriendStanding(forCharacterId)
-      || gameState.characterById(forCharacterId).isFlying
+    looksFreeToStand(forCharacterId) ||
+      isFriendStanding(forCharacterId) ||
+      gameState.characterById(forCharacterId).isFlying
 
 }

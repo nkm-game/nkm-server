@@ -1,5 +1,6 @@
 package com.tosware.nkm.models.game.hex
 
+import com.tosware.nkm.*
 import com.tosware.nkm.models.game.game_state.GameState
 
 import scala.math.*

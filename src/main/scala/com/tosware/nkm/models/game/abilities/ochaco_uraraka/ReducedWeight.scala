@@ -42,6 +42,7 @@ case class ReducedWeight(abilityId: AbilityId, parentCharacterId: CharacterId)
       )(random, id)
   }
   override def useChecks(implicit useData: UseData, gameState: GameState): Set[UseCheck] =
-    super.useChecks ++ characterBaseUseChecks(useData.firstAsCharacterId)
-      + UseCheck.Character.IsFriend(useData.firstAsCharacterId)
+    super.useChecks ++
+      characterBaseUseChecks(useData.firstAsCharacterId) +
+      UseCheck.Character.IsFriend(useData.firstAsCharacterId)
 }

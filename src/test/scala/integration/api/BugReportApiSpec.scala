@@ -8,8 +8,8 @@ import helpers.UserApiTrait
 
 class BugReportApiSpec extends UserApiTrait {
   def fetchBugReports(): Seq[BugReport] =
-    Get("/api/bug_reports/fetch").addAuthHeader(adminToken)
-      ~> Route.seal(routes) ~> check {
+    Get("/api/bug_reports/fetch").addAuthHeader(adminToken) ~>
+      Route.seal(routes) ~> check {
         status shouldEqual OK
         responseAs[Seq[BugReport]]
       }
@@ -30,8 +30,8 @@ class BugReportApiSpec extends UserApiTrait {
     }
 
     "allow admins to fetch bug reports" in {
-      Get("/api/bug_reports/fetch").addAuthHeader(adminToken)
-        ~> Route.seal(routes) ~> check {
+      Get("/api/bug_reports/fetch").addAuthHeader(adminToken) ~>
+        Route.seal(routes) ~> check {
           status shouldEqual OK
           responseAs[Seq[BugReport]] should be(Seq.empty)
         }
@@ -77,8 +77,8 @@ class BugReportApiSpec extends UserApiTrait {
       }
 
       Post("/api/bug_reports/set_resolved", BugReportRequest.SetResolved(reports.head.id, resolved = true))
-        .addAuthHeader(0)
-        ~> Route.seal(routes) ~> check {
+        .addAuthHeader(0) ~>
+        Route.seal(routes) ~> check {
           status shouldEqual Forbidden
         }
 
@@ -94,8 +94,8 @@ class BugReportApiSpec extends UserApiTrait {
       reports.head.resolved should be(false)
 
       Post("/api/bug_reports/set_resolved", BugReportRequest.SetResolved(reports.head.id, resolved = true))
-        .addAuthHeader(adminToken)
-        ~> Route.seal(routes) ~> check {
+        .addAuthHeader(adminToken) ~>
+        Route.seal(routes) ~> check {
           status shouldEqual OK
         }
 

@@ -51,10 +51,10 @@ case class MjolnirHammer(abilityId: AbilityId, parentCharacterId: CharacterId)
   override def useChecks(implicit useData: UseData, gameState: GameState): Set[UseCheck] = {
     val targetCharacterIds = useData.allAsCharacterIds.distinct
     val allowedRange = metadata.targetsMetadata.head.allowedRange
-    super.useChecks
-      ++ targetCharacterIds.flatMap(characterBaseUseChecks)
-      ++ targetCharacterIds.map(UseCheck.Character.IsEnemy)
-      ++ Seq(
+    super.useChecks ++
+      targetCharacterIds.flatMap(characterBaseUseChecks) ++
+      targetCharacterIds.map(UseCheck.Character.IsEnemy) ++
+      Seq(
         // TODO: check against targets metadata as a base check for all abilities
         allowedRange.contains(targetCharacterIds.size) ->
           s"You should provide between ${allowedRange.min} or ${allowedRange.max} characters."

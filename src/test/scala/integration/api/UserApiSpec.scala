@@ -10,8 +10,8 @@ import helpers.UserApiTrait
 class UserApiSpec extends UserApiTrait {
   def fetchUserSettings(): UserSettings =
     Get("/api/user/settings/fetch")
-      .addAuthHeader(0)
-      ~> Route.seal(routes) ~> check {
+      .addAuthHeader(0) ~>
+      Route.seal(routes) ~> check {
         status shouldEqual OK
         responseAs[UserSettings]
       }

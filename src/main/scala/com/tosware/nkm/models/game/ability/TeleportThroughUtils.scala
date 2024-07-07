@@ -3,6 +3,7 @@ package com.tosware.nkm.models.game.ability
 import com.tosware.nkm.models.game.game_state.GameState
 import com.tosware.nkm.models.game.hex.*
 import com.tosware.nkm.{CharacterId, UseCheck}
+import com.tosware.nkm.*
 
 object TeleportThroughUtils {
   def rangeCellCoords(a: Ability)(implicit gameState: GameState): Set[HexCoordinates] =

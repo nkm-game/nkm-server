@@ -149,8 +149,7 @@ case class GameStateValidator()(implicit gameState: GameState) {
         (for {
           targetCoords <- targetCoordsOpt
           character <- gameState.characterByIdOpt(characterId)
-        } yield character.basicAttackCellCoords.contains(targetCoords)).getOrElse(false)
-          -> Message.targetNotInRange
+        } yield character.basicAttackCellCoords.contains(targetCoords)).getOrElse(false) -> Message.targetNotInRange
     }
     object Ability {
       def InGame(abilityId: AbilityId): UseCheck =
