@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   nkm-actor-server-dev:
     restart: always
@@ -18,7 +16,7 @@ services:
       - db
   db:
     restart: always
-    image: mysql
+    image: mysql:8.3.0
     volumes:
       - mysql_data:/var/lib/mysql
     environment:
