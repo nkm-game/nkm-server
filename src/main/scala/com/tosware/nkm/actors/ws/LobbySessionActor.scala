@@ -24,7 +24,7 @@ class LobbySessionActor(implicit val lobbyService: LobbyService)
       import scala.concurrent.ExecutionContext.Implicits.global
 
       val lobbyId = e.id
-      val lobbyStateOpt = aw(lobbyService.getLobbyStateOpt(lobbyId).traverse(identity))
+      val lobbyStateOpt = aw(lobbyService.getLobbyStateOpt(lobbyId).sequence)
       lobbyStateOpt foreach { lobbyState =>
         val response =
           WebsocketLobbyResponse(LobbyResponse.GetLobby, StatusCodes.OK.intValue, lobbyState.toJson.toString)
