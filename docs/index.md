@@ -32,9 +32,13 @@ This is a backend for a turn-based multiplayer game played on a hexagonal board.
 ## Quick Start
 
 !!! tip "Getting Started"
-New to the project? Start with the [Game Rules](game-rules.md) to understand how the game works, then check out the [Development Guide](backend_development/dev-guide.md) for setting up your development environment.
+    New to the project? Start with the [Game Rules](game-rules.md) to understand how the game works, then check out the [Development Guide](backend_development/dev-guide.md) for setting up your development environment.
 
-!!! info "Navigation Tips" - **Search**: Use the search bar to quickly find documentation - **Theme**: Toggle between light and dark modes using the theme switcher in the header - **Colors**: Check out [Theme Colors](theme-colors.md) for popular color scheme options - **Mobile**: All features work seamlessly on mobile devices
+!!! info "Navigation Tips"
+    - **Search**: Use the search bar to quickly find documentation
+    - **Theme**: Toggle between light and dark modes using the theme switcher in the header
+    - **Colors**: Check out [Theme Colors](theme-colors.md) for popular color scheme options
+    - **Mobile**: All features work seamlessly on mobile devices
 
 ## Documentation Sections
 
@@ -72,4 +76,4 @@ We welcome contributions! Please check our development guides and feel free to s
 
 ## License
 
-This project is licensed under the terms specified in the [LICENSE](https://github.com/nkm-game/nkm-server/blob/main/LICENSE) file.
+This project is licensed under the terms specified in the [LICENSE](https://github.com/nkm-game/nkm-server/blob/master/LICENSE) file.
