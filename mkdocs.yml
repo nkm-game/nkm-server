@@ -1,0 +1,96 @@
+site_name: NKM Game Server Documentation
+site_description: Documentation for the NKM turn-based multiplayer game server
+site_url: https://nkm-game.github.io/nkm-server/
+repo_url: https://github.com/nkm-game/nkm-server
+repo_name: nkm-game/nkm-server
+
+theme:
+  name: material
+  palette:
+    # Palette toggle for automatic mode
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+
+    # Palette toggle for light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: deep purple
+      accent: amber
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+
+    # Palette toggle for dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: deep purple
+      accent: amber
+      toggle:
+        icon: material/brightness-4
+        name: Switch to system preference
+
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - search.highlight
+    - search.suggest
+    - content.code.copy
+
+  logo: img/NKM.png
+  favicon: img/NKM.png
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - admonition
+  - pymdownx.details
+  - attr_list
+  - md_in_html
+  - toc:
+      permalink: true
+
+plugins:
+  - search:
+      separator: '[\s\-,:!=\[\]()"`/]+|\.(?!\d)|&[lg]t;|(?!\b)(?=[A-Z][a-z])'
+  - git-revision-date-localized:
+      enable_creation_date: true
+
+nav:
+  - Home: index.md
+  - Game Rules: game-rules.md
+  - Theme Colors: theme-colors.md
+  - Backend Development:
+      - Architecture: backend_development/architecture.md
+      - Development Guide: backend_development/dev-guide.md
+      - Docker Setup: backend_development/docker.md
+      - Adding New Characters: backend_development/adding-new-characters.md
+      - Adding New Effects: backend_development/adding-new-effects.md
+      - Adding New Actors: backend_development/adding-new-actors.md
+      - Adding Test Hexmaps: backend_development/adding-new-test-hexmap.md
+  - Frontend Development:
+      - API Documentation: frontend_development/api.md
+      - Event to Animation: frontend_development/event-to-animation.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/nkm-game/nkm-server
+  generator: false
+
+copyright: Copyright &copy; 2024 NKM Game
