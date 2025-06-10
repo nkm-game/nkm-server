@@ -92,5 +92,3 @@ extra:
     - icon: fontawesome/brands/github
       link: https://github.com/nkm-game/nkm-server
   generator: false
-
-copyright: Copyright &copy; 2024 NKM Game
