@@ -71,6 +71,10 @@ plugins:
   - git-revision-date-localized:
       enable_creation_date: true
 
+# Exclude files that shouldn't be part of the documentation site
+exclude_docs: |
+  README.md
+
 nav:
   - Home: index.md
   - Game Rules: game-rules.md
